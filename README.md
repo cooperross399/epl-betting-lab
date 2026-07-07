@@ -147,6 +147,55 @@ The weekly card includes:
 
 ---
 
+## Track actual bets in the ledger
+
+The model card is research. If you actually place a bet yourself, record it in:
+
+```text
+data/manual/bet_ledger.csv
+```
+
+The repo also includes a blank template:
+
+```text
+data/manual/bet_ledger_template.csv
+```
+
+Use one row per bet. Keep `stake_units` as the main tracker. You can leave
+`closing_american_odds`, `profit_units`, `profit_dollars`, and
+`clv_probability_points` blank at first.
+
+Important fields:
+
+```text
+result = win, loss, push, or pending
+american_odds = the price you actually bet
+closing_american_odds = optional closing price after the market closes
+stake_units = your unit stake, such as 0.5 or 1
+book = sportsbook name for your notes
+```
+
+Run the ledger report:
+
+```bash
+python scripts/run_bet_ledger.py
+```
+
+This creates:
+
+```text
+data/outputs/bet_ledger_summary.md
+data/outputs/bet_ledger_by_market.csv
+data/outputs/bet_ledger_by_selection.csv
+data/outputs/bet_ledger_by_team.csv
+data/outputs/bet_ledger_pending.csv
+```
+
+Pending bets do not count toward profit/loss or ROI. Pushes count as 0.
+Missing closing odds stay blank instead of being guessed.
+
+---
+
 ## Open the dashboard
 
 ```bash
@@ -176,6 +225,8 @@ epl-betting-lab/
 │   ├── manual/
 │   │   ├── upcoming_fixtures.csv
 │   │   ├── current_odds_template.csv
+│   │   ├── bet_ledger_template.csv
+│   │   ├── bet_ledger.csv
 │   │   └── mock_current_odds.csv
 │   ├── raw/
 │   ├── processed/

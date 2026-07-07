@@ -1,0 +1,1 @@
+bet_id,date,season,match,home_team,away_team,market,selection,model_recommendation_status,raw_model_prob,calibrated_model_prob,raw_edge,calibrated_edge,american_odds,closing_american_odds,stake_units,stake_dollars,result,profit_units,profit_dollars,clv_probability_points,book,notes

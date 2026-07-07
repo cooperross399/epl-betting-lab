@@ -1,0 +1,299 @@
+# EPL Betting Lab
+
+A starter Python project for building, testing, and using English Premier League betting strategies for the 2026/27 season.
+
+This is built for a practical betting workflow:
+
+- Pull historical EPL data
+- Fit a simple goals model
+- Compare model probabilities to betting prices
+- Avoid heavy juice by default
+- Backtest strategy rules before trusting them
+- Generate a weekly betting card
+- Review which markets are actually working
+
+> Responsible betting note: this project is for research and tracking. It does not guarantee profit. Use small stakes, record every play, and treat model output as a decision aid rather than an auto-bet system.
+
+---
+
+## Data sources
+
+The starter project is designed around these public data sources:
+
+- **Football-Data.co.uk** for historical EPL results, match stats, and odds CSVs.
+- **ClubElo** for team strength ratings.
+- **Manual odds entry** at first, because sportsbook lines vary by state/book and change constantly.
+
+The included `data/manual/upcoming_fixtures.csv` is a starter fixture sheet for early 2026/27 EPL matches. Fixtures and times can change, so update it before betting.
+
+---
+
+## Setup on Mac
+
+From Terminal:
+
+```bash
+cd ~/Downloads/epl-betting-lab
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+pip install -e .
+```
+
+---
+
+## Fetch historical EPL data
+
+```bash
+python scripts/fetch_data.py --seasons 2122 2223 2324 2425 2526
+```
+
+This creates:
+
+```text
+data/processed/epl_historical_matches.csv
+```
+
+Season code examples:
+
+```text
+2122 = 2021/22
+2223 = 2022/23
+2324 = 2023/24
+2425 = 2024/25
+2526 = 2025/26
+```
+
+---
+
+## Run the first backtest
+
+```bash
+python scripts/run_backtest.py
+```
+
+This creates:
+
+```text
+data/outputs/backtest_bets.csv
+data/outputs/backtest_summary.csv
+```
+
+The starter backtest tests:
+
+- 1X2 moneyline-style markets
+- Over/under 2.5 goals
+- Basic model-vs-book edge logic
+- Your default no-heavy-juice rule: pass on odds worse than about `-160`
+
+---
+
+## Add current odds
+
+Copy the template:
+
+```bash
+cp data/manual/current_odds_template.csv data/manual/current_odds.csv
+```
+
+Then replace the example odds with real book prices.
+
+Expected format:
+
+```csv
+date,home_team,away_team,market,selection,american_odds,book,notes
+2026-08-21,Arsenal,Coventry,total_2_5,under,110,DraftKings,
+```
+
+Supported starter markets:
+
+```text
+1x2 selections: home, draw, away
+total_2_5 selections: over, under
+btts selections: yes, no
+```
+
+---
+
+## Generate a weekly card
+
+```bash
+python scripts/generate_weekly_card.py
+```
+
+This creates:
+
+```text
+data/outputs/weekly_card.csv
+data/outputs/weekly_card.md
+```
+
+The weekly card includes:
+
+- Matchup
+- Market
+- Selection
+- American odds
+- Model probability
+- Book implied probability
+- Edge
+- Fair price
+- Suggested unit size
+
+---
+
+## Open the dashboard
+
+```bash
+streamlit run app.py
+```
+
+The dashboard shows:
+
+- Recent form table
+- Upcoming fixture projections
+- Promoted-team review spots
+- Value board
+- Weekly card
+- Backtest summary, after you run the backtest
+
+---
+
+## Project structure
+
+```text
+epl-betting-lab/
+├── app.py
+├── requirements.txt
+├── pyproject.toml
+├── README.md
+├── data/
+│   ├── manual/
+│   │   ├── upcoming_fixtures.csv
+│   │   ├── current_odds_template.csv
+│   │   └── mock_current_odds.csv
+│   ├── raw/
+│   ├── processed/
+│   └── outputs/
+├── scripts/
+│   ├── fetch_data.py
+│   ├── run_backtest.py
+│   └── generate_weekly_card.py
+└── src/epl_betting_lab/
+    ├── config.py
+    ├── data/
+    ├── models/
+    ├── strategies/
+    ├── backtest/
+    └── reports/
+```
+
+---
+
+## How the model works right now
+
+The starter model uses a transparent Poisson goals approach:
+
+```text
+Home expected goals = league home scoring average × home attack strength × away defensive weakness
+Away expected goals = league away scoring average × away attack strength × home defensive weakness
+```
+
+From there it estimates:
+
+```text
+Home win probability
+Draw probability
+Away win probability
+Over/under 2.5 probability
+BTTS yes/no probability
+Most likely scorelines
+```
+
+Then it compares those probabilities to sportsbook odds.
+
+A play is usually only marked `BETTABLE` when:
+
+```text
+model probability - book implied probability >= minimum edge
+expected value > 0
+odds are not worse than the default max juice threshold
+```
+
+---
+
+## Strategy ideas to expand next
+
+Good next modules:
+
+- Corners model
+- Shots on target props
+- Anytime goal scorer model
+- Cards/fouls model
+- European hangover spots
+- Promoted-team fade tracker
+- Closing-line value tracker
+- Line movement tracker
+- Bankroll ledger
+- Twitter/X thread generator for matchweek previews
+
+---
+
+## Team naming note
+
+The starter fixture file uses Football-Data-style names where possible, such as:
+
+```text
+Man United
+Man City
+Nott'm Forest
+Tottenham
+Newcastle
+```
+
+If your fixtures use `Manchester United` but the historical data uses `Man United`, the model will treat them as different teams. Keep names consistent.
+
+---
+
+## Using Codex as the season-long agent
+
+This project is now Codex-ready.
+
+Important files:
+
+```text
+AGENTS.md                                  # Rules/instructions Codex should follow
+codex/prompts/weekly_model_update.md       # Weekly update prompt
+codex/prompts/add_corners_model.md         # Future corners-model prompt
+codex/prompts/add_shots_sot_model.md       # Future shots/SOT prompt
+docs/CODEX_SETUP_BEGINNER.md               # Beginner Codex setup guide
+scripts/agent_weekly_brief.py              # Creates an in-season brief for the agent
+```
+
+After each matchweek, once current-season data is available, run:
+
+```bash
+python scripts/fetch_data.py --seasons 2122 2223 2324 2425 2526 2627
+python scripts/run_backtest.py
+python scripts/agent_weekly_brief.py --current-season 2627 --recent-matches 6
+```
+
+This creates:
+
+```text
+data/outputs/agent_weekly_brief.md
+data/outputs/agent_team_recent_form.csv
+data/outputs/agent_team_market_profile.csv
+```
+
+Give Codex this weekly instruction:
+
+```text
+Read AGENTS.md. Use data/outputs/agent_weekly_brief.md, the latest backtest outputs, and the current codebase to decide whether the model needs a small, explainable improvement. Do not fabricate odds. Respect the max-juice rule around -160. Run tests before summarizing changes.
+```
+
+For full beginner instructions, open:
+
+```text
+docs/CODEX_SETUP_BEGINNER.md
+```

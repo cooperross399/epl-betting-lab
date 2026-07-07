@@ -66,6 +66,11 @@ def run_walk_forward_backtest(
         game = df.iloc[i]
         model = PoissonGoalsModel().fit(train, last_n_matches_per_team=last_n_fit_matches_per_team)
         probs = model.match_probabilities(game.home_team, game.away_team)
+        projected_home_goals = float(probs["home_xg"])
+        projected_away_goals = float(probs["away_xg"])
+        projected_total_goals = projected_home_goals + projected_away_goals
+        favorite_strength = max(float(probs["home_win"]), float(probs["away_win"]))
+        actual_total_goals = int(game.home_goals) + int(game.away_goals)
 
         candidates = []
         # 1X2 odds: prefer Avg columns, fall back to B365.
@@ -133,6 +138,11 @@ def run_walk_forward_backtest(
                 "home_team": game.home_team,
                 "away_team": game.away_team,
                 "score": f"{int(game.home_goals)}-{int(game.away_goals)}",
+                "projected_home_goals": round(projected_home_goals, 3),
+                "projected_away_goals": round(projected_away_goals, 3),
+                "projected_total_goals": round(projected_total_goals, 3),
+                "favorite_strength": round(favorite_strength, 4),
+                "actual_total_goals": actual_total_goals,
                 "market": market,
                 "selection": selection,
                 "decimal_odds": round(float(dec_odds), 3),

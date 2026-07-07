@@ -101,6 +101,7 @@ def run_walk_forward_backtest(
                 "book_implied": grade["book_implied"],
                 "edge": grade["edge"],
                 "ev_per_unit": grade["ev_per_unit"],
+                "status": grade["status"],
                 "won": won,
                 "profit_units": round(_profit(won, float(dec_odds)), 3),
             })

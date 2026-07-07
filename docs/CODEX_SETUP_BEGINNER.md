@@ -111,6 +111,25 @@ Then read:
 data/outputs/bet_ledger_summary.md
 ```
 
+To create draft ledger rows from the weekly card instead of copying each play
+by hand, run this after `python scripts/generate_weekly_card.py`:
+
+```bash
+python scripts/prefill_bet_ledger.py
+```
+
+This adds `BETTABLE` and `LEAN` rows from `data/outputs/weekly_card.csv` to
+`data/manual/bet_ledger.csv`. It uses a stable `bet_id`, so running it twice
+does not create duplicates. The rows are drafts: `result` stays `pending`,
+`closing_american_odds` stays blank, and you still need to confirm which bets
+you actually placed.
+
+If you want to review pass rows too:
+
+```bash
+python scripts/prefill_bet_ledger.py --include-pass
+```
+
 ## Step 7 — What to approve and what to reject
 
 Approve Codex changes when:

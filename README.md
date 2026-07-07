@@ -194,6 +194,24 @@ data/outputs/bet_ledger_pending.csv
 Pending bets do not count toward profit/loss or ROI. Pushes count as 0.
 Missing closing odds stay blank instead of being guessed.
 
+To save typing after you generate the weekly card, you can pre-fill draft
+ledger rows from `data/outputs/weekly_card.csv`:
+
+```bash
+python scripts/prefill_bet_ledger.py
+```
+
+By default this adds only `BETTABLE` and `LEAN` model rows, marks them
+`pending`, leaves `closing_american_odds` blank, and skips rows that are
+already in your ledger. To include pass rows for review:
+
+```bash
+python scripts/prefill_bet_ledger.py --include-pass
+```
+
+After pre-filling, delete any rows you did not actually bet or leave a note
+that they were not placed.
+
 ---
 
 ## Open the dashboard

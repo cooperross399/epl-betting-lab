@@ -2,57 +2,55 @@
 
 This report uses settled historical backtest bets only. It does not use live odds, does not fabricate prices, and does not place bets.
 
-Status note: the current backtest only settles plays that passed the old `BETTABLE` filter. The CSVs keep a `status` column so future candidate logs can also compare leans and passes.
+Status note: these rows use calibrated `BETTABLE` decisions. Raw edge columns are included for before/after comparison.
 
 ## Quick answers
 
-- Worst market: total_2_5 lost -36.34 units across 606 bets.
-- Worst odds range: +101 to +200 lost -48.05 units across 568 bets.
-- Favorite vs underdog read: underdog / plus money lost -56.54 units across 1046 bets.
-- Small-edge read: 8% to 12% lost -36.52 units across 358 bets.
-- Threshold check: A stricter edge cutoff of 3.5% had the best ROI among already-bettable historical plays: -4.7% over 1433 bets.
+- Worst market: total_2_5 lost -36.53 units across 474 bets.
+- Worst odds range: +101 to +200 lost -34.4 units across 395 bets.
+- Favorite vs underdog read: underdog / plus money lost -25.25 units across 727 bets.
+- Small-edge read: 5% to 8% lost -58.34 units across 520 bets.
+- Threshold check: A stricter edge cutoff of 3.5% had the best ROI among already-bettable historical plays: -2.2% over 1020 bets.
 
 ## Favorite vs underdog
 
-| favorite_bucket       | status   |   bets |   wins |   losses |   win_rate |   profit_units |    roi |   avg_american_odds |   avg_edge |
-|:----------------------|:---------|-------:|-------:|---------:|-----------:|---------------:|-------:|--------------------:|-----------:|
-| underdog / plus money | BETTABLE |   1046 |    331 |      715 |      0.316 |         -56.54 | -0.054 |                 266 |     0.0935 |
-| favorite / juiced     | BETTABLE |    383 |    207 |      176 |      0.54  |         -10.18 | -0.027 |                -127 |     0.0863 |
-| even money            | BETTABLE |      4 |      2 |        2 |      0.5   |           0    |  0     |                 100 |     0.0564 |
+| favorite_bucket       | status   |   bets |   wins |   losses |   win_rate |   profit_units |    roi |   avg_american_odds |   avg_raw_edge |   avg_calibrated_edge |
+|:----------------------|:---------|-------:|-------:|---------:|-----------:|---------------:|-------:|--------------------:|---------------:|----------------------:|
+| underdog / plus money | BETTABLE |    727 |    233 |      494 |      0.32  |         -25.25 | -0.035 |                 264 |         0.0722 |                0.0499 |
+| even money            | BETTABLE |      4 |      2 |        2 |      0.5   |           0    |  0     |                 100 |         0.0564 |                0.0435 |
+| favorite / juiced     | BETTABLE |    289 |    161 |      128 |      0.557 |           2.44 |  0.008 |                -126 |         0.0683 |                0.0536 |
 
 ## Edge buckets
 
-| edge_bucket   | status   |   bets |   wins |   losses |   win_rate |   profit_units |    roi |   avg_american_odds |   avg_edge |
-|:--------------|:---------|-------:|-------:|---------:|-----------:|---------------:|-------:|--------------------:|-----------:|
-| 8% to 12%     | BETTABLE |    358 |    135 |      223 |      0.377 |         -36.52 | -0.102 |                 135 |     0.0991 |
-| 12% or higher | BETTABLE |    307 |    113 |      194 |      0.368 |         -19.24 | -0.063 |                 157 |     0.1738 |
-| 5% to 8%      | BETTABLE |    456 |    170 |      286 |      0.373 |         -16.09 | -0.035 |                 159 |     0.0634 |
-| 3.5% to 5%    | BETTABLE |    312 |    122 |      190 |      0.391 |           5.13 |  0.016 |                 195 |     0.0428 |
+| edge_bucket   | status   |   bets |   wins |   losses |   win_rate |   profit_units |    roi |   avg_american_odds |   avg_raw_edge |   avg_calibrated_edge |
+|:--------------|:---------|-------:|-------:|---------:|-----------:|---------------:|-------:|--------------------:|---------------:|----------------------:|
+| 5% to 8%      | BETTABLE |    520 |    199 |      321 |      0.383 |         -58.34 | -0.112 |                 112 |         0.0814 |                0.0587 |
+| 3.5% to 5%    | BETTABLE |    500 |    197 |      303 |      0.394 |          35.53 |  0.071 |                 195 |         0.0603 |                0.0428 |
 
 ## Teams most associated with losses
 
-| team           | team_role   | bet_on_team   |   bets |   wins |   losses |   win_rate |   profit_units |    roi |   avg_american_odds |   avg_edge |
-|:---------------|:------------|:--------------|-------:|-------:|---------:|-----------:|---------------:|-------:|--------------------:|-----------:|
-| Bournemouth    | away        | False         |     56 |     17 |       39 |      0.304 |         -20.45 | -0.365 |                  69 |     0.0974 |
-| Man United     | home        | False         |    115 |     31 |       84 |      0.27  |         -20.41 | -0.177 |                 255 |     0.103  |
-| Bournemouth    | home        | False         |     69 |     22 |       47 |      0.319 |         -19.26 | -0.279 |                 126 |     0.0995 |
-| Aston Villa    | home        | False         |     54 |     13 |       41 |      0.241 |         -19.11 | -0.354 |                 169 |     0.0842 |
-| Newcastle      | away        | False         |     36 |     12 |       24 |      0.333 |         -12.9  | -0.358 |                  25 |     0.0798 |
-| Brighton       | away        | False         |     45 |     14 |       31 |      0.311 |         -12.83 | -0.285 |                 105 |     0.0772 |
-| Man City       | home        | False         |     42 |      8 |       34 |      0.19  |         -12.29 | -0.293 |                 482 |     0.1084 |
-| Crystal Palace | home        | False         |     34 |     11 |       23 |      0.324 |         -12.07 | -0.355 |                  55 |     0.0769 |
-| Brentford      | home        | False         |     30 |      9 |       21 |      0.3   |         -11.48 | -0.383 |                   8 |     0.0721 |
-| Newcastle      | away        | True          |     36 |     10 |       26 |      0.278 |         -11.32 | -0.314 |                 168 |     0.1003 |
+| team           | team_role   | bet_on_team   |   bets |   wins |   losses |   win_rate |   profit_units |    roi |   avg_american_odds |   avg_raw_edge |   avg_calibrated_edge |
+|:---------------|:------------|:--------------|-------:|-------:|---------:|-----------:|---------------:|-------:|--------------------:|---------------:|----------------------:|
+| Brighton       | away        | False         |     37 |     10 |       27 |      0.27  |         -14.49 | -0.392 |                  97 |         0.0696 |                0.0507 |
+| Man United     | home        | False         |     71 |     19 |       52 |      0.268 |         -11.73 | -0.165 |                 241 |         0.0742 |                0.0516 |
+| Brentford      | home        | False         |     27 |      8 |       19 |      0.296 |         -10.96 | -0.406 |                 -16 |         0.0719 |                0.0502 |
+| Newcastle      | away        | False         |     28 |      9 |       19 |      0.321 |         -10.7  | -0.382 |                  19 |         0.0683 |                0.0521 |
+| Chelsea        | away        | False         |     44 |     15 |       29 |      0.341 |         -10.08 | -0.229 |                 103 |         0.0686 |                0.0523 |
+| Arsenal        | home        | False         |     36 |      9 |       27 |      0.25  |          -9.75 | -0.271 |                 334 |         0.0625 |                0.0473 |
+| Everton        | home        | False         |     60 |     22 |       38 |      0.367 |          -9.25 | -0.154 |                  78 |         0.075  |                0.0505 |
+| Crystal Palace | home        | True          |     26 |      7 |       19 |      0.269 |          -9.11 | -0.35  |                 227 |         0.0697 |                0.0504 |
+| Crystal Palace | home        | False         |     29 |     10 |       19 |      0.345 |          -8.8  | -0.303 |                  41 |         0.0681 |                0.0509 |
+| Everton        | away        | False         |     39 |     15 |       24 |      0.385 |          -8.04 | -0.206 |                  46 |         0.0703 |                0.0537 |
 
 ## Threshold check
 
-This section only tests stricter cutoffs on bets the old rules already fired. It does not prove the model would have found every possible pass or lean.
+This section tests stricter cutoffs on calibrated bets that fired. It does not prove the model would have found every possible pass or lean.
 
 |   min_edge_threshold |   bets |   wins |   losses |   win_rate |   profit_units |    roi |
 |---------------------:|-------:|-------:|---------:|-----------:|---------------:|-------:|
-|                0.035 |   1433 |    540 |      893 |      0.377 |         -66.72 | -0.047 |
-|                0.05  |   1121 |    418 |      703 |      0.373 |         -71.85 | -0.064 |
-|                0.08  |    665 |    248 |      417 |      0.373 |         -55.76 | -0.084 |
-|                0.1   |    473 |    177 |      296 |      0.374 |         -31.95 | -0.068 |
-|                0.12  |    307 |    113 |      194 |      0.368 |         -19.24 | -0.063 |
-|                0.15  |    179 |     63 |      116 |      0.352 |         -12.67 | -0.071 |
+|                0.035 |   1020 |    396 |      624 |      0.388 |         -22.81 | -0.022 |
+|                0.05  |    520 |    199 |      321 |      0.383 |         -58.34 | -0.112 |
+|                0.08  |      0 |      0 |        0 |      0     |           0    |  0     |
+|                0.1   |      0 |      0 |        0 |      0     |           0    |  0     |
+|                0.12  |      0 |      0 |        0 |      0     |           0    |  0     |
+|                0.15  |      0 |      0 |        0 |      0     |           0    |  0     |

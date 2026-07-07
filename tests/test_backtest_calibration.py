@@ -21,12 +21,19 @@ def _sample_bets() -> pd.DataFrame:
             "selection": "home",
             "decimal_odds": 1.8,
             "american_odds": -125,
-            "model_prob": 0.62,
+            "raw_model_prob": 0.62,
+            "calibrated_model_prob": 0.58,
+            "model_prob": 0.58,
             "book_implied": 0.556,
-            "edge": 0.064,
+            "raw_edge": 0.064,
+            "calibrated_edge": 0.024,
+            "edge": 0.024,
             "ev_per_unit": 0.116,
+            "calibration_weight": 0.2,
             "status": "BETTABLE",
+            "calibrated_would_bet": True,
             "won": True,
+            "calibrated_profit_units": 0.8,
             "profit_units": 0.8,
         },
         {
@@ -39,12 +46,19 @@ def _sample_bets() -> pd.DataFrame:
             "selection": "over",
             "decimal_odds": 2.2,
             "american_odds": 120,
-            "model_prob": 0.48,
+            "raw_model_prob": 0.48,
+            "calibrated_model_prob": 0.47,
+            "model_prob": 0.47,
             "book_implied": 0.455,
-            "edge": 0.045,
+            "raw_edge": 0.045,
+            "calibrated_edge": 0.015,
+            "edge": 0.015,
             "ev_per_unit": 0.1,
+            "calibration_weight": 0.3,
             "status": "BETTABLE",
+            "calibrated_would_bet": True,
             "won": False,
+            "calibrated_profit_units": -1.0,
             "profit_units": -1.0,
         },
     ])
@@ -60,12 +74,14 @@ def test_probability_bucket_labels() -> None:
 
 def test_summarize_calibration_gap() -> None:
     summary = summarize_calibration(_sample_bets(), ["probability_bucket"])
-    row = summary[summary["probability_bucket"] == "60% to 70%"].iloc[0]
+    row = summary[summary["probability_bucket"] == "50% to 60%"].iloc[0]
     assert row["bets"] == 1
     assert row["wins"] == 1
     assert row["actual_win_rate"] == 1.0
-    assert row["avg_model_prob"] == 0.62
-    assert row["calibration_gap"] == 0.38
+    assert row["avg_raw_model_prob"] == 0.62
+    assert row["avg_calibrated_model_prob"] == 0.58
+    assert row["raw_calibration_gap"] == 0.38
+    assert row["calibrated_calibration_gap"] == 0.42
 
 
 def test_save_backtest_calibration_reports(tmp_path) -> None:

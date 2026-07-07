@@ -3,6 +3,7 @@ from __future__ import annotations
 import pandas as pd
 
 from epl_betting_lab.config import MIN_EDGE, MAX_DEFAULT_JUICE
+from epl_betting_lab.models.calibration import historical_baseline, calibrate_probability, ShrinkageConfig
 from epl_betting_lab.models.poisson_goals import PoissonGoalsModel
 from epl_betting_lab.models.value import decimal_to_american, grade_edge
 
@@ -45,6 +46,7 @@ def run_walk_forward_backtest(
     min_edge: float = MIN_EDGE,
     max_juice: int = MAX_DEFAULT_JUICE,
     last_n_fit_matches_per_team: int | None = 38,
+    calibration_config: ShrinkageConfig = ShrinkageConfig(),
 ) -> pd.DataFrame:
     """Walk-forward backtest using only matches before each test game.
 
@@ -76,8 +78,24 @@ def run_walk_forward_backtest(
             if dec_odds is None or pd.isna(dec_odds) or float(dec_odds) <= 1:
                 continue
             american = decimal_to_american(float(dec_odds))
-            grade = grade_edge(float(model_prob), american, min_edge=min_edge, max_default_juice=max_juice)
-            if grade["status"] != "BETTABLE":
+            raw_grade = grade_edge(float(model_prob), american, min_edge=min_edge, max_default_juice=max_juice)
+            calibration = calibrate_probability(
+                float(model_prob),
+                market,
+                selection,
+                american_odds=american,
+                historical_target=historical_baseline(train, market, selection),
+                config=calibration_config,
+            )
+            calibrated_grade = grade_edge(
+                float(calibration["calibrated_model_prob"]),
+                american,
+                min_edge=min_edge,
+                max_default_juice=max_juice,
+            )
+            raw_would_bet = raw_grade["status"] == "BETTABLE"
+            calibrated_would_bet = calibrated_grade["status"] == "BETTABLE"
+            if not raw_would_bet and not calibrated_would_bet:
                 continue
 
             if market == "1x2":
@@ -86,6 +104,8 @@ def run_walk_forward_backtest(
                 won = _settle_total_25(selection, int(game.home_goals), int(game.away_goals))
             else:
                 continue
+
+            profit = round(_profit(won, float(dec_odds)), 3)
 
             bets.append({
                 "date": game.date,
@@ -97,28 +117,68 @@ def run_walk_forward_backtest(
                 "selection": selection,
                 "decimal_odds": round(float(dec_odds), 3),
                 "american_odds": american,
-                "model_prob": grade["model_prob"],
-                "book_implied": grade["book_implied"],
-                "edge": grade["edge"],
-                "ev_per_unit": grade["ev_per_unit"],
-                "status": grade["status"],
+                "raw_model_prob": raw_grade["model_prob"],
+                "calibrated_model_prob": calibrated_grade["model_prob"],
+                "model_prob": calibrated_grade["model_prob"],
+                "book_implied": calibrated_grade["book_implied"],
+                "raw_edge": raw_grade["edge"],
+                "calibrated_edge": calibrated_grade["edge"],
+                "edge": calibrated_grade["edge"],
+                "raw_ev_per_unit": raw_grade["ev_per_unit"],
+                "calibrated_ev_per_unit": calibrated_grade["ev_per_unit"],
+                "ev_per_unit": calibrated_grade["ev_per_unit"],
+                "raw_fair_american": raw_grade["fair_american"],
+                "calibrated_fair_american": calibrated_grade["fair_american"],
+                "fair_american": calibrated_grade["fair_american"],
+                "raw_status": raw_grade["status"],
+                "calibrated_status": calibrated_grade["status"],
+                "status": calibrated_grade["status"],
+                **calibration,
+                "raw_would_bet": raw_would_bet,
+                "calibrated_would_bet": calibrated_would_bet,
                 "won": won,
-                "profit_units": round(_profit(won, float(dec_odds)), 3),
+                "raw_profit_units": profit if raw_would_bet else 0.0,
+                "calibrated_profit_units": profit if calibrated_would_bet else 0.0,
+                "profit_units": profit if calibrated_would_bet else 0.0,
             })
 
     return pd.DataFrame(bets)
 
 
 def summarize_backtest(bets: pd.DataFrame) -> pd.DataFrame:
+    columns = [
+        "market", "raw_bets", "raw_wins", "raw_profit_units", "raw_roi",
+        "calibrated_bets", "calibrated_wins", "calibrated_profit_units", "calibrated_roi",
+        "bets", "wins", "losses", "win_rate", "profit_units", "roi",
+    ]
     if bets.empty:
-        return pd.DataFrame(columns=["market", "bets", "wins", "losses", "win_rate", "profit_units", "roi"])
-    grouped = bets.groupby("market").agg(
-        bets=("won", "size"),
-        wins=("won", "sum"),
-        profit_units=("profit_units", "sum"),
-    ).reset_index()
-    grouped["losses"] = grouped["bets"] - grouped["wins"]
-    grouped["win_rate"] = (grouped["wins"] / grouped["bets"]).round(3)
-    grouped["profit_units"] = grouped["profit_units"].round(3)
-    grouped["roi"] = (grouped["profit_units"] / grouped["bets"]).round(3)
-    return grouped.sort_values("profit_units", ascending=False)
+        return pd.DataFrame(columns=columns)
+
+    rows = []
+    for market, group in bets.groupby("market"):
+        raw = group[group.get("raw_would_bet", False) == True]
+        calibrated = group[group.get("calibrated_would_bet", True) == True]
+        raw_bets = len(raw)
+        calibrated_bets = len(calibrated)
+        raw_wins = int(raw["won"].sum()) if raw_bets else 0
+        calibrated_wins = int(calibrated["won"].sum()) if calibrated_bets else 0
+        raw_profit = round(float(raw["raw_profit_units"].sum()), 3) if raw_bets else 0.0
+        calibrated_profit = round(float(calibrated["calibrated_profit_units"].sum()), 3) if calibrated_bets else 0.0
+        rows.append({
+            "market": market,
+            "raw_bets": raw_bets,
+            "raw_wins": raw_wins,
+            "raw_profit_units": raw_profit,
+            "raw_roi": round(raw_profit / raw_bets, 3) if raw_bets else 0.0,
+            "calibrated_bets": calibrated_bets,
+            "calibrated_wins": calibrated_wins,
+            "calibrated_profit_units": calibrated_profit,
+            "calibrated_roi": round(calibrated_profit / calibrated_bets, 3) if calibrated_bets else 0.0,
+            "bets": calibrated_bets,
+            "wins": calibrated_wins,
+            "losses": calibrated_bets - calibrated_wins,
+            "win_rate": round(calibrated_wins / calibrated_bets, 3) if calibrated_bets else 0.0,
+            "profit_units": calibrated_profit,
+            "roi": round(calibrated_profit / calibrated_bets, 3) if calibrated_bets else 0.0,
+        })
+    return pd.DataFrame(rows, columns=columns).sort_values("calibrated_profit_units", ascending=False)

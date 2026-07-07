@@ -46,6 +46,13 @@ def _profit(win: bool, decimal_odds: float) -> float:
     return (decimal_odds - 1) if win else -1.0
 
 
+def _valid_decimal_odds(value: object) -> float | None:
+    if value is None or pd.isna(value):
+        return None
+    value = float(value)
+    return value if value > 1 else None
+
+
 def run_walk_forward_backtest(
     matches: pd.DataFrame,
     start_after_matches: int = 380,
@@ -76,19 +83,22 @@ def run_walk_forward_backtest(
         candidates = []
         # 1X2 odds: prefer Avg columns, fall back to B365.
         candidates.extend([
-            ("1x2", "home", probs["home_win"], game.get("AvgH") if pd.notna(game.get("AvgH")) else game.get("B365H")),
-            ("1x2", "draw", probs["draw"], game.get("AvgD") if pd.notna(game.get("AvgD")) else game.get("B365D")),
-            ("1x2", "away", probs["away_win"], game.get("AvgA") if pd.notna(game.get("AvgA")) else game.get("B365A")),
+            ("1x2", "home", probs["home_win"], game.get("AvgH") if pd.notna(game.get("AvgH")) else game.get("B365H"), game.get("CloseH")),
+            ("1x2", "draw", probs["draw"], game.get("AvgD") if pd.notna(game.get("AvgD")) else game.get("B365D"), game.get("CloseD")),
+            ("1x2", "away", probs["away_win"], game.get("AvgA") if pd.notna(game.get("AvgA")) else game.get("B365A"), game.get("CloseA")),
         ])
         candidates.extend([
-            ("total_2_5", "over", probs["over_2_5"], game.get("Avg>2.5") if pd.notna(game.get("Avg>2.5")) else game.get("B365>2.5")),
-            ("total_2_5", "under", probs["under_2_5"], game.get("Avg<2.5") if pd.notna(game.get("Avg<2.5")) else game.get("B365<2.5")),
+            ("total_2_5", "over", probs["over_2_5"], game.get("Avg>2.5") if pd.notna(game.get("Avg>2.5")) else game.get("B365>2.5"), game.get("Close>2.5")),
+            ("total_2_5", "under", probs["under_2_5"], game.get("Avg<2.5") if pd.notna(game.get("Avg<2.5")) else game.get("B365<2.5"), game.get("Close<2.5")),
         ])
 
-        for market, selection, model_prob, dec_odds in candidates:
-            if dec_odds is None or pd.isna(dec_odds) or float(dec_odds) <= 1:
+        for market, selection, model_prob, dec_odds, close_dec_odds in candidates:
+            dec_odds = _valid_decimal_odds(dec_odds)
+            if dec_odds is None:
                 continue
+            close_dec_odds = _valid_decimal_odds(close_dec_odds)
             american = decimal_to_american(float(dec_odds))
+            closing_american = decimal_to_american(close_dec_odds) if close_dec_odds is not None else pd.NA
             raw_grade = grade_edge(float(model_prob), american, min_edge=min_edge, max_default_juice=max_juice)
             generic_calibration = calibrate_probability(
                 float(model_prob),
@@ -181,6 +191,9 @@ def run_walk_forward_backtest(
                 "selection": selection,
                 "decimal_odds": round(float(dec_odds), 3),
                 "american_odds": american,
+                "opening_american_odds": american,
+                "opening_implied_probability": raw_grade["book_implied"],
+                "closing_american_odds": closing_american,
                 "raw_model_prob": raw_grade["model_prob"],
                 "generic_calibrated_model_prob": generic_grade["model_prob"],
                 "calibrated_model_prob": calibrated_grade["model_prob"],

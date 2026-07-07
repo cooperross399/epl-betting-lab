@@ -16,6 +16,7 @@ def evaluate_btts(projections: pd.DataFrame, odds: pd.DataFrame, min_edge: float
             if line.empty:
                 continue
             american = float(line.iloc[0].american_odds)
+            closing_american = line.iloc[0].get("closing_american_odds", pd.NA)
             raw_prob = float(p[prob_col])
             raw_grade = grade_edge(raw_prob, american, min_edge=min_edge, max_default_juice=max_juice)
             config = ShrinkageConfig()
@@ -32,6 +33,9 @@ def evaluate_btts(projections: pd.DataFrame, odds: pd.DataFrame, min_edge: float
                 "market": "btts",
                 "selection": selection,
                 "american_odds": american,
+                "opening_american_odds": american,
+                "opening_implied_probability": raw_grade["book_implied"],
+                "closing_american_odds": closing_american,
                 "raw_model_prob": raw_grade["model_prob"],
                 "calibrated_model_prob": grade["model_prob"],
                 "raw_edge": raw_grade["edge"],

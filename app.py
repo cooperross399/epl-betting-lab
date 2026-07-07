@@ -58,7 +58,7 @@ try:
     else:
         candidates = pd.concat([
             evaluate_1x2_value(projections, odds, min_edge=min_edge, max_juice=int(max_juice)),
-            evaluate_total_25(projections, odds, min_edge=min_edge, max_juice=int(max_juice)),
+            evaluate_total_25(projections, odds, min_edge=min_edge, max_juice=int(max_juice), matches=matches),
             evaluate_btts(projections, odds, min_edge=min_edge, max_juice=int(max_juice)),
         ], ignore_index=True)
         st.dataframe(candidates.sort_values("edge", ascending=False), use_container_width=True, hide_index=True)

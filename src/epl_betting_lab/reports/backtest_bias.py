@@ -76,21 +76,26 @@ def enrich_backtest_bets(bets: pd.DataFrame) -> pd.DataFrame:
     df = bets.copy()
     if "status" not in df.columns:
         df["status"] = "BETTABLE"
-    if "calibrated_would_bet" in df.columns:
-        df = df[df["calibrated_would_bet"]].copy()
+    final_would_bet_col = "goal_environment_adjusted_would_bet" if "goal_environment_adjusted_would_bet" in df.columns else "calibrated_would_bet"
+    if final_would_bet_col in df.columns:
+        df = df[df[final_would_bet_col]].copy()
     if "raw_edge" not in df.columns:
         df["raw_edge"] = df["edge"]
     if "calibrated_edge" not in df.columns:
         df["calibrated_edge"] = df["edge"]
     if "calibrated_profit_units" not in df.columns:
         df["calibrated_profit_units"] = df["profit_units"]
+    if "goal_environment_adjusted_edge" not in df.columns:
+        df["goal_environment_adjusted_edge"] = df["calibrated_edge"]
+    if "goal_environment_adjusted_profit_units" not in df.columns:
+        df["goal_environment_adjusted_profit_units"] = df["calibrated_profit_units"]
 
     df["odds_range"] = df["american_odds"].apply(odds_range)
-    df["edge_bucket"] = df["calibrated_edge"].apply(edge_bucket)
+    df["edge_bucket"] = df["goal_environment_adjusted_edge"].apply(edge_bucket)
     df["favorite_bucket"] = df["american_odds"].apply(favorite_bucket)
     df["selection_context"] = df.apply(lambda r: selection_context(r["market"], r["selection"]), axis=1)
-    df["profit_units"] = df["calibrated_profit_units"]
-    df["edge"] = df["calibrated_edge"]
+    df["profit_units"] = df["goal_environment_adjusted_profit_units"]
+    df["edge"] = df["goal_environment_adjusted_edge"]
     return df
 
 

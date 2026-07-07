@@ -66,7 +66,52 @@ Then tell Codex:
 I updated `data/manual/current_odds.csv` with current odds. Run the model, generate the weekly card, and tell me the best smart plays, leans, avoids, and sneaky/fun angles. Respect my max juice rule around -160.
 ```
 
-## Step 6 — What to approve and what to reject
+## Step 6 — Track actual bets
+
+The weekly card is not a bet slip. If you decide to place a bet yourself, log
+it in:
+
+```text
+data/manual/bet_ledger.csv
+```
+
+Use one row per bet. The safest fields to fill right away are:
+
+```text
+bet_id
+date
+season
+match
+home_team
+away_team
+market
+selection
+model_recommendation_status
+american_odds
+stake_units
+result
+book
+notes
+```
+
+Use `pending` until the match is graded. Later change `result` to `win`,
+`loss`, or `push`. If you paste `closing_american_odds` after the market
+closes, the report will calculate CLV. If closing odds are blank, CLV stays
+blank.
+
+Run:
+
+```bash
+python scripts/run_bet_ledger.py
+```
+
+Then read:
+
+```text
+data/outputs/bet_ledger_summary.md
+```
+
+## Step 7 — What to approve and what to reject
 
 Approve Codex changes when:
 

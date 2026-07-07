@@ -56,6 +56,10 @@ Before a matchweek, paste or enter odds into:
 data/manual/current_odds.csv
 ```
 
+Use `american_odds` for the price available when you run the model. Leave
+`closing_american_odds` blank until after the market closes, then paste the
+closing price there for CLV tracking. Missing closing odds are not guessed.
+
 Then tell Codex:
 
 ```text

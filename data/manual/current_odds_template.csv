@@ -1,8 +1,8 @@
-date,home_team,away_team,market,selection,american_odds,book,notes
-2026-08-21,Arsenal,Coventry,1x2,home,-350,,example only - replace with real odds
-2026-08-21,Arsenal,Coventry,1x2,draw,500,,example only - replace with real odds
-2026-08-21,Arsenal,Coventry,1x2,away,900,,example only - replace with real odds
-2026-08-21,Arsenal,Coventry,total_2_5,over,-130,,example only - replace with real odds
-2026-08-21,Arsenal,Coventry,total_2_5,under,110,,example only - replace with real odds
-2026-08-21,Arsenal,Coventry,btts,yes,135,,example only - replace with real odds
-2026-08-21,Arsenal,Coventry,btts,no,-155,,example only - replace with real odds
+date,home_team,away_team,market,selection,american_odds,closing_american_odds,book,notes
+2026-08-21,Arsenal,Coventry,1x2,home,-350,,,example only - replace with real odds
+2026-08-21,Arsenal,Coventry,1x2,draw,500,,,example only - replace with real odds
+2026-08-21,Arsenal,Coventry,1x2,away,900,,,example only - replace with real odds
+2026-08-21,Arsenal,Coventry,total_2_5,over,-130,,,example only - replace with real odds
+2026-08-21,Arsenal,Coventry,total_2_5,under,110,,,example only - replace with real odds
+2026-08-21,Arsenal,Coventry,btts,yes,135,,,example only - replace with real odds
+2026-08-21,Arsenal,Coventry,btts,no,-155,,,example only - replace with real odds

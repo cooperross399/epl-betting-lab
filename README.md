@@ -101,8 +101,8 @@ Then replace the example odds with real book prices.
 Expected format:
 
 ```csv
-date,home_team,away_team,market,selection,american_odds,book,notes
-2026-08-21,Arsenal,Coventry,total_2_5,under,110,DraftKings,
+date,home_team,away_team,market,selection,american_odds,closing_american_odds,book,notes
+2026-08-21,Arsenal,Coventry,total_2_5,under,110,,DraftKings,
 ```
 
 Supported starter markets:
@@ -112,6 +112,11 @@ Supported starter markets:
 total_2_5 selections: over, under
 btts selections: yes, no
 ```
+
+`american_odds` is the price used when the model makes the decision.
+`closing_american_odds` is optional. Leave it blank before matches, then paste
+the closing price after the market closes. If it is blank, CLV stays missing
+instead of being guessed.
 
 ---
 

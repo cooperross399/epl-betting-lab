@@ -9,6 +9,7 @@ from epl_betting_lab.reports.backtest_calibration import (
     save_backtest_calibration_reports,
     save_market_specific_comparison,
 )
+from epl_betting_lab.reports.clv import save_clv_reports
 from epl_betting_lab.reports.totals_diagnostics import save_totals_diagnostics_reports
 
 
@@ -26,6 +27,7 @@ def main() -> None:
     calibration_paths = save_backtest_calibration_reports(bets, OUTPUTS_DIR)
     comparison_paths = save_market_specific_comparison(summary, OUTPUTS_DIR)
     totals_paths = save_totals_diagnostics_reports(bets, matches, OUTPUTS_DIR)
+    clv_paths = save_clv_reports(bets, OUTPUTS_DIR)
 
     print("Backtest summary:")
     print(summary.to_string(index=False) if not summary.empty else "No bets found.")
@@ -42,6 +44,9 @@ def main() -> None:
         print(f"- {path}")
     print("Saved totals diagnostics:")
     for path in totals_paths.values():
+        print(f"- {path}")
+    print("Saved CLV reports:")
+    for path in clv_paths.values():
         print(f"- {path}")
 
 

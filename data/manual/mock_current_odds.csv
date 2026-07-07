@@ -1,15 +1,15 @@
-date,home_team,away_team,market,selection,american_odds,book,notes
-2026-08-21,Arsenal,Coventry,1x2,home,-350,mock,not real odds
-2026-08-21,Arsenal,Coventry,1x2,draw,500,mock,not real odds
-2026-08-21,Arsenal,Coventry,1x2,away,900,mock,not real odds
-2026-08-21,Arsenal,Coventry,total_2_5,over,-130,mock,not real odds
-2026-08-21,Arsenal,Coventry,total_2_5,under,110,mock,not real odds
-2026-08-21,Arsenal,Coventry,btts,yes,135,mock,not real odds
-2026-08-21,Arsenal,Coventry,btts,no,-155,mock,not real odds
-2026-08-22,Hull,Man United,1x2,home,600,mock,not real odds
-2026-08-22,Hull,Man United,1x2,draw,360,mock,not real odds
-2026-08-22,Hull,Man United,1x2,away,-220,mock,not real odds
-2026-08-22,Hull,Man United,total_2_5,over,-115,mock,not real odds
-2026-08-22,Hull,Man United,total_2_5,under,-105,mock,not real odds
-2026-08-22,Hull,Man United,btts,yes,-105,mock,not real odds
-2026-08-22,Hull,Man United,btts,no,-115,mock,not real odds
+date,home_team,away_team,market,selection,american_odds,closing_american_odds,book,notes
+2026-08-21,Arsenal,Coventry,1x2,home,-350,,mock,not real odds
+2026-08-21,Arsenal,Coventry,1x2,draw,500,,mock,not real odds
+2026-08-21,Arsenal,Coventry,1x2,away,900,,mock,not real odds
+2026-08-21,Arsenal,Coventry,total_2_5,over,-130,,mock,not real odds
+2026-08-21,Arsenal,Coventry,total_2_5,under,110,,mock,not real odds
+2026-08-21,Arsenal,Coventry,btts,yes,135,,mock,not real odds
+2026-08-21,Arsenal,Coventry,btts,no,-155,,mock,not real odds
+2026-08-22,Hull,Man United,1x2,home,600,,mock,not real odds
+2026-08-22,Hull,Man United,1x2,draw,360,,mock,not real odds
+2026-08-22,Hull,Man United,1x2,away,-220,,mock,not real odds
+2026-08-22,Hull,Man United,total_2_5,over,-115,,mock,not real odds
+2026-08-22,Hull,Man United,total_2_5,under,-105,,mock,not real odds
+2026-08-22,Hull,Man United,btts,yes,-105,,mock,not real odds
+2026-08-22,Hull,Man United,btts,no,-115,,mock,not real odds

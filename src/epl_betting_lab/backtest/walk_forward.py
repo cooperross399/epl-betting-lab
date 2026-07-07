@@ -3,7 +3,12 @@ from __future__ import annotations
 import pandas as pd
 
 from epl_betting_lab.config import MIN_EDGE, MAX_DEFAULT_JUICE
-from epl_betting_lab.models.calibration import historical_baseline, calibrate_probability, ShrinkageConfig
+from epl_betting_lab.models.calibration import (
+    historical_baseline,
+    calibrate_probability,
+    min_calibrated_edge,
+    ShrinkageConfig,
+)
 from epl_betting_lab.models.poisson_goals import PoissonGoalsModel
 from epl_betting_lab.models.value import decimal_to_american, grade_edge
 
@@ -79,6 +84,20 @@ def run_walk_forward_backtest(
                 continue
             american = decimal_to_american(float(dec_odds))
             raw_grade = grade_edge(float(model_prob), american, min_edge=min_edge, max_default_juice=max_juice)
+            generic_calibration = calibrate_probability(
+                float(model_prob),
+                market,
+                selection,
+                american_odds=american,
+                historical_target=historical_baseline(train, market, selection),
+                config=ShrinkageConfig.generic(),
+            )
+            generic_grade = grade_edge(
+                float(generic_calibration["calibrated_model_prob"]),
+                american,
+                min_edge=min_edge,
+                max_default_juice=max_juice,
+            )
             calibration = calibrate_probability(
                 float(model_prob),
                 market,
@@ -90,12 +109,13 @@ def run_walk_forward_backtest(
             calibrated_grade = grade_edge(
                 float(calibration["calibrated_model_prob"]),
                 american,
-                min_edge=min_edge,
+                min_edge=min_calibrated_edge(market, selection, min_edge, calibration_config),
                 max_default_juice=max_juice,
             )
             raw_would_bet = raw_grade["status"] == "BETTABLE"
+            generic_calibrated_would_bet = generic_grade["status"] == "BETTABLE"
             calibrated_would_bet = calibrated_grade["status"] == "BETTABLE"
-            if not raw_would_bet and not calibrated_would_bet:
+            if not raw_would_bet and not generic_calibrated_would_bet and not calibrated_would_bet:
                 continue
 
             if market == "1x2":
@@ -118,26 +138,35 @@ def run_walk_forward_backtest(
                 "decimal_odds": round(float(dec_odds), 3),
                 "american_odds": american,
                 "raw_model_prob": raw_grade["model_prob"],
+                "generic_calibrated_model_prob": generic_grade["model_prob"],
                 "calibrated_model_prob": calibrated_grade["model_prob"],
                 "model_prob": calibrated_grade["model_prob"],
                 "book_implied": calibrated_grade["book_implied"],
                 "raw_edge": raw_grade["edge"],
+                "generic_calibrated_edge": generic_grade["edge"],
                 "calibrated_edge": calibrated_grade["edge"],
                 "edge": calibrated_grade["edge"],
                 "raw_ev_per_unit": raw_grade["ev_per_unit"],
+                "generic_calibrated_ev_per_unit": generic_grade["ev_per_unit"],
                 "calibrated_ev_per_unit": calibrated_grade["ev_per_unit"],
                 "ev_per_unit": calibrated_grade["ev_per_unit"],
                 "raw_fair_american": raw_grade["fair_american"],
+                "generic_calibrated_fair_american": generic_grade["fair_american"],
                 "calibrated_fair_american": calibrated_grade["fair_american"],
                 "fair_american": calibrated_grade["fair_american"],
                 "raw_status": raw_grade["status"],
+                "generic_calibrated_status": generic_grade["status"],
                 "calibrated_status": calibrated_grade["status"],
                 "status": calibrated_grade["status"],
+                "generic_calibrated_min_edge": min_edge,
+                "calibrated_min_edge": min_calibrated_edge(market, selection, min_edge, calibration_config),
                 **calibration,
                 "raw_would_bet": raw_would_bet,
+                "generic_calibrated_would_bet": generic_calibrated_would_bet,
                 "calibrated_would_bet": calibrated_would_bet,
                 "won": won,
                 "raw_profit_units": profit if raw_would_bet else 0.0,
+                "generic_calibrated_profit_units": profit if generic_calibrated_would_bet else 0.0,
                 "calibrated_profit_units": profit if calibrated_would_bet else 0.0,
                 "profit_units": profit if calibrated_would_bet else 0.0,
             })
@@ -148,8 +177,9 @@ def run_walk_forward_backtest(
 def summarize_backtest(bets: pd.DataFrame) -> pd.DataFrame:
     columns = [
         "market", "raw_bets", "raw_wins", "raw_profit_units", "raw_roi",
+        "generic_calibrated_bets", "generic_calibrated_wins", "generic_calibrated_profit_units", "generic_calibrated_roi",
         "calibrated_bets", "calibrated_wins", "calibrated_profit_units", "calibrated_roi",
-        "bets", "wins", "losses", "win_rate", "profit_units", "roi",
+        "bets_filtered_out", "bets", "wins", "losses", "win_rate", "profit_units", "roi",
     ]
     if bets.empty:
         return pd.DataFrame(columns=columns)
@@ -157,12 +187,16 @@ def summarize_backtest(bets: pd.DataFrame) -> pd.DataFrame:
     rows = []
     for market, group in bets.groupby("market"):
         raw = group[group.get("raw_would_bet", False) == True]
+        generic = group[group.get("generic_calibrated_would_bet", False) == True]
         calibrated = group[group.get("calibrated_would_bet", True) == True]
         raw_bets = len(raw)
+        generic_bets = len(generic)
         calibrated_bets = len(calibrated)
         raw_wins = int(raw["won"].sum()) if raw_bets else 0
+        generic_wins = int(generic["won"].sum()) if generic_bets else 0
         calibrated_wins = int(calibrated["won"].sum()) if calibrated_bets else 0
         raw_profit = round(float(raw["raw_profit_units"].sum()), 3) if raw_bets else 0.0
+        generic_profit = round(float(generic["generic_calibrated_profit_units"].sum()), 3) if generic_bets else 0.0
         calibrated_profit = round(float(calibrated["calibrated_profit_units"].sum()), 3) if calibrated_bets else 0.0
         rows.append({
             "market": market,
@@ -170,10 +204,15 @@ def summarize_backtest(bets: pd.DataFrame) -> pd.DataFrame:
             "raw_wins": raw_wins,
             "raw_profit_units": raw_profit,
             "raw_roi": round(raw_profit / raw_bets, 3) if raw_bets else 0.0,
+            "generic_calibrated_bets": generic_bets,
+            "generic_calibrated_wins": generic_wins,
+            "generic_calibrated_profit_units": generic_profit,
+            "generic_calibrated_roi": round(generic_profit / generic_bets, 3) if generic_bets else 0.0,
             "calibrated_bets": calibrated_bets,
             "calibrated_wins": calibrated_wins,
             "calibrated_profit_units": calibrated_profit,
             "calibrated_roi": round(calibrated_profit / calibrated_bets, 3) if calibrated_bets else 0.0,
+            "bets_filtered_out": raw_bets - calibrated_bets,
             "bets": calibrated_bets,
             "wins": calibrated_wins,
             "losses": calibrated_bets - calibrated_wins,

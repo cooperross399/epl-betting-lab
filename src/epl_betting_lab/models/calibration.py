@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import pandas as pd
 
@@ -19,6 +19,33 @@ class ShrinkageConfig:
     high_probability_cutoff: float = 0.70
     medium_edge_cutoff: float = 0.08
     big_edge_cutoff: float = 0.12
+    market_weight_add: dict[str, float] = field(default_factory=lambda: {
+        "total_2_5": 0.10,
+        "btts": 0.05,
+    })
+    selection_weight_add: dict[tuple[str, str], float] = field(default_factory=lambda: {
+        ("total_2_5", "over"): 0.05,
+        ("total_2_5", "under"): 0.20,
+    })
+    market_min_edges: dict[str, float] = field(default_factory=lambda: {
+        "1x2": 0.035,
+        "total_2_5": 0.065,
+        "btts": 0.045,
+    })
+    selection_min_edges: dict[tuple[str, str], float] = field(default_factory=lambda: {
+        ("total_2_5", "over"): 0.06,
+        ("total_2_5", "under"): 0.08,
+    })
+
+    @classmethod
+    def generic(cls) -> "ShrinkageConfig":
+        """Return the original market-neutral shrinkage settings."""
+        return cls(
+            market_weight_add={},
+            selection_weight_add={},
+            market_min_edges={},
+            selection_min_edges={},
+        )
 
 
 DEFAULT_BASELINES = {
@@ -78,7 +105,21 @@ def shrinkage_weight(
         weight += config.away_1x2_add
     if american_odds is not None and float(american_odds) > 0:
         weight += config.plus_money_add
+    weight += config.market_weight_add.get(market, 0.0)
+    weight += config.selection_weight_add.get((market, selection), 0.0)
     return round(min(weight, config.max_weight), 4)
+
+
+def min_calibrated_edge(
+    market: str,
+    selection: str,
+    default_min_edge: float,
+    config: ShrinkageConfig = ShrinkageConfig(),
+) -> float:
+    """Return the configured minimum edge for a calibrated betting decision."""
+    if (market, selection) in config.selection_min_edges:
+        return config.selection_min_edges[(market, selection)]
+    return config.market_min_edges.get(market, default_min_edge)
 
 
 def calibrate_probability(

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pandas as pd
 
-from epl_betting_lab.models.calibration import calibrate_probability
+from epl_betting_lab.models.calibration import ShrinkageConfig, calibrate_probability, min_calibrated_edge
 from epl_betting_lab.models.value import grade_edge
 
 
@@ -18,11 +18,12 @@ def evaluate_total_25(projections: pd.DataFrame, odds: pd.DataFrame, min_edge: f
             american = float(line.iloc[0].american_odds)
             raw_prob = float(p[prob_col])
             raw_grade = grade_edge(raw_prob, american, min_edge=min_edge, max_default_juice=max_juice)
-            calibration = calibrate_probability(raw_prob, "total_2_5", selection, american_odds=american)
+            config = ShrinkageConfig()
+            calibration = calibrate_probability(raw_prob, "total_2_5", selection, american_odds=american, config=config)
             grade = grade_edge(
                 float(calibration["calibrated_model_prob"]),
                 american,
-                min_edge=min_edge,
+                min_edge=min_calibrated_edge("total_2_5", selection, min_edge, config),
                 max_default_juice=max_juice,
             )
             rows.append({
@@ -37,6 +38,7 @@ def evaluate_total_25(projections: pd.DataFrame, odds: pd.DataFrame, min_edge: f
                 "calibrated_edge": grade["edge"],
                 "raw_status": raw_grade["status"],
                 "calibrated_status": grade["status"],
+                "calibrated_min_edge": min_calibrated_edge("total_2_5", selection, min_edge, config),
                 **calibration,
                 **grade,
             })

@@ -200,3 +200,46 @@ def save_backtest_calibration_reports(bets: pd.DataFrame, output_dir: Path) -> d
     paths["markdown"] = output_dir / "backtest_calibration_report.md"
     paths["markdown"].write_text(markdown, encoding="utf-8")
     return paths
+
+
+def render_market_specific_comparison(summary: pd.DataFrame) -> str:
+    if summary.empty:
+        return "# EPL Betting Lab Market-Specific Calibration Comparison\n\nNo backtest summary available."
+
+    display_cols = [
+        "market",
+        "raw_bets",
+        "raw_roi",
+        "generic_calibrated_bets",
+        "generic_calibrated_roi",
+        "calibrated_bets",
+        "calibrated_roi",
+        "bets_filtered_out",
+        "calibrated_profit_units",
+    ]
+    available = [col for col in display_cols if col in summary.columns]
+    table = summary[available].copy()
+
+    lines = [
+        "# EPL Betting Lab Market-Specific Calibration Comparison",
+        "",
+        "This compares the old raw model, the generic shrinkage layer, and the new market-specific calibration settings.",
+        "",
+        "- `generic_calibrated` means the same shrinkage rules for every market.",
+        "- `calibrated` means market-specific rules, including stricter total_2_5 thresholds.",
+        "- This report uses historical backtest odds only. It does not use live odds, fabricate prices, or place bets.",
+        "",
+        table.to_markdown(index=False),
+    ]
+    return "\n".join(lines)
+
+
+def save_market_specific_comparison(summary: pd.DataFrame, output_dir: Path) -> dict[str, Path]:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    paths = {
+        "csv": output_dir / "backtest_market_specific_calibration_comparison.csv",
+        "markdown": output_dir / "backtest_market_specific_calibration_comparison.md",
+    }
+    summary.to_csv(paths["csv"], index=False)
+    paths["markdown"].write_text(render_market_specific_comparison(summary), encoding="utf-8")
+    return paths

@@ -4,6 +4,7 @@ import pandas as pd
 
 from epl_betting_lab.reports.backtest_calibration import (
     probability_bucket,
+    save_market_specific_comparison,
     save_backtest_calibration_reports,
     summarize_calibration,
 )
@@ -96,3 +97,23 @@ def test_save_backtest_calibration_reports(tmp_path) -> None:
     assert paths["side"].exists()
     assert paths["markdown"].exists()
     assert "Backtest Calibration Report" in paths["markdown"].read_text(encoding="utf-8")
+
+
+def test_save_market_specific_comparison(tmp_path) -> None:
+    summary = pd.DataFrame([{
+        "market": "total_2_5",
+        "raw_bets": 10,
+        "raw_roi": -0.1,
+        "generic_calibrated_bets": 8,
+        "generic_calibrated_roi": -0.05,
+        "calibrated_bets": 2,
+        "calibrated_roi": 0.1,
+        "bets_filtered_out": 8,
+        "calibrated_profit_units": 0.2,
+    }])
+    paths = save_market_specific_comparison(summary, tmp_path)
+
+    assert paths["csv"].name == "backtest_market_specific_calibration_comparison.csv"
+    assert paths["markdown"].name == "backtest_market_specific_calibration_comparison.md"
+    assert paths["csv"].exists()
+    assert "Market-Specific Calibration Comparison" in paths["markdown"].read_text(encoding="utf-8")

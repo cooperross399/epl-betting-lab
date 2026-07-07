@@ -5,6 +5,7 @@ from epl_betting_lab.backtest.walk_forward import run_walk_forward_backtest, sum
 from epl_betting_lab.config import OUTPUTS_DIR
 from epl_betting_lab.data.loaders import load_matches
 from epl_betting_lab.reports.backtest_bias import save_backtest_bias_reports
+from epl_betting_lab.reports.backtest_calibration import save_backtest_calibration_reports
 
 
 def main() -> None:
@@ -18,6 +19,7 @@ def main() -> None:
     bets.to_csv(bets_path, index=False)
     summary.to_csv(summary_path, index=False)
     report_paths = save_backtest_bias_reports(bets, OUTPUTS_DIR)
+    calibration_paths = save_backtest_calibration_reports(bets, OUTPUTS_DIR)
 
     print("Backtest summary:")
     print(summary.to_string(index=False) if not summary.empty else "No bets found.")
@@ -25,6 +27,9 @@ def main() -> None:
     print(f"Saved summary to {summary_path}")
     print("Saved bias reports:")
     for path in report_paths.values():
+        print(f"- {path}")
+    print("Saved calibration reports:")
+    for path in calibration_paths.values():
         print(f"- {path}")
 
 

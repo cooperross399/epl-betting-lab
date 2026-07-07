@@ -42,18 +42,25 @@ def enrich_calibration_bets(bets: pd.DataFrame) -> pd.DataFrame:
         return bets.copy()
 
     df = enrich_backtest_bets(bets)
-    if "calibrated_would_bet" in df.columns:
-        df = df[df["calibrated_would_bet"]].copy()
+    final_would_bet_col = "goal_environment_adjusted_would_bet" if "goal_environment_adjusted_would_bet" in df.columns else "calibrated_would_bet"
+    if final_would_bet_col in df.columns:
+        df = df[df[final_would_bet_col]].copy()
     if "raw_model_prob" not in df.columns:
         df["raw_model_prob"] = df["model_prob"]
     if "calibrated_model_prob" not in df.columns:
         df["calibrated_model_prob"] = df["model_prob"]
+    if "goal_environment_adjusted_calibrated_model_prob" in df.columns:
+        df["calibrated_model_prob"] = df["goal_environment_adjusted_calibrated_model_prob"]
     if "raw_edge" not in df.columns:
         df["raw_edge"] = df["edge"]
     if "calibrated_edge" not in df.columns:
         df["calibrated_edge"] = df["edge"]
+    if "goal_environment_adjusted_edge" in df.columns:
+        df["calibrated_edge"] = df["goal_environment_adjusted_edge"]
     if "calibrated_profit_units" not in df.columns:
         df["calibrated_profit_units"] = df["profit_units"]
+    if "goal_environment_adjusted_profit_units" in df.columns:
+        df["calibrated_profit_units"] = df["goal_environment_adjusted_profit_units"]
     if "calibration_weight" not in df.columns:
         df["calibration_weight"] = 0.0
 
@@ -214,8 +221,12 @@ def render_market_specific_comparison(summary: pd.DataFrame) -> str:
         "generic_calibrated_roi",
         "calibrated_bets",
         "calibrated_roi",
+        "goal_environment_adjusted_bets",
+        "goal_environment_adjusted_roi",
+        "goal_environment_bets_filtered_out",
         "bets_filtered_out",
         "calibrated_profit_units",
+        "goal_environment_adjusted_profit_units",
     ]
     available = [col for col in display_cols if col in summary.columns]
     table = summary[available].copy()

@@ -21,11 +21,18 @@ TOTALS_SUMMARY_COLUMNS = [
     "calibrated_wins",
     "calibrated_profit_units",
     "calibrated_roi",
+    "goal_environment_adjusted_bets",
+    "goal_environment_adjusted_wins",
+    "goal_environment_adjusted_profit_units",
+    "goal_environment_adjusted_roi",
     "bets_filtered_out",
+    "goal_environment_bets_filtered_out",
     "avg_american_odds",
     "avg_raw_edge",
     "avg_calibrated_edge",
+    "avg_goal_environment_adjusted_edge",
     "avg_projected_total_goals",
+    "avg_adjusted_projected_total_goals",
     "avg_actual_total_goals",
     "actual_over_2_5_rate",
 ]
@@ -140,6 +147,8 @@ def enrich_totals_diagnostics(bets: pd.DataFrame, matches: pd.DataFrame | None =
         "raw_profit_units": "profit_units",
         "generic_calibrated_profit_units": "profit_units",
         "calibrated_profit_units": "profit_units",
+        "goal_environment_adjusted_profit_units": "calibrated_profit_units",
+        "goal_environment_adjusted_edge": "calibrated_edge",
     }
     for column, fallback in defaults.items():
         if column not in df.columns and fallback in df.columns:
@@ -148,6 +157,10 @@ def enrich_totals_diagnostics(bets: pd.DataFrame, matches: pd.DataFrame | None =
     for flag in ["raw_would_bet", "generic_calibrated_would_bet", "calibrated_would_bet"]:
         if flag not in df.columns:
             df[flag] = True
+    if "goal_environment_adjusted_would_bet" not in df.columns:
+        df["goal_environment_adjusted_would_bet"] = df["calibrated_would_bet"]
+    if "adjusted_projected_total_goals" not in df.columns and "projected_total_goals" in df.columns:
+        df["adjusted_projected_total_goals"] = df["projected_total_goals"]
 
     if "actual_total_goals" not in df.columns and "score" in df.columns:
         score_parts = df["score"].astype(str).str.extract(r"^(\d+)-(\d+)$")
@@ -192,12 +205,15 @@ def summarize_totals_by(totals: pd.DataFrame, group_cols: list[str]) -> pd.DataF
         raw = group[group["raw_would_bet"] == True]
         generic = group[group["generic_calibrated_would_bet"] == True]
         calibrated = group[group["calibrated_would_bet"] == True]
+        adjusted = group[group["goal_environment_adjusted_would_bet"] == True]
         raw_bets = len(raw)
         generic_bets = len(generic)
         calibrated_bets = len(calibrated)
+        adjusted_bets = len(adjusted)
         raw_profit = round(float(raw["raw_profit_units"].sum()), 3) if raw_bets else 0.0
         generic_profit = round(float(generic["generic_calibrated_profit_units"].sum()), 3) if generic_bets else 0.0
         calibrated_profit = round(float(calibrated["calibrated_profit_units"].sum()), 3) if calibrated_bets else 0.0
+        adjusted_profit = round(float(adjusted["goal_environment_adjusted_profit_units"].sum()), 3) if adjusted_bets else 0.0
         row = dict(zip(group_cols, key, strict=False))
         row.update({
             "candidates": len(group),
@@ -213,11 +229,18 @@ def summarize_totals_by(totals: pd.DataFrame, group_cols: list[str]) -> pd.DataF
             "calibrated_wins": int(calibrated["won"].sum()) if calibrated_bets else 0,
             "calibrated_profit_units": calibrated_profit,
             "calibrated_roi": round(calibrated_profit / calibrated_bets, 3) if calibrated_bets else 0.0,
+            "goal_environment_adjusted_bets": adjusted_bets,
+            "goal_environment_adjusted_wins": int(adjusted["won"].sum()) if adjusted_bets else 0,
+            "goal_environment_adjusted_profit_units": adjusted_profit,
+            "goal_environment_adjusted_roi": round(adjusted_profit / adjusted_bets, 3) if adjusted_bets else 0.0,
             "bets_filtered_out": raw_bets - calibrated_bets,
+            "goal_environment_bets_filtered_out": raw_bets - adjusted_bets,
             "avg_american_odds": round(float(group["american_odds"].mean()), 0),
             "avg_raw_edge": round(float(group["raw_edge"].mean()), 4),
             "avg_calibrated_edge": round(float(group["calibrated_edge"].mean()), 4),
+            "avg_goal_environment_adjusted_edge": round(float(group["goal_environment_adjusted_edge"].mean()), 4),
             "avg_projected_total_goals": round(float(group["projected_total_goals"].mean()), 3) if "projected_total_goals" in group else pd.NA,
+            "avg_adjusted_projected_total_goals": round(float(group["adjusted_projected_total_goals"].mean()), 3) if "adjusted_projected_total_goals" in group else pd.NA,
             "avg_actual_total_goals": round(float(group["actual_total_goals"].mean()), 3) if "actual_total_goals" in group else pd.NA,
             "actual_over_2_5_rate": round(float((group["actual_total_goals"] > 2.5).mean()), 3) if "actual_total_goals" in group else pd.NA,
         })
@@ -248,6 +271,59 @@ def build_totals_team_breakdown(totals: pd.DataFrame) -> pd.DataFrame:
     return summarize_totals_by(pd.DataFrame(rows), ["team", "team_role", "team_event_bucket"])
 
 
+def build_goal_environment_comparison(totals: pd.DataFrame) -> pd.DataFrame:
+    columns = [
+        "selection",
+        "raw_bets",
+        "raw_roi",
+        "calibrated_bets",
+        "calibrated_roi",
+        "goal_environment_adjusted_bets",
+        "goal_environment_adjusted_roi",
+        "goal_environment_bets_filtered_out",
+        "goal_environment_adjusted_profit_units",
+        "under_improved",
+    ]
+    if totals.empty:
+        return pd.DataFrame(columns=columns)
+
+    summary = summarize_totals_by(totals, ["selection"])
+    rows = []
+    for _, row in summary.iterrows():
+        rows.append({
+            "selection": row["selection"],
+            "raw_bets": row["raw_bets"],
+            "raw_roi": row["raw_roi"],
+            "calibrated_bets": row["calibrated_bets"],
+            "calibrated_roi": row["calibrated_roi"],
+            "goal_environment_adjusted_bets": row["goal_environment_adjusted_bets"],
+            "goal_environment_adjusted_roi": row["goal_environment_adjusted_roi"],
+            "goal_environment_bets_filtered_out": row["goal_environment_bets_filtered_out"],
+            "goal_environment_adjusted_profit_units": row["goal_environment_adjusted_profit_units"],
+            "under_improved": bool(
+                row["selection"] == "under"
+                and row["goal_environment_adjusted_roi"] >= row["raw_roi"]
+                and row["goal_environment_adjusted_profit_units"] >= row["raw_profit_units"]
+            ),
+        })
+
+    total = summarize_totals_by(totals, ["market"]).iloc[0] if "market" in totals.columns else None
+    if total is not None:
+        rows.append({
+            "selection": "all totals",
+            "raw_bets": total["raw_bets"],
+            "raw_roi": total["raw_roi"],
+            "calibrated_bets": total["calibrated_bets"],
+            "calibrated_roi": total["calibrated_roi"],
+            "goal_environment_adjusted_bets": total["goal_environment_adjusted_bets"],
+            "goal_environment_adjusted_roi": total["goal_environment_adjusted_roi"],
+            "goal_environment_bets_filtered_out": total["goal_environment_bets_filtered_out"],
+            "goal_environment_adjusted_profit_units": total["goal_environment_adjusted_profit_units"],
+            "under_improved": pd.NA,
+        })
+    return pd.DataFrame(rows, columns=columns)
+
+
 def _worst_line(df: pd.DataFrame, label_col: str, profit_col: str = "raw_profit_units") -> str:
     if df.empty:
         return "No historical total_2_5 rows were available."
@@ -268,8 +344,30 @@ def _better_selection(selection_breakdown: pd.DataFrame) -> str:
     worst = active.iloc[-1]
     return (
         f"{best['selection']} was better historically than {worst['selection']} "
-        f"on raw totals bets ({best['raw_roi']:.1%} ROI vs {worst['raw_roi']:.1%})."
+        f"on raw totals bets ({best['raw_roi']:.1%} ROI vs {worst['raw_roi']:.1%}). "
+        f"After the goal-environment layer, {best['selection']} finished at "
+        f"{best['goal_environment_adjusted_roi']:.1%} ROI over {int(best['goal_environment_adjusted_bets'])} bets."
     )
+
+
+def _comparison_line(comparison: pd.DataFrame) -> str:
+    if comparison.empty:
+        return "No goal-environment comparison rows available."
+    totals = comparison[comparison["selection"] == "all totals"]
+    under = comparison[comparison["selection"] == "under"]
+    pieces = []
+    if not totals.empty:
+        row = totals.iloc[0]
+        pieces.append(
+            f"all totals moved from {row['raw_roi']:.1%} raw ROI to "
+            f"{row['goal_environment_adjusted_roi']:.1%} adjusted ROI, with "
+            f"{int(row['goal_environment_bets_filtered_out'])} raw totals filtered out"
+        )
+    if not under.empty:
+        row = under.iloc[0]
+        improved = "improved" if bool(row["under_improved"]) else "did not improve"
+        pieces.append(f"unders {improved} versus raw under results")
+    return "; ".join(pieces) + "."
 
 
 def render_totals_diagnostics_report(
@@ -281,6 +379,7 @@ def render_totals_diagnostics_report(
     calibrated_edge: pd.DataFrame,
     team: pd.DataFrame,
     event_profile: pd.DataFrame,
+    comparison: pd.DataFrame,
 ) -> str:
     worst_teams = team[team["raw_bets"] > 0].sort_values("raw_profit_units").head(10) if not team.empty else pd.DataFrame()
     low_goal = goal_bucket[goal_bucket["projected_goal_total_bucket"].astype(str).str.contains("under|2.2", regex=True, na=False)]
@@ -293,6 +392,8 @@ def render_totals_diagnostics_report(
         "",
         "Status note: `raw` means the old uncalibrated totals signal. `calibrated` means the current stricter market-specific totals rule used for betting decisions.",
         "",
+        "The `goal_environment_adjusted` columns are the current final totals decisions after the extra goal-environment check.",
+        "",
         "## Quick answers",
         "",
         f"- Over vs under: {_better_selection(selection)}",
@@ -301,6 +402,11 @@ def render_totals_diagnostics_report(
         f"- Worst projected goal bucket: {_worst_line(goal_bucket, 'projected_goal_total_bucket')}",
         f"- Worst raw edge bucket: {_worst_line(raw_edge, 'raw_edge_bucket')}",
         f"- Worst calibrated edge bucket: {_worst_line(calibrated_edge, 'calibrated_edge_bucket')}",
+        f"- Goal-environment comparison: {_comparison_line(comparison)}",
+        "",
+        "## Goal-environment comparison",
+        "",
+        comparison.to_markdown(index=False) if not comparison.empty else "No goal-environment comparison rows available.",
         "",
         "## Over vs under",
         "",
@@ -361,6 +467,7 @@ def save_totals_diagnostics_reports(bets: pd.DataFrame, matches: pd.DataFrame | 
         "favorite_strength": summarize_totals_by(totals, ["favorite_strength_bucket", "selection"]),
         "event_profile": summarize_totals_by(totals, ["match_event_profile", "selection"]),
         "team": build_totals_team_breakdown(totals),
+        "comparison": build_goal_environment_comparison(totals),
     }
 
     paths = {
@@ -375,6 +482,7 @@ def save_totals_diagnostics_reports(bets: pd.DataFrame, matches: pd.DataFrame | 
         "favorite_strength": output_dir / "backtest_totals_by_favorite_strength.csv",
         "event_profile": output_dir / "backtest_totals_by_event_profile.csv",
         "team": output_dir / "backtest_totals_by_team.csv",
+        "comparison": output_dir / "backtest_totals_goal_environment_comparison.csv",
     }
 
     for name, report in reports.items():
@@ -389,6 +497,7 @@ def save_totals_diagnostics_reports(bets: pd.DataFrame, matches: pd.DataFrame | 
         reports["calibrated_edge_bucket"],
         reports["team"],
         reports["event_profile"],
+        reports["comparison"],
     )
     paths["markdown"] = output_dir / "backtest_totals_diagnostics_report.md"
     paths["markdown"].write_text(markdown, encoding="utf-8")

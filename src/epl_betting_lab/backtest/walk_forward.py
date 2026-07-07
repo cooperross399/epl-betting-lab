@@ -9,6 +9,7 @@ from epl_betting_lab.models.calibration import (
     min_calibrated_edge,
     ShrinkageConfig,
 )
+from epl_betting_lab.models.goal_environment import adjust_total_probability
 from epl_betting_lab.models.poisson_goals import PoissonGoalsModel
 from epl_betting_lab.models.value import decimal_to_american, grade_edge
 
@@ -111,16 +112,49 @@ def run_walk_forward_backtest(
                 historical_target=historical_baseline(train, market, selection),
                 config=calibration_config,
             )
+            goal_environment = {}
+            adjusted_model_prob = float(model_prob)
+            if market == "total_2_5":
+                goal_environment = adjust_total_probability(
+                    float(model_prob),
+                    selection,
+                    game.home_team,
+                    game.away_team,
+                    projected_home_goals,
+                    projected_away_goals,
+                    train,
+                )
+                adjusted_model_prob = float(goal_environment["goal_environment_adjusted_model_prob"])
+            adjusted_calibration = calibrate_probability(
+                adjusted_model_prob,
+                market,
+                selection,
+                american_odds=american,
+                historical_target=historical_baseline(train, market, selection),
+                config=calibration_config,
+            )
             calibrated_grade = grade_edge(
                 float(calibration["calibrated_model_prob"]),
                 american,
                 min_edge=min_calibrated_edge(market, selection, min_edge, calibration_config),
                 max_default_juice=max_juice,
             )
+            adjusted_grade = grade_edge(
+                float(adjusted_calibration["calibrated_model_prob"]),
+                american,
+                min_edge=min_calibrated_edge(market, selection, min_edge, calibration_config),
+                max_default_juice=max_juice,
+            )
+            if goal_environment.get("goal_environment_under_guardrail") and adjusted_grade["status"] in {"BETTABLE", "LEAN"}:
+                adjusted_grade = {**adjusted_grade, "status": "PASS - hot goal environment"}
             raw_would_bet = raw_grade["status"] == "BETTABLE"
             generic_calibrated_would_bet = generic_grade["status"] == "BETTABLE"
             calibrated_would_bet = calibrated_grade["status"] == "BETTABLE"
-            if not raw_would_bet and not generic_calibrated_would_bet and not calibrated_would_bet:
+            goal_environment_adjusted_would_bet = adjusted_grade["status"] == "BETTABLE"
+            if market == "total_2_5" and goal_environment_adjusted_would_bet and not calibrated_would_bet:
+                adjusted_grade = {**adjusted_grade, "status": "PASS - needs pre-adjustment edge"}
+                goal_environment_adjusted_would_bet = False
+            if not raw_would_bet and not generic_calibrated_would_bet and not calibrated_would_bet and not goal_environment_adjusted_would_bet:
                 continue
 
             if market == "1x2":
@@ -150,35 +184,49 @@ def run_walk_forward_backtest(
                 "raw_model_prob": raw_grade["model_prob"],
                 "generic_calibrated_model_prob": generic_grade["model_prob"],
                 "calibrated_model_prob": calibrated_grade["model_prob"],
-                "model_prob": calibrated_grade["model_prob"],
-                "book_implied": calibrated_grade["book_implied"],
+                "goal_environment_adjusted_model_prob": round(adjusted_model_prob, 4),
+                "goal_environment_adjusted_calibrated_model_prob": adjusted_grade["model_prob"],
+                "model_prob": adjusted_grade["model_prob"],
+                "book_implied": adjusted_grade["book_implied"],
                 "raw_edge": raw_grade["edge"],
                 "generic_calibrated_edge": generic_grade["edge"],
                 "calibrated_edge": calibrated_grade["edge"],
-                "edge": calibrated_grade["edge"],
+                "goal_environment_adjusted_edge": adjusted_grade["edge"],
+                "edge": adjusted_grade["edge"],
                 "raw_ev_per_unit": raw_grade["ev_per_unit"],
                 "generic_calibrated_ev_per_unit": generic_grade["ev_per_unit"],
                 "calibrated_ev_per_unit": calibrated_grade["ev_per_unit"],
-                "ev_per_unit": calibrated_grade["ev_per_unit"],
+                "goal_environment_adjusted_ev_per_unit": adjusted_grade["ev_per_unit"],
+                "ev_per_unit": adjusted_grade["ev_per_unit"],
                 "raw_fair_american": raw_grade["fair_american"],
                 "generic_calibrated_fair_american": generic_grade["fair_american"],
                 "calibrated_fair_american": calibrated_grade["fair_american"],
-                "fair_american": calibrated_grade["fair_american"],
+                "goal_environment_adjusted_fair_american": adjusted_grade["fair_american"],
+                "fair_american": adjusted_grade["fair_american"],
                 "raw_status": raw_grade["status"],
                 "generic_calibrated_status": generic_grade["status"],
                 "calibrated_status": calibrated_grade["status"],
-                "status": calibrated_grade["status"],
+                "goal_environment_adjusted_status": adjusted_grade["status"],
+                "status": adjusted_grade["status"],
                 "generic_calibrated_min_edge": min_edge,
                 "calibrated_min_edge": min_calibrated_edge(market, selection, min_edge, calibration_config),
-                **calibration,
+                "calibration_target": adjusted_calibration["calibration_target"],
+                "calibration_weight": adjusted_calibration["calibration_weight"],
+                "calibration_target_source": adjusted_calibration["calibration_target_source"],
+                "pre_goal_environment_calibration_target": calibration["calibration_target"],
+                "pre_goal_environment_calibration_weight": calibration["calibration_weight"],
+                "pre_goal_environment_calibration_target_source": calibration["calibration_target_source"],
+                **goal_environment,
                 "raw_would_bet": raw_would_bet,
                 "generic_calibrated_would_bet": generic_calibrated_would_bet,
                 "calibrated_would_bet": calibrated_would_bet,
+                "goal_environment_adjusted_would_bet": goal_environment_adjusted_would_bet,
                 "won": won,
                 "raw_profit_units": profit if raw_would_bet else 0.0,
                 "generic_calibrated_profit_units": profit if generic_calibrated_would_bet else 0.0,
                 "calibrated_profit_units": profit if calibrated_would_bet else 0.0,
-                "profit_units": profit if calibrated_would_bet else 0.0,
+                "goal_environment_adjusted_profit_units": profit if goal_environment_adjusted_would_bet else 0.0,
+                "profit_units": profit if goal_environment_adjusted_would_bet else 0.0,
             })
 
     return pd.DataFrame(bets)
@@ -189,7 +237,8 @@ def summarize_backtest(bets: pd.DataFrame) -> pd.DataFrame:
         "market", "raw_bets", "raw_wins", "raw_profit_units", "raw_roi",
         "generic_calibrated_bets", "generic_calibrated_wins", "generic_calibrated_profit_units", "generic_calibrated_roi",
         "calibrated_bets", "calibrated_wins", "calibrated_profit_units", "calibrated_roi",
-        "bets_filtered_out", "bets", "wins", "losses", "win_rate", "profit_units", "roi",
+        "goal_environment_adjusted_bets", "goal_environment_adjusted_wins", "goal_environment_adjusted_profit_units", "goal_environment_adjusted_roi",
+        "bets_filtered_out", "goal_environment_bets_filtered_out", "bets", "wins", "losses", "win_rate", "profit_units", "roi",
     ]
     if bets.empty:
         return pd.DataFrame(columns=columns)
@@ -199,15 +248,20 @@ def summarize_backtest(bets: pd.DataFrame) -> pd.DataFrame:
         raw = group[group.get("raw_would_bet", False) == True]
         generic = group[group.get("generic_calibrated_would_bet", False) == True]
         calibrated = group[group.get("calibrated_would_bet", True) == True]
+        adjusted = group[group.get("goal_environment_adjusted_would_bet", group.get("calibrated_would_bet", True)) == True]
         raw_bets = len(raw)
         generic_bets = len(generic)
         calibrated_bets = len(calibrated)
+        adjusted_bets = len(adjusted)
         raw_wins = int(raw["won"].sum()) if raw_bets else 0
         generic_wins = int(generic["won"].sum()) if generic_bets else 0
         calibrated_wins = int(calibrated["won"].sum()) if calibrated_bets else 0
+        adjusted_wins = int(adjusted["won"].sum()) if adjusted_bets else 0
         raw_profit = round(float(raw["raw_profit_units"].sum()), 3) if raw_bets else 0.0
         generic_profit = round(float(generic["generic_calibrated_profit_units"].sum()), 3) if generic_bets else 0.0
         calibrated_profit = round(float(calibrated["calibrated_profit_units"].sum()), 3) if calibrated_bets else 0.0
+        adjusted_profit_col = "goal_environment_adjusted_profit_units" if "goal_environment_adjusted_profit_units" in adjusted.columns else "calibrated_profit_units"
+        adjusted_profit = round(float(adjusted[adjusted_profit_col].sum()), 3) if adjusted_bets else 0.0
         rows.append({
             "market": market,
             "raw_bets": raw_bets,
@@ -222,12 +276,17 @@ def summarize_backtest(bets: pd.DataFrame) -> pd.DataFrame:
             "calibrated_wins": calibrated_wins,
             "calibrated_profit_units": calibrated_profit,
             "calibrated_roi": round(calibrated_profit / calibrated_bets, 3) if calibrated_bets else 0.0,
+            "goal_environment_adjusted_bets": adjusted_bets,
+            "goal_environment_adjusted_wins": adjusted_wins,
+            "goal_environment_adjusted_profit_units": adjusted_profit,
+            "goal_environment_adjusted_roi": round(adjusted_profit / adjusted_bets, 3) if adjusted_bets else 0.0,
             "bets_filtered_out": raw_bets - calibrated_bets,
-            "bets": calibrated_bets,
-            "wins": calibrated_wins,
-            "losses": calibrated_bets - calibrated_wins,
-            "win_rate": round(calibrated_wins / calibrated_bets, 3) if calibrated_bets else 0.0,
-            "profit_units": calibrated_profit,
-            "roi": round(calibrated_profit / calibrated_bets, 3) if calibrated_bets else 0.0,
+            "goal_environment_bets_filtered_out": raw_bets - adjusted_bets,
+            "bets": adjusted_bets,
+            "wins": adjusted_wins,
+            "losses": adjusted_bets - adjusted_wins,
+            "win_rate": round(adjusted_wins / adjusted_bets, 3) if adjusted_bets else 0.0,
+            "profit_units": adjusted_profit,
+            "roi": round(adjusted_profit / adjusted_bets, 3) if adjusted_bets else 0.0,
         })
     return pd.DataFrame(rows, columns=columns).sort_values("calibrated_profit_units", ascending=False)

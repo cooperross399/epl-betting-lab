@@ -31,10 +31,13 @@ def _sample_bets() -> pd.DataFrame:
             "raw_would_bet": True,
             "generic_calibrated_would_bet": True,
             "calibrated_would_bet": True,
+            "goal_environment_adjusted_would_bet": True,
             "won": True,
             "raw_profit_units": 1.2,
             "generic_calibrated_profit_units": 1.2,
             "calibrated_profit_units": 1.2,
+            "goal_environment_adjusted_profit_units": 1.2,
+            "goal_environment_adjusted_edge": 0.07,
             "profit_units": 1.2,
         },
         {
@@ -54,10 +57,13 @@ def _sample_bets() -> pd.DataFrame:
             "raw_would_bet": True,
             "generic_calibrated_would_bet": False,
             "calibrated_would_bet": False,
+            "goal_environment_adjusted_would_bet": False,
             "won": False,
             "raw_profit_units": -1.0,
             "generic_calibrated_profit_units": 0.0,
             "calibrated_profit_units": 0.0,
+            "goal_environment_adjusted_profit_units": 0.0,
+            "goal_environment_adjusted_edge": 0.01,
             "profit_units": 0.0,
         },
         {
@@ -118,6 +124,8 @@ def test_summarize_totals_by_compares_raw_and_calibrated_results() -> None:
     assert under["raw_profit_units"] == -1.0
     assert under["calibrated_bets"] == 0
     assert under["bets_filtered_out"] == 1
+    assert under["goal_environment_adjusted_bets"] == 0
+    assert under["goal_environment_bets_filtered_out"] == 1
 
 
 def test_team_event_profile_is_available() -> None:
@@ -134,6 +142,7 @@ def test_save_totals_diagnostics_reports(tmp_path) -> None:
     assert paths["selection"].name == "backtest_totals_by_selection.csv"
     assert paths["goal_bucket"].name == "backtest_totals_by_goal_bucket.csv"
     assert paths["price_bucket"].name == "backtest_totals_by_price_bucket.csv"
+    assert paths["comparison"].name == "backtest_totals_goal_environment_comparison.csv"
     assert paths["team"].name == "backtest_totals_by_team.csv"
     assert paths["markdown"].name == "backtest_totals_diagnostics_report.md"
     assert paths["diagnostics"].exists()

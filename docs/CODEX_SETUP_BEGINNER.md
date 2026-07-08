@@ -205,9 +205,11 @@ data/outputs/thursday_best_bets_comparison.csv
 ```
 
 The comparison shows which plays were added or removed, plus changes in status,
-confidence tier, ranking score, odds, calibrated edge, and suggested units. If
-there are not enough archives yet, the report says comparison is not available
-yet and tells you to create more Thursday snapshots first.
+confidence tier, ranking score, odds, calibrated edge, and suggested units. It
+also adds a movement category and importance score so the top of the markdown
+shows the biggest recommendation moves first. If there are not enough archives
+yet, the report says comparison is not available yet and tells you to create
+more Thursday snapshots first.
 
 The Thursday report ranks plays with a simple score and tier:
 

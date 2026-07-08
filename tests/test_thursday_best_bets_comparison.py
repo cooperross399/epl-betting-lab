@@ -87,6 +87,9 @@ def test_build_thursday_best_bets_comparison_finds_added_removed_and_changed_row
     assert summary["previous_archive"] == str(previous_csv)
     assert set(comparison["change_type"]) == {"status_changed", "removed", "added"}
     arsenal = comparison[comparison["home_team"] == "Arsenal"].iloc[0]
+    assert arsenal["movement_category"] == "Became BETTABLE"
+    assert arsenal["importance_score"] == 100.0
+    assert "BETTABLE" in arsenal["movement_reason"]
     assert arsenal["previous_status"] == "LEAN"
     assert arsenal["latest_status"] == "BETTABLE"
     assert arsenal["ranking_score_change"] == 13.0
@@ -95,9 +98,39 @@ def test_build_thursday_best_bets_comparison_finds_added_removed_and_changed_row
     assert arsenal["suggested_units_change"] == 0.15
 
     markdown = render_thursday_best_bets_comparison(comparison, summary)
+    assert "Biggest changes" in markdown
+    assert "Became BETTABLE" in markdown
     assert "Plays Added" in markdown
     assert "Plays Removed" in markdown
     assert "Status Changes" in markdown
+
+
+def test_movement_summary_highlights_downgrades_and_lost_edges(tmp_path) -> None:
+    _write_archive(
+        tmp_path,
+        "2026-07-08T12:00:00",
+        [
+            _row("Spurs", "Wolves", "1x2", "home", "BETTABLE", "A", 78.0, -130, 0.08, 0.5),
+            _row("Chelsea", "Fulham", "total_2_5", "under", "LEAN", "C", 43.0, 120, 0.03, 0.1),
+        ],
+    )
+    _write_archive(
+        tmp_path,
+        "2026-07-09T12:00:00",
+        [
+            _row("Spurs", "Wolves", "1x2", "home", "PASS - too much juice", "Pass/Avoid", 25.0, -180, -0.01, 0.0),
+            _row("Chelsea", "Fulham", "total_2_5", "under", "LEAN", "C", 47.0, 135, 0.05, 0.1),
+        ],
+    )
+
+    comparison, _ = build_thursday_best_bets_comparison(tmp_path)
+
+    spurs = comparison[comparison["home_team"] == "Spurs"].iloc[0]
+    chelsea = comparison[comparison["home_team"] == "Chelsea"].iloc[0]
+    assert spurs["movement_category"] == "Became PASS/Avoid"
+    assert spurs["importance_score"] > chelsea["importance_score"]
+    assert chelsea["movement_category"] == "Edge improved"
+    assert {"movement_category", "importance_score", "movement_reason"}.issubset(comparison.columns)
 
 
 def test_save_thursday_best_bets_comparison_handles_missing_second_archive(tmp_path) -> None:

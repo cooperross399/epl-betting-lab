@@ -318,8 +318,11 @@ data/outputs/thursday_best_bets_comparison.md
 
 The comparison shows plays added or removed, status changes, confidence tier
 changes, ranking score movement, odds movement, calibrated edge changes, and
-suggested unit changes. If there are not two archived reports yet, it writes a
-beginner-friendly message instead of guessing.
+suggested unit changes. It also labels each row with a movement category and
+importance score so the markdown report can show the biggest recommendation
+moves first, such as `Became BETTABLE`, `Became PASS/Avoid`, `Tier upgraded`,
+`Edge improved`, or `Odds moved against us`. If there are not two archived
+reports yet, it writes a beginner-friendly message instead of guessing.
 
 The report separates best bets, leans, and passes/notable avoids. It uses
 calibrated probabilities, respects the default max-juice rule around `-160`,

@@ -5,6 +5,11 @@ import streamlit as st
 
 from epl_betting_lab.backtest.walk_forward import summarize_backtest
 from epl_betting_lab.config import MANUAL_DIR, MAX_DEFAULT_JUICE, MIN_EDGE, OUTPUTS_DIR
+from epl_betting_lab.dashboard_actions import (
+    run_bet_ledger_report,
+    run_ledger_health_check,
+    run_settlement_preview,
+)
 from epl_betting_lab.data.loaders import load_matches, load_upcoming_fixtures, load_current_odds
 from epl_betting_lab.models.poisson_goals import PoissonGoalsModel
 from epl_betting_lab.models.ratings import simple_form_table
@@ -14,6 +19,7 @@ from epl_betting_lab.strategies.btts import evaluate_btts
 from epl_betting_lab.strategies.ml_value import evaluate_1x2_value
 from epl_betting_lab.strategies.promoted_fades import flag_promoted_team_spots
 from epl_betting_lab.strategies.totals import evaluate_total_25
+from scripts import run_backtest
 
 
 def read_output_csv(filename: str) -> pd.DataFrame | None:
@@ -40,11 +46,41 @@ def show_output_table(title: str, filename: str, command: str) -> pd.DataFrame |
     return df
 
 
+def run_dashboard_action(label: str, action) -> None:
+    try:
+        action()
+    except Exception as exc:
+        st.error(f"{label} failed.")
+        st.exception(exc)
+    else:
+        st.success(f"{label} finished. Refreshing dashboard data.")
+        st.rerun()
+
+
+def render_report_buttons() -> None:
+    st.subheader("Report controls")
+    st.caption(
+        "These buttons only regenerate reports. They do not place bets, confirm bets, edit odds, or apply settlements."
+    )
+    button_cols = st.columns(5)
+    if button_cols[0].button("Run bet ledger report", use_container_width=True):
+        run_dashboard_action("Bet ledger report", run_bet_ledger_report)
+    if button_cols[1].button("Run ledger health check", use_container_width=True):
+        run_dashboard_action("Ledger health check", run_ledger_health_check)
+    if button_cols[2].button("Run settlement preview", use_container_width=True):
+        run_dashboard_action("Settlement preview", run_settlement_preview)
+    if button_cols[3].button("Run backtest reports", use_container_width=True):
+        run_dashboard_action("Backtest reports", run_backtest.main)
+    if button_cols[4].button("Refresh dashboard data", use_container_width=True):
+        st.rerun()
+
+
 def render_betting_ledger_tab() -> None:
     st.header("Betting ledger")
     st.caption(
         "Read-only view of your manual betting ledger workflow. This dashboard does not edit the ledger, place bets, or invent odds."
     )
+    render_report_buttons()
 
     with st.expander("Weekly ledger commands", expanded=False):
         st.code(

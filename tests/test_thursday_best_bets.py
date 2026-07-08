@@ -34,6 +34,24 @@ def _candidates() -> pd.DataFrame:
             "notes": "real row in manual odds file",
         },
         {
+            "home_team": "Liverpool",
+            "away_team": "Leeds",
+            "market": "1x2",
+            "selection": "home",
+            "status": "BETTABLE",
+            "american_odds": 105,
+            "raw_model_prob": 0.62,
+            "calibrated_model_prob": 0.61,
+            "model_prob": 0.61,
+            "book_implied": 0.4878,
+            "raw_edge": 0.15,
+            "calibrated_edge": 0.1222,
+            "edge": 0.1222,
+            "ev_per_unit": 0.25,
+            "fair_american": -156,
+            "book": "DraftKings",
+        },
+        {
             "home_team": "Chelsea",
             "away_team": "Fulham",
             "market": "total_2_5",
@@ -53,6 +71,26 @@ def _candidates() -> pd.DataFrame:
             "goal_environment_under_guardrail": True,
             "goal_environment_reason": "Recent games were hot.",
             "pre_goal_environment_calibrated_status": "LEAN",
+        },
+        {
+            "home_team": "Everton",
+            "away_team": "Sunderland",
+            "market": "total_2_5",
+            "selection": "under",
+            "status": "BETTABLE",
+            "american_odds": 120,
+            "raw_model_prob": 0.68,
+            "calibrated_model_prob": 0.62,
+            "model_prob": 0.62,
+            "book_implied": 0.4545,
+            "raw_edge": 0.2255,
+            "calibrated_edge": 0.1655,
+            "edge": 0.1655,
+            "ev_per_unit": 0.36,
+            "fair_american": -163,
+            "book": "FanDuel",
+            "goal_environment_under_guardrail": False,
+            "goal_environment_reason": "Existing protections left this playable.",
         },
         {
             "home_team": "Spurs",
@@ -76,22 +114,42 @@ def _candidates() -> pd.DataFrame:
 
 
 def test_build_thursday_best_bets_sections_and_fields() -> None:
-    report = build_thursday_best_bets(_candidates())
+    report = build_thursday_best_bets(_candidates(), market_reliability={"1x2": 8.0, "total_2_5": -8.0})
 
-    assert list(report["section"]) == ["Best bets", "Leans", "Passes / notable avoids"]
+    assert list(report["section"]) == ["Best bets", "Best bets", "Best bets", "Leans", "Passes / notable avoids"]
     assert report.loc[report["section"] == "Passes / notable avoids", "suggested_units"].iloc[0] == 0.0
-    assert "Under guardrail" in report.loc[report["market"] == "total_2_5", "totals_note"].iloc[0]
+    chelsea_total = report[(report["home_team"] == "Chelsea") & (report["market"] == "total_2_5")].iloc[0]
+    assert "Under guardrail" in chelsea_total["totals_note"]
     assert "qualifies_reason" in report.columns
+    assert "ranking_score" in report.columns
+    assert "confidence_tier" in report.columns
+    assert "risk_flags" in report.columns
+    assert report.iloc[0]["home_team"] == "Liverpool"
+    assert report.iloc[0]["confidence_tier"] == "A"
+    assert report.iloc[0]["suggested_units"] == 0.5
 
 
 def test_render_thursday_best_bets_includes_checklist_and_prices() -> None:
-    markdown = render_thursday_best_bets(build_thursday_best_bets(_candidates()))
+    markdown = render_thursday_best_bets(build_thursday_best_bets(_candidates(), market_reliability={"1x2": 8.0, "total_2_5": -8.0}))
 
     assert "Wednesday/Thursday checklist" in markdown
     assert "Arsenal vs Coventry" in markdown
     assert "raw 62.0%" in markdown
     assert "calibrated 58.0%" in markdown
     assert "Fair price" in markdown
+    assert "Ranking and confidence guide" in markdown
+    assert "Ranking score" in markdown
+    assert "Market reliability" in markdown
+    assert "Risk flags" in markdown
+
+
+def test_totals_unders_cannot_receive_a_tier() -> None:
+    report = build_thursday_best_bets(_candidates(), market_reliability={"1x2": 8.0, "total_2_5": 12.0})
+    totals_under = report[(report["market"] == "total_2_5") & (report["selection"] == "under") & (report["status"] == "BETTABLE")].iloc[0]
+
+    assert totals_under["confidence_tier"] == "B"
+    assert totals_under["suggested_units"] == 0.25
+    assert "totals under caution" in totals_under["risk_flags"]
 
 
 def test_missing_current_odds_message_is_beginner_friendly() -> None:

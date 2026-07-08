@@ -19,6 +19,7 @@ from epl_betting_lab.strategies.btts import evaluate_btts
 from epl_betting_lab.strategies.ml_value import evaluate_1x2_value
 from epl_betting_lab.strategies.promoted_fades import flag_promoted_team_spots
 from epl_betting_lab.strategies.totals import evaluate_total_25
+from epl_betting_lab.workflow_status import build_workflow_status
 from scripts import run_backtest
 
 
@@ -75,11 +76,24 @@ def render_report_buttons() -> None:
         st.rerun()
 
 
+def render_workflow_checklist() -> None:
+    st.subheader("Weekly workflow checklist")
+    st.caption("Read-only file check for the reports that power this dashboard.")
+    status = build_workflow_status()
+    counts = status["status"].value_counts().to_dict()
+    metric_cols = st.columns(3)
+    metric_cols[0].metric("Complete", int(counts.get("Complete", 0)))
+    metric_cols[1].metric("Needs refresh", int(counts.get("Needs refresh", 0)))
+    metric_cols[2].metric("Missing", int(counts.get("Missing", 0)))
+    st.dataframe(status, use_container_width=True, hide_index=True)
+
+
 def render_betting_ledger_tab() -> None:
     st.header("Betting ledger")
     st.caption(
         "Read-only view of your manual betting ledger workflow. This dashboard does not edit the ledger, place bets, or invent odds."
     )
+    render_workflow_checklist()
     render_report_buttons()
 
     with st.expander("Weekly ledger commands", expanded=False):

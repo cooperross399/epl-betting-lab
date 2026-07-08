@@ -10,6 +10,9 @@ from epl_betting_lab.reports.thursday_best_bets import list_recent_thursday_arch
 
 COMPARISON_COLUMNS = [
     "change_type",
+    "movement_category",
+    "importance_score",
+    "movement_reason",
     "home_team",
     "away_team",
     "market",
@@ -43,6 +46,9 @@ def _blank_row(key: tuple[str, ...], previous_archive: str, latest_archive: str)
     home_team, away_team, market, selection = key
     return {
         "change_type": "",
+        "movement_category": "",
+        "importance_score": 0.0,
+        "movement_reason": "",
         "home_team": home_team,
         "away_team": away_team,
         "market": market,
@@ -98,6 +104,19 @@ def _delta(previous: object, latest: object) -> object:
     return round(latest_number - previous_number, 4)
 
 
+def _status_rank(status: object) -> int:
+    text = _clean(status).upper()
+    if text == "BETTABLE":
+        return 3
+    if text == "LEAN":
+        return 2
+    return 1
+
+
+def _tier_rank(tier: object) -> int:
+    return {"A": 4, "B": 3, "C": 2, "PASS/AVOID": 1}.get(_clean(tier).upper(), 1)
+
+
 def _row_key(row: pd.Series) -> tuple[str, ...]:
     return tuple(_clean(row.get(column)).lower() for column in KEY_COLUMNS)
 
@@ -150,6 +169,86 @@ def _change_type(changed: list[str]) -> str:
     return "updated"
 
 
+def _movement(row: dict[str, object]) -> tuple[str, float, str]:
+    change_type = _clean(row.get("change_type"))
+    previous_status = row.get("previous_status", "")
+    latest_status = row.get("latest_status", "")
+    previous_tier = row.get("previous_confidence_tier", "")
+    latest_tier = row.get("latest_confidence_tier", "")
+    edge_change = _as_float(row.get("calibrated_edge_change"))
+    latest_edge = _as_float(row.get("latest_calibrated_edge"))
+    odds_change = _as_float(row.get("american_odds_change"))
+    units_change = _as_float(row.get("suggested_units_change"))
+    score_change = abs(_as_float(row.get("ranking_score_change")) or 0.0)
+
+    category = "Updated"
+    base_score = 25.0
+    reason = "Several recommendation fields changed."
+
+    if change_type == "added":
+        category = "New play"
+        base_score = 82.0
+        reason = "This play appears on the latest card but was not on the previous card."
+    elif change_type == "removed":
+        category = "Removed play"
+        base_score = 78.0
+        reason = "This play was on the previous card but is no longer on the latest card."
+    elif _clean(latest_status).upper() == "BETTABLE" and _clean(previous_status).upper() != "BETTABLE":
+        category = "Became BETTABLE"
+        base_score = 100.0
+        reason = "The play moved into BETTABLE status."
+    elif "PASS" in _clean(latest_status).upper() and "PASS" not in _clean(previous_status).upper():
+        category = "Became PASS/Avoid"
+        base_score = 94.0
+        reason = "The play moved out of playable range and is now a pass or avoid."
+    elif _clean(latest_status).upper() == "LEAN" and _status_rank(previous_status) > _status_rank(latest_status):
+        category = "Fell to LEAN"
+        base_score = 76.0
+        reason = "The play dropped from a stronger recommendation to LEAN."
+    elif (
+        latest_edge is not None
+        and latest_edge <= 0
+        and (_as_float(row.get("previous_calibrated_edge")) or 0.0) > 0
+    ):
+        category = "Edge disappeared"
+        base_score = 88.0
+        reason = "The calibrated edge is now zero or negative."
+    elif _tier_rank(latest_tier) > _tier_rank(previous_tier):
+        category = "Tier upgraded"
+        base_score = 72.0
+        reason = "The confidence tier improved."
+    elif _tier_rank(latest_tier) < _tier_rank(previous_tier):
+        category = "Tier downgraded"
+        base_score = 70.0
+        reason = "The confidence tier got worse."
+    elif units_change is not None and units_change > 0:
+        category = "Suggested units increased"
+        base_score = 62.0
+        reason = "The suggested unit size increased."
+    elif units_change is not None and units_change < 0:
+        category = "Suggested units decreased"
+        base_score = 60.0
+        reason = "The suggested unit size decreased."
+    elif edge_change is not None and edge_change > 0:
+        category = "Edge improved"
+        base_score = 54.0
+        reason = "The calibrated edge improved."
+    elif odds_change is not None and odds_change > 0:
+        category = "Odds moved in our favor"
+        base_score = 50.0
+        reason = "The American odds moved to a better price for this selection."
+    elif odds_change is not None and odds_change < 0:
+        category = "Odds moved against us"
+        base_score = 50.0
+        reason = "The American odds moved to a worse price for this selection."
+
+    edge_points = min(10.0, abs(edge_change or 0.0) * 200)
+    score_points = min(8.0, score_change / 5)
+    unit_points = min(6.0, abs(units_change or 0.0) * 12)
+    importance_score = round(min(100.0, base_score + edge_points + score_points + unit_points), 1)
+    return category, importance_score, reason
+
+
 def _comparison_row(
     key: tuple[str, ...],
     previous: pd.Series | None,
@@ -183,6 +282,14 @@ def _comparison_row(
     return row
 
 
+def _finalize_row(row: dict[str, object]) -> dict[str, object]:
+    category, score, reason = _movement(row)
+    row["movement_category"] = category
+    row["importance_score"] = score
+    row["movement_reason"] = reason
+    return row
+
+
 def build_thursday_best_bets_comparison(output_dir: Path | None = None) -> tuple[pd.DataFrame, dict[str, object]]:
     output_dir = output_dir or OUTPUTS_DIR
     archives = list_recent_thursday_archives(output_dir=output_dir, limit=2)
@@ -207,19 +314,21 @@ def build_thursday_best_bets_comparison(output_dir: Path | None = None) -> tuple
         if previous_row is None:
             row["change_type"] = "added"
             row["details"] = "Play appears in the latest archived card but not the previous one."
-            rows.append(row)
+            rows.append(_finalize_row(row))
         elif latest_row is None:
             row["change_type"] = "removed"
             row["details"] = "Play was on the previous archived card but not the latest one."
-            rows.append(row)
+            rows.append(_finalize_row(row))
         else:
             changed = _changed_fields(previous_row, latest_row)
             if changed:
                 row["change_type"] = _change_type(changed)
                 row["details"] = "Changed fields: " + ", ".join(changed) + "."
-                rows.append(row)
+                rows.append(_finalize_row(row))
 
     comparison = pd.DataFrame(rows, columns=COMPARISON_COLUMNS)
+    if not comparison.empty:
+        comparison = comparison.sort_values(["importance_score", "home_team", "market"], ascending=[False, True, True]).reset_index(drop=True)
     summary = {
         "available": True,
         "message": "",
@@ -261,6 +370,22 @@ def render_thursday_best_bets_comparison(comparison: pd.DataFrame, summary: dict
         lines.extend(["No changes were found between the latest two archived Thursday cards.", ""])
         return "\n".join(lines)
 
+    biggest = comparison.sort_values("importance_score", ascending=False).head(8)
+    lines.extend([
+        "## Biggest changes",
+        "",
+        "These are the recommendation moves most worth reviewing first.",
+        "",
+    ])
+    for _, row in biggest.iterrows():
+        matchup = f"{row['home_team']} vs {row['away_team']}"
+        play = f"{row['market']} {row['selection']}"
+        lines.append(
+            f"- {row['movement_category']} ({float(row['importance_score']):.1f}/100): "
+            f"{matchup}, {play}. {row['movement_reason']}"
+        )
+    lines.append("")
+
     for change_type, title in [
         ("added", "Plays Added"),
         ("removed", "Plays Removed"),
@@ -279,7 +404,11 @@ def render_thursday_best_bets_comparison(comparison: pd.DataFrame, summary: dict
         for _, row in subset.iterrows():
             matchup = f"{row['home_team']} vs {row['away_team']}"
             play = f"{row['market']} {row['selection']}"
-            lines.append(f"- {matchup}, {play}: {row['details']}")
+            lines.append(
+                f"- {matchup}, {play}: {row['movement_category']} "
+                f"({float(row['importance_score']):.1f}/100). {row['movement_reason']}"
+            )
+            lines.append(f"  Details: {row['details']}")
             if row["previous_status"] or row["latest_status"]:
                 lines.append(f"  Status: {row['previous_status']} -> {row['latest_status']}")
             if row["previous_confidence_tier"] or row["latest_confidence_tier"]:

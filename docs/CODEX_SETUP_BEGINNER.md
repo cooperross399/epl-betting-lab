@@ -130,6 +130,22 @@ If you want to review pass rows too:
 python scripts/prefill_bet_ledger.py --include-pass
 ```
 
+Before you settle bets or trust profit/loss, run the ledger health check:
+
+```bash
+python scripts/check_bet_ledger.py
+```
+
+Then read:
+
+```text
+data/outputs/bet_ledger_health_check.md
+```
+
+Fix serious issues first, such as duplicate `bet_id`, missing odds, invalid
+markets, invalid results, or missing team names. Missing closing odds are
+optional cleanup for CLV tracking, not a blocker.
+
 After matches finish, update the processed EPL results and preview settlement:
 
 ```bash

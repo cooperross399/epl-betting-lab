@@ -212,6 +212,23 @@ python scripts/prefill_bet_ledger.py --include-pass
 After pre-filling, delete any rows you did not actually bet or leave a note
 that they were not placed.
 
+Before settling or reviewing profit/loss, run the ledger health check:
+
+```bash
+python scripts/check_bet_ledger.py
+```
+
+This creates:
+
+```text
+data/outputs/bet_ledger_health_check.csv
+data/outputs/bet_ledger_health_check.md
+```
+
+The health check is read-only. It flags serious issues like duplicate bet IDs,
+missing odds, invalid markets, invalid results, and missing team names. It also
+flags optional cleanup like missing closing lines for CLV.
+
 After matches finish and the processed EPL results are updated, preview
 settlements for pending ledger rows:
 

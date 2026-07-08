@@ -9,6 +9,7 @@ from epl_betting_lab.dashboard_actions import (
     require_existing_current_odds,
     run_bet_ledger_report,
     run_create_current_odds_template,
+    run_current_odds_completeness,
     run_current_odds_maintenance_preview,
     run_current_odds_validation,
     run_ledger_health_check,
@@ -130,6 +131,36 @@ def test_run_current_odds_maintenance_preview_does_not_edit_current_odds(tmp_pat
 
     assert paths["csv"].name == "current_odds_maintenance_preview.csv"
     assert paths["markdown"].name == "current_odds_maintenance_report.md"
+    assert paths["csv"].exists()
+    assert paths["markdown"].exists()
+    assert odds_path.read_text(encoding="utf-8") == original
+
+
+def test_run_current_odds_completeness_writes_report_without_editing_odds(tmp_path, monkeypatch) -> None:
+    odds_path = tmp_path / "current_odds.csv"
+    output_dir = tmp_path / "outputs"
+    pd.DataFrame([
+        {
+            "date": "2026-08-21",
+            "home_team": "Arsenal",
+            "away_team": "Coventry",
+            "market": "1x2",
+            "selection": "home",
+            "american_odds": "",
+            "book": "",
+        }
+    ]).to_csv(odds_path, index=False)
+    original = odds_path.read_text(encoding="utf-8")
+    monkeypatch.setattr(
+        dashboard_actions,
+        "load_upcoming_fixtures",
+        lambda: pd.DataFrame([{"date": "2026-08-21", "home_team": "Arsenal", "away_team": "Coventry"}]),
+    )
+
+    paths = run_current_odds_completeness(odds_path, output_dir)
+
+    assert paths["csv"].name == "current_odds_completeness.csv"
+    assert paths["markdown"].name == "current_odds_completeness.md"
     assert paths["csv"].exists()
     assert paths["markdown"].exists()
     assert odds_path.read_text(encoding="utf-8") == original

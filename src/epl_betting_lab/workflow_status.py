@@ -49,6 +49,13 @@ WORKFLOW_CHECKS = [
         any_path_ok=True,
     ),
     WorkflowCheck(
+        "Current odds completeness",
+        (OUTPUTS_DIR / "current_odds_completeness.csv", OUTPUTS_DIR / "current_odds_completeness.md"),
+        "python scripts/check_current_odds_completeness.py",
+        stale_after=(MANUAL_DIR / "current_odds.csv", MANUAL_DIR / "upcoming_fixtures.csv"),
+        any_path_ok=True,
+    ),
+    WorkflowCheck(
         "Weekly card",
         (OUTPUTS_DIR / "weekly_card.csv", OUTPUTS_DIR / "weekly_card.md"),
         "python scripts/generate_weekly_card.py",

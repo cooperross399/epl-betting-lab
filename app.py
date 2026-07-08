@@ -9,6 +9,7 @@ from epl_betting_lab.current_odds_status import build_current_odds_status
 from epl_betting_lab.dashboard_actions import (
     run_bet_ledger_report,
     run_create_current_odds_template,
+    run_current_odds_completeness,
     run_current_odds_maintenance_preview,
     run_current_odds_validation,
     run_ledger_health_check,
@@ -86,18 +87,20 @@ def render_report_buttons() -> None:
     if report_cols[2].button("Run settlement preview", width="stretch"):
         run_dashboard_action("Settlement preview", run_settlement_preview)
 
-    workflow_cols = st.columns(6)
+    workflow_cols = st.columns(7)
     if workflow_cols[0].button("Create current odds template", width="stretch"):
         run_dashboard_action("Current odds template", run_create_current_odds_template)
     if workflow_cols[1].button("Preview current odds maintenance", width="stretch"):
         run_dashboard_action("Current odds maintenance preview", run_current_odds_maintenance_preview)
-    if workflow_cols[2].button("Validate current odds", width="stretch"):
+    if workflow_cols[2].button("Check odds entry completeness", width="stretch"):
+        run_dashboard_action("Current odds completeness", run_current_odds_completeness)
+    if workflow_cols[3].button("Validate current odds", width="stretch"):
         run_dashboard_action("Current odds validation", run_current_odds_validation)
-    if workflow_cols[3].button("Generate Thursday best-bets report", width="stretch"):
+    if workflow_cols[4].button("Generate Thursday best-bets report", width="stretch"):
         run_dashboard_action("Thursday best-bets report", run_thursday_best_bets_report)
-    if workflow_cols[4].button("Run backtest reports", width="stretch"):
+    if workflow_cols[5].button("Run backtest reports", width="stretch"):
         run_dashboard_action("Backtest reports", run_backtest.main)
-    if workflow_cols[5].button("Refresh dashboard data", width="stretch"):
+    if workflow_cols[6].button("Refresh dashboard data", width="stretch"):
         st.rerun()
 
 
@@ -126,6 +129,37 @@ def render_thursday_best_bets_panel() -> None:
     else:
         show_missing_report("data/outputs/current_odds_maintenance_report.md", "python scripts/maintain_current_odds.py")
     show_output_table("Current odds maintenance rows", "current_odds_maintenance_preview.csv", "python scripts/maintain_current_odds.py")
+
+    st.subheader("Incomplete odds entries")
+    completeness = read_output_csv("current_odds_completeness.csv")
+    if completeness is None:
+        show_missing_report("data/outputs/current_odds_completeness.csv", "python scripts/check_current_odds_completeness.py")
+    elif completeness.empty:
+        st.success("No incomplete current-odds entries found in the latest completeness report.")
+    else:
+        incomplete_issues = {
+            "missing_current_odds_csv",
+            "blank_american_odds",
+            "non_numeric_american_odds",
+            "missing_expected_market_row",
+            "duplicate_market_selection_row",
+        }
+        incomplete = completeness[completeness["issue"].isin(incomplete_issues)]
+        if incomplete.empty:
+            st.success("All expected odds rows have numeric prices. Review warnings below if needed.")
+        else:
+            st.caption("Fix these matches and markets before trusting Thursday best bets.")
+            st.dataframe(incomplete, width="stretch", hide_index=True)
+
+    completeness_path = OUTPUTS_DIR / "current_odds_completeness.md"
+    if completeness_path.exists():
+        with st.expander("Full odds completeness report", expanded=False):
+            st.markdown(completeness_path.read_text(encoding="utf-8"))
+    else:
+        show_missing_report("data/outputs/current_odds_completeness.md", "python scripts/check_current_odds_completeness.py")
+    completeness = show_output_table("All odds completeness issues", "current_odds_completeness.csv", "python scripts/check_current_odds_completeness.py")
+    if completeness is not None and not completeness.empty:
+        st.caption("Warnings like missing book names are useful for tracking, but they do not mean odds are missing.")
 
     markdown_path = OUTPUTS_DIR / "thursday_best_bets.md"
     if markdown_path.exists():

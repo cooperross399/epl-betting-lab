@@ -18,6 +18,7 @@ from epl_betting_lab.reports.current_odds_validation import (
     save_current_odds_validation,
     validation_stop_message,
 )
+from epl_betting_lab.reports.current_odds_completeness import save_current_odds_completeness
 from epl_betting_lab.reports.current_odds_template import create_current_odds_template
 from epl_betting_lab.reports.current_odds_maintenance import maintain_current_odds
 from epl_betting_lab.reports.thursday_best_bets import (
@@ -76,6 +77,18 @@ def run_current_odds_validation(
     output_dir: Path | None = None,
 ) -> dict[str, Path]:
     return save_current_odds_validation(current_odds_path or MANUAL_DIR / "current_odds.csv", output_dir or OUTPUTS_DIR)
+
+
+def run_current_odds_completeness(
+    current_odds_path: Path | None = None,
+    output_dir: Path | None = None,
+) -> dict[str, Path]:
+    fixtures = load_upcoming_fixtures()
+    return save_current_odds_completeness(
+        current_odds_path or MANUAL_DIR / "current_odds.csv",
+        output_dir or OUTPUTS_DIR,
+        fixtures=fixtures,
+    )
 
 
 def run_create_current_odds_template(

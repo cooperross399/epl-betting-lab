@@ -209,6 +209,24 @@ To prefill the book only on newly added rows:
 python scripts/maintain_current_odds.py --book FanDuel --apply
 ```
 
+After your rows exist, check whether any prices are still missing:
+
+```bash
+python scripts/check_current_odds_completeness.py
+```
+
+This writes:
+
+```text
+data/outputs/current_odds_completeness.csv
+data/outputs/current_odds_completeness.md
+```
+
+The completeness report shows blank odds, non-numeric odds, missing book names,
+duplicate market/selection rows, and expected fixture/market rows that are
+missing. It also shows a completion percentage: rows with numeric odds divided
+by existing rows plus any expected rows that are missing.
+
 Validate the odds file before generating the report:
 
 ```bash
@@ -240,9 +258,10 @@ python scripts/generate_thursday_best_bets.py --force
 ```
 
 Or open the dashboard and use `Create current odds template`, `Preview current
-odds maintenance`, then `Generate Thursday best-bets report`, on the `Betting
-ledger` tab. The dashboard can preview missing odds rows, but it does not apply
-maintenance, overwrite an existing odds file, or force generation.
+odds maintenance`, `Check odds entry completeness`, then `Generate Thursday
+best-bets report`, on the `Betting ledger` tab. The dashboard can preview
+missing odds rows and show incomplete entries, but it does not apply
+maintenance, overwrite an existing odds file, edit odds, or force generation.
 
 The dashboard shows a current-odds status badge:
 
@@ -403,13 +422,17 @@ The ledger tab also has buttons for the safe report actions:
 Run bet ledger report
 Run ledger health check
 Run settlement preview
+Create current odds template
+Preview current odds maintenance
+Check odds entry completeness
 Validate current odds
 Generate Thursday best-bets report
 Run backtest reports
 Refresh dashboard data
 ```
 
-The ledger tab also displays `data/outputs/current_odds_validation.md`,
+The ledger tab also displays `data/outputs/current_odds_completeness.md`,
+`data/outputs/current_odds_validation.md`,
 `data/outputs/current_odds_validation.csv`, `data/outputs/thursday_best_bets.md`,
 and `data/outputs/thursday_best_bets.csv` when they exist.
 

@@ -169,7 +169,20 @@ python scripts/settle_bet_ledger.py --apply
 Rows marked `unmatched` are left alone so you can fix team names, dates, or
 missing results by hand.
 
-## Step 7 — What to approve and what to reject
+## Step 7 — View the ledger dashboard tab
+
+After you run the ledger scripts, open the dashboard:
+
+```bash
+streamlit run app.py
+```
+
+Use the `Betting ledger` tab to see your record, profit/loss, ROI, pending
+bets, health check issues, settlement preview, CLV summary, and market/team
+breakdowns in one place. The dashboard is read-only for now, so it will not
+edit `data/manual/bet_ledger.csv`.
+
+## Step 8 — What to approve and what to reject
 
 Approve Codex changes when:
 

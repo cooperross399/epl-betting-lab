@@ -111,6 +111,18 @@ rows, use:
 python scripts/maintain_current_odds.py --book FanDuel --apply
 ```
 
+Then check whether any odds entries are still incomplete:
+
+```bash
+python scripts/check_current_odds_completeness.py
+```
+
+Read `data/outputs/current_odds_completeness.md`. It groups missing or bad odds
+by match, market, selection, and book when available. It flags blank odds,
+non-numeric odds, missing books, duplicate rows, and expected market rows that
+are missing. The completion percentage is numeric odds filled divided by
+existing rows plus any expected rows that are missing.
+
 Then validate your manual odds file:
 
 ```bash
@@ -135,10 +147,11 @@ python scripts/generate_thursday_best_bets.py --force
 ```
 
 You can also open the dashboard and click `Create current odds template`,
-`Preview current odds maintenance`, `Validate current odds`, then `Generate
-Thursday best-bets report`, on the `Betting ledger` tab. The dashboard only
-previews maintenance. It does not overwrite an existing odds file, apply
-maintenance, or force generation.
+`Preview current odds maintenance`, `Check odds entry completeness`, `Validate
+current odds`, then `Generate Thursday best-bets report`, on the `Betting
+ledger` tab. The dashboard only previews maintenance and shows report tables.
+It does not overwrite an existing odds file, apply maintenance, edit odds, or
+force generation.
 
 The dashboard badge means:
 
@@ -283,6 +296,7 @@ Run ledger health check
 Run settlement preview
 Create current odds template
 Preview current odds maintenance
+Check odds entry completeness
 Validate current odds
 Generate Thursday best-bets report
 Run backtest reports

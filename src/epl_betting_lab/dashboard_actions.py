@@ -10,6 +10,7 @@ from epl_betting_lab.models.poisson_goals import PoissonGoalsModel
 from epl_betting_lab.reports.bet_ledger import load_bet_ledger, save_bet_ledger_reports
 from epl_betting_lab.reports.bet_ledger_health import save_bet_ledger_health_check
 from epl_betting_lab.reports.bet_settlement import build_settlement_preview, save_settlement_preview
+from epl_betting_lab.reports.current_odds_validation import build_current_odds_validation, save_current_odds_validation
 from epl_betting_lab.reports.thursday_best_bets import (
     build_thursday_best_bets,
     missing_current_odds_message,
@@ -61,6 +62,13 @@ def run_settlement_preview(
     return save_settlement_preview(preview, output_dir or OUTPUTS_DIR)
 
 
+def run_current_odds_validation(
+    current_odds_path: Path | None = None,
+    output_dir: Path | None = None,
+) -> dict[str, Path]:
+    return save_current_odds_validation(current_odds_path or MANUAL_DIR / "current_odds.csv", output_dir or OUTPUTS_DIR)
+
+
 def run_thursday_best_bets_report(
     current_odds_path: Path | None = None,
     output_dir: Path | None = None,
@@ -69,6 +77,7 @@ def run_thursday_best_bets_report(
     matches = load_matches()
     fixtures = load_upcoming_fixtures()
     odds = load_current_odds(odds_path)
+    validation_issues = build_current_odds_validation(odds_path, matches=matches, fixtures=fixtures)
 
     model = PoissonGoalsModel().fit(matches, last_n_matches_per_team=38)
     projections = model.project_fixtures(fixtures)
@@ -79,4 +88,4 @@ def run_thursday_best_bets_report(
     ], ignore_index=True)
 
     report = build_thursday_best_bets(candidates)
-    return save_thursday_best_bets(report, output_dir or OUTPUTS_DIR)
+    return save_thursday_best_bets(report, output_dir or OUTPUTS_DIR, validation_issues=validation_issues)

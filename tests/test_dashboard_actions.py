@@ -7,6 +7,7 @@ from epl_betting_lab.dashboard_actions import (
     require_existing_ledger,
     require_existing_current_odds,
     run_bet_ledger_report,
+    run_current_odds_validation,
     run_ledger_health_check,
     run_settlement_preview,
 )
@@ -60,6 +61,19 @@ def test_require_existing_current_odds_shows_manual_copy_command(tmp_path) -> No
         require_existing_current_odds(odds_path)
 
     assert "cp data/manual/current_odds_template.csv data/manual/current_odds.csv" in str(exc.value)
+    assert not odds_path.exists()
+
+
+def test_run_current_odds_validation_writes_report_without_creating_odds_file(tmp_path) -> None:
+    odds_path = tmp_path / "current_odds.csv"
+    output_dir = tmp_path / "outputs"
+
+    paths = run_current_odds_validation(odds_path, output_dir)
+
+    assert paths["csv"].name == "current_odds_validation.csv"
+    assert paths["markdown"].name == "current_odds_validation.md"
+    assert paths["csv"].exists()
+    assert paths["markdown"].exists()
     assert not odds_path.exists()
 
 

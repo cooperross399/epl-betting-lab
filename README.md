@@ -159,6 +159,22 @@ Use real sportsbook prices only. If the file does not exist yet:
 cp data/manual/current_odds_template.csv data/manual/current_odds.csv
 ```
 
+Validate the odds file before generating the report:
+
+```bash
+python scripts/validate_current_odds.py
+```
+
+This creates:
+
+```text
+data/outputs/current_odds_validation.csv
+data/outputs/current_odds_validation.md
+```
+
+Fix serious issues before trusting the Thursday card. Warnings, like missing
+book names, heavy juice, or total_2_5 under caution, are review notes.
+
 Then run:
 
 ```bash
@@ -319,13 +335,15 @@ The ledger tab also has buttons for the safe report actions:
 Run bet ledger report
 Run ledger health check
 Run settlement preview
+Validate current odds
 Generate Thursday best-bets report
 Run backtest reports
 Refresh dashboard data
 ```
 
-The ledger tab also displays `data/outputs/thursday_best_bets.md` and
-`data/outputs/thursday_best_bets.csv` when they exist.
+The ledger tab also displays `data/outputs/current_odds_validation.md`,
+`data/outputs/current_odds_validation.csv`, `data/outputs/thursday_best_bets.md`,
+and `data/outputs/thursday_best_bets.csv` when they exist.
 
 These buttons do not edit `data/manual/bet_ledger.csv`, do not edit
 `data/manual/current_odds.csv`, do not apply settlements, do not place bets,

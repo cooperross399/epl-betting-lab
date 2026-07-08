@@ -66,14 +66,24 @@ Then tell Codex:
 I updated `data/manual/current_odds.csv` with current odds. Run the model, generate the weekly card, and tell me the best smart plays, leans, avoids, and sneaky/fun angles. Respect my max juice rule around -160.
 ```
 
-For a Thursday best-bets report, run:
+Before a Thursday best-bets report, validate your manual odds file:
+
+```bash
+python scripts/validate_current_odds.py
+```
+
+Read `data/outputs/current_odds_validation.md`. Fix serious issues before
+trusting the card. Warnings, like missing book names, heavy juice, or totals
+under caution, are review notes.
+
+Then run:
 
 ```bash
 python scripts/generate_thursday_best_bets.py
 ```
 
-You can also open the dashboard and click `Generate Thursday best-bets report`
-on the `Betting ledger` tab.
+You can also open the dashboard and click `Validate current odds`, then
+`Generate Thursday best-bets report`, on the `Betting ledger` tab.
 
 This reads only `data/manual/current_odds.csv` and writes:
 
@@ -208,14 +218,14 @@ The ledger tab has buttons to run safe report actions:
 Run bet ledger report
 Run ledger health check
 Run settlement preview
+Validate current odds
 Generate Thursday best-bets report
 Run backtest reports
 Refresh dashboard data
 ```
 
-The tab also shows the Thursday report writeup and table when
-`data/outputs/thursday_best_bets.md` and `data/outputs/thursday_best_bets.csv`
-exist.
+The tab also shows the current odds validation report and Thursday report
+writeup/table when their files exist.
 
 These buttons only regenerate reports. They do not apply settlements, confirm
 actual bets, edit the ledger, edit `data/manual/current_odds.csv`, place bets,

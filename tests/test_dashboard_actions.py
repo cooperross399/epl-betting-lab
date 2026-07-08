@@ -8,6 +8,7 @@ from epl_betting_lab.dashboard_actions import (
     require_existing_ledger,
     require_existing_current_odds,
     run_bet_ledger_report,
+    run_create_current_odds_template,
     run_current_odds_validation,
     run_ledger_health_check,
     run_settlement_preview,
@@ -78,6 +79,27 @@ def test_run_current_odds_validation_writes_report_without_creating_odds_file(tm
     assert paths["csv"].exists()
     assert paths["markdown"].exists()
     assert not odds_path.exists()
+
+
+def test_run_create_current_odds_template_creates_file_without_overwrite(tmp_path, monkeypatch) -> None:
+    odds_path = tmp_path / "current_odds.csv"
+    monkeypatch.setattr(
+        dashboard_actions,
+        "load_upcoming_fixtures",
+        lambda: pd.DataFrame([{"date": "2026-08-21", "home_team": "Arsenal", "away_team": "Coventry"}]),
+    )
+
+    paths = run_create_current_odds_template(odds_path, book="ExampleBook")
+
+    assert paths["csv"] == odds_path
+    assert odds_path.exists()
+    original = odds_path.read_text(encoding="utf-8")
+    assert "ExampleBook" in original
+
+    with pytest.raises(FileExistsError):
+        run_create_current_odds_template(odds_path)
+
+    assert odds_path.read_text(encoding="utf-8") == original
 
 
 def test_thursday_best_bets_stops_when_current_odds_missing(tmp_path) -> None:

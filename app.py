@@ -8,6 +8,7 @@ from epl_betting_lab.config import MANUAL_DIR, MAX_DEFAULT_JUICE, MIN_EDGE, OUTP
 from epl_betting_lab.current_odds_status import build_current_odds_status
 from epl_betting_lab.dashboard_actions import (
     run_bet_ledger_report,
+    run_create_current_odds_template,
     run_current_odds_validation,
     run_ledger_health_check,
     run_settlement_preview,
@@ -57,6 +58,9 @@ def run_dashboard_action(label: str, action) -> None:
     except CurrentOddsValidationError as exc:
         st.error(f"{label} stopped.")
         st.info(str(exc))
+    except FileExistsError as exc:
+        st.warning(f"{label} stopped.")
+        st.info(str(exc))
     except FileNotFoundError as exc:
         st.error(f"{label} failed.")
         st.info(str(exc))
@@ -81,14 +85,16 @@ def render_report_buttons() -> None:
     if report_cols[2].button("Run settlement preview", width="stretch"):
         run_dashboard_action("Settlement preview", run_settlement_preview)
 
-    workflow_cols = st.columns(4)
-    if workflow_cols[0].button("Validate current odds", width="stretch"):
+    workflow_cols = st.columns(5)
+    if workflow_cols[0].button("Create current odds template", width="stretch"):
+        run_dashboard_action("Current odds template", run_create_current_odds_template)
+    if workflow_cols[1].button("Validate current odds", width="stretch"):
         run_dashboard_action("Current odds validation", run_current_odds_validation)
-    if workflow_cols[1].button("Generate Thursday best-bets report", width="stretch"):
+    if workflow_cols[2].button("Generate Thursday best-bets report", width="stretch"):
         run_dashboard_action("Thursday best-bets report", run_thursday_best_bets_report)
-    if workflow_cols[2].button("Run backtest reports", width="stretch"):
+    if workflow_cols[3].button("Run backtest reports", width="stretch"):
         run_dashboard_action("Backtest reports", run_backtest.main)
-    if workflow_cols[3].button("Refresh dashboard data", width="stretch"):
+    if workflow_cols[4].button("Refresh dashboard data", width="stretch"):
         st.rerun()
 
 

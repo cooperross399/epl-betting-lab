@@ -161,6 +161,11 @@ The dashboard badge means:
 - `Needs refresh`: `current_odds.csv` changed after validation.
 - `Not checked`: run validation first.
 
+The Thursday panel also shows a quick readiness row before the full reports:
+odds completion percentage, incomplete matches, serious validation issues,
+validation warnings, and Thursday status. Use that row first, then open the
+details only when something looks missing or blocked.
+
 This reads only `data/manual/current_odds.csv` and writes:
 
 ```text

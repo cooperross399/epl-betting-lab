@@ -271,6 +271,11 @@ The dashboard shows a current-odds status badge:
 - `Needs refresh`: `current_odds.csv` changed after validation.
 - `Not checked`: run validation first.
 
+The Thursday panel also has a compact readiness row before the full reports.
+It shows odds completion percentage, incomplete matches, serious validation
+issues, validation warnings, and whether the Thursday workflow is ready,
+blocked, stale, or not checked.
+
 This creates:
 
 ```text
@@ -435,6 +440,10 @@ The ledger tab also displays `data/outputs/current_odds_completeness.md`,
 `data/outputs/current_odds_validation.md`,
 `data/outputs/current_odds_validation.csv`, `data/outputs/thursday_best_bets.md`,
 and `data/outputs/thursday_best_bets.csv` when they exist.
+
+At the top of the Thursday panel, the dashboard shows a readiness row with
+odds completion percentage, incomplete matches, serious current-odds issues,
+current-odds warnings, and Thursday status.
 
 These buttons do not edit `data/manual/bet_ledger.csv`, do not edit
 `data/manual/current_odds.csv`, do not apply settlements, do not place bets,

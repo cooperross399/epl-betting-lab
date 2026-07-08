@@ -87,6 +87,30 @@ replace it intentionally with:
 python scripts/create_current_odds_template.py --overwrite
 ```
 
+If your odds file already has real prices and you only need to add missing
+fixtures or market rows, preview the maintenance helper:
+
+```bash
+python scripts/maintain_current_odds.py
+```
+
+This writes `data/outputs/current_odds_maintenance_preview.csv` and
+`data/outputs/current_odds_maintenance_report.md` without editing your odds
+file. If the preview looks right, apply it:
+
+```bash
+python scripts/maintain_current_odds.py --apply
+```
+
+The helper preserves prices, closing odds, book names, notes, and extra columns
+already in `data/manual/current_odds.csv`. Before it applies changes, it writes
+a backup in `data/manual/backups/`. To fill a book name only on newly added
+rows, use:
+
+```bash
+python scripts/maintain_current_odds.py --book FanDuel --apply
+```
+
 Then validate your manual odds file:
 
 ```bash
@@ -111,9 +135,10 @@ python scripts/generate_thursday_best_bets.py --force
 ```
 
 You can also open the dashboard and click `Create current odds template`,
-`Validate current odds`, then `Generate Thursday best-bets report`, on the
-`Betting ledger` tab. The dashboard does not overwrite an existing odds file
-and does not force generation.
+`Preview current odds maintenance`, `Validate current odds`, then `Generate
+Thursday best-bets report`, on the `Betting ledger` tab. The dashboard only
+previews maintenance. It does not overwrite an existing odds file, apply
+maintenance, or force generation.
 
 The dashboard badge means:
 
@@ -256,6 +281,8 @@ The ledger tab has buttons to run safe report actions:
 Run bet ledger report
 Run ledger health check
 Run settlement preview
+Create current odds template
+Preview current odds maintenance
 Validate current odds
 Generate Thursday best-bets report
 Run backtest reports

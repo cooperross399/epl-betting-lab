@@ -174,6 +174,41 @@ replace it intentionally:
 python scripts/create_current_odds_template.py --overwrite
 ```
 
+If the odds file already has prices and you only want to add missing fixtures
+or market rows, preview maintenance first:
+
+```bash
+python scripts/maintain_current_odds.py
+```
+
+This writes:
+
+```text
+data/outputs/current_odds_maintenance_preview.csv
+data/outputs/current_odds_maintenance_report.md
+```
+
+The preview does not edit `data/manual/current_odds.csv`. If the preview looks
+right, apply the missing rows:
+
+```bash
+python scripts/maintain_current_odds.py --apply
+```
+
+Existing `american_odds`, `closing_american_odds`, `book`, `notes`, and any
+extra columns are preserved. Before applying, the helper backs up the current
+odds file in:
+
+```text
+data/manual/backups/current_odds_YYYYMMDD_HHMMSS.csv
+```
+
+To prefill the book only on newly added rows:
+
+```bash
+python scripts/maintain_current_odds.py --book FanDuel --apply
+```
+
 Validate the odds file before generating the report:
 
 ```bash
@@ -204,10 +239,10 @@ intentional preview only, you can run:
 python scripts/generate_thursday_best_bets.py --force
 ```
 
-Or open the dashboard and use `Create current odds template`, then
-`Generate Thursday best-bets report`, on the `Betting ledger` tab. The
-dashboard does not overwrite an existing odds file and does not force
-generation.
+Or open the dashboard and use `Create current odds template`, `Preview current
+odds maintenance`, then `Generate Thursday best-bets report`, on the `Betting
+ledger` tab. The dashboard can preview missing odds rows, but it does not apply
+maintenance, overwrite an existing odds file, or force generation.
 
 The dashboard shows a current-odds status badge:
 

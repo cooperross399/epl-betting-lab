@@ -26,6 +26,10 @@ VALIDATION_COLUMNS = [
 SERIOUS_SEVERITIES = {"error"}
 
 
+class CurrentOddsValidationError(RuntimeError):
+    """Raised when serious manual odds issues should stop report generation."""
+
+
 def _is_blank(value: object) -> bool:
     return pd.isna(value) or str(value).strip() == ""
 
@@ -176,6 +180,38 @@ def build_current_odds_validation(
 
 def has_serious_issues(issues: pd.DataFrame) -> bool:
     return not issues.empty and bool(issues["severity"].isin(SERIOUS_SEVERITIES).any())
+
+
+def serious_issue_summary(issues: pd.DataFrame, max_rows: int = 5) -> str:
+    if not has_serious_issues(issues):
+        return "No serious issues found."
+    serious = issues[issues["severity"].isin(SERIOUS_SEVERITIES)].head(max_rows)
+    lines = []
+    for _, row in serious.iterrows():
+        row_text = "" if pd.isna(row.get("row_number")) else f"row {row['row_number']}: "
+        issue = row.get("issue", "validation_error")
+        details = row.get("details", "")
+        lines.append(f"- {row_text}{issue} - {details}")
+    remaining = len(issues[issues["severity"].isin(SERIOUS_SEVERITIES)]) - len(serious)
+    if remaining > 0:
+        lines.append(f"- plus {remaining} more serious issue(s)")
+    return "\n".join(lines)
+
+
+def validation_stop_message(issues: pd.DataFrame, output_dir: Path | None = None) -> str:
+    output_dir = output_dir or OUTPUTS_DIR
+    return "\n".join([
+        "Thursday best-bets generation stopped because serious current-odds validation issues exist.",
+        "",
+        "Serious issues found:",
+        serious_issue_summary(issues),
+        "",
+        f"Read the full report at `{output_dir / 'current_odds_validation.md'}`.",
+        "Run `python scripts/validate_current_odds.py` to regenerate the validation report.",
+        "If `data/manual/current_odds.csv` is missing, run `cp data/manual/current_odds_template.csv data/manual/current_odds.csv`, then enter real sportsbook odds.",
+        "",
+        "If the odds file exists and you intentionally want a preview anyway from Terminal only, run `python scripts/generate_thursday_best_bets.py --force`.",
+    ])
 
 
 def render_current_odds_validation_report(issues: pd.DataFrame) -> str:

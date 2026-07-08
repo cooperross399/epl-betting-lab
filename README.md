@@ -181,8 +181,17 @@ Then run:
 python scripts/generate_thursday_best_bets.py
 ```
 
+If serious validation issues exist, this command stops before creating a card.
+Fix the issues in `data/manual/current_odds.csv`, then run it again. For a rare
+intentional preview only, you can run:
+
+```bash
+python scripts/generate_thursday_best_bets.py --force
+```
+
 Or open the dashboard and use the `Generate Thursday best-bets report` button
-on the `Betting ledger` tab.
+on the `Betting ledger` tab. The dashboard uses the safe default and does not
+force generation.
 
 This creates:
 

@@ -10,7 +10,14 @@ from epl_betting_lab.models.poisson_goals import PoissonGoalsModel
 from epl_betting_lab.reports.bet_ledger import load_bet_ledger, save_bet_ledger_reports
 from epl_betting_lab.reports.bet_ledger_health import save_bet_ledger_health_check
 from epl_betting_lab.reports.bet_settlement import build_settlement_preview, save_settlement_preview
-from epl_betting_lab.reports.current_odds_validation import build_current_odds_validation, save_current_odds_validation
+from epl_betting_lab.reports.current_odds_validation import (
+    CurrentOddsValidationError,
+    build_current_odds_validation,
+    has_serious_issues,
+    render_current_odds_validation_report,
+    save_current_odds_validation,
+    validation_stop_message,
+)
 from epl_betting_lab.reports.thursday_best_bets import (
     build_thursday_best_bets,
     missing_current_odds_message,
@@ -72,12 +79,34 @@ def run_current_odds_validation(
 def run_thursday_best_bets_report(
     current_odds_path: Path | None = None,
     output_dir: Path | None = None,
+    force: bool = False,
 ) -> dict[str, Path]:
-    odds_path = require_existing_current_odds(current_odds_path)
+    odds_path = current_odds_path or MANUAL_DIR / "current_odds.csv"
+    output_dir = output_dir or OUTPUTS_DIR
+    if not odds_path.exists():
+        validation_issues = build_current_odds_validation(odds_path, matches=pd.DataFrame(), fixtures=pd.DataFrame())
+        output_dir.mkdir(parents=True, exist_ok=True)
+        validation_issues.to_csv(output_dir / "current_odds_validation.csv", index=False)
+        (output_dir / "current_odds_validation.md").write_text(
+            render_current_odds_validation_report(validation_issues),
+            encoding="utf-8",
+        )
+        raise CurrentOddsValidationError(validation_stop_message(validation_issues, output_dir))
+
     matches = load_matches()
     fixtures = load_upcoming_fixtures()
-    odds = load_current_odds(odds_path)
     validation_issues = build_current_odds_validation(odds_path, matches=matches, fixtures=fixtures)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    validation_issues.to_csv(output_dir / "current_odds_validation.csv", index=False)
+    (output_dir / "current_odds_validation.md").write_text(
+        render_current_odds_validation_report(validation_issues),
+        encoding="utf-8",
+    )
+
+    if has_serious_issues(validation_issues) and not force:
+        raise CurrentOddsValidationError(validation_stop_message(validation_issues, output_dir))
+
+    odds = load_current_odds(odds_path)
 
     model = PoissonGoalsModel().fit(matches, last_n_matches_per_team=38)
     projections = model.project_fixtures(fixtures)
@@ -88,4 +117,4 @@ def run_thursday_best_bets_report(
     ], ignore_index=True)
 
     report = build_thursday_best_bets(candidates)
-    return save_thursday_best_bets(report, output_dir or OUTPUTS_DIR, validation_issues=validation_issues)
+    return save_thursday_best_bets(report, output_dir, validation_issues=validation_issues, forced=force)

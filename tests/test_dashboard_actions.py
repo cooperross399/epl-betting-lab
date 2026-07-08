@@ -3,6 +3,7 @@ from __future__ import annotations
 import pandas as pd
 import pytest
 
+import epl_betting_lab.dashboard_actions as dashboard_actions
 from epl_betting_lab.dashboard_actions import (
     require_existing_ledger,
     require_existing_current_odds,
@@ -10,7 +11,9 @@ from epl_betting_lab.dashboard_actions import (
     run_current_odds_validation,
     run_ledger_health_check,
     run_settlement_preview,
+    run_thursday_best_bets_report,
 )
+from epl_betting_lab.reports.current_odds_validation import CurrentOddsValidationError
 from epl_betting_lab.reports.bet_ledger import LEDGER_COLUMNS
 
 
@@ -75,6 +78,55 @@ def test_run_current_odds_validation_writes_report_without_creating_odds_file(tm
     assert paths["csv"].exists()
     assert paths["markdown"].exists()
     assert not odds_path.exists()
+
+
+def test_thursday_best_bets_stops_when_current_odds_missing(tmp_path) -> None:
+    odds_path = tmp_path / "current_odds.csv"
+    output_dir = tmp_path / "outputs"
+
+    with pytest.raises(CurrentOddsValidationError) as exc:
+        run_thursday_best_bets_report(odds_path, output_dir)
+
+    assert "Thursday best-bets generation stopped" in str(exc.value)
+    assert "python scripts/validate_current_odds.py" in str(exc.value)
+    assert "cp data/manual/current_odds_template.csv data/manual/current_odds.csv" in str(exc.value)
+    assert (output_dir / "current_odds_validation.csv").exists()
+    assert (output_dir / "current_odds_validation.md").exists()
+    assert not (output_dir / "thursday_best_bets.md").exists()
+    assert not odds_path.exists()
+
+
+def test_thursday_best_bets_stops_on_serious_validation_issues(tmp_path, monkeypatch) -> None:
+    odds_path = tmp_path / "current_odds.csv"
+    output_dir = tmp_path / "outputs"
+    pd.DataFrame([
+        {
+            "date": "2026-08-21",
+            "home_team": "Arsenal",
+            "away_team": "Coventry",
+            "market": "shots",
+            "selection": "over",
+            "american_odds": "+120",
+            "book": "ExampleBook",
+        }
+    ]).to_csv(odds_path, index=False)
+    monkeypatch.setattr(
+        dashboard_actions,
+        "load_matches",
+        lambda: pd.DataFrame([{"home_team": "Arsenal", "away_team": "Coventry"}]),
+    )
+    monkeypatch.setattr(
+        dashboard_actions,
+        "load_upcoming_fixtures",
+        lambda: pd.DataFrame([{"home_team": "Arsenal", "away_team": "Coventry"}]),
+    )
+
+    with pytest.raises(CurrentOddsValidationError) as exc:
+        run_thursday_best_bets_report(odds_path, output_dir)
+
+    assert "invalid_market" in str(exc.value)
+    assert (output_dir / "current_odds_validation.md").exists()
+    assert not (output_dir / "thursday_best_bets.md").exists()
 
 
 def test_dashboard_report_actions_write_outputs_without_editing_ledger(tmp_path) -> None:

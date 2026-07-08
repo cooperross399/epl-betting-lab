@@ -130,6 +130,29 @@ If you want to review pass rows too:
 python scripts/prefill_bet_ledger.py --include-pass
 ```
 
+After matches finish, update the processed EPL results and preview settlement:
+
+```bash
+python scripts/settle_bet_ledger.py
+```
+
+Read:
+
+```text
+data/outputs/bet_settlement_preview.md
+```
+
+The preview suggests `win`, `loss`, `push`, `pending`, or `unmatched` for
+pending ledger rows. It does not edit your ledger by default. If the preview
+looks right, apply the confident settlements:
+
+```bash
+python scripts/settle_bet_ledger.py --apply
+```
+
+Rows marked `unmatched` are left alone so you can fix team names, dates, or
+missing results by hand.
+
 ## Step 7 — What to approve and what to reject
 
 Approve Codex changes when:

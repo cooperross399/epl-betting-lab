@@ -212,6 +212,28 @@ python scripts/prefill_bet_ledger.py --include-pass
 After pre-filling, delete any rows you did not actually bet or leave a note
 that they were not placed.
 
+After matches finish and the processed EPL results are updated, preview
+settlements for pending ledger rows:
+
+```bash
+python scripts/settle_bet_ledger.py
+```
+
+This creates:
+
+```text
+data/outputs/bet_settlement_preview.csv
+data/outputs/bet_settlement_preview.md
+```
+
+Review the preview first. It supports `1x2`, `total_2_5`, and `btts`.
+Rows marked `unmatched` are not changed. To apply confident win/loss/push
+suggestions to the ledger:
+
+```bash
+python scripts/settle_bet_ledger.py --apply
+```
+
 ---
 
 ## Open the dashboard

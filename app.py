@@ -15,6 +15,7 @@ from epl_betting_lab.dashboard_actions import (
     run_ledger_health_check,
     run_settlement_preview,
     run_thursday_best_bets_report,
+    run_thursday_readiness_refresh,
 )
 from epl_betting_lab.data.loaders import load_matches, load_upcoming_fixtures, load_current_odds
 from epl_betting_lab.models.poisson_goals import PoissonGoalsModel
@@ -75,11 +76,39 @@ def run_dashboard_action(label: str, action) -> None:
         st.rerun()
 
 
+def run_dashboard_refresh_sequence() -> None:
+    def progress(step_name: str, status: str, message: str) -> None:
+        if status == "running":
+            st.info(message)
+        elif status == "success":
+            st.success(message)
+        else:
+            st.error(message)
+
+    try:
+        run_thursday_readiness_refresh(progress=progress)
+    except CurrentOddsValidationError as exc:
+        st.error("Thursday readiness refresh stopped safely.")
+        st.info(str(exc))
+    except FileNotFoundError as exc:
+        st.error("Thursday readiness refresh failed.")
+        st.info(str(exc))
+    except Exception as exc:
+        st.error("Thursday readiness refresh failed.")
+        st.exception(exc)
+    else:
+        st.success("Thursday readiness refresh finished. Refreshing dashboard data.")
+        st.rerun()
+
+
 def render_report_buttons() -> None:
     st.subheader("Report controls")
     st.caption(
         "These buttons only regenerate reports. They do not place bets, confirm bets, edit odds, or apply settlements."
     )
+    if st.button("Run Thursday readiness refresh", width="stretch"):
+        run_dashboard_refresh_sequence()
+
     report_cols = st.columns(3)
     if report_cols[0].button("Run bet ledger report", width="stretch"):
         run_dashboard_action("Bet ledger report", run_bet_ledger_report)

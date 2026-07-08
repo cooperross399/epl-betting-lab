@@ -15,6 +15,7 @@ from epl_betting_lab.dashboard_actions import (
     run_ledger_health_check,
     run_settlement_preview,
     run_thursday_best_bets_report,
+    run_thursday_readiness_refresh,
 )
 from epl_betting_lab.reports.current_odds_validation import CurrentOddsValidationError
 from epl_betting_lab.reports.bet_ledger import LEDGER_COLUMNS
@@ -213,6 +214,108 @@ def test_thursday_best_bets_stops_on_serious_validation_issues(tmp_path, monkeyp
     assert "invalid_market" in str(exc.value)
     assert (output_dir / "current_odds_validation.md").exists()
     assert not (output_dir / "thursday_best_bets.md").exists()
+
+
+def test_thursday_readiness_refresh_runs_safe_steps_in_order(tmp_path, monkeypatch) -> None:
+    odds_path = tmp_path / "current_odds.csv"
+    output_dir = tmp_path / "outputs"
+    calls: list[str] = []
+    progress_events: list[tuple[str, str]] = []
+
+    def fake_completeness(path, out):
+        calls.append(f"completeness:{path == odds_path}:{out == output_dir}")
+        return {"csv": out / "current_odds_completeness.csv"}
+
+    def fake_validation(path, out):
+        calls.append(f"validation:{path == odds_path}:{out == output_dir}")
+        return {"csv": out / "current_odds_validation.csv"}
+
+    def fake_thursday(path, out, force=False):
+        calls.append(f"thursday:{path == odds_path}:{out == output_dir}:force={force}")
+        return {"csv": out / "thursday_best_bets.csv"}
+
+    monkeypatch.setattr(dashboard_actions, "run_current_odds_completeness", fake_completeness)
+    monkeypatch.setattr(dashboard_actions, "run_current_odds_validation", fake_validation)
+    monkeypatch.setattr(dashboard_actions, "run_thursday_best_bets_report", fake_thursday)
+
+    paths = run_thursday_readiness_refresh(
+        odds_path,
+        output_dir,
+        progress=lambda step, status, message: progress_events.append((step, status)),
+    )
+
+    assert calls == [
+        "completeness:True:True",
+        "validation:True:True",
+        "thursday:True:True:force=False",
+    ]
+    assert list(paths) == ["odds_completeness", "current_odds_validation", "thursday_best_bets"]
+    assert progress_events == [
+        ("Odds completeness check", "running"),
+        ("Odds completeness check", "success"),
+        ("Current odds validation", "running"),
+        ("Current odds validation", "success"),
+        ("Thursday best-bets generation", "running"),
+        ("Thursday best-bets generation", "success"),
+    ]
+
+
+def test_thursday_readiness_refresh_stops_when_validation_gate_blocks(tmp_path, monkeypatch) -> None:
+    odds_path = tmp_path / "current_odds.csv"
+    output_dir = tmp_path / "outputs"
+    calls: list[str] = []
+    progress_events: list[tuple[str, str]] = []
+
+    def fake_completeness(path, out):
+        calls.append("completeness")
+        return {"csv": out / "current_odds_completeness.csv"}
+
+    def fake_validation(path, out):
+        calls.append("validation")
+        return {"csv": out / "current_odds_validation.csv"}
+
+    def fake_thursday(path, out, force=False):
+        calls.append(f"thursday:force={force}")
+        raise CurrentOddsValidationError("serious validation issues")
+
+    monkeypatch.setattr(dashboard_actions, "run_current_odds_completeness", fake_completeness)
+    monkeypatch.setattr(dashboard_actions, "run_current_odds_validation", fake_validation)
+    monkeypatch.setattr(dashboard_actions, "run_thursday_best_bets_report", fake_thursday)
+
+    with pytest.raises(CurrentOddsValidationError):
+        run_thursday_readiness_refresh(
+            odds_path,
+            output_dir,
+            progress=lambda step, status, message: progress_events.append((step, status)),
+        )
+
+    assert calls == ["completeness", "validation", "thursday:force=False"]
+    assert progress_events[-1] == ("Thursday best-bets generation", "error")
+
+
+def test_thursday_readiness_refresh_stops_remaining_steps_after_failure(tmp_path, monkeypatch) -> None:
+    calls: list[str] = []
+
+    def fake_completeness(path, out):
+        calls.append("completeness")
+        raise FileNotFoundError("missing fixtures")
+
+    def fake_validation(path, out):
+        calls.append("validation")
+        return {}
+
+    def fake_thursday(path, out, force=False):
+        calls.append("thursday")
+        return {}
+
+    monkeypatch.setattr(dashboard_actions, "run_current_odds_completeness", fake_completeness)
+    monkeypatch.setattr(dashboard_actions, "run_current_odds_validation", fake_validation)
+    monkeypatch.setattr(dashboard_actions, "run_thursday_best_bets_report", fake_thursday)
+
+    with pytest.raises(FileNotFoundError):
+        run_thursday_readiness_refresh(tmp_path / "current_odds.csv", tmp_path / "outputs")
+
+    assert calls == ["completeness"]
 
 
 def test_dashboard_report_actions_write_outputs_without_editing_ledger(tmp_path) -> None:

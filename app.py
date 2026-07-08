@@ -5,6 +5,7 @@ import streamlit as st
 
 from epl_betting_lab.backtest.walk_forward import summarize_backtest
 from epl_betting_lab.config import MANUAL_DIR, MAX_DEFAULT_JUICE, MIN_EDGE, OUTPUTS_DIR
+from epl_betting_lab.current_odds_status import build_current_odds_status
 from epl_betting_lab.dashboard_actions import (
     run_bet_ledger_report,
     run_current_odds_validation,
@@ -94,6 +95,12 @@ def render_report_buttons() -> None:
 def render_thursday_best_bets_panel() -> None:
     st.subheader("Thursday best-bets report")
     st.info("Run `Validate current odds` before generating Thursday best bets so bad manual inputs do not create a bad card.")
+    status = build_current_odds_status()
+    status_cols = st.columns([1, 3])
+    status_cols[0].metric("Current odds", status.status)
+    status_cols[1].caption(
+        f"{status.explanation} Refresh with `{status.command}` or the `Validate current odds` dashboard button."
+    )
 
     validation_path = OUTPUTS_DIR / "current_odds_validation.md"
     if validation_path.exists():

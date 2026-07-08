@@ -267,6 +267,17 @@ The dashboard shows:
 - Value board
 - Weekly card
 - Backtest summary, after you run the backtest
+- Betting ledger tab, after you run the ledger scripts
+
+For the ledger tab, run these as needed before opening or refreshing the
+dashboard:
+
+```bash
+python scripts/run_bet_ledger.py
+python scripts/check_bet_ledger.py
+python scripts/settle_bet_ledger.py
+python scripts/run_backtest.py
+```
 
 ---
 

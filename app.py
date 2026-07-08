@@ -9,6 +9,7 @@ from epl_betting_lab.dashboard_actions import (
     run_bet_ledger_report,
     run_ledger_health_check,
     run_settlement_preview,
+    run_thursday_best_bets_report,
 )
 from epl_betting_lab.data.loaders import load_matches, load_upcoming_fixtures, load_current_odds
 from epl_betting_lab.models.poisson_goals import PoissonGoalsModel
@@ -50,6 +51,9 @@ def show_output_table(title: str, filename: str, command: str) -> pd.DataFrame |
 def run_dashboard_action(label: str, action) -> None:
     try:
         action()
+    except FileNotFoundError as exc:
+        st.error(f"{label} failed.")
+        st.info(str(exc))
     except Exception as exc:
         st.error(f"{label} failed.")
         st.exception(exc)
@@ -63,17 +67,33 @@ def render_report_buttons() -> None:
     st.caption(
         "These buttons only regenerate reports. They do not place bets, confirm bets, edit odds, or apply settlements."
     )
-    button_cols = st.columns(5)
-    if button_cols[0].button("Run bet ledger report", use_container_width=True):
+    report_cols = st.columns(3)
+    if report_cols[0].button("Run bet ledger report", use_container_width=True):
         run_dashboard_action("Bet ledger report", run_bet_ledger_report)
-    if button_cols[1].button("Run ledger health check", use_container_width=True):
+    if report_cols[1].button("Run ledger health check", use_container_width=True):
         run_dashboard_action("Ledger health check", run_ledger_health_check)
-    if button_cols[2].button("Run settlement preview", use_container_width=True):
+    if report_cols[2].button("Run settlement preview", use_container_width=True):
         run_dashboard_action("Settlement preview", run_settlement_preview)
-    if button_cols[3].button("Run backtest reports", use_container_width=True):
+
+    workflow_cols = st.columns(3)
+    if workflow_cols[0].button("Generate Thursday best-bets report", use_container_width=True):
+        run_dashboard_action("Thursday best-bets report", run_thursday_best_bets_report)
+    if workflow_cols[1].button("Run backtest reports", use_container_width=True):
         run_dashboard_action("Backtest reports", run_backtest.main)
-    if button_cols[4].button("Refresh dashboard data", use_container_width=True):
+    if workflow_cols[2].button("Refresh dashboard data", use_container_width=True):
         st.rerun()
+
+
+def render_thursday_best_bets_panel() -> None:
+    st.subheader("Thursday best-bets report")
+    markdown_path = OUTPUTS_DIR / "thursday_best_bets.md"
+    if markdown_path.exists():
+        with st.expander("Best-bets writeup", expanded=True):
+            st.markdown(markdown_path.read_text(encoding="utf-8"))
+    else:
+        show_missing_report("data/outputs/thursday_best_bets.md", "python scripts/generate_thursday_best_bets.py")
+
+    show_output_table("Thursday best-bets table", "thursday_best_bets.csv", "python scripts/generate_thursday_best_bets.py")
 
 
 def render_workflow_checklist() -> None:
@@ -95,6 +115,7 @@ def render_betting_ledger_tab() -> None:
     )
     render_workflow_checklist()
     render_report_buttons()
+    render_thursday_best_bets_panel()
 
     with st.expander("Weekly ledger commands", expanded=False):
         st.code(

@@ -33,8 +33,9 @@ REPORT_COLUMNS = [
 def missing_current_odds_message(path: Path) -> str:
     return (
         f"Missing {path}. Copy data/manual/current_odds_template.csv to "
-        f"data/manual/current_odds.csv, then enter real sportsbook odds before "
-        f"running the Thursday best-bets report."
+        f"data/manual/current_odds.csv by running `cp data/manual/current_odds_template.csv "
+        f"data/manual/current_odds.csv`, then enter real sportsbook odds before running "
+        f"the Thursday best-bets report."
     )
 
 

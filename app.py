@@ -16,6 +16,7 @@ from epl_betting_lab.data.loaders import load_matches, load_upcoming_fixtures, l
 from epl_betting_lab.models.poisson_goals import PoissonGoalsModel
 from epl_betting_lab.models.ratings import simple_form_table
 from epl_betting_lab.reports.bet_ledger import load_bet_ledger, summarize_overall
+from epl_betting_lab.reports.current_odds_validation import CurrentOddsValidationError
 from epl_betting_lab.reports.weekly_card import build_weekly_card, card_to_markdown
 from epl_betting_lab.strategies.btts import evaluate_btts
 from epl_betting_lab.strategies.ml_value import evaluate_1x2_value
@@ -52,6 +53,9 @@ def show_output_table(title: str, filename: str, command: str) -> pd.DataFrame |
 def run_dashboard_action(label: str, action) -> None:
     try:
         action()
+    except CurrentOddsValidationError as exc:
+        st.error(f"{label} stopped.")
+        st.info(str(exc))
     except FileNotFoundError as exc:
         st.error(f"{label} failed.")
         st.info(str(exc))

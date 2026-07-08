@@ -115,21 +115,26 @@ def build_thursday_best_bets(candidates: pd.DataFrame, max_best_bets: int = 8, m
     return report[REPORT_COLUMNS]
 
 
-def _validation_warning(validation_issues: pd.DataFrame | None) -> list[str]:
+def _validation_warning(validation_issues: pd.DataFrame | None, forced: bool = False) -> list[str]:
     if validation_issues is None or validation_issues.empty or "severity" not in validation_issues.columns:
         return []
     serious = validation_issues[validation_issues["severity"] == "error"]
     if serious.empty:
         return []
+    prefix = "Generated with `--force` despite" if forced else "`data/manual/current_odds.csv` has"
     return [
         "## Current odds validation warning",
         "",
-        f"`data/manual/current_odds.csv` has {len(serious)} serious validation issue(s). Run `python scripts/validate_current_odds.py` and fix serious issues before trusting this card.",
+        f"{prefix} {len(serious)} serious validation issue(s). Run `python scripts/validate_current_odds.py` and fix serious issues before trusting this card.",
         "",
     ]
 
 
-def render_thursday_best_bets(report: pd.DataFrame, validation_issues: pd.DataFrame | None = None) -> str:
+def render_thursday_best_bets(
+    report: pd.DataFrame,
+    validation_issues: pd.DataFrame | None = None,
+    forced: bool = False,
+) -> str:
     lines = [
         "# EPL Thursday Best Bets Report",
         "",
@@ -144,7 +149,7 @@ def render_thursday_best_bets(report: pd.DataFrame, validation_issues: pd.DataFr
         "5. Review best bets, leans, and passes before deciding manually.",
         "",
     ]
-    lines.extend(_validation_warning(validation_issues))
+    lines.extend(_validation_warning(validation_issues, forced=forced))
     if report.empty:
         lines.extend([
             "No candidate plays were produced from the current odds file.",
@@ -191,10 +196,14 @@ def save_thursday_best_bets(
     report: pd.DataFrame,
     output_dir: Path,
     validation_issues: pd.DataFrame | None = None,
+    forced: bool = False,
 ) -> dict[str, Path]:
     output_dir.mkdir(parents=True, exist_ok=True)
     csv_path = output_dir / "thursday_best_bets.csv"
     markdown_path = output_dir / "thursday_best_bets.md"
     report.to_csv(csv_path, index=False)
-    markdown_path.write_text(render_thursday_best_bets(report, validation_issues=validation_issues), encoding="utf-8")
+    markdown_path.write_text(
+        render_thursday_best_bets(report, validation_issues=validation_issues, forced=forced),
+        encoding="utf-8",
+    )
     return {"csv": csv_path, "markdown": markdown_path}

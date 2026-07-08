@@ -132,7 +132,9 @@ def test_validation_report_and_thursday_card_show_serious_warning() -> None:
 
     validation_markdown = render_current_odds_validation_report(issues)
     thursday_markdown = render_thursday_best_bets(pd.DataFrame(), validation_issues=issues)
+    forced_markdown = render_thursday_best_bets(pd.DataFrame(), validation_issues=issues, forced=True)
 
     assert "1 serious issues" in validation_markdown
     assert "Current odds validation warning" in thursday_markdown
     assert "fix serious issues before trusting this card" in thursday_markdown
+    assert "Generated with `--force` despite" in forced_markdown

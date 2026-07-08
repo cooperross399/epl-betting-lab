@@ -303,6 +303,24 @@ of replacing the first one. The dashboard shows recent archived Thursday
 reports in the `Betting ledger` tab. Only use `--overwrite-archive` from
 Terminal if you intentionally want to replace a timestamp collision.
 
+After you have at least two archived Thursday reports, compare the newest two:
+
+```bash
+python scripts/compare_thursday_best_bets.py
+```
+
+This creates:
+
+```text
+data/outputs/thursday_best_bets_comparison.csv
+data/outputs/thursday_best_bets_comparison.md
+```
+
+The comparison shows plays added or removed, status changes, confidence tier
+changes, ranking score movement, odds movement, calibrated edge changes, and
+suggested unit changes. If there are not two archived reports yet, it writes a
+beginner-friendly message instead of guessing.
+
 The report separates best bets, leans, and passes/notable avoids. It uses
 calibrated probabilities, respects the default max-juice rule around `-160`,
 and keeps the totals protections. It also adds a transparent ranking score and
@@ -465,6 +483,7 @@ Preview current odds maintenance
 Check odds entry completeness
 Validate current odds
 Generate Thursday best-bets report
+Compare latest Thursday reports
 Run backtest reports
 Refresh dashboard data
 ```
@@ -472,7 +491,9 @@ Refresh dashboard data
 The ledger tab also displays `data/outputs/current_odds_completeness.md`,
 `data/outputs/current_odds_validation.md`,
 `data/outputs/current_odds_validation.csv`, `data/outputs/thursday_best_bets.md`,
-and `data/outputs/thursday_best_bets.csv` when they exist.
+`data/outputs/thursday_best_bets.csv`,
+`data/outputs/thursday_best_bets_comparison.md`, and
+`data/outputs/thursday_best_bets_comparison.csv` when they exist.
 
 At the top of the Thursday panel, the dashboard shows a readiness row with
 odds completion percentage, incomplete matches, serious current-odds issues,

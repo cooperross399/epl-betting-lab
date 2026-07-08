@@ -14,6 +14,7 @@ from epl_betting_lab.dashboard_actions import (
     run_current_odds_validation,
     run_ledger_health_check,
     run_settlement_preview,
+    run_thursday_best_bets_comparison,
     run_thursday_best_bets_report,
     run_thursday_readiness_refresh,
 )
@@ -165,6 +166,15 @@ def test_run_current_odds_completeness_writes_report_without_editing_odds(tmp_pa
     assert paths["csv"].exists()
     assert paths["markdown"].exists()
     assert odds_path.read_text(encoding="utf-8") == original
+
+
+def test_run_thursday_best_bets_comparison_writes_report(tmp_path) -> None:
+    paths = run_thursday_best_bets_comparison(tmp_path)
+
+    assert paths["csv"].name == "thursday_best_bets_comparison.csv"
+    assert paths["markdown"].name == "thursday_best_bets_comparison.md"
+    assert paths["csv"].exists()
+    assert "Comparison is not available yet" in paths["markdown"].read_text(encoding="utf-8")
 
 
 def test_thursday_best_bets_stops_when_current_odds_missing(tmp_path) -> None:

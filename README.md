@@ -279,6 +279,19 @@ python scripts/settle_bet_ledger.py
 python scripts/run_backtest.py
 ```
 
+The ledger tab also has buttons for the safe report actions:
+
+```text
+Run bet ledger report
+Run ledger health check
+Run settlement preview
+Run backtest reports
+Refresh dashboard data
+```
+
+These buttons do not edit `data/manual/bet_ledger.csv`, do not apply
+settlements, do not place bets, and do not invent missing odds.
+
 ---
 
 ## Project structure

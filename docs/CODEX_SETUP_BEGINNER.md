@@ -182,6 +182,19 @@ bets, health check issues, settlement preview, CLV summary, and market/team
 breakdowns in one place. The dashboard is read-only for now, so it will not
 edit `data/manual/bet_ledger.csv`.
 
+The ledger tab has buttons to run safe report actions:
+
+```text
+Run bet ledger report
+Run ledger health check
+Run settlement preview
+Run backtest reports
+Refresh dashboard data
+```
+
+These buttons only regenerate reports. They do not apply settlements, confirm
+actual bets, edit the ledger, place bets, or invent missing odds.
+
 ## Step 8 — What to approve and what to reject
 
 Approve Codex changes when:

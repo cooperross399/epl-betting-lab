@@ -195,6 +195,10 @@ Refresh dashboard data
 These buttons only regenerate reports. They do not apply settlements, confirm
 actual bets, edit the ledger, place bets, or invent missing odds.
 
+At the top of the tab, the weekly workflow checklist shows which files are
+ready, missing, or stale. If something says `Missing` or `Needs refresh`, use
+the command shown in that row.
+
 ## Step 8 — What to approve and what to reject
 
 Approve Codex changes when:

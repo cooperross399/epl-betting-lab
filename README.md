@@ -292,6 +292,10 @@ Refresh dashboard data
 These buttons do not edit `data/manual/bet_ledger.csv`, do not apply
 settlements, do not place bets, and do not invent missing odds.
 
+The ledger tab also includes a weekly workflow checklist. It shows whether key
+files are `Complete`, `Missing`, or `Needs refresh`, when they were last
+modified, and the command to run when something is missing or stale.
+
 ---
 
 ## Project structure

@@ -44,7 +44,7 @@ def show_output_table(title: str, filename: str, command: str) -> pd.DataFrame |
     if df.empty:
         st.info("The report exists, but it has no rows yet.")
     else:
-        st.dataframe(df, use_container_width=True, hide_index=True)
+        st.dataframe(df, width="stretch", hide_index=True)
     return df
 
 
@@ -68,19 +68,19 @@ def render_report_buttons() -> None:
         "These buttons only regenerate reports. They do not place bets, confirm bets, edit odds, or apply settlements."
     )
     report_cols = st.columns(3)
-    if report_cols[0].button("Run bet ledger report", use_container_width=True):
+    if report_cols[0].button("Run bet ledger report", width="stretch"):
         run_dashboard_action("Bet ledger report", run_bet_ledger_report)
-    if report_cols[1].button("Run ledger health check", use_container_width=True):
+    if report_cols[1].button("Run ledger health check", width="stretch"):
         run_dashboard_action("Ledger health check", run_ledger_health_check)
-    if report_cols[2].button("Run settlement preview", use_container_width=True):
+    if report_cols[2].button("Run settlement preview", width="stretch"):
         run_dashboard_action("Settlement preview", run_settlement_preview)
 
     workflow_cols = st.columns(3)
-    if workflow_cols[0].button("Generate Thursday best-bets report", use_container_width=True):
+    if workflow_cols[0].button("Generate Thursday best-bets report", width="stretch"):
         run_dashboard_action("Thursday best-bets report", run_thursday_best_bets_report)
-    if workflow_cols[1].button("Run backtest reports", use_container_width=True):
+    if workflow_cols[1].button("Run backtest reports", width="stretch"):
         run_dashboard_action("Backtest reports", run_backtest.main)
-    if workflow_cols[2].button("Refresh dashboard data", use_container_width=True):
+    if workflow_cols[2].button("Refresh dashboard data", width="stretch"):
         st.rerun()
 
 
@@ -105,7 +105,7 @@ def render_workflow_checklist() -> None:
     metric_cols[0].metric("Complete", int(counts.get("Complete", 0)))
     metric_cols[1].metric("Needs refresh", int(counts.get("Needs refresh", 0)))
     metric_cols[2].metric("Missing", int(counts.get("Missing", 0)))
-    st.dataframe(status, use_container_width=True, hide_index=True)
+    st.dataframe(status, width="stretch", hide_index=True)
 
 
 def render_betting_ledger_tab() -> None:
@@ -161,7 +161,7 @@ def render_betting_ledger_tab() -> None:
     elif health.empty:
         st.success("No ledger health issues found in the latest health check.")
     else:
-        st.dataframe(health, use_container_width=True, hide_index=True)
+        st.dataframe(health, width="stretch", hide_index=True)
 
     show_output_table("Settlement preview", "bet_settlement_preview.csv", "python scripts/settle_bet_ledger.py")
     show_output_table("CLV by market", "clv_by_market.csv", "python scripts/run_backtest.py")
@@ -198,14 +198,14 @@ model_tab, ledger_tab, backtest_tab = st.tabs(["Model & weekly card", "Betting l
 
 with model_tab:
     st.subheader("Recent form table")
-    st.dataframe(simple_form_table(matches, last_n=6), use_container_width=True, hide_index=True)
+    st.dataframe(simple_form_table(matches, last_n=6), width="stretch", hide_index=True)
 
     st.subheader("Upcoming fixtures and projections")
     try:
         fixtures = load_upcoming_fixtures()
         projections = model.project_fixtures(fixtures)
         projections_show = projections.drop(columns=["top_scores"], errors="ignore")
-        st.dataframe(projections_show, use_container_width=True, hide_index=True)
+        st.dataframe(projections_show, width="stretch", hide_index=True)
     except FileNotFoundError as exc:
         st.warning(str(exc))
         fixtures = pd.DataFrame()
@@ -213,7 +213,7 @@ with model_tab:
 
     if not fixtures.empty:
         st.subheader("Promoted team review spots")
-        st.dataframe(flag_promoted_team_spots(fixtures), use_container_width=True, hide_index=True)
+        st.dataframe(flag_promoted_team_spots(fixtures), width="stretch", hide_index=True)
 
     st.subheader("Value board")
     try:
@@ -226,7 +226,7 @@ with model_tab:
                 evaluate_total_25(projections, odds, min_edge=min_edge, max_juice=int(max_juice), matches=matches),
                 evaluate_btts(projections, odds, min_edge=min_edge, max_juice=int(max_juice)),
             ], ignore_index=True)
-            st.dataframe(candidates.sort_values("edge", ascending=False), use_container_width=True, hide_index=True)
+            st.dataframe(candidates.sort_values("edge", ascending=False), width="stretch", hide_index=True)
             card = build_weekly_card(candidates)
             st.subheader("Weekly card")
             st.markdown(card_to_markdown(card))
@@ -241,6 +241,6 @@ with backtest_tab:
     st.write("Run `python scripts/run_backtest.py` to create `data/outputs/backtest_bets.csv` and `data/outputs/backtest_summary.csv`.")
     try:
         bets = pd.read_csv(OUTPUTS_DIR / "backtest_bets.csv")
-        st.dataframe(summarize_backtest(bets), use_container_width=True, hide_index=True)
+        st.dataframe(summarize_backtest(bets), width="stretch", hide_index=True)
     except Exception:
         st.info("No backtest results found yet.")

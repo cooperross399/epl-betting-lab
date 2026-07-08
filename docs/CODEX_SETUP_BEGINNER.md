@@ -153,6 +153,11 @@ ledger` tab. The dashboard only previews maintenance and shows report tables.
 It does not overwrite an existing odds file, apply maintenance, edit odds, or
 force generation.
 
+After the odds file exists, the easiest path is the dashboard button `Run
+Thursday readiness refresh`. It runs odds completeness, current odds
+validation, and Thursday best-bets generation in that order. If validation is
+blocked, it stops safely and tells you what to fix.
+
 The dashboard badge means:
 
 - `Ready`: no serious issues or warnings.
@@ -296,6 +301,7 @@ edit `data/manual/bet_ledger.csv`.
 The ledger tab has buttons to run safe report actions:
 
 ```text
+Run Thursday readiness refresh
 Run bet ledger report
 Run ledger health check
 Run settlement preview
@@ -313,7 +319,7 @@ writeup/table when their files exist.
 
 These buttons only regenerate reports. They do not apply settlements, confirm
 actual bets, edit the ledger, edit `data/manual/current_odds.csv`, place bets,
-or invent missing odds.
+force Thursday generation, or invent missing odds.
 
 At the top of the tab, the weekly workflow checklist shows which files are
 ready, missing, or stale. If something says `Missing` or `Needs refresh`, use

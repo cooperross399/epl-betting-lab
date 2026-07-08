@@ -263,6 +263,12 @@ best-bets report`, on the `Betting ledger` tab. The dashboard can preview
 missing odds rows and show incomplete entries, but it does not apply
 maintenance, overwrite an existing odds file, edit odds, or force generation.
 
+Once `data/manual/current_odds.csv` exists, you can also click `Run Thursday
+readiness refresh`. That one safe button runs odds completeness, current odds
+validation, and Thursday best-bets generation in order. If validation finds a
+serious blocker, it stops before trusting the card and does not force
+generation.
+
 The dashboard shows a current-odds status badge:
 
 - `Ready`: no serious issues or warnings.
@@ -424,6 +430,7 @@ python scripts/run_backtest.py
 The ledger tab also has buttons for the safe report actions:
 
 ```text
+Run Thursday readiness refresh
 Run bet ledger report
 Run ledger health check
 Run settlement preview
@@ -447,7 +454,7 @@ current-odds warnings, and Thursday status.
 
 These buttons do not edit `data/manual/bet_ledger.csv`, do not edit
 `data/manual/current_odds.csv`, do not apply settlements, do not place bets,
-and do not invent missing odds.
+do not force Thursday generation, and do not invent missing odds.
 
 The ledger tab also includes a weekly workflow checklist. It shows whether key
 files are `Complete`, `Missing`, or `Needs refresh`, when they were last

@@ -91,6 +91,51 @@ def run_current_odds_completeness(
     )
 
 
+def _run_refresh_step(
+    step_name: str,
+    action,
+    progress=None,
+) -> dict[str, Path]:
+    if progress is not None:
+        progress(step_name, "running", f"Running {step_name}.")
+    try:
+        paths = action()
+    except Exception as exc:
+        if progress is not None:
+            progress(step_name, "error", f"{step_name} stopped: {exc}")
+        raise
+    if progress is not None:
+        progress(step_name, "success", f"{step_name} finished.")
+    return paths
+
+
+def run_thursday_readiness_refresh(
+    current_odds_path: Path | None = None,
+    output_dir: Path | None = None,
+    progress=None,
+) -> dict[str, dict[str, Path]]:
+    """Run safe Thursday reports in order without editing odds or forcing generation."""
+    odds_path = current_odds_path or MANUAL_DIR / "current_odds.csv"
+    outputs = output_dir or OUTPUTS_DIR
+    return {
+        "odds_completeness": _run_refresh_step(
+            "Odds completeness check",
+            lambda: run_current_odds_completeness(odds_path, outputs),
+            progress,
+        ),
+        "current_odds_validation": _run_refresh_step(
+            "Current odds validation",
+            lambda: run_current_odds_validation(odds_path, outputs),
+            progress,
+        ),
+        "thursday_best_bets": _run_refresh_step(
+            "Thursday best-bets generation",
+            lambda: run_thursday_best_bets_report(odds_path, outputs, force=False),
+            progress,
+        ),
+    }
+
+
 def run_create_current_odds_template(
     current_odds_path: Path | None = None,
     book: str = "",

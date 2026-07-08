@@ -10,7 +10,9 @@ def load_matches(path: Path | None = None) -> pd.DataFrame:
     path = path or PROCESSED_DIR / "epl_historical_matches.csv"
     if not path.exists():
         raise FileNotFoundError(f"Missing {path}. Run scripts/fetch_data.py first.")
-    df = pd.read_csv(path, parse_dates=["date"])
+    df = pd.read_csv(path)
+    if "date" in df.columns:
+        df["date"] = pd.to_datetime(df["date"], errors="coerce", format="mixed")
     return df
 
 

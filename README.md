@@ -289,6 +289,20 @@ data/outputs/thursday_best_bets.csv
 data/outputs/thursday_best_bets.md
 ```
 
+Each successful run also saves a dated archive snapshot:
+
+```text
+data/outputs/archive/thursday_best_bets/YYYY-MM-DD/HHMMSS_thursday_best_bets.csv
+data/outputs/archive/thursday_best_bets/YYYY-MM-DD/HHMMSS_thursday_best_bets.md
+data/outputs/archive/thursday_best_bets/YYYY-MM-DD/HHMMSS_thursday_best_bets_metadata.json
+```
+
+The archive lets you review old Thursday cards later. If two reports are
+generated in the same second, the second snapshot gets a safe suffix instead
+of replacing the first one. The dashboard shows recent archived Thursday
+reports in the `Betting ledger` tab. Only use `--overwrite-archive` from
+Terminal if you intentionally want to replace a timestamp collision.
+
 The report separates best bets, leans, and passes/notable avoids. It uses
 calibrated probabilities, respects the default max-juice rule around `-160`,
 and keeps the totals protections. It also adds a transparent ranking score and

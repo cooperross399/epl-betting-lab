@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+import json
+from datetime import datetime
 from pathlib import Path
 
 import pandas as pd
 
 from epl_betting_lab.reports.thursday_best_bets import (
     build_thursday_best_bets,
+    list_recent_thursday_archives,
     missing_current_odds_message,
     render_thursday_best_bets,
     save_thursday_best_bets,
@@ -161,9 +164,45 @@ def test_missing_current_odds_message_is_beginner_friendly() -> None:
 
 def test_save_thursday_best_bets(tmp_path) -> None:
     report = build_thursday_best_bets(_candidates())
-    paths = save_thursday_best_bets(report, tmp_path)
+    paths = save_thursday_best_bets(report, tmp_path, generated_at=datetime(2026, 7, 8, 12, 30, 5))
 
     assert paths["csv"].name == "thursday_best_bets.csv"
     assert paths["markdown"].name == "thursday_best_bets.md"
     assert paths["csv"].exists()
     assert "Thursday Best Bets" in paths["markdown"].read_text(encoding="utf-8")
+    assert paths["archive_csv"].exists()
+    assert paths["archive_markdown"].exists()
+    assert paths["archive_metadata"].exists()
+    assert "archive/thursday_best_bets/2026-07-08/123005_thursday_best_bets.md" in str(paths["archive_markdown"])
+
+    metadata = json.loads(paths["archive_metadata"].read_text(encoding="utf-8"))
+    assert metadata["generated_at"] == "2026-07-08T12:30:05"
+    assert metadata["best_bets"] == 3
+    assert metadata["leans"] == 1
+    assert metadata["passes"] == 1
+    assert metadata["validation_status"] == "not_checked"
+
+
+def test_save_thursday_best_bets_does_not_overwrite_same_timestamp_archive(tmp_path) -> None:
+    report = build_thursday_best_bets(_candidates())
+    generated_at = datetime(2026, 7, 8, 12, 30, 5)
+
+    first = save_thursday_best_bets(report, tmp_path, generated_at=generated_at)
+    second = save_thursday_best_bets(report, tmp_path, generated_at=generated_at)
+
+    assert first["archive_markdown"].exists()
+    assert second["archive_markdown"].exists()
+    assert first["archive_markdown"] != second["archive_markdown"]
+    assert second["archive_markdown"].name == "123005_2_thursday_best_bets.md"
+
+
+def test_list_recent_thursday_archives(tmp_path) -> None:
+    report = build_thursday_best_bets(_candidates())
+    older = save_thursday_best_bets(report, tmp_path, generated_at=datetime(2026, 7, 8, 12, 30, 5))
+    newer = save_thursday_best_bets(report, tmp_path, generated_at=datetime(2026, 7, 9, 12, 30, 5))
+
+    archives = list_recent_thursday_archives(tmp_path)
+
+    assert list(archives["generated_at"]) == ["2026-07-09T12:30:05", "2026-07-08T12:30:05"]
+    assert archives.iloc[0]["markdown"] == str(newer["archive_markdown"])
+    assert archives.iloc[1]["csv"] == str(older["archive_csv"])

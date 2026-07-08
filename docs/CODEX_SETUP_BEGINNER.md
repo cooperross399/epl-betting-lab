@@ -178,6 +178,19 @@ data/outputs/thursday_best_bets.md
 data/outputs/thursday_best_bets.csv
 ```
 
+Every successful run also saves dated snapshots here:
+
+```text
+data/outputs/archive/thursday_best_bets/YYYY-MM-DD/HHMMSS_thursday_best_bets.md
+data/outputs/archive/thursday_best_bets/YYYY-MM-DD/HHMMSS_thursday_best_bets.csv
+data/outputs/archive/thursday_best_bets/YYYY-MM-DD/HHMMSS_thursday_best_bets_metadata.json
+```
+
+These archived reports are read-only history so you can compare old Thursday
+cards later. Same-second duplicates get a safe suffix instead of overwriting.
+The dashboard lists recent archived Thursday reports on the `Betting ledger`
+tab.
+
 The Thursday report ranks plays with a simple score and tier:
 
 ```text

@@ -169,6 +169,8 @@ def run_thursday_best_bets_report(
     current_odds_path: Path | None = None,
     output_dir: Path | None = None,
     force: bool = False,
+    archive: bool = True,
+    overwrite_archive: bool = False,
 ) -> dict[str, Path]:
     odds_path = current_odds_path or MANUAL_DIR / "current_odds.csv"
     output_dir = output_dir or OUTPUTS_DIR
@@ -206,4 +208,11 @@ def run_thursday_best_bets_report(
     ], ignore_index=True)
 
     report = build_thursday_best_bets(candidates)
-    return save_thursday_best_bets(report, output_dir, validation_issues=validation_issues, forced=force)
+    return save_thursday_best_bets(
+        report,
+        output_dir,
+        validation_issues=validation_issues,
+        forced=force,
+        archive=archive,
+        overwrite_archive=overwrite_archive,
+    )

@@ -66,7 +66,28 @@ Then tell Codex:
 I updated `data/manual/current_odds.csv` with current odds. Run the model, generate the weekly card, and tell me the best smart plays, leans, avoids, and sneaky/fun angles. Respect my max juice rule around -160.
 ```
 
-Before a Thursday best-bets report, validate your manual odds file:
+Before a Thursday best-bets report, create the manual odds file from upcoming
+fixtures if it does not exist yet:
+
+```bash
+python scripts/create_current_odds_template.py
+```
+
+This fills in dates, teams, markets, and selections. You still need to enter
+`american_odds` and `book`. If you want to prefill a book name:
+
+```bash
+python scripts/create_current_odds_template.py --book FanDuel
+```
+
+If `data/manual/current_odds.csv` already exists, the script stops safely. Only
+replace it intentionally with:
+
+```bash
+python scripts/create_current_odds_template.py --overwrite
+```
+
+Then validate your manual odds file:
 
 ```bash
 python scripts/validate_current_odds.py
@@ -89,9 +110,10 @@ odds file and run it again. For a rare intentional preview only, run:
 python scripts/generate_thursday_best_bets.py --force
 ```
 
-You can also open the dashboard and click `Validate current odds`, then
-`Generate Thursday best-bets report`, on the `Betting ledger` tab. The
-dashboard uses the safe default and does not force generation.
+You can also open the dashboard and click `Create current odds template`,
+`Validate current odds`, then `Generate Thursday best-bets report`, on the
+`Betting ledger` tab. The dashboard does not overwrite an existing odds file
+and does not force generation.
 
 The dashboard badge means:
 

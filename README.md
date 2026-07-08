@@ -153,10 +153,25 @@ Every Wednesday or Thursday, update:
 data/manual/current_odds.csv
 ```
 
-Use real sportsbook prices only. If the file does not exist yet:
+Use real sportsbook prices only. If the file does not exist yet, create a fresh
+odds-entry template from upcoming fixtures:
 
 ```bash
-cp data/manual/current_odds_template.csv data/manual/current_odds.csv
+python scripts/create_current_odds_template.py
+```
+
+This fills in dates, teams, markets, and selections. You still need to enter
+`american_odds` and `book`. To prefill a book name:
+
+```bash
+python scripts/create_current_odds_template.py --book FanDuel
+```
+
+If `data/manual/current_odds.csv` already exists, the script stops safely. To
+replace it intentionally:
+
+```bash
+python scripts/create_current_odds_template.py --overwrite
 ```
 
 Validate the odds file before generating the report:
@@ -189,9 +204,10 @@ intentional preview only, you can run:
 python scripts/generate_thursday_best_bets.py --force
 ```
 
-Or open the dashboard and use the `Generate Thursday best-bets report` button
-on the `Betting ledger` tab. The dashboard uses the safe default and does not
-force generation.
+Or open the dashboard and use `Create current odds template`, then
+`Generate Thursday best-bets report`, on the `Betting ledger` tab. The
+dashboard does not overwrite an existing odds file and does not force
+generation.
 
 The dashboard shows a current-odds status badge:
 

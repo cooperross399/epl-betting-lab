@@ -32,7 +32,7 @@ WORKFLOW_CHECKS = [
     WorkflowCheck(
         "Current odds file",
         (MANUAL_DIR / "current_odds.csv",),
-        "cp data/manual/current_odds_template.csv data/manual/current_odds.csv",
+        "python scripts/create_current_odds_template.py",
     ),
     WorkflowCheck(
         "Current odds validation",

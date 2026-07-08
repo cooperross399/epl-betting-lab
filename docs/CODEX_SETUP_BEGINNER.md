@@ -191,6 +191,24 @@ cards later. Same-second duplicates get a safe suffix instead of overwriting.
 The dashboard lists recent archived Thursday reports on the `Betting ledger`
 tab.
 
+After you have at least two archived reports, compare the latest two:
+
+```bash
+python scripts/compare_thursday_best_bets.py
+```
+
+This writes:
+
+```text
+data/outputs/thursday_best_bets_comparison.md
+data/outputs/thursday_best_bets_comparison.csv
+```
+
+The comparison shows which plays were added or removed, plus changes in status,
+confidence tier, ranking score, odds, calibrated edge, and suggested units. If
+there are not enough archives yet, the report says comparison is not available
+yet and tells you to create more Thursday snapshots first.
+
 The Thursday report ranks plays with a simple score and tier:
 
 ```text
@@ -336,12 +354,15 @@ Preview current odds maintenance
 Check odds entry completeness
 Validate current odds
 Generate Thursday best-bets report
+Compare latest Thursday reports
 Run backtest reports
 Refresh dashboard data
 ```
 
 The tab also shows the current odds validation report and Thursday report
-writeup/table when their files exist.
+writeup/table when their files exist. It also shows the latest Thursday
+snapshot comparison after you run `python scripts/compare_thursday_best_bets.py`
+or click `Compare latest Thursday reports`.
 
 These buttons only regenerate reports. They do not apply settlements, confirm
 actual bets, edit the ledger, edit `data/manual/current_odds.csv`, place bets,

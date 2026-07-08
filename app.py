@@ -14,6 +14,7 @@ from epl_betting_lab.dashboard_actions import (
     run_current_odds_validation,
     run_ledger_health_check,
     run_settlement_preview,
+    run_thursday_best_bets_comparison,
     run_thursday_best_bets_report,
     run_thursday_readiness_refresh,
 )
@@ -118,7 +119,7 @@ def render_report_buttons() -> None:
     if report_cols[2].button("Run settlement preview", width="stretch"):
         run_dashboard_action("Settlement preview", run_settlement_preview)
 
-    workflow_cols = st.columns(7)
+    workflow_cols = st.columns(8)
     if workflow_cols[0].button("Create current odds template", width="stretch"):
         run_dashboard_action("Current odds template", run_create_current_odds_template)
     if workflow_cols[1].button("Preview current odds maintenance", width="stretch"):
@@ -129,9 +130,11 @@ def render_report_buttons() -> None:
         run_dashboard_action("Current odds validation", run_current_odds_validation)
     if workflow_cols[4].button("Generate Thursday best-bets report", width="stretch"):
         run_dashboard_action("Thursday best-bets report", run_thursday_best_bets_report)
-    if workflow_cols[5].button("Run backtest reports", width="stretch"):
+    if workflow_cols[5].button("Compare latest Thursday reports", width="stretch"):
+        run_dashboard_action("Thursday best-bets comparison", run_thursday_best_bets_comparison)
+    if workflow_cols[6].button("Run backtest reports", width="stretch"):
         run_dashboard_action("Backtest reports", run_backtest.main)
-    if workflow_cols[6].button("Refresh dashboard data", width="stretch"):
+    if workflow_cols[7].button("Refresh dashboard data", width="stretch"):
         st.rerun()
 
 
@@ -221,6 +224,18 @@ def render_thursday_best_bets_panel() -> None:
     else:
         st.caption("Each successful Thursday generation saves dated markdown, CSV, and metadata snapshots here.")
         st.dataframe(archives, width="stretch", hide_index=True)
+
+    comparison_path = OUTPUTS_DIR / "thursday_best_bets_comparison.md"
+    if comparison_path.exists():
+        with st.expander("Latest Thursday snapshot comparison", expanded=False):
+            st.markdown(comparison_path.read_text(encoding="utf-8"))
+    else:
+        show_missing_report("data/outputs/thursday_best_bets_comparison.md", "python scripts/compare_thursday_best_bets.py")
+    show_output_table(
+        "Thursday snapshot comparison table",
+        "thursday_best_bets_comparison.csv",
+        "python scripts/compare_thursday_best_bets.py",
+    )
 
 
 def render_workflow_checklist() -> None:

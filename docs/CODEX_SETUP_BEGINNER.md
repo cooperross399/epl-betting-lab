@@ -178,6 +178,19 @@ data/outputs/thursday_best_bets.md
 data/outputs/thursday_best_bets.csv
 ```
 
+The Thursday report ranks plays with a simple score and tier:
+
+```text
+A = strongest best-bet profile, up to 0.5u
+B = playable, 0.25u
+C = lean/watchlist only, 0.10u max
+Pass/Avoid = 0u
+```
+
+The ranking rewards calibrated edge, calibrated probability, BETTABLE status,
+and more trusted markets. It penalizes heavy juice, plus-money variance,
+totals, totals unders, and goal-environment under warnings.
+
 Before running it each Wednesday or Thursday, update the real book prices in
 `american_odds`, fill in `book`, and leave `closing_american_odds` blank until
 after the market closes.

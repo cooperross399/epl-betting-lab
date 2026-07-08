@@ -291,7 +291,19 @@ data/outputs/thursday_best_bets.md
 
 The report separates best bets, leans, and passes/notable avoids. It uses
 calibrated probabilities, respects the default max-juice rule around `-160`,
-and keeps the totals protections.
+and keeps the totals protections. It also adds a transparent ranking score and
+confidence tier:
+
+```text
+A = strongest best-bet profile, up to 0.5u
+B = playable, 0.25u
+C = lean/watchlist only, 0.10u max
+Pass/Avoid = 0u
+```
+
+The ranking rewards calibrated edge, calibrated probability, BETTABLE status,
+and more trusted markets. It penalizes heavy juice, plus-money variance,
+totals, totals unders, and goal-environment under warnings.
 
 ---
 

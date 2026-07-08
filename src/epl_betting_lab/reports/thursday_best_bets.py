@@ -4,8 +4,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from epl_betting_lab.config import BANKROLL_UNIT_DOLLARS
-from epl_betting_lab.reports.weekly_card import confidence_tier
+from epl_betting_lab.config import BANKROLL_UNIT_DOLLARS, MAX_DEFAULT_JUICE, OUTPUTS_DIR
 
 
 REPORT_COLUMNS = [
@@ -19,12 +18,17 @@ REPORT_COLUMNS = [
     "calibrated_model_prob",
     "raw_edge",
     "calibrated_edge",
+    "ranking_score",
+    "confidence_tier",
     "fair_american",
     "american_odds",
     "suggested_units",
     "suggested_wager_$",
     "book",
+    "risk_flags",
+    "market_reliability_note",
     "qualifies_reason",
+    "ranking_reason",
     "totals_note",
     "notes",
 ]
@@ -45,6 +49,35 @@ def _value(row: pd.Series, column: str, fallback: object = pd.NA) -> object:
     return row[column]
 
 
+def _float_value(row: pd.Series, column: str, fallback: float = 0.0) -> float:
+    value = _value(row, column, fallback)
+    numeric = pd.to_numeric(value, errors="coerce")
+    return fallback if pd.isna(numeric) else float(numeric)
+
+
+def _market_reliability_from_backtest(path: Path | None = None) -> dict[str, float]:
+    path = path or OUTPUTS_DIR / "backtest_market_breakdown.csv"
+    default = {"1x2": 8.0, "btts": 2.0, "total_2_5": -8.0}
+    if not path.exists():
+        return default
+    try:
+        backtest = pd.read_csv(path)
+    except Exception:
+        return default
+    required = {"market", "status", "roi"}
+    if not required.issubset(backtest.columns):
+        return default
+
+    reliability = default.copy()
+    bettable = backtest[backtest["status"].astype(str).str.upper() == "BETTABLE"]
+    for _, row in bettable.iterrows():
+        market = str(row.get("market", "")).strip()
+        roi = pd.to_numeric(row.get("roi"), errors="coerce")
+        if market and not pd.isna(roi):
+            reliability[market] = max(-12.0, min(12.0, float(roi) * 50))
+    return reliability
+
+
 def _notes_for_totals(row: pd.Series) -> str:
     if row.get("market") != "total_2_5":
         return ""
@@ -63,7 +96,7 @@ def _notes_for_totals(row: pd.Series) -> str:
 def _qualifies_reason(row: pd.Series, section: str) -> str:
     status = str(row["status"])
     if section == "Best bets":
-        return f"Calibrated status is {status} with positive calibrated edge and playable price."
+        return f"Calibrated status is {status} with positive calibrated edge, playable price, and {row['confidence_tier']}-tier ranking."
     if section == "Leans":
         return "Positive but thinner edge; keep smaller unless the price improves."
     if "too much juice" in status.lower():
@@ -75,6 +108,119 @@ def _qualifies_reason(row: pd.Series, section: str) -> str:
     return f"Pass: calibrated status is {status}."
 
 
+def _market_reliability_note(row: pd.Series, market_reliability: dict[str, float]) -> str:
+    market = str(row.get("market", ""))
+    adjustment = market_reliability.get(market, 0.0)
+    if market == "1x2":
+        trust = "1X2 is currently the most trusted market in this report."
+    elif market == "total_2_5":
+        trust = "Totals are treated cautiously because recent backtests showed leakage."
+    elif market == "btts":
+        trust = "BTTS is allowed, but ranked between 1X2 and totals until more evidence builds."
+    else:
+        trust = "Market reliability is neutral."
+    return f"{trust} Reliability adjustment: {adjustment:+.1f} points."
+
+
+def _risk_flags(row: pd.Series) -> str:
+    flags = []
+    market = str(row.get("market", ""))
+    selection = str(row.get("selection", "")).lower()
+    odds = _float_value(row, "american_odds")
+    if odds <= MAX_DEFAULT_JUICE:
+        flags.append("heavy juice")
+    if odds > 100:
+        flags.append("plus-money variance")
+    if market == "total_2_5":
+        flags.append("totals market caution")
+    if market == "total_2_5" and selection == "under":
+        flags.append("totals under caution")
+    if bool(row.get("goal_environment_under_guardrail", False)):
+        flags.append("goal-environment under guardrail")
+    return "; ".join(flags)
+
+
+def _ranking_components(row: pd.Series, market_reliability: dict[str, float]) -> tuple[float, list[str]]:
+    market = str(row.get("market", ""))
+    selection = str(row.get("selection", "")).lower()
+    status = str(row.get("status", ""))
+    status_upper = status.upper()
+    odds = _float_value(row, "american_odds")
+    calibrated_edge = _float_value(row, "calibrated_edge", _float_value(row, "edge"))
+    calibrated_prob = _float_value(row, "calibrated_model_prob", _float_value(row, "model_prob"))
+
+    score = 0.0
+    reasons: list[str] = []
+
+    edge_points = max(0.0, min(40.0, calibrated_edge * 500))
+    prob_points = max(0.0, min(15.0, calibrated_prob * 22))
+    score += edge_points + prob_points
+    reasons.append(f"calibrated edge adds {edge_points:.1f}")
+    reasons.append(f"calibrated probability adds {prob_points:.1f}")
+
+    if status_upper == "BETTABLE":
+        score += 15.0
+        reasons.append("BETTABLE status adds 15.0")
+    elif status_upper == "LEAN":
+        score += 5.0
+        reasons.append("LEAN status adds 5.0")
+    else:
+        score -= 25.0
+        reasons.append("PASS/Avoid status subtracts 25.0")
+
+    reliability = market_reliability.get(market, 0.0)
+    score += reliability
+    reasons.append(f"market reliability adds {reliability:+.1f}")
+
+    if odds <= MAX_DEFAULT_JUICE:
+        score -= 15.0
+        reasons.append(f"heavy juice {int(odds):+d} subtracts 15.0")
+    if odds > 100:
+        score -= 4.0
+        reasons.append("plus-money variance subtracts 4.0")
+
+    if market == "total_2_5":
+        score -= 8.0
+        reasons.append("totals caution subtracts 8.0")
+        if selection == "under":
+            score -= 12.0
+            reasons.append("totals under caution subtracts 12.0")
+        if bool(row.get("goal_environment_under_guardrail", False)):
+            score -= 15.0
+            reasons.append("goal-environment under guardrail subtracts 15.0")
+
+    return round(max(0.0, min(100.0, score)), 1), reasons
+
+
+def _confidence_tier(row: pd.Series) -> str:
+    section = row.get("section")
+    status = str(row.get("status", "")).upper()
+    market = str(row.get("market", ""))
+    selection = str(row.get("selection", "")).lower()
+    score = _float_value(row, "ranking_score")
+    edge = _float_value(row, "calibrated_edge", _float_value(row, "edge"))
+
+    if section == "Passes / notable avoids" or "PASS" in status or edge <= 0:
+        return "Pass/Avoid"
+    if status == "LEAN":
+        return "C"
+    if score >= 72:
+        tier = "A"
+    elif score >= 55:
+        tier = "B"
+    elif score >= 35:
+        tier = "C"
+    else:
+        tier = "Pass/Avoid"
+    if market == "total_2_5" and selection == "under" and tier == "A":
+        return "B"
+    return tier
+
+
+def _suggested_units(tier: str) -> float:
+    return {"A": 0.5, "B": 0.25, "C": 0.1, "Pass/Avoid": 0.0}.get(tier, 0.0)
+
+
 def _section(status: object) -> str:
     status_text = "" if pd.isna(status) else str(status)
     if status_text == "BETTABLE":
@@ -84,7 +230,12 @@ def _section(status: object) -> str:
     return "Passes / notable avoids"
 
 
-def build_thursday_best_bets(candidates: pd.DataFrame, max_best_bets: int = 8, max_passes: int = 12) -> pd.DataFrame:
+def build_thursday_best_bets(
+    candidates: pd.DataFrame,
+    max_best_bets: int = 8,
+    max_passes: int = 12,
+    market_reliability: dict[str, float] | None = None,
+) -> pd.DataFrame:
     if candidates.empty:
         return pd.DataFrame(columns=REPORT_COLUMNS)
 
@@ -102,15 +253,20 @@ def build_thursday_best_bets(candidates: pd.DataFrame, max_best_bets: int = 8, m
     df["book"] = df.apply(lambda row: _value(row, "book", ""), axis=1)
     df["notes"] = df.apply(lambda row: _value(row, "notes", ""), axis=1)
     df["totals_note"] = df.apply(_notes_for_totals, axis=1)
+    market_reliability = market_reliability or _market_reliability_from_backtest()
+    scores_and_reasons = df.apply(lambda row: _ranking_components(row, market_reliability), axis=1)
+    df["ranking_score"] = scores_and_reasons.apply(lambda item: item[0])
+    df["ranking_reason"] = scores_and_reasons.apply(lambda item: "; ".join(item[1]))
+    df["confidence_tier"] = df.apply(_confidence_tier, axis=1)
+    df["risk_flags"] = df.apply(_risk_flags, axis=1)
+    df["market_reliability_note"] = df.apply(lambda row: _market_reliability_note(row, market_reliability), axis=1)
     df["qualifies_reason"] = df.apply(lambda row: _qualifies_reason(row, row["section"]), axis=1)
-    df["confidence"] = df.apply(lambda row: confidence_tier(float(row["edge"]), float(row["ev_per_unit"])), axis=1)
-    df["suggested_units"] = df["confidence"].map({"A": 0.75, "B": 0.5, "C": 0.25, "Lean/Pass": 0.1}).fillna(0.1)
-    df.loc[df["section"] == "Passes / notable avoids", "suggested_units"] = 0.0
+    df["suggested_units"] = df["confidence_tier"].apply(_suggested_units)
     df["suggested_wager_$"] = (df["suggested_units"] * BANKROLL_UNIT_DOLLARS).round(2)
 
-    best = df[df["section"] == "Best bets"].sort_values(["edge", "ev_per_unit"], ascending=False).head(max_best_bets)
-    leans = df[df["section"] == "Leans"].sort_values(["edge", "ev_per_unit"], ascending=False)
-    passes = df[df["section"] == "Passes / notable avoids"].sort_values(["edge", "ev_per_unit"], ascending=False).head(max_passes)
+    best = df[df["section"] == "Best bets"].sort_values(["ranking_score", "calibrated_edge"], ascending=False).head(max_best_bets)
+    leans = df[df["section"] == "Leans"].sort_values(["ranking_score", "calibrated_edge"], ascending=False)
+    passes = df[df["section"] == "Passes / notable avoids"].sort_values(["ranking_score", "calibrated_edge"], ascending=False).head(max_passes)
     report = pd.concat([best, leans, passes], ignore_index=True)
     return report[REPORT_COLUMNS]
 
@@ -148,6 +304,17 @@ def render_thursday_best_bets(
         "4. Run `python scripts/generate_thursday_best_bets.py`.",
         "5. Review best bets, leans, and passes before deciding manually.",
         "",
+        "## Ranking and confidence guide",
+        "",
+        "The ranking score is a transparent 0-100 helper for sorting candidates. It rewards calibrated edge, calibrated probability, BETTABLE status, and historically stronger markets. It penalizes totals, totals unders, goal-environment under warnings, heavy juice worse than about -160, plus-money variance, and pass/avoid statuses.",
+        "",
+        "- A: strongest best-bet profile, suggested up to 0.5u.",
+        "- B: playable but not top tier, suggested 0.25u.",
+        "- C: lean/watchlist only, suggested 0.10u max.",
+        "- Pass/Avoid: no bet, suggested 0u.",
+        "",
+        "Totals unders cannot receive A-tier in this conservative version because they have been a historical leak; the report can still show them as B/C only when the existing protections leave them playable.",
+        "",
     ]
     lines.extend(_validation_warning(validation_issues, forced=forced))
     if report.empty:
@@ -171,6 +338,7 @@ def render_thursday_best_bets(
             lines.append(f"### {matchup}")
             lines.append(f"- Play: {row['market']} {row['selection']} at {price:+d}")
             lines.append(f"- Status: {row['status']}")
+            lines.append(f"- Confidence tier: {row['confidence_tier']} | Ranking score: {float(row['ranking_score']):.1f}/100")
             lines.append(f"- Suggested size: {row['suggested_units']}u")
             lines.append(
                 f"- Probability: raw {float(row['raw_model_prob']):.1%}, "
@@ -184,6 +352,10 @@ def render_thursday_best_bets(
             if row["book"]:
                 lines.append(f"- Book: {row['book']}")
             lines.append(f"- Why: {row['qualifies_reason']}")
+            lines.append(f"- Ranking notes: {row['ranking_reason']}")
+            lines.append(f"- Market reliability: {row['market_reliability_note']}")
+            if row["risk_flags"]:
+                lines.append(f"- Risk flags: {row['risk_flags']}")
             if row["totals_note"]:
                 lines.append(f"- Totals note: {row['totals_note']}")
             if row["notes"]:

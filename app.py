@@ -7,6 +7,7 @@ from epl_betting_lab.backtest.walk_forward import summarize_backtest
 from epl_betting_lab.config import MANUAL_DIR, MAX_DEFAULT_JUICE, MIN_EDGE, OUTPUTS_DIR
 from epl_betting_lab.dashboard_actions import (
     run_bet_ledger_report,
+    run_current_odds_validation,
     run_ledger_health_check,
     run_settlement_preview,
     run_thursday_best_bets_report,
@@ -75,17 +76,29 @@ def render_report_buttons() -> None:
     if report_cols[2].button("Run settlement preview", width="stretch"):
         run_dashboard_action("Settlement preview", run_settlement_preview)
 
-    workflow_cols = st.columns(3)
-    if workflow_cols[0].button("Generate Thursday best-bets report", width="stretch"):
+    workflow_cols = st.columns(4)
+    if workflow_cols[0].button("Validate current odds", width="stretch"):
+        run_dashboard_action("Current odds validation", run_current_odds_validation)
+    if workflow_cols[1].button("Generate Thursday best-bets report", width="stretch"):
         run_dashboard_action("Thursday best-bets report", run_thursday_best_bets_report)
-    if workflow_cols[1].button("Run backtest reports", width="stretch"):
+    if workflow_cols[2].button("Run backtest reports", width="stretch"):
         run_dashboard_action("Backtest reports", run_backtest.main)
-    if workflow_cols[2].button("Refresh dashboard data", width="stretch"):
+    if workflow_cols[3].button("Refresh dashboard data", width="stretch"):
         st.rerun()
 
 
 def render_thursday_best_bets_panel() -> None:
     st.subheader("Thursday best-bets report")
+    st.info("Run `Validate current odds` before generating Thursday best bets so bad manual inputs do not create a bad card.")
+
+    validation_path = OUTPUTS_DIR / "current_odds_validation.md"
+    if validation_path.exists():
+        with st.expander("Current odds validation", expanded=False):
+            st.markdown(validation_path.read_text(encoding="utf-8"))
+    else:
+        show_missing_report("data/outputs/current_odds_validation.md", "python scripts/validate_current_odds.py")
+    show_output_table("Current odds validation issues", "current_odds_validation.csv", "python scripts/validate_current_odds.py")
+
     markdown_path = OUTPUTS_DIR / "thursday_best_bets.md"
     if markdown_path.exists():
         with st.expander("Best-bets writeup", expanded=True):

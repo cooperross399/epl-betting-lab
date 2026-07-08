@@ -35,6 +35,13 @@ WORKFLOW_CHECKS = [
         "cp data/manual/current_odds_template.csv data/manual/current_odds.csv",
     ),
     WorkflowCheck(
+        "Current odds validation",
+        (OUTPUTS_DIR / "current_odds_validation.csv", OUTPUTS_DIR / "current_odds_validation.md"),
+        "python scripts/validate_current_odds.py",
+        stale_after=(MANUAL_DIR / "current_odds.csv",),
+        any_path_ok=True,
+    ),
+    WorkflowCheck(
         "Weekly card",
         (OUTPUTS_DIR / "weekly_card.csv", OUTPUTS_DIR / "weekly_card.md"),
         "python scripts/generate_weekly_card.py",

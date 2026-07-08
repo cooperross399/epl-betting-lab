@@ -193,6 +193,14 @@ Or open the dashboard and use the `Generate Thursday best-bets report` button
 on the `Betting ledger` tab. The dashboard uses the safe default and does not
 force generation.
 
+The dashboard shows a current-odds status badge:
+
+- `Ready`: no serious issues or warnings.
+- `Warnings only`: review warnings before trusting the card.
+- `Blocked`: fix serious issues before generating best bets.
+- `Needs refresh`: `current_odds.csv` changed after validation.
+- `Not checked`: run validation first.
+
 This creates:
 
 ```text

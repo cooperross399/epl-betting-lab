@@ -26,6 +26,7 @@ from epl_betting_lab.strategies.btts import evaluate_btts
 from epl_betting_lab.strategies.ml_value import evaluate_1x2_value
 from epl_betting_lab.strategies.promoted_fades import flag_promoted_team_spots
 from epl_betting_lab.strategies.totals import evaluate_total_25
+from epl_betting_lab.thursday_readiness import build_thursday_readiness
 from epl_betting_lab.workflow_status import build_workflow_status
 from scripts import run_backtest
 
@@ -107,6 +108,19 @@ def render_report_buttons() -> None:
 def render_thursday_best_bets_panel() -> None:
     st.subheader("Thursday best-bets report")
     st.info("Run `Validate current odds` before generating Thursday best bets so bad manual inputs do not create a bad card.")
+    readiness = build_thursday_readiness()
+    readiness_cols = st.columns(5)
+    completion = "Missing" if readiness.odds_completion_percentage is None else f"{readiness.odds_completion_percentage:.1%}"
+    incomplete_matches = "Missing" if readiness.incomplete_matches is None else int(readiness.incomplete_matches)
+    serious = "Missing" if readiness.serious_validation_issues is None else int(readiness.serious_validation_issues)
+    warnings = "Missing" if readiness.validation_warnings is None else int(readiness.validation_warnings)
+    readiness_cols[0].metric("Odds complete", completion)
+    readiness_cols[1].metric("Incomplete matches", incomplete_matches)
+    readiness_cols[2].metric("Serious odds issues", serious)
+    readiness_cols[3].metric("Odds warnings", warnings)
+    readiness_cols[4].metric("Thursday status", readiness.thursday_report_status)
+    st.caption(f"{readiness.explanation} Refresh with `{readiness.command}` or the dashboard buttons below.")
+
     status = build_current_odds_status()
     status_cols = st.columns([1, 3])
     status_cols[0].metric("Current odds", status.status)

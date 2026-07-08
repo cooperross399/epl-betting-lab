@@ -9,6 +9,7 @@ from epl_betting_lab.current_odds_status import build_current_odds_status
 from epl_betting_lab.dashboard_actions import (
     run_bet_ledger_report,
     run_create_current_odds_template,
+    run_current_odds_maintenance_preview,
     run_current_odds_validation,
     run_ledger_health_check,
     run_settlement_preview,
@@ -85,16 +86,18 @@ def render_report_buttons() -> None:
     if report_cols[2].button("Run settlement preview", width="stretch"):
         run_dashboard_action("Settlement preview", run_settlement_preview)
 
-    workflow_cols = st.columns(5)
+    workflow_cols = st.columns(6)
     if workflow_cols[0].button("Create current odds template", width="stretch"):
         run_dashboard_action("Current odds template", run_create_current_odds_template)
-    if workflow_cols[1].button("Validate current odds", width="stretch"):
+    if workflow_cols[1].button("Preview current odds maintenance", width="stretch"):
+        run_dashboard_action("Current odds maintenance preview", run_current_odds_maintenance_preview)
+    if workflow_cols[2].button("Validate current odds", width="stretch"):
         run_dashboard_action("Current odds validation", run_current_odds_validation)
-    if workflow_cols[2].button("Generate Thursday best-bets report", width="stretch"):
+    if workflow_cols[3].button("Generate Thursday best-bets report", width="stretch"):
         run_dashboard_action("Thursday best-bets report", run_thursday_best_bets_report)
-    if workflow_cols[3].button("Run backtest reports", width="stretch"):
+    if workflow_cols[4].button("Run backtest reports", width="stretch"):
         run_dashboard_action("Backtest reports", run_backtest.main)
-    if workflow_cols[4].button("Refresh dashboard data", width="stretch"):
+    if workflow_cols[5].button("Refresh dashboard data", width="stretch"):
         st.rerun()
 
 
@@ -115,6 +118,14 @@ def render_thursday_best_bets_panel() -> None:
     else:
         show_missing_report("data/outputs/current_odds_validation.md", "python scripts/validate_current_odds.py")
     show_output_table("Current odds validation issues", "current_odds_validation.csv", "python scripts/validate_current_odds.py")
+
+    maintenance_path = OUTPUTS_DIR / "current_odds_maintenance_report.md"
+    if maintenance_path.exists():
+        with st.expander("Current odds maintenance preview", expanded=False):
+            st.markdown(maintenance_path.read_text(encoding="utf-8"))
+    else:
+        show_missing_report("data/outputs/current_odds_maintenance_report.md", "python scripts/maintain_current_odds.py")
+    show_output_table("Current odds maintenance rows", "current_odds_maintenance_preview.csv", "python scripts/maintain_current_odds.py")
 
     markdown_path = OUTPUTS_DIR / "thursday_best_bets.md"
     if markdown_path.exists():

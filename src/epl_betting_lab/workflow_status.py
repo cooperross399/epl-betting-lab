@@ -42,6 +42,13 @@ WORKFLOW_CHECKS = [
         any_path_ok=True,
     ),
     WorkflowCheck(
+        "Thursday best-bets report",
+        (OUTPUTS_DIR / "thursday_best_bets.csv", OUTPUTS_DIR / "thursday_best_bets.md"),
+        "python scripts/generate_thursday_best_bets.py",
+        stale_after=(MANUAL_DIR / "current_odds.csv",),
+        any_path_ok=True,
+    ),
+    WorkflowCheck(
         "Bet ledger",
         (MANUAL_DIR / "bet_ledger.csv",),
         "python scripts/run_bet_ledger.py",

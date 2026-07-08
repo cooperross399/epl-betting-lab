@@ -145,6 +145,37 @@ The weekly card includes:
 - Fair price
 - Suggested unit size
 
+## Generate Thursday best bets
+
+Every Wednesday or Thursday, update:
+
+```text
+data/manual/current_odds.csv
+```
+
+Use real sportsbook prices only. If the file does not exist yet:
+
+```bash
+cp data/manual/current_odds_template.csv data/manual/current_odds.csv
+```
+
+Then run:
+
+```bash
+python scripts/generate_thursday_best_bets.py
+```
+
+This creates:
+
+```text
+data/outputs/thursday_best_bets.csv
+data/outputs/thursday_best_bets.md
+```
+
+The report separates best bets, leans, and passes/notable avoids. It uses
+calibrated probabilities, respects the default max-juice rule around `-160`,
+and keeps the totals protections.
+
 ---
 
 ## Track actual bets in the ledger

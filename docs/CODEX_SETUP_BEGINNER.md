@@ -66,6 +66,23 @@ Then tell Codex:
 I updated `data/manual/current_odds.csv` with current odds. Run the model, generate the weekly card, and tell me the best smart plays, leans, avoids, and sneaky/fun angles. Respect my max juice rule around -160.
 ```
 
+For a Thursday best-bets report, run:
+
+```bash
+python scripts/generate_thursday_best_bets.py
+```
+
+This reads only `data/manual/current_odds.csv` and writes:
+
+```text
+data/outputs/thursday_best_bets.md
+data/outputs/thursday_best_bets.csv
+```
+
+Before running it each Wednesday or Thursday, update the real book prices in
+`american_odds`, fill in `book`, and leave `closing_american_odds` blank until
+after the market closes.
+
 ## Step 6 — Track actual bets
 
 The weekly card is not a bet slip. If you decide to place a bet yourself, log

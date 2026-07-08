@@ -22,6 +22,7 @@ from epl_betting_lab.models.poisson_goals import PoissonGoalsModel
 from epl_betting_lab.models.ratings import simple_form_table
 from epl_betting_lab.reports.bet_ledger import load_bet_ledger, summarize_overall
 from epl_betting_lab.reports.current_odds_validation import CurrentOddsValidationError
+from epl_betting_lab.reports.thursday_best_bets import list_recent_thursday_archives
 from epl_betting_lab.reports.weekly_card import build_weekly_card, card_to_markdown
 from epl_betting_lab.strategies.btts import evaluate_btts
 from epl_betting_lab.strategies.ml_value import evaluate_1x2_value
@@ -212,6 +213,14 @@ def render_thursday_best_bets_panel() -> None:
         show_missing_report("data/outputs/thursday_best_bets.md", "python scripts/generate_thursday_best_bets.py")
 
     show_output_table("Thursday best-bets table", "thursday_best_bets.csv", "python scripts/generate_thursday_best_bets.py")
+
+    st.subheader("Recent Thursday report archives")
+    archives = list_recent_thursday_archives()
+    if archives.empty:
+        st.info("No archived Thursday reports found yet. Generate Thursday best bets to save the first snapshot.")
+    else:
+        st.caption("Each successful Thursday generation saves dated markdown, CSV, and metadata snapshots here.")
+        st.dataframe(archives, width="stretch", hide_index=True)
 
 
 def render_workflow_checklist() -> None:

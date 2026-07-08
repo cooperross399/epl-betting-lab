@@ -14,16 +14,25 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Generate a preview even when serious current-odds validation issues exist.",
     )
+    parser.add_argument(
+        "--overwrite-archive",
+        action="store_true",
+        help="Replace the archive snapshot if this run reuses an existing archive timestamp.",
+    )
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
-    paths = run_thursday_best_bets_report(force=args.force)
+    paths = run_thursday_best_bets_report(force=args.force, overwrite_archive=args.overwrite_archive)
 
     print((OUTPUTS_DIR / "thursday_best_bets.md").read_text(encoding="utf-8"))
     print(f"\nSaved CSV to {paths['csv']}")
     print(f"Saved Markdown to {paths['markdown']}")
+    if "archive_csv" in paths:
+        print(f"Archived CSV to {paths['archive_csv']}")
+        print(f"Archived Markdown to {paths['archive_markdown']}")
+        print(f"Archived metadata to {paths['archive_metadata']}")
 
 
 if __name__ == "__main__":

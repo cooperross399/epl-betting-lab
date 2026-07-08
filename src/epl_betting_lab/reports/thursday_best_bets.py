@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+from datetime import datetime
 from pathlib import Path
 
 import pandas as pd
@@ -31,6 +33,17 @@ REPORT_COLUMNS = [
     "ranking_reason",
     "totals_note",
     "notes",
+]
+
+ARCHIVE_COLUMNS = [
+    "generated_at",
+    "validation_status",
+    "best_bets",
+    "leans",
+    "passes",
+    "markdown",
+    "csv",
+    "metadata",
 ]
 
 
@@ -364,18 +377,134 @@ def render_thursday_best_bets(
     return "\n".join(lines)
 
 
+def _archive_generated_at(generated_at: datetime | None = None) -> tuple[datetime, str, str]:
+    timestamp = generated_at or datetime.now()
+    return timestamp, timestamp.strftime("%Y-%m-%d"), timestamp.strftime("%H%M%S")
+
+
+def _validation_status(validation_issues: pd.DataFrame | None) -> str:
+    if validation_issues is None:
+        return "not_checked"
+    if validation_issues.empty or "severity" not in validation_issues.columns:
+        return "ready"
+    severities = validation_issues["severity"].astype(str).str.lower()
+    if (severities == "error").any():
+        return "blocked"
+    if (severities == "warning").any():
+        return "warnings_only"
+    return "ready"
+
+
+def _section_count(report: pd.DataFrame, section: str) -> int:
+    if report.empty or "section" not in report.columns:
+        return 0
+    return int((report["section"] == section).sum())
+
+
+def _archive_paths(
+    output_dir: Path,
+    generated_at: datetime | None = None,
+    overwrite: bool = False,
+) -> tuple[datetime, dict[str, Path], str]:
+    timestamp, date_label, time_label = _archive_generated_at(generated_at)
+    archive_dir = output_dir / "archive" / "thursday_best_bets" / date_label
+    archive_dir.mkdir(parents=True, exist_ok=True)
+
+    suffix = ""
+    while True:
+        stem = f"{time_label}{suffix}_thursday_best_bets"
+        paths = {
+            "archive_csv": archive_dir / f"{stem}.csv",
+            "archive_markdown": archive_dir / f"{stem}.md",
+            "archive_metadata": archive_dir / f"{stem}_metadata.json",
+        }
+        if overwrite or not any(path.exists() for path in paths.values()):
+            return timestamp, paths, suffix
+        suffix = "_2" if not suffix else f"_{int(suffix.strip('_')) + 1}"
+
+
+def archive_thursday_best_bets(
+    report: pd.DataFrame,
+    markdown: str,
+    output_dir: Path,
+    validation_issues: pd.DataFrame | None = None,
+    forced: bool = False,
+    generated_at: datetime | None = None,
+    overwrite: bool = False,
+) -> dict[str, Path]:
+    timestamp, paths, _ = _archive_paths(output_dir, generated_at=generated_at, overwrite=overwrite)
+    report.to_csv(paths["archive_csv"], index=False)
+    paths["archive_markdown"].write_text(markdown, encoding="utf-8")
+
+    metadata = {
+        "generated_at": timestamp.isoformat(timespec="seconds"),
+        "best_bets": _section_count(report, "Best bets"),
+        "leans": _section_count(report, "Leans"),
+        "passes": _section_count(report, "Passes / notable avoids"),
+        "validation_status": _validation_status(validation_issues),
+        "forced": bool(forced),
+        "csv": str(paths["archive_csv"]),
+        "markdown": str(paths["archive_markdown"]),
+    }
+    paths["archive_metadata"].write_text(json.dumps(metadata, indent=2) + "\n", encoding="utf-8")
+    return paths
+
+
+def list_recent_thursday_archives(output_dir: Path | None = None, limit: int = 8) -> pd.DataFrame:
+    output_dir = output_dir or OUTPUTS_DIR
+    archive_root = output_dir / "archive" / "thursday_best_bets"
+    if not archive_root.exists():
+        return pd.DataFrame(columns=ARCHIVE_COLUMNS)
+
+    rows = []
+    for metadata_path in archive_root.glob("*/*_metadata.json"):
+        try:
+            metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+        rows.append({
+            "generated_at": metadata.get("generated_at", ""),
+            "validation_status": metadata.get("validation_status", ""),
+            "best_bets": metadata.get("best_bets", 0),
+            "leans": metadata.get("leans", 0),
+            "passes": metadata.get("passes", 0),
+            "markdown": metadata.get("markdown", ""),
+            "csv": metadata.get("csv", ""),
+            "metadata": str(metadata_path),
+        })
+
+    if not rows:
+        return pd.DataFrame(columns=ARCHIVE_COLUMNS)
+    archives = pd.DataFrame(rows, columns=ARCHIVE_COLUMNS)
+    return archives.sort_values("generated_at", ascending=False).head(limit).reset_index(drop=True)
+
+
 def save_thursday_best_bets(
     report: pd.DataFrame,
     output_dir: Path,
     validation_issues: pd.DataFrame | None = None,
     forced: bool = False,
+    archive: bool = True,
+    generated_at: datetime | None = None,
+    overwrite_archive: bool = False,
 ) -> dict[str, Path]:
     output_dir.mkdir(parents=True, exist_ok=True)
     csv_path = output_dir / "thursday_best_bets.csv"
     markdown_path = output_dir / "thursday_best_bets.md"
+    markdown = render_thursday_best_bets(report, validation_issues=validation_issues, forced=forced)
     report.to_csv(csv_path, index=False)
-    markdown_path.write_text(
-        render_thursday_best_bets(report, validation_issues=validation_issues, forced=forced),
-        encoding="utf-8",
-    )
-    return {"csv": csv_path, "markdown": markdown_path}
+    markdown_path.write_text(markdown, encoding="utf-8")
+    paths = {"csv": csv_path, "markdown": markdown_path}
+    if archive:
+        paths.update(
+            archive_thursday_best_bets(
+                report,
+                markdown,
+                output_dir,
+                validation_issues=validation_issues,
+                forced=forced,
+                generated_at=generated_at,
+                overwrite=overwrite_archive,
+            )
+        )
+    return paths

@@ -72,6 +72,9 @@ For a Thursday best-bets report, run:
 python scripts/generate_thursday_best_bets.py
 ```
 
+You can also open the dashboard and click `Generate Thursday best-bets report`
+on the `Betting ledger` tab.
+
 This reads only `data/manual/current_odds.csv` and writes:
 
 ```text
@@ -205,12 +208,18 @@ The ledger tab has buttons to run safe report actions:
 Run bet ledger report
 Run ledger health check
 Run settlement preview
+Generate Thursday best-bets report
 Run backtest reports
 Refresh dashboard data
 ```
 
+The tab also shows the Thursday report writeup and table when
+`data/outputs/thursday_best_bets.md` and `data/outputs/thursday_best_bets.csv`
+exist.
+
 These buttons only regenerate reports. They do not apply settlements, confirm
-actual bets, edit the ledger, place bets, or invent missing odds.
+actual bets, edit the ledger, edit `data/manual/current_odds.csv`, place bets,
+or invent missing odds.
 
 At the top of the tab, the weekly workflow checklist shows which files are
 ready, missing, or stale. If something says `Missing` or `Needs refresh`, use

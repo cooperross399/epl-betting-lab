@@ -5,6 +5,7 @@ import pytest
 
 from epl_betting_lab.dashboard_actions import (
     require_existing_ledger,
+    require_existing_current_odds,
     run_bet_ledger_report,
     run_ledger_health_check,
     run_settlement_preview,
@@ -50,6 +51,16 @@ def test_require_existing_ledger_does_not_create_missing_file(tmp_path) -> None:
         require_existing_ledger(ledger_path)
 
     assert not ledger_path.exists()
+
+
+def test_require_existing_current_odds_shows_manual_copy_command(tmp_path) -> None:
+    odds_path = tmp_path / "current_odds.csv"
+
+    with pytest.raises(FileNotFoundError) as exc:
+        require_existing_current_odds(odds_path)
+
+    assert "cp data/manual/current_odds_template.csv data/manual/current_odds.csv" in str(exc.value)
+    assert not odds_path.exists()
 
 
 def test_dashboard_report_actions_write_outputs_without_editing_ledger(tmp_path) -> None:

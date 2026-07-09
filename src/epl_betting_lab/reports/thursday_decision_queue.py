@@ -6,6 +6,7 @@ from typing import Any
 import pandas as pd
 
 from epl_betting_lab.config import OUTPUTS_DIR
+from epl_betting_lab.reports.thursday_archive_pair import build_thursday_archive_pair
 
 
 ACTION_PRIORITY = [
@@ -56,12 +57,15 @@ def _ensure_queue_columns(df: pd.DataFrame) -> pd.DataFrame:
 
 def build_thursday_decision_queue(output_dir: Path | None = None) -> tuple[pd.DataFrame, dict[str, Any]]:
     output_dir = output_dir or OUTPUTS_DIR
+    archive_pair = build_thursday_archive_pair(output_dir)
     comparison_path = output_dir / "thursday_best_bets_comparison.csv"
     if not comparison_path.exists():
         return pd.DataFrame(columns=QUEUE_COLUMNS), {
             "available": False,
             "message": missing_comparison_message(output_dir),
             "comparison_path": str(comparison_path),
+            "comparison_label": "Comparison not available yet",
+            "archive_pair_label": archive_pair["label"],
             "total_rows": 0,
         }
 
@@ -72,6 +76,8 @@ def build_thursday_decision_queue(output_dir: Path | None = None) -> tuple[pd.Da
             "available": True,
             "message": "The comparison report exists, but it has no changed plays to review.",
             "comparison_path": str(comparison_path),
+            "comparison_label": archive_pair["label"],
+            "archive_pair_label": archive_pair["label"],
             "total_rows": 0,
             "action_counts": {},
         }
@@ -90,6 +96,8 @@ def build_thursday_decision_queue(output_dir: Path | None = None) -> tuple[pd.Da
         "available": True,
         "message": "Decision queue created from the latest Thursday comparison report.",
         "comparison_path": str(comparison_path),
+        "comparison_label": archive_pair["label"],
+        "archive_pair_label": archive_pair["label"],
         "total_rows": int(len(queue)),
         "action_counts": queue["action_needed"].value_counts().to_dict(),
     }
@@ -138,6 +146,9 @@ def render_thursday_decision_queue(queue: pd.DataFrame, summary: dict[str, Any])
 
     if not summary.get("available", False):
         lines.extend([
+            str(summary.get("comparison_label", "Comparison not available yet")),
+            str(summary.get("archive_pair_label", "")),
+            "",
             str(summary.get("message", missing_comparison_message())),
             "",
             "Command to run first:",
@@ -151,12 +162,16 @@ def render_thursday_decision_queue(queue: pd.DataFrame, summary: dict[str, Any])
 
     if queue.empty:
         lines.extend([
+            str(summary.get("comparison_label", "Comparison not available yet")),
+            "",
             str(summary.get("message", "No changed plays are available to review.")),
             "",
         ])
         return "\n".join(lines)
 
     lines.extend([
+        str(summary.get("comparison_label", "Comparison not available yet")),
+        "",
         f"Total changed plays in queue: {int(summary.get('total_rows', len(queue)))}",
         "",
         "Review order: Candidate upgrade, Review price, Likely remove from card, Recheck odds, Recheck validation, Watch only, then No action.",

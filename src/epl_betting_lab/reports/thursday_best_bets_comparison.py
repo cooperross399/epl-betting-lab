@@ -5,7 +5,7 @@ from pathlib import Path
 import pandas as pd
 
 from epl_betting_lab.config import OUTPUTS_DIR
-from epl_betting_lab.reports.thursday_best_bets import list_recent_thursday_archives
+from epl_betting_lab.reports.thursday_archive_pair import build_thursday_archive_pair
 
 
 COMPARISON_COLUMNS = [
@@ -348,17 +348,21 @@ def _finalize_row(row: dict[str, object]) -> dict[str, object]:
 
 def build_thursday_best_bets_comparison(output_dir: Path | None = None) -> tuple[pd.DataFrame, dict[str, object]]:
     output_dir = output_dir or OUTPUTS_DIR
-    archives = list_recent_thursday_archives(output_dir=output_dir, limit=2)
-    if len(archives) < 2:
+    archive_pair = build_thursday_archive_pair(output_dir)
+    if not archive_pair["available"]:
         return pd.DataFrame(columns=COMPARISON_COLUMNS), {
             "available": False,
             "message": "Comparison is not available yet. Generate at least two Thursday best-bets archive snapshots first.",
             "latest_archive": "",
             "previous_archive": "",
+            "latest_archive_label": archive_pair["latest"]["label"] if archive_pair["latest"] else "",
+            "previous_archive_label": "",
+            "comparison_label": archive_pair["label"],
+            "archive_pair_status": archive_pair["status"],
         }
 
-    latest_archive = Path(str(archives.iloc[0]["csv"]))
-    previous_archive = Path(str(archives.iloc[1]["csv"]))
+    latest_archive = Path(str(archive_pair["latest"]["csv"]))
+    previous_archive = Path(str(archive_pair["previous"]["csv"]))
     latest = _indexed_snapshot(latest_archive)
     previous = _indexed_snapshot(previous_archive)
 
@@ -390,6 +394,10 @@ def build_thursday_best_bets_comparison(output_dir: Path | None = None) -> tuple
         "message": "",
         "latest_archive": str(latest_archive),
         "previous_archive": str(previous_archive),
+        "latest_archive_label": archive_pair["latest"]["label"],
+        "previous_archive_label": archive_pair["previous"]["label"],
+        "comparison_label": archive_pair["label"],
+        "archive_pair_status": archive_pair["status"],
         "total_changes": int(len(comparison)),
         "added": int((comparison["change_type"] == "added").sum()) if not comparison.empty else 0,
         "removed": int((comparison["change_type"] == "removed").sum()) if not comparison.empty else 0,
@@ -407,6 +415,8 @@ def render_thursday_best_bets_comparison(comparison: pd.DataFrame, summary: dict
     ]
     if not summary.get("available"):
         lines.extend([
+            f"- {summary.get('comparison_label', 'Comparison not available yet')}",
+            "",
             str(summary.get("message", "Comparison is not available yet.")),
             "",
             "Run `python scripts/generate_thursday_best_bets.py` on at least two different refreshes to create enough archived snapshots.",
@@ -414,6 +424,7 @@ def render_thursday_best_bets_comparison(comparison: pd.DataFrame, summary: dict
         return "\n".join(lines)
 
     lines.extend([
+        f"- {summary['comparison_label']}",
         f"- Latest archive: `{summary['latest_archive']}`",
         f"- Previous archive: `{summary['previous_archive']}`",
         f"- Total changes: {summary.get('total_changes', 0)}",

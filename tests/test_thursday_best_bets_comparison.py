@@ -102,6 +102,7 @@ def test_build_thursday_best_bets_comparison_finds_added_removed_and_changed_row
 
     markdown = render_thursday_best_bets_comparison(comparison, summary)
     assert "Comparing: 2026-07-09 12:00:00 vs 2026-07-08 12:00:00" in markdown
+    assert "Card count changes: Best bets 1 -> 1 (0), Leans 0 -> 0 (0), Passes 0 -> 0 (0), Total 1 -> 1 (0)" in markdown
     assert "Action needed" in markdown
     assert "Biggest changes" in markdown
     assert "Became BETTABLE" in markdown
@@ -177,4 +178,5 @@ def test_save_thursday_best_bets_comparison_handles_missing_second_archive(tmp_p
     markdown = paths["markdown"].read_text(encoding="utf-8")
     assert "Comparison is not available yet" in markdown
     assert "Only one archived snapshot found: 2026-07-09 12:00:00" in markdown
+    assert "Card count changes: only one archived snapshot found." in markdown
     assert pd.read_csv(paths["csv"]).empty

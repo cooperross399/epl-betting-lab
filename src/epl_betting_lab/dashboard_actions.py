@@ -27,6 +27,7 @@ from epl_betting_lab.reports.thursday_best_bets import (
     save_thursday_best_bets,
 )
 from epl_betting_lab.reports.thursday_best_bets_comparison import save_thursday_best_bets_comparison
+from epl_betting_lab.reports.thursday_decision_queue import save_thursday_decision_queue
 from epl_betting_lab.strategies.btts import evaluate_btts
 from epl_betting_lab.strategies.ml_value import evaluate_1x2_value
 from epl_betting_lab.strategies.totals import evaluate_total_25
@@ -168,6 +169,10 @@ def run_current_odds_maintenance_preview(
 
 def run_thursday_best_bets_comparison(output_dir: Path | None = None) -> dict[str, Path]:
     return save_thursday_best_bets_comparison(output_dir or OUTPUTS_DIR)
+
+
+def run_thursday_decision_queue(output_dir: Path | None = None) -> dict[str, Path]:
+    return save_thursday_decision_queue(output_dir or OUTPUTS_DIR)
 
 
 def run_thursday_best_bets_report(

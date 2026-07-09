@@ -13,6 +13,7 @@ from epl_betting_lab.dashboard_actions import (
     run_current_odds_maintenance_preview,
     run_current_odds_validation,
     run_ledger_health_check,
+    run_post_thursday_review,
     run_settlement_preview,
     run_thursday_best_bets_comparison,
     run_thursday_best_bets_report,
@@ -104,6 +105,28 @@ def run_dashboard_refresh_sequence() -> None:
         st.rerun()
 
 
+def run_dashboard_post_thursday_review() -> None:
+    def progress(step_name: str, status: str, message: str) -> None:
+        if status == "running":
+            st.info(message)
+        elif status == "success":
+            st.success(message)
+        else:
+            st.error(message)
+
+    try:
+        run_post_thursday_review(progress=progress)
+    except FileNotFoundError as exc:
+        st.warning("Post-refresh Thursday review stopped.")
+        st.info(str(exc))
+    except Exception as exc:
+        st.error("Post-refresh Thursday review failed.")
+        st.exception(exc)
+    else:
+        st.success("Post-refresh Thursday review finished. Refreshing dashboard data.")
+        st.rerun()
+
+
 def render_report_buttons() -> None:
     st.subheader("Report controls")
     st.caption(
@@ -111,6 +134,8 @@ def render_report_buttons() -> None:
     )
     if st.button("Run Thursday readiness refresh", width="stretch"):
         run_dashboard_refresh_sequence()
+    if st.button("Run post-refresh Thursday review", width="stretch"):
+        run_dashboard_post_thursday_review()
 
     report_cols = st.columns(3)
     if report_cols[0].button("Run bet ledger report", width="stretch"):

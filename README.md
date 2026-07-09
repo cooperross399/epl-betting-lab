@@ -328,6 +328,27 @@ remove from card`, `Watch only`, `Recheck odds`, `Recheck validation`, or
 not two archived reports yet, it writes a beginner-friendly message instead of
 guessing.
 
+To turn that comparison into a compact review queue grouped by what you should
+look at first, run:
+
+```bash
+python scripts/generate_thursday_decision_queue.py
+```
+
+This creates:
+
+```text
+data/outputs/thursday_decision_queue.csv
+data/outputs/thursday_decision_queue.md
+```
+
+The decision queue groups changed plays by `action_needed` in this order:
+`Candidate upgrade`, `Review price`, `Likely remove from card`, `Recheck odds`,
+`Recheck validation`, `Watch only`, then `No action`. Within each group, the
+most important changes appear first. If the comparison report does not exist
+yet, the queue report tells you to run
+`python scripts/compare_thursday_best_bets.py` first.
+
 The report separates best bets, leans, and passes/notable avoids. It uses
 calibrated probabilities, respects the default max-juice rule around `-160`,
 and keeps the totals protections. It also adds a transparent ranking score and
@@ -491,6 +512,7 @@ Check odds entry completeness
 Validate current odds
 Generate Thursday best-bets report
 Compare latest Thursday reports
+Generate Thursday decision queue
 Run backtest reports
 Refresh dashboard data
 ```
@@ -500,7 +522,9 @@ The ledger tab also displays `data/outputs/current_odds_completeness.md`,
 `data/outputs/current_odds_validation.csv`, `data/outputs/thursday_best_bets.md`,
 `data/outputs/thursday_best_bets.csv`,
 `data/outputs/thursday_best_bets_comparison.md`, and
-`data/outputs/thursday_best_bets_comparison.csv` when they exist.
+`data/outputs/thursday_best_bets_comparison.csv`,
+`data/outputs/thursday_decision_queue.md`, and
+`data/outputs/thursday_decision_queue.csv` when they exist.
 
 At the top of the Thursday panel, the dashboard shows a readiness row with
 odds completion percentage, incomplete matches, serious current-odds issues,

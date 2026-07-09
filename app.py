@@ -16,6 +16,7 @@ from epl_betting_lab.dashboard_actions import (
     run_settlement_preview,
     run_thursday_best_bets_comparison,
     run_thursday_best_bets_report,
+    run_thursday_decision_queue,
     run_thursday_readiness_refresh,
 )
 from epl_betting_lab.data.loaders import load_matches, load_upcoming_fixtures, load_current_odds
@@ -119,7 +120,7 @@ def render_report_buttons() -> None:
     if report_cols[2].button("Run settlement preview", width="stretch"):
         run_dashboard_action("Settlement preview", run_settlement_preview)
 
-    workflow_cols = st.columns(8)
+    workflow_cols = st.columns(9)
     if workflow_cols[0].button("Create current odds template", width="stretch"):
         run_dashboard_action("Current odds template", run_create_current_odds_template)
     if workflow_cols[1].button("Preview current odds maintenance", width="stretch"):
@@ -132,9 +133,11 @@ def render_report_buttons() -> None:
         run_dashboard_action("Thursday best-bets report", run_thursday_best_bets_report)
     if workflow_cols[5].button("Compare latest Thursday reports", width="stretch"):
         run_dashboard_action("Thursday best-bets comparison", run_thursday_best_bets_comparison)
-    if workflow_cols[6].button("Run backtest reports", width="stretch"):
+    if workflow_cols[6].button("Generate Thursday decision queue", width="stretch"):
+        run_dashboard_action("Thursday decision queue", run_thursday_decision_queue)
+    if workflow_cols[7].button("Run backtest reports", width="stretch"):
         run_dashboard_action("Backtest reports", run_backtest.main)
-    if workflow_cols[7].button("Refresh dashboard data", width="stretch"):
+    if workflow_cols[8].button("Refresh dashboard data", width="stretch"):
         st.rerun()
 
 
@@ -235,6 +238,18 @@ def render_thursday_best_bets_panel() -> None:
         "Thursday snapshot comparison table",
         "thursday_best_bets_comparison.csv",
         "python scripts/compare_thursday_best_bets.py",
+    )
+
+    decision_queue_path = OUTPUTS_DIR / "thursday_decision_queue.md"
+    if decision_queue_path.exists():
+        with st.expander("Thursday decision queue", expanded=True):
+            st.markdown(decision_queue_path.read_text(encoding="utf-8"))
+    else:
+        show_missing_report("data/outputs/thursday_decision_queue.md", "python scripts/generate_thursday_decision_queue.py")
+    show_output_table(
+        "Thursday decision queue table",
+        "thursday_decision_queue.csv",
+        "python scripts/generate_thursday_decision_queue.py",
     )
 
 

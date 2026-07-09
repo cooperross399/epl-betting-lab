@@ -214,6 +214,26 @@ validation`, or `No action`. If there are not enough archives yet, the report
 says comparison is not available yet and tells you to create more Thursday
 snapshots first.
 
+After the comparison exists, create a compact decision queue:
+
+```bash
+python scripts/generate_thursday_decision_queue.py
+```
+
+This writes:
+
+```text
+data/outputs/thursday_decision_queue.md
+data/outputs/thursday_decision_queue.csv
+```
+
+The decision queue groups plays by `action_needed` so the biggest manual review
+items are easier to scan: `Candidate upgrade`, `Review price`, `Likely remove
+from card`, `Recheck odds`, `Recheck validation`, `Watch only`, then
+`No action`. Inside each group, higher `importance_score` rows come first. If
+the comparison file is missing, the queue report tells you to run
+`python scripts/compare_thursday_best_bets.py` first.
+
 The Thursday report ranks plays with a simple score and tier:
 
 ```text
@@ -360,6 +380,7 @@ Check odds entry completeness
 Validate current odds
 Generate Thursday best-bets report
 Compare latest Thursday reports
+Generate Thursday decision queue
 Run backtest reports
 Refresh dashboard data
 ```
@@ -367,7 +388,10 @@ Refresh dashboard data
 The tab also shows the current odds validation report and Thursday report
 writeup/table when their files exist. It also shows the latest Thursday
 snapshot comparison after you run `python scripts/compare_thursday_best_bets.py`
-or click `Compare latest Thursday reports`.
+or click `Compare latest Thursday reports`. After that, it can also show the
+Thursday decision queue after you run
+`python scripts/generate_thursday_decision_queue.py` or click
+`Generate Thursday decision queue`.
 
 These buttons only regenerate reports. They do not apply settlements, confirm
 actual bets, edit the ledger, edit `data/manual/current_odds.csv`, place bets,

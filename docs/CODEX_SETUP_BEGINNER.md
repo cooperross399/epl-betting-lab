@@ -224,6 +224,9 @@ The comparison report and dashboard show the exact archive pair being reviewed,
 such as `Comparing: 2026-07-09 12:30:00 vs 2026-07-08 11:00:00`. The project
 uses archive metadata for that label when available and falls back to the
 archived CSV filename timestamp if metadata is missing.
+Open `Archive history details` in the dashboard to see the latest and previous
+archive paths, validation status, best/lean/pass counts, total rows, and notes
+when metadata is missing or a file cannot be read.
 
 After the comparison exists, create a compact decision queue:
 

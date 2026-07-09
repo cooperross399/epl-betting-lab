@@ -10,7 +10,32 @@ import pandas as pd
 from epl_betting_lab.config import OUTPUTS_DIR
 
 
-SNAPSHOT_COLUMNS = ["generated_at", "label", "csv", "metadata", "source"]
+SNAPSHOT_COLUMNS = [
+    "generated_at",
+    "label",
+    "csv",
+    "markdown",
+    "metadata",
+    "source",
+    "validation_status",
+    "best_bets",
+    "leans",
+    "passes",
+]
+DETAIL_COLUMNS = [
+    "snapshot",
+    "archive_label",
+    "generated_at",
+    "validation_status",
+    "best_bets",
+    "leans",
+    "passes",
+    "total_rows",
+    "markdown",
+    "csv",
+    "metadata",
+    "notes",
+]
 
 
 def _archive_root(output_dir: Path) -> Path:
@@ -57,8 +82,13 @@ def list_thursday_archive_snapshots(output_dir: Path | None = None, limit: int |
             "generated_at": generated_at,
             "label": _format_label(generated_at),
             "csv": str(csv_path),
+            "markdown": str(metadata.get("markdown", "")),
             "metadata": str(metadata_path),
             "source": "metadata",
+            "validation_status": str(metadata.get("validation_status", "")),
+            "best_bets": metadata.get("best_bets", ""),
+            "leans": metadata.get("leans", ""),
+            "passes": metadata.get("passes", ""),
         })
         seen_csvs.add(str(csv_path))
 
@@ -70,8 +100,13 @@ def list_thursday_archive_snapshots(output_dir: Path | None = None, limit: int |
             "generated_at": generated_at,
             "label": _format_label(generated_at),
             "csv": str(csv_path),
+            "markdown": "",
             "metadata": "",
             "source": "csv_filename",
+            "validation_status": "",
+            "best_bets": "",
+            "leans": "",
+            "passes": "",
         })
 
     if not rows:
@@ -117,3 +152,60 @@ def build_thursday_archive_pair(output_dir: Path | None = None) -> dict[str, Any
         "previous": previous,
         "count": 2,
     }
+
+
+def _csv_summary(csv_path: str) -> tuple[int | str, int | str, int | str, int | str, str]:
+    path = Path(str(csv_path))
+    try:
+        df = pd.read_csv(path)
+    except Exception as exc:
+        return "", "", "", "", f"Could not read archived CSV: {exc}"
+
+    total_rows = int(len(df))
+    if "section" not in df.columns:
+        return "", "", "", total_rows, "CSV readable; section counts are unavailable because `section` is missing."
+
+    sections = df["section"].astype(str)
+    return (
+        int((sections == "Best bets").sum()),
+        int((sections == "Leans").sum()),
+        int((sections == "Passes / notable avoids").sum()),
+        total_rows,
+        "",
+    )
+
+
+def build_thursday_archive_history_details(output_dir: Path | None = None) -> tuple[pd.DataFrame, str]:
+    snapshots = list_thursday_archive_snapshots(output_dir=output_dir, limit=2)
+    if snapshots.empty:
+        return pd.DataFrame(columns=DETAIL_COLUMNS), "No archived snapshots found yet."
+
+    rows: list[dict[str, object]] = []
+    for index, snapshot in snapshots.iterrows():
+        csv_best, csv_leans, csv_passes, total_rows, csv_note = _csv_summary(str(snapshot.get("csv", "")))
+        has_metadata = str(snapshot.get("metadata", "")).strip() != ""
+        notes = []
+        if not has_metadata:
+            notes.append("Metadata JSON missing; using archived CSV filename and CSV rows only.")
+        if csv_note:
+            notes.append(csv_note)
+
+        rows.append({
+            "snapshot": "Latest" if index == 0 else "Previous",
+            "archive_label": snapshot.get("label", ""),
+            "generated_at": snapshot.get("generated_at", ""),
+            "validation_status": snapshot.get("validation_status", ""),
+            "best_bets": snapshot.get("best_bets", "") if has_metadata else csv_best,
+            "leans": snapshot.get("leans", "") if has_metadata else csv_leans,
+            "passes": snapshot.get("passes", "") if has_metadata else csv_passes,
+            "total_rows": total_rows,
+            "markdown": snapshot.get("markdown", ""),
+            "csv": snapshot.get("csv", ""),
+            "metadata": snapshot.get("metadata", ""),
+            "notes": " ".join(notes),
+        })
+
+    message = ""
+    if len(rows) == 1:
+        message = "Only one archived snapshot found. Generate one more Thursday best-bets report before comparing."
+    return pd.DataFrame(rows, columns=DETAIL_COLUMNS), message

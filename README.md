@@ -338,6 +338,9 @@ The comparison report and dashboard also show which archive pair is being
 reviewed, such as `Comparing: 2026-07-09 12:30:00 vs 2026-07-08 11:00:00`.
 The label uses archive metadata when it is available and falls back to the
 archived CSV filename timestamp if metadata is missing.
+Open `Archive history details` in the dashboard to see the latest and previous
+archive paths, validation status, best/lean/pass counts, total rows, and notes
+when metadata is missing or a file cannot be read.
 
 To turn that comparison into a compact review queue grouped by what you should
 look at first, run:

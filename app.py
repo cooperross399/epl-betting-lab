@@ -25,7 +25,10 @@ from epl_betting_lab.models.poisson_goals import PoissonGoalsModel
 from epl_betting_lab.models.ratings import simple_form_table
 from epl_betting_lab.reports.bet_ledger import load_bet_ledger, summarize_overall
 from epl_betting_lab.reports.current_odds_validation import CurrentOddsValidationError
-from epl_betting_lab.reports.thursday_archive_pair import build_thursday_archive_pair
+from epl_betting_lab.reports.thursday_archive_pair import (
+    build_thursday_archive_history_details,
+    build_thursday_archive_pair,
+)
 from epl_betting_lab.reports.thursday_best_bets import list_recent_thursday_archives
 from epl_betting_lab.reports.weekly_card import build_weekly_card, card_to_markdown
 from epl_betting_lab.strategies.btts import evaluate_btts
@@ -263,6 +266,17 @@ def render_thursday_best_bets_panel() -> None:
         st.info(f"{archive_pair['label']}. Generate one more Thursday best-bets archive before comparing.")
     else:
         st.info("Comparison not available yet. Generate Thursday best bets on at least two refreshes first.")
+
+    with st.expander("Archive history details", expanded=False):
+        archive_details, archive_message = build_thursday_archive_history_details()
+        if archive_details.empty:
+            st.info(archive_message or "No archived snapshots found yet.")
+        else:
+            if archive_message:
+                st.info(archive_message)
+            st.dataframe(archive_details, width="stretch", hide_index=True)
+            if archive_details["notes"].astype(str).str.strip().any():
+                st.caption("Notes explain missing metadata or unreadable archive files when the helper has to fall back.")
 
     comparison_path = OUTPUTS_DIR / "thursday_best_bets_comparison.md"
     if comparison_path.exists():

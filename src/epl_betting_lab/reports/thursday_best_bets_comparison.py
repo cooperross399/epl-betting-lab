@@ -13,6 +13,8 @@ COMPARISON_COLUMNS = [
     "movement_category",
     "importance_score",
     "movement_reason",
+    "action_needed",
+    "action_reason",
     "home_team",
     "away_team",
     "market",
@@ -49,6 +51,8 @@ def _blank_row(key: tuple[str, ...], previous_archive: str, latest_archive: str)
         "movement_category": "",
         "importance_score": 0.0,
         "movement_reason": "",
+        "action_needed": "No action",
+        "action_reason": "",
         "home_team": home_team,
         "away_team": away_team,
         "market": market,
@@ -249,6 +253,55 @@ def _movement(row: dict[str, object]) -> tuple[str, float, str]:
     return category, importance_score, reason
 
 
+def _action_needed(row: dict[str, object]) -> tuple[str, str]:
+    category = _clean(row.get("movement_category"))
+    latest_status = _clean(row.get("latest_status")).upper()
+    previous_tier = row.get("previous_confidence_tier", "")
+    latest_tier = row.get("latest_confidence_tier", "")
+    edge_change = _as_float(row.get("calibrated_edge_change"))
+    latest_edge = _as_float(row.get("latest_calibrated_edge"))
+    odds_change = _as_float(row.get("american_odds_change"))
+    details = " ".join([
+        _clean(row.get("details")).lower(),
+        _clean(row.get("previous_status")).lower(),
+        _clean(row.get("latest_status")).lower(),
+    ])
+
+    if any(token in details for token in ["validation", "missing", "unmatched", "blank", "nan"]):
+        return "Recheck validation", "This row may be affected by missing or validation-related data."
+    if category == "Became BETTABLE":
+        return "Review price", "The play became BETTABLE, so confirm the current sportsbook price before trusting it."
+    if category == "New play":
+        return "Review price", "This is new on the latest card, so verify the price and book before considering it."
+    if category == "Tier upgraded":
+        if _clean(latest_tier).upper() in {"A", "B"} or latest_status == "BETTABLE":
+            return "Candidate upgrade", "The tier improved into a more playable range."
+        return "Review price", "The tier improved, but the current price still needs a manual check."
+    if odds_change is not None and odds_change > 0 and edge_change is not None and edge_change > 0:
+        return "Candidate upgrade", "The price and calibrated edge both improved."
+    if category == "Edge improved" and latest_status == "BETTABLE":
+        return "Candidate upgrade", "The calibrated edge improved while the play remains BETTABLE."
+    if category == "Odds moved against us":
+        return "Review price", "The price moved against this play, so confirm it is still playable."
+    if category == "Odds moved in our favor":
+        return "Recheck odds", "The price moved in a useful direction, but the edge did not clearly improve."
+    if category in {"Became PASS/Avoid", "Edge disappeared"}:
+        return "Likely remove from card", "The play no longer has a playable profile."
+    if category == "Removed play":
+        return "Likely remove from card", "The play disappeared from the latest card."
+    if category == "Tier downgraded":
+        if _tier_rank(previous_tier) - _tier_rank(latest_tier) >= 2:
+            return "Likely remove from card", "The tier dropped sharply."
+        return "Watch only", "The tier got worse, so keep it off the main card unless the price improves."
+    if category in {"Fell to LEAN", "Suggested units decreased"}:
+        return "Watch only", "The recommendation weakened, so treat it as a watchlist play."
+    if category == "Suggested units increased":
+        return "Review price", "The suggested size increased, so verify the current price before upgrading."
+    if latest_edge is not None and latest_edge <= 0:
+        return "Likely remove from card", "The latest calibrated edge is zero or negative."
+    return "No action", "No specific action is needed beyond normal review."
+
+
 def _comparison_row(
     key: tuple[str, ...],
     previous: pd.Series | None,
@@ -287,6 +340,9 @@ def _finalize_row(row: dict[str, object]) -> dict[str, object]:
     row["movement_category"] = category
     row["importance_score"] = score
     row["movement_reason"] = reason
+    action, action_reason = _action_needed(row)
+    row["action_needed"] = action
+    row["action_reason"] = action_reason
     return row
 
 
@@ -370,6 +426,27 @@ def render_thursday_best_bets_comparison(comparison: pd.DataFrame, summary: dict
         lines.extend(["No changes were found between the latest two archived Thursday cards.", ""])
         return "\n".join(lines)
 
+    action_counts = comparison["action_needed"].value_counts().to_dict()
+    lines.extend([
+        "## Action needed",
+        "",
+        "Use this as a review checklist, not an automatic bet slip.",
+        "",
+    ])
+    for action in [
+        "Candidate upgrade",
+        "Review price",
+        "Likely remove from card",
+        "Watch only",
+        "Recheck odds",
+        "Recheck validation",
+        "No action",
+    ]:
+        count = int(action_counts.get(action, 0))
+        if count:
+            lines.append(f"- {action}: {count}")
+    lines.append("")
+
     biggest = comparison.sort_values("importance_score", ascending=False).head(8)
     lines.extend([
         "## Biggest changes",
@@ -382,7 +459,7 @@ def render_thursday_best_bets_comparison(comparison: pd.DataFrame, summary: dict
         play = f"{row['market']} {row['selection']}"
         lines.append(
             f"- {row['movement_category']} ({float(row['importance_score']):.1f}/100): "
-            f"{matchup}, {play}. {row['movement_reason']}"
+            f"{matchup}, {play}. {row['movement_reason']} Action: {row['action_needed']}."
         )
     lines.append("")
 
@@ -408,6 +485,7 @@ def render_thursday_best_bets_comparison(comparison: pd.DataFrame, summary: dict
                 f"- {matchup}, {play}: {row['movement_category']} "
                 f"({float(row['importance_score']):.1f}/100). {row['movement_reason']}"
             )
+            lines.append(f"  Action needed: {row['action_needed']}. {row['action_reason']}")
             lines.append(f"  Details: {row['details']}")
             if row["previous_status"] or row["latest_status"]:
                 lines.append(f"  Status: {row['previous_status']} -> {row['latest_status']}")

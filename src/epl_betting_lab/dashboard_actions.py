@@ -23,6 +23,7 @@ from epl_betting_lab.reports.current_odds_template import create_current_odds_te
 from epl_betting_lab.reports.current_odds_maintenance import maintain_current_odds
 from epl_betting_lab.reports.thursday_best_bets import (
     build_thursday_best_bets,
+    list_recent_thursday_archives,
     missing_current_odds_message,
     save_thursday_best_bets,
 )
@@ -173,6 +174,38 @@ def run_thursday_best_bets_comparison(output_dir: Path | None = None) -> dict[st
 
 def run_thursday_decision_queue(output_dir: Path | None = None) -> dict[str, Path]:
     return save_thursday_decision_queue(output_dir or OUTPUTS_DIR)
+
+
+def run_post_thursday_review(
+    output_dir: Path | None = None,
+    progress=None,
+) -> dict[str, dict[str, Path]]:
+    """Run the read-only post-refresh review reports without editing odds or ledger files."""
+    outputs = output_dir or OUTPUTS_DIR
+    comparison_paths = _run_refresh_step(
+        "Thursday snapshot comparison",
+        lambda: run_thursday_best_bets_comparison(outputs),
+        progress,
+    )
+    archives = list_recent_thursday_archives(outputs, limit=2)
+    if len(archives) < 2:
+        message = (
+            "Comparison is not available yet. Generate at least two Thursday best-bets archive snapshots first, "
+            "then run post-refresh Thursday review again."
+        )
+        if progress is not None:
+            progress("Thursday decision queue", "error", message)
+        raise FileNotFoundError(message)
+
+    decision_queue_paths = _run_refresh_step(
+        "Thursday decision queue",
+        lambda: run_thursday_decision_queue(outputs),
+        progress,
+    )
+    return {
+        "comparison": comparison_paths,
+        "decision_queue": decision_queue_paths,
+    }
 
 
 def run_thursday_best_bets_report(

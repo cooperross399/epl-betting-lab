@@ -13,6 +13,7 @@ from epl_betting_lab.dashboard_actions import (
     run_current_odds_maintenance_preview,
     run_current_odds_validation,
     run_ledger_health_check,
+    run_post_thursday_review,
     run_settlement_preview,
     run_thursday_best_bets_comparison,
     run_thursday_best_bets_report,
@@ -336,6 +337,109 @@ def test_thursday_readiness_refresh_stops_remaining_steps_after_failure(tmp_path
         run_thursday_readiness_refresh(tmp_path / "current_odds.csv", tmp_path / "outputs")
 
     assert calls == ["completeness"]
+
+
+def test_post_thursday_review_runs_comparison_then_decision_queue(tmp_path, monkeypatch) -> None:
+    output_dir = tmp_path / "outputs"
+    calls: list[str] = []
+    progress_events: list[tuple[str, str]] = []
+
+    def fake_comparison(out):
+        calls.append(f"comparison:{out == output_dir}")
+        return {"csv": out / "thursday_best_bets_comparison.csv"}
+
+    def fake_archives(out, limit=8):
+        calls.append(f"archives:{out == output_dir}:limit={limit}")
+        return pd.DataFrame([
+            {"generated_at": "2026-07-09T12:00:00"},
+            {"generated_at": "2026-07-08T12:00:00"},
+        ])
+
+    def fake_decision_queue(out):
+        calls.append(f"decision_queue:{out == output_dir}")
+        return {"csv": out / "thursday_decision_queue.csv"}
+
+    monkeypatch.setattr(dashboard_actions, "run_thursday_best_bets_comparison", fake_comparison)
+    monkeypatch.setattr(dashboard_actions, "list_recent_thursday_archives", fake_archives)
+    monkeypatch.setattr(dashboard_actions, "run_thursday_decision_queue", fake_decision_queue)
+
+    paths = run_post_thursday_review(
+        output_dir,
+        progress=lambda step, status, message: progress_events.append((step, status)),
+    )
+
+    assert calls == [
+        "comparison:True",
+        "archives:True:limit=2",
+        "decision_queue:True",
+    ]
+    assert list(paths) == ["comparison", "decision_queue"]
+    assert progress_events == [
+        ("Thursday snapshot comparison", "running"),
+        ("Thursday snapshot comparison", "success"),
+        ("Thursday decision queue", "running"),
+        ("Thursday decision queue", "success"),
+    ]
+
+
+def test_post_thursday_review_stops_when_not_enough_archives(tmp_path, monkeypatch) -> None:
+    output_dir = tmp_path / "outputs"
+    calls: list[str] = []
+    progress_events: list[tuple[str, str]] = []
+
+    def fake_comparison(out):
+        calls.append("comparison")
+        return {"csv": out / "thursday_best_bets_comparison.csv"}
+
+    def fake_archives(out, limit=8):
+        calls.append(f"archives:limit={limit}")
+        return pd.DataFrame([{"generated_at": "2026-07-09T12:00:00"}])
+
+    def fake_decision_queue(out):
+        calls.append("decision_queue")
+        return {}
+
+    monkeypatch.setattr(dashboard_actions, "run_thursday_best_bets_comparison", fake_comparison)
+    monkeypatch.setattr(dashboard_actions, "list_recent_thursday_archives", fake_archives)
+    monkeypatch.setattr(dashboard_actions, "run_thursday_decision_queue", fake_decision_queue)
+
+    with pytest.raises(FileNotFoundError) as exc:
+        run_post_thursday_review(
+            output_dir,
+            progress=lambda step, status, message: progress_events.append((step, status)),
+        )
+
+    assert "at least two Thursday best-bets archive snapshots" in str(exc.value)
+    assert calls == ["comparison", "archives:limit=2"]
+    assert progress_events[-1] == ("Thursday decision queue", "error")
+
+
+def test_post_thursday_review_stops_when_comparison_fails(tmp_path, monkeypatch) -> None:
+    calls: list[str] = []
+    progress_events: list[tuple[str, str]] = []
+
+    def fake_comparison(out):
+        calls.append("comparison")
+        raise RuntimeError("comparison broke")
+
+    def fake_decision_queue(out):
+        calls.append("decision_queue")
+        return {}
+
+    monkeypatch.setattr(dashboard_actions, "run_thursday_best_bets_comparison", fake_comparison)
+    monkeypatch.setattr(dashboard_actions, "run_thursday_decision_queue", fake_decision_queue)
+
+    with pytest.raises(RuntimeError):
+        run_post_thursday_review(
+            tmp_path / "outputs",
+            progress=lambda step, status, message: progress_events.append((step, status)),
+        )
+
+    assert calls == ["comparison"]
+    assert progress_events == [
+        ("Thursday snapshot comparison", "running"),
+        ("Thursday snapshot comparison", "error"),
+    ]
 
 
 def test_dashboard_report_actions_write_outputs_without_editing_ledger(tmp_path) -> None:

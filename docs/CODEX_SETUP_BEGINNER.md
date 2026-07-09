@@ -158,6 +158,12 @@ Thursday readiness refresh`. It runs odds completeness, current odds
 validation, and Thursday best-bets generation in that order. If validation is
 blocked, it stops safely and tells you what to fix.
 
+After a new Thursday best-bets archive is created, use `Run post-refresh
+Thursday review`. It compares the newest archived card against the previous
+archived card, then builds the decision queue. If you do not have at least two
+archived Thursday cards yet, it stops and explains that comparison is not
+available yet.
+
 The dashboard badge means:
 
 - `Ready`: no serious issues or warnings.
@@ -233,6 +239,10 @@ from card`, `Recheck odds`, `Recheck validation`, `Watch only`, then
 `No action`. Inside each group, higher `importance_score` rows come first. If
 the comparison file is missing, the queue report tells you to run
 `python scripts/compare_thursday_best_bets.py` first.
+
+From the dashboard, `Run post-refresh Thursday review` runs the comparison and
+decision queue together after the Thursday report has been refreshed. It does
+not edit odds, edit your ledger, force report generation, or place bets.
 
 The Thursday report ranks plays with a simple score and tier:
 
@@ -371,6 +381,7 @@ The ledger tab has buttons to run safe report actions:
 
 ```text
 Run Thursday readiness refresh
+Run post-refresh Thursday review
 Run bet ledger report
 Run ledger health check
 Run settlement preview

@@ -269,6 +269,12 @@ validation, and Thursday best-bets generation in order. If validation finds a
 serious blocker, it stops before trusting the card and does not force
 generation.
 
+After a new Thursday best-bets archive is created, click `Run post-refresh
+Thursday review`. That safe review button compares the latest archived card
+against the previous archived card, then creates the Thursday decision queue.
+If there are not at least two archived cards yet, it stops with a friendly
+message and does not try to build the queue.
+
 The dashboard shows a current-odds status badge:
 
 - `Ready`: no serious issues or warnings.
@@ -348,6 +354,10 @@ The decision queue groups changed plays by `action_needed` in this order:
 most important changes appear first. If the comparison report does not exist
 yet, the queue report tells you to run
 `python scripts/compare_thursday_best_bets.py` first.
+
+From the dashboard, you can use `Run post-refresh Thursday review` to run the
+comparison and decision queue together after a new archive exists. It does not
+edit odds, edit the ledger, force Thursday generation, or place bets.
 
 The report separates best bets, leans, and passes/notable avoids. It uses
 calibrated probabilities, respects the default max-juice rule around `-160`,
@@ -503,6 +513,7 @@ The ledger tab also has buttons for the safe report actions:
 
 ```text
 Run Thursday readiness refresh
+Run post-refresh Thursday review
 Run bet ledger report
 Run ledger health check
 Run settlement preview

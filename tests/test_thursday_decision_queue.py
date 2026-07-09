@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+
 import pandas as pd
 
 from epl_betting_lab.reports.thursday_decision_queue import (
@@ -7,6 +9,18 @@ from epl_betting_lab.reports.thursday_decision_queue import (
     render_thursday_decision_queue,
     save_thursday_decision_queue,
 )
+
+
+def _write_archive_metadata(output_dir, generated_at: str) -> None:
+    archive_dir = output_dir / "archive" / "thursday_best_bets" / generated_at[:10]
+    archive_dir.mkdir(parents=True, exist_ok=True)
+    time_label = generated_at[11:19].replace(":", "")
+    csv_path = archive_dir / f"{time_label}_thursday_best_bets.csv"
+    pd.DataFrame([{"home_team": "Arsenal"}]).to_csv(csv_path, index=False)
+    (archive_dir / f"{time_label}_thursday_best_bets_metadata.json").write_text(
+        json.dumps({"generated_at": generated_at, "csv": str(csv_path)}),
+        encoding="utf-8",
+    )
 
 
 def _comparison_rows() -> list[dict[str, object]]:
@@ -98,12 +112,15 @@ def test_decision_queue_groups_by_action_then_importance(tmp_path) -> None:
 
 
 def test_decision_queue_markdown_shows_grouped_review_fields(tmp_path) -> None:
+    _write_archive_metadata(tmp_path, "2026-07-08T11:00:00")
+    _write_archive_metadata(tmp_path, "2026-07-09T12:30:00")
     pd.DataFrame(_comparison_rows()).to_csv(tmp_path / "thursday_best_bets_comparison.csv", index=False)
     queue, summary = build_thursday_decision_queue(tmp_path)
 
     markdown = render_thursday_decision_queue(queue, summary)
 
     assert "Thursday Decision Queue" in markdown
+    assert "Comparing: 2026-07-09 12:30:00 vs 2026-07-08 11:00:00" in markdown
     assert "## Candidate upgrade" in markdown
     assert "Review order" in markdown
     assert "Status: LEAN -> BETTABLE" in markdown

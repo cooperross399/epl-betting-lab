@@ -334,6 +334,11 @@ remove from card`, `Watch only`, `Recheck odds`, `Recheck validation`, or
 not two archived reports yet, it writes a beginner-friendly message instead of
 guessing.
 
+The comparison report and dashboard also show which archive pair is being
+reviewed, such as `Comparing: 2026-07-09 12:30:00 vs 2026-07-08 11:00:00`.
+The label uses archive metadata when it is available and falls back to the
+archived CSV filename timestamp if metadata is missing.
+
 To turn that comparison into a compact review queue grouped by what you should
 look at first, run:
 

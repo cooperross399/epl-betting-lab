@@ -220,6 +220,11 @@ validation`, or `No action`. If there are not enough archives yet, the report
 says comparison is not available yet and tells you to create more Thursday
 snapshots first.
 
+The comparison report and dashboard show the exact archive pair being reviewed,
+such as `Comparing: 2026-07-09 12:30:00 vs 2026-07-08 11:00:00`. The project
+uses archive metadata for that label when available and falls back to the
+archived CSV filename timestamp if metadata is missing.
+
 After the comparison exists, create a compact decision queue:
 
 ```bash

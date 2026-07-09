@@ -85,6 +85,7 @@ def test_build_thursday_best_bets_comparison_finds_added_removed_and_changed_row
     assert summary["available"] is True
     assert summary["latest_archive"] == str(latest_csv)
     assert summary["previous_archive"] == str(previous_csv)
+    assert summary["comparison_label"] == "Comparing: 2026-07-09 12:00:00 vs 2026-07-08 12:00:00"
     assert set(comparison["change_type"]) == {"status_changed", "removed", "added"}
     arsenal = comparison[comparison["home_team"] == "Arsenal"].iloc[0]
     assert arsenal["movement_category"] == "Became BETTABLE"
@@ -100,6 +101,7 @@ def test_build_thursday_best_bets_comparison_finds_added_removed_and_changed_row
     assert arsenal["suggested_units_change"] == 0.15
 
     markdown = render_thursday_best_bets_comparison(comparison, summary)
+    assert "Comparing: 2026-07-09 12:00:00 vs 2026-07-08 12:00:00" in markdown
     assert "Action needed" in markdown
     assert "Biggest changes" in markdown
     assert "Became BETTABLE" in markdown
@@ -174,4 +176,5 @@ def test_save_thursday_best_bets_comparison_handles_missing_second_archive(tmp_p
     assert paths["csv"].exists()
     markdown = paths["markdown"].read_text(encoding="utf-8")
     assert "Comparison is not available yet" in markdown
+    assert "Only one archived snapshot found: 2026-07-09 12:00:00" in markdown
     assert pd.read_csv(paths["csv"]).empty

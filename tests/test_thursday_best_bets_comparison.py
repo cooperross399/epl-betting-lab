@@ -90,6 +90,8 @@ def test_build_thursday_best_bets_comparison_finds_added_removed_and_changed_row
     assert arsenal["movement_category"] == "Became BETTABLE"
     assert arsenal["importance_score"] == 100.0
     assert "BETTABLE" in arsenal["movement_reason"]
+    assert arsenal["action_needed"] == "Review price"
+    assert "price" in arsenal["action_reason"]
     assert arsenal["previous_status"] == "LEAN"
     assert arsenal["latest_status"] == "BETTABLE"
     assert arsenal["ranking_score_change"] == 13.0
@@ -98,8 +100,10 @@ def test_build_thursday_best_bets_comparison_finds_added_removed_and_changed_row
     assert arsenal["suggested_units_change"] == 0.15
 
     markdown = render_thursday_best_bets_comparison(comparison, summary)
+    assert "Action needed" in markdown
     assert "Biggest changes" in markdown
     assert "Became BETTABLE" in markdown
+    assert "Action: Review price" in markdown
     assert "Plays Added" in markdown
     assert "Plays Removed" in markdown
     assert "Status Changes" in markdown
@@ -128,9 +132,32 @@ def test_movement_summary_highlights_downgrades_and_lost_edges(tmp_path) -> None
     spurs = comparison[comparison["home_team"] == "Spurs"].iloc[0]
     chelsea = comparison[comparison["home_team"] == "Chelsea"].iloc[0]
     assert spurs["movement_category"] == "Became PASS/Avoid"
+    assert spurs["action_needed"] == "Likely remove from card"
     assert spurs["importance_score"] > chelsea["importance_score"]
     assert chelsea["movement_category"] == "Edge improved"
-    assert {"movement_category", "importance_score", "movement_reason"}.issubset(comparison.columns)
+    assert chelsea["action_needed"] == "Candidate upgrade"
+    assert {"movement_category", "importance_score", "movement_reason", "action_needed", "action_reason"}.issubset(
+        comparison.columns
+    )
+
+
+def test_action_needed_flags_odds_recheck_without_edge_improvement(tmp_path) -> None:
+    _write_archive(
+        tmp_path,
+        "2026-07-08T12:00:00",
+        [_row("Arsenal", "Coventry", "1x2", "home", "LEAN", "C", 52.0, -120, 0.03, 0.1)],
+    )
+    _write_archive(
+        tmp_path,
+        "2026-07-09T12:00:00",
+        [_row("Arsenal", "Coventry", "1x2", "home", "LEAN", "C", 52.0, -105, 0.03, 0.1)],
+    )
+
+    comparison, _ = build_thursday_best_bets_comparison(tmp_path)
+
+    row = comparison.iloc[0]
+    assert row["movement_category"] == "Odds moved in our favor"
+    assert row["action_needed"] == "Recheck odds"
 
 
 def test_save_thursday_best_bets_comparison_handles_missing_second_archive(tmp_path) -> None:

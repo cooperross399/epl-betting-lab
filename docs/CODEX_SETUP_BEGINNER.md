@@ -227,6 +227,9 @@ archived CSV filename timestamp if metadata is missing.
 Open `Archive history details` in the dashboard to see the latest and previous
 archive paths, validation status, best/lean/pass counts, total rows, and notes
 when metadata is missing or a file cannot be read.
+The dashboard and comparison report also show a quick card count-change note
+for best bets, leans, passes, and total rows before you open the full
+comparison.
 
 After the comparison exists, create a compact decision queue:
 

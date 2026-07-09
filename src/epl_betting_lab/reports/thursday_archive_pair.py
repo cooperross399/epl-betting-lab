@@ -175,6 +175,95 @@ def _csv_summary(csv_path: str) -> tuple[int | str, int | str, int | str, int | 
     )
 
 
+def _count_from_snapshot(snapshot: pd.Series) -> tuple[dict[str, int | None], list[str]]:
+    notes: list[str] = []
+    counts: dict[str, int | None] = {
+        "best_bets": None,
+        "leans": None,
+        "passes": None,
+        "total": None,
+    }
+
+    has_metadata = str(snapshot.get("metadata", "")).strip() != ""
+    if has_metadata:
+        metadata_counts_available = True
+        for key in ["best_bets", "leans", "passes"]:
+            value = pd.to_numeric(snapshot.get(key, ""), errors="coerce")
+            if pd.isna(value):
+                metadata_counts_available = False
+                break
+            counts[key] = int(value)
+        if metadata_counts_available:
+            counts["total"] = int(counts["best_bets"] or 0) + int(counts["leans"] or 0) + int(counts["passes"] or 0)
+            return counts, notes
+        notes.append("Archive metadata is missing one or more count fields; using CSV rows instead.")
+    else:
+        notes.append("Metadata JSON missing; using archived CSV rows for counts.")
+
+    csv_best, csv_leans, csv_passes, total_rows, csv_note = _csv_summary(str(snapshot.get("csv", "")))
+    if isinstance(csv_best, int):
+        counts["best_bets"] = csv_best
+        counts["leans"] = int(csv_leans)
+        counts["passes"] = int(csv_passes)
+    if isinstance(total_rows, int):
+        counts["total"] = total_rows
+    if csv_note:
+        notes.append(csv_note)
+    return counts, notes
+
+
+def _format_count(value: int | None) -> str:
+    return "n/a" if value is None else str(value)
+
+
+def _format_delta(previous: int | None, latest: int | None) -> str:
+    if previous is None or latest is None:
+        return "n/a"
+    delta = latest - previous
+    if delta > 0:
+        return f"+{delta}"
+    return str(delta)
+
+
+def _format_count_part(label: str, previous: int | None, latest: int | None) -> str:
+    return f"{label} {_format_count(previous)} -> {_format_count(latest)} ({_format_delta(previous, latest)})"
+
+
+def build_thursday_archive_count_change_note(output_dir: Path | None = None) -> dict[str, object]:
+    snapshots = list_thursday_archive_snapshots(output_dir=output_dir, limit=2)
+    if snapshots.empty:
+        return {
+            "available": False,
+            "status": "no_archives",
+            "note": "Card count changes: no archived snapshots found yet.",
+            "notes": ["No archived snapshots found yet."],
+        }
+    if len(snapshots) == 1:
+        return {
+            "available": False,
+            "status": "one_archive",
+            "note": "Card count changes: only one archived snapshot found.",
+            "notes": ["Generate one more Thursday best-bets report before comparing count changes."],
+        }
+
+    latest_counts, latest_notes = _count_from_snapshot(snapshots.iloc[0])
+    previous_counts, previous_notes = _count_from_snapshot(snapshots.iloc[1])
+    parts = [
+        _format_count_part("Best bets", previous_counts["best_bets"], latest_counts["best_bets"]),
+        _format_count_part("Leans", previous_counts["leans"], latest_counts["leans"]),
+        _format_count_part("Passes", previous_counts["passes"], latest_counts["passes"]),
+        _format_count_part("Total", previous_counts["total"], latest_counts["total"]),
+    ]
+    return {
+        "available": True,
+        "status": "ready",
+        "note": "Card count changes: " + ", ".join(parts),
+        "latest_counts": latest_counts,
+        "previous_counts": previous_counts,
+        "notes": latest_notes + previous_notes,
+    }
+
+
 def build_thursday_archive_history_details(output_dir: Path | None = None) -> tuple[pd.DataFrame, str]:
     snapshots = list_thursday_archive_snapshots(output_dir=output_dir, limit=2)
     if snapshots.empty:

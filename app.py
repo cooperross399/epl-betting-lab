@@ -27,6 +27,7 @@ from epl_betting_lab.reports.bet_ledger import load_bet_ledger, summarize_overal
 from epl_betting_lab.reports.current_odds_validation import CurrentOddsValidationError
 from epl_betting_lab.reports.thursday_archive_pair import (
     build_thursday_archive_history_details,
+    build_thursday_archive_count_change_note,
     build_thursday_archive_pair,
 )
 from epl_betting_lab.reports.thursday_best_bets import list_recent_thursday_archives
@@ -266,6 +267,9 @@ def render_thursday_best_bets_panel() -> None:
         st.info(f"{archive_pair['label']}. Generate one more Thursday best-bets archive before comparing.")
     else:
         st.info("Comparison not available yet. Generate Thursday best bets on at least two refreshes first.")
+
+    count_change = build_thursday_archive_count_change_note()
+    st.caption(count_change["note"])
 
     with st.expander("Archive history details", expanded=False):
         archive_details, archive_message = build_thursday_archive_history_details()

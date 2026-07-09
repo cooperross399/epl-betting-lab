@@ -18,7 +18,13 @@ def _write_archive_metadata(output_dir, generated_at: str) -> None:
     csv_path = archive_dir / f"{time_label}_thursday_best_bets.csv"
     pd.DataFrame([{"home_team": "Arsenal"}]).to_csv(csv_path, index=False)
     (archive_dir / f"{time_label}_thursday_best_bets_metadata.json").write_text(
-        json.dumps({"generated_at": generated_at, "csv": str(csv_path)}),
+        json.dumps({
+            "generated_at": generated_at,
+            "csv": str(csv_path),
+            "best_bets": 0,
+            "leans": 0,
+            "passes": 0,
+        }),
         encoding="utf-8",
     )
 
@@ -121,6 +127,7 @@ def test_decision_queue_markdown_shows_grouped_review_fields(tmp_path) -> None:
 
     assert "Thursday Decision Queue" in markdown
     assert "Comparing: 2026-07-09 12:30:00 vs 2026-07-08 11:00:00" in markdown
+    assert "Card count changes: Best bets 0 -> 0 (0), Leans 0 -> 0 (0), Passes 0 -> 0 (0), Total 0 -> 0 (0)" in markdown
     assert "## Candidate upgrade" in markdown
     assert "Review order" in markdown
     assert "Status: LEAN -> BETTABLE" in markdown
@@ -138,4 +145,5 @@ def test_save_decision_queue_handles_missing_comparison(tmp_path) -> None:
     assert pd.read_csv(paths["csv"]).empty
     markdown = paths["markdown"].read_text(encoding="utf-8")
     assert "comparison report is missing" in markdown
+    assert "Card count changes: no archived snapshots found yet." in markdown
     assert "python scripts/compare_thursday_best_bets.py" in markdown

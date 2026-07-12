@@ -87,6 +87,32 @@ replace it intentionally with:
 python scripts/create_current_odds_template.py --overwrite
 ```
 
+To import several real sportsbook prices without editing `current_odds.csv`
+row by row, first copy the beginner template:
+
+```bash
+cp data/manual/current_odds_import_template.csv data/manual/current_odds_import.csv
+```
+
+Enter the real `american_odds` and `book` for each row. You may leave
+`closing_american_odds` and `notes` blank. Preview everything before applying:
+
+```bash
+python scripts/import_current_odds.py
+```
+
+Read `data/outputs/current_odds_import_report.md`. It shows valid rows, invalid
+rows, duplicates, additions, and updates without changing your odds file. When
+the preview is correct, apply valid rows from Terminal only:
+
+```bash
+python scripts/import_current_odds.py --apply
+```
+
+Apply mode backs up an existing `current_odds.csv`, preserves its extra columns
+and existing optional values, and skips invalid rows. The dashboard button
+`Preview current odds import` cannot apply changes.
+
 If your odds file already has real prices and you only need to add missing
 fixtures or market rows, preview the maintenance helper:
 
@@ -147,11 +173,12 @@ python scripts/generate_thursday_best_bets.py --force
 ```
 
 You can also open the dashboard and click `Create current odds template`,
-`Preview current odds maintenance`, `Check odds entry completeness`, `Validate
-current odds`, then `Generate Thursday best-bets report`, on the `Betting
-ledger` tab. The dashboard only previews maintenance and shows report tables.
-It does not overwrite an existing odds file, apply maintenance, edit odds, or
-force generation.
+`Preview current odds import`, `Preview current odds maintenance`, `Check odds
+entry completeness`, `Validate current odds`, then `Generate Thursday
+best-bets report`, on the `Betting ledger` tab. The dashboard only previews
+imports and maintenance and shows report tables. It does not overwrite an
+existing odds file, apply imports or maintenance, edit odds, or force
+generation.
 
 After the odds file exists, the easiest path is the dashboard button `Run
 Thursday readiness refresh`. It runs odds completeness, current odds
@@ -427,6 +454,7 @@ Run bet ledger report
 Run ledger health check
 Run settlement preview
 Create current odds template
+Preview current odds import
 Preview current odds maintenance
 Check odds entry completeness
 Validate current odds

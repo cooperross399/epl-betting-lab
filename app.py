@@ -10,6 +10,7 @@ from epl_betting_lab.dashboard_actions import (
     run_bet_ledger_report,
     run_create_current_odds_template,
     run_current_odds_completeness,
+    run_current_odds_import_preview,
     run_current_odds_maintenance_preview,
     run_current_odds_validation,
     run_ledger_health_check,
@@ -148,6 +149,8 @@ def render_report_buttons() -> None:
         run_dashboard_refresh_sequence()
     if st.button("Run post-refresh Thursday review", width="stretch"):
         run_dashboard_post_thursday_review()
+    if st.button("Preview current odds import", width="stretch"):
+        run_dashboard_action("Current odds import preview", run_current_odds_import_preview)
 
     report_cols = st.columns(3)
     if report_cols[0].button("Run bet ledger report", width="stretch"):
@@ -233,6 +236,14 @@ def render_thursday_best_bets_panel() -> None:
     else:
         show_missing_report("data/outputs/current_odds_maintenance_report.md", "python scripts/maintain_current_odds.py")
     show_output_table("Current odds maintenance rows", "current_odds_maintenance_preview.csv", "python scripts/maintain_current_odds.py")
+
+    import_path = OUTPUTS_DIR / "current_odds_import_report.md"
+    if import_path.exists():
+        with st.expander("Current odds import preview", expanded=False):
+            st.markdown(import_path.read_text(encoding="utf-8"))
+    else:
+        show_missing_report("data/outputs/current_odds_import_report.md", "python scripts/import_current_odds.py")
+    show_output_table("Current odds import rows", "current_odds_import_preview.csv", "python scripts/import_current_odds.py")
 
     st.subheader("Incomplete odds entries")
     completeness = read_output_csv("current_odds_completeness.csv")

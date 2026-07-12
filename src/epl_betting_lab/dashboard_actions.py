@@ -19,6 +19,7 @@ from epl_betting_lab.reports.current_odds_validation import (
     validation_stop_message,
 )
 from epl_betting_lab.reports.current_odds_completeness import save_current_odds_completeness
+from epl_betting_lab.reports.current_odds_import import process_current_odds_import
 from epl_betting_lab.reports.current_odds_template import create_current_odds_template
 from epl_betting_lab.reports.current_odds_maintenance import maintain_current_odds
 from epl_betting_lab.reports.thursday_best_bets import (
@@ -166,6 +167,24 @@ def run_current_odds_maintenance_preview(
         output_dir or OUTPUTS_DIR,
         apply=False,
         book=book,
+    )
+
+
+def run_current_odds_import_preview(
+    import_path: Path | None = None,
+    current_odds_path: Path | None = None,
+    output_dir: Path | None = None,
+    *,
+    fixtures: pd.DataFrame | None = None,
+    matches: pd.DataFrame | None = None,
+) -> dict[str, Path]:
+    return process_current_odds_import(
+        import_path or MANUAL_DIR / "current_odds_import.csv",
+        current_odds_path or MANUAL_DIR / "current_odds.csv",
+        output_dir or OUTPUTS_DIR,
+        apply=False,
+        fixtures=fixtures,
+        matches=matches,
     )
 
 

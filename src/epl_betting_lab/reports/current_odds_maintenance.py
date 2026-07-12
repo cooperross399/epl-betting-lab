@@ -98,7 +98,7 @@ def render_current_odds_maintenance_report(
     return "\n".join(lines)
 
 
-def _backup_current_odds(path: Path, timestamp: str | None = None) -> Path:
+def backup_current_odds(path: Path, timestamp: str | None = None) -> Path:
     timestamp = timestamp or datetime.now().strftime("%Y%m%d_%H%M%S")
     backup_dir = path.parent / "backups"
     backup_dir.mkdir(parents=True, exist_ok=True)
@@ -145,7 +145,7 @@ def maintain_current_odds(
     if apply and not preview.empty:
         odds_path.parent.mkdir(parents=True, exist_ok=True)
         if odds_path.exists():
-            backup_path = _backup_current_odds(odds_path, timestamp=timestamp)
+            backup_path = backup_current_odds(odds_path, timestamp=timestamp)
         combined = pd.concat([
             existing,
             preview.drop(columns=["maintenance_action"], errors="ignore"),

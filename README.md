@@ -174,6 +174,41 @@ replace it intentionally:
 python scripts/create_current_odds_template.py --overwrite
 ```
 
+To paste or export several real sportsbook prices at once, create the import
+file from its safe template:
+
+```bash
+cp data/manual/current_odds_import_template.csv data/manual/current_odds_import.csv
+```
+
+Fill in `date`, `home_team`, `away_team`, `market`, `selection`,
+`american_odds`, and `book`. `closing_american_odds` and `notes` are optional.
+Then preview the import:
+
+```bash
+python scripts/import_current_odds.py
+```
+
+The preview normalizes familiar team/market labels, flags invalid or duplicate
+rows, and shows which rows would be added or updated. It writes:
+
+```text
+data/outputs/current_odds_import_preview.csv
+data/outputs/current_odds_import_report.md
+```
+
+Preview mode never edits `current_odds.csv`. After reviewing the report, apply
+only valid rows from Terminal:
+
+```bash
+python scripts/import_current_odds.py --apply
+```
+
+Apply mode creates a timestamped backup before modifying an existing odds
+file, preserves extra columns and blank optional fields, and skips every invalid
+or duplicate import row. The dashboard only offers `Preview current odds
+import`; it has no apply button.
+
 If the odds file already has prices and you only want to add missing fixtures
 or market rows, preview maintenance first:
 
@@ -258,10 +293,11 @@ python scripts/generate_thursday_best_bets.py --force
 ```
 
 Or open the dashboard and use `Create current odds template`, `Preview current
-odds maintenance`, `Check odds entry completeness`, then `Generate Thursday
-best-bets report`, on the `Betting ledger` tab. The dashboard can preview
-missing odds rows and show incomplete entries, but it does not apply
-maintenance, overwrite an existing odds file, edit odds, or force generation.
+odds import`, `Preview current odds maintenance`, `Check odds entry
+completeness`, then `Generate Thursday best-bets report`, on the `Betting
+ledger` tab. The dashboard can preview imports and missing odds rows and show
+incomplete entries, but it does not apply imports or maintenance, overwrite an
+existing odds file, edit odds, or force generation.
 
 Once `data/manual/current_odds.csv` exists, you can also click `Run Thursday
 readiness refresh`. That one safe button runs odds completeness, current odds
@@ -563,6 +599,7 @@ Run bet ledger report
 Run ledger health check
 Run settlement preview
 Create current odds template
+Preview current odds import
 Preview current odds maintenance
 Check odds entry completeness
 Validate current odds
@@ -613,6 +650,7 @@ epl-betting-lab/
 │   ├── manual/
 │   │   ├── upcoming_fixtures.csv
 │   │   ├── current_odds_template.csv
+│   │   ├── current_odds_import_template.csv
 │   │   ├── bet_ledger_template.csv
 │   │   ├── bet_ledger.csv
 │   │   └── mock_current_odds.csv
@@ -621,6 +659,7 @@ epl-betting-lab/
 │   └── outputs/
 ├── scripts/
 │   ├── fetch_data.py
+│   ├── import_current_odds.py
 │   ├── run_backtest.py
 │   └── generate_weekly_card.py
 └── src/epl_betting_lab/

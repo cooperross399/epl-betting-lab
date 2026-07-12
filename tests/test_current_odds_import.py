@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pandas as pd
@@ -122,6 +123,8 @@ def test_preview_writes_reports_without_editing_current_odds(tmp_path) -> None:
     preview = pd.read_csv(paths["csv"], dtype=str).fillna("")
     assert preview.iloc[0]["import_action"] == "update_existing"
     assert "preview / dry run" in paths["markdown"].read_text(encoding="utf-8")
+    assert not (output_dir / "current_odds_import_audit.csv").exists()
+    assert not (output_dir / "archive" / "current_odds_imports").exists()
 
 
 def test_preview_warns_on_heavy_juice_and_totals_unders() -> None:
@@ -163,8 +166,11 @@ def test_apply_backs_up_updates_appends_and_skips_invalid_rows(tmp_path) -> None
         fixtures=_fixtures(),
         matches=_matches(),
         timestamp="20260712_120000",
+        batch_id="odds-import-test-update",
+        applied_at="2026-07-12T12:00:00-04:00",
     )
 
+    assert paths["batch_id"] == "odds-import-test-update"
     assert paths["backup"] == tmp_path / "backups" / "current_odds_20260712_120000.csv"
     backup = pd.read_csv(paths["backup"], dtype=str).fillna("")
     assert len(backup) == 1
@@ -180,6 +186,21 @@ def test_apply_backs_up_updates_appends_and_skips_invalid_rows(tmp_path) -> None
     assert total["american_odds"] == "-110"
     assert not updated["market"].eq("shots").any()
 
+    audit = pd.read_csv(paths["audit_csv"], dtype=str).fillna("")
+    assert len(audit) == 3
+    assert audit["batch_id"].eq("odds-import-test-update").all()
+    assert audit["source_sha256"].str.len().eq(64).all()
+    assert audit["backup_path"].eq(str(paths["backup"])).all()
+    assert audit["rows_added"].eq("1").all()
+    assert audit["rows_updated"].eq("1").all()
+    assert audit["rows_skipped_invalid"].eq("1").all()
+    update_audit = audit[audit["row_action"] == "update_existing"].iloc[0]
+    assert json.loads(update_audit["before_values"])["american_odds"] == "+120"
+    assert json.loads(update_audit["after_values"])["american_odds"] == "+130"
+    assert paths["batch_audit_csv"].exists()
+    assert paths["batch_audit_markdown"].exists()
+    assert "odds-import-test-update" in paths["audit_markdown"].read_text(encoding="utf-8")
+
 
 def test_apply_can_create_new_current_odds_without_fake_backup(tmp_path) -> None:
     import_path = tmp_path / "current_odds_import.csv"
@@ -193,11 +214,16 @@ def test_apply_can_create_new_current_odds_without_fake_backup(tmp_path) -> None
         apply=True,
         fixtures=_fixtures(),
         matches=_matches(),
+        batch_id="odds-import-new-file",
+        applied_at="2026-07-12T12:05:00-04:00",
     )
 
     assert odds_path.exists()
     assert "backup" not in paths
     assert pd.read_csv(odds_path).shape[0] == 1
+    audit = pd.read_csv(paths["audit_csv"], dtype=str).fillna("")
+    assert audit.iloc[0]["backup_path"] == ""
+    assert "Not available (new file or no valid changes)" in paths["audit_markdown"].read_text(encoding="utf-8")
 
 
 def test_missing_empty_and_invalid_column_files_write_safe_reports(tmp_path) -> None:
@@ -207,6 +233,7 @@ def test_missing_empty_and_invalid_column_files_write_safe_reports(tmp_path) -> 
     assert list(pd.read_csv(missing_paths["csv"]).columns) == IMPORT_PREVIEW_COLUMNS
     missing_report = missing_paths["markdown"].read_text(encoding="utf-8")
     assert "current_odds_import_template.csv" in missing_report
+    assert "audit_csv" not in missing_paths
 
     pd.DataFrame(columns=["date", "home_team"]).to_csv(import_path, index=False)
     empty_paths = process_current_odds_import(import_path, tmp_path / "current_odds.csv", output_dir)
@@ -228,6 +255,62 @@ def test_missing_empty_and_invalid_column_files_write_safe_reports(tmp_path) -> 
     import_path.write_text('date,home_team\n"2026-08-21,Arsenal\n', encoding="utf-8")
     unreadable_paths = process_current_odds_import(import_path, tmp_path / "current_odds.csv", output_dir)
     assert "could not be read" in unreadable_paths["markdown"].read_text(encoding="utf-8")
+
+
+def test_every_apply_attempt_gets_an_audit_batch_even_without_rows(tmp_path) -> None:
+    paths = process_current_odds_import(
+        tmp_path / "missing_import.csv",
+        tmp_path / "current_odds.csv",
+        tmp_path / "outputs",
+        apply=True,
+        batch_id="odds-import-no-rows",
+        applied_at="2026-07-12T12:10:00-04:00",
+    )
+
+    assert paths["batch_id"] == "odds-import-no-rows"
+    audit = pd.read_csv(paths["audit_csv"], dtype=str).fillna("")
+    assert len(audit) == 1
+    assert audit.iloc[0]["batch_status"] == "no_changes"
+    assert audit.iloc[0]["row_action"] == "no_rows"
+    assert audit.iloc[0]["source_sha256"] == ""
+    assert not (tmp_path / "current_odds.csv").exists()
+
+
+def test_cumulative_audit_appends_multiple_apply_batches(tmp_path) -> None:
+    import_path = tmp_path / "current_odds_import.csv"
+    odds_path = tmp_path / "current_odds.csv"
+    output_dir = tmp_path / "outputs"
+    pd.DataFrame([_import_row(american_odds="+120")]).to_csv(import_path, index=False)
+
+    first = process_current_odds_import(
+        import_path,
+        odds_path,
+        output_dir,
+        apply=True,
+        fixtures=_fixtures(),
+        matches=_matches(),
+        batch_id="odds-import-batch-one",
+        applied_at="2026-07-12T12:15:00-04:00",
+    )
+    pd.DataFrame([_import_row(american_odds="+130")]).to_csv(import_path, index=False)
+    second = process_current_odds_import(
+        import_path,
+        odds_path,
+        output_dir,
+        apply=True,
+        fixtures=_fixtures(),
+        matches=_matches(),
+        timestamp="20260712_121600",
+        batch_id="odds-import-batch-two",
+        applied_at="2026-07-12T12:16:00-04:00",
+    )
+
+    audit = pd.read_csv(second["audit_csv"], dtype=str).fillna("")
+    assert set(audit["batch_id"]) == {"odds-import-batch-one", "odds-import-batch-two"}
+    assert audit[audit["batch_id"] == "odds-import-batch-one"].iloc[0]["rows_added"] == "1"
+    assert audit[audit["batch_id"] == "odds-import-batch-two"].iloc[0]["rows_updated"] == "1"
+    assert first["batch_audit_csv"].exists()
+    assert second["batch_audit_csv"].exists()
 
 
 def test_template_contains_supported_columns_without_fabricated_odds() -> None:

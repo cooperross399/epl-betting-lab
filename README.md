@@ -209,6 +209,21 @@ file, preserves extra columns and blank optional fields, and skips every invalid
 or duplicate import row. The dashboard only offers `Preview current odds
 import`; it has no apply button.
 
+Every `--apply` attempt also prints a unique import batch ID and writes audit
+history:
+
+```text
+data/outputs/current_odds_import_audit.csv
+data/outputs/current_odds_import_audit.md
+data/outputs/archive/current_odds_imports/BATCH_ID/current_odds_import_audit.csv
+data/outputs/archive/current_odds_imports/BATCH_ID/current_odds_import_audit.md
+```
+
+Each batch records the source file and SHA-256 checksum, backup path, row
+counts, six-field matching key, skipped issues, and before/after values for
+updates. Preview mode does not create an apply audit. The dashboard shows recent
+batch summaries and read-only audit details after the first Terminal apply.
+
 If the odds file already has prices and you only want to add missing fixtures
 or market rows, preview maintenance first:
 

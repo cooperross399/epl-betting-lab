@@ -113,6 +113,20 @@ Apply mode backs up an existing `current_odds.csv`, preserves its extra columns
 and existing optional values, and skips invalid rows. The dashboard button
 `Preview current odds import` cannot apply changes.
 
+Every Terminal `--apply` attempt prints an import batch ID. Read the cumulative
+history here:
+
+```text
+data/outputs/current_odds_import_audit.md
+data/outputs/current_odds_import_audit.csv
+```
+
+The project also saves one CSV and markdown snapshot per batch under
+`data/outputs/archive/current_odds_imports/BATCH_ID/`. The audit records the
+source checksum, backup path, added/updated/unchanged/skipped counts, matching
+key, and before/after values. Preview mode creates no apply audit. Recent batch
+summaries and details appear read-only in the dashboard after the first apply.
+
 If your odds file already has real prices and you only need to add missing
 fixtures or market rows, preview the maintenance helper:
 

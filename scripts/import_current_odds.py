@@ -43,6 +43,10 @@ def main() -> None:
     print(f"Report: {paths['markdown']}")
     if "backup" in paths:
         print(f"Backup: {paths['backup']}")
+    if args.apply and "batch_id" in paths:
+        print(f"Import batch ID: {paths['batch_id']}")
+        print(f"Audit history: {paths['audit_markdown']}")
+        print(f"Per-batch audit: {paths['batch_audit_markdown']}")
     if not args.apply:
         print(
             "No odds were changed. Review the report, then run "

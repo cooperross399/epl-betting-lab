@@ -178,6 +178,26 @@ To convert a sportsbook or odds-site CSV export with different column names,
 save it as `data/manual/sportsbook_export.csv`, then run:
 
 ```bash
+python scripts/diagnose_odds_export.py --source data/manual/sportsbook_export.csv
+```
+
+The read-only diagnostic compares the export columns with every profile in
+`data/manual/odds_import_profiles.json`. It shows the best profile, missing
+required mappings, ignored extra columns, a small normalized sample, and market
+or selection values the safe importer may reject. It writes:
+
+```text
+data/outputs/odds_export_profile_diagnostic.csv
+data/outputs/odds_export_profile_diagnostic.md
+```
+
+If there is no full match, update the closest profile or add a new one before
+converting. The diagnostic never creates an import file or edits odds. The
+dashboard button `Diagnose odds export profile` runs the same read-only check.
+
+After choosing a profile, preview the conversion:
+
+```bash
 python scripts/convert_odds_export.py --profile generic --source data/manual/sportsbook_export.csv
 ```
 
@@ -704,6 +724,7 @@ epl-betting-lab/
 │   └── outputs/
 ├── scripts/
 │   ├── fetch_data.py
+│   ├── diagnose_odds_export.py
 │   ├── convert_odds_export.py
 │   ├── import_current_odds.py
 │   ├── run_backtest.py

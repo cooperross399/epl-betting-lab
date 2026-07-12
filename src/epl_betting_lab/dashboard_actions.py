@@ -26,6 +26,11 @@ from epl_betting_lab.reports.odds_export_conversion import (
     OddsExportConversionError,
     convert_odds_export,
 )
+from epl_betting_lab.reports.odds_export_profile_diagnostic import (
+    FATAL_DIAGNOSTIC_STATUSES,
+    OddsExportProfileDiagnosticError,
+    diagnose_odds_export_profiles,
+)
 from epl_betting_lab.reports.thursday_best_bets import (
     build_thursday_best_bets,
     list_recent_thursday_archives,
@@ -208,6 +213,23 @@ def run_odds_export_conversion_preview(
     )
     if paths["status"] != "preview_only":
         raise OddsExportConversionError(str(paths.get("message", "Conversion preview could not run.")))
+    return paths
+
+
+def run_odds_export_profile_diagnostic(
+    source_path: Path | None = None,
+    profiles_path: Path | None = None,
+    output_dir: Path | None = None,
+) -> dict[str, Path | str]:
+    paths = diagnose_odds_export_profiles(
+        source_path or MANUAL_DIR / "sportsbook_export.csv",
+        profiles_path or MANUAL_DIR / "odds_import_profiles.json",
+        output_dir or OUTPUTS_DIR,
+    )
+    if paths["status"] in FATAL_DIAGNOSTIC_STATUSES:
+        raise OddsExportProfileDiagnosticError(
+            str(paths.get("message", "Odds export profile diagnostic could not run."))
+        )
     return paths
 
 

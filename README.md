@@ -587,7 +587,9 @@ with Thursday status, odds completion, serious current-odds issues, warnings,
 the latest archive pair, count-change risk, top movement reason, and the
 recommended next manual action. The detailed readiness row and full reports
 remain below the card. An `Open this next` cue points to the validation,
-archive, comparison, or decision-queue section that matches that action.
+archive, comparison, or decision-queue section that matches that action. When
+the decision queue is current, the cue also shows how many plays are in the
+relevant review group. Missing, stale, or unreadable queues show a refresh note.
 
 These buttons do not edit `data/manual/bet_ledger.csv`, do not edit
 `data/manual/current_odds.csv`, do not apply settlements, do not place bets,

@@ -177,7 +177,9 @@ Thursday status, odds completion, serious validation issues, warnings, the
 latest archive pair, count-change risk, top movement reason, and the
 recommended next manual action. Use that card first, then open the details only
 when something looks missing or blocked. The `Open this next` line points to
-the exact detail section to review after you read the recommended action.
+the exact detail section to review after you read the recommended action. It
+also shows affected-play counts from `thursday_decision_queue.csv` when that
+file is current, or a short generate/refresh message when it is not usable.
 
 This reads only `data/manual/current_odds.csv` and writes:
 

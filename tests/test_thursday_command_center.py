@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 import pandas as pd
@@ -76,6 +77,10 @@ def test_command_center_summarizes_ready_workflow(tmp_path) -> None:
             "importance_score": 80,
         }
     ]).to_csv(tmp_path / "thursday_best_bets_comparison.csv", index=False)
+    pd.DataFrame([
+        {"action_needed": "Candidate upgrade"},
+        {"action_needed": "Candidate upgrade"},
+    ]).to_csv(tmp_path / "thursday_decision_queue.csv", index=False)
 
     summary = build_thursday_command_center(tmp_path, tmp_path / "current_odds.csv")
 
@@ -88,7 +93,7 @@ def test_command_center_summarizes_ready_workflow(tmp_path) -> None:
     assert summary.count_change_risk_flag == "Stable card"
     assert summary.top_card_movement_reason == "Mostly tier/status changes"
     assert summary.recommended_next_action.startswith("Review candidate upgrades")
-    assert summary.detail_cue == "Thursday decision queue: Candidate upgrade"
+    assert summary.detail_cue == "Thursday decision queue: Candidate upgrade - Candidate upgrade: 2 plays"
 
 
 def test_detail_cue_maps_recommended_actions_to_dashboard_sections() -> None:
@@ -111,3 +116,51 @@ def test_detail_cue_maps_recommended_actions_to_dashboard_sections() -> None:
 def test_detail_cue_has_beginner_friendly_fallback() -> None:
     assert build_thursday_detail_cue(None) == "Thursday readiness and report details below"
     assert build_thursday_detail_cue("Unexpected action") == "Thursday readiness and report details below"
+
+
+def test_detail_cue_shows_relevant_decision_queue_counts(tmp_path) -> None:
+    pd.DataFrame([
+        {"action_needed": "Review price"},
+        {"action_needed": "Review price"},
+        {"action_needed": "Review price"},
+        {"action_needed": "Likely remove from card"},
+        {"action_needed": "Candidate upgrade"},
+        {"action_needed": "Candidate upgrade"},
+        {"action_needed": "Recheck odds"},
+        {"action_needed": "Recheck odds"},
+        {"action_needed": "Recheck validation"},
+    ]).to_csv(tmp_path / "thursday_decision_queue.csv", index=False)
+
+    assert build_thursday_detail_cue("Review prices first", tmp_path).endswith(
+        "Review price: 3 plays; Recheck odds: 2 plays"
+    )
+    assert build_thursday_detail_cue("Review removals first", tmp_path).endswith(
+        "Likely remove from card: 1 play"
+    )
+    assert build_thursday_detail_cue("Review candidate upgrades", tmp_path).endswith(
+        "Candidate upgrade: 2 plays"
+    )
+    assert build_thursday_detail_cue("Check data/odds first", tmp_path).endswith(
+        "Recheck validation: 1 play"
+    )
+
+
+def test_detail_cue_handles_missing_stale_empty_and_malformed_queue(tmp_path) -> None:
+    action = "Review prices first"
+    missing = build_thursday_detail_cue(action, tmp_path)
+    assert "play counts unavailable" in missing
+    assert "generate the Thursday decision queue" in missing
+
+    queue_path = tmp_path / "thursday_decision_queue.csv"
+    pd.DataFrame(columns=["action_needed"]).to_csv(queue_path, index=False)
+    assert "no affected plays are currently listed" in build_thursday_detail_cue(action, tmp_path)
+
+    pd.DataFrame([{"market": "1x2"}]).to_csv(queue_path, index=False)
+    assert "regenerate the Thursday decision queue" in build_thursday_detail_cue(action, tmp_path)
+
+    pd.DataFrame([{"action_needed": "Review price"}]).to_csv(queue_path, index=False)
+    comparison_path = tmp_path / "thursday_best_bets_comparison.csv"
+    comparison_path.write_text("action_needed\nReview price\n", encoding="utf-8")
+    newer = queue_path.stat().st_mtime + 10
+    os.utime(comparison_path, (newer, newer))
+    assert "play counts need refresh" in build_thursday_detail_cue(action, tmp_path)

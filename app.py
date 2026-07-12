@@ -15,6 +15,7 @@ from epl_betting_lab.dashboard_actions import (
     run_current_odds_validation,
     run_ledger_health_check,
     run_odds_export_conversion_preview,
+    run_odds_export_profile_diagnostic,
     run_post_thursday_review,
     run_settlement_preview,
     run_tier_performance_report,
@@ -33,6 +34,9 @@ from epl_betting_lab.reports.current_odds_import_audit import (
     summarize_current_odds_import_batches,
 )
 from epl_betting_lab.reports.odds_export_conversion import OddsExportConversionError
+from epl_betting_lab.reports.odds_export_profile_diagnostic import (
+    OddsExportProfileDiagnosticError,
+)
 from epl_betting_lab.reports.thursday_archive_pair import (
     build_thursday_archive_history_details,
     build_thursday_archive_count_change_note,
@@ -86,6 +90,9 @@ def run_dashboard_action(label: str, action) -> None:
         st.error(f"{label} stopped.")
         st.info(str(exc))
     except OddsExportConversionError as exc:
+        st.error(f"{label} could not run.")
+        st.info(str(exc))
+    except OddsExportProfileDiagnosticError as exc:
         st.error(f"{label} could not run.")
         st.info(str(exc))
     except FileExistsError as exc:
@@ -158,6 +165,8 @@ def render_report_buttons() -> None:
         run_dashboard_refresh_sequence()
     if st.button("Run post-refresh Thursday review", width="stretch"):
         run_dashboard_post_thursday_review()
+    if st.button("Diagnose odds export profile", width="stretch"):
+        run_dashboard_action("Odds export profile diagnostic", run_odds_export_profile_diagnostic)
     if st.button("Preview odds export conversion", width="stretch"):
         run_dashboard_action("Odds export conversion preview", run_odds_export_conversion_preview)
     if st.button("Preview current odds import", width="stretch"):
@@ -230,6 +239,21 @@ def render_thursday_best_bets_panel() -> None:
     status_cols[0].metric("Current odds", status.status)
     status_cols[1].caption(
         f"{status.explanation} Refresh with `{status.command}` or the `Validate current odds` dashboard button."
+    )
+
+    diagnostic_path = OUTPUTS_DIR / "odds_export_profile_diagnostic.md"
+    diagnostic_command = (
+        "python scripts/diagnose_odds_export.py --source data/manual/sportsbook_export.csv"
+    )
+    if diagnostic_path.exists():
+        with st.expander("Odds export profile diagnostic", expanded=False):
+            st.markdown(diagnostic_path.read_text(encoding="utf-8"))
+    else:
+        show_missing_report("data/outputs/odds_export_profile_diagnostic.md", diagnostic_command)
+    show_output_table(
+        "Odds export profile matches",
+        "odds_export_profile_diagnostic.csv",
+        diagnostic_command,
     )
 
     conversion_path = OUTPUTS_DIR / "odds_export_conversion_report.md"

@@ -91,6 +91,21 @@ If your sportsbook or odds site gives you a CSV export with different column
 names, save it as `data/manual/sportsbook_export.csv`, then run:
 
 ```bash
+python scripts/diagnose_odds_export.py --source data/manual/sportsbook_export.csv
+```
+
+Open `data/outputs/odds_export_profile_diagnostic.md`. It compares every
+configured profile, shows the closest match and missing source columns, lists
+extra columns, and previews how market and selection names would normalize.
+If no profile fully matches, update `data/manual/odds_import_profiles.json` and
+run the diagnostic again. Nothing is imported or applied by this step.
+
+The dashboard button `Diagnose odds export profile` performs the same safe,
+read-only check and displays both the report and comparison table.
+
+When the report identifies the right profile, convert the export:
+
+```bash
 python scripts/convert_odds_export.py --profile generic --source data/manual/sportsbook_export.csv
 ```
 
@@ -210,9 +225,10 @@ python scripts/generate_thursday_best_bets.py --force
 ```
 
 You can also open the dashboard and click `Create current odds template`,
-`Preview odds export conversion`, `Preview current odds import`, `Preview
-current odds maintenance`, `Check odds entry completeness`, `Validate current
-odds`, then `Generate Thursday best-bets report`, on the `Betting ledger` tab.
+`Diagnose odds export profile`, `Preview odds export conversion`, `Preview
+current odds import`, `Preview current odds maintenance`, `Check odds entry
+completeness`, `Validate current odds`, then `Generate Thursday best-bets
+report`, on the `Betting ledger` tab.
 The dashboard only previews imports and maintenance and shows report tables.
 It does not overwrite an existing odds file, apply imports or maintenance,
 edit odds, or force generation.

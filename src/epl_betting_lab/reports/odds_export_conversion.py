@@ -56,7 +56,10 @@ def load_odds_import_profiles(path: Path | None = None) -> dict[str, dict[str, o
     return profiles
 
 
-def _validate_profile(profile_name: str, profile: dict[str, object]) -> tuple[dict[str, str], list[str]]:
+def validate_odds_import_profile(
+    profile_name: str,
+    profile: dict[str, object],
+) -> tuple[dict[str, str], list[str]]:
     column_map = profile.get("column_map")
     if not isinstance(column_map, dict) or not column_map:
         return {}, [f"Profile `{profile_name}` must define a non-empty `column_map` object."]
@@ -275,7 +278,7 @@ def convert_odds_export(
             "message": f"Profile `{profile_name}` must be a JSON object.",
         }
         return _save_conversion_reports(empty_preview, summary, None, output_dir)
-    column_map, profile_issues = _validate_profile(profile_name, profile)
+    column_map, profile_issues = validate_odds_import_profile(profile_name, profile)
     if profile_issues:
         summary = {**base_summary, "source_status": "profile_error", "message": " ".join(profile_issues)}
         return _save_conversion_reports(empty_preview, summary, column_map, output_dir)

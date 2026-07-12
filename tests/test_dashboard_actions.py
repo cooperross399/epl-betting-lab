@@ -15,6 +15,7 @@ from epl_betting_lab.dashboard_actions import (
     run_ledger_health_check,
     run_post_thursday_review,
     run_settlement_preview,
+    run_tier_performance_report,
     run_thursday_best_bets_comparison,
     run_thursday_best_bets_report,
     run_thursday_decision_queue,
@@ -186,6 +187,22 @@ def test_run_thursday_decision_queue_writes_report(tmp_path) -> None:
     assert paths["markdown"].name == "thursday_decision_queue.md"
     assert paths["csv"].exists()
     assert "comparison report is missing" in paths["markdown"].read_text(encoding="utf-8")
+
+
+def test_run_tier_performance_report_writes_outputs(tmp_path) -> None:
+    ledger_path = tmp_path / "bet_ledger.csv"
+    output_dir = tmp_path / "outputs"
+    _ledger(ledger_path)
+
+    paths = run_tier_performance_report(ledger_path, output_dir)
+
+    assert paths["summary"].name == "tier_performance_summary.csv"
+    assert paths["market"].name == "tier_performance_by_market.csv"
+    assert paths["team"].name == "tier_performance_by_team.csv"
+    assert paths["odds_range"].name == "tier_performance_by_odds_range.csv"
+    assert paths["clv"].name == "tier_performance_by_clv.csv"
+    assert paths["markdown"].name == "tier_performance_report.md"
+    assert "Tier Performance Report" in paths["markdown"].read_text(encoding="utf-8")
 
 
 def test_thursday_best_bets_stops_when_current_odds_missing(tmp_path) -> None:

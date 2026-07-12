@@ -330,6 +330,20 @@ Then read:
 data/outputs/bet_ledger_summary.md
 ```
 
+To review whether A, B, C, LEAN, and PASS/Avoid tiers are actually performing,
+run:
+
+```bash
+python scripts/generate_tier_performance_report.py
+```
+
+This writes `data/outputs/tier_performance_report.md` plus CSV breakdowns by
+tier, market, team, odds range, and CLV when closing odds are available.
+Settled ledger bets count toward profit/loss. Archived Thursday recommendations
+that were not bet are tracked separately as recommendation-only rows. The
+dashboard has a safe `Generate tier performance report` button for the same
+read-only report.
+
 To create draft ledger rows from the weekly card instead of copying each play
 by hand, run this after `python scripts/generate_weekly_card.py`:
 

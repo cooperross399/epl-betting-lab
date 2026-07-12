@@ -29,6 +29,7 @@ from epl_betting_lab.reports.thursday_best_bets import (
 )
 from epl_betting_lab.reports.thursday_best_bets_comparison import save_thursday_best_bets_comparison
 from epl_betting_lab.reports.thursday_decision_queue import save_thursday_decision_queue
+from epl_betting_lab.reports.tier_performance import save_tier_performance_reports
 from epl_betting_lab.strategies.btts import evaluate_btts
 from epl_betting_lab.strategies.ml_value import evaluate_1x2_value
 from epl_betting_lab.strategies.totals import evaluate_total_25
@@ -174,6 +175,13 @@ def run_thursday_best_bets_comparison(output_dir: Path | None = None) -> dict[st
 
 def run_thursday_decision_queue(output_dir: Path | None = None) -> dict[str, Path]:
     return save_thursday_decision_queue(output_dir or OUTPUTS_DIR)
+
+
+def run_tier_performance_report(
+    ledger_path: Path | None = None,
+    output_dir: Path | None = None,
+) -> dict[str, Path]:
+    return save_tier_performance_reports(ledger_path or MANUAL_DIR / "bet_ledger.csv", output_dir or OUTPUTS_DIR)
 
 
 def run_post_thursday_review(

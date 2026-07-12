@@ -103,6 +103,23 @@ run the diagnostic again. Nothing is imported or applied by this step.
 The dashboard button `Diagnose odds export profile` performs the same safe,
 read-only check and displays both the report and comparison table.
 
+If no existing profile fully matches, create a review-only draft:
+
+```bash
+python scripts/suggest_odds_export_profile.py --source data/manual/sportsbook_export.csv --profile-name example_book
+```
+
+Open `data/outputs/odds_export_profile_suggestion.md`. High confidence means a
+source header exactly matched a known alias. Medium confidence means it matched
+only after spaces or separators were removed. `REVIEW_NEEDED` means the helper
+did not make a safe choice. Optional fields may remain blank.
+
+The JSON and markdown outputs are drafts only. The helper does not edit
+`odds_import_profiles.json`, `current_odds.csv`, or `current_odds_import.csv`.
+After checking every confidence note, manually add the approved profile to the
+registry and rerun the diagnostic. The dashboard button `Suggest odds export
+profile` provides the same safe workflow and lets you enter a draft name.
+
 When the report identifies the right profile, convert the export:
 
 ```bash
@@ -225,10 +242,10 @@ python scripts/generate_thursday_best_bets.py --force
 ```
 
 You can also open the dashboard and click `Create current odds template`,
-`Diagnose odds export profile`, `Preview odds export conversion`, `Preview
-current odds import`, `Preview current odds maintenance`, `Check odds entry
-completeness`, `Validate current odds`, then `Generate Thursday best-bets
-report`, on the `Betting ledger` tab.
+`Diagnose odds export profile`, `Suggest odds export profile`, `Preview odds
+export conversion`, `Preview current odds import`, `Preview current odds
+maintenance`, `Check odds entry completeness`, `Validate current odds`, then
+`Generate Thursday best-bets report`, on the `Betting ledger` tab.
 The dashboard only previews imports and maintenance and shows report tables.
 It does not overwrite an existing odds file, apply imports or maintenance,
 edit odds, or force generation.

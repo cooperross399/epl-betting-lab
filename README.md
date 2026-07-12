@@ -195,6 +195,27 @@ If there is no full match, update the closest profile or add a new one before
 converting. The diagnostic never creates an import file or edits odds. The
 dashboard button `Diagnose odds export profile` runs the same read-only check.
 
+To create a conservative draft for an unmatched export, run:
+
+```bash
+python scripts/suggest_odds_export_profile.py --source data/manual/sportsbook_export.csv --profile-name example_book
+```
+
+The suggestion uses only known column aliases. Exact matches receive high
+confidence, compact spelling matches receive medium confidence, and ambiguous
+or unknown required fields remain `REVIEW_NEEDED`. It writes:
+
+```text
+data/outputs/odds_export_profile_suggestion.json
+data/outputs/odds_export_profile_suggestion.md
+```
+
+These are review-only drafts. The helper never edits
+`data/manual/odds_import_profiles.json`, either odds CSV, or the ledger. Review
+the confidence notes and unmapped columns, manually add the approved profile,
+then rerun the diagnostic. The dashboard button `Suggest odds export profile`
+runs the same safe draft workflow.
+
 After choosing a profile, preview the conversion:
 
 ```bash
@@ -725,6 +746,7 @@ epl-betting-lab/
 ├── scripts/
 │   ├── fetch_data.py
 │   ├── diagnose_odds_export.py
+│   ├── suggest_odds_export_profile.py
 │   ├── convert_odds_export.py
 │   ├── import_current_odds.py
 │   ├── run_backtest.py

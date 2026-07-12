@@ -16,6 +16,7 @@ from epl_betting_lab.dashboard_actions import (
     run_ledger_health_check,
     run_odds_export_conversion_preview,
     run_odds_export_profile_diagnostic,
+    run_odds_export_profile_suggestion,
     run_post_thursday_review,
     run_settlement_preview,
     run_tier_performance_report,
@@ -283,6 +284,54 @@ def test_run_odds_export_profile_diagnostic_reports_missing_source_cleanly(tmp_p
 
     assert "Missing source export" in str(exc.value)
     assert (output_dir / "odds_export_profile_diagnostic.md").exists()
+
+
+def test_run_odds_export_profile_suggestion_is_read_only(tmp_path) -> None:
+    source_path = tmp_path / "sportsbook_export.csv"
+    output_dir = tmp_path / "outputs"
+    profiles_path = tmp_path / "odds_import_profiles.json"
+    current_odds_path = tmp_path / "current_odds.csv"
+    import_path = tmp_path / "current_odds_import.csv"
+    pd.DataFrame([
+        {
+            "game_date": "2026-08-21",
+            "home": "Arsenal",
+            "away": "Coventry",
+            "bet_type": "1x2",
+            "pick": "home",
+            "odds": "+120",
+            "sportsbook": "ExampleBook",
+        }
+    ]).to_csv(source_path, index=False)
+    profiles_path.write_text('{"profiles":{"keep":{}}}\n', encoding="utf-8")
+    current_odds_path.write_text("keep current odds\n", encoding="utf-8")
+    import_path.write_text("keep import\n", encoding="utf-8")
+    originals = {
+        path: path.read_text(encoding="utf-8")
+        for path in [profiles_path, current_odds_path, import_path]
+    }
+
+    paths = run_odds_export_profile_suggestion("example_book", source_path, output_dir)
+
+    assert paths["status"] == "draft_ready_for_review"
+    assert paths["json"].exists()
+    assert paths["markdown"].exists()
+    for path, original in originals.items():
+        assert path.read_text(encoding="utf-8") == original
+
+
+def test_run_odds_export_profile_suggestion_reports_missing_source_cleanly(tmp_path) -> None:
+    output_dir = tmp_path / "outputs"
+
+    with pytest.raises(dashboard_actions.OddsExportProfileSuggestionError) as exc:
+        run_odds_export_profile_suggestion(
+            "draft_sportsbook",
+            tmp_path / "missing.csv",
+            output_dir,
+        )
+
+    assert "Missing source export" in str(exc.value)
+    assert (output_dir / "odds_export_profile_suggestion.md").exists()
 
 
 def test_run_current_odds_completeness_writes_report_without_editing_odds(tmp_path, monkeypatch) -> None:

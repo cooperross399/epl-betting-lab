@@ -31,6 +31,11 @@ from epl_betting_lab.reports.odds_export_profile_diagnostic import (
     OddsExportProfileDiagnosticError,
     diagnose_odds_export_profiles,
 )
+from epl_betting_lab.reports.odds_export_profile_suggestion import (
+    FATAL_SUGGESTION_STATUSES,
+    OddsExportProfileSuggestionError,
+    suggest_odds_export_profile,
+)
 from epl_betting_lab.reports.thursday_best_bets import (
     build_thursday_best_bets,
     list_recent_thursday_archives,
@@ -229,6 +234,23 @@ def run_odds_export_profile_diagnostic(
     if paths["status"] in FATAL_DIAGNOSTIC_STATUSES:
         raise OddsExportProfileDiagnosticError(
             str(paths.get("message", "Odds export profile diagnostic could not run."))
+        )
+    return paths
+
+
+def run_odds_export_profile_suggestion(
+    profile_name: str = "draft_sportsbook",
+    source_path: Path | None = None,
+    output_dir: Path | None = None,
+) -> dict[str, Path | str]:
+    paths = suggest_odds_export_profile(
+        source_path or MANUAL_DIR / "sportsbook_export.csv",
+        profile_name,
+        output_dir or OUTPUTS_DIR,
+    )
+    if paths["status"] in FATAL_SUGGESTION_STATUSES:
+        raise OddsExportProfileSuggestionError(
+            str(paths.get("message", "Odds export profile suggestion could not run."))
         )
     return paths
 

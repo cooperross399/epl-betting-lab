@@ -71,6 +71,23 @@ def _joined(values: list[str] | set[str]) -> str:
     return ", ".join(sorted(value for value in values if value))
 
 
+def read_odds_export_source(
+    source_path: Path,
+) -> tuple[pd.DataFrame | None, str, str]:
+    """Read an export without changing it and return a beginner-friendly status."""
+    if not source_path.exists():
+        return None, "missing_source", f"Missing source export `{source_path}`. Save the CSV there and run again."
+    try:
+        source = pd.read_csv(source_path, dtype=str).fillna("")
+    except pd.errors.EmptyDataError:
+        source = pd.DataFrame()
+    except (OSError, UnicodeError, pd.errors.ParserError) as exc:
+        return None, "unreadable_source", f"The source export could not be read as CSV: {exc}"
+    if source.empty:
+        return source, "empty_source", "The source export exists, but it has no odds rows to inspect."
+    return source, "ready", "The source export was read successfully."
+
+
 def _normalization_details(
     profile_name: str,
     preview: pd.DataFrame,
@@ -383,36 +400,14 @@ def diagnose_odds_export_profiles(
         "possible_matching_profiles": "",
     }
 
-    if not source_path.exists():
-        summary.update(
-            {
-                "status": "missing_source",
-                "message": f"Missing source export `{source_path}`. Save the CSV there and run again.",
-            }
-        )
-        return _save_diagnostic(empty, empty_sample, summary, output_dir)
-    try:
-        source = pd.read_csv(source_path, dtype=str).fillna("")
-    except pd.errors.EmptyDataError:
-        source = pd.DataFrame()
-    except (OSError, UnicodeError, pd.errors.ParserError) as exc:
-        summary.update(
-            {
-                "status": "unreadable_source",
-                "message": f"The source export could not be read as CSV: {exc}",
-            }
-        )
+    source, source_status, source_message = read_odds_export_source(source_path)
+    if source is None or source_status != "ready":
+        if source is not None:
+            summary["detected_columns"] = _joined(set(source.columns))
+        summary.update({"status": source_status, "message": source_message})
         return _save_diagnostic(empty, empty_sample, summary, output_dir)
 
     summary["detected_columns"] = _joined(set(source.columns))
-    if source.empty:
-        summary.update(
-            {
-                "status": "empty_source",
-                "message": "The source export exists, but it has no odds rows to diagnose.",
-            }
-        )
-        return _save_diagnostic(empty, empty_sample, summary, output_dir)
 
     try:
         profiles = load_odds_import_profiles(profiles_path)

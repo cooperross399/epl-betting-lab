@@ -8,6 +8,7 @@ import pandas as pd
 from epl_betting_lab.config import OUTPUTS_DIR
 from epl_betting_lab.reports.thursday_archive_pair import (
     build_thursday_archive_count_change_note,
+    build_thursday_archive_count_change_risk,
     build_thursday_archive_pair,
 )
 
@@ -62,6 +63,7 @@ def build_thursday_decision_queue(output_dir: Path | None = None) -> tuple[pd.Da
     output_dir = output_dir or OUTPUTS_DIR
     archive_pair = build_thursday_archive_pair(output_dir)
     count_change = build_thursday_archive_count_change_note(output_dir)
+    count_risk = build_thursday_archive_count_change_risk(output_dir)
     comparison_path = output_dir / "thursday_best_bets_comparison.csv"
     if not comparison_path.exists():
         return pd.DataFrame(columns=QUEUE_COLUMNS), {
@@ -71,6 +73,8 @@ def build_thursday_decision_queue(output_dir: Path | None = None) -> tuple[pd.Da
             "comparison_label": "Comparison not available yet",
             "archive_pair_label": archive_pair["label"],
             "count_change_note": count_change["note"],
+            "count_change_risk_flag": count_risk["risk_flag"],
+            "count_change_risk_reason": count_risk["risk_reason"],
             "total_rows": 0,
         }
 
@@ -84,6 +88,8 @@ def build_thursday_decision_queue(output_dir: Path | None = None) -> tuple[pd.Da
             "comparison_label": archive_pair["label"],
             "archive_pair_label": archive_pair["label"],
             "count_change_note": count_change["note"],
+            "count_change_risk_flag": count_risk["risk_flag"],
+            "count_change_risk_reason": count_risk["risk_reason"],
             "total_rows": 0,
             "action_counts": {},
         }
@@ -105,6 +111,8 @@ def build_thursday_decision_queue(output_dir: Path | None = None) -> tuple[pd.Da
         "comparison_label": archive_pair["label"],
         "archive_pair_label": archive_pair["label"],
         "count_change_note": count_change["note"],
+        "count_change_risk_flag": count_risk["risk_flag"],
+        "count_change_risk_reason": count_risk["risk_reason"],
         "total_rows": int(len(queue)),
         "action_counts": queue["action_needed"].value_counts().to_dict(),
     }
@@ -156,6 +164,7 @@ def render_thursday_decision_queue(queue: pd.DataFrame, summary: dict[str, Any])
             str(summary.get("comparison_label", "Comparison not available yet")),
             str(summary.get("archive_pair_label", "")),
             str(summary.get("count_change_note", "Card count changes: comparison not available yet.")),
+            f"Count-change risk: {summary.get('count_change_risk_flag', 'Not enough archive history')}. {summary.get('count_change_risk_reason', '')}",
             "",
             str(summary.get("message", missing_comparison_message())),
             "",
@@ -172,6 +181,7 @@ def render_thursday_decision_queue(queue: pd.DataFrame, summary: dict[str, Any])
         lines.extend([
             str(summary.get("comparison_label", "Comparison not available yet")),
             str(summary.get("count_change_note", "Card count changes: unavailable.")),
+            f"Count-change risk: {summary.get('count_change_risk_flag', 'Stable card')}. {summary.get('count_change_risk_reason', '')}",
             "",
             str(summary.get("message", "No changed plays are available to review.")),
             "",
@@ -181,6 +191,7 @@ def render_thursday_decision_queue(queue: pd.DataFrame, summary: dict[str, Any])
     lines.extend([
         str(summary.get("comparison_label", "Comparison not available yet")),
         str(summary.get("count_change_note", "Card count changes: unavailable.")),
+        f"Count-change risk: {summary.get('count_change_risk_flag', 'Stable card')}. {summary.get('count_change_risk_reason', '')}",
         "",
         f"Total changed plays in queue: {int(summary.get('total_rows', len(queue)))}",
         "",

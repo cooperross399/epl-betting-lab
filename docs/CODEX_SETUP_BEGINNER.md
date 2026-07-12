@@ -230,6 +230,9 @@ when metadata is missing or a file cannot be read.
 The dashboard and comparison report also show a quick card count-change note
 for best bets, leans, passes, and total rows before you open the full
 comparison.
+The count-change risk flag is conservative: a best-bet drop of 2+, pass/lean
+increase of 5+, total-candidate move of 5+, or incomplete archive data gets
+called out for review.
 
 After the comparison exists, create a compact decision queue:
 

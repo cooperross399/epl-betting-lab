@@ -264,6 +264,65 @@ def build_thursday_archive_count_change_note(output_dir: Path | None = None) -> 
     }
 
 
+def _count_delta(previous: int | None, latest: int | None) -> int | None:
+    if previous is None or latest is None:
+        return None
+    return latest - previous
+
+
+def build_thursday_archive_count_change_risk(output_dir: Path | None = None) -> dict[str, object]:
+    count_change = build_thursday_archive_count_change_note(output_dir)
+    if not count_change["available"]:
+        return {
+            "risk_flag": "Not enough archive history",
+            "risk_reason": "Generate at least two Thursday best-bets archive snapshots before judging count-change risk.",
+        }
+
+    notes = " ".join(str(note) for note in count_change.get("notes", []))
+    if "Could not read archived CSV" in notes or "section` is missing" in notes:
+        return {
+            "risk_flag": "Possible missing odds/data issue",
+            "risk_reason": "One or both archived CSV files could not provide complete section counts, so review the archive history details before trusting the comparison.",
+        }
+
+    latest = count_change["latest_counts"]
+    previous = count_change["previous_counts"]
+    best_delta = _count_delta(previous["best_bets"], latest["best_bets"])
+    leans_delta = _count_delta(previous["leans"], latest["leans"])
+    passes_delta = _count_delta(previous["passes"], latest["passes"])
+    total_delta = _count_delta(previous["total"], latest["total"])
+
+    if total_delta is not None and abs(total_delta) >= 5:
+        return {
+            "risk_flag": "Candidate count changed sharply",
+            "risk_reason": f"Total candidates changed by {total_delta:+d}, which can mean the odds file, fixture list, or filters changed materially.",
+        }
+    if passes_delta is not None and passes_delta >= 5:
+        return {
+            "risk_flag": "Passes increased sharply",
+            "risk_reason": f"Passes increased by {passes_delta:+d}, so review whether prices moved, validation warnings appeared, or more rows became avoids.",
+        }
+    if leans_delta is not None and leans_delta >= 5:
+        return {
+            "risk_flag": "Leans increased sharply",
+            "risk_reason": f"Leans increased by {leans_delta:+d}, so the card may have more watchlist plays and fewer clear decisions.",
+        }
+    if best_delta is not None and best_delta <= -2:
+        return {
+            "risk_flag": "Fewer bettable plays",
+            "risk_reason": f"Best bets dropped by {best_delta:+d}, so review whether odds got worse or calibration filtered plays out.",
+        }
+    if best_delta is not None and best_delta >= 2:
+        return {
+            "risk_flag": "More bettable plays",
+            "risk_reason": f"Best bets increased by {best_delta:+d}; review prices carefully before trusting the larger card.",
+        }
+    return {
+        "risk_flag": "Stable card",
+        "risk_reason": "Best bets, leans, passes, and total candidates did not move enough to trigger a count-change warning.",
+    }
+
+
 def build_thursday_archive_history_details(output_dir: Path | None = None) -> tuple[pd.DataFrame, str]:
     snapshots = list_thursday_archive_snapshots(output_dir=output_dir, limit=2)
     if snapshots.empty:

@@ -7,6 +7,7 @@ import pandas as pd
 from epl_betting_lab.config import OUTPUTS_DIR
 from epl_betting_lab.reports.thursday_archive_pair import (
     build_thursday_archive_count_change_note,
+    build_thursday_archive_count_change_risk,
     build_thursday_archive_pair,
 )
 
@@ -353,6 +354,7 @@ def build_thursday_best_bets_comparison(output_dir: Path | None = None) -> tuple
     output_dir = output_dir or OUTPUTS_DIR
     archive_pair = build_thursday_archive_pair(output_dir)
     count_change = build_thursday_archive_count_change_note(output_dir)
+    count_risk = build_thursday_archive_count_change_risk(output_dir)
     if not archive_pair["available"]:
         return pd.DataFrame(columns=COMPARISON_COLUMNS), {
             "available": False,
@@ -364,6 +366,8 @@ def build_thursday_best_bets_comparison(output_dir: Path | None = None) -> tuple
             "comparison_label": archive_pair["label"],
             "archive_pair_status": archive_pair["status"],
             "count_change_note": count_change["note"],
+            "count_change_risk_flag": count_risk["risk_flag"],
+            "count_change_risk_reason": count_risk["risk_reason"],
         }
 
     latest_archive = Path(str(archive_pair["latest"]["csv"]))
@@ -404,6 +408,8 @@ def build_thursday_best_bets_comparison(output_dir: Path | None = None) -> tuple
         "comparison_label": archive_pair["label"],
         "archive_pair_status": archive_pair["status"],
         "count_change_note": count_change["note"],
+        "count_change_risk_flag": count_risk["risk_flag"],
+        "count_change_risk_reason": count_risk["risk_reason"],
         "total_changes": int(len(comparison)),
         "added": int((comparison["change_type"] == "added").sum()) if not comparison.empty else 0,
         "removed": int((comparison["change_type"] == "removed").sum()) if not comparison.empty else 0,
@@ -423,6 +429,7 @@ def render_thursday_best_bets_comparison(comparison: pd.DataFrame, summary: dict
         lines.extend([
             f"- {summary.get('comparison_label', 'Comparison not available yet')}",
             f"- {summary.get('count_change_note', 'Card count changes: comparison not available yet.')}",
+            f"- Count-change risk: {summary.get('count_change_risk_flag', 'Not enough archive history')}. {summary.get('count_change_risk_reason', '')}",
             "",
             str(summary.get("message", "Comparison is not available yet.")),
             "",
@@ -433,6 +440,7 @@ def render_thursday_best_bets_comparison(comparison: pd.DataFrame, summary: dict
     lines.extend([
         f"- {summary['comparison_label']}",
         f"- {summary.get('count_change_note', 'Card count changes: unavailable.')}",
+        f"- Count-change risk: {summary.get('count_change_risk_flag', 'Stable card')}. {summary.get('count_change_risk_reason', '')}",
         f"- Latest archive: `{summary['latest_archive']}`",
         f"- Previous archive: `{summary['previous_archive']}`",
         f"- Total changes: {summary.get('total_changes', 0)}",

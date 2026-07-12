@@ -28,6 +28,7 @@ from epl_betting_lab.reports.current_odds_validation import CurrentOddsValidatio
 from epl_betting_lab.reports.thursday_archive_pair import (
     build_thursday_archive_history_details,
     build_thursday_archive_count_change_note,
+    build_thursday_archive_count_change_risk,
     build_thursday_archive_pair,
 )
 from epl_betting_lab.reports.thursday_best_bets import list_recent_thursday_archives
@@ -270,6 +271,8 @@ def render_thursday_best_bets_panel() -> None:
 
     count_change = build_thursday_archive_count_change_note()
     st.caption(count_change["note"])
+    count_risk = build_thursday_archive_count_change_risk()
+    st.caption(f"Count-change risk: {count_risk['risk_flag']}. {count_risk['risk_reason']}")
 
     with st.expander("Archive history details", expanded=False):
         archive_details, archive_message = build_thursday_archive_history_details()

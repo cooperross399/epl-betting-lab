@@ -8,6 +8,7 @@ import pandas as pd
 from epl_betting_lab.reports.thursday_archive_pair import (
     build_thursday_archive_history_details,
     build_thursday_archive_count_change_note,
+    build_thursday_archive_count_change_risk,
     build_thursday_archive_pair,
     list_thursday_archive_snapshots,
 )
@@ -203,3 +204,71 @@ def test_archive_count_change_note_handles_missing_section_column(tmp_path) -> N
     assert "Best bets n/a -> n/a" in note["note"]
     assert "Total 1 -> 1 (0)" in note["note"]
     assert "section` is missing" in " ".join(note["notes"])
+
+
+def test_archive_count_change_risk_reports_missing_history(tmp_path) -> None:
+    risk = build_thursday_archive_count_change_risk(tmp_path)
+
+    assert risk["risk_flag"] == "Not enough archive history"
+    assert "at least two" in risk["risk_reason"]
+
+
+def test_archive_count_change_risk_flags_more_or_fewer_bettable_plays(tmp_path) -> None:
+    _write_archive(tmp_path, "2026-07-08T11:00:00", best_bets=4, leans=2, passes=1)
+    _write_archive(tmp_path, "2026-07-09T12:30:00", best_bets=1, leans=2, passes=1)
+
+    fewer = build_thursday_archive_count_change_risk(tmp_path)
+
+    assert fewer["risk_flag"] == "Fewer bettable plays"
+    assert "Best bets dropped" in fewer["risk_reason"]
+
+    tmp_more = tmp_path / "more"
+    _write_archive(tmp_more, "2026-07-08T11:00:00", best_bets=1, leans=2, passes=1)
+    _write_archive(tmp_more, "2026-07-09T12:30:00", best_bets=3, leans=2, passes=1)
+
+    more = build_thursday_archive_count_change_risk(tmp_more)
+
+    assert more["risk_flag"] == "More bettable plays"
+    assert "review prices" in more["risk_reason"].lower()
+
+
+def test_archive_count_change_risk_flags_sharp_pass_lean_and_total_changes(tmp_path) -> None:
+    _write_archive(tmp_path, "2026-07-08T11:00:00", best_bets=1, leans=1, passes=1)
+    _write_archive(tmp_path, "2026-07-09T12:30:00", best_bets=1, leans=1, passes=6)
+
+    total = build_thursday_archive_count_change_risk(tmp_path)
+
+    assert total["risk_flag"] == "Candidate count changed sharply"
+
+    tmp_passes = tmp_path / "passes"
+    _write_archive(tmp_passes, "2026-07-08T11:00:00", best_bets=3, leans=5, passes=1)
+    _write_archive(tmp_passes, "2026-07-09T12:30:00", best_bets=3, leans=0, passes=6)
+
+    passes = build_thursday_archive_count_change_risk(tmp_passes)
+
+    assert passes["risk_flag"] == "Passes increased sharply"
+
+    tmp_leans = tmp_path / "leans"
+    _write_archive(tmp_leans, "2026-07-08T11:00:00", best_bets=3, leans=1, passes=5)
+    _write_archive(tmp_leans, "2026-07-09T12:30:00", best_bets=3, leans=6, passes=0)
+
+    leans = build_thursday_archive_count_change_risk(tmp_leans)
+
+    assert leans["risk_flag"] == "Leans increased sharply"
+
+
+def test_archive_count_change_risk_flags_possible_data_issue_and_stable_card(tmp_path) -> None:
+    _write_archive(tmp_path, "2026-07-08T11:00:00", with_metadata=False, rows=[{"team": "Arsenal"}])
+    _write_archive(tmp_path, "2026-07-09T12:30:00", with_metadata=False, rows=[{"team": "Chelsea"}])
+
+    data_issue = build_thursday_archive_count_change_risk(tmp_path)
+
+    assert data_issue["risk_flag"] == "Possible missing odds/data issue"
+
+    tmp_stable = tmp_path / "stable"
+    _write_archive(tmp_stable, "2026-07-08T11:00:00", best_bets=2, leans=3, passes=4)
+    _write_archive(tmp_stable, "2026-07-09T12:30:00", best_bets=2, leans=3, passes=4)
+
+    stable = build_thursday_archive_count_change_risk(tmp_stable)
+
+    assert stable["risk_flag"] == "Stable card"

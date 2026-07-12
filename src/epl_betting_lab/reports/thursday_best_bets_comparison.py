@@ -46,6 +46,7 @@ COMPARISON_COLUMNS = [
 ]
 KEY_COLUMNS = ["home_team", "away_team", "market", "selection"]
 WATCH_COLUMNS = ["status", "confidence_tier", "ranking_score", "american_odds", "calibrated_edge", "suggested_units"]
+TOP_REASON_COLUMNS = ["movement_category", "action_needed"]
 
 
 def _blank_row(key: tuple[str, ...], previous_archive: str, latest_archive: str) -> dict[str, object]:
@@ -306,6 +307,128 @@ def _action_needed(row: dict[str, object]) -> tuple[str, str]:
     return "No action", "No specific action is needed beyond normal review."
 
 
+def _movement_reason_group(row: pd.Series) -> str:
+    category = _clean(row.get("movement_category"))
+    action = _clean(row.get("action_needed"))
+    details = " ".join([
+        category.lower(),
+        action.lower(),
+        _clean(row.get("movement_reason")).lower(),
+        _clean(row.get("action_reason")).lower(),
+        _clean(row.get("details")).lower(),
+    ])
+
+    if "validation" in details or "missing" in details or action == "Recheck validation":
+        return "Possible missing odds/data issue"
+    if category in {"New play", "Removed play"}:
+        return "Mostly new/removed plays"
+    if category in {"Became BETTABLE", "Fell to LEAN", "Became PASS/Avoid", "Tier upgraded", "Tier downgraded"}:
+        return "Mostly tier/status changes"
+    if category in {"Odds moved in our favor", "Odds moved against us"} or action in {"Review price", "Recheck odds"}:
+        return "Mostly odds movement"
+    if category in {"Edge improved", "Edge disappeared"}:
+        return "Mostly edge movement"
+    if category in {"Suggested units increased", "Suggested units decreased"}:
+        return "Mostly unit-size changes"
+    return "No meaningful movement"
+
+
+def _top_reason_detail(reason: str, count: int, total: int, score: float) -> str:
+    if reason == "Possible missing odds/data issue":
+        return (
+            f"{count} of {total} changed plays point to missing, validation, or data-quality checks. "
+            "Review odds validation before trusting the card movement."
+        )
+    if reason == "Mostly new/removed plays":
+        return f"{count} of {total} changed plays were added or removed, so card composition changed most."
+    if reason == "Mostly tier/status changes":
+        return f"{count} of {total} changed plays moved between BETTABLE, LEAN, PASS/Avoid, or confidence tiers."
+    if reason == "Mostly odds movement":
+        return f"{count} of {total} changed plays were mainly driven by price movement or price-review actions."
+    if reason == "Mostly edge movement":
+        return f"{count} of {total} changed plays were mainly driven by calibrated edge movement."
+    if reason == "Mostly unit-size changes":
+        return f"{count} of {total} changed plays were mainly driven by suggested unit-size changes."
+    return f"No movement category clearly dominated across {total} changed plays; the strongest group scored {score:.1f}."
+
+
+def build_top_card_movement_reason(
+    output_dir: Path | None = None,
+    comparison: pd.DataFrame | None = None,
+) -> dict[str, object]:
+    output_dir = output_dir or OUTPUTS_DIR
+    archive_pair = build_thursday_archive_pair(output_dir)
+    if not archive_pair["available"]:
+        return {
+            "top_movement_reason": "Not enough archive history",
+            "movement_reason_detail": archive_pair["message"],
+        }
+
+    if comparison is None:
+        comparison_path = output_dir / "thursday_best_bets_comparison.csv"
+        if not comparison_path.exists():
+            return {
+                "top_movement_reason": "No comparison report yet",
+                "movement_reason_detail": (
+                    "Run `python scripts/compare_thursday_best_bets.py` after at least two archived Thursday cards exist."
+                ),
+            }
+        try:
+            comparison = pd.read_csv(comparison_path).fillna("")
+        except Exception as exc:
+            return {
+                "top_movement_reason": "Possible missing odds/data issue",
+                "movement_reason_detail": f"The comparison CSV could not be read: {exc}",
+            }
+
+    if comparison.empty:
+        return {
+            "top_movement_reason": "No meaningful movement",
+            "movement_reason_detail": "The latest comparison report has no changed plays.",
+        }
+
+    missing_columns = [column for column in TOP_REASON_COLUMNS if column not in comparison.columns]
+    if missing_columns:
+        return {
+            "top_movement_reason": "Possible missing odds/data issue",
+            "movement_reason_detail": (
+                "The comparison CSV is missing movement/action columns: " + ", ".join(missing_columns) + "."
+            ),
+        }
+
+    scored = comparison.copy()
+    if "importance_score" not in scored.columns:
+        scored["importance_score"] = 0.0
+    scored["importance_score"] = pd.to_numeric(scored["importance_score"], errors="coerce").fillna(0.0)
+    scored["_movement_reason_group"] = scored.apply(_movement_reason_group, axis=1)
+    useful = scored[scored["_movement_reason_group"] != "No meaningful movement"]
+    if useful.empty:
+        return {
+            "top_movement_reason": "No meaningful movement",
+            "movement_reason_detail": "The comparison report exists, but no movement category clearly explains the changes.",
+        }
+
+    grouped = (
+        useful.groupby("_movement_reason_group")
+        .agg(count=("_movement_reason_group", "size"), importance=("importance_score", "sum"))
+        .reset_index()
+    )
+    grouped = grouped.sort_values(
+        ["importance", "count", "_movement_reason_group"],
+        ascending=[False, False, True],
+    ).reset_index(drop=True)
+    top = grouped.iloc[0]
+    reason = str(top["_movement_reason_group"])
+    count = int(top["count"])
+    total = int(len(scored))
+    importance = float(top["importance"])
+    return {
+        "top_movement_reason": reason,
+        "movement_reason_detail": _top_reason_detail(reason, count, total, importance),
+        "movement_group_counts": grouped.set_index("_movement_reason_group")["count"].to_dict(),
+    }
+
+
 def _comparison_row(
     key: tuple[str, ...],
     previous: pd.Series | None,
@@ -356,6 +479,7 @@ def build_thursday_best_bets_comparison(output_dir: Path | None = None) -> tuple
     count_change = build_thursday_archive_count_change_note(output_dir)
     count_risk = build_thursday_archive_count_change_risk(output_dir)
     if not archive_pair["available"]:
+        top_reason = build_top_card_movement_reason(output_dir, pd.DataFrame(columns=COMPARISON_COLUMNS))
         return pd.DataFrame(columns=COMPARISON_COLUMNS), {
             "available": False,
             "message": "Comparison is not available yet. Generate at least two Thursday best-bets archive snapshots first.",
@@ -368,6 +492,8 @@ def build_thursday_best_bets_comparison(output_dir: Path | None = None) -> tuple
             "count_change_note": count_change["note"],
             "count_change_risk_flag": count_risk["risk_flag"],
             "count_change_risk_reason": count_risk["risk_reason"],
+            "top_movement_reason": top_reason["top_movement_reason"],
+            "movement_reason_detail": top_reason["movement_reason_detail"],
         }
 
     latest_archive = Path(str(archive_pair["latest"]["csv"]))
@@ -415,6 +541,11 @@ def build_thursday_best_bets_comparison(output_dir: Path | None = None) -> tuple
         "removed": int((comparison["change_type"] == "removed").sum()) if not comparison.empty else 0,
         "updated": int((~comparison["change_type"].isin(["added", "removed"])).sum()) if not comparison.empty else 0,
     }
+    top_reason = build_top_card_movement_reason(output_dir, comparison)
+    summary.update({
+        "top_movement_reason": top_reason["top_movement_reason"],
+        "movement_reason_detail": top_reason["movement_reason_detail"],
+    })
     return comparison, summary
 
 
@@ -430,6 +561,7 @@ def render_thursday_best_bets_comparison(comparison: pd.DataFrame, summary: dict
             f"- {summary.get('comparison_label', 'Comparison not available yet')}",
             f"- {summary.get('count_change_note', 'Card count changes: comparison not available yet.')}",
             f"- Count-change risk: {summary.get('count_change_risk_flag', 'Not enough archive history')}. {summary.get('count_change_risk_reason', '')}",
+            f"- Top card movement reason: {summary.get('top_movement_reason', 'Not enough archive history')}. {summary.get('movement_reason_detail', '')}",
             "",
             str(summary.get("message", "Comparison is not available yet.")),
             "",
@@ -441,6 +573,7 @@ def render_thursday_best_bets_comparison(comparison: pd.DataFrame, summary: dict
         f"- {summary['comparison_label']}",
         f"- {summary.get('count_change_note', 'Card count changes: unavailable.')}",
         f"- Count-change risk: {summary.get('count_change_risk_flag', 'Stable card')}. {summary.get('count_change_risk_reason', '')}",
+        f"- Top card movement reason: {summary.get('top_movement_reason', 'No meaningful movement')}. {summary.get('movement_reason_detail', '')}",
         f"- Latest archive: `{summary['latest_archive']}`",
         f"- Previous archive: `{summary['previous_archive']}`",
         f"- Total changes: {summary.get('total_changes', 0)}",

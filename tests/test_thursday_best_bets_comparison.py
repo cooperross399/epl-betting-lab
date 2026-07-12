@@ -7,6 +7,7 @@ import pandas as pd
 
 from epl_betting_lab.reports.thursday_best_bets_comparison import (
     build_thursday_best_bets_comparison,
+    build_top_card_movement_reason,
     render_thursday_best_bets_comparison,
     save_thursday_best_bets_comparison,
 )
@@ -104,6 +105,7 @@ def test_build_thursday_best_bets_comparison_finds_added_removed_and_changed_row
     assert "Comparing: 2026-07-09 12:00:00 vs 2026-07-08 12:00:00" in markdown
     assert "Card count changes: Best bets 1 -> 1 (0), Leans 0 -> 0 (0), Passes 0 -> 0 (0), Total 1 -> 1 (0)" in markdown
     assert "Count-change risk: Stable card" in markdown
+    assert "Top card movement reason: Mostly new/removed plays" in markdown
     assert "Action needed" in markdown
     assert "Biggest changes" in markdown
     assert "Became BETTABLE" in markdown
@@ -181,4 +183,55 @@ def test_save_thursday_best_bets_comparison_handles_missing_second_archive(tmp_p
     assert "Only one archived snapshot found: 2026-07-09 12:00:00" in markdown
     assert "Card count changes: only one archived snapshot found." in markdown
     assert "Count-change risk: Not enough archive history" in markdown
+    assert "Top card movement reason: Not enough archive history" in markdown
     assert pd.read_csv(paths["csv"]).empty
+
+
+def test_top_card_movement_reason_uses_comparison_csv_when_available(tmp_path) -> None:
+    _write_archive(
+        tmp_path,
+        "2026-07-08T12:00:00",
+        [_row("Arsenal", "Coventry", "1x2", "home", "LEAN", "C", 52.0, -120, 0.03, 0.1)],
+    )
+    _write_archive(
+        tmp_path,
+        "2026-07-09T12:00:00",
+        [_row("Arsenal", "Coventry", "1x2", "home", "BETTABLE", "B", 65.0, -110, 0.05, 0.25)],
+    )
+    comparison = pd.DataFrame([
+        {"movement_category": "Odds moved against us", "action_needed": "Review price", "importance_score": 90},
+        {"movement_category": "Odds moved in our favor", "action_needed": "Recheck odds", "importance_score": 70},
+        {"movement_category": "Edge improved", "action_needed": "Candidate upgrade", "importance_score": 60},
+    ])
+    comparison.to_csv(tmp_path / "thursday_best_bets_comparison.csv", index=False)
+
+    summary = build_top_card_movement_reason(tmp_path)
+
+    assert summary["top_movement_reason"] == "Mostly odds movement"
+    assert "2 of 3" in summary["movement_reason_detail"]
+
+
+def test_top_card_movement_reason_handles_missing_and_empty_states(tmp_path) -> None:
+    missing = build_top_card_movement_reason(tmp_path)
+    assert missing["top_movement_reason"] == "Not enough archive history"
+
+    _write_archive(
+        tmp_path,
+        "2026-07-08T12:00:00",
+        [_row("Arsenal", "Coventry", "1x2", "home", "LEAN", "C", 52.0, -120, 0.03, 0.1)],
+    )
+    _write_archive(
+        tmp_path,
+        "2026-07-09T12:00:00",
+        [_row("Arsenal", "Coventry", "1x2", "home", "LEAN", "C", 52.0, -120, 0.03, 0.1)],
+    )
+
+    no_report = build_top_card_movement_reason(tmp_path)
+    assert no_report["top_movement_reason"] == "No comparison report yet"
+
+    empty = build_top_card_movement_reason(tmp_path, pd.DataFrame(columns=["movement_category", "action_needed"]))
+    assert empty["top_movement_reason"] == "No meaningful movement"
+
+    missing_columns = build_top_card_movement_reason(tmp_path, pd.DataFrame([{"movement_category": "Edge improved"}]))
+    assert missing_columns["top_movement_reason"] == "Possible missing odds/data issue"
+    assert "action_needed" in missing_columns["movement_reason_detail"]

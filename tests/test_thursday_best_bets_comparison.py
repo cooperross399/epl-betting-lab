@@ -6,6 +6,7 @@ from pathlib import Path
 import pandas as pd
 
 from epl_betting_lab.reports.thursday_best_bets_comparison import (
+    build_recommended_next_action,
     build_thursday_best_bets_comparison,
     build_top_card_movement_reason,
     render_thursday_best_bets_comparison,
@@ -106,6 +107,7 @@ def test_build_thursday_best_bets_comparison_finds_added_removed_and_changed_row
     assert "Card count changes: Best bets 1 -> 1 (0), Leans 0 -> 0 (0), Passes 0 -> 0 (0), Total 1 -> 1 (0)" in markdown
     assert "Count-change risk: Stable card" in markdown
     assert "Top card movement reason: Mostly new/removed plays" in markdown
+    assert "Recommended next action: Review removals first" in markdown
     assert "Action needed" in markdown
     assert "Biggest changes" in markdown
     assert "Became BETTABLE" in markdown
@@ -184,6 +186,7 @@ def test_save_thursday_best_bets_comparison_handles_missing_second_archive(tmp_p
     assert "Card count changes: only one archived snapshot found." in markdown
     assert "Count-change risk: Not enough archive history" in markdown
     assert "Top card movement reason: Not enough archive history" in markdown
+    assert "Recommended next action: Generate one more Thursday archive first" in markdown
     assert pd.read_csv(paths["csv"]).empty
 
 
@@ -235,3 +238,76 @@ def test_top_card_movement_reason_handles_missing_and_empty_states(tmp_path) -> 
     missing_columns = build_top_card_movement_reason(tmp_path, pd.DataFrame([{"movement_category": "Edge improved"}]))
     assert missing_columns["top_movement_reason"] == "Possible missing odds/data issue"
     assert "action_needed" in missing_columns["movement_reason_detail"]
+
+
+def test_recommended_next_action_handles_missing_history_and_comparison(tmp_path) -> None:
+    no_archives = build_recommended_next_action(tmp_path)
+    assert no_archives["recommended_next_action"].startswith("Generate a Thursday archive first")
+
+    _write_archive(
+        tmp_path,
+        "2026-07-08T12:00:00",
+        [_row("Arsenal", "Coventry", "1x2", "home", "LEAN", "C", 52.0, -120, 0.03, 0.1)],
+    )
+    one_archive = build_recommended_next_action(tmp_path)
+    assert one_archive["recommended_next_action"].startswith("Generate one more Thursday archive first")
+
+    _write_archive(
+        tmp_path,
+        "2026-07-09T12:00:00",
+        [_row("Arsenal", "Coventry", "1x2", "home", "LEAN", "C", 52.0, -120, 0.03, 0.1)],
+    )
+    no_comparison = build_recommended_next_action(tmp_path)
+    assert no_comparison["recommended_next_action"].startswith("Generate comparison first")
+
+
+def test_recommended_next_action_prioritizes_data_removals_prices_and_upgrades(tmp_path) -> None:
+    _write_archive(
+        tmp_path,
+        "2026-07-08T12:00:00",
+        [_row("Arsenal", "Coventry", "1x2", "home", "LEAN", "C", 52.0, -120, 0.03, 0.1)],
+    )
+    _write_archive(
+        tmp_path,
+        "2026-07-09T12:00:00",
+        [_row("Arsenal", "Coventry", "1x2", "home", "LEAN", "C", 52.0, -120, 0.03, 0.1)],
+    )
+
+    malformed = build_recommended_next_action(tmp_path, pd.DataFrame([{"movement_category": "Edge improved"}]))
+    assert malformed["recommended_next_action"].startswith("Check data/odds first")
+
+    remove = build_recommended_next_action(
+        tmp_path,
+        pd.DataFrame([{
+            "movement_category": "Became PASS/Avoid",
+            "action_needed": "Likely remove from card",
+            "importance_score": 95,
+        }]),
+    )
+    assert remove["recommended_next_action"].startswith("Review removals first")
+
+    price = build_recommended_next_action(
+        tmp_path,
+        pd.DataFrame([{
+            "movement_category": "Odds moved against us",
+            "action_needed": "Review price",
+            "importance_score": 80,
+        }]),
+    )
+    assert price["recommended_next_action"].startswith("Review prices first")
+
+    upgrade = build_recommended_next_action(
+        tmp_path,
+        pd.DataFrame([{
+            "movement_category": "Tier upgraded",
+            "action_needed": "Candidate upgrade",
+            "importance_score": 75,
+        }]),
+    )
+    assert upgrade["recommended_next_action"].startswith("Review candidate upgrades")
+
+    quiet = build_recommended_next_action(
+        tmp_path,
+        pd.DataFrame(columns=["movement_category", "action_needed", "importance_score"]),
+    )
+    assert quiet["recommended_next_action"].startswith("No urgent action")

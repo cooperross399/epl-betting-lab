@@ -130,6 +130,7 @@ def test_decision_queue_markdown_shows_grouped_review_fields(tmp_path) -> None:
     assert "Card count changes: Best bets 0 -> 0 (0), Leans 0 -> 0 (0), Passes 0 -> 0 (0), Total 0 -> 0 (0)" in markdown
     assert "Count-change risk: Stable card" in markdown
     assert "Top card movement reason: Mostly tier/status changes" in markdown
+    assert "Recommended next action: Review prices first" in markdown
     assert "## Candidate upgrade" in markdown
     assert "Review order" in markdown
     assert "Status: LEAN -> BETTABLE" in markdown
@@ -150,4 +151,5 @@ def test_save_decision_queue_handles_missing_comparison(tmp_path) -> None:
     assert "Card count changes: no archived snapshots found yet." in markdown
     assert "Count-change risk: Not enough archive history" in markdown
     assert "Top card movement reason: Not enough archive history" in markdown
+    assert "Recommended next action: Generate a Thursday archive first" in markdown
     assert "python scripts/compare_thursday_best_bets.py" in markdown

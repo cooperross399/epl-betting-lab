@@ -238,6 +238,10 @@ The comparison and dashboard also show a `Top card movement reason`, such as
 plays`, `Mostly edge movement`, `Mostly unit-size changes`, or `Possible
 missing odds/data issue`. This is only a quick explanation of why the card
 changed; it does not recommend or place a bet.
+The dashboard, comparison report, and decision queue also show a `Recommended
+next action` banner. It puts data/odds problems first, then likely removals,
+price reviews, and candidate upgrades. It is only a manual review prompt; it
+does not edit odds, edit your ledger, or place bets.
 
 After the comparison exists, create a compact decision queue:
 

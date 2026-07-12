@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from epl_betting_lab.thursday_command_center import build_thursday_command_center
+from epl_betting_lab.thursday_command_center import build_thursday_command_center, build_thursday_detail_cue
 
 
 def _write_completeness(output_dir: Path, completion: str = "100.0%", incomplete: int = 0) -> None:
@@ -60,6 +60,7 @@ def test_command_center_reports_missing_state(tmp_path) -> None:
     assert summary.count_change_risk_flag == "Not enough archive history"
     assert summary.top_card_movement_reason == "Not enough archive history"
     assert summary.recommended_next_action.startswith("Generate a Thursday archive first")
+    assert summary.detail_cue == "Thursday readiness refresh and Thursday best-bets report"
 
 
 def test_command_center_summarizes_ready_workflow(tmp_path) -> None:
@@ -87,3 +88,26 @@ def test_command_center_summarizes_ready_workflow(tmp_path) -> None:
     assert summary.count_change_risk_flag == "Stable card"
     assert summary.top_card_movement_reason == "Mostly tier/status changes"
     assert summary.recommended_next_action.startswith("Review candidate upgrades")
+    assert summary.detail_cue == "Thursday decision queue: Candidate upgrade"
+
+
+def test_detail_cue_maps_recommended_actions_to_dashboard_sections() -> None:
+    expected = {
+        "Generate a Thursday archive first: no archive exists.": "Thursday readiness refresh and Thursday best-bets report",
+        "Generate one more Thursday archive first: only one exists.": "Thursday readiness refresh and Recent Thursday report archives",
+        "Generate comparison first: no comparison exists.": "Post-refresh Thursday review and Latest Thursday snapshot comparison",
+        "Check data/odds first: validation needs attention.": "Current odds validation and Odds entry completeness",
+        "Review removals first: one play changed.": "Thursday decision queue: Likely remove from card",
+        "Review prices first: odds moved against us.": "Thursday decision queue: Review price",
+        "Review candidate upgrades: one play improved.": "Thursday decision queue: Candidate upgrade",
+        "Review the decision queue: changed plays exist.": "Thursday decision queue",
+        "No urgent action: the card is stable.": "Archive comparison and latest Thursday best-bets summary",
+    }
+
+    for action, cue in expected.items():
+        assert build_thursday_detail_cue(action) == cue
+
+
+def test_detail_cue_has_beginner_friendly_fallback() -> None:
+    assert build_thursday_detail_cue(None) == "Thursday readiness and report details below"
+    assert build_thursday_detail_cue("Unexpected action") == "Thursday readiness and report details below"

@@ -586,7 +586,8 @@ At the top of the Thursday panel, the dashboard shows a command center card
 with Thursday status, odds completion, serious current-odds issues, warnings,
 the latest archive pair, count-change risk, top movement reason, and the
 recommended next manual action. The detailed readiness row and full reports
-remain below the card.
+remain below the card. An `Open this next` cue points to the validation,
+archive, comparison, or decision-queue section that matches that action.
 
 These buttons do not edit `data/manual/bet_ledger.csv`, do not edit
 `data/manual/current_odds.csv`, do not apply settlements, do not place bets,

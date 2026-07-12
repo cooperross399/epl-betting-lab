@@ -15,6 +15,7 @@ from epl_betting_lab.dashboard_actions import (
     run_ledger_health_check,
     run_post_thursday_review,
     run_settlement_preview,
+    run_tier_performance_report,
     run_thursday_best_bets_comparison,
     run_thursday_best_bets_report,
     run_thursday_decision_queue,
@@ -156,7 +157,7 @@ def render_report_buttons() -> None:
     if report_cols[2].button("Run settlement preview", width="stretch"):
         run_dashboard_action("Settlement preview", run_settlement_preview)
 
-    workflow_cols = st.columns(9)
+    workflow_cols = st.columns(10)
     if workflow_cols[0].button("Create current odds template", width="stretch"):
         run_dashboard_action("Current odds template", run_create_current_odds_template)
     if workflow_cols[1].button("Preview current odds maintenance", width="stretch"):
@@ -173,7 +174,9 @@ def render_report_buttons() -> None:
         run_dashboard_action("Thursday decision queue", run_thursday_decision_queue)
     if workflow_cols[7].button("Run backtest reports", width="stretch"):
         run_dashboard_action("Backtest reports", run_backtest.main)
-    if workflow_cols[8].button("Refresh dashboard data", width="stretch"):
+    if workflow_cols[8].button("Generate tier performance report", width="stretch"):
+        run_dashboard_action("Tier performance report", run_tier_performance_report)
+    if workflow_cols[9].button("Refresh dashboard data", width="stretch"):
         st.rerun()
 
 
@@ -404,6 +407,25 @@ def render_betting_ledger_tab() -> None:
 
     show_output_table("Settlement preview", "bet_settlement_preview.csv", "python scripts/settle_bet_ledger.py")
     show_output_table("CLV by market", "clv_by_market.csv", "python scripts/run_backtest.py")
+
+    st.subheader("Tier performance")
+    tier_path = OUTPUTS_DIR / "tier_performance_report.md"
+    if tier_path.exists():
+        with st.expander("Tier performance report", expanded=True):
+            st.markdown(tier_path.read_text(encoding="utf-8"))
+    else:
+        show_missing_report("data/outputs/tier_performance_report.md", "python scripts/generate_tier_performance_report.py")
+    tier_tabs = st.tabs(["Summary", "Market", "Team", "Odds range", "CLV"])
+    with tier_tabs[0]:
+        show_output_table("Tier performance summary", "tier_performance_summary.csv", "python scripts/generate_tier_performance_report.py")
+    with tier_tabs[1]:
+        show_output_table("Tier performance by market", "tier_performance_by_market.csv", "python scripts/generate_tier_performance_report.py")
+    with tier_tabs[2]:
+        show_output_table("Tier performance by team", "tier_performance_by_team.csv", "python scripts/generate_tier_performance_report.py")
+    with tier_tabs[3]:
+        show_output_table("Tier performance by odds range", "tier_performance_by_odds_range.csv", "python scripts/generate_tier_performance_report.py")
+    with tier_tabs[4]:
+        show_output_table("Tier performance by CLV", "tier_performance_by_clv.csv", "python scripts/generate_tier_performance_report.py")
 
     st.subheader("Profit breakdowns")
     breakdown_tabs = st.tabs(["Market", "Selection", "Team"])

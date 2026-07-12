@@ -447,6 +447,28 @@ data/outputs/bet_ledger_pending.csv
 Pending bets do not count toward profit/loss or ROI. Pushes count as 0.
 Missing closing odds stay blank instead of being guessed.
 
+To review how confidence tiers are performing mid-season, run:
+
+```bash
+python scripts/generate_tier_performance_report.py
+```
+
+This creates:
+
+```text
+data/outputs/tier_performance_summary.csv
+data/outputs/tier_performance_by_market.csv
+data/outputs/tier_performance_by_team.csv
+data/outputs/tier_performance_by_odds_range.csv
+data/outputs/tier_performance_by_clv.csv
+data/outputs/tier_performance_report.md
+```
+
+Settled ledger bets count toward wins, losses, pushes, units, and ROI.
+Archived Thursday recommendations that were not entered as actual bets are
+tracked separately as recommendation-only rows. The dashboard button `Generate
+tier performance report` runs the same read-only report.
+
 To save typing after you generate the weekly card, you can pre-fill draft
 ledger rows from `data/outputs/weekly_card.csv`:
 

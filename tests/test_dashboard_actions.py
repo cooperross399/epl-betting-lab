@@ -10,6 +10,7 @@ from epl_betting_lab.dashboard_actions import (
     run_bet_ledger_report,
     run_create_current_odds_template,
     run_current_odds_completeness,
+    run_current_odds_import_preview,
     run_current_odds_maintenance_preview,
     run_current_odds_validation,
     run_ledger_health_check,
@@ -138,6 +139,37 @@ def test_run_current_odds_maintenance_preview_does_not_edit_current_odds(tmp_pat
     assert paths["markdown"].name == "current_odds_maintenance_report.md"
     assert paths["csv"].exists()
     assert paths["markdown"].exists()
+    assert odds_path.read_text(encoding="utf-8") == original
+
+
+def test_run_current_odds_import_preview_does_not_edit_current_odds(tmp_path) -> None:
+    import_path = tmp_path / "current_odds_import.csv"
+    odds_path = tmp_path / "current_odds.csv"
+    output_dir = tmp_path / "outputs"
+    row = {
+        "date": "2026-08-21",
+        "home_team": "Arsenal",
+        "away_team": "Coventry",
+        "market": "1x2",
+        "selection": "home",
+        "american_odds": "+120",
+        "book": "ExampleBook",
+    }
+    pd.DataFrame([row]).to_csv(import_path, index=False)
+    pd.DataFrame([{**row, "american_odds": "+110", "custom_column": "keep"}]).to_csv(odds_path, index=False)
+    original = odds_path.read_text(encoding="utf-8")
+    fixtures = pd.DataFrame([{"date": "2026-08-21", "home_team": "Arsenal", "away_team": "Coventry"}])
+
+    paths = run_current_odds_import_preview(
+        import_path,
+        odds_path,
+        output_dir,
+        fixtures=fixtures,
+        matches=pd.DataFrame(),
+    )
+
+    assert paths["csv"].name == "current_odds_import_preview.csv"
+    assert paths["markdown"].name == "current_odds_import_report.md"
     assert odds_path.read_text(encoding="utf-8") == original
 
 

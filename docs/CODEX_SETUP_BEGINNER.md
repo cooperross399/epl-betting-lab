@@ -87,8 +87,31 @@ replace it intentionally with:
 python scripts/create_current_odds_template.py --overwrite
 ```
 
-To import several real sportsbook prices without editing `current_odds.csv`
-row by row, first copy the beginner template:
+If your sportsbook or odds site gives you a CSV export with different column
+names, save it as `data/manual/sportsbook_export.csv`, then run:
+
+```bash
+python scripts/convert_odds_export.py --profile generic --source data/manual/sportsbook_export.csv
+```
+
+The example `generic` profile expects `game_date`, `home`, `away`, `bet_type`,
+`pick`, `odds`, and `sportsbook`. It maps them to the safe standard import
+format using `data/manual/odds_import_profiles.json`. Add another named profile
+there when a site uses different headers; no model code needs to change.
+
+The converter creates `data/manual/current_odds_import.csv` plus a conversion
+preview CSV and markdown report in `data/outputs/`. It does not fetch or invent
+odds. Invalid American prices are excluded, and an existing import file is
+preserved unless you deliberately pass `--overwrite-import`.
+
+The dashboard's `Preview odds export conversion` button creates reports only.
+It never writes or applies the import file. After a Terminal conversion, run
+`python scripts/import_current_odds.py`; team and fixture matching, market and
+selection validation, duplicate checks, backups, and audit gates remain in the
+existing safe importer.
+
+To import several real sportsbook prices without an export profile, first copy
+the beginner template:
 
 ```bash
 cp data/manual/current_odds_import_template.csv data/manual/current_odds_import.csv
@@ -187,12 +210,12 @@ python scripts/generate_thursday_best_bets.py --force
 ```
 
 You can also open the dashboard and click `Create current odds template`,
-`Preview current odds import`, `Preview current odds maintenance`, `Check odds
-entry completeness`, `Validate current odds`, then `Generate Thursday
-best-bets report`, on the `Betting ledger` tab. The dashboard only previews
-imports and maintenance and shows report tables. It does not overwrite an
-existing odds file, apply imports or maintenance, edit odds, or force
-generation.
+`Preview odds export conversion`, `Preview current odds import`, `Preview
+current odds maintenance`, `Check odds entry completeness`, `Validate current
+odds`, then `Generate Thursday best-bets report`, on the `Betting ledger` tab.
+The dashboard only previews imports and maintenance and shows report tables.
+It does not overwrite an existing odds file, apply imports or maintenance,
+edit odds, or force generation.
 
 After the odds file exists, the easiest path is the dashboard button `Run
 Thursday readiness refresh`. It runs odds completeness, current odds

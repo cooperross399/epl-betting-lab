@@ -14,6 +14,7 @@ from epl_betting_lab.dashboard_actions import (
     run_current_odds_maintenance_preview,
     run_current_odds_validation,
     run_ledger_health_check,
+    run_odds_export_conversion_preview,
     run_post_thursday_review,
     run_settlement_preview,
     run_tier_performance_report,
@@ -31,6 +32,7 @@ from epl_betting_lab.reports.current_odds_import_audit import (
     load_current_odds_import_audit,
     summarize_current_odds_import_batches,
 )
+from epl_betting_lab.reports.odds_export_conversion import OddsExportConversionError
 from epl_betting_lab.reports.thursday_archive_pair import (
     build_thursday_archive_history_details,
     build_thursday_archive_count_change_note,
@@ -82,6 +84,9 @@ def run_dashboard_action(label: str, action) -> None:
         action()
     except CurrentOddsValidationError as exc:
         st.error(f"{label} stopped.")
+        st.info(str(exc))
+    except OddsExportConversionError as exc:
+        st.error(f"{label} could not run.")
         st.info(str(exc))
     except FileExistsError as exc:
         st.warning(f"{label} stopped.")
@@ -153,6 +158,8 @@ def render_report_buttons() -> None:
         run_dashboard_refresh_sequence()
     if st.button("Run post-refresh Thursday review", width="stretch"):
         run_dashboard_post_thursday_review()
+    if st.button("Preview odds export conversion", width="stretch"):
+        run_dashboard_action("Odds export conversion preview", run_odds_export_conversion_preview)
     if st.button("Preview current odds import", width="stretch"):
         run_dashboard_action("Current odds import preview", run_current_odds_import_preview)
 
@@ -223,6 +230,18 @@ def render_thursday_best_bets_panel() -> None:
     status_cols[0].metric("Current odds", status.status)
     status_cols[1].caption(
         f"{status.explanation} Refresh with `{status.command}` or the `Validate current odds` dashboard button."
+    )
+
+    conversion_path = OUTPUTS_DIR / "odds_export_conversion_report.md"
+    if conversion_path.exists():
+        with st.expander("Odds export conversion preview", expanded=False):
+            st.markdown(conversion_path.read_text(encoding="utf-8"))
+    else:
+        show_missing_report("data/outputs/odds_export_conversion_report.md", "python scripts/convert_odds_export.py --profile generic")
+    show_output_table(
+        "Odds export conversion rows",
+        "odds_export_conversion_preview.csv",
+        "python scripts/convert_odds_export.py --profile generic",
     )
 
     validation_path = OUTPUTS_DIR / "current_odds_validation.md"

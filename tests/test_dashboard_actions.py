@@ -14,6 +14,7 @@ from epl_betting_lab.dashboard_actions import (
     run_current_odds_maintenance_preview,
     run_current_odds_validation,
     run_ledger_health_check,
+    run_odds_export_conversion_preview,
     run_post_thursday_review,
     run_settlement_preview,
     run_tier_performance_report,
@@ -171,6 +172,68 @@ def test_run_current_odds_import_preview_does_not_edit_current_odds(tmp_path) ->
     assert paths["csv"].name == "current_odds_import_preview.csv"
     assert paths["markdown"].name == "current_odds_import_report.md"
     assert odds_path.read_text(encoding="utf-8") == original
+
+
+def test_run_odds_export_conversion_preview_never_writes_import_file(tmp_path, monkeypatch) -> None:
+    manual_dir = tmp_path / "manual"
+    manual_dir.mkdir()
+    monkeypatch.setattr(dashboard_actions, "MANUAL_DIR", manual_dir)
+    profiles_path = tmp_path / "profiles.json"
+    source_path = tmp_path / "sportsbook_export.csv"
+    output_dir = tmp_path / "outputs"
+    profiles_path.write_text(
+        '{"profiles":{"generic":{"column_map":{'
+        '"game_date":"date","home":"home_team","away":"away_team",'
+        '"bet_type":"market","pick":"selection","odds":"american_odds",'
+        '"sportsbook":"book"}}}}',
+        encoding="utf-8",
+    )
+    pd.DataFrame([
+        {
+            "game_date": "2026-08-21",
+            "home": "Arsenal",
+            "away": "Coventry",
+            "bet_type": "1x2",
+            "pick": "home",
+            "odds": "+120",
+            "sportsbook": "ExampleBook",
+        }
+    ]).to_csv(source_path, index=False)
+
+    paths = run_odds_export_conversion_preview(
+        "generic",
+        source_path,
+        profiles_path,
+        output_dir,
+    )
+
+    assert paths["status"] == "preview_only"
+    assert paths["csv"].exists()
+    assert paths["markdown"].exists()
+    assert not (manual_dir / "current_odds_import.csv").exists()
+
+
+def test_run_odds_export_conversion_preview_reports_missing_source_cleanly(tmp_path) -> None:
+    profiles_path = tmp_path / "profiles.json"
+    output_dir = tmp_path / "outputs"
+    profiles_path.write_text(
+        '{"profiles":{"generic":{"column_map":{'
+        '"game_date":"date","home":"home_team","away":"away_team",'
+        '"bet_type":"market","pick":"selection","odds":"american_odds",'
+        '"sportsbook":"book"}}}}',
+        encoding="utf-8",
+    )
+
+    with pytest.raises(dashboard_actions.OddsExportConversionError) as exc:
+        run_odds_export_conversion_preview(
+            "generic",
+            tmp_path / "missing.csv",
+            profiles_path,
+            output_dir,
+        )
+
+    assert "Missing source export" in str(exc.value)
+    assert (output_dir / "odds_export_conversion_report.md").exists()
 
 
 def test_run_current_odds_completeness_writes_report_without_editing_odds(tmp_path, monkeypatch) -> None:

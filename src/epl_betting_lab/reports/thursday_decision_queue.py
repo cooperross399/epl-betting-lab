@@ -11,6 +11,7 @@ from epl_betting_lab.reports.thursday_archive_pair import (
     build_thursday_archive_count_change_risk,
     build_thursday_archive_pair,
 )
+from epl_betting_lab.reports.thursday_best_bets_comparison import build_top_card_movement_reason
 
 
 ACTION_PRIORITY = [
@@ -64,6 +65,7 @@ def build_thursday_decision_queue(output_dir: Path | None = None) -> tuple[pd.Da
     archive_pair = build_thursday_archive_pair(output_dir)
     count_change = build_thursday_archive_count_change_note(output_dir)
     count_risk = build_thursday_archive_count_change_risk(output_dir)
+    top_reason = build_top_card_movement_reason(output_dir)
     comparison_path = output_dir / "thursday_best_bets_comparison.csv"
     if not comparison_path.exists():
         return pd.DataFrame(columns=QUEUE_COLUMNS), {
@@ -75,6 +77,8 @@ def build_thursday_decision_queue(output_dir: Path | None = None) -> tuple[pd.Da
             "count_change_note": count_change["note"],
             "count_change_risk_flag": count_risk["risk_flag"],
             "count_change_risk_reason": count_risk["risk_reason"],
+            "top_movement_reason": top_reason["top_movement_reason"],
+            "movement_reason_detail": top_reason["movement_reason_detail"],
             "total_rows": 0,
         }
 
@@ -90,6 +94,8 @@ def build_thursday_decision_queue(output_dir: Path | None = None) -> tuple[pd.Da
             "count_change_note": count_change["note"],
             "count_change_risk_flag": count_risk["risk_flag"],
             "count_change_risk_reason": count_risk["risk_reason"],
+            "top_movement_reason": top_reason["top_movement_reason"],
+            "movement_reason_detail": top_reason["movement_reason_detail"],
             "total_rows": 0,
             "action_counts": {},
         }
@@ -113,6 +119,8 @@ def build_thursday_decision_queue(output_dir: Path | None = None) -> tuple[pd.Da
         "count_change_note": count_change["note"],
         "count_change_risk_flag": count_risk["risk_flag"],
         "count_change_risk_reason": count_risk["risk_reason"],
+        "top_movement_reason": top_reason["top_movement_reason"],
+        "movement_reason_detail": top_reason["movement_reason_detail"],
         "total_rows": int(len(queue)),
         "action_counts": queue["action_needed"].value_counts().to_dict(),
     }
@@ -165,6 +173,7 @@ def render_thursday_decision_queue(queue: pd.DataFrame, summary: dict[str, Any])
             str(summary.get("archive_pair_label", "")),
             str(summary.get("count_change_note", "Card count changes: comparison not available yet.")),
             f"Count-change risk: {summary.get('count_change_risk_flag', 'Not enough archive history')}. {summary.get('count_change_risk_reason', '')}",
+            f"Top card movement reason: {summary.get('top_movement_reason', 'No comparison report yet')}. {summary.get('movement_reason_detail', '')}",
             "",
             str(summary.get("message", missing_comparison_message())),
             "",
@@ -182,6 +191,7 @@ def render_thursday_decision_queue(queue: pd.DataFrame, summary: dict[str, Any])
             str(summary.get("comparison_label", "Comparison not available yet")),
             str(summary.get("count_change_note", "Card count changes: unavailable.")),
             f"Count-change risk: {summary.get('count_change_risk_flag', 'Stable card')}. {summary.get('count_change_risk_reason', '')}",
+            f"Top card movement reason: {summary.get('top_movement_reason', 'No meaningful movement')}. {summary.get('movement_reason_detail', '')}",
             "",
             str(summary.get("message", "No changed plays are available to review.")),
             "",
@@ -192,6 +202,7 @@ def render_thursday_decision_queue(queue: pd.DataFrame, summary: dict[str, Any])
         str(summary.get("comparison_label", "Comparison not available yet")),
         str(summary.get("count_change_note", "Card count changes: unavailable.")),
         f"Count-change risk: {summary.get('count_change_risk_flag', 'Stable card')}. {summary.get('count_change_risk_reason', '')}",
+        f"Top card movement reason: {summary.get('top_movement_reason', 'No meaningful movement')}. {summary.get('movement_reason_detail', '')}",
         "",
         f"Total changed plays in queue: {int(summary.get('total_rows', len(queue)))}",
         "",

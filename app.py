@@ -32,6 +32,7 @@ from epl_betting_lab.reports.thursday_archive_pair import (
     build_thursday_archive_pair,
 )
 from epl_betting_lab.reports.thursday_best_bets import list_recent_thursday_archives
+from epl_betting_lab.reports.thursday_best_bets_comparison import build_top_card_movement_reason
 from epl_betting_lab.reports.weekly_card import build_weekly_card, card_to_markdown
 from epl_betting_lab.strategies.btts import evaluate_btts
 from epl_betting_lab.strategies.ml_value import evaluate_1x2_value
@@ -273,6 +274,8 @@ def render_thursday_best_bets_panel() -> None:
     st.caption(count_change["note"])
     count_risk = build_thursday_archive_count_change_risk()
     st.caption(f"Count-change risk: {count_risk['risk_flag']}. {count_risk['risk_reason']}")
+    top_reason = build_top_card_movement_reason()
+    st.caption(f"Top card movement reason: {top_reason['top_movement_reason']}. {top_reason['movement_reason_detail']}")
 
     with st.expander("Archive history details", expanded=False):
         archive_details, archive_message = build_thursday_archive_history_details()

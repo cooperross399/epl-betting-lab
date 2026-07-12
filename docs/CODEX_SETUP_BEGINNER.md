@@ -233,6 +233,11 @@ comparison.
 The count-change risk flag is conservative: a best-bet drop of 2+, pass/lean
 increase of 5+, total-candidate move of 5+, or incomplete archive data gets
 called out for review.
+The comparison and dashboard also show a `Top card movement reason`, such as
+`Mostly odds movement`, `Mostly tier/status changes`, `Mostly new/removed
+plays`, `Mostly edge movement`, `Mostly unit-size changes`, or `Possible
+missing odds/data issue`. This is only a quick explanation of why the card
+changed; it does not recommend or place a bet.
 
 After the comparison exists, create a compact decision queue:
 

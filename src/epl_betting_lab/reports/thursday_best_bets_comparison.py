@@ -429,6 +429,138 @@ def build_top_card_movement_reason(
     }
 
 
+def _read_optional_csv(path: Path) -> tuple[pd.DataFrame | None, str]:
+    if not path.exists():
+        return None, ""
+    try:
+        return pd.read_csv(path).fillna(""), ""
+    except Exception as exc:
+        return None, f"Could not read `{path}`: {exc}"
+
+
+def _action_counts(source: pd.DataFrame | None) -> tuple[dict[str, int], str]:
+    if source is None:
+        return {}, ""
+    if source.empty:
+        return {}, ""
+    if "action_needed" not in source.columns:
+        return {}, "The comparison/decision queue is missing the `action_needed` column."
+    return source["action_needed"].astype(str).str.strip().value_counts().to_dict(), ""
+
+
+def _has_odds_moved_against(comparison: pd.DataFrame | None) -> bool:
+    if comparison is None or comparison.empty:
+        return False
+    movement = comparison.get("movement_category", pd.Series(dtype=str)).astype(str)
+    action = comparison.get("action_needed", pd.Series(dtype=str)).astype(str)
+    return bool(((movement == "Odds moved against us") | ((action == "Review price") & movement.str.contains("Odds", na=False))).any())
+
+
+def build_recommended_next_action(
+    output_dir: Path | None = None,
+    comparison: pd.DataFrame | None = None,
+    queue: pd.DataFrame | None = None,
+) -> dict[str, str]:
+    output_dir = output_dir or OUTPUTS_DIR
+    archive_pair = build_thursday_archive_pair(output_dir)
+    if archive_pair["status"] == "no_archives":
+        return {
+            "recommended_next_action": "Generate a Thursday archive first: no archived Thursday card exists yet.",
+            "next_action_reason": "Run the Thursday readiness refresh after current odds are entered and validated.",
+        }
+    if archive_pair["status"] == "one_archive":
+        return {
+            "recommended_next_action": "Generate one more Thursday archive first: only one archived card is available.",
+            "next_action_reason": "The comparison needs two archived Thursday cards before it can identify movement.",
+        }
+
+    comparison_error = ""
+    if comparison is None:
+        comparison, comparison_error = _read_optional_csv(output_dir / "thursday_best_bets_comparison.csv")
+    count_risk = build_thursday_archive_count_change_risk(output_dir)
+    top_reason = build_top_card_movement_reason(output_dir, comparison)
+
+    if comparison_error:
+        return {
+            "recommended_next_action": "Check data/odds first: the comparison file could not be read.",
+            "next_action_reason": comparison_error,
+        }
+    if comparison is None:
+        return {
+            "recommended_next_action": "Generate comparison first: no comparison report is available yet.",
+            "next_action_reason": "Run `python scripts/compare_thursday_best_bets.py`, or use the dashboard comparison button.",
+        }
+    if count_risk["risk_flag"] in {"Possible missing odds/data issue", "Candidate count changed sharply"}:
+        return {
+            "recommended_next_action": "Check data/odds first: candidate counts changed sharply or archive data looks incomplete.",
+            "next_action_reason": str(count_risk["risk_reason"]),
+        }
+    if top_reason["top_movement_reason"] == "Possible missing odds/data issue":
+        return {
+            "recommended_next_action": "Check data/odds first: the card movement may be caused by missing or malformed data.",
+            "next_action_reason": str(top_reason["movement_reason_detail"]),
+        }
+
+    if comparison.empty:
+        return {
+            "recommended_next_action": "No urgent action: the card is stable and there are no meaningful recommendation changes.",
+            "next_action_reason": "The comparison report has no changed plays.",
+        }
+
+    queue_error = ""
+    if queue is None:
+        queue, queue_error = _read_optional_csv(output_dir / "thursday_decision_queue.csv")
+    action_source = queue if queue is not None and not queue.empty else comparison
+    counts, action_error = _action_counts(action_source)
+    if queue_error or action_error:
+        return {
+            "recommended_next_action": "Generate decision queue first: action labels are not available yet.",
+            "next_action_reason": queue_error or action_error,
+        }
+
+    likely_remove = int(counts.get("Likely remove from card", 0))
+    review_price = int(counts.get("Review price", 0))
+    candidate_upgrade = int(counts.get("Candidate upgrade", 0))
+    recheck_validation = int(counts.get("Recheck validation", 0))
+    recheck_odds = int(counts.get("Recheck odds", 0))
+
+    if recheck_validation:
+        return {
+            "recommended_next_action": f"Check data/odds first: {recheck_validation} changed play(s) need validation review.",
+            "next_action_reason": "Validation-related action labels come before betting decisions.",
+        }
+    if likely_remove:
+        return {
+            "recommended_next_action": f"Review removals first: {likely_remove} play(s) likely need to come off the card.",
+            "next_action_reason": "`Likely remove from card` is high priority because stale plays can be more dangerous than missing a new play.",
+        }
+    if review_price and _has_odds_moved_against(comparison):
+        return {
+            "recommended_next_action": "Review prices first: the latest card includes plays where odds moved against us.",
+            "next_action_reason": "Price movement can erase edge, so confirm the sportsbook number before trusting the card.",
+        }
+    if candidate_upgrade:
+        return {
+            "recommended_next_action": f"Review candidate upgrades: {candidate_upgrade} play(s) improved enough to consider before adding anything.",
+            "next_action_reason": "Candidate upgrades still need manual price review; this project does not place bets.",
+        }
+    if review_price or recheck_odds:
+        return {
+            "recommended_next_action": "Review prices first: the comparison has price-review or odds-recheck items.",
+            "next_action_reason": "Confirm current sportsbook prices before making any manual card decisions.",
+        }
+    actionable_count = sum(count for action, count in counts.items() if action != "No action")
+    if count_risk["risk_flag"] == "Stable card" and top_reason["top_movement_reason"] == "No meaningful movement" and actionable_count == 0:
+        return {
+            "recommended_next_action": "No urgent action: the card is stable and there are no meaningful recommendation changes.",
+            "next_action_reason": "Count changes are stable and the comparison did not find actionable movement.",
+        }
+    return {
+        "recommended_next_action": "Review the decision queue: changed plays exist, but none require emergency handling.",
+        "next_action_reason": "Start with the highest-importance rows in the Thursday decision queue.",
+    }
+
+
 def _comparison_row(
     key: tuple[str, ...],
     previous: pd.Series | None,
@@ -480,6 +612,7 @@ def build_thursday_best_bets_comparison(output_dir: Path | None = None) -> tuple
     count_risk = build_thursday_archive_count_change_risk(output_dir)
     if not archive_pair["available"]:
         top_reason = build_top_card_movement_reason(output_dir, pd.DataFrame(columns=COMPARISON_COLUMNS))
+        next_action = build_recommended_next_action(output_dir, pd.DataFrame(columns=COMPARISON_COLUMNS))
         return pd.DataFrame(columns=COMPARISON_COLUMNS), {
             "available": False,
             "message": "Comparison is not available yet. Generate at least two Thursday best-bets archive snapshots first.",
@@ -494,6 +627,8 @@ def build_thursday_best_bets_comparison(output_dir: Path | None = None) -> tuple
             "count_change_risk_reason": count_risk["risk_reason"],
             "top_movement_reason": top_reason["top_movement_reason"],
             "movement_reason_detail": top_reason["movement_reason_detail"],
+            "recommended_next_action": next_action["recommended_next_action"],
+            "next_action_reason": next_action["next_action_reason"],
         }
 
     latest_archive = Path(str(archive_pair["latest"]["csv"]))
@@ -542,9 +677,12 @@ def build_thursday_best_bets_comparison(output_dir: Path | None = None) -> tuple
         "updated": int((~comparison["change_type"].isin(["added", "removed"])).sum()) if not comparison.empty else 0,
     }
     top_reason = build_top_card_movement_reason(output_dir, comparison)
+    next_action = build_recommended_next_action(output_dir, comparison)
     summary.update({
         "top_movement_reason": top_reason["top_movement_reason"],
         "movement_reason_detail": top_reason["movement_reason_detail"],
+        "recommended_next_action": next_action["recommended_next_action"],
+        "next_action_reason": next_action["next_action_reason"],
     })
     return comparison, summary
 
@@ -562,6 +700,8 @@ def render_thursday_best_bets_comparison(comparison: pd.DataFrame, summary: dict
             f"- {summary.get('count_change_note', 'Card count changes: comparison not available yet.')}",
             f"- Count-change risk: {summary.get('count_change_risk_flag', 'Not enough archive history')}. {summary.get('count_change_risk_reason', '')}",
             f"- Top card movement reason: {summary.get('top_movement_reason', 'Not enough archive history')}. {summary.get('movement_reason_detail', '')}",
+            f"- Recommended next action: {summary.get('recommended_next_action', 'Generate comparison first: no comparison report is available yet.')}",
+            f"- Why: {summary.get('next_action_reason', '')}",
             "",
             str(summary.get("message", "Comparison is not available yet.")),
             "",
@@ -574,6 +714,8 @@ def render_thursday_best_bets_comparison(comparison: pd.DataFrame, summary: dict
         f"- {summary.get('count_change_note', 'Card count changes: unavailable.')}",
         f"- Count-change risk: {summary.get('count_change_risk_flag', 'Stable card')}. {summary.get('count_change_risk_reason', '')}",
         f"- Top card movement reason: {summary.get('top_movement_reason', 'No meaningful movement')}. {summary.get('movement_reason_detail', '')}",
+        f"- Recommended next action: {summary.get('recommended_next_action', 'Review the decision queue.')}",
+        f"- Why: {summary.get('next_action_reason', '')}",
         f"- Latest archive: `{summary['latest_archive']}`",
         f"- Previous archive: `{summary['previous_archive']}`",
         f"- Total changes: {summary.get('total_changes', 0)}",

@@ -32,7 +32,10 @@ from epl_betting_lab.reports.thursday_archive_pair import (
     build_thursday_archive_pair,
 )
 from epl_betting_lab.reports.thursday_best_bets import list_recent_thursday_archives
-from epl_betting_lab.reports.thursday_best_bets_comparison import build_top_card_movement_reason
+from epl_betting_lab.reports.thursday_best_bets_comparison import (
+    build_recommended_next_action,
+    build_top_card_movement_reason,
+)
 from epl_betting_lab.reports.weekly_card import build_weekly_card, card_to_markdown
 from epl_betting_lab.strategies.btts import evaluate_btts
 from epl_betting_lab.strategies.ml_value import evaluate_1x2_value
@@ -269,6 +272,10 @@ def render_thursday_best_bets_panel() -> None:
         st.info(f"{archive_pair['label']}. Generate one more Thursday best-bets archive before comparing.")
     else:
         st.info("Comparison not available yet. Generate Thursday best bets on at least two refreshes first.")
+
+    next_action = build_recommended_next_action()
+    st.info(f"Recommended next action: {next_action['recommended_next_action']}")
+    st.caption(f"Why: {next_action['next_action_reason']}")
 
     count_change = build_thursday_archive_count_change_note()
     st.caption(count_change["note"])

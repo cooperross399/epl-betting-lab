@@ -11,7 +11,10 @@ from epl_betting_lab.reports.thursday_archive_pair import (
     build_thursday_archive_count_change_risk,
     build_thursday_archive_pair,
 )
-from epl_betting_lab.reports.thursday_best_bets_comparison import build_top_card_movement_reason
+from epl_betting_lab.reports.thursday_best_bets_comparison import (
+    build_recommended_next_action,
+    build_top_card_movement_reason,
+)
 
 
 ACTION_PRIORITY = [
@@ -66,6 +69,7 @@ def build_thursday_decision_queue(output_dir: Path | None = None) -> tuple[pd.Da
     count_change = build_thursday_archive_count_change_note(output_dir)
     count_risk = build_thursday_archive_count_change_risk(output_dir)
     top_reason = build_top_card_movement_reason(output_dir)
+    next_action = build_recommended_next_action(output_dir)
     comparison_path = output_dir / "thursday_best_bets_comparison.csv"
     if not comparison_path.exists():
         return pd.DataFrame(columns=QUEUE_COLUMNS), {
@@ -79,12 +83,15 @@ def build_thursday_decision_queue(output_dir: Path | None = None) -> tuple[pd.Da
             "count_change_risk_reason": count_risk["risk_reason"],
             "top_movement_reason": top_reason["top_movement_reason"],
             "movement_reason_detail": top_reason["movement_reason_detail"],
+            "recommended_next_action": next_action["recommended_next_action"],
+            "next_action_reason": next_action["next_action_reason"],
             "total_rows": 0,
         }
 
     comparison = pd.read_csv(comparison_path).fillna("")
     comparison = _ensure_queue_columns(comparison)
     if comparison.empty:
+        next_action = build_recommended_next_action(output_dir, comparison, comparison)
         return pd.DataFrame(columns=QUEUE_COLUMNS), {
             "available": True,
             "message": "The comparison report exists, but it has no changed plays to review.",
@@ -96,6 +103,8 @@ def build_thursday_decision_queue(output_dir: Path | None = None) -> tuple[pd.Da
             "count_change_risk_reason": count_risk["risk_reason"],
             "top_movement_reason": top_reason["top_movement_reason"],
             "movement_reason_detail": top_reason["movement_reason_detail"],
+            "recommended_next_action": next_action["recommended_next_action"],
+            "next_action_reason": next_action["next_action_reason"],
             "total_rows": 0,
             "action_counts": {},
         }
@@ -109,6 +118,7 @@ def build_thursday_decision_queue(output_dir: Path | None = None) -> tuple[pd.Da
         ascending=[True, False, True, True, True, True],
     ).drop(columns=["_action_order"])
     queue = queue.reset_index(drop=True)
+    next_action = build_recommended_next_action(output_dir, comparison, queue)
 
     return queue, {
         "available": True,
@@ -121,6 +131,8 @@ def build_thursday_decision_queue(output_dir: Path | None = None) -> tuple[pd.Da
         "count_change_risk_reason": count_risk["risk_reason"],
         "top_movement_reason": top_reason["top_movement_reason"],
         "movement_reason_detail": top_reason["movement_reason_detail"],
+        "recommended_next_action": next_action["recommended_next_action"],
+        "next_action_reason": next_action["next_action_reason"],
         "total_rows": int(len(queue)),
         "action_counts": queue["action_needed"].value_counts().to_dict(),
     }
@@ -174,6 +186,8 @@ def render_thursday_decision_queue(queue: pd.DataFrame, summary: dict[str, Any])
             str(summary.get("count_change_note", "Card count changes: comparison not available yet.")),
             f"Count-change risk: {summary.get('count_change_risk_flag', 'Not enough archive history')}. {summary.get('count_change_risk_reason', '')}",
             f"Top card movement reason: {summary.get('top_movement_reason', 'No comparison report yet')}. {summary.get('movement_reason_detail', '')}",
+            f"Recommended next action: {summary.get('recommended_next_action', 'Generate comparison first: no comparison report is available yet.')}",
+            f"Why: {summary.get('next_action_reason', '')}",
             "",
             str(summary.get("message", missing_comparison_message())),
             "",
@@ -192,6 +206,8 @@ def render_thursday_decision_queue(queue: pd.DataFrame, summary: dict[str, Any])
             str(summary.get("count_change_note", "Card count changes: unavailable.")),
             f"Count-change risk: {summary.get('count_change_risk_flag', 'Stable card')}. {summary.get('count_change_risk_reason', '')}",
             f"Top card movement reason: {summary.get('top_movement_reason', 'No meaningful movement')}. {summary.get('movement_reason_detail', '')}",
+            f"Recommended next action: {summary.get('recommended_next_action', 'No urgent action: the card is stable and there are no meaningful recommendation changes.')}",
+            f"Why: {summary.get('next_action_reason', '')}",
             "",
             str(summary.get("message", "No changed plays are available to review.")),
             "",
@@ -203,6 +219,8 @@ def render_thursday_decision_queue(queue: pd.DataFrame, summary: dict[str, Any])
         str(summary.get("count_change_note", "Card count changes: unavailable.")),
         f"Count-change risk: {summary.get('count_change_risk_flag', 'Stable card')}. {summary.get('count_change_risk_reason', '')}",
         f"Top card movement reason: {summary.get('top_movement_reason', 'No meaningful movement')}. {summary.get('movement_reason_detail', '')}",
+        f"Recommended next action: {summary.get('recommended_next_action', 'Review the decision queue.')}",
+        f"Why: {summary.get('next_action_reason', '')}",
         "",
         f"Total changed plays in queue: {int(summary.get('total_rows', len(queue)))}",
         "",

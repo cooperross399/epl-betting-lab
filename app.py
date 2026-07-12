@@ -27,6 +27,10 @@ from epl_betting_lab.models.poisson_goals import PoissonGoalsModel
 from epl_betting_lab.models.ratings import simple_form_table
 from epl_betting_lab.reports.bet_ledger import load_bet_ledger, summarize_overall
 from epl_betting_lab.reports.current_odds_validation import CurrentOddsValidationError
+from epl_betting_lab.reports.current_odds_import_audit import (
+    load_current_odds_import_audit,
+    summarize_current_odds_import_batches,
+)
 from epl_betting_lab.reports.thursday_archive_pair import (
     build_thursday_archive_history_details,
     build_thursday_archive_count_change_note,
@@ -244,6 +248,24 @@ def render_thursday_best_bets_panel() -> None:
     else:
         show_missing_report("data/outputs/current_odds_import_report.md", "python scripts/import_current_odds.py")
     show_output_table("Current odds import rows", "current_odds_import_preview.csv", "python scripts/import_current_odds.py")
+
+    st.subheader("Recent current odds import audits")
+    audit, audit_message = load_current_odds_import_audit()
+    if audit is None:
+        st.warning(audit_message)
+    elif audit.empty:
+        st.info(audit_message)
+    else:
+        st.dataframe(summarize_current_odds_import_batches(audit), width="stretch", hide_index=True)
+    audit_markdown = OUTPUTS_DIR / "current_odds_import_audit.md"
+    if audit_markdown.exists():
+        try:
+            audit_text = audit_markdown.read_text(encoding="utf-8")
+        except (OSError, UnicodeError) as exc:
+            st.warning(f"The current odds import audit report is unreadable: {exc}")
+        else:
+            with st.expander("Current odds import audit details", expanded=False):
+                st.markdown(audit_text)
 
     st.subheader("Incomplete odds entries")
     completeness = read_output_csv("current_odds_completeness.csv")

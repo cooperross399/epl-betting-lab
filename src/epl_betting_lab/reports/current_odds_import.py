@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime
 from pathlib import Path
 import re
 
@@ -10,6 +11,12 @@ from epl_betting_lab.data.loaders import load_matches, load_upcoming_fixtures
 from epl_betting_lab.reports.current_odds_maintenance import (
     backup_current_odds,
     load_existing_current_odds,
+)
+from epl_betting_lab.reports.current_odds_import_audit import (
+    build_current_odds_import_audit_rows,
+    new_import_batch_id,
+    save_current_odds_import_audit,
+    source_file_sha256,
 )
 from epl_betting_lab.reports.current_odds_template import CURRENT_ODDS_COLUMNS
 
@@ -390,6 +397,27 @@ def _apply_preview(preview: pd.DataFrame, existing: pd.DataFrame, teams: dict[st
     return updated.fillna("")
 
 
+def _audit_snapshots(
+    preview: pd.DataFrame,
+    before: pd.DataFrame,
+    after: pd.DataFrame,
+    teams: dict[str, str],
+) -> dict[int, tuple[dict[str, object], dict[str, object]]]:
+    before_index = _existing_key_index(before, teams)
+    after_index = _existing_key_index(after, teams)
+    snapshots: dict[int, tuple[dict[str, object], dict[str, object]]] = {}
+    for _, row in preview.iterrows():
+        if row.get("import_status") != "valid":
+            continue
+        key = _row_key(row)
+        before_matches = before_index.get(key, [])
+        after_matches = after_index.get(key, [])
+        before_values = before.loc[before_matches[0]].to_dict() if len(before_matches) == 1 else {}
+        after_values = after.loc[after_matches[0]].to_dict() if len(after_matches) == 1 else {}
+        snapshots[int(row["source_row_number"])] = (before_values, after_values)
+    return snapshots
+
+
 def render_current_odds_import_report(preview: pd.DataFrame, summary: dict[str, object]) -> str:
     applied = bool(summary.get("applied", False))
     apply_requested = bool(summary.get("apply_requested", False))
@@ -423,6 +451,12 @@ def render_current_odds_import_report(preview: pd.DataFrame, summary: dict[str, 
         lines.append(f"- Extra columns ignored: {', '.join(summary['extra_columns'])}")
     if summary.get("backup_path"):
         lines.append(f"- Backup: `{summary['backup_path']}`")
+    elif apply_requested:
+        lines.append("- Backup: not available because the odds file was new or no valid changes were written.")
+    if summary.get("batch_id"):
+        lines.append(f"- Import batch ID: `{summary['batch_id']}`")
+    if summary.get("audit_path"):
+        lines.append(f"- Apply audit: `{summary['audit_path']}`")
     if applied:
         lines.append(f"- Valid changes applied: {int(summary.get('applied_rows', 0))}")
     elif not apply_requested:
@@ -457,6 +491,55 @@ def _save_reports(preview: pd.DataFrame, summary: dict[str, object], output_dir:
     return {"csv": csv_path, "markdown": markdown_path}
 
 
+def _finish_current_odds_import(
+    preview: pd.DataFrame,
+    summary: dict[str, object],
+    *,
+    apply: bool,
+    import_path: Path,
+    output_dir: Path,
+    before: pd.DataFrame | None = None,
+    after: pd.DataFrame | None = None,
+    teams: dict[str, str] | None = None,
+    backup_path: Path | None = None,
+    batch_id: str | None = None,
+    applied_at: str | None = None,
+) -> dict[str, Path | str]:
+    audit_paths: dict[str, Path] = {}
+    resolved_batch_id = ""
+    if apply:
+        applied_at = applied_at or datetime.now().astimezone().isoformat(timespec="seconds")
+        resolved_batch_id = batch_id or new_import_batch_id(applied_at)
+        before = before if before is not None else pd.DataFrame(columns=CURRENT_ODDS_COLUMNS)
+        after = after if after is not None else before.copy()
+        snapshots = _audit_snapshots(preview, before, after, teams or {})
+        checksum = source_file_sha256(import_path)
+        summary.update({
+            "batch_id": resolved_batch_id,
+            "applied_at": applied_at,
+            "source_sha256": checksum,
+            "backup_path": str(backup_path) if backup_path else "",
+        })
+        audit_rows = build_current_odds_import_audit_rows(
+            preview,
+            summary,
+            batch_id=resolved_batch_id,
+            applied_at=applied_at,
+            source_import_path=import_path,
+            source_sha256=checksum,
+            backup_path=backup_path,
+            snapshots=snapshots,
+        )
+        audit_paths = save_current_odds_import_audit(audit_rows, output_dir)
+        summary["audit_path"] = str(audit_paths["audit_markdown"])
+
+    paths: dict[str, Path | str] = _save_reports(preview, summary, output_dir)
+    paths.update(audit_paths)
+    if resolved_batch_id:
+        paths["batch_id"] = resolved_batch_id
+    return paths
+
+
 def process_current_odds_import(
     import_path: Path | None = None,
     current_odds_path: Path | None = None,
@@ -466,7 +549,9 @@ def process_current_odds_import(
     fixtures: pd.DataFrame | None = None,
     matches: pd.DataFrame | None = None,
     timestamp: str | None = None,
-) -> dict[str, Path]:
+    batch_id: str | None = None,
+    applied_at: str | None = None,
+) -> dict[str, Path | str]:
     import_path = import_path or MANUAL_DIR / "current_odds_import.csv"
     current_odds_path = current_odds_path or MANUAL_DIR / "current_odds.csv"
     output_dir = output_dir or OUTPUTS_DIR
@@ -482,7 +567,15 @@ def process_current_odds_import(
             "applied": False,
             "apply_requested": apply,
         }
-        return _save_reports(preview, summary, output_dir)
+        return _finish_current_odds_import(
+            preview,
+            summary,
+            apply=apply,
+            import_path=import_path,
+            output_dir=output_dir,
+            batch_id=batch_id,
+            applied_at=applied_at,
+        )
 
     try:
         imported = pd.read_csv(import_path, dtype=str).fillna("")
@@ -496,7 +589,15 @@ def process_current_odds_import(
             "applied": False,
             "apply_requested": apply,
         }
-        return _save_reports(preview, summary, output_dir)
+        return _finish_current_odds_import(
+            preview,
+            summary,
+            apply=apply,
+            import_path=import_path,
+            output_dir=output_dir,
+            batch_id=batch_id,
+            applied_at=applied_at,
+        )
     if imported.empty:
         preview = pd.DataFrame(columns=IMPORT_PREVIEW_COLUMNS)
         summary = {
@@ -505,7 +606,15 @@ def process_current_odds_import(
             "applied": False,
             "apply_requested": apply,
         }
-        return _save_reports(preview, summary, output_dir)
+        return _finish_current_odds_import(
+            preview,
+            summary,
+            apply=apply,
+            import_path=import_path,
+            output_dir=output_dir,
+            batch_id=batch_id,
+            applied_at=applied_at,
+        )
 
     if fixtures is None:
         try:
@@ -527,12 +636,21 @@ def process_current_odds_import(
             "applied": False,
             "apply_requested": apply,
         }
-        return _save_reports(preview, summary, output_dir)
+        return _finish_current_odds_import(
+            preview,
+            summary,
+            apply=apply,
+            import_path=import_path,
+            output_dir=output_dir,
+            batch_id=batch_id,
+            applied_at=applied_at,
+        )
     preview, summary = build_current_odds_import_preview(imported, existing, fixtures, matches)
     summary.update({"applied": False, "apply_requested": apply, "applied_rows": 0})
 
     backup_path = None
     change_count = int(preview["import_action"].isin(["add_new", "update_existing"]).sum())
+    updated = existing
     if apply and change_count:
         current_odds_path.parent.mkdir(parents=True, exist_ok=True)
         if current_odds_path.exists():
@@ -547,7 +665,19 @@ def process_current_odds_import(
             "message": f"Applied {change_count} valid addition/update row(s). Invalid rows were skipped.",
         })
 
-    paths = _save_reports(preview, summary, output_dir)
+    paths = _finish_current_odds_import(
+        preview,
+        summary,
+        apply=apply,
+        import_path=import_path,
+        output_dir=output_dir,
+        before=existing,
+        after=updated,
+        teams=_team_map(fixtures, matches),
+        backup_path=backup_path,
+        batch_id=batch_id,
+        applied_at=applied_at,
+    )
     if backup_path is not None:
         paths["backup"] = backup_path
     if apply and change_count:

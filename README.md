@@ -560,9 +560,11 @@ The ledger tab also displays `data/outputs/current_odds_completeness.md`,
 `data/outputs/thursday_decision_queue.md`, and
 `data/outputs/thursday_decision_queue.csv` when they exist.
 
-At the top of the Thursday panel, the dashboard shows a readiness row with
-odds completion percentage, incomplete matches, serious current-odds issues,
-current-odds warnings, and Thursday status.
+At the top of the Thursday panel, the dashboard shows a command center card
+with Thursday status, odds completion, serious current-odds issues, warnings,
+the latest archive pair, count-change risk, top movement reason, and the
+recommended next manual action. The detailed readiness row and full reports
+remain below the card.
 
 These buttons do not edit `data/manual/bet_ledger.csv`, do not edit
 `data/manual/current_odds.csv`, do not apply settlements, do not place bets,

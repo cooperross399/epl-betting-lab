@@ -41,6 +41,7 @@ from epl_betting_lab.strategies.btts import evaluate_btts
 from epl_betting_lab.strategies.ml_value import evaluate_1x2_value
 from epl_betting_lab.strategies.promoted_fades import flag_promoted_team_spots
 from epl_betting_lab.strategies.totals import evaluate_total_25
+from epl_betting_lab.thursday_command_center import build_thursday_command_center
 from epl_betting_lab.thursday_readiness import build_thursday_readiness
 from epl_betting_lab.workflow_status import build_workflow_status
 from scripts import run_backtest
@@ -179,6 +180,20 @@ def render_report_buttons() -> None:
 def render_thursday_best_bets_panel() -> None:
     st.subheader("Thursday best-bets report")
     st.info("Run `Validate current odds` before generating Thursday best bets so bad manual inputs do not create a bad card.")
+    command_center = build_thursday_command_center()
+    with st.container(border=True):
+        st.markdown("**Thursday command center**")
+        command_cols = st.columns(4)
+        command_cols[0].metric("Thursday status", command_center.thursday_status)
+        command_cols[1].metric("Odds complete", command_center.odds_completion)
+        command_cols[2].metric("Serious issues", command_center.serious_validation_issues)
+        command_cols[3].metric("Warnings", command_center.validation_warnings)
+        st.caption(f"Current odds validation: {command_center.current_odds_status}. {command_center.explanation}")
+        st.caption(f"Archive pair: {command_center.archive_pair_label}")
+        st.caption(f"Count-change risk: {command_center.count_change_risk_flag}")
+        st.caption(f"Top movement reason: {command_center.top_card_movement_reason}")
+        st.info(f"Recommended next action: {command_center.recommended_next_action}")
+
     readiness = build_thursday_readiness()
     readiness_cols = st.columns(5)
     completion = "Missing" if readiness.odds_completion_percentage is None else f"{readiness.odds_completion_percentage:.1%}"

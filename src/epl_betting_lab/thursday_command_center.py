@@ -3,6 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
+import pandas as pd
+
 from epl_betting_lab.config import MANUAL_DIR, OUTPUTS_DIR
 from epl_betting_lab.current_odds_status import build_current_odds_status
 from epl_betting_lab.reports.thursday_archive_pair import (
@@ -43,23 +45,85 @@ def _format_count(value: int | None) -> str:
     return str(int(value))
 
 
-def build_thursday_detail_cue(recommended_next_action: object) -> str:
+COUNTED_ACTION_GROUPS = (
+    "Review price",
+    "Likely remove from card",
+    "Candidate upgrade",
+    "Recheck odds",
+    "Recheck validation",
+)
+
+
+def _load_decision_queue_counts(output_dir: Path) -> tuple[dict[str, int] | None, str]:
+    queue_path = output_dir / "thursday_decision_queue.csv"
+    comparison_path = output_dir / "thursday_best_bets_comparison.csv"
+    if not queue_path.exists():
+        return None, "play counts unavailable - generate the Thursday decision queue"
+    if comparison_path.exists() and comparison_path.stat().st_mtime > queue_path.stat().st_mtime:
+        return None, "play counts need refresh - regenerate the Thursday decision queue"
+
+    try:
+        queue = pd.read_csv(queue_path)
+    except (OSError, UnicodeError, pd.errors.EmptyDataError, pd.errors.ParserError):
+        return None, "play counts unavailable - regenerate the Thursday decision queue"
+    if queue.empty:
+        return {}, "no affected plays are currently listed"
+    if "action_needed" not in queue.columns:
+        return None, "play counts unavailable - regenerate the Thursday decision queue"
+
+    actions = queue["action_needed"].fillna("").astype(str).str.strip()
+    if not actions.ne("").any():
+        return None, "play counts unavailable - regenerate the Thursday decision queue"
+    counts = actions.value_counts().to_dict()
+    return {action: int(counts.get(action, 0)) for action in COUNTED_ACTION_GROUPS}, ""
+
+
+def _add_play_counts(cue: str, groups: tuple[str, ...], output_dir: Path | None) -> str:
+    if not groups or output_dir is None:
+        return cue
+    counts, fallback = _load_decision_queue_counts(output_dir)
+    if fallback:
+        return f"{cue} ({fallback})"
+
+    labels = [
+        f"{group}: {counts[group]} {'play' if counts[group] == 1 else 'plays'}"
+        for group in groups
+        if counts[group]
+    ]
+    if not labels:
+        return f"{cue} (no matching affected plays are listed)"
+    return f"{cue} - {'; '.join(labels)}"
+
+
+def build_thursday_detail_cue(recommended_next_action: object, output_dir: Path | None = None) -> str:
     action = str(recommended_next_action or "").strip().lower()
     cues = (
-        ("generate a thursday archive first", "Thursday readiness refresh and Thursday best-bets report"),
-        ("generate one more thursday archive first", "Thursday readiness refresh and Recent Thursday report archives"),
-        ("generate comparison first", "Post-refresh Thursday review and Latest Thursday snapshot comparison"),
-        ("check data/odds first", "Current odds validation and Odds entry completeness"),
-        ("review removals first", "Thursday decision queue: Likely remove from card"),
-        ("review prices first", "Thursday decision queue: Review price"),
-        ("review candidate upgrades", "Thursday decision queue: Candidate upgrade"),
-        ("generate decision queue first", "Thursday decision queue"),
-        ("review the decision queue", "Thursday decision queue"),
-        ("no urgent action", "Archive comparison and latest Thursday best-bets summary"),
+        ("generate a thursday archive first", "Thursday readiness refresh and Thursday best-bets report", ()),
+        (
+            "generate one more thursday archive first",
+            "Thursday readiness refresh and Recent Thursday report archives",
+            (),
+        ),
+        (
+            "generate comparison first",
+            "Post-refresh Thursday review and Latest Thursday snapshot comparison",
+            (),
+        ),
+        ("check data/odds first", "Current odds validation and Odds entry completeness", ("Recheck validation",)),
+        (
+            "review removals first",
+            "Thursday decision queue: Likely remove from card",
+            ("Likely remove from card",),
+        ),
+        ("review prices first", "Thursday decision queue: Review price", ("Review price", "Recheck odds")),
+        ("review candidate upgrades", "Thursday decision queue: Candidate upgrade", ("Candidate upgrade",)),
+        ("generate decision queue first", "Thursday decision queue", COUNTED_ACTION_GROUPS),
+        ("review the decision queue", "Thursday decision queue", COUNTED_ACTION_GROUPS),
+        ("no urgent action", "Archive comparison and latest Thursday best-bets summary", ()),
     )
-    for prefix, cue in cues:
+    for prefix, cue, groups in cues:
         if action.startswith(prefix):
-            return cue
+            return _add_play_counts(cue, groups, output_dir)
     return "Thursday readiness and report details below"
 
 
@@ -98,6 +162,6 @@ def build_thursday_command_center(
         count_change_risk_flag=str(count_risk["risk_flag"]),
         top_card_movement_reason=str(top_reason["top_movement_reason"]),
         recommended_next_action=str(next_action["recommended_next_action"]),
-        detail_cue=build_thursday_detail_cue(next_action.get("recommended_next_action")),
+        detail_cue=build_thursday_detail_cue(next_action.get("recommended_next_action"), output_dir),
         explanation=readiness.explanation,
     )

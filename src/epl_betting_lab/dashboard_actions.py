@@ -22,6 +22,10 @@ from epl_betting_lab.reports.current_odds_completeness import save_current_odds_
 from epl_betting_lab.reports.current_odds_import import process_current_odds_import
 from epl_betting_lab.reports.current_odds_template import create_current_odds_template
 from epl_betting_lab.reports.current_odds_maintenance import maintain_current_odds
+from epl_betting_lab.reports.odds_export_conversion import (
+    OddsExportConversionError,
+    convert_odds_export,
+)
 from epl_betting_lab.reports.thursday_best_bets import (
     build_thursday_best_bets,
     list_recent_thursday_archives,
@@ -186,6 +190,25 @@ def run_current_odds_import_preview(
         fixtures=fixtures,
         matches=matches,
     )
+
+
+def run_odds_export_conversion_preview(
+    profile_name: str = "generic",
+    source_path: Path | None = None,
+    profiles_path: Path | None = None,
+    output_dir: Path | None = None,
+) -> dict[str, Path | str]:
+    paths = convert_odds_export(
+        profile_name,
+        source_path or MANUAL_DIR / "sportsbook_export.csv",
+        profiles_path or MANUAL_DIR / "odds_import_profiles.json",
+        MANUAL_DIR / "current_odds_import.csv",
+        output_dir or OUTPUTS_DIR,
+        write_import=False,
+    )
+    if paths["status"] != "preview_only":
+        raise OddsExportConversionError(str(paths.get("message", "Conversion preview could not run.")))
+    return paths
 
 
 def run_thursday_best_bets_comparison(output_dir: Path | None = None) -> dict[str, Path]:

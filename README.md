@@ -174,8 +174,37 @@ replace it intentionally:
 python scripts/create_current_odds_template.py --overwrite
 ```
 
-To paste or export several real sportsbook prices at once, create the import
-file from its safe template:
+To convert a sportsbook or odds-site CSV export with different column names,
+save it as `data/manual/sportsbook_export.csv`, then run:
+
+```bash
+python scripts/convert_odds_export.py --profile generic --source data/manual/sportsbook_export.csv
+```
+
+The `generic` mapping in `data/manual/odds_import_profiles.json` converts
+`game_date`, `home`, `away`, `bet_type`, `pick`, `odds`, and `sportsbook` into
+the standard import columns. You can add another named profile for a different
+export without changing Python code. The converter writes:
+
+```text
+data/manual/current_odds_import.csv
+data/outputs/odds_export_conversion_preview.csv
+data/outputs/odds_export_conversion_report.md
+```
+
+It only copies supplied values; it does not fetch or guess prices. Invalid
+American odds are excluded. If `current_odds_import.csv` already exists, it is
+preserved unless you intentionally add `--overwrite-import`. The dashboard
+button `Preview odds export conversion` only writes the preview reports and
+never creates, replaces, or applies an import file.
+
+After conversion, run `python scripts/import_current_odds.py`. That existing
+safe importer still performs team normalization, fixture matching,
+market/selection validation, duplicate checks, and the normal preview gate.
+Applying remains a separate Terminal-only step with backups and audit history.
+
+To enter several real sportsbook prices without an export profile, create the
+import file from its safe template:
 
 ```bash
 cp data/manual/current_odds_import_template.csv data/manual/current_odds_import.csv
@@ -666,6 +695,7 @@ epl-betting-lab/
 │   │   ├── upcoming_fixtures.csv
 │   │   ├── current_odds_template.csv
 │   │   ├── current_odds_import_template.csv
+│   │   ├── odds_import_profiles.json
 │   │   ├── bet_ledger_template.csv
 │   │   ├── bet_ledger.csv
 │   │   └── mock_current_odds.csv
@@ -674,6 +704,7 @@ epl-betting-lab/
 │   └── outputs/
 ├── scripts/
 │   ├── fetch_data.py
+│   ├── convert_odds_export.py
 │   ├── import_current_odds.py
 │   ├── run_backtest.py
 │   └── generate_weekly_card.py

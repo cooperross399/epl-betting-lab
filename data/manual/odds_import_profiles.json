@@ -1,0 +1,16 @@
+{
+  "profiles": {
+    "generic": {
+      "description": "Example profile for a generic sportsbook or odds-site CSV export.",
+      "column_map": {
+        "game_date": "date",
+        "home": "home_team",
+        "away": "away_team",
+        "bet_type": "market",
+        "pick": "selection",
+        "odds": "american_odds",
+        "sportsbook": "book"
+      }
+    }
+  }
+}

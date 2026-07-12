@@ -85,6 +85,18 @@ def validate_odds_import_profile(
     return mapping, issues
 
 
+def map_odds_export_columns(
+    source: pd.DataFrame,
+    column_map: dict[str, str],
+) -> pd.DataFrame:
+    """Map source columns in memory without writing or applying an import."""
+    converted = pd.DataFrame("", index=source.index, columns=CURRENT_ODDS_COLUMNS)
+    for source_column, target_column in column_map.items():
+        if source_column in source.columns and target_column in CURRENT_ODDS_COLUMNS:
+            converted[target_column] = source[source_column].fillna("").astype(str).str.strip()
+    return converted
+
+
 def build_odds_export_conversion_preview(
     source: pd.DataFrame,
     column_map: dict[str, str],
@@ -104,10 +116,7 @@ def build_odds_export_conversion_preview(
             "missing_source_columns": missing_source_columns,
         }
 
-    converted = pd.DataFrame("", index=source.index, columns=CURRENT_ODDS_COLUMNS)
-    for source_column, target_column in column_map.items():
-        if source_column in source.columns:
-            converted[target_column] = source[source_column].fillna("").astype(str).str.strip()
+    converted = map_odds_export_columns(source, column_map)
 
     preview_rows: list[dict[str, object]] = []
     for position, (_, row) in enumerate(converted.iterrows(), start=2):

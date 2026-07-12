@@ -176,7 +176,8 @@ The Thursday panel also shows a command center card before the full reports:
 Thursday status, odds completion, serious validation issues, warnings, the
 latest archive pair, count-change risk, top movement reason, and the
 recommended next manual action. Use that card first, then open the details only
-when something looks missing or blocked.
+when something looks missing or blocked. The `Open this next` line points to
+the exact detail section to review after you read the recommended action.
 
 This reads only `data/manual/current_odds.csv` and writes:
 

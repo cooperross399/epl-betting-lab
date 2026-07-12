@@ -196,6 +196,7 @@ def render_thursday_best_bets_panel() -> None:
         st.caption(f"Count-change risk: {command_center.count_change_risk_flag}")
         st.caption(f"Top movement reason: {command_center.top_card_movement_reason}")
         st.info(f"Recommended next action: {command_center.recommended_next_action}")
+        st.caption(f"Open this next: {command_center.detail_cue}")
 
     readiness = build_thursday_readiness()
     readiness_cols = st.columns(5)

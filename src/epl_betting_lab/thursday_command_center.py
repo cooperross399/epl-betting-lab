@@ -27,6 +27,7 @@ class ThursdayCommandCenter:
     count_change_risk_flag: str
     top_card_movement_reason: str
     recommended_next_action: str
+    detail_cue: str
     explanation: str
 
 
@@ -40,6 +41,26 @@ def _format_count(value: int | None) -> str:
     if value is None:
         return "Missing"
     return str(int(value))
+
+
+def build_thursday_detail_cue(recommended_next_action: object) -> str:
+    action = str(recommended_next_action or "").strip().lower()
+    cues = (
+        ("generate a thursday archive first", "Thursday readiness refresh and Thursday best-bets report"),
+        ("generate one more thursday archive first", "Thursday readiness refresh and Recent Thursday report archives"),
+        ("generate comparison first", "Post-refresh Thursday review and Latest Thursday snapshot comparison"),
+        ("check data/odds first", "Current odds validation and Odds entry completeness"),
+        ("review removals first", "Thursday decision queue: Likely remove from card"),
+        ("review prices first", "Thursday decision queue: Review price"),
+        ("review candidate upgrades", "Thursday decision queue: Candidate upgrade"),
+        ("generate decision queue first", "Thursday decision queue"),
+        ("review the decision queue", "Thursday decision queue"),
+        ("no urgent action", "Archive comparison and latest Thursday best-bets summary"),
+    )
+    for prefix, cue in cues:
+        if action.startswith(prefix):
+            return cue
+    return "Thursday readiness and report details below"
 
 
 def build_thursday_command_center(
@@ -77,5 +98,6 @@ def build_thursday_command_center(
         count_change_risk_flag=str(count_risk["risk_flag"]),
         top_card_movement_reason=str(top_reason["top_movement_reason"]),
         recommended_next_action=str(next_action["recommended_next_action"]),
+        detail_cue=build_thursday_detail_cue(next_action.get("recommended_next_action")),
         explanation=readiness.explanation,
     )

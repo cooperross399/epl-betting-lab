@@ -13,6 +13,7 @@ from epl_betting_lab.dashboard_portal import (
     SECTION_DESCRIPTIONS,
     apply_portal_navigation_request,
     apply_portal_query_navigation,
+    build_portal_breadcrumb,
     build_ledger_portal_summary,
     portal_section_from_slug,
     portal_slug_from_section,
@@ -51,6 +52,26 @@ def test_portal_query_slugs_are_stable_and_reversible() -> None:
     for section, slug in expected.items():
         assert portal_slug_from_section(section) == slug
         assert portal_section_from_slug(slug) == section
+
+
+def test_portal_breadcrumbs_are_compact_and_complete() -> None:
+    expected = {
+        "Home / Command Center": "Home",
+        "Thursday Card": "Home > Thursday Card",
+        "Odds Import": "Home > Odds Import",
+        "Performance Reports": "Home > Performance Reports",
+        "Bet Ledger": "Home > Bet Ledger",
+        "Archives & Comparisons": "Home > Archives & Comparisons",
+        "Tools / Diagnostics": "Home > Tools / Diagnostics",
+    }
+
+    assert {section: build_portal_breadcrumb(section) for section in PORTAL_SECTIONS} == expected
+
+
+def test_portal_breadcrumb_falls_back_to_home_for_bad_state() -> None:
+    malformed_values = (None, "", "Unknown", ["Odds Import"], {"section": "tools"})
+
+    assert all(build_portal_breadcrumb(value) == "Home" for value in malformed_values)
 
 
 def test_odds_import_steps_preserve_the_safe_workflow_order() -> None:

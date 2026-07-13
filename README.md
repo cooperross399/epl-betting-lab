@@ -824,6 +824,8 @@ unknown, repeated, or malformed section value safely opens Home. The parameter
 only controls the visible portal section and never runs a report.
 Every non-Home section also has a compact `Back to Home` button near the top;
 it returns to Home and updates the URL to `?section=home` without running a report.
+Each page also shows a compact display-only breadcrumb, such as
+`Home > Odds Import`, so you can quickly confirm where you are in the portal.
 
 These buttons do not edit `data/manual/bet_ledger.csv`, do not edit
 `data/manual/current_odds.csv`, do not apply settlements, do not place bets,

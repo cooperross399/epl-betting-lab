@@ -325,13 +325,10 @@ odds file and run it again. For a rare intentional preview only, run:
 python scripts/generate_thursday_best_bets.py --force
 ```
 
-You can also open the dashboard and click `Create current odds template`,
-`Diagnose odds export profile`, `Suggest odds export profile`, `Validate
-suggested odds profile`, `Preview odds profile install`, `Verify installed odds
-profile`, `Preview odds export conversion`, `Preview current odds import`,
-`Preview current odds maintenance`, `Check odds entry completeness`, `Validate
-current odds`, then `Generate Thursday best-bets report`, on the `Betting
-ledger` tab.
+You can also open the dashboard. Use `Odds Import` for the export/profile/import
+steps, then use `Thursday Card` for odds completeness, validation, and best-bets
+generation. `Home / Command Center` keeps the readiness refresh and recommended
+next action at the front.
 The dashboard only previews imports and maintenance and shows report tables.
 It does not overwrite an existing odds file, apply imports or maintenance,
 edit odds, or force generation.
@@ -588,7 +585,7 @@ python scripts/settle_bet_ledger.py --apply
 Rows marked `unmatched` are left alone so you can fix team names, dates, or
 missing results by hand.
 
-## Step 7 — View the ledger dashboard tab
+## Step 7 — Open the betting portal
 
 After you run the ledger scripts, open the dashboard:
 
@@ -596,16 +593,28 @@ After you run the ledger scripts, open the dashboard:
 streamlit run app.py
 ```
 
-Use the `Betting ledger` tab to see your record, profit/loss, ROI, pending
-bets, health check issues, settlement preview, CLV summary, and market/team
-breakdowns in one place. The dashboard is read-only for now, so it will not
-edit `data/manual/bet_ledger.csv`.
+Use the sidebar sections:
 
-The ledger tab has buttons to run safe report actions:
+- `Home / Command Center` for Thursday readiness, the next action, ledger
+  units/ROI, and pending bets.
+- `Thursday Card` for odds completeness, validation, and best bets.
+- `Odds Import` for the safe profile and import preview sequence.
+- `Performance Reports` for tiers, backtests, CLV, and profit breakdowns.
+- `Bet Ledger` for record, pending bets, health checks, and settlement preview.
+- `Archives & Comparisons` for saved cards, comparisons, and decision queue.
+- `Tools / Diagnostics` for projections, form, model views, and file checks.
+
+The three main Home buttons are:
 
 ```text
 Run Thursday readiness refresh
 Run post-refresh Thursday review
+Generate tier performance report
+```
+
+The related sections keep the individual safe report actions:
+
+```text
 Run bet ledger report
 Run ledger health check
 Run settlement preview
@@ -621,11 +630,10 @@ Run backtest reports
 Refresh dashboard data
 ```
 
-The tab also shows the current odds validation report and Thursday report
-writeup/table when their files exist. It also shows the latest Thursday
+`Thursday Card` shows the current odds validation report and Thursday report
+writeup/table when their files exist. `Archives & Comparisons` shows the latest
 snapshot comparison after you run `python scripts/compare_thursday_best_bets.py`
-or click `Compare latest Thursday reports`. After that, it can also show the
-Thursday decision queue after you run
+or click `Compare latest Thursday reports`. It also shows the decision queue after you run
 `python scripts/generate_thursday_decision_queue.py` or click
 `Generate Thursday decision queue`.
 

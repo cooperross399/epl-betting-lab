@@ -266,6 +266,44 @@ The dashboard buttons `Suggest odds export profile`, `Validate suggested odds
 profile`, and `Preview odds profile install` are report-only. There is no
 dashboard apply button.
 
+After a Terminal installation, verify the installed profile against the export:
+
+```bash
+python scripts/verify_installed_odds_profile.py --profile example_book --source data/manual/sportsbook_export.csv
+```
+
+Verification loads the installed registry entry and converts the source only
+in memory. It checks required mappings and values, American odds,
+market/selection normalization, duplicates, and sample rows. It writes:
+
+```text
+data/outputs/odds_profile_post_install_verification.csv
+data/outputs/odds_profile_post_install_verification.md
+```
+
+The dashboard button `Verify installed odds profile` runs this read-only check.
+It never creates an import file or edits odds.
+
+If verification exposes a problem, preview a registry rollback using the
+backup path recorded by installation:
+
+```bash
+python scripts/rollback_odds_profile_registry.py --backup-path data/manual/backups/BACKUP.json
+```
+
+The rollback preview compares profile counts and lists names that would be
+added, removed, or changed. It does not modify the registry. To restore the
+selected backup from Terminal:
+
+```bash
+python scripts/rollback_odds_profile_registry.py --backup-path data/manual/backups/BACKUP.json --apply
+```
+
+Apply first backs up the current registry, then restores the selected backup
+and writes `odds_profile_rollback_audit.csv` plus its markdown report in
+`data/outputs/`. An equivalent backup produces no changes. The dashboard can
+display the latest rollback preview but has no rollback apply button.
+
 After choosing a profile, preview the conversion:
 
 ```bash
@@ -799,6 +837,8 @@ epl-betting-lab/
 │   ├── suggest_odds_export_profile.py
 │   ├── validate_odds_export_profile_suggestion.py
 │   ├── preview_install_odds_profile.py
+│   ├── verify_installed_odds_profile.py
+│   ├── rollback_odds_profile_registry.py
 │   ├── convert_odds_export.py
 │   ├── import_current_odds.py
 │   ├── run_backtest.py

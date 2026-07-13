@@ -4,9 +4,13 @@ import pandas as pd
 
 from epl_betting_lab.dashboard_portal import (
     ODDS_IMPORT_STEPS,
+    PORTAL_NAVIGATION_REQUEST_KEY,
+    PORTAL_SECTION_STATE_KEY,
     PORTAL_SECTIONS,
     SECTION_DESCRIPTIONS,
+    apply_portal_navigation_request,
     build_ledger_portal_summary,
+    resolve_open_next_section,
 )
 
 
@@ -36,6 +40,58 @@ def test_odds_import_steps_preserve_the_safe_workflow_order() -> None:
         "Preview current odds import",
         "View import audits",
     ]
+
+
+def test_open_next_cues_map_to_portal_sections() -> None:
+    assert resolve_open_next_section(
+        "Thursday readiness refresh and Thursday best-bets report"
+    ) == "Thursday Card"
+    assert resolve_open_next_section("Odds import profile install") == "Odds Import"
+    assert resolve_open_next_section(
+        "Post-refresh Thursday review and Latest Thursday snapshot comparison"
+    ) == "Archives & Comparisons"
+    assert resolve_open_next_section("Tier performance report") == "Performance Reports"
+    assert resolve_open_next_section("Bet ledger health check") == "Bet Ledger"
+    assert resolve_open_next_section("Model projections and diagnostics") == "Tools / Diagnostics"
+
+
+def test_open_next_archive_cue_takes_priority_over_thursday_readiness() -> None:
+    cue = "Thursday readiness refresh and Recent Thursday report archives"
+
+    assert resolve_open_next_section(cue) == "Archives & Comparisons"
+
+
+def test_open_next_cue_has_safe_unknown_fallback() -> None:
+    assert resolve_open_next_section(None) is None
+    assert resolve_open_next_section("") is None
+    assert resolve_open_next_section("Unexpected destination") is None
+
+
+def test_navigation_request_changes_only_the_selected_section() -> None:
+    state: dict[str, object] = {
+        PORTAL_SECTION_STATE_KEY: "Home / Command Center",
+        PORTAL_NAVIGATION_REQUEST_KEY: "Bet Ledger",
+        "unrelated": "unchanged",
+    }
+
+    selected = apply_portal_navigation_request(state)
+
+    assert selected == "Bet Ledger"
+    assert state[PORTAL_SECTION_STATE_KEY] == "Bet Ledger"
+    assert PORTAL_NAVIGATION_REQUEST_KEY not in state
+    assert state["unrelated"] == "unchanged"
+
+
+def test_navigation_request_discards_unknown_sections_and_repairs_bad_state() -> None:
+    state = {
+        PORTAL_SECTION_STATE_KEY: "Not a portal section",
+        PORTAL_NAVIGATION_REQUEST_KEY: "Unknown destination",
+    }
+
+    selected = apply_portal_navigation_request(state)
+
+    assert selected == "Home / Command Center"
+    assert state == {PORTAL_SECTION_STATE_KEY: "Home / Command Center"}
 
 
 def test_ledger_portal_summary_handles_missing_ledger(tmp_path) -> None:

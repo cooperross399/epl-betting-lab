@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+from typing import MutableMapping
 
 import pandas as pd
 
@@ -18,6 +19,8 @@ PORTAL_SECTIONS = (
     "Archives & Comparisons",
     "Tools / Diagnostics",
 )
+PORTAL_SECTION_STATE_KEY = "portal_section"
+PORTAL_NAVIGATION_REQUEST_KEY = "portal_navigation_request"
 
 SECTION_DESCRIPTIONS = {
     "Home / Command Center": "Start here for Thursday readiness and the next manual step.",
@@ -28,6 +31,76 @@ SECTION_DESCRIPTIONS = {
     "Archives & Comparisons": "Compare saved Thursday cards and review the decision queue.",
     "Tools / Diagnostics": "Open model projections, workflow files, and advanced diagnostics.",
 }
+
+
+def resolve_open_next_section(cue: object) -> str | None:
+    normalized = " ".join(str(cue or "").strip().lower().split())
+    if not normalized:
+        return None
+
+    mappings = (
+        (
+            (
+                "decision queue",
+                "snapshot comparison",
+                "archive comparison",
+                "recent thursday report archives",
+                "archive history",
+                "archives & comparisons",
+            ),
+            "Archives & Comparisons",
+        ),
+        (
+            (
+                "odds import",
+                "export profile",
+                "profile install",
+                "installed profile",
+                "rollback preview",
+                "export conversion",
+            ),
+            "Odds Import",
+        ),
+        (
+            ("tier performance", "performance reports", "backtest", "clv"),
+            "Performance Reports",
+        ),
+        (
+            ("bet ledger", "ledger health", "settlement", "pending bets"),
+            "Bet Ledger",
+        ),
+        (
+            ("tools / diagnostics", "model projections", "workflow checklist", "diagnostics"),
+            "Tools / Diagnostics",
+        ),
+        (
+            (
+                "thursday card",
+                "thursday readiness",
+                "best-bets report",
+                "current odds validation",
+                "odds entry completeness",
+            ),
+            "Thursday Card",
+        ),
+    )
+    for phrases, section in mappings:
+        if any(phrase in normalized for phrase in phrases):
+            return section
+    return None
+
+
+def apply_portal_navigation_request(state: MutableMapping[str, object]) -> str:
+    current = state.get(PORTAL_SECTION_STATE_KEY)
+    if current not in PORTAL_SECTIONS:
+        current = PORTAL_SECTIONS[0]
+
+    requested = state.pop(PORTAL_NAVIGATION_REQUEST_KEY, None)
+    if requested in PORTAL_SECTIONS:
+        current = requested
+
+    state[PORTAL_SECTION_STATE_KEY] = current
+    return str(current)
 
 
 @dataclass(frozen=True)

@@ -5,11 +5,16 @@ import pandas as pd
 from epl_betting_lab.dashboard_portal import (
     ODDS_IMPORT_STEPS,
     PORTAL_NAVIGATION_REQUEST_KEY,
+    PORTAL_QUERY_PARAM,
     PORTAL_SECTION_STATE_KEY,
+    PORTAL_SECTION_SLUGS,
     PORTAL_SECTIONS,
     SECTION_DESCRIPTIONS,
     apply_portal_navigation_request,
+    apply_portal_query_navigation,
     build_ledger_portal_summary,
+    portal_section_from_slug,
+    portal_slug_from_section,
     resolve_open_next_section,
 )
 
@@ -25,6 +30,25 @@ def test_portal_sections_are_beginner_friendly_and_complete() -> None:
         "Tools / Diagnostics",
     )
     assert set(SECTION_DESCRIPTIONS) == set(PORTAL_SECTIONS)
+    assert set(PORTAL_SECTION_SLUGS) == set(PORTAL_SECTIONS)
+    assert PORTAL_QUERY_PARAM == "section"
+
+
+def test_portal_query_slugs_are_stable_and_reversible() -> None:
+    expected = {
+        "Home / Command Center": "home",
+        "Thursday Card": "thursday-card",
+        "Odds Import": "odds-import",
+        "Performance Reports": "performance",
+        "Bet Ledger": "bet-ledger",
+        "Archives & Comparisons": "archives",
+        "Tools / Diagnostics": "tools",
+    }
+
+    assert PORTAL_SECTION_SLUGS == expected
+    for section, slug in expected.items():
+        assert portal_slug_from_section(section) == slug
+        assert portal_section_from_slug(slug) == section
 
 
 def test_odds_import_steps_preserve_the_safe_workflow_order() -> None:
@@ -92,6 +116,35 @@ def test_navigation_request_discards_unknown_sections_and_repairs_bad_state() ->
 
     assert selected == "Home / Command Center"
     assert state == {PORTAL_SECTION_STATE_KEY: "Home / Command Center"}
+
+
+def test_query_navigation_selects_bookmarked_section() -> None:
+    state: dict[str, object] = {}
+
+    selected = apply_portal_query_navigation(state, "odds-import")
+
+    assert selected == "Odds Import"
+    assert state[PORTAL_SECTION_STATE_KEY] == "Odds Import"
+
+
+def test_query_navigation_home_fallbacks_are_strict() -> None:
+    malformed_values = (None, "", "unknown", "odds import", ["odds-import"], {"section": "tools"})
+
+    for value in malformed_values:
+        state = {PORTAL_SECTION_STATE_KEY: "Performance Reports"}
+        assert apply_portal_query_navigation(state, value) == "Home / Command Center"
+
+
+def test_pending_open_next_request_overrides_old_query_value() -> None:
+    state = {
+        PORTAL_SECTION_STATE_KEY: "Home / Command Center",
+        PORTAL_NAVIGATION_REQUEST_KEY: "Performance Reports",
+    }
+
+    selected = apply_portal_query_navigation(state, "home")
+
+    assert selected == "Performance Reports"
+    assert PORTAL_NAVIGATION_REQUEST_KEY not in state
 
 
 def test_ledger_portal_summary_handles_missing_ledger(tmp_path) -> None:

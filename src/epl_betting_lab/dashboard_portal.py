@@ -21,6 +21,17 @@ PORTAL_SECTIONS = (
 )
 PORTAL_SECTION_STATE_KEY = "portal_section"
 PORTAL_NAVIGATION_REQUEST_KEY = "portal_navigation_request"
+PORTAL_QUERY_PARAM = "section"
+PORTAL_SECTION_SLUGS = {
+    "Home / Command Center": "home",
+    "Thursday Card": "thursday-card",
+    "Odds Import": "odds-import",
+    "Performance Reports": "performance",
+    "Bet Ledger": "bet-ledger",
+    "Archives & Comparisons": "archives",
+    "Tools / Diagnostics": "tools",
+}
+PORTAL_SLUG_SECTIONS = {slug: section for section, slug in PORTAL_SECTION_SLUGS.items()}
 
 SECTION_DESCRIPTIONS = {
     "Home / Command Center": "Start here for Thursday readiness and the next manual step.",
@@ -90,6 +101,17 @@ def resolve_open_next_section(cue: object) -> str | None:
     return None
 
 
+def portal_section_from_slug(value: object) -> str:
+    if not isinstance(value, str):
+        return PORTAL_SECTIONS[0]
+    normalized = value.strip().lower()
+    return PORTAL_SLUG_SECTIONS.get(normalized, PORTAL_SECTIONS[0])
+
+
+def portal_slug_from_section(section: object) -> str:
+    return PORTAL_SECTION_SLUGS.get(str(section), PORTAL_SECTION_SLUGS[PORTAL_SECTIONS[0]])
+
+
 def apply_portal_navigation_request(state: MutableMapping[str, object]) -> str:
     current = state.get(PORTAL_SECTION_STATE_KEY)
     if current not in PORTAL_SECTIONS:
@@ -101,6 +123,14 @@ def apply_portal_navigation_request(state: MutableMapping[str, object]) -> str:
 
     state[PORTAL_SECTION_STATE_KEY] = current
     return str(current)
+
+
+def apply_portal_query_navigation(
+    state: MutableMapping[str, object],
+    query_value: object,
+) -> str:
+    state[PORTAL_SECTION_STATE_KEY] = portal_section_from_slug(query_value)
+    return apply_portal_navigation_request(state)
 
 
 @dataclass(frozen=True)

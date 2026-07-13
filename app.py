@@ -9,11 +9,13 @@ from epl_betting_lab.current_odds_status import build_current_odds_status
 from epl_betting_lab.dashboard_portal import (
     ODDS_IMPORT_STEPS,
     PORTAL_NAVIGATION_REQUEST_KEY,
+    PORTAL_QUERY_PARAM,
     PORTAL_SECTION_STATE_KEY,
     PORTAL_SECTIONS,
     SECTION_DESCRIPTIONS,
-    apply_portal_navigation_request,
+    apply_portal_query_navigation,
     build_ledger_portal_summary,
+    portal_slug_from_section,
     resolve_open_next_section,
 )
 from epl_betting_lab.dashboard_actions import (
@@ -149,6 +151,16 @@ def render_status_message(status: str, message: str) -> None:
         st.info(message)
 
 
+def sync_portal_query_param(section: object) -> None:
+    slug = portal_slug_from_section(section)
+    if st.query_params.get_all(PORTAL_QUERY_PARAM) != [slug]:
+        st.query_params[PORTAL_QUERY_PARAM] = slug
+
+
+def sync_portal_query_from_sidebar() -> None:
+    sync_portal_query_param(st.session_state.get(PORTAL_SECTION_STATE_KEY))
+
+
 def run_dashboard_action(label: str, action) -> None:
     try:
         action()
@@ -265,6 +277,7 @@ def render_open_next_cue(cue: object) -> None:
         width="stretch",
     ):
         st.session_state[PORTAL_NAVIGATION_REQUEST_KEY] = destination
+        sync_portal_query_param(destination)
         st.rerun()
 
 
@@ -924,7 +937,11 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-apply_portal_navigation_request(st.session_state)
+portal_query_values = st.query_params.get_all(PORTAL_QUERY_PARAM)
+portal_query_value: object = (
+    portal_query_values[0] if len(portal_query_values) == 1 else portal_query_values
+)
+apply_portal_query_navigation(st.session_state, portal_query_value)
 
 with st.sidebar:
     st.title("EPL Betting Lab")
@@ -933,8 +950,10 @@ with st.sidebar:
         "Portal navigation",
         PORTAL_SECTIONS,
         key=PORTAL_SECTION_STATE_KEY,
+        on_change=sync_portal_query_from_sidebar,
         label_visibility="collapsed",
     )
+    sync_portal_query_param(selected_section)
     st.caption(SECTION_DESCRIPTIONS[selected_section])
     st.divider()
     with st.expander("Model settings", expanded=False):

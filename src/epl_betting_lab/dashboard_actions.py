@@ -36,6 +36,11 @@ from epl_betting_lab.reports.odds_export_profile_suggestion import (
     OddsExportProfileSuggestionError,
     suggest_odds_export_profile,
 )
+from epl_betting_lab.reports.odds_export_profile_suggestion_validation import (
+    FATAL_VALIDATION_STATUSES,
+    OddsExportProfileSuggestionValidationError,
+    validate_odds_export_profile_suggestion_file,
+)
 from epl_betting_lab.reports.thursday_best_bets import (
     build_thursday_best_bets,
     list_recent_thursday_archives,
@@ -251,6 +256,23 @@ def run_odds_export_profile_suggestion(
     if paths["status"] in FATAL_SUGGESTION_STATUSES:
         raise OddsExportProfileSuggestionError(
             str(paths.get("message", "Odds export profile suggestion could not run."))
+        )
+    return paths
+
+
+def run_odds_export_profile_suggestion_validation(
+    suggestion_path: Path | None = None,
+    source_path: Path | None = None,
+    output_dir: Path | None = None,
+) -> dict[str, Path | str]:
+    paths = validate_odds_export_profile_suggestion_file(
+        suggestion_path or OUTPUTS_DIR / "odds_export_profile_suggestion.json",
+        source_path,
+        output_dir or OUTPUTS_DIR,
+    )
+    if paths["status"] in FATAL_VALIDATION_STATUSES:
+        raise OddsExportProfileSuggestionValidationError(
+            str(paths.get("message", "Draft odds profile validation could not run."))
         )
     return paths
 

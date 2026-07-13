@@ -212,9 +212,27 @@ data/outputs/odds_export_profile_suggestion.md
 
 These are review-only drafts. The helper never edits
 `data/manual/odds_import_profiles.json`, either odds CSV, or the ledger. Review
-the confidence notes and unmapped columns, manually add the approved profile,
-then rerun the diagnostic. The dashboard button `Suggest odds export profile`
-runs the same safe draft workflow.
+the confidence notes and unmapped columns, then validate the draft in memory:
+
+```bash
+python scripts/validate_odds_export_profile_suggestion.py
+```
+
+The validator uses the source path stored in the suggestion. Override it when
+needed with `--source data/manual/sportsbook_export.csv`. It checks required
+outputs, unresolved mappings, missing source columns, odds values,
+market/selection normalization, and duplicate converted rows. It writes:
+
+```text
+data/outputs/odds_export_profile_suggestion_validation.csv
+data/outputs/odds_export_profile_suggestion_validation.md
+```
+
+The verdict is `Ready for manual profile review`, `Needs edits before profile
+review`, or `Invalid draft suggestion`. Even a ready verdict still requires
+manual review. The validator never creates `current_odds_import.csv` or edits
+the profile registry or odds files. The dashboard buttons `Suggest odds export
+profile` and `Validate suggested odds profile` run these safe report steps.
 
 After choosing a profile, preview the conversion:
 
@@ -747,6 +765,7 @@ epl-betting-lab/
 │   ├── fetch_data.py
 │   ├── diagnose_odds_export.py
 │   ├── suggest_odds_export_profile.py
+│   ├── validate_odds_export_profile_suggestion.py
 │   ├── convert_odds_export.py
 │   ├── import_current_odds.py
 │   ├── run_backtest.py

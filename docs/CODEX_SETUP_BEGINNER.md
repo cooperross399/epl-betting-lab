@@ -368,6 +368,9 @@ The selected portal section is also stored in the browser URL. For example,
 Performance Reports after a refresh or from a bookmark. Sidebar changes and
 the Home `Open ...` button update the URL automatically. Missing or invalid
 values safely open Home, and the URL never runs reports or changes data.
+Use the compact `Back to Home` button at the top of any other portal section to
+return to Home / Command Center. It also changes the URL to `?section=home` and
+does not run reports or edit files.
 
 This reads only `data/manual/current_odds.csv` and writes:
 

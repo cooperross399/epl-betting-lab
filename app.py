@@ -7,6 +7,7 @@ from epl_betting_lab.backtest.walk_forward import summarize_backtest
 from epl_betting_lab.config import MANUAL_DIR, MAX_DEFAULT_JUICE, MIN_EDGE, OUTPUTS_DIR
 from epl_betting_lab.current_odds_status import build_current_odds_status
 from epl_betting_lab.dashboard_portal import (
+    HOME_PORTAL_SECTION,
     ODDS_IMPORT_STEPS,
     PORTAL_NAVIGATION_REQUEST_KEY,
     PORTAL_QUERY_PARAM,
@@ -16,6 +17,7 @@ from epl_betting_lab.dashboard_portal import (
     apply_portal_query_navigation,
     build_ledger_portal_summary,
     portal_slug_from_section,
+    request_portal_home_navigation,
     resolve_open_next_section,
 )
 from epl_betting_lab.dashboard_actions import (
@@ -159,6 +161,18 @@ def sync_portal_query_param(section: object) -> None:
 
 def sync_portal_query_from_sidebar() -> None:
     sync_portal_query_param(st.session_state.get(PORTAL_SECTION_STATE_KEY))
+
+
+def render_back_to_home() -> None:
+    if st.button(
+        "Back to Home",
+        key="portal_back_to_home",
+        help="Return to Home / Command Center without running any action.",
+        width="content",
+    ):
+        destination = request_portal_home_navigation(st.session_state)
+        sync_portal_query_param(destination)
+        st.rerun()
 
 
 def run_dashboard_action(label: str, action) -> None:
@@ -970,6 +984,9 @@ with st.sidebar:
 
 st.title("EPL Betting Lab")
 st.caption(SECTION_DESCRIPTIONS[selected_section])
+
+if selected_section != HOME_PORTAL_SECTION:
+    render_back_to_home()
 
 if selected_section == "Home / Command Center":
     render_home()

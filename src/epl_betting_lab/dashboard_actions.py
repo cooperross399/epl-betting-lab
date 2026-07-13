@@ -41,6 +41,11 @@ from epl_betting_lab.reports.odds_export_profile_suggestion_validation import (
     OddsExportProfileSuggestionValidationError,
     validate_odds_export_profile_suggestion_file,
 )
+from epl_betting_lab.reports.odds_profile_install import (
+    FATAL_INSTALL_PREVIEW_STATUSES,
+    OddsProfileInstallPreviewError,
+    process_odds_profile_install,
+)
 from epl_betting_lab.reports.thursday_best_bets import (
     build_thursday_best_bets,
     list_recent_thursday_archives,
@@ -273,6 +278,29 @@ def run_odds_export_profile_suggestion_validation(
     if paths["status"] in FATAL_VALIDATION_STATUSES:
         raise OddsExportProfileSuggestionValidationError(
             str(paths.get("message", "Draft odds profile validation could not run."))
+        )
+    return paths
+
+
+def run_odds_profile_install_preview(
+    suggestion_path: Path | None = None,
+    validation_markdown_path: Path | None = None,
+    validation_csv_path: Path | None = None,
+    registry_path: Path | None = None,
+    output_dir: Path | None = None,
+) -> dict[str, Path | str]:
+    outputs = output_dir or OUTPUTS_DIR
+    paths = process_odds_profile_install(
+        suggestion_path or outputs / "odds_export_profile_suggestion.json",
+        validation_markdown_path or outputs / "odds_export_profile_suggestion_validation.md",
+        validation_csv_path or outputs / "odds_export_profile_suggestion_validation.csv",
+        registry_path or MANUAL_DIR / "odds_import_profiles.json",
+        outputs,
+        apply=False,
+    )
+    if paths["status"] in FATAL_INSTALL_PREVIEW_STATUSES:
+        raise OddsProfileInstallPreviewError(
+            str(paths.get("message", "Odds profile installation preview could not run."))
         )
     return paths
 

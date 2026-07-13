@@ -138,8 +138,36 @@ The verdicts are:
 
 The validation is read-only and never creates `current_odds_import.csv`. The
 dashboard buttons `Suggest odds export profile` and `Validate suggested odds
-profile` provide the same safe flow. Only manually add a profile to the
-registry after the validator and your own review both pass.
+profile` provide the same safe flow.
+
+Next, preview the exact registry change without installing anything:
+
+```bash
+python scripts/preview_install_odds_profile.py
+```
+
+Read `data/outputs/odds_profile_install_preview.md`. It shows the profile name,
+whether that name already exists, profile counts before and after, the exact
+JSON block, validation verdict, and warnings. The dashboard button `Preview
+odds profile install` runs this same read-only preview.
+
+Only after reviewing the preview should you install from Terminal:
+
+```bash
+python scripts/preview_install_odds_profile.py --apply
+```
+
+Additional safety flags are required in riskier cases:
+
+- `--replace-existing` replaces a duplicate profile name.
+- `--allow-needs-edits` explicitly accepts a Needs-edits verdict, invalid
+  validation rows, or remaining `REVIEW_NEEDED` fields.
+- `--allow-missing-validation` explicitly accepts missing validation.
+
+An `Invalid draft suggestion` verdict can never be overridden. A successful
+install first backs up the registry under `data/manual/backups/`, then writes
+`data/outputs/odds_profile_install_audit.csv` and its markdown report. There is
+no dashboard apply button.
 
 When the report identifies the right profile, convert the export:
 
@@ -264,10 +292,10 @@ python scripts/generate_thursday_best_bets.py --force
 
 You can also open the dashboard and click `Create current odds template`,
 `Diagnose odds export profile`, `Suggest odds export profile`, `Validate
-suggested odds profile`, `Preview odds export conversion`, `Preview current
-odds import`, `Preview current odds maintenance`, `Check odds entry
-completeness`, `Validate current odds`, then `Generate Thursday best-bets
-report`, on the `Betting ledger` tab.
+suggested odds profile`, `Preview odds profile install`, `Preview odds export
+conversion`, `Preview current odds import`, `Preview current odds maintenance`,
+`Check odds entry completeness`, `Validate current odds`, then `Generate
+Thursday best-bets report`, on the `Betting ledger` tab.
 The dashboard only previews imports and maintenance and shows report tables.
 It does not overwrite an existing odds file, apply imports or maintenance,
 edit odds, or force generation.

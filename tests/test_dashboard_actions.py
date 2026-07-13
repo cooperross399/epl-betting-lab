@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+
 import pandas as pd
 import pytest
 
@@ -18,6 +20,7 @@ from epl_betting_lab.dashboard_actions import (
     run_odds_export_profile_diagnostic,
     run_odds_export_profile_suggestion,
     run_odds_export_profile_suggestion_validation,
+    run_odds_profile_install_preview,
     run_post_thursday_review,
     run_settlement_preview,
     run_tier_performance_report,
@@ -389,6 +392,67 @@ def test_run_odds_export_profile_suggestion_validation_reports_missing_draft(tmp
 
     assert "Missing draft suggestion" in str(exc.value)
     assert (output_dir / "odds_export_profile_suggestion_validation.md").exists()
+
+
+def test_run_odds_profile_install_preview_never_edits_registry(tmp_path) -> None:
+    suggestion_path = tmp_path / "suggestion.json"
+    validation_markdown = tmp_path / "validation.md"
+    validation_csv = tmp_path / "validation.csv"
+    registry_path = tmp_path / "odds_import_profiles.json"
+    output_dir = tmp_path / "outputs"
+    profile = {
+        "description": "Reviewed profile",
+        "column_map": {
+            "game_date": "date",
+            "home": "home_team",
+            "away": "away_team",
+            "bet_type": "market",
+            "pick": "selection",
+            "odds": "american_odds",
+            "sportsbook": "book",
+        },
+    }
+    suggestion_path.write_text(
+        json.dumps({"profile_name": "example_book", "suggested_profile": profile}),
+        encoding="utf-8",
+    )
+    validation_markdown.write_text(
+        "## Verdict: Ready for manual profile review\n",
+        encoding="utf-8",
+    )
+    pd.DataFrame({"validation_status": ["valid"]}).to_csv(validation_csv, index=False)
+    registry_path.write_text('{"profiles":{"generic":{}}}\n', encoding="utf-8")
+    original = registry_path.read_text(encoding="utf-8")
+
+    paths = run_odds_profile_install_preview(
+        suggestion_path,
+        validation_markdown,
+        validation_csv,
+        registry_path,
+        output_dir,
+    )
+
+    assert paths["status"] == "preview_ready"
+    assert paths["json"].exists()
+    assert paths["markdown"].exists()
+    assert registry_path.read_text(encoding="utf-8") == original
+    assert not (tmp_path / "backups").exists()
+
+
+def test_run_odds_profile_install_preview_reports_missing_suggestion(tmp_path) -> None:
+    registry_path = tmp_path / "odds_import_profiles.json"
+    output_dir = tmp_path / "outputs"
+    registry_path.write_text('{"profiles":{"generic":{}}}\n', encoding="utf-8")
+
+    with pytest.raises(dashboard_actions.OddsProfileInstallPreviewError) as exc:
+        run_odds_profile_install_preview(
+            tmp_path / "missing.json",
+            registry_path=registry_path,
+            output_dir=output_dir,
+        )
+
+    assert "Missing suggestion file" in str(exc.value)
+    assert (output_dir / "odds_profile_install_preview.md").exists()
 
 
 def test_run_current_odds_completeness_writes_report_without_editing_odds(tmp_path, monkeypatch) -> None:

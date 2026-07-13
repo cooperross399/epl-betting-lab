@@ -18,6 +18,7 @@ from epl_betting_lab.dashboard_actions import (
     run_odds_export_profile_diagnostic,
     run_odds_export_profile_suggestion,
     run_odds_export_profile_suggestion_validation,
+    run_odds_profile_install_preview,
     run_post_thursday_review,
     run_settlement_preview,
     run_tier_performance_report,
@@ -44,6 +45,9 @@ from epl_betting_lab.reports.odds_export_profile_suggestion import (
 )
 from epl_betting_lab.reports.odds_export_profile_suggestion_validation import (
     OddsExportProfileSuggestionValidationError,
+)
+from epl_betting_lab.reports.odds_profile_install import (
+    OddsProfileInstallPreviewError,
 )
 from epl_betting_lab.reports.thursday_archive_pair import (
     build_thursday_archive_history_details,
@@ -107,6 +111,9 @@ def run_dashboard_action(label: str, action) -> None:
         st.error(f"{label} could not run.")
         st.info(str(exc))
     except OddsExportProfileSuggestionValidationError as exc:
+        st.error(f"{label} could not run.")
+        st.info(str(exc))
+    except OddsProfileInstallPreviewError as exc:
         st.error(f"{label} could not run.")
         st.info(str(exc))
     except FileExistsError as exc:
@@ -194,6 +201,11 @@ def render_report_buttons() -> None:
         run_dashboard_action(
             "Suggested odds profile validation",
             run_odds_export_profile_suggestion_validation,
+        )
+    if st.button("Preview odds profile install", width="stretch"):
+        run_dashboard_action(
+            "Odds profile installation preview",
+            run_odds_profile_install_preview,
         )
     if st.button("Preview odds export conversion", width="stretch"):
         run_dashboard_action("Odds export conversion preview", run_odds_export_conversion_preview)
@@ -314,6 +326,17 @@ def render_thursday_best_bets_panel() -> None:
         "odds_export_profile_suggestion_validation.csv",
         suggestion_validation_command,
     )
+
+    install_preview_path = OUTPUTS_DIR / "odds_profile_install_preview.md"
+    install_preview_command = "python scripts/preview_install_odds_profile.py"
+    if install_preview_path.exists():
+        with st.expander("Odds profile installation preview", expanded=False):
+            st.markdown(install_preview_path.read_text(encoding="utf-8"))
+    else:
+        show_missing_report(
+            "data/outputs/odds_profile_install_preview.md",
+            install_preview_command,
+        )
 
     conversion_path = OUTPUTS_DIR / "odds_export_conversion_report.md"
     if conversion_path.exists():

@@ -231,8 +231,40 @@ data/outputs/odds_export_profile_suggestion_validation.md
 The verdict is `Ready for manual profile review`, `Needs edits before profile
 review`, or `Invalid draft suggestion`. Even a ready verdict still requires
 manual review. The validator never creates `current_odds_import.csv` or edits
-the profile registry or odds files. The dashboard buttons `Suggest odds export
-profile` and `Validate suggested odds profile` run these safe report steps.
+the profile registry or odds files.
+
+Before installing a reviewed profile, preview the exact registry change:
+
+```bash
+python scripts/preview_install_odds_profile.py
+```
+
+Preview mode shows whether the profile name already exists, profile counts
+before/after, the exact JSON block, validation verdict, and safety warnings. It
+writes:
+
+```text
+data/outputs/odds_profile_install_preview.json
+data/outputs/odds_profile_install_preview.md
+```
+
+Preview never edits the registry. Installation is Terminal-only and requires:
+
+```bash
+python scripts/preview_install_odds_profile.py --apply
+```
+
+A ready, new profile needs no extra flag beyond `--apply`. Existing names need
+`--replace-existing`; Needs-edits or `REVIEW_NEEDED` drafts need
+`--allow-needs-edits`; missing validation needs `--allow-missing-validation`.
+An invalid draft verdict is always refused. Successful installation creates a
+timestamped backup under `data/manual/backups/` and writes
+`odds_profile_install_audit.csv` plus `odds_profile_install_audit.md` in
+`data/outputs/`.
+
+The dashboard buttons `Suggest odds export profile`, `Validate suggested odds
+profile`, and `Preview odds profile install` are report-only. There is no
+dashboard apply button.
 
 After choosing a profile, preview the conversion:
 
@@ -766,6 +798,7 @@ epl-betting-lab/
 │   ├── diagnose_odds_export.py
 │   ├── suggest_odds_export_profile.py
 │   ├── validate_odds_export_profile_suggestion.py
+│   ├── preview_install_odds_profile.py
 │   ├── convert_odds_export.py
 │   ├── import_current_odds.py
 │   ├── run_backtest.py

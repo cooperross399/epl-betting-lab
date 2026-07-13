@@ -363,6 +363,12 @@ change files. It
 also shows affected-play counts from `thursday_decision_queue.csv` when that
 file is current, or a short generate/refresh message when it is not usable.
 
+The Home page `Data freshness` area shows how many important files are `Fresh`,
+`Stale`, `Missing`, `Needs refresh`, or `Not checked`. Follow its plain-English
+recommendation first. Open `Data freshness details` only when you need the exact
+file paths, source paths, local timestamps, notes, and refresh commands. The
+freshness check never changes a file.
+
 The selected portal section is also stored in the browser URL. For example,
 `?section=odds-import` opens Odds Import and `?section=performance` opens
 Performance Reports after a refresh or from a bookmark. Sidebar changes and

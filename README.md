@@ -807,6 +807,13 @@ running a report or editing data. When
 the decision queue is current, the cue also shows how many plays are in the
 relevant review group. Missing, stale, or unreadable queues show a refresh note.
 
+Home also includes a compact `Data freshness` area. It checks historical
+results, fixtures, current odds, Thursday reports and archives, comparison and
+decision reports, tier performance, and the ledger summary. The main view shows
+status counts and the most important next refresh step; open `Data freshness
+details` for file paths, source paths, local timestamps, notes, and commands.
+This check is read-only.
+
 Portal sections are bookmarkable with the `section` query parameter:
 
 ```text

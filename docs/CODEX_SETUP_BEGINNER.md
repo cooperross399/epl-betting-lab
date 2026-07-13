@@ -371,6 +371,8 @@ values safely open Home, and the URL never runs reports or changes data.
 Use the compact `Back to Home` button at the top of any other portal section to
 return to Home / Command Center. It also changes the URL to `?section=home` and
 does not run reports or edit files.
+Every portal page also shows a small display-only location breadcrumb, such as
+`Home > Thursday Card`. The breadcrumb never runs a report or changes a file.
 
 This reads only `data/manual/current_odds.csv` and writes:
 

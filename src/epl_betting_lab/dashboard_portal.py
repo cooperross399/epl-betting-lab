@@ -113,6 +113,12 @@ def portal_slug_from_section(section: object) -> str:
     return PORTAL_SECTION_SLUGS.get(str(section), PORTAL_SECTION_SLUGS[PORTAL_SECTIONS[0]])
 
 
+def build_portal_breadcrumb(section: object) -> str:
+    if section not in PORTAL_SECTIONS or section == HOME_PORTAL_SECTION:
+        return "Home"
+    return f"Home > {section}"
+
+
 def apply_portal_navigation_request(state: MutableMapping[str, object]) -> str:
     current = state.get(PORTAL_SECTION_STATE_KEY)
     if current not in PORTAL_SECTIONS:

@@ -15,6 +15,7 @@ from epl_betting_lab.dashboard_portal import (
     PORTAL_SECTIONS,
     SECTION_DESCRIPTIONS,
     apply_portal_query_navigation,
+    build_portal_breadcrumb,
     build_ledger_portal_summary,
     portal_slug_from_section,
     request_portal_home_navigation,
@@ -984,6 +985,7 @@ with st.sidebar:
 
 st.title("EPL Betting Lab")
 st.caption(SECTION_DESCRIPTIONS[selected_section])
+st.caption(f"Location: {build_portal_breadcrumb(selected_section)}")
 
 if selected_section != HOME_PORTAL_SECTION:
     render_back_to_home()

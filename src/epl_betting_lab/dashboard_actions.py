@@ -46,6 +46,11 @@ from epl_betting_lab.reports.odds_profile_install import (
     OddsProfileInstallPreviewError,
     process_odds_profile_install,
 )
+from epl_betting_lab.reports.odds_profile_verification import (
+    FATAL_VERIFICATION_STATUSES,
+    InstalledOddsProfileVerificationError,
+    verify_installed_odds_profile,
+)
 from epl_betting_lab.reports.thursday_best_bets import (
     build_thursday_best_bets,
     list_recent_thursday_archives,
@@ -301,6 +306,25 @@ def run_odds_profile_install_preview(
     if paths["status"] in FATAL_INSTALL_PREVIEW_STATUSES:
         raise OddsProfileInstallPreviewError(
             str(paths.get("message", "Odds profile installation preview could not run."))
+        )
+    return paths
+
+
+def run_installed_odds_profile_verification(
+    profile_name: str = "generic",
+    source_path: Path | None = None,
+    registry_path: Path | None = None,
+    output_dir: Path | None = None,
+) -> dict[str, Path | str]:
+    paths = verify_installed_odds_profile(
+        profile_name,
+        source_path or MANUAL_DIR / "sportsbook_export.csv",
+        registry_path or MANUAL_DIR / "odds_import_profiles.json",
+        output_dir or OUTPUTS_DIR,
+    )
+    if paths["status"] in FATAL_VERIFICATION_STATUSES:
+        raise InstalledOddsProfileVerificationError(
+            str(paths.get("message", "Installed odds profile verification could not run."))
         )
     return paths
 

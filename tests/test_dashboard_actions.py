@@ -21,6 +21,7 @@ from epl_betting_lab.dashboard_actions import (
     run_odds_export_profile_suggestion,
     run_odds_export_profile_suggestion_validation,
     run_odds_profile_install_preview,
+    run_installed_odds_profile_verification,
     run_post_thursday_review,
     run_settlement_preview,
     run_tier_performance_report,
@@ -453,6 +454,72 @@ def test_run_odds_profile_install_preview_reports_missing_suggestion(tmp_path) -
 
     assert "Missing suggestion file" in str(exc.value)
     assert (output_dir / "odds_profile_install_preview.md").exists()
+
+
+def test_run_installed_odds_profile_verification_is_read_only(tmp_path) -> None:
+    registry_path = tmp_path / "odds_import_profiles.json"
+    source_path = tmp_path / "sportsbook_export.csv"
+    output_dir = tmp_path / "outputs"
+    profile = {
+        "description": "Installed profile",
+        "column_map": {
+            "game_date": "date",
+            "home": "home_team",
+            "away": "away_team",
+            "bet_type": "market",
+            "pick": "selection",
+            "odds": "american_odds",
+            "sportsbook": "book",
+        },
+    }
+    registry_path.write_text(
+        json.dumps({"profiles": {"example": profile}}),
+        encoding="utf-8",
+    )
+    original = registry_path.read_text(encoding="utf-8")
+    pd.DataFrame([
+        {
+            "game_date": "2026-08-21",
+            "home": "Arsenal",
+            "away": "Coventry",
+            "bet_type": "1x2",
+            "pick": "home",
+            "odds": "+120",
+            "sportsbook": "ExampleBook",
+        }
+    ]).to_csv(source_path, index=False)
+
+    paths = run_installed_odds_profile_verification(
+        "example",
+        source_path,
+        registry_path,
+        output_dir,
+    )
+
+    assert paths["status"] == "verified"
+    assert paths["csv"].exists()
+    assert paths["markdown"].exists()
+    assert registry_path.read_text(encoding="utf-8") == original
+    assert not (tmp_path / "current_odds.csv").exists()
+    assert not (tmp_path / "current_odds_import.csv").exists()
+
+
+def test_run_installed_odds_profile_verification_reports_missing_profile(tmp_path) -> None:
+    registry_path = tmp_path / "odds_import_profiles.json"
+    source_path = tmp_path / "sportsbook_export.csv"
+    output_dir = tmp_path / "outputs"
+    registry_path.write_text('{"profiles":{"generic":{}}}\n', encoding="utf-8")
+
+    with pytest.raises(dashboard_actions.InstalledOddsProfileVerificationError) as exc:
+        run_installed_odds_profile_verification(
+            "missing",
+            source_path,
+            registry_path,
+            output_dir,
+        )
+
+    assert "not installed" in str(exc.value)
+    assert (output_dir / "odds_profile_post_install_verification.md").exists()
 
 
 def test_run_current_odds_completeness_writes_report_without_editing_odds(tmp_path, monkeypatch) -> None:

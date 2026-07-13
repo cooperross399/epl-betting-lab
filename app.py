@@ -19,6 +19,7 @@ from epl_betting_lab.dashboard_actions import (
     run_odds_export_profile_suggestion,
     run_odds_export_profile_suggestion_validation,
     run_odds_profile_install_preview,
+    run_installed_odds_profile_verification,
     run_post_thursday_review,
     run_settlement_preview,
     run_tier_performance_report,
@@ -48,6 +49,9 @@ from epl_betting_lab.reports.odds_export_profile_suggestion_validation import (
 )
 from epl_betting_lab.reports.odds_profile_install import (
     OddsProfileInstallPreviewError,
+)
+from epl_betting_lab.reports.odds_profile_verification import (
+    InstalledOddsProfileVerificationError,
 )
 from epl_betting_lab.reports.thursday_archive_pair import (
     build_thursday_archive_history_details,
@@ -114,6 +118,9 @@ def run_dashboard_action(label: str, action) -> None:
         st.error(f"{label} could not run.")
         st.info(str(exc))
     except OddsProfileInstallPreviewError as exc:
+        st.error(f"{label} could not run.")
+        st.info(str(exc))
+    except InstalledOddsProfileVerificationError as exc:
         st.error(f"{label} could not run.")
         st.info(str(exc))
     except FileExistsError as exc:
@@ -206,6 +213,15 @@ def render_report_buttons() -> None:
         run_dashboard_action(
             "Odds profile installation preview",
             run_odds_profile_install_preview,
+        )
+    installed_profile_name = st.text_input(
+        "Installed odds profile name",
+        value="generic",
+    )
+    if st.button("Verify installed odds profile", width="stretch"):
+        run_dashboard_action(
+            "Installed odds profile verification",
+            lambda: run_installed_odds_profile_verification(installed_profile_name),
         )
     if st.button("Preview odds export conversion", width="stretch"):
         run_dashboard_action("Odds export conversion preview", run_odds_export_conversion_preview)
@@ -336,6 +352,38 @@ def render_thursday_best_bets_panel() -> None:
         show_missing_report(
             "data/outputs/odds_profile_install_preview.md",
             install_preview_command,
+        )
+
+    verification_path = OUTPUTS_DIR / "odds_profile_post_install_verification.md"
+    verification_command = (
+        "python scripts/verify_installed_odds_profile.py --profile PROFILE_NAME "
+        "--source data/manual/sportsbook_export.csv"
+    )
+    if verification_path.exists():
+        with st.expander("Installed odds profile verification", expanded=False):
+            st.markdown(verification_path.read_text(encoding="utf-8"))
+    else:
+        show_missing_report(
+            "data/outputs/odds_profile_post_install_verification.md",
+            verification_command,
+        )
+    show_output_table(
+        "Installed odds profile converted rows",
+        "odds_profile_post_install_verification.csv",
+        verification_command,
+    )
+
+    rollback_preview_path = OUTPUTS_DIR / "odds_profile_rollback_preview.md"
+    rollback_command = (
+        "python scripts/rollback_odds_profile_registry.py --backup-path PATH"
+    )
+    if rollback_preview_path.exists():
+        with st.expander("Odds profile rollback preview", expanded=False):
+            st.markdown(rollback_preview_path.read_text(encoding="utf-8"))
+    else:
+        show_missing_report(
+            "data/outputs/odds_profile_rollback_preview.md",
+            rollback_command,
         )
 
     conversion_path = OUTPUTS_DIR / "odds_export_conversion_report.md"

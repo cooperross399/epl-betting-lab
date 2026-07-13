@@ -85,7 +85,11 @@ from epl_betting_lab.strategies.promoted_fades import flag_promoted_team_spots
 from epl_betting_lab.strategies.totals import evaluate_total_25
 from epl_betting_lab.thursday_command_center import build_thursday_command_center
 from epl_betting_lab.thursday_readiness import build_thursday_readiness
-from epl_betting_lab.workflow_status import build_workflow_status
+from epl_betting_lab.workflow_status import (
+    build_data_freshness_status,
+    build_workflow_status,
+    recommend_data_freshness_action,
+)
 from scripts import run_backtest
 
 
@@ -271,6 +275,48 @@ def render_workflow_checklist() -> None:
     st.dataframe(status, width="stretch", hide_index=True)
 
 
+def render_data_freshness() -> None:
+    freshness = build_data_freshness_status()
+    counts = freshness["status"].value_counts().to_dict()
+
+    st.subheader("Data freshness")
+    metric_cols = st.columns(5)
+    for column, label in zip(
+        metric_cols,
+        ("Fresh", "Stale", "Missing", "Needs refresh", "Not checked"),
+        strict=True,
+    ):
+        column.metric(label, int(counts.get(label, 0)))
+
+    recommendation = recommend_data_freshness_action(freshness)
+    if (freshness["status"] == "Fresh").all():
+        st.success(recommendation)
+    else:
+        st.warning(recommendation)
+
+    attention = freshness[freshness["status"] != "Fresh"]
+    if not attention.empty:
+        visible = attention.head(4)
+        labels = [f"{row.item} ({row.status})" for row in visible.itertuples()]
+        extra = len(attention) - len(visible)
+        suffix = f"; plus {extra} more" if extra else ""
+        st.caption(f"Needs attention: {', '.join(labels)}{suffix}. Open details below.")
+
+    with st.expander("Data freshness details", expanded=False):
+        detail_columns = [
+            "item",
+            "status",
+            "last_modified",
+            "source_last_modified",
+            "file",
+            "source_files",
+            "command",
+            "note",
+        ]
+        st.dataframe(freshness[detail_columns], width="stretch", hide_index=True)
+        st.caption("Timestamps use your computer's local time. No files are changed by this check.")
+
+
 def render_open_next_cue(cue: object) -> None:
     cue_text = str(cue or "").strip()
     destination = resolve_open_next_section(cue)
@@ -356,6 +402,7 @@ def render_home() -> None:
     st.header("Home / Command Center")
     st.caption("Start here each Thursday. Read the status, then follow the recommended manual step.")
     render_command_center_card()
+    render_data_freshness()
     render_main_actions()
     with st.expander("Weekly workflow file status", expanded=False):
         render_workflow_checklist()

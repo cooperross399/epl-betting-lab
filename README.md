@@ -465,12 +465,11 @@ intentional preview only, you can run:
 python scripts/generate_thursday_best_bets.py --force
 ```
 
-Or open the dashboard and use `Create current odds template`, `Preview current
-odds import`, `Preview current odds maintenance`, `Check odds entry
-completeness`, then `Generate Thursday best-bets report`, on the `Betting
-ledger` tab. The dashboard can preview imports and missing odds rows and show
-incomplete entries, but it does not apply imports or maintenance, overwrite an
-existing odds file, edit odds, or force generation.
+Or open the dashboard. Use `Odds Import` for export/import previews and
+`Thursday Card` for completeness, validation, and best-bets generation. The
+dashboard can preview imports and missing odds rows, but it does not apply
+imports or maintenance, overwrite an existing odds file, edit odds, or force
+generation.
 
 Once `data/manual/current_odds.csv` exists, you can also click `Run Thursday
 readiness refresh`. That one safe button runs odds completeness, current odds
@@ -743,18 +742,27 @@ python scripts/settle_bet_ledger.py --apply
 streamlit run app.py
 ```
 
-The dashboard shows:
+Use the sidebar to move between seven focused sections:
 
-- Recent form table
-- Upcoming fixture projections
-- Promoted-team review spots
-- Value board
-- Weekly card
-- Backtest summary, after you run the backtest
-- Betting ledger tab, after you run the ledger scripts
+- `Home / Command Center`: Thursday status, recommended next action, odds
+  completion, validation counts, archive movement, ledger units/ROI, and
+  pending bets.
+- `Thursday Card`: readiness refresh, completeness, validation, and the latest
+  best-bets report.
+- `Odds Import`: diagnose, suggest, validate, install-preview, verify,
+  rollback-preview, conversion-preview, import-preview, and audit history in
+  step-by-step order.
+- `Performance Reports`: tier performance, backtest summary, CLV, and ledger
+  profit breakdowns.
+- `Bet Ledger`: record, pending bets, health check, settlement preview, and
+  weekly ledger commands.
+- `Archives & Comparisons`: archived cards, archive pair, comparison report,
+  movement summary, and decision queue.
+- `Tools / Diagnostics`: model projections, recent form, promoted-team spots,
+  value board, weekly card, maintenance reports, and file status.
 
-For the ledger tab, run these as needed before opening or refreshing the
-dashboard:
+Run these as needed before opening or refreshing the ledger and performance
+sections:
 
 ```bash
 python scripts/run_bet_ledger.py
@@ -763,11 +771,17 @@ python scripts/settle_bet_ledger.py
 python scripts/run_backtest.py
 ```
 
-The ledger tab also has buttons for the safe report actions:
+The three most important report buttons are visible on `Home / Command Center`:
 
 ```text
 Run Thursday readiness refresh
 Run post-refresh Thursday review
+Generate tier performance report
+```
+
+The related sections keep the individual safe actions available:
+
+```text
 Run bet ledger report
 Run ledger health check
 Run settlement preview
@@ -783,20 +797,11 @@ Run backtest reports
 Refresh dashboard data
 ```
 
-The ledger tab also displays `data/outputs/current_odds_completeness.md`,
-`data/outputs/current_odds_validation.md`,
-`data/outputs/current_odds_validation.csv`, `data/outputs/thursday_best_bets.md`,
-`data/outputs/thursday_best_bets.csv`,
-`data/outputs/thursday_best_bets_comparison.md`, and
-`data/outputs/thursday_best_bets_comparison.csv`,
-`data/outputs/thursday_decision_queue.md`, and
-`data/outputs/thursday_decision_queue.csv` when they exist.
-
-At the top of the Thursday panel, the dashboard shows a command center card
+The Home page shows a command center card
 with Thursday status, odds completion, serious current-odds issues, warnings,
 the latest archive pair, count-change risk, top movement reason, and the
-recommended next manual action. The detailed readiness row and full reports
-remain below the card. An `Open this next` cue points to the validation,
+recommended next manual action. It also shows ledger units, ROI, record, and
+pending bets when the ledger is available. An `Open this next` cue points to the validation,
 archive, comparison, or decision-queue section that matches that action. When
 the decision queue is current, the cue also shows how many plays are in the
 relevant review group. Missing, stale, or unreadable queues show a refresh note.
@@ -805,9 +810,10 @@ These buttons do not edit `data/manual/bet_ledger.csv`, do not edit
 `data/manual/current_odds.csv`, do not apply settlements, do not place bets,
 do not force Thursday generation, and do not invent missing odds.
 
-The ledger tab also includes a weekly workflow checklist. It shows whether key
-files are `Complete`, `Missing`, or `Needs refresh`, when they were last
-modified, and the command to run when something is missing or stale.
+The weekly workflow checklist is available from the Home page and `Tools /
+Diagnostics`. It shows whether key files are `Complete`, `Missing`, or `Needs
+refresh`, when they were last modified, and the command to run when something
+is missing or stale.
 
 ---
 
@@ -845,6 +851,7 @@ epl-betting-lab/
 │   └── generate_weekly_card.py
 └── src/epl_betting_lab/
     ├── config.py
+    ├── dashboard_portal.py
     ├── data/
     ├── models/
     ├── strategies/

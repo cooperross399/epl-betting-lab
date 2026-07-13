@@ -807,6 +807,22 @@ running a report or editing data. When
 the decision queue is current, the cue also shows how many plays are in the
 relevant review group. Missing, stale, or unreadable queues show a refresh note.
 
+Portal sections are bookmarkable with the `section` query parameter:
+
+```text
+?section=home
+?section=thursday-card
+?section=odds-import
+?section=performance
+?section=bet-ledger
+?section=archives
+?section=tools
+```
+
+The sidebar and Home `Open ...` button keep this value synchronized. A missing,
+unknown, repeated, or malformed section value safely opens Home. The parameter
+only controls the visible portal section and never runs a report.
+
 These buttons do not edit `data/manual/bet_ledger.csv`, do not edit
 `data/manual/current_odds.csv`, do not apply settlements, do not place bets,
 do not force Thursday generation, and do not invent missing odds.

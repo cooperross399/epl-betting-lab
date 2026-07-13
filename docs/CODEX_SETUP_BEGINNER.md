@@ -363,6 +363,12 @@ change files. It
 also shows affected-play counts from `thursday_decision_queue.csv` when that
 file is current, or a short generate/refresh message when it is not usable.
 
+The selected portal section is also stored in the browser URL. For example,
+`?section=odds-import` opens Odds Import and `?section=performance` opens
+Performance Reports after a refresh or from a bookmark. Sidebar changes and
+the Home `Open ...` button update the URL automatically. Missing or invalid
+values safely open Home, and the URL never runs reports or changes data.
+
 This reads only `data/manual/current_odds.csv` and writes:
 
 ```text

@@ -8,9 +8,13 @@ from epl_betting_lab.config import MANUAL_DIR, MAX_DEFAULT_JUICE, MIN_EDGE, OUTP
 from epl_betting_lab.current_odds_status import build_current_odds_status
 from epl_betting_lab.dashboard_portal import (
     ODDS_IMPORT_STEPS,
+    PORTAL_NAVIGATION_REQUEST_KEY,
+    PORTAL_SECTION_STATE_KEY,
     PORTAL_SECTIONS,
     SECTION_DESCRIPTIONS,
+    apply_portal_navigation_request,
     build_ledger_portal_summary,
+    resolve_open_next_section,
 )
 from epl_betting_lab.dashboard_actions import (
     run_bet_ledger_report,
@@ -240,6 +244,30 @@ def render_workflow_checklist() -> None:
     st.dataframe(status, width="stretch", hide_index=True)
 
 
+def render_open_next_cue(cue: object) -> None:
+    cue_text = str(cue or "").strip()
+    destination = resolve_open_next_section(cue)
+    if cue_text:
+        st.caption(f"Open this next: {cue_text}")
+    if destination is None:
+        st.button(
+            "Choose a portal section from the sidebar",
+            key="open_next_unavailable",
+            disabled=True,
+            width="stretch",
+        )
+        st.caption("No safe direct destination is available for this cue yet.")
+        return
+
+    if st.button(
+        f"Open {destination}",
+        key="open_next_destination",
+        width="stretch",
+    ):
+        st.session_state[PORTAL_NAVIGATION_REQUEST_KEY] = destination
+        st.rerun()
+
+
 def render_command_center_card() -> None:
     command_center = build_thursday_command_center()
     ledger = build_ledger_portal_summary()
@@ -268,7 +296,7 @@ def render_command_center_card() -> None:
             f"Current odds: {command_center.current_odds_status}. {command_center.explanation}",
         )
         st.info(f"Recommended next action: {command_center.recommended_next_action}")
-        st.caption(f"Open this next: {command_center.detail_cue}")
+        render_open_next_cue(command_center.detail_cue)
 
         st.markdown(f"**Latest archive pair**  \n{command_center.archive_pair_label}")
         signal_cols = st.columns(2)
@@ -896,12 +924,15 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+apply_portal_navigation_request(st.session_state)
+
 with st.sidebar:
     st.title("EPL Betting Lab")
     st.caption("Weekly betting portal")
     selected_section = st.radio(
         "Portal navigation",
         PORTAL_SECTIONS,
+        key=PORTAL_SECTION_STATE_KEY,
         label_visibility="collapsed",
     )
     st.caption(SECTION_DESCRIPTIONS[selected_section])

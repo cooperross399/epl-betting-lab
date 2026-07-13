@@ -3,6 +3,7 @@ from __future__ import annotations
 import pandas as pd
 
 from epl_betting_lab.dashboard_portal import (
+    HOME_PORTAL_SECTION,
     ODDS_IMPORT_STEPS,
     PORTAL_NAVIGATION_REQUEST_KEY,
     PORTAL_QUERY_PARAM,
@@ -15,6 +16,7 @@ from epl_betting_lab.dashboard_portal import (
     build_ledger_portal_summary,
     portal_section_from_slug,
     portal_slug_from_section,
+    request_portal_home_navigation,
     resolve_open_next_section,
 )
 
@@ -145,6 +147,34 @@ def test_pending_open_next_request_overrides_old_query_value() -> None:
 
     assert selected == "Performance Reports"
     assert PORTAL_NAVIGATION_REQUEST_KEY not in state
+
+
+def test_back_to_home_request_works_from_every_non_home_section() -> None:
+    for section in PORTAL_SECTIONS[1:]:
+        state: dict[str, object] = {
+            PORTAL_SECTION_STATE_KEY: section,
+            "unrelated": "unchanged",
+        }
+
+        destination = request_portal_home_navigation(state)
+
+        assert destination == HOME_PORTAL_SECTION
+        assert state[PORTAL_NAVIGATION_REQUEST_KEY] == HOME_PORTAL_SECTION
+        assert apply_portal_navigation_request(state) == HOME_PORTAL_SECTION
+        assert state[PORTAL_SECTION_STATE_KEY] == HOME_PORTAL_SECTION
+        assert state["unrelated"] == "unchanged"
+
+
+def test_back_to_home_request_repairs_malformed_navigation_state() -> None:
+    state: dict[str, object] = {
+        PORTAL_SECTION_STATE_KEY: ["not", "valid"],
+        PORTAL_NAVIGATION_REQUEST_KEY: {"bad": "request"},
+    }
+
+    request_portal_home_navigation(state)
+
+    assert apply_portal_navigation_request(state) == HOME_PORTAL_SECTION
+    assert state == {PORTAL_SECTION_STATE_KEY: HOME_PORTAL_SECTION}
 
 
 def test_ledger_portal_summary_handles_missing_ledger(tmp_path) -> None:

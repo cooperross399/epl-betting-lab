@@ -19,6 +19,7 @@ PORTAL_SECTIONS = (
     "Archives & Comparisons",
     "Tools / Diagnostics",
 )
+HOME_PORTAL_SECTION = PORTAL_SECTIONS[0]
 PORTAL_SECTION_STATE_KEY = "portal_section"
 PORTAL_NAVIGATION_REQUEST_KEY = "portal_navigation_request"
 PORTAL_QUERY_PARAM = "section"
@@ -131,6 +132,11 @@ def apply_portal_query_navigation(
 ) -> str:
     state[PORTAL_SECTION_STATE_KEY] = portal_section_from_slug(query_value)
     return apply_portal_navigation_request(state)
+
+
+def request_portal_home_navigation(state: MutableMapping[str, object]) -> str:
+    state[PORTAL_NAVIGATION_REQUEST_KEY] = HOME_PORTAL_SECTION
+    return HOME_PORTAL_SECTION
 
 
 @dataclass(frozen=True)

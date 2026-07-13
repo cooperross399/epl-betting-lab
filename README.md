@@ -822,6 +822,8 @@ Portal sections are bookmarkable with the `section` query parameter:
 The sidebar and Home `Open ...` button keep this value synchronized. A missing,
 unknown, repeated, or malformed section value safely opens Home. The parameter
 only controls the visible portal section and never runs a report.
+Every non-Home section also has a compact `Back to Home` button near the top;
+it returns to Home and updates the URL to `?section=home` without running a report.
 
 These buttons do not edit `data/manual/bet_ledger.csv`, do not edit
 `data/manual/current_odds.csv`, do not apply settlements, do not place bets,

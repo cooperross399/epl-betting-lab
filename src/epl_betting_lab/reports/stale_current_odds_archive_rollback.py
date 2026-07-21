@@ -22,7 +22,7 @@ PREVIEW_PREFIX_COLUMNS = [
     "source_file",
     "source_row_number",
 ]
-AUDIT_COLUMNS = [
+LEGACY_AUDIT_COLUMNS = [
     "rollback_id",
     "applied_at",
     "status",
@@ -38,6 +38,15 @@ AUDIT_COLUMNS = [
     "rows_removed_or_replaced",
     "unchanged_rows",
     "rows_after",
+]
+AUDIT_CHECKSUM_COLUMNS = [
+    "backup_checksum_sha256",
+    "recovery_backup_checksum_sha256",
+]
+AUDIT_COLUMNS = [
+    *LEGACY_AUDIT_COLUMNS[:8],
+    *AUDIT_CHECKSUM_COLUMNS,
+    *LEGACY_AUDIT_COLUMNS[8:],
 ]
 
 
@@ -347,12 +356,15 @@ def _load_existing_audit(output_dir: Path) -> pd.DataFrame:
         audit = pd.read_csv(audit_path, dtype=str, keep_default_na=False)
     except (OSError, UnicodeError, pd.errors.EmptyDataError, pd.errors.ParserError) as exc:
         raise ValueError(f"Existing stale-odds rollback audit is unreadable and was not overwritten: {exc}") from exc
-    missing = [column for column in AUDIT_COLUMNS if column not in audit.columns]
+    missing = [column for column in LEGACY_AUDIT_COLUMNS if column not in audit.columns]
     if missing:
         raise ValueError(
             "Existing stale-odds rollback audit is missing required columns and was not overwritten: "
             f"{', '.join(missing)}."
         )
+    for column in AUDIT_CHECKSUM_COLUMNS:
+        if column not in audit.columns:
+            audit[column] = ""
     return audit[AUDIT_COLUMNS]
 
 
@@ -374,7 +386,9 @@ def render_stale_current_odds_archive_rollback_audit(audit: pd.DataFrame) -> str
             f"- Rollback ID: `{latest['rollback_id']}`",
             f"- Applied at: {latest['applied_at']}",
             f"- Selected backup: `{latest['selected_backup_path']}`",
+            f"- Selected backup SHA-256: `{latest['backup_checksum_sha256'] or 'Not recorded'}`",
             f"- Pre-rollback backup: `{latest['pre_rollback_backup_path']}`",
+            f"- Recovery backup SHA-256: `{latest['recovery_backup_checksum_sha256'] or 'Not recorded'}`",
             f"- Rows before: {latest['current_rows_before']}",
             f"- Rows after: {latest['rows_after']}",
             "",
@@ -543,7 +557,8 @@ def process_stale_current_odds_archive_rollback(
         )
     pre_rollback_backup.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(current_odds_path, pre_rollback_backup)
-    if source_file_sha256(pre_rollback_backup) != current_sha:
+    recovery_backup_checksum_sha256 = source_file_sha256(pre_rollback_backup)
+    if recovery_backup_checksum_sha256 != current_sha:
         raise OSError("Pre-rollback backup verification failed. current_odds.csv was not replaced.")
 
     try:
@@ -581,6 +596,8 @@ def process_stale_current_odds_archive_rollback(
                 "pre_rollback_backup_path": str(pre_rollback_backup),
                 "current_sha256_before": current_sha,
                 "selected_backup_sha256": backup_sha,
+                "backup_checksum_sha256": backup_sha,
+                "recovery_backup_checksum_sha256": recovery_backup_checksum_sha256,
                 "current_sha256_after": current_sha_after,
                 "current_rows_before": len(current),
                 "backup_rows": len(backup),

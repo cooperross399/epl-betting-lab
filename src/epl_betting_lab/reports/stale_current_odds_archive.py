@@ -19,7 +19,7 @@ from epl_betting_lab.reports.stale_current_odds import (
 
 
 PREVIEW_COLUMNS = REPORT_COLUMNS + ["archive_action", "archive_reason"]
-AUDIT_COLUMNS = [
+LEGACY_AUDIT_COLUMNS = [
     "archive_id",
     "applied_at",
     "status",
@@ -33,6 +33,15 @@ AUDIT_COLUMNS = [
     "current_rows_kept",
     "date_fix_rows_kept",
     "rows_after",
+]
+AUDIT_CHECKSUM_COLUMNS = [
+    "backup_checksum_sha256",
+    "archive_file_checksum_sha256",
+]
+AUDIT_COLUMNS = [
+    *LEGACY_AUDIT_COLUMNS[:8],
+    *AUDIT_CHECKSUM_COLUMNS,
+    *LEGACY_AUDIT_COLUMNS[8:],
 ]
 FATAL_SOURCE_STATUSES = {
     "Missing file": "missing_file",
@@ -235,12 +244,15 @@ def _load_existing_audit(output_dir: Path) -> pd.DataFrame:
         audit = pd.read_csv(audit_path, dtype=str, keep_default_na=False)
     except (OSError, UnicodeError, pd.errors.EmptyDataError, pd.errors.ParserError) as exc:
         raise ValueError(f"Existing stale-odds archive audit is unreadable and was not overwritten: {exc}") from exc
-    missing = [column for column in AUDIT_COLUMNS if column not in audit.columns]
+    missing = [column for column in LEGACY_AUDIT_COLUMNS if column not in audit.columns]
     if missing:
         raise ValueError(
             "Existing stale-odds archive audit is missing required columns and was not overwritten: "
             f"{', '.join(missing)}."
         )
+    for column in AUDIT_CHECKSUM_COLUMNS:
+        if column not in audit.columns:
+            audit[column] = ""
     return audit[AUDIT_COLUMNS]
 
 
@@ -266,7 +278,9 @@ def render_stale_current_odds_archive_audit(audit: pd.DataFrame) -> str:
             f"- Current rows kept: {latest['current_rows_kept']}",
             f"- Date-fix rows kept: {latest['date_fix_rows_kept']}",
             f"- Backup: `{latest['backup_path']}`",
+            f"- Backup SHA-256: `{latest['backup_checksum_sha256'] or 'Not recorded'}`",
             f"- Stale-row archive: `{latest['stale_archive_path']}`",
+            f"- Stale-row archive SHA-256: `{latest['archive_file_checksum_sha256'] or 'Not recorded'}`",
             "",
             "## Apply History",
             "",
@@ -343,7 +357,8 @@ def archive_stale_current_odds(
     backup_dir.mkdir(parents=True, exist_ok=True)
     stale_archive_dir.mkdir(parents=True, exist_ok=True)
     shutil.copy2(odds_path, backup_path)
-    if source_file_sha256(backup_path) != source_sha_before:
+    backup_checksum_sha256 = source_file_sha256(backup_path)
+    if backup_checksum_sha256 != source_sha_before:
         raise OSError("Backup verification failed. No stale rows were removed from current_odds.csv.")
 
     _write_csv_atomic(stale_rows, stale_archive_path, overwrite=False)
@@ -354,6 +369,9 @@ def archive_stale_current_odds(
     expected_archive = stale_rows.reset_index(drop=True)
     if archived.columns.tolist() != source.columns.tolist() or not archived.equals(expected_archive):
         raise OSError("Stale archive verification failed. Current odds were not changed.")
+    archive_file_checksum_sha256 = source_file_sha256(stale_archive_path)
+    if not archive_file_checksum_sha256:
+        raise OSError("Stale archive checksum failed. Current odds were not changed.")
     if source_file_sha256(odds_path) != source_sha_before:
         raise ValueError("Current odds changed before replacement. The backup and archive remain; no rows were removed.")
 
@@ -381,6 +399,8 @@ def archive_stale_current_odds(
                 "current_sha256_after": current_sha_after,
                 "backup_path": str(backup_path),
                 "stale_archive_path": str(stale_archive_path),
+                "backup_checksum_sha256": backup_checksum_sha256,
+                "archive_file_checksum_sha256": archive_file_checksum_sha256,
                 "rows_before": len(source),
                 "stale_rows_archived": len(stale_rows),
                 "current_rows_kept": int(summary.get("current_rows", 0)),

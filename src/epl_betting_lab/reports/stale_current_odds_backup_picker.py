@@ -2,10 +2,12 @@ from __future__ import annotations
 
 from datetime import date, datetime
 from pathlib import Path
+import re
 
 import pandas as pd
 
 from epl_betting_lab.config import MANUAL_DIR, OUTPUTS_DIR, PROJECT_ROOT
+from epl_betting_lab.reports.current_odds_import_audit import source_file_sha256
 from epl_betting_lab.reports.stale_current_odds import build_stale_current_odds_report
 
 
@@ -30,6 +32,10 @@ BACKUP_LIST_COLUMNS = [
     "rows_replaced",
     "operation_status",
     "audit_note",
+    "recorded_checksum_sha256",
+    "current_checksum_sha256",
+    "checksum_status",
+    "checksum_note",
     "filename_timestamp",
     "filename_status",
     "file_modified_at",
@@ -99,6 +105,10 @@ def _base_record(path: Path) -> dict[str, object]:
         "rows_replaced": "",
         "operation_status": "",
         "audit_note": "Audit history has not been checked yet.",
+        "recorded_checksum_sha256": "",
+        "current_checksum_sha256": source_file_sha256(path),
+        "checksum_status": "Not available",
+        "checksum_note": "No linked audit checksum is available yet.",
         "filename_timestamp": filename_timestamp,
         "filename_status": filename_status,
         "file_modified_at": modified_at,
@@ -231,6 +241,48 @@ def _audit_text(row: pd.Series, column: str) -> str:
     return str(row[column]).strip()
 
 
+def _is_sha256(value: object) -> bool:
+    return bool(re.fullmatch(r"[0-9a-fA-F]{64}", str(value).strip()))
+
+
+def _audit_checksum(row: pd.Series, *columns: str) -> str:
+    values = [_audit_text(row, column) for column in columns]
+    values = [value for value in values if value]
+    for value in values:
+        if _is_sha256(value):
+            return value.lower()
+    return values[0] if values else ""
+
+
+def _checksum_verification(
+    recorded_checksum: object,
+    current_checksum: object,
+    operation: object,
+) -> tuple[str, str]:
+    recorded = str(recorded_checksum).strip()
+    current = str(current_checksum).strip()
+    creator = str(operation).strip()
+    if not recorded:
+        if creator == "unknown":
+            return "Not available", "No linked audit checksum is available for this backup."
+        return (
+            "Not available",
+            "The linked audit does not contain a usable backup checksum. Older audit rows may predate "
+            "checksum recording.",
+        )
+    if not _is_sha256(recorded):
+        return "Not available", "The recorded audit checksum is malformed and cannot be verified."
+    if not _is_sha256(current):
+        return "Not available", "The backup file could not be checksummed, so its integrity is not confirmed."
+    if recorded.lower() == current.lower():
+        return "Verified", "The backup matches the SHA-256 checksum recorded when it was created."
+    return (
+        "Mismatch",
+        "The backup no longer matches its recorded SHA-256 checksum. Do not trust it for rollback "
+        "unless it is manually inspected.",
+    )
+
+
 def _audit_link(
     row: pd.Series,
     *,
@@ -245,6 +297,11 @@ def _audit_link(
         rows_archived = _audit_text(row, "stale_rows_archived")
         rows_restored = ""
         rows_replaced = ""
+        recorded_checksum = _audit_checksum(
+            row,
+            "backup_checksum_sha256",
+            "source_sha256_before",
+        )
     else:
         operation_id = _audit_text(row, "rollback_id") or "ID not recorded"
         note = (
@@ -255,6 +312,11 @@ def _audit_link(
         rows_archived = ""
         rows_restored = _audit_text(row, "rows_restored")
         rows_replaced = _audit_text(row, "rows_removed_or_replaced")
+        recorded_checksum = _audit_checksum(
+            row,
+            "recovery_backup_checksum_sha256",
+            "current_sha256_before",
+        )
 
     audit_timestamp = _audit_text(row, "applied_at")
     if not audit_timestamp:
@@ -270,6 +332,7 @@ def _audit_link(
         "rows_replaced": rows_replaced,
         "operation_status": _audit_text(row, "status"),
         "audit_note": note,
+        "recorded_checksum_sha256": recorded_checksum,
     }
 
 
@@ -411,6 +474,15 @@ def _link_backup_audits(
         for column, value in match.items():
             linked.at[index, column] = value
 
+    for index, row in linked.iterrows():
+        checksum_status, checksum_note = _checksum_verification(
+            row["recorded_checksum_sha256"],
+            row["current_checksum_sha256"],
+            row["created_by_operation"],
+        )
+        linked.at[index, "checksum_status"] = checksum_status
+        linked.at[index, "checksum_note"] = checksum_note
+
     malformed_rows = sum(int(result.get("malformed_rows", 0)) for result in audit_results)
     warning_messages = [
         str(warning)
@@ -430,6 +502,9 @@ def _link_backup_audits(
         link_status = "needs_review"
     else:
         link_status = "no_matches"
+    verified_checksums = int(linked["checksum_status"].eq("Verified").sum())
+    mismatched_checksums = int(linked["checksum_status"].eq("Mismatch").sum())
+    unavailable_checksums = int(linked["checksum_status"].eq("Not available").sum())
     summary = {
         "audit_link_status": link_status,
         "archive_audit_status": archive_result["status"],
@@ -441,6 +516,9 @@ def _link_backup_audits(
         "audit_warning_messages": " ".join(warning_messages),
         "archive_audit_message": archive_result["message"],
         "rollback_audit_message": rollback_result["message"],
+        "verified_checksums": verified_checksums,
+        "mismatched_checksums": mismatched_checksums,
+        "unavailable_checksums": unavailable_checksums,
     }
     return linked.reindex(columns=BACKUP_LIST_COLUMNS).fillna(""), summary
 
@@ -485,6 +563,9 @@ def build_stale_current_odds_backup_list(
             "audit_warning_messages": "",
             "archive_audit_message": "No backups were available to match.",
             "rollback_audit_message": "No backups were available to match.",
+            "verified_checksums": 0,
+            "mismatched_checksums": 0,
+            "unavailable_checksums": 0,
         }
         return _empty_backup_list(), summary
 
@@ -511,11 +592,13 @@ def build_stale_current_odds_backup_list(
     valid_count = int(backup_list["valid"].eq("Yes").sum())
     invalid_count = len(backup_list) - valid_count
     malformed_filenames = int(backup_list["filename_status"].ne("Parsed").sum())
+    mismatched_checksums = int(audit_summary["mismatched_checksums"])
     summary = {
-        "status": "ready" if valid_count else "needs_review",
+        "status": "ready" if valid_count and not mismatched_checksums else "needs_review",
         "message": (
             f"Found {len(backup_list)} backup file(s); {valid_count} can be selected for rollback preview, "
-            f"and {audit_summary['matched_backups']} matched a creator audit entry."
+            f"{audit_summary['matched_backups']} matched a creator audit entry, and "
+            f"{audit_summary['verified_checksums']} passed checksum verification."
         ),
         "backups_dir": str(backups_dir),
         "checked_date": local_today.isoformat(),
@@ -562,6 +645,18 @@ def render_stale_current_odds_backup_list(
         f"- Rollback audit: {summary.get('rollback_audit_status', 'not_checked')}",
         f"- Rollback audit note: {summary.get('rollback_audit_message', '')}",
         "",
+        "## Checksum Verification",
+        "",
+        f"- Verified backups: {int(summary.get('verified_checksums', 0))}",
+        f"- Checksum mismatches: {int(summary.get('mismatched_checksums', 0))}",
+        f"- Checksums not available: {int(summary.get('unavailable_checksums', 0))}",
+        (
+            "- Safety warning: A checksum mismatch means the backup changed after creation. "
+            "Do not trust it for rollback unless it is manually inspected."
+            if int(summary.get("mismatched_checksums", 0))
+            else "- Safety note: Only `Verified` backups have a confirmed byte-for-byte audit match."
+        ),
+        "",
         "## Backup Details",
         "",
     ]
@@ -585,6 +680,8 @@ def render_stale_current_odds_backup_list(
             "Choose a row marked `valid = Yes`, then preview it with "
             "`python scripts/rollback_stale_current_odds_archive.py --backup-path PATH`. "
             "Prefer a backup with a linked `archive_apply` or `rollback_apply` creator when possible. "
+            "Treat `Mismatch` as unsafe until manually inspected; `Not available` means the older audit "
+            "did not provide enough checksum evidence. "
             "The dashboard provides the same selection and preview without an apply button.",
         ]
     )

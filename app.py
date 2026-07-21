@@ -1017,6 +1017,12 @@ def render_tools_and_diagnostics(min_edge: float, max_juice: int, recent_matches
                 f"{int(backup_summary.get('matched_backups', 0))} matched | "
                 f"{int(backup_summary.get('unmatched_backups', 0))} unknown"
             )
+            st.caption(
+                "Checksum status: "
+                f"{int(backup_summary.get('verified_checksums', 0))} verified | "
+                f"{int(backup_summary.get('mismatched_checksums', 0))} mismatch | "
+                f"{int(backup_summary.get('unavailable_checksums', 0))} not available"
+            )
             if audit_link_status == "no_history":
                 st.info("No archive or rollback audit history is available yet. Backup creators show as unknown.")
             elif audit_link_status == "needs_review":
@@ -1025,6 +1031,11 @@ def render_tools_and_diagnostics(min_edge: float, max_juice: int, recent_matches
                 st.info("Some backup paths have no matching creator row. Those operations remain unknown.")
             if int(backup_summary.get("audit_warning_count", 0)):
                 st.warning("Some audit rows or markdown files need review. Details are in the backup list report.")
+            if int(backup_summary.get("mismatched_checksums", 0)):
+                st.warning(
+                    "One or more backups do not match their recorded checksums. Do not trust a mismatched "
+                    "backup for rollback unless you inspect it manually."
+                )
             compact_columns = [
                 "backup_type",
                 "filename_timestamp",
@@ -1033,6 +1044,7 @@ def render_tools_and_diagnostics(min_edge: float, max_juice: int, recent_matches
                 "created_by_operation",
                 "audit_timestamp",
                 "operation_status",
+                "checksum_status",
                 "rows_archived",
                 "rows_restored",
                 "rows_replaced",
@@ -1051,7 +1063,8 @@ def render_tools_and_diagnostics(min_edge: float, max_juice: int, recent_matches
                     str(row["backup_path"]): (
                         f"{row['filename_timestamp'] or row['file_modified_at'] or 'Unknown time'} | "
                         f"{Path(str(row['backup_path'])).name} | "
-                        f"{row['created_by_operation']} | {int(row['row_count'])} rows"
+                        f"{row['created_by_operation']} | {row['checksum_status']} | "
+                        f"{int(row['row_count'])} rows"
                     )
                     for _, row in valid_backups.iterrows()
                 }
@@ -1067,9 +1080,14 @@ def render_tools_and_diagnostics(min_edge: float, max_juice: int, recent_matches
                 ].iloc[0]
                 st.caption(
                     f"Creator: {selected_record['created_by_operation']} | "
-                    f"Status: {selected_record['operation_status'] or 'Not recorded'}"
+                    f"Operation: {selected_record['operation_status'] or 'Not recorded'} | "
+                    f"Checksum: {selected_record['checksum_status']}"
                 )
                 st.caption(str(selected_record["audit_note"]))
+                if selected_record["checksum_status"] == "Mismatch":
+                    st.warning(str(selected_record["checksum_note"]))
+                else:
+                    st.caption(str(selected_record["checksum_note"]))
     manual_backup_path = st.text_input(
         "Manual backup path (optional override)",
         placeholder="data/manual/backups/TIMESTAMP_current_odds_pre_stale_archive.csv",

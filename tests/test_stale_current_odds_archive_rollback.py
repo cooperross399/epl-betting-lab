@@ -7,6 +7,7 @@ import epl_betting_lab.reports.stale_current_odds_archive_rollback as rollback_m
 from epl_betting_lab.reports.current_odds_import_audit import source_file_sha256
 from epl_betting_lab.reports.stale_current_odds_archive_rollback import (
     AUDIT_COLUMNS,
+    AUDIT_CHECKSUM_COLUMNS,
     process_stale_current_odds_archive_rollback,
 )
 
@@ -50,6 +51,21 @@ def _write_current_and_backup(current_path, backup_path) -> None:
     ).to_csv(backup_path, index=False)
 
 
+def _write_archive_checksum_audit(output_dir, backup_path, checksum=None) -> str:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    recorded_checksum = checksum or source_file_sha256(backup_path)
+    pd.DataFrame([
+        {
+            "archive_id": "selected-backup-creator",
+            "applied_at": "2026-07-21T13:00:00-04:00",
+            "status": "applied",
+            "backup_path": str(backup_path),
+            "backup_checksum_sha256": recorded_checksum,
+        }
+    ]).to_csv(output_dir / "stale_current_odds_archive_audit.csv", index=False)
+    return recorded_checksum
+
+
 def test_preview_lists_restored_and_replaced_rows_without_editing_files(tmp_path) -> None:
     current_path = tmp_path / "current_odds.csv"
     backup_path = tmp_path / "2026-07-21_current_odds_pre_stale_archive.csv"
@@ -71,6 +87,9 @@ def test_preview_lists_restored_and_replaced_rows_without_editing_files(tmp_path
         "Remove or replace current",
     ]
     assert preview["home_team"].tolist() == ["Arsenal", "Fulham"]
+    assert preview["checksum_status"].eq("Not available").all()
+    assert preview["checksum_gate_result"].eq("Allowed with warning").all()
+    assert preview["current_checksum_sha256"].eq(source_file_sha256(backup_path)).all()
     markdown = paths["markdown"].read_text(encoding="utf-8")
     assert "Current row count: 2" in markdown
     assert "Backup row count: 2" in markdown
@@ -78,6 +97,8 @@ def test_preview_lists_restored_and_replaced_rows_without_editing_files(tmp_path
     assert "Current rows removed or replaced: 1" in markdown
     assert "apply replaces current_odds.csv" in markdown
     assert "Default mode is preview only" in markdown
+    assert "Checksum status: Not available" in markdown
+    assert "Gate result: Allowed with warning" in markdown
     assert current_path.read_bytes() == current_before
     assert backup_path.read_bytes() == backup_before
     assert not (tmp_path / "backups").exists()
@@ -89,6 +110,7 @@ def test_apply_backs_up_current_restores_selected_backup_and_writes_audit(tmp_pa
     backup_path = tmp_path / "2026-07-21_current_odds_pre_stale_archive.csv"
     output_dir = tmp_path / "outputs"
     _write_current_and_backup(current_path, backup_path)
+    recorded_checksum = _write_archive_checksum_audit(output_dir, backup_path)
     current_before = current_path.read_bytes()
     selected_backup_before = backup_path.read_bytes()
 
@@ -121,11 +143,16 @@ def test_apply_backs_up_current_restores_selected_backup_and_writes_audit(tmp_pa
     assert audit.iloc[-1]["recovery_backup_checksum_sha256"] == source_file_sha256(
         paths["pre_rollback_backup"]
     )
+    assert audit.iloc[-1]["checksum_status"] == "Verified"
+    assert audit.iloc[-1]["recorded_checksum_sha256"] == recorded_checksum
+    assert audit.iloc[-1]["current_checksum_sha256"] == source_file_sha256(backup_path)
+    assert audit.iloc[-1]["checksum_gate_result"] == "Allowed"
     assert "Latest Rollback" in paths["audit_markdown"].read_text(encoding="utf-8")
     assert "Recovery backup SHA-256" in paths["audit_markdown"].read_text(encoding="utf-8")
     apply_markdown = paths["markdown"].read_text(encoding="utf-8")
     assert "Applied: yes" in apply_markdown
     assert "explicitly applied from Terminal" in apply_markdown
+    assert "Gate result: Allowed" in apply_markdown
 
 
 def test_apply_upgrades_legacy_rollback_audit_with_blank_checksum_fields(tmp_path) -> None:
@@ -134,8 +161,7 @@ def test_apply_upgrades_legacy_rollback_audit_with_blank_checksum_fields(tmp_pat
     output_dir = tmp_path / "outputs"
     output_dir.mkdir()
     _write_current_and_backup(current_path, backup_path)
-    checksum_columns = {"backup_checksum_sha256", "recovery_backup_checksum_sha256"}
-    legacy_columns = [column for column in AUDIT_COLUMNS if column not in checksum_columns]
+    legacy_columns = [column for column in AUDIT_COLUMNS if column not in AUDIT_CHECKSUM_COLUMNS]
     legacy_row = {column: "" for column in legacy_columns}
     legacy_row["rollback_id"] = "legacy-rollback"
     pd.DataFrame([legacy_row], columns=legacy_columns).to_csv(
@@ -157,6 +183,84 @@ def test_apply_upgrades_legacy_rollback_audit_with_blank_checksum_fields(tmp_pat
     assert audit.iloc[0]["backup_checksum_sha256"] == ""
     assert audit.iloc[0]["recovery_backup_checksum_sha256"] == ""
     assert audit.iloc[-1]["backup_checksum_sha256"] == source_file_sha256(backup_path)
+    assert audit.iloc[-1]["checksum_status"] == "Not available"
+    assert audit.iloc[-1]["checksum_gate_result"] == "Allowed with warning"
+    assert "no audit checksum was available" in paths["message"]
+
+
+def test_apply_blocks_checksum_mismatch_without_changing_current_odds(tmp_path) -> None:
+    current_path = tmp_path / "current_odds.csv"
+    backup_path = tmp_path / "2026-07-21_current_odds_pre_stale_archive.csv"
+    output_dir = tmp_path / "outputs"
+    _write_current_and_backup(current_path, backup_path)
+    recorded_checksum = _write_archive_checksum_audit(output_dir, backup_path)
+    changed_backup = pd.read_csv(backup_path, dtype=str, keep_default_na=False)
+    changed_backup.loc[0, "notes"] = "manually changed after archive"
+    changed_backup.to_csv(backup_path, index=False)
+    current_before = current_path.read_bytes()
+    backup_before = backup_path.read_bytes()
+
+    paths = process_stale_current_odds_archive_rollback(
+        backup_path,
+        current_path,
+        output_dir,
+        apply=True,
+        timestamp="2026-07-21_140002",
+    )
+
+    assert paths["status"] == "checksum_mismatch_blocked"
+    assert paths["checksum_status"] == "Mismatch"
+    assert paths["checksum_gate_result"] == "Blocked"
+    assert paths["recorded_checksum_sha256"] == recorded_checksum
+    assert paths["current_checksum_sha256"] == source_file_sha256(backup_path)
+    assert current_path.read_bytes() == current_before
+    assert backup_path.read_bytes() == backup_before
+    assert not (tmp_path / "backups").exists()
+    assert not (output_dir / "stale_current_odds_archive_rollback_audit.csv").exists()
+    preview = pd.read_csv(paths["csv"], dtype=str, keep_default_na=False)
+    assert preview["checksum_status"].eq("Mismatch").all()
+    assert preview["checksum_gate_result"].eq("Blocked").all()
+    markdown = paths["markdown"].read_text(encoding="utf-8")
+    assert "Rollback was not applied" in markdown
+    assert "--allow-checksum-mismatch" in markdown
+
+
+def test_apply_allows_checksum_mismatch_only_with_explicit_override(tmp_path) -> None:
+    current_path = tmp_path / "current_odds.csv"
+    backup_path = tmp_path / "2026-07-21_current_odds_pre_stale_archive.csv"
+    output_dir = tmp_path / "outputs"
+    _write_current_and_backup(current_path, backup_path)
+    recorded_checksum = _write_archive_checksum_audit(output_dir, backup_path)
+    changed_backup = pd.read_csv(backup_path, dtype=str, keep_default_na=False)
+    changed_backup.loc[0, "notes"] = "manually inspected changed backup"
+    changed_backup.to_csv(backup_path, index=False)
+    backup_before = backup_path.read_bytes()
+
+    paths = process_stale_current_odds_archive_rollback(
+        backup_path,
+        current_path,
+        output_dir,
+        apply=True,
+        allow_checksum_mismatch=True,
+        timestamp="2026-07-21_140003",
+        rollback_id="checksum-override-test",
+    )
+
+    assert paths["status"] == "applied"
+    assert paths["checksum_status"] == "Mismatch"
+    assert paths["checksum_gate_result"] == "Override used"
+    assert "may have changed after creation" in paths["message"]
+    assert current_path.read_bytes() == backup_before
+    audit = pd.read_csv(paths["audit_csv"], dtype=str, keep_default_na=False)
+    latest = audit.iloc[-1]
+    assert latest["rollback_id"] == "checksum-override-test"
+    assert latest["checksum_status"] == "Mismatch"
+    assert latest["recorded_checksum_sha256"] == recorded_checksum
+    assert latest["current_checksum_sha256"] == source_file_sha256(backup_path)
+    assert latest["checksum_gate_result"] == "Override used"
+    assert "explicit Terminal-only" in latest["checksum_gate_note"]
+    audit_markdown = paths["audit_markdown"].read_text(encoding="utf-8")
+    assert "explicit checksum mismatch override" in audit_markdown
 
 
 def test_matching_backup_is_a_read_only_no_op_even_with_apply(tmp_path) -> None:
@@ -190,6 +294,7 @@ def test_matching_backup_is_a_read_only_no_op_even_with_apply(tmp_path) -> None:
         ("empty_backup", "empty_backup"),
         ("header_only_backup", "empty_backup"),
         ("malformed_backup", "malformed_backup"),
+        ("unreadable_backup", "unreadable_backup"),
         ("missing_date", "malformed_backup"),
     ],
 )
@@ -212,6 +317,8 @@ def test_invalid_backups_are_reported_and_never_applied(tmp_path, setup, expecte
         backup_path.write_text("date,home_team,away_team\n", encoding="utf-8")
     elif setup == "malformed_backup":
         backup_path.write_text('date,home_team\n"2026-07-20,Arsenal\n', encoding="utf-8")
+    elif setup == "unreadable_backup":
+        backup_path.write_bytes(b"\xff\xfe\x00\x00")
     elif setup == "missing_date":
         pd.DataFrame([{"home_team": "Arsenal", "away_team": "Chelsea"}]).to_csv(
             backup_path,
@@ -229,6 +336,8 @@ def test_invalid_backups_are_reported_and_never_applied(tmp_path, setup, expecte
     assert paths["status"] == expected_status
     assert paths["csv"].exists()
     assert paths["markdown"].exists()
+    assert paths["checksum_status"] == "Not available"
+    assert paths["checksum_gate_result"] == "Not checked"
     assert current_path.read_bytes() == before
     assert not (tmp_path / "backups").exists()
     assert not (output_dir / "stale_current_odds_archive_rollback_audit.csv").exists()

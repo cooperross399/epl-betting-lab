@@ -1108,7 +1108,8 @@ def render_tools_and_diagnostics(min_edge: float, max_juice: int, recent_matches
                 lambda: run_stale_current_odds_archive_rollback_preview(rollback_backup_path),
             )
     st.caption(
-        "Rollback apply remains Terminal-only and always creates another backup of current_odds.csv first."
+        "Rollback apply and checksum-mismatch overrides remain Terminal-only. Apply always creates "
+        "another backup of current_odds.csv first."
     )
 
     with st.expander("Weekly workflow checklist", expanded=True):

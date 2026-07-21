@@ -421,9 +421,10 @@ python scripts/rollback_stale_current_odds_archive.py \
 
 The preview compares the selected backup with the current file and writes
 `data/outputs/stale_current_odds_archive_rollback_preview.csv` plus its
-markdown report. No odds are changed. In the dashboard, open `Tools /
-Diagnostics`, enter the backup path, and click `Preview stale odds rollback`
-for the same read-only check.
+markdown report. It also shows whether the checksum is `Verified`, `Mismatch`,
+or `Not available`, plus the checksum gate result. No odds are changed. In the
+dashboard, open `Tools / Diagnostics`, enter the backup path, and click
+`Preview stale odds rollback` for the same read-only check.
 
 After reviewing the preview, restore only from Terminal:
 
@@ -440,6 +441,29 @@ malformed, missing, non-CSV, or same-file backups are blocked. The dashboard
 does not offer rollback apply. New archive audit rows record checksums for the
 pre-archive backup and stale-row archive. New rollback audit rows record the
 selected backup checksum and the pre-rollback recovery backup checksum.
+
+The checksum safety gate behaves conservatively:
+
+- `Verified` backups may be applied normally.
+- `Not available` backups may be applied, but the report and audit warn that
+  older or missing audit history cannot confirm their original integrity.
+- `Mismatch` backups are blocked before `current_odds.csv` or any recovery
+  backup is changed.
+
+Only after manually inspecting a mismatched backup may you use the explicit
+Terminal-only override:
+
+```bash
+python scripts/rollback_stale_current_odds_archive.py \
+  --backup-path data/manual/backups/TIMESTAMP_current_odds_pre_stale_archive.csv \
+  --apply \
+  --allow-checksum-mismatch
+```
+
+The console, rollback preview, and audit then say `Override used` and warn that
+the file may have changed after creation. They record the checksum status,
+recorded checksum, current checksum, gate result, and gate note. There is no
+dashboard apply or override button.
 
 List the available backups first so you do not need to find and paste paths:
 

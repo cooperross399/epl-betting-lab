@@ -874,10 +874,10 @@ python scripts/rollback_stale_current_odds_archive.py \
 
 Preview writes `stale_current_odds_archive_rollback_preview.csv` and `.md`
 under `data/outputs/`. It shows the current and backup row counts, rows that
-would return, rows that would be replaced, and a clear replacement warning.
-It does not edit either CSV. The `Preview stale odds rollback` button under
-`Tools / Diagnostics` runs this same read-only check after you enter a backup
-path.
+would return, rows that would be replaced, and the selected backup's checksum
+safety status. It does not edit either CSV. The `Preview stale odds rollback`
+button under `Tools / Diagnostics` runs this same read-only check after you
+enter a backup path.
 
 Apply is Terminal-only and explicit:
 
@@ -895,6 +895,29 @@ backup, restores it atomically, and writes
 the newly created `recovery_backup_checksum_sha256`. Missing, empty,
 malformed, non-CSV, or same-file backups are blocked. There is no dashboard
 rollback apply button.
+
+Rollback apply also uses a checksum safety gate:
+
+- `Verified`: apply is allowed because the backup matches its creator audit.
+- `Not available`: apply is allowed with a warning because older or unmatched
+  audit history cannot confirm the backup's original checksum.
+- `Mismatch`: apply is blocked before any recovery backup or odds replacement.
+
+After manually inspecting a known mismatch, the only override is explicit and
+Terminal-only:
+
+```bash
+python scripts/rollback_stale_current_odds_archive.py \
+  --backup-path data/manual/backups/TIMESTAMP_current_odds_pre_stale_archive.csv \
+  --apply \
+  --allow-checksum-mismatch
+```
+
+The console, preview report, and rollback audit clearly record `Override used`
+and warn that the backup may have changed after creation. Preview and audit
+outputs include `checksum_status`, `recorded_checksum_sha256`,
+`current_checksum_sha256`, `checksum_gate_result`, and `checksum_gate_note`.
+The dashboard has no apply or checksum-override button.
 
 To list available stale-odds backups without searching the backup folder
 manually, run:

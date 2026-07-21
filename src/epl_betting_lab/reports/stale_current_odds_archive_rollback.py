@@ -13,12 +13,23 @@ import pandas as pd
 
 from epl_betting_lab.config import MANUAL_DIR, OUTPUTS_DIR
 from epl_betting_lab.reports.current_odds_import_audit import source_file_sha256
+from epl_betting_lab.reports.stale_current_odds_backup_picker import (
+    get_stale_current_odds_backup_checksum_status,
+)
 
 
 DEFAULT_CURRENT_ODDS_PATH = MANUAL_DIR / "current_odds.csv"
+CHECKSUM_REPORT_COLUMNS = [
+    "checksum_status",
+    "recorded_checksum_sha256",
+    "current_checksum_sha256",
+    "checksum_gate_result",
+    "checksum_gate_note",
+]
 PREVIEW_PREFIX_COLUMNS = [
     "rollback_action",
     "rollback_reason",
+    *CHECKSUM_REPORT_COLUMNS,
     "source_file",
     "source_row_number",
 ]
@@ -42,12 +53,36 @@ LEGACY_AUDIT_COLUMNS = [
 AUDIT_CHECKSUM_COLUMNS = [
     "backup_checksum_sha256",
     "recovery_backup_checksum_sha256",
+    *CHECKSUM_REPORT_COLUMNS,
 ]
 AUDIT_COLUMNS = [
     *LEGACY_AUDIT_COLUMNS[:8],
     *AUDIT_CHECKSUM_COLUMNS,
     *LEGACY_AUDIT_COLUMNS[8:],
 ]
+
+
+def _checksum_gate(checksum_status: object, *, allow_mismatch: bool) -> tuple[str, str]:
+    status = str(checksum_status).strip()
+    if status == "Verified":
+        return "Allowed", "The selected backup matches its recorded checksum. Rollback apply is allowed."
+    if status == "Mismatch" and allow_mismatch:
+        return (
+            "Override used",
+            "WARNING: The selected backup may have changed after creation. An explicit Terminal-only "
+            "checksum mismatch override was used after manual inspection.",
+        )
+    if status == "Mismatch":
+        return (
+            "Blocked",
+            "The selected backup does not match its recorded checksum. Rollback apply is blocked by "
+            "default; inspect the file manually before considering an override.",
+        )
+    return (
+        "Allowed with warning",
+        "No usable audit checksum is available for this backup. Rollback apply is allowed, but its "
+        "original integrity cannot be confirmed.",
+    )
 
 
 def _read_csv(
@@ -227,6 +262,11 @@ def _error_preview(
         "pre_rollback_backup_path": "",
         "current_sha256_before": "",
         "selected_backup_sha256": "",
+        "checksum_status": "Not available",
+        "recorded_checksum_sha256": "",
+        "current_checksum_sha256": "",
+        "checksum_gate_result": "Not checked",
+        "checksum_gate_note": "Checksum safety was not checked because the selected input could not be read.",
     }
 
 
@@ -273,6 +313,14 @@ def render_stale_current_odds_archive_rollback_preview(
         f"- Backup of current odds: `{summary.get('pre_rollback_backup_path', '') or 'not created in preview mode'}`",
         f"- Message: {summary.get('message', '')}",
         "",
+        "## Checksum Safety Gate",
+        "",
+        f"- Checksum status: {summary.get('checksum_status', 'Not available')}",
+        f"- Recorded checksum: `{summary.get('recorded_checksum_sha256', '') or 'Not available'}`",
+        f"- Current backup checksum: `{summary.get('current_checksum_sha256', '') or 'Not available'}`",
+        f"- Gate result: {summary.get('checksum_gate_result', 'Not checked')}",
+        f"- Gate note: {summary.get('checksum_gate_note', '') or 'Checksum safety was not checked.'}",
+        "",
         "## Rows Restored From Backup",
         "",
         restored.to_markdown(index=False) if not restored.empty else "No backup-only rows found.",
@@ -286,11 +334,28 @@ def render_stale_current_odds_archive_rollback_preview(
     ]
     if summary.get("applied"):
         lines.append("Rollback completed from Terminal. Review the rollback audit before continuing.")
-    elif summary.get("status") == "preview_ready":
+    elif summary.get("status") == "checksum_mismatch_blocked":
         lines.append(
-            "Review the differences above. Apply only from Terminal with "
-            "`python scripts/rollback_stale_current_odds_archive.py --backup-path PATH --apply`."
+            "Rollback was not applied because the selected backup failed checksum verification. "
+            "Inspect it manually before deciding whether the Terminal-only "
+            "`--allow-checksum-mismatch` override is appropriate."
         )
+    elif summary.get("status") == "preview_ready":
+        if summary.get("checksum_gate_result") == "Blocked":
+            lines.append(
+                "Review the backup manually. Normal rollback apply is blocked by the checksum mismatch. "
+                "Only after inspection, Terminal supports the explicit `--allow-checksum-mismatch` override."
+            )
+        elif summary.get("checksum_gate_result") == "Allowed with warning":
+            lines.append(
+                "No audit checksum is available. Review the backup carefully, then apply only from Terminal "
+                "with `python scripts/rollback_stale_current_odds_archive.py --backup-path PATH --apply`."
+            )
+        else:
+            lines.append(
+                "Review the differences above. Apply only from Terminal with "
+                "`python scripts/rollback_stale_current_odds_archive.py --backup-path PATH --apply`."
+            )
     elif summary.get("status") == "no_changes":
         lines.append("No rollback is needed because the selected backup already matches the current file.")
     else:
@@ -333,12 +398,15 @@ def save_stale_current_odds_archive_rollback_preview(
         render_stale_current_odds_archive_rollback_preview(preview, summary),
         encoding="utf-8",
     )
-    return {
+    result: dict[str, Path | str] = {
         "csv": csv_path,
         "markdown": markdown_path,
         "status": str(summary.get("status", "not_checked")),
         "message": str(summary.get("message", "")),
     }
+    for column in CHECKSUM_REPORT_COLUMNS:
+        result[column] = str(summary.get(column, ""))
+    return result
 
 
 def _safe_timestamp(timestamp: str | None = None) -> str:
@@ -379,16 +447,28 @@ def render_stale_current_odds_archive_rollback_audit(audit: pd.DataFrame) -> str
         lines.append("No stale current-odds archive rollbacks have been applied.")
         return "\n".join(lines)
     latest = audit.iloc[-1]
+    gate_warning = (
+        "**WARNING: This rollback used an explicit checksum mismatch override. "
+        "The selected backup may have changed after creation.**"
+        if latest["checksum_gate_result"] == "Override used"
+        else ""
+    )
+    lines.extend(["## Latest Rollback", ""])
+    if gate_warning:
+        lines.extend([gate_warning, ""])
     lines.extend(
         [
-            "## Latest Rollback",
-            "",
             f"- Rollback ID: `{latest['rollback_id']}`",
             f"- Applied at: {latest['applied_at']}",
             f"- Selected backup: `{latest['selected_backup_path']}`",
             f"- Selected backup SHA-256: `{latest['backup_checksum_sha256'] or 'Not recorded'}`",
             f"- Pre-rollback backup: `{latest['pre_rollback_backup_path']}`",
             f"- Recovery backup SHA-256: `{latest['recovery_backup_checksum_sha256'] or 'Not recorded'}`",
+            f"- Checksum status: {latest['checksum_status'] or 'Not available'}",
+            f"- Recorded checksum: `{latest['recorded_checksum_sha256'] or 'Not available'}`",
+            f"- Current backup checksum: `{latest['current_checksum_sha256'] or 'Not available'}`",
+            f"- Checksum gate: {latest['checksum_gate_result'] or 'Not recorded'}",
+            f"- Checksum gate note: {latest['checksum_gate_note'] or 'Not recorded'}",
             f"- Rows before: {latest['current_rows_before']}",
             f"- Rows after: {latest['rows_after']}",
             "",
@@ -443,6 +523,7 @@ def process_stale_current_odds_archive_rollback(
     output_dir: Path | None = None,
     *,
     apply: bool = False,
+    allow_checksum_mismatch: bool = False,
     timestamp: str | None = None,
     rollback_id: str | None = None,
     applied_at: str | None = None,
@@ -533,6 +614,42 @@ def process_stale_current_odds_archive_rollback(
         current_odds_path=current_odds_path,
         backup_path=selected_backup,
     )
+    checksum_details = get_stale_current_odds_backup_checksum_status(
+        selected_backup,
+        archive_audit_path=output_dir / "stale_current_odds_archive_audit.csv",
+        rollback_audit_path=output_dir / "stale_current_odds_archive_rollback_audit.csv",
+    )
+    override_active = bool(apply and allow_checksum_mismatch)
+    checksum_gate_result, checksum_gate_note = _checksum_gate(
+        checksum_details["checksum_status"],
+        allow_mismatch=override_active,
+    )
+    summary.update(
+        {
+            "checksum_status": checksum_details["checksum_status"],
+            "recorded_checksum_sha256": checksum_details["recorded_checksum_sha256"],
+            "current_checksum_sha256": checksum_details["current_checksum_sha256"],
+            "checksum_gate_result": checksum_gate_result,
+            "checksum_gate_note": checksum_gate_note,
+        }
+    )
+    for column in CHECKSUM_REPORT_COLUMNS:
+        preview[column] = str(summary[column])
+    if checksum_gate_result == "Blocked":
+        summary["message"] = (
+            "Rollback preview created, but the selected backup has a checksum mismatch. "
+            "Normal rollback apply is blocked."
+        )
+        if apply and summary["status"] == "preview_ready":
+            summary["status"] = "checksum_mismatch_blocked"
+    elif checksum_gate_result == "Allowed with warning":
+        summary["message"] = (
+            "Rollback preview created. No audit checksum is available, so apply is allowed with caution."
+        )
+    elif checksum_gate_result == "Override used":
+        summary["message"] = (
+            "Checksum mismatch override requested from Terminal. The backup may have changed after creation."
+        )
     paths = save_stale_current_odds_archive_rollback_preview(preview, summary, output_dir)
     if not apply or summary["status"] != "preview_ready":
         return paths
@@ -598,6 +715,11 @@ def process_stale_current_odds_archive_rollback(
                 "selected_backup_sha256": backup_sha,
                 "backup_checksum_sha256": backup_sha,
                 "recovery_backup_checksum_sha256": recovery_backup_checksum_sha256,
+                "checksum_status": summary["checksum_status"],
+                "recorded_checksum_sha256": summary["recorded_checksum_sha256"],
+                "current_checksum_sha256": summary["current_checksum_sha256"],
+                "checksum_gate_result": summary["checksum_gate_result"],
+                "checksum_gate_note": summary["checksum_gate_note"],
                 "current_sha256_after": current_sha_after,
                 "current_rows_before": len(current),
                 "backup_rows": len(backup),
@@ -618,10 +740,22 @@ def process_stale_current_odds_archive_rollback(
             f"The recovery backup remains at `{pre_rollback_backup}`: {exc}"
         ) from exc
 
+    if summary["checksum_gate_result"] == "Override used":
+        applied_message = (
+            "The selected pre-archive backup was restored with an explicit checksum mismatch override. "
+            "WARNING: the backup may have changed after creation."
+        )
+    elif summary["checksum_gate_result"] == "Allowed with warning":
+        applied_message = (
+            "The selected pre-archive backup was restored. WARNING: no audit checksum was available "
+            "to confirm its original integrity."
+        )
+    else:
+        applied_message = "The verified pre-archive backup was restored from Terminal."
     summary.update(
         {
             "status": "applied",
-            "message": "The selected pre-archive backup was restored from Terminal.",
+            "message": applied_message,
             "applied": True,
             "pre_rollback_backup_path": str(pre_rollback_backup),
             "rollback_id": resolved_rollback_id,

@@ -53,6 +53,9 @@ from epl_betting_lab.reports.odds_profile_verification import (
 )
 from epl_betting_lab.reports.stale_current_odds import save_stale_current_odds_report
 from epl_betting_lab.reports.stale_current_odds_archive import archive_stale_current_odds
+from epl_betting_lab.reports.stale_current_odds_archive_rollback import (
+    process_stale_current_odds_archive_rollback,
+)
 from epl_betting_lab.reports.thursday_best_bets import (
     build_thursday_best_bets,
     list_recent_thursday_archives,
@@ -216,6 +219,19 @@ def run_stale_current_odds_archive_preview(
     output_dir: Path | None = None,
 ) -> dict[str, Path | str]:
     return archive_stale_current_odds(
+        current_odds_path or MANUAL_DIR / "current_odds.csv",
+        output_dir or OUTPUTS_DIR,
+        apply=False,
+    )
+
+
+def run_stale_current_odds_archive_rollback_preview(
+    backup_path: Path | str | None,
+    current_odds_path: Path | None = None,
+    output_dir: Path | None = None,
+) -> dict[str, Path | str]:
+    return process_stale_current_odds_archive_rollback(
+        backup_path,
         current_odds_path or MANUAL_DIR / "current_odds.csv",
         output_dir or OUTPUTS_DIR,
         apply=False,

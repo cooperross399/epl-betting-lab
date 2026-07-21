@@ -411,6 +411,34 @@ under `data/manual/archive/current_odds_stale/`, verifies that archive, and
 then keeps current and date-fix rows in `current_odds.csv`. Audit files are
 written under `data/outputs/`. The dashboard has no apply button.
 
+To undo an applied stale-odds archive, preview a selected pre-archive backup
+first:
+
+```bash
+python scripts/rollback_stale_current_odds_archive.py \
+  --backup-path data/manual/backups/TIMESTAMP_current_odds_pre_stale_archive.csv
+```
+
+The preview compares the selected backup with the current file and writes
+`data/outputs/stale_current_odds_archive_rollback_preview.csv` plus its
+markdown report. No odds are changed. In the dashboard, open `Tools /
+Diagnostics`, enter the backup path, and click `Preview stale odds rollback`
+for the same read-only check.
+
+After reviewing the preview, restore only from Terminal:
+
+```bash
+python scripts/rollback_stale_current_odds_archive.py \
+  --backup-path data/manual/backups/TIMESTAMP_current_odds_pre_stale_archive.csv \
+  --apply
+```
+
+Apply first saves the current file as a new timestamped pre-rollback backup,
+then restores and verifies the selected backup. It records the operation in
+`data/outputs/stale_current_odds_archive_rollback_audit.csv` and `.md`. Empty,
+malformed, missing, non-CSV, or same-file backups are blocked. The dashboard
+does not offer rollback apply.
+
 The selected portal section is also stored in the browser URL. For example,
 `?section=odds-import` opens Odds Import and `?section=performance` opens
 Performance Reports after a refresh or from a bookmark. Sidebar changes and

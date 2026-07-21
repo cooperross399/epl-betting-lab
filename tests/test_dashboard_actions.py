@@ -25,6 +25,7 @@ from epl_betting_lab.dashboard_actions import (
     run_post_thursday_review,
     run_settlement_preview,
     run_stale_current_odds_archive_preview,
+    run_stale_current_odds_archive_rollback_preview,
     run_stale_current_odds_report,
     run_tier_performance_report,
     run_thursday_best_bets_comparison,
@@ -604,6 +605,59 @@ def test_run_stale_current_odds_archive_preview_never_edits_odds(tmp_path) -> No
     assert not (odds_path.parent / "backups").exists()
     assert not (odds_path.parent / "archive").exists()
     assert not (output_dir / "stale_current_odds_archive_audit.csv").exists()
+
+
+def test_run_stale_current_odds_archive_rollback_preview_never_edits_odds(tmp_path) -> None:
+    odds_path = tmp_path / "current_odds.csv"
+    backup_path = tmp_path / "2026-07-21_current_odds_pre_stale_archive.csv"
+    output_dir = tmp_path / "outputs"
+    pd.DataFrame([
+        {
+            "date": "2026-08-21",
+            "home_team": "Arsenal",
+            "away_team": "Coventry",
+            "market": "1x2",
+            "selection": "home",
+            "american_odds": "-150",
+            "book": "FanDuel",
+        }
+    ]).to_csv(odds_path, index=False)
+    pd.DataFrame([
+        {
+            "date": "2026-07-20",
+            "home_team": "Chelsea",
+            "away_team": "Everton",
+            "market": "1x2",
+            "selection": "draw",
+            "american_odds": "+240",
+            "book": "FanDuel",
+        },
+        {
+            "date": "2026-08-21",
+            "home_team": "Arsenal",
+            "away_team": "Coventry",
+            "market": "1x2",
+            "selection": "home",
+            "american_odds": "-150",
+            "book": "FanDuel",
+        },
+    ]).to_csv(backup_path, index=False)
+    odds_before = odds_path.read_bytes()
+    backup_before = backup_path.read_bytes()
+
+    paths = run_stale_current_odds_archive_rollback_preview(
+        backup_path,
+        odds_path,
+        output_dir,
+    )
+
+    assert paths["status"] == "preview_ready"
+    assert paths["csv"].name == "stale_current_odds_archive_rollback_preview.csv"
+    assert paths["markdown"].name == "stale_current_odds_archive_rollback_preview.md"
+    assert odds_path.read_bytes() == odds_before
+    assert backup_path.read_bytes() == backup_before
+    assert not (tmp_path / "backups").exists()
+    assert not (output_dir / "stale_current_odds_archive_rollback_audit.csv").exists()
 
 
 def test_run_thursday_best_bets_comparison_writes_report(tmp_path) -> None:

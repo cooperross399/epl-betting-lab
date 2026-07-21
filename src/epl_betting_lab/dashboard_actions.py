@@ -51,6 +51,7 @@ from epl_betting_lab.reports.odds_profile_verification import (
     InstalledOddsProfileVerificationError,
     verify_installed_odds_profile,
 )
+from epl_betting_lab.reports.stale_current_odds import save_stale_current_odds_report
 from epl_betting_lab.reports.thursday_best_bets import (
     build_thursday_best_bets,
     list_recent_thursday_archives,
@@ -196,6 +197,16 @@ def run_current_odds_maintenance_preview(
         output_dir or OUTPUTS_DIR,
         apply=False,
         book=book,
+    )
+
+
+def run_stale_current_odds_report(
+    current_odds_path: Path | None = None,
+    output_dir: Path | None = None,
+) -> dict[str, Path]:
+    return save_stale_current_odds_report(
+        current_odds_path or MANUAL_DIR / "current_odds.csv",
+        output_dir or OUTPUTS_DIR,
     )
 
 

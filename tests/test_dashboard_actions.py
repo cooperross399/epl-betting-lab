@@ -24,6 +24,7 @@ from epl_betting_lab.dashboard_actions import (
     run_installed_odds_profile_verification,
     run_post_thursday_review,
     run_settlement_preview,
+    run_stale_current_odds_report,
     run_tier_performance_report,
     run_thursday_best_bets_comparison,
     run_thursday_best_bets_report,
@@ -547,6 +548,31 @@ def test_run_current_odds_completeness_writes_report_without_editing_odds(tmp_pa
 
     assert paths["csv"].name == "current_odds_completeness.csv"
     assert paths["markdown"].name == "current_odds_completeness.md"
+    assert paths["csv"].exists()
+    assert paths["markdown"].exists()
+    assert odds_path.read_text(encoding="utf-8") == original
+
+
+def test_run_stale_current_odds_report_writes_report_without_editing_odds(tmp_path) -> None:
+    odds_path = tmp_path / "current_odds.csv"
+    output_dir = tmp_path / "outputs"
+    pd.DataFrame([
+        {
+            "date": "2026-08-21",
+            "home_team": "Arsenal",
+            "away_team": "Coventry",
+            "market": "1x2",
+            "selection": "home",
+            "american_odds": "-150",
+            "book": "FanDuel",
+        }
+    ]).to_csv(odds_path, index=False)
+    original = odds_path.read_text(encoding="utf-8")
+
+    paths = run_stale_current_odds_report(odds_path, output_dir)
+
+    assert paths["csv"].name == "stale_current_odds_report.csv"
+    assert paths["markdown"].name == "stale_current_odds_report.md"
     assert paths["csv"].exists()
     assert paths["markdown"].exists()
     assert odds_path.read_text(encoding="utf-8") == original

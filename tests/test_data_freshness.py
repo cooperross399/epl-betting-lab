@@ -29,6 +29,17 @@ def _fixture_check(path: Path) -> DataFreshnessCheck:
     )
 
 
+def _current_odds_check(path: Path) -> DataFreshnessCheck:
+    return DataFreshnessCheck(
+        "Current odds",
+        path,
+        "update odds",
+        "Update current odds.",
+        current_odds_date_column="date",
+        priority=1,
+    )
+
+
 def test_data_freshness_marks_available_inputs_fresh_and_absent_inputs_missing(
     tmp_path: Path,
 ) -> None:
@@ -150,6 +161,89 @@ def test_fixture_dates_are_not_checked_when_date_column_is_missing(tmp_path: Pat
     assert "missing the `date` column" in row["note"]
 
 
+def test_current_odds_need_refresh_when_every_row_is_in_the_past(tmp_path: Path) -> None:
+    odds = tmp_path / "current_odds.csv"
+    odds.write_text("date,market\n2026-07-01,1x2\n2026-07-12,total_2_5\n", encoding="utf-8")
+
+    status = build_data_freshness_status(
+        [_current_odds_check(odds)],
+        today=date(2026, 7, 13),
+    )
+    row = status.iloc[0]
+
+    assert row["status"] == "Needs refresh"
+    assert row["earliest_odds_date"] == "2026-07-01"
+    assert row["latest_odds_date"] == "2026-07-12"
+    assert row["past_odds_rows"] == 2
+    assert row["today_or_future_odds_rows"] == 0
+    assert row["invalid_odds_date_rows"] == 0
+    assert recommend_data_freshness_action(status) == (
+        "Current odds are tied to past matches. Import or update odds before Thursday analysis."
+    )
+
+
+def test_current_odds_are_fresh_when_rows_are_today_or_later(tmp_path: Path) -> None:
+    odds = tmp_path / "current_odds.csv"
+    odds.write_text("date\n2026-07-13\n2026-07-14\n", encoding="utf-8")
+
+    row = build_data_freshness_status(
+        [_current_odds_check(odds)],
+        today=date(2026, 7, 13),
+    ).iloc[0]
+
+    assert row["status"] == "Fresh"
+    assert row["past_odds_rows"] == 0
+    assert row["today_or_future_odds_rows"] == 2
+    assert row["warning"] == ""
+    assert row["command"] == ""
+
+
+def test_mixed_current_odds_stay_fresh_but_warn_about_past_rows(tmp_path: Path) -> None:
+    odds = tmp_path / "current_odds.csv"
+    odds.write_text("date\n2026-07-12\n2026-07-13\n2026-07-14\n", encoding="utf-8")
+
+    status = build_data_freshness_status(
+        [_current_odds_check(odds)],
+        today=date(2026, 7, 13),
+    )
+    row = status.iloc[0]
+
+    assert row["status"] == "Fresh"
+    assert row["past_odds_rows"] == 1
+    assert row["today_or_future_odds_rows"] == 2
+    assert "past current-odds row" in row["warning"]
+    assert row["command"] == "update odds"
+    assert recommend_data_freshness_action(status) == row["warning"]
+
+
+def test_current_odds_dates_are_not_checked_when_values_are_malformed(tmp_path: Path) -> None:
+    odds = tmp_path / "current_odds.csv"
+    odds.write_text("date\n2026-07-14\nnot-a-date\n", encoding="utf-8")
+
+    row = build_data_freshness_status(
+        [_current_odds_check(odds)],
+        today=date(2026, 7, 13),
+    ).iloc[0]
+
+    assert row["status"] == "Not checked"
+    assert row["today_or_future_odds_rows"] == 1
+    assert row["invalid_odds_date_rows"] == 1
+    assert "blank or malformed" in row["note"]
+
+
+def test_current_odds_dates_are_not_checked_when_file_is_unreadable(tmp_path: Path) -> None:
+    odds = tmp_path / "current_odds.csv"
+    odds.write_bytes(b"\xff\xfe\x00")
+
+    row = build_data_freshness_status(
+        [_current_odds_check(odds)],
+        today=date(2026, 7, 13),
+    ).iloc[0]
+
+    assert row["status"] == "Not checked"
+    assert "could not be read" in row["note"]
+
+
 def test_data_freshness_uses_not_checked_when_required_sources_are_missing(
     tmp_path: Path,
 ) -> None:
@@ -267,3 +361,5 @@ def test_default_data_freshness_checks_track_required_items_and_latest_archives(
     }
     assert by_item["Latest Thursday archive"].path == newer_archive
     assert by_item["Thursday comparison report"].sources == (older_archive, newer_archive)
+    assert by_item["Current odds"].current_odds_date_column == "date"
+    assert by_item["Current odds validation report"].dependencies == ("Current odds",)

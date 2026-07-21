@@ -40,6 +40,7 @@ class DataFreshnessCheck:
     stale_status: str = "Stale"
     not_checked_until_sources: bool = False
     fixture_date_column: str = ""
+    current_odds_date_column: str = ""
     priority: int = 100
 
 
@@ -53,6 +54,19 @@ class FixtureDateFreshness:
     past_fixtures: int | None = None
     today_or_future_fixtures: int | None = None
     invalid_fixture_dates: int | None = None
+
+
+@dataclass(frozen=True)
+class CurrentOddsDateFreshness:
+    status: str
+    note: str
+    recommendation: str = ""
+    warning: str = ""
+    earliest_date: str = ""
+    latest_date: str = ""
+    past_rows: int | None = None
+    today_or_future_rows: int | None = None
+    invalid_date_rows: int | None = None
 
 
 WORKFLOW_CHECKS = [
@@ -191,6 +205,7 @@ def build_data_freshness_checks(
             path=current_odds,
             command="python scripts/create_current_odds_template.py",
             recommendation="Create or import current odds before running Thursday analysis.",
+            current_odds_date_column="date",
             priority=1,
         ),
         DataFreshnessCheck(
@@ -199,6 +214,7 @@ def build_data_freshness_checks(
             command="python scripts/validate_current_odds.py",
             recommendation="Update odds validation before generating the Thursday card.",
             sources=(current_odds,),
+            dependencies=("Current odds",),
             minimum_sources=1,
             not_checked_until_sources=True,
             priority=2,
@@ -209,6 +225,7 @@ def build_data_freshness_checks(
             command="python scripts/check_current_odds_completeness.py",
             recommendation="Check odds completeness before generating the Thursday card.",
             sources=(current_odds, fixtures),
+            dependencies=("Upcoming fixtures", "Current odds"),
             minimum_sources=2,
             not_checked_until_sources=True,
             priority=3,
@@ -219,6 +236,7 @@ def build_data_freshness_checks(
             command="python scripts/generate_thursday_best_bets.py",
             recommendation="Run Thursday readiness refresh.",
             sources=(current_odds, validation, completeness),
+            dependencies=("Current odds validation report", "Odds completeness report"),
             minimum_sources=3,
             not_checked_until_sources=True,
             priority=4,
@@ -384,6 +402,97 @@ def inspect_fixture_date_freshness(
     )
 
 
+def inspect_current_odds_date_freshness(
+    path: Path,
+    *,
+    today: date | None = None,
+    date_column: str = "date",
+) -> CurrentOddsDateFreshness:
+    today = today or date.today()
+    try:
+        odds = pd.read_csv(path)
+    except (
+        OSError,
+        UnicodeError,
+        pd.errors.EmptyDataError,
+        pd.errors.ParserError,
+    ) as exc:
+        return CurrentOddsDateFreshness(
+            status="Not checked",
+            note=f"Current odds dates could not be read: {exc}",
+            recommendation="Fix the current odds file before running Thursday analysis.",
+        )
+
+    if odds.empty:
+        return CurrentOddsDateFreshness(
+            status="Not checked",
+            note="The current odds file has no rows to check.",
+            recommendation="Import or enter current odds before running Thursday analysis.",
+        )
+    if date_column not in odds.columns:
+        return CurrentOddsDateFreshness(
+            status="Not checked",
+            note=f"The current odds file is missing the `{date_column}` column.",
+            recommendation="Add valid match dates to current odds before Thursday analysis.",
+        )
+
+    parsed = pd.to_datetime(odds[date_column], errors="coerce")
+    invalid_count = int(parsed.isna().sum())
+    valid_dates = parsed.dropna().dt.date
+    if valid_dates.empty:
+        return CurrentOddsDateFreshness(
+            status="Not checked",
+            note="No valid current odds dates could be read.",
+            recommendation="Fix current odds dates before running Thursday analysis.",
+            invalid_date_rows=invalid_count,
+        )
+
+    earliest = min(valid_dates)
+    latest = max(valid_dates)
+    past_count = sum(odds_date < today for odds_date in valid_dates)
+    today_or_future_count = sum(odds_date >= today for odds_date in valid_dates)
+    common = {
+        "earliest_date": earliest.isoformat(),
+        "latest_date": latest.isoformat(),
+        "past_rows": past_count,
+        "today_or_future_rows": today_or_future_count,
+        "invalid_date_rows": invalid_count,
+    }
+
+    if invalid_count:
+        return CurrentOddsDateFreshness(
+            status="Not checked",
+            note=f"{invalid_count} current odds date row(s) are blank or malformed.",
+            recommendation="Fix current odds dates before running Thursday analysis.",
+            **common,
+        )
+    if today_or_future_count == 0:
+        message = "Current odds are tied to past matches. Import or update odds before Thursday analysis."
+        return CurrentOddsDateFreshness(
+            status="Needs refresh",
+            note=message,
+            recommendation=message,
+            **common,
+        )
+    if past_count:
+        warning = (
+            f"{past_count} past current-odds row(s) remain, but "
+            f"{today_or_future_count} today/future row(s) can still be used. "
+            "Review or remove the old rows when convenient."
+        )
+        return CurrentOddsDateFreshness(
+            status="Fresh",
+            note=warning,
+            warning=warning,
+            **common,
+        )
+    return CurrentOddsDateFreshness(
+        status="Fresh",
+        note=f"{today_or_future_count} current odds row(s) are for today or future matches.",
+        **common,
+    )
+
+
 def build_data_freshness_status(
     checks: list[DataFreshnessCheck] | None = None,
     *,
@@ -402,7 +511,9 @@ def build_data_freshness_status(
             if item_statuses.get(item) != "Fresh"
         ]
         fixture_dates = FixtureDateFreshness(status="", note="")
+        odds_dates = CurrentOddsDateFreshness(status="", note="")
         recommendation = check.recommendation
+        warning = ""
 
         if dependency_issues:
             status = "Not checked"
@@ -440,6 +551,18 @@ def build_data_freshness_status(
                 note = fixture_dates.note
                 recommendation = fixture_dates.recommendation or recommendation
 
+        if check.current_odds_date_column and output_mtime is not None:
+            odds_dates = inspect_current_odds_date_freshness(
+                check.path,
+                today=today,
+                date_column=check.current_odds_date_column,
+            )
+            if status == "Fresh":
+                status = odds_dates.status
+                note = odds_dates.note
+                recommendation = odds_dates.recommendation or recommendation
+                warning = odds_dates.warning
+
         missing_sources = [str(path) for path in check.sources if not path.exists()]
         if status == "Not checked" and missing_sources:
             note = f"{note} Missing sources: {', '.join(missing_sources)}"
@@ -455,9 +578,15 @@ def build_data_freshness_status(
                 "past_fixtures": fixture_dates.past_fixtures,
                 "today_or_future_fixtures": fixture_dates.today_or_future_fixtures,
                 "invalid_fixture_dates": fixture_dates.invalid_fixture_dates,
+                "earliest_odds_date": odds_dates.earliest_date,
+                "latest_odds_date": odds_dates.latest_date,
+                "past_odds_rows": odds_dates.past_rows,
+                "today_or_future_odds_rows": odds_dates.today_or_future_rows,
+                "invalid_odds_date_rows": odds_dates.invalid_date_rows,
+                "warning": warning,
                 "file": str(check.path),
                 "source_files": ", ".join(str(path) for path in check.sources),
-                "command": "" if status == "Fresh" else check.command,
+                "command": "" if status == "Fresh" and not warning else check.command,
                 "note": note,
                 "recommendation": recommendation,
                 "priority": check.priority,
@@ -470,6 +599,9 @@ def build_data_freshness_status(
         "past_fixtures",
         "today_or_future_fixtures",
         "invalid_fixture_dates",
+        "past_odds_rows",
+        "today_or_future_odds_rows",
+        "invalid_odds_date_rows",
     ):
         status[column] = pd.array(status[column], dtype="Int64")
     return status
@@ -481,6 +613,11 @@ def recommend_data_freshness_action(status: pd.DataFrame) -> str:
 
     attention = status[status["status"] != "Fresh"]
     if attention.empty:
+        if "warning" in status.columns:
+            warnings = status[status["warning"].fillna("").astype(str).str.strip() != ""]
+            if not warnings.empty:
+                first_warning = warnings.sort_values(["priority", "item"], kind="stable").iloc[0]
+                return str(first_warning["warning"])
         return "No data refresh is needed right now."
 
     first = attention.sort_values(["priority", "item"], kind="stable").iloc[0]

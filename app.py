@@ -289,15 +289,19 @@ def render_data_freshness() -> None:
         column.metric(label, int(counts.get(label, 0)))
 
     recommendation = recommend_data_freshness_action(freshness)
-    if (freshness["status"] == "Fresh").all():
+    warning_mask = freshness["warning"].fillna("").astype(str).str.strip() != ""
+    if (freshness["status"] == "Fresh").all() and not warning_mask.any():
         st.success(recommendation)
     else:
         st.warning(recommendation)
 
-    attention = freshness[freshness["status"] != "Fresh"]
+    attention = freshness[(freshness["status"] != "Fresh") | warning_mask]
     if not attention.empty:
         visible = attention.head(4)
-        labels = [f"{row.item} ({row.status})" for row in visible.itertuples()]
+        labels = [
+            f"{row.item} ({'Warning' if row.status == 'Fresh' and row.warning else row.status})"
+            for row in visible.itertuples()
+        ]
         extra = len(attention) - len(visible)
         suffix = f"; plus {extra} more" if extra else ""
         st.caption(f"Needs attention: {', '.join(labels)}{suffix}. Open details below.")
@@ -313,6 +317,12 @@ def render_data_freshness() -> None:
             "past_fixtures",
             "today_or_future_fixtures",
             "invalid_fixture_dates",
+            "earliest_odds_date",
+            "latest_odds_date",
+            "past_odds_rows",
+            "today_or_future_odds_rows",
+            "invalid_odds_date_rows",
+            "warning",
             "file",
             "source_files",
             "command",

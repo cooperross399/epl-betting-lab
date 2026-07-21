@@ -452,11 +452,19 @@ backup's timestamp, modified time, row count, date range, stale/current/date
 issue counts, and whether it is readable and valid. It does not change any
 backup or odds file.
 
+The list also checks the archive and rollback audit CSV/markdown reports. A
+matched backup shows whether `archive_apply` or `rollback_apply` created it,
+when that happened, the operation status, relevant archive path, and available
+archived/restored/replaced row counts. `unknown` means there is no matching
+creator row yet, or the audit history is missing, unreadable, or malformed. The
+backup remains visible so you can review it manually.
+
 In the dashboard, open `Tools / Diagnostics` and expand `Available stale odds
 backups`. Select a valid backup from the list, then click `Preview stale odds
 rollback`. The selected path is used only for preview. Unreadable or malformed
 files remain visible for review but are not offered in the selector, and there
-is still no dashboard rollback apply button.
+is still no dashboard rollback apply button. The compact table and selected
+backup note show audit provenance without changing any audit or odds file.
 
 The selected portal section is also stored in the browser URL. For example,
 `?section=odds-import` opens Odds Import and `?section=performance` opens

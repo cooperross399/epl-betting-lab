@@ -1011,7 +1011,38 @@ def render_tools_and_diagnostics(min_edge: float, max_juice: int, recent_matches
         if backup_list.empty:
             st.info(str(backup_summary.get("message", "No stale current-odds backups were found.")))
         else:
-            st.dataframe(backup_list, width="stretch", hide_index=True)
+            audit_link_status = str(backup_summary.get("audit_link_status", "not_checked"))
+            st.caption(
+                f"Audit linkage: {audit_link_status} | "
+                f"{int(backup_summary.get('matched_backups', 0))} matched | "
+                f"{int(backup_summary.get('unmatched_backups', 0))} unknown"
+            )
+            if audit_link_status == "no_history":
+                st.info("No archive or rollback audit history is available yet. Backup creators show as unknown.")
+            elif audit_link_status == "needs_review":
+                st.warning("Some audit history is unreadable or malformed. Review the audit notes before choosing.")
+            elif audit_link_status in {"partial", "no_matches"}:
+                st.info("Some backup paths have no matching creator row. Those operations remain unknown.")
+            if int(backup_summary.get("audit_warning_count", 0)):
+                st.warning("Some audit rows or markdown files need review. Details are in the backup list report.")
+            compact_columns = [
+                "backup_type",
+                "filename_timestamp",
+                "row_count",
+                "valid",
+                "created_by_operation",
+                "audit_timestamp",
+                "operation_status",
+                "rows_archived",
+                "rows_restored",
+                "rows_replaced",
+                "backup_path",
+            ]
+            st.dataframe(
+                backup_list[[column for column in compact_columns if column in backup_list.columns]],
+                width="stretch",
+                hide_index=True,
+            )
             valid_backups = backup_list[backup_list["valid"].eq("Yes")]
             if valid_backups.empty:
                 st.warning("Backups were found, but none are readable and valid for rollback preview.")
@@ -1019,7 +1050,8 @@ def render_tools_and_diagnostics(min_edge: float, max_juice: int, recent_matches
                 backup_labels = {
                     str(row["backup_path"]): (
                         f"{row['filename_timestamp'] or row['file_modified_at'] or 'Unknown time'} | "
-                        f"{Path(str(row['backup_path'])).name} | {int(row['row_count'])} rows"
+                        f"{Path(str(row['backup_path'])).name} | "
+                        f"{row['created_by_operation']} | {int(row['row_count'])} rows"
                     )
                     for _, row in valid_backups.iterrows()
                 }
@@ -1030,6 +1062,14 @@ def render_tools_and_diagnostics(min_edge: float, max_juice: int, recent_matches
                     key="stale_odds_rollback_backup_picker",
                 )
                 st.code(selected_backup_path, language="text")
+                selected_record = valid_backups.loc[
+                    valid_backups["backup_path"].eq(selected_backup_path)
+                ].iloc[0]
+                st.caption(
+                    f"Creator: {selected_record['created_by_operation']} | "
+                    f"Status: {selected_record['operation_status'] or 'Not recorded'}"
+                )
+                st.caption(str(selected_record["audit_note"]))
     manual_backup_path = st.text_input(
         "Manual backup path (optional override)",
         placeholder="data/manual/backups/TIMESTAMP_current_odds_pre_stale_archive.csv",

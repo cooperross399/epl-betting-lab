@@ -367,7 +367,10 @@ The Home page `Data freshness` area shows how many important files are `Fresh`,
 `Stale`, `Missing`, `Needs refresh`, or `Not checked`. Follow its plain-English
 recommendation first. Open `Data freshness details` only when you need the exact
 file paths, source paths, local timestamps, notes, and refresh commands. The
-freshness check never changes a file.
+fixture row also shows the earliest and latest match dates plus past,
+today/future, and invalid-date counts. If every listed match is before today,
+fixtures show `Needs refresh`. Blank, malformed, or unreadable dates show `Not
+checked`. The freshness check never changes a file.
 
 The selected portal section is also stored in the browser URL. For example,
 `?section=odds-import` opens Odds Import and `?section=performance` opens

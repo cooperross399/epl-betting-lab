@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from datetime import date
 from pathlib import Path
 
 from epl_betting_lab.workflow_status import (
@@ -15,6 +16,17 @@ def _touch(path: Path, timestamp: int) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("ok", encoding="utf-8")
     os.utime(path, (timestamp, timestamp))
+
+
+def _fixture_check(path: Path) -> DataFreshnessCheck:
+    return DataFreshnessCheck(
+        "Upcoming fixtures",
+        path,
+        "update fixtures",
+        "Update upcoming fixtures.",
+        fixture_date_column="date",
+        priority=1,
+    )
 
 
 def test_data_freshness_marks_available_inputs_fresh_and_absent_inputs_missing(
@@ -67,6 +79,75 @@ def test_data_freshness_marks_reports_stale_when_a_source_is_newer(tmp_path: Pat
     assert status.loc["Report", "status"] == "Stale"
     assert status.loc["Processed data", "status"] == "Needs refresh"
     assert str(source) in status.loc["Report", "note"]
+
+
+def test_fixture_dates_need_refresh_when_every_match_is_in_the_past(tmp_path: Path) -> None:
+    fixtures = tmp_path / "upcoming_fixtures.csv"
+    fixtures.write_text("date\n2026-07-01\n2026-07-12\n", encoding="utf-8")
+
+    status = build_data_freshness_status(
+        [_fixture_check(fixtures)],
+        today=date(2026, 7, 13),
+    )
+    row = status.iloc[0]
+
+    assert row["status"] == "Needs refresh"
+    assert row["earliest_fixture_date"] == "2026-07-01"
+    assert row["latest_fixture_date"] == "2026-07-12"
+    assert row["past_fixtures"] == 2
+    assert row["today_or_future_fixtures"] == 0
+    assert row["invalid_fixture_dates"] == 0
+    assert recommend_data_freshness_action(status) == (
+        "Upcoming fixtures are all in the past. Refresh fixtures before Thursday analysis."
+    )
+
+
+def test_fixture_dates_are_fresh_when_a_match_is_today_or_later(tmp_path: Path) -> None:
+    fixtures = tmp_path / "upcoming_fixtures.csv"
+    fixtures.write_text(
+        "date\n2026-07-12\n2026-07-13\n2026-07-14\n",
+        encoding="utf-8",
+    )
+
+    row = build_data_freshness_status(
+        [_fixture_check(fixtures)],
+        today=date(2026, 7, 13),
+    ).iloc[0]
+
+    assert row["status"] == "Fresh"
+    assert row["past_fixtures"] == 1
+    assert row["today_or_future_fixtures"] == 2
+    assert row["command"] == ""
+
+
+def test_fixture_dates_are_not_checked_when_values_are_malformed(tmp_path: Path) -> None:
+    fixtures = tmp_path / "upcoming_fixtures.csv"
+    fixtures.write_text("date\n2026-07-14\nnot-a-date\n", encoding="utf-8")
+
+    row = build_data_freshness_status(
+        [_fixture_check(fixtures)],
+        today=date(2026, 7, 13),
+    ).iloc[0]
+
+    assert row["status"] == "Not checked"
+    assert row["earliest_fixture_date"] == "2026-07-14"
+    assert row["latest_fixture_date"] == "2026-07-14"
+    assert row["today_or_future_fixtures"] == 1
+    assert row["invalid_fixture_dates"] == 1
+    assert "blank or malformed" in row["note"]
+
+
+def test_fixture_dates_are_not_checked_when_date_column_is_missing(tmp_path: Path) -> None:
+    fixtures = tmp_path / "upcoming_fixtures.csv"
+    fixtures.write_text("home_team\nArsenal\n", encoding="utf-8")
+
+    row = build_data_freshness_status(
+        [_fixture_check(fixtures)],
+        today=date(2026, 7, 13),
+    ).iloc[0]
+
+    assert row["status"] == "Not checked"
+    assert "missing the `date` column" in row["note"]
 
 
 def test_data_freshness_uses_not_checked_when_required_sources_are_missing(

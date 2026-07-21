@@ -442,6 +442,58 @@ def _unknown_audit_note(audit_results: list[dict[str, object]]) -> str:
     return f"{note} Operation is unknown."
 
 
+def get_stale_current_odds_backup_checksum_status(
+    backup_path: Path | str,
+    *,
+    archive_audit_path: Path | None = None,
+    rollback_audit_path: Path | None = None,
+) -> dict[str, str]:
+    """Return read-only checksum evidence for one selected stale-odds backup."""
+    path = Path(backup_path).expanduser()
+    archive_result = _load_audit_links(
+        archive_audit_path or DEFAULT_ARCHIVE_AUDIT_PATH,
+        operation="archive_apply",
+        backup_column="backup_path",
+    )
+    rollback_result = _load_audit_links(
+        rollback_audit_path or DEFAULT_ROLLBACK_AUDIT_PATH,
+        operation="rollback_apply",
+        backup_column="pre_rollback_backup_path",
+    )
+    audit_results = [archive_result, rollback_result]
+    canonical_path = _canonical_path(path)
+    match = archive_result["matches"].get(canonical_path)
+    if match is None:
+        match = rollback_result["matches"].get(canonical_path)
+
+    details = {
+        "created_by_operation": "unknown",
+        "audit_file_path": "",
+        "audit_note": _unknown_audit_note(audit_results),
+        "recorded_checksum_sha256": "",
+        "current_checksum_sha256": source_file_sha256(path),
+    }
+    if match is not None:
+        for key in details:
+            if key in match:
+                details[key] = str(match[key])
+
+    checksum_status, checksum_note = _checksum_verification(
+        details["recorded_checksum_sha256"],
+        details["current_checksum_sha256"],
+        details["created_by_operation"],
+    )
+    if match is None and details["audit_note"]:
+        checksum_note = f"{checksum_note} {details['audit_note']}"
+    details.update(
+        {
+            "checksum_status": checksum_status,
+            "checksum_note": checksum_note,
+        }
+    )
+    return details
+
+
 def _link_backup_audits(
     backup_list: pd.DataFrame,
     *,

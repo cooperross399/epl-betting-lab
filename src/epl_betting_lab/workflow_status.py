@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path
 
 import pandas as pd
@@ -39,7 +39,20 @@ class DataFreshnessCheck:
     minimum_sources: int = 0
     stale_status: str = "Stale"
     not_checked_until_sources: bool = False
+    fixture_date_column: str = ""
     priority: int = 100
+
+
+@dataclass(frozen=True)
+class FixtureDateFreshness:
+    status: str
+    note: str
+    recommendation: str = ""
+    earliest_date: str = ""
+    latest_date: str = ""
+    past_fixtures: int | None = None
+    today_or_future_fixtures: int | None = None
+    invalid_fixture_dates: int | None = None
 
 
 WORKFLOW_CHECKS = [
@@ -170,6 +183,7 @@ def build_data_freshness_checks(
             path=fixtures,
             command="Update data/manual/upcoming_fixtures.csv",
             recommendation="Update upcoming fixtures before running Thursday analysis.",
+            fixture_date_column="date",
             priority=10,
         ),
         DataFreshnessCheck(
@@ -292,8 +306,88 @@ def _stale_source(check: WorkflowCheck, newest_output: float | None) -> Path | N
     return None
 
 
+def inspect_fixture_date_freshness(
+    path: Path,
+    *,
+    today: date | None = None,
+    date_column: str = "date",
+) -> FixtureDateFreshness:
+    today = today or date.today()
+    try:
+        fixtures = pd.read_csv(path)
+    except (
+        OSError,
+        UnicodeError,
+        pd.errors.EmptyDataError,
+        pd.errors.ParserError,
+    ) as exc:
+        return FixtureDateFreshness(
+            status="Not checked",
+            note=f"Fixture dates could not be read: {exc}",
+            recommendation="Fix the fixture file before running Thursday analysis.",
+        )
+
+    if fixtures.empty:
+        return FixtureDateFreshness(
+            status="Not checked",
+            note="The fixture file has no rows to check.",
+            recommendation="Add upcoming fixtures before running Thursday analysis.",
+        )
+    if date_column not in fixtures.columns:
+        return FixtureDateFreshness(
+            status="Not checked",
+            note=f"The fixture file is missing the `{date_column}` column.",
+            recommendation="Add valid fixture dates before running Thursday analysis.",
+        )
+
+    parsed = pd.to_datetime(fixtures[date_column], errors="coerce")
+    invalid_count = int(parsed.isna().sum())
+    valid_dates = parsed.dropna().dt.date
+    if valid_dates.empty:
+        return FixtureDateFreshness(
+            status="Not checked",
+            note="No valid fixture dates could be read.",
+            recommendation="Fix fixture dates before running Thursday analysis.",
+            invalid_fixture_dates=invalid_count,
+        )
+
+    earliest = min(valid_dates)
+    latest = max(valid_dates)
+    past_count = sum(fixture_date < today for fixture_date in valid_dates)
+    today_or_future_count = sum(fixture_date >= today for fixture_date in valid_dates)
+
+    common = {
+        "earliest_date": earliest.isoformat(),
+        "latest_date": latest.isoformat(),
+        "past_fixtures": past_count,
+        "today_or_future_fixtures": today_or_future_count,
+        "invalid_fixture_dates": invalid_count,
+    }
+    if invalid_count:
+        return FixtureDateFreshness(
+            status="Not checked",
+            note=f"{invalid_count} fixture date(s) are blank or malformed.",
+            recommendation="Fix fixture dates before running Thursday analysis.",
+            **common,
+        )
+    if today_or_future_count == 0:
+        return FixtureDateFreshness(
+            status="Needs refresh",
+            note="Upcoming fixtures are all in the past. Refresh fixtures before Thursday analysis.",
+            recommendation="Upcoming fixtures are all in the past. Refresh fixtures before Thursday analysis.",
+            **common,
+        )
+    return FixtureDateFreshness(
+        status="Fresh",
+        note=f"{today_or_future_count} fixture(s) are today or in the future.",
+        **common,
+    )
+
+
 def build_data_freshness_status(
     checks: list[DataFreshnessCheck] | None = None,
+    *,
+    today: date | None = None,
 ) -> pd.DataFrame:
     rows: list[dict[str, object]] = []
     item_statuses: dict[str, str] = {}
@@ -307,6 +401,8 @@ def build_data_freshness_status(
             for item in check.dependencies
             if item_statuses.get(item) != "Fresh"
         ]
+        fixture_dates = FixtureDateFreshness(status="", note="")
+        recommendation = check.recommendation
 
         if dependency_issues:
             status = "Not checked"
@@ -333,6 +429,17 @@ def build_data_freshness_status(
                 else "File is available."
             )
 
+        if check.fixture_date_column and output_mtime is not None:
+            fixture_dates = inspect_fixture_date_freshness(
+                check.path,
+                today=today,
+                date_column=check.fixture_date_column,
+            )
+            if status == "Fresh":
+                status = fixture_dates.status
+                note = fixture_dates.note
+                recommendation = fixture_dates.recommendation or recommendation
+
         missing_sources = [str(path) for path in check.sources if not path.exists()]
         if status == "Not checked" and missing_sources:
             note = f"{note} Missing sources: {', '.join(missing_sources)}"
@@ -343,17 +450,29 @@ def build_data_freshness_status(
                 "status": status,
                 "last_modified": _format_mtime(output_mtime),
                 "source_last_modified": _format_mtime(newest_source),
+                "earliest_fixture_date": fixture_dates.earliest_date,
+                "latest_fixture_date": fixture_dates.latest_date,
+                "past_fixtures": fixture_dates.past_fixtures,
+                "today_or_future_fixtures": fixture_dates.today_or_future_fixtures,
+                "invalid_fixture_dates": fixture_dates.invalid_fixture_dates,
                 "file": str(check.path),
                 "source_files": ", ".join(str(path) for path in check.sources),
                 "command": "" if status == "Fresh" else check.command,
                 "note": note,
-                "recommendation": check.recommendation,
+                "recommendation": recommendation,
                 "priority": check.priority,
             }
         )
         item_statuses[check.item] = status
 
-    return pd.DataFrame(rows)
+    status = pd.DataFrame(rows)
+    for column in (
+        "past_fixtures",
+        "today_or_future_fixtures",
+        "invalid_fixture_dates",
+    ):
+        status[column] = pd.array(status[column], dtype="Int64")
+    return status
 
 
 def recommend_data_freshness_action(status: pd.DataFrame) -> str:

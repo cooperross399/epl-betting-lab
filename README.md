@@ -812,7 +812,10 @@ results, fixtures, current odds, Thursday reports and archives, comparison and
 decision reports, tier performance, and the ledger summary. The main view shows
 status counts and the most important next refresh step; open `Data freshness
 details` for file paths, source paths, local timestamps, notes, and commands.
-This check is read-only.
+The fixture check also reads the `date` column: at least one match today or in
+the future keeps fixtures fresh, while an all-past slate needs refresh. The
+details include the fixture date range and past/future counts. This check is
+read-only.
 
 Portal sections are bookmarkable with the `section` query parameter:
 

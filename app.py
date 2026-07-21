@@ -36,6 +36,7 @@ from epl_betting_lab.dashboard_actions import (
     run_odds_profile_install_preview,
     run_installed_odds_profile_verification,
     run_post_thursday_review,
+    run_stale_current_odds_archive_preview,
     run_stale_current_odds_report,
     run_settlement_preview,
     run_tier_performance_report,
@@ -985,6 +986,15 @@ def render_tools_and_diagnostics(min_edge: float, max_juice: int, recent_matches
         run_dashboard_action("Stale current odds report", run_stale_current_odds_report)
     if action_cols[3].button("Refresh dashboard data", width="stretch"):
         st.rerun()
+    if st.button(
+        "Preview stale odds archive",
+        help="Preview which rows would be archived and removed. This never applies changes.",
+        width="content",
+    ):
+        run_dashboard_action(
+            "Stale odds archive preview",
+            run_stale_current_odds_archive_preview,
+        )
 
     with st.expander("Weekly workflow checklist", expanded=True):
         render_workflow_checklist()
@@ -1007,6 +1017,21 @@ def render_tools_and_diagnostics(min_edge: float, max_juice: int, recent_matches
         "Stale current odds rows",
         "stale_current_odds_report.csv",
         "python scripts/report_stale_current_odds.py",
+    )
+    render_markdown_expander(
+        "Stale odds archive preview",
+        "stale_current_odds_archive_preview.md",
+        "python scripts/archive_stale_current_odds.py",
+    )
+    render_table_expander(
+        "Stale odds archive row plan",
+        "stale_current_odds_archive_preview.csv",
+        "python scripts/archive_stale_current_odds.py",
+    )
+    render_markdown_expander(
+        "Stale odds archive audit",
+        "stale_current_odds_archive_audit.md",
+        "python scripts/archive_stale_current_odds.py --apply",
     )
     with st.expander("Projection model views", expanded=False):
         render_model_workspace(min_edge, max_juice, recent_matches)

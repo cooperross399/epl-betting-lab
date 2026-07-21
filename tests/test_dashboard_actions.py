@@ -24,6 +24,7 @@ from epl_betting_lab.dashboard_actions import (
     run_installed_odds_profile_verification,
     run_post_thursday_review,
     run_settlement_preview,
+    run_stale_current_odds_archive_preview,
     run_stale_current_odds_report,
     run_tier_performance_report,
     run_thursday_best_bets_comparison,
@@ -576,6 +577,33 @@ def test_run_stale_current_odds_report_writes_report_without_editing_odds(tmp_pa
     assert paths["csv"].exists()
     assert paths["markdown"].exists()
     assert odds_path.read_text(encoding="utf-8") == original
+
+
+def test_run_stale_current_odds_archive_preview_never_edits_odds(tmp_path) -> None:
+    odds_path = tmp_path / "current_odds.csv"
+    output_dir = tmp_path / "outputs"
+    pd.DataFrame([
+        {
+            "date": "2000-01-01",
+            "home_team": "Arsenal",
+            "away_team": "Coventry",
+            "market": "1x2",
+            "selection": "home",
+            "american_odds": "-150",
+            "book": "FanDuel",
+        }
+    ]).to_csv(odds_path, index=False)
+    original = odds_path.read_bytes()
+
+    paths = run_stale_current_odds_archive_preview(odds_path, output_dir)
+
+    assert paths["status"] == "preview_ready"
+    assert paths["csv"].name == "stale_current_odds_archive_preview.csv"
+    assert paths["markdown"].name == "stale_current_odds_archive_preview.md"
+    assert odds_path.read_bytes() == original
+    assert not (odds_path.parent / "backups").exists()
+    assert not (odds_path.parent / "archive").exists()
+    assert not (output_dir / "stale_current_odds_archive_audit.csv").exists()
 
 
 def test_run_thursday_best_bets_comparison_writes_report(tmp_path) -> None:

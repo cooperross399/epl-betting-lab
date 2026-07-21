@@ -4,6 +4,7 @@ import pandas as pd
 import pytest
 
 import epl_betting_lab.reports.stale_current_odds_archive_rollback as rollback_module
+from epl_betting_lab.reports.current_odds_import_audit import source_file_sha256
 from epl_betting_lab.reports.stale_current_odds_archive_rollback import (
     AUDIT_COLUMNS,
     process_stale_current_odds_archive_rollback,
@@ -116,10 +117,46 @@ def test_apply_backs_up_current_restores_selected_backup_and_writes_audit(tmp_pa
     assert audit.iloc[-1]["rows_restored"] == "1"
     assert audit.iloc[-1]["rows_removed_or_replaced"] == "1"
     assert audit.iloc[-1]["rows_after"] == "2"
+    assert audit.iloc[-1]["backup_checksum_sha256"] == source_file_sha256(backup_path)
+    assert audit.iloc[-1]["recovery_backup_checksum_sha256"] == source_file_sha256(
+        paths["pre_rollback_backup"]
+    )
     assert "Latest Rollback" in paths["audit_markdown"].read_text(encoding="utf-8")
+    assert "Recovery backup SHA-256" in paths["audit_markdown"].read_text(encoding="utf-8")
     apply_markdown = paths["markdown"].read_text(encoding="utf-8")
     assert "Applied: yes" in apply_markdown
     assert "explicitly applied from Terminal" in apply_markdown
+
+
+def test_apply_upgrades_legacy_rollback_audit_with_blank_checksum_fields(tmp_path) -> None:
+    current_path = tmp_path / "current_odds.csv"
+    backup_path = tmp_path / "2026-07-21_current_odds_pre_stale_archive.csv"
+    output_dir = tmp_path / "outputs"
+    output_dir.mkdir()
+    _write_current_and_backup(current_path, backup_path)
+    checksum_columns = {"backup_checksum_sha256", "recovery_backup_checksum_sha256"}
+    legacy_columns = [column for column in AUDIT_COLUMNS if column not in checksum_columns]
+    legacy_row = {column: "" for column in legacy_columns}
+    legacy_row["rollback_id"] = "legacy-rollback"
+    pd.DataFrame([legacy_row], columns=legacy_columns).to_csv(
+        output_dir / "stale_current_odds_archive_rollback_audit.csv",
+        index=False,
+    )
+
+    paths = process_stale_current_odds_archive_rollback(
+        backup_path,
+        current_path,
+        output_dir,
+        apply=True,
+        timestamp="2026-07-21_140001",
+    )
+
+    audit = pd.read_csv(paths["audit_csv"], dtype=str, keep_default_na=False)
+    assert audit.columns.tolist() == AUDIT_COLUMNS
+    assert audit.iloc[0]["rollback_id"] == "legacy-rollback"
+    assert audit.iloc[0]["backup_checksum_sha256"] == ""
+    assert audit.iloc[0]["recovery_backup_checksum_sha256"] == ""
+    assert audit.iloc[-1]["backup_checksum_sha256"] == source_file_sha256(backup_path)
 
 
 def test_matching_backup_is_a_read_only_no_op_even_with_apply(tmp_path) -> None:

@@ -6,6 +6,7 @@ import pandas as pd
 import pytest
 
 import epl_betting_lab.reports.stale_current_odds_archive as archive_module
+from epl_betting_lab.reports.current_odds_import_audit import source_file_sha256
 from epl_betting_lab.reports.stale_current_odds_archive import (
     AUDIT_COLUMNS,
     PREVIEW_COLUMNS,
@@ -164,8 +165,43 @@ def test_apply_backs_up_archives_and_keeps_current_and_date_fix_rows(tmp_path) -
     assert audit.iloc[-1]["current_rows_kept"] == "2"
     assert audit.iloc[-1]["date_fix_rows_kept"] == "2"
     assert audit.iloc[-1]["rows_after"] == "4"
+    assert audit.iloc[-1]["backup_checksum_sha256"] == source_file_sha256(paths["backup"])
+    assert audit.iloc[-1]["archive_file_checksum_sha256"] == source_file_sha256(
+        paths["stale_archive"]
+    )
     assert "Preview only" in paths["markdown"].read_text(encoding="utf-8")
     assert "Latest Apply" in paths["audit_markdown"].read_text(encoding="utf-8")
+    assert "Backup SHA-256" in paths["audit_markdown"].read_text(encoding="utf-8")
+
+
+def test_apply_upgrades_legacy_audit_with_blank_old_checksum_fields(tmp_path) -> None:
+    odds_path = tmp_path / "current_odds.csv"
+    output_dir = tmp_path / "outputs"
+    output_dir.mkdir()
+    _write_mixed_odds(odds_path)
+    checksum_columns = {"backup_checksum_sha256", "archive_file_checksum_sha256"}
+    legacy_columns = [column for column in AUDIT_COLUMNS if column not in checksum_columns]
+    legacy_row = {column: "" for column in legacy_columns}
+    legacy_row["archive_id"] = "legacy-archive"
+    pd.DataFrame([legacy_row], columns=legacy_columns).to_csv(
+        output_dir / "stale_current_odds_archive_audit.csv",
+        index=False,
+    )
+
+    paths = archive_stale_current_odds(
+        odds_path,
+        output_dir,
+        apply=True,
+        today=TODAY,
+        timestamp="2026-07-21_110001",
+    )
+
+    audit = pd.read_csv(paths["audit_csv"], dtype=str, keep_default_na=False)
+    assert audit.columns.tolist() == AUDIT_COLUMNS
+    assert audit.iloc[0]["archive_id"] == "legacy-archive"
+    assert audit.iloc[0]["backup_checksum_sha256"] == ""
+    assert audit.iloc[0]["archive_file_checksum_sha256"] == ""
+    assert audit.iloc[-1]["backup_checksum_sha256"] == source_file_sha256(paths["backup"])
 
 
 def test_apply_with_no_stale_rows_is_a_read_only_no_op(tmp_path) -> None:

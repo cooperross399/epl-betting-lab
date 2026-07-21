@@ -37,6 +37,7 @@ from epl_betting_lab.dashboard_actions import (
 )
 from epl_betting_lab.reports.current_odds_validation import CurrentOddsValidationError
 from epl_betting_lab.reports.bet_ledger import LEDGER_COLUMNS
+from epl_betting_lab.reports.current_odds_import_audit import source_file_sha256
 
 
 def _ledger(path) -> None:
@@ -688,6 +689,7 @@ def test_stale_current_odds_backup_list_actions_are_read_only(tmp_path) -> None:
             "status": "applied",
             "backup_path": str(backup_path),
             "stale_rows_archived": "1",
+            "source_sha256_before": source_file_sha256(backup_path),
         }
     ]).to_csv(archive_audit_path, index=False)
     before = backup_path.read_bytes()
@@ -707,6 +709,7 @@ def test_stale_current_odds_backup_list_actions_are_read_only(tmp_path) -> None:
     assert summary["status"] == "ready"
     assert backup_list["backup_path"].tolist() == [str(backup_path)]
     assert backup_list.iloc[0]["created_by_operation"] == "archive_apply"
+    assert backup_list.iloc[0]["checksum_status"] == "Verified"
     assert paths["csv"].name == "stale_current_odds_backup_list.csv"
     assert paths["markdown"].name == "stale_current_odds_backup_list.md"
     assert backup_path.read_bytes() == before

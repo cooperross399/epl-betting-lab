@@ -860,7 +860,9 @@ Apply first backs up the full odds file under `data/manual/backups/`, then
 writes stale rows under `data/manual/archive/current_odds_stale/`, verifies the
 archive, and keeps today/future plus date-fix rows in `current_odds.csv`. It
 also writes `stale_current_odds_archive_audit.csv` and `.md` under
-`data/outputs/`. There is no dashboard apply button.
+`data/outputs/`. Future audit rows record `backup_checksum_sha256` and
+`archive_file_checksum_sha256` after those files are verified. There is no
+dashboard apply button.
 
 If you need to undo an applied stale-odds archive, first choose the matching
 pre-archive backup and preview the rollback:
@@ -889,8 +891,10 @@ Before restoring, apply creates another timestamped backup ending in
 `current_odds_pre_stale_archive_rollback.csv`. It then verifies the selected
 backup, restores it atomically, and writes
 `stale_current_odds_archive_rollback_audit.csv` and `.md` under
-`data/outputs/`. Missing, empty, malformed, non-CSV, or same-file backups are
-blocked. There is no dashboard rollback apply button.
+`data/outputs/`. Future rollback rows record the selected backup checksum and
+the newly created `recovery_backup_checksum_sha256`. Missing, empty,
+malformed, non-CSV, or same-file backups are blocked. There is no dashboard
+rollback apply button.
 
 To list available stale-odds backups without searching the backup folder
 manually, run:
@@ -922,12 +926,27 @@ operation status, archive path, archived/restored/replaced row counts, audit
 file paths, and a plain-English note. Missing, unreadable, or malformed audit
 history never hides a backup and never stops the list from running.
 
+The picker also calculates each backup's current SHA-256 checksum. It compares
+that value with the explicit checksum in newer audits, or the equivalent
+source checksum in older audits when available:
+
+- `Verified`: the backup still matches the recorded checksum byte for byte.
+- `Mismatch`: the file changed after creation. Do not trust it for rollback
+  unless you inspect it manually.
+- `Not available`: no usable recorded checksum exists, or the file could not
+  be checksummed. Older backups commonly have this status.
+
+The CSV and markdown include `recorded_checksum_sha256`,
+`current_checksum_sha256`, `checksum_status`, and `checksum_note`. Running the
+picker only reads backup and audit files; it never modifies them.
+
 In `Tools / Diagnostics`, open `Available stale odds backups`. Readable backups
 can be selected directly and their full path is shown for copying. The selected
 path feeds only `Preview stale odds rollback`; it never applies a rollback or
 edits an odds file. A manual path remains available when a valid backup lives
 outside the standard folder. The dashboard uses a compact provenance view and
-shows the selected backup's audit explanation below the path.
+shows checksum status beside each backup. A selected mismatch displays a clear
+warning beneath the path, but the dashboard still has no rollback apply action.
 
 Portal sections are bookmarkable with the `section` query parameter:
 

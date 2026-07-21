@@ -437,7 +437,9 @@ Apply first saves the current file as a new timestamped pre-rollback backup,
 then restores and verifies the selected backup. It records the operation in
 `data/outputs/stale_current_odds_archive_rollback_audit.csv` and `.md`. Empty,
 malformed, missing, non-CSV, or same-file backups are blocked. The dashboard
-does not offer rollback apply.
+does not offer rollback apply. New archive audit rows record checksums for the
+pre-archive backup and stale-row archive. New rollback audit rows record the
+selected backup checksum and the pre-rollback recovery backup checksum.
 
 List the available backups first so you do not need to find and paste paths:
 
@@ -459,12 +461,26 @@ archived/restored/replaced row counts. `unknown` means there is no matching
 creator row yet, or the audit history is missing, unreadable, or malformed. The
 backup remains visible so you can review it manually.
 
+The backup list also checks file integrity without editing anything. It hashes
+the backup and compares that value with the linked audit checksum. Older audit
+rows can use their equivalent source checksum when one was recorded:
+
+- `Verified` means the backup is still an exact byte-for-byte match.
+- `Mismatch` means the backup changed after it was created. Do not trust it for
+  rollback until you inspect it manually.
+- `Not available` means there is no usable recorded checksum. This is normal
+  for some older backups, but their integrity is not confirmed.
+
+The output shows the recorded checksum, current checksum, status, and a short
+explanation. Generating the list never changes a backup, audit, or odds file.
+
 In the dashboard, open `Tools / Diagnostics` and expand `Available stale odds
 backups`. Select a valid backup from the list, then click `Preview stale odds
 rollback`. The selected path is used only for preview. Unreadable or malformed
 files remain visible for review but are not offered in the selector, and there
 is still no dashboard rollback apply button. The compact table and selected
-backup note show audit provenance without changing any audit or odds file.
+backup note show audit provenance and checksum status without changing any
+audit or odds file. A mismatch produces a clear warning to inspect the file.
 
 The selected portal section is also stored in the browser URL. For example,
 `?section=odds-import` opens Odds Import and `?section=performance` opens

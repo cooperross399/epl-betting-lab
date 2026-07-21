@@ -4,6 +4,7 @@ from datetime import date
 
 import pandas as pd
 
+from epl_betting_lab.reports.current_odds_import_audit import source_file_sha256
 from epl_betting_lab.reports.stale_current_odds_backup_picker import (
     BACKUP_LIST_COLUMNS,
     build_stale_current_odds_backup_list,
@@ -75,6 +76,9 @@ def test_backup_list_finds_archive_and_rollback_backups_with_date_details(tmp_pa
     assert archive["readable"] == "Yes"
     assert archive["valid"] == "Yes"
     assert archive["created_by_operation"] == "unknown"
+    assert archive["current_checksum_sha256"] == source_file_sha256(archive_backup)
+    assert archive["recorded_checksum_sha256"] == ""
+    assert archive["checksum_status"] == "Not available"
     assert "No archive or rollback audit history" in archive["audit_note"]
 
     recovery = backup_list.loc[backup_list["backup_path"] == str(rollback_backup)].iloc[0]
@@ -190,6 +194,7 @@ def test_backup_list_links_archive_and_rollback_creator_audits(tmp_path) -> None
             "backup_path": str(archive_backup),
             "stale_archive_path": str(stale_rows_archive),
             "stale_rows_archived": "1",
+            "source_sha256_before": source_file_sha256(archive_backup),
         }
     ]).to_csv(archive_audit_path, index=False)
     archive_audit_path.with_suffix(".md").write_text("# Archive audit\n", encoding="utf-8")
@@ -202,6 +207,7 @@ def test_backup_list_links_archive_and_rollback_creator_audits(tmp_path) -> None
             "selected_backup_path": str(archive_backup),
             "rows_restored": "1",
             "rows_removed_or_replaced": "2",
+            "current_sha256_before": source_file_sha256(rollback_backup),
         }
     ]).to_csv(rollback_audit_path, index=False)
     rollback_audit_path.with_suffix(".md").write_text("# Rollback audit\n", encoding="utf-8")
@@ -221,6 +227,8 @@ def test_backup_list_links_archive_and_rollback_creator_audits(tmp_path) -> None
     assert archive["archive_file_path"] == str(stale_rows_archive)
     assert archive["rows_archived"] == "1"
     assert archive["operation_status"] == "applied"
+    assert archive["checksum_status"] == "Verified"
+    assert archive["recorded_checksum_sha256"] == source_file_sha256(archive_backup)
     assert "archive-123" in archive["audit_note"]
 
     recovery = backup_list.loc[backup_list["backup_path"] == str(rollback_backup)].iloc[0]
@@ -229,10 +237,15 @@ def test_backup_list_links_archive_and_rollback_creator_audits(tmp_path) -> None
     assert recovery["rows_restored"] == "1"
     assert recovery["rows_replaced"] == "2"
     assert recovery["archive_file_path"] == ""
+    assert recovery["checksum_status"] == "Verified"
+    assert recovery["recorded_checksum_sha256"] == source_file_sha256(rollback_backup)
     assert "rollback-456" in recovery["audit_note"]
     assert summary["audit_link_status"] == "linked"
     assert summary["matched_backups"] == 2
     assert summary["unmatched_backups"] == 0
+    assert summary["verified_checksums"] == 2
+    assert summary["mismatched_checksums"] == 0
+    assert summary["unavailable_checksums"] == 0
 
 
 def test_unreadable_and_malformed_audits_leave_backup_operation_unknown(tmp_path) -> None:
@@ -294,3 +307,76 @@ def test_unmatched_backup_and_malformed_audit_rows_are_explained(tmp_path) -> No
     assert summary["audit_link_status"] == "no_matches"
     assert summary["malformed_audit_rows"] == 1
     assert summary["matched_backups"] == 0
+
+
+def test_backup_checksum_mismatch_is_reported_without_changing_backup(tmp_path) -> None:
+    backups_dir = tmp_path / "backups"
+    audit_dir = tmp_path / "outputs"
+    report_dir = tmp_path / "reports"
+    backups_dir.mkdir()
+    audit_dir.mkdir()
+    backup_path = backups_dir / "2026-07-21_110000_current_odds_pre_stale_archive.csv"
+    archive_audit_path = audit_dir / "stale_current_odds_archive_audit.csv"
+    rollback_audit_path = audit_dir / "stale_current_odds_archive_rollback_audit.csv"
+    _write_odds(backup_path, ["2026-08-01"])
+    recorded_checksum = source_file_sha256(backup_path)
+    pd.DataFrame([
+        {
+            "archive_id": "archive-before-change",
+            "backup_path": str(backup_path),
+            "backup_checksum_sha256": recorded_checksum,
+            "status": "applied",
+        }
+    ]).to_csv(archive_audit_path, index=False)
+    _write_odds(backup_path, ["2026-08-01", "2026-08-02"])
+    changed_bytes = backup_path.read_bytes()
+
+    paths = save_stale_current_odds_backup_list(
+        backups_dir,
+        report_dir,
+        today=TODAY,
+        archive_audit_path=archive_audit_path,
+        rollback_audit_path=rollback_audit_path,
+    )
+
+    report = pd.read_csv(paths["csv"], dtype=str, keep_default_na=False)
+    backup = report.iloc[0]
+    assert backup["recorded_checksum_sha256"] == recorded_checksum
+    assert backup["current_checksum_sha256"] == source_file_sha256(backup_path)
+    assert backup["checksum_status"] == "Mismatch"
+    assert "Do not trust it for rollback" in backup["checksum_note"]
+    assert backup_path.read_bytes() == changed_bytes
+    markdown = paths["markdown"].read_text(encoding="utf-8")
+    assert "Checksum mismatches: 1" in markdown
+    assert "Do not trust it for rollback" in markdown
+
+
+def test_linked_older_audit_without_checksum_is_not_available(tmp_path) -> None:
+    backups_dir = tmp_path / "backups"
+    audit_dir = tmp_path / "outputs"
+    backups_dir.mkdir()
+    audit_dir.mkdir()
+    backup_path = backups_dir / "2026-07-21_110000_current_odds_pre_stale_archive.csv"
+    archive_audit_path = audit_dir / "stale_current_odds_archive_audit.csv"
+    rollback_audit_path = audit_dir / "stale_current_odds_archive_rollback_audit.csv"
+    _write_odds(backup_path, ["2026-08-01"])
+    pd.DataFrame([
+        {
+            "archive_id": "old-archive",
+            "backup_path": str(backup_path),
+            "status": "applied",
+        }
+    ]).to_csv(archive_audit_path, index=False)
+
+    backup_list, summary = build_stale_current_odds_backup_list(
+        backups_dir,
+        today=TODAY,
+        archive_audit_path=archive_audit_path,
+        rollback_audit_path=rollback_audit_path,
+    )
+
+    backup = backup_list.iloc[0]
+    assert backup["created_by_operation"] == "archive_apply"
+    assert backup["checksum_status"] == "Not available"
+    assert "Older audit rows may predate checksum recording" in backup["checksum_note"]
+    assert summary["unavailable_checksums"] == 1

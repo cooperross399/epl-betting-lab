@@ -389,6 +389,28 @@ date`. Open `Tools / Diagnostics` and use `Report stale current odds` for the
 same safe check from the dashboard. It only writes report files under
 `data/outputs/`; it never edits the odds file.
 
+Preview stale-row archiving before changing anything:
+
+```bash
+python scripts/archive_stale_current_odds.py
+```
+
+The preview lists rows that would be archived/removed and rows that would
+stay. Blank and invalid dates always stay for you to fix manually. You can run
+the same read-only preview from `Tools / Diagnostics` with `Preview stale odds
+archive`.
+
+Only after reviewing the preview, apply from Terminal:
+
+```bash
+python scripts/archive_stale_current_odds.py --apply
+```
+
+Apply creates a full backup under `data/manual/backups/`, archives stale rows
+under `data/manual/archive/current_odds_stale/`, verifies that archive, and
+then keeps current and date-fix rows in `current_odds.csv`. Audit files are
+written under `data/outputs/`. The dashboard has no apply button.
+
 The selected portal section is also stored in the browser URL. For example,
 `?section=odds-import` opens Odds Import and `?section=performance` opens
 Performance Reports after a refresh or from a bookmark. Sidebar changes and
@@ -661,6 +683,7 @@ Create current odds template
 Preview current odds import
 Preview current odds maintenance
 Report stale current odds
+Preview stale odds archive
 Check odds entry completeness
 Validate current odds
 Generate Thursday best-bets report

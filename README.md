@@ -789,6 +789,7 @@ Create current odds template
 Preview current odds import
 Preview current odds maintenance
 Report stale current odds
+Preview stale odds archive
 Check odds entry completeness
 Validate current odds
 Generate Thursday best-bets report
@@ -833,6 +834,31 @@ This creates `data/outputs/stale_current_odds_report.csv` and
 action. The report is read-only: it never removes, archives, or changes odds.
 The same check is available as `Report stale current odds` in `Tools /
 Diagnostics`.
+
+To safely preview removing those stale rows, run:
+
+```bash
+python scripts/archive_stale_current_odds.py
+```
+
+The default command only writes
+`data/outputs/stale_current_odds_archive_preview.csv` and
+`data/outputs/stale_current_odds_archive_preview.md`. It shows stale rows that
+would be archived/removed, current rows that would stay, and blank or invalid
+dates that stay for manual fixing. The dashboard offers the same read-only
+`Preview stale odds archive` action under `Tools / Diagnostics`.
+
+After reviewing the preview, Terminal-only apply is explicit:
+
+```bash
+python scripts/archive_stale_current_odds.py --apply
+```
+
+Apply first backs up the full odds file under `data/manual/backups/`, then
+writes stale rows under `data/manual/archive/current_odds_stale/`, verifies the
+archive, and keeps today/future plus date-fix rows in `current_odds.csv`. It
+also writes `stale_current_odds_archive_audit.csv` and `.md` under
+`data/outputs/`. There is no dashboard apply button.
 
 Portal sections are bookmarkable with the `section` query parameter:
 

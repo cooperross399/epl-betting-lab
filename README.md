@@ -791,6 +791,7 @@ Preview current odds maintenance
 Report stale current odds
 Preview stale odds archive
 Preview stale odds rollback
+Refresh backup list report
 Check odds entry completeness
 Validate current odds
 Generate Thursday best-bets report
@@ -890,6 +891,32 @@ backup, restores it atomically, and writes
 `stale_current_odds_archive_rollback_audit.csv` and `.md` under
 `data/outputs/`. Missing, empty, malformed, non-CSV, or same-file backups are
 blocked. There is no dashboard rollback apply button.
+
+To list available stale-odds backups without searching the backup folder
+manually, run:
+
+```bash
+python scripts/list_stale_current_odds_backups.py
+```
+
+This scans only these established backup types:
+
+```text
+data/manual/backups/*_current_odds_pre_stale_archive.csv
+data/manual/backups/*_current_odds_pre_stale_archive_rollback.csv
+```
+
+It writes `data/outputs/stale_current_odds_backup_list.csv` and `.md`. For
+each file, the report shows its path, parsed filename timestamp, modified time,
+row count, odds date range, stale/current/date-fix counts, and whether it is
+readable and valid for rollback preview. Unreadable files, malformed CSVs, and
+malformed filename timestamps stay visible with clear warnings.
+
+In `Tools / Diagnostics`, open `Available stale odds backups`. Readable backups
+can be selected directly and their full path is shown for copying. The selected
+path feeds only `Preview stale odds rollback`; it never applies a rollback or
+edits an odds file. A manual path remains available when a valid backup lives
+outside the standard folder.
 
 Portal sections are bookmarkable with the `section` query parameter:
 

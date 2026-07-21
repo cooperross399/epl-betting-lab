@@ -439,6 +439,25 @@ then restores and verifies the selected backup. It records the operation in
 malformed, missing, non-CSV, or same-file backups are blocked. The dashboard
 does not offer rollback apply.
 
+List the available backups first so you do not need to find and paste paths:
+
+```bash
+python scripts/list_stale_current_odds_backups.py
+```
+
+The command reads the pre-archive and pre-rollback recovery files under
+`data/manual/backups/`. It writes
+`data/outputs/stale_current_odds_backup_list.csv` and `.md`, showing each
+backup's timestamp, modified time, row count, date range, stale/current/date
+issue counts, and whether it is readable and valid. It does not change any
+backup or odds file.
+
+In the dashboard, open `Tools / Diagnostics` and expand `Available stale odds
+backups`. Select a valid backup from the list, then click `Preview stale odds
+rollback`. The selected path is used only for preview. Unreadable or malformed
+files remain visible for review but are not offered in the selector, and there
+is still no dashboard rollback apply button.
+
 The selected portal section is also stored in the browser URL. For example,
 `?section=odds-import` opens Odds Import and `?section=performance` opens
 Performance Reports after a refresh or from a bookmark. Sidebar changes and

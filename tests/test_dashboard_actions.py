@@ -7,6 +7,7 @@ import pytest
 
 import epl_betting_lab.dashboard_actions as dashboard_actions
 from epl_betting_lab.dashboard_actions import (
+    get_stale_current_odds_backup_list,
     require_existing_ledger,
     require_existing_current_odds,
     run_bet_ledger_report,
@@ -26,6 +27,7 @@ from epl_betting_lab.dashboard_actions import (
     run_settlement_preview,
     run_stale_current_odds_archive_preview,
     run_stale_current_odds_archive_rollback_preview,
+    run_stale_current_odds_backup_list,
     run_stale_current_odds_report,
     run_tier_performance_report,
     run_thursday_best_bets_comparison,
@@ -657,6 +659,35 @@ def test_run_stale_current_odds_archive_rollback_preview_never_edits_odds(tmp_pa
     assert odds_path.read_bytes() == odds_before
     assert backup_path.read_bytes() == backup_before
     assert not (tmp_path / "backups").exists()
+    assert not (output_dir / "stale_current_odds_archive_rollback_audit.csv").exists()
+
+
+def test_stale_current_odds_backup_list_actions_are_read_only(tmp_path) -> None:
+    backups_dir = tmp_path / "backups"
+    backups_dir.mkdir()
+    backup_path = backups_dir / "2026-07-21_110000_current_odds_pre_stale_archive.csv"
+    output_dir = tmp_path / "outputs"
+    pd.DataFrame([
+        {
+            "date": "2026-08-21",
+            "home_team": "Arsenal",
+            "away_team": "Coventry",
+            "market": "1x2",
+            "selection": "home",
+            "american_odds": "-150",
+            "book": "FanDuel",
+        }
+    ]).to_csv(backup_path, index=False)
+    before = backup_path.read_bytes()
+
+    backup_list, summary = get_stale_current_odds_backup_list(backups_dir)
+    paths = run_stale_current_odds_backup_list(backups_dir, output_dir)
+
+    assert summary["status"] == "ready"
+    assert backup_list["backup_path"].tolist() == [str(backup_path)]
+    assert paths["csv"].name == "stale_current_odds_backup_list.csv"
+    assert paths["markdown"].name == "stale_current_odds_backup_list.md"
+    assert backup_path.read_bytes() == before
     assert not (output_dir / "stale_current_odds_archive_rollback_audit.csv").exists()
 
 

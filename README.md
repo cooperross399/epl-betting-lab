@@ -788,6 +788,7 @@ Run settlement preview
 Create current odds template
 Preview current odds import
 Preview current odds maintenance
+Report stale current odds
 Check odds entry completeness
 Validate current odds
 Generate Thursday best-bets report
@@ -819,6 +820,19 @@ read-only. Current odds use the same local-date rule: all-past rows need a
 refresh, malformed dates cannot be checked, and a mix of past and future rows
 stays usable with a warning about the old rows. Odds date ranges and row counts
 appear in the details expander.
+
+To see exactly which odds rows belong to past matches, run:
+
+```bash
+python scripts/report_stale_current_odds.py
+```
+
+This creates `data/outputs/stale_current_odds_report.csv` and
+`data/outputs/stale_current_odds_report.md`. Each source row is marked
+`Stale`, `Current`, `Invalid date`, or `Blank date`, with a suggested manual
+action. The report is read-only: it never removes, archives, or changes odds.
+The same check is available as `Report stale current odds` in `Tools /
+Diagnostics`.
 
 Portal sections are bookmarkable with the `section` query parameter:
 

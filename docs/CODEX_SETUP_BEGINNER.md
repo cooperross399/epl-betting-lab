@@ -378,6 +378,17 @@ current odds stay `Fresh` and show a warning so valid prices are not blocked.
 The details table shows earliest/latest odds dates plus past, today/future, and
 invalid-date row counts. The check only reads `current_odds.csv`.
 
+To list the exact rows behind that freshness warning, run:
+
+```bash
+python scripts/report_stale_current_odds.py
+```
+
+The report marks each row as `Stale`, `Current`, `Invalid date`, or `Blank
+date`. Open `Tools / Diagnostics` and use `Report stale current odds` for the
+same safe check from the dashboard. It only writes report files under
+`data/outputs/`; it never edits the odds file.
+
 The selected portal section is also stored in the browser URL. For example,
 `?section=odds-import` opens Odds Import and `?section=performance` opens
 Performance Reports after a refresh or from a bookmark. Sidebar changes and
@@ -649,6 +660,7 @@ Run settlement preview
 Create current odds template
 Preview current odds import
 Preview current odds maintenance
+Report stale current odds
 Check odds entry completeness
 Validate current odds
 Generate Thursday best-bets report

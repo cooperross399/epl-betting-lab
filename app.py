@@ -36,6 +36,7 @@ from epl_betting_lab.dashboard_actions import (
     run_odds_profile_install_preview,
     run_installed_odds_profile_verification,
     run_post_thursday_review,
+    run_stale_current_odds_report,
     run_settlement_preview,
     run_tier_performance_report,
     run_thursday_best_bets_comparison,
@@ -972,7 +973,7 @@ def render_model_workspace(min_edge: float, max_juice: int, recent_matches: int)
 def render_tools_and_diagnostics(min_edge: float, max_juice: int, recent_matches: int) -> None:
     st.header("Tools / Diagnostics")
     st.caption("Advanced model views and file-level checks live here so the weekly workflow stays quiet.")
-    action_cols = st.columns(3)
+    action_cols = st.columns(4)
     if action_cols[0].button("Create current odds template", width="stretch"):
         run_dashboard_action("Current odds template", run_create_current_odds_template)
     if action_cols[1].button("Preview current odds maintenance", width="stretch"):
@@ -980,7 +981,9 @@ def render_tools_and_diagnostics(min_edge: float, max_juice: int, recent_matches
             "Current odds maintenance preview",
             run_current_odds_maintenance_preview,
         )
-    if action_cols[2].button("Refresh dashboard data", width="stretch"):
+    if action_cols[2].button("Report stale current odds", width="stretch"):
+        run_dashboard_action("Stale current odds report", run_stale_current_odds_report)
+    if action_cols[3].button("Refresh dashboard data", width="stretch"):
         st.rerun()
 
     with st.expander("Weekly workflow checklist", expanded=True):
@@ -994,6 +997,16 @@ def render_tools_and_diagnostics(min_edge: float, max_juice: int, recent_matches
         "Current odds maintenance rows",
         "current_odds_maintenance_preview.csv",
         "python scripts/maintain_current_odds.py",
+    )
+    render_markdown_expander(
+        "Stale current odds report",
+        "stale_current_odds_report.md",
+        "python scripts/report_stale_current_odds.py",
+    )
+    render_table_expander(
+        "Stale current odds rows",
+        "stale_current_odds_report.csv",
+        "python scripts/report_stale_current_odds.py",
     )
     with st.expander("Projection model views", expanded=False):
         render_model_workspace(min_edge, max_juice, recent_matches)

@@ -815,7 +815,10 @@ details` for file paths, source paths, local timestamps, notes, and commands.
 The fixture check also reads the `date` column: at least one match today or in
 the future keeps fixtures fresh, while an all-past slate needs refresh. The
 details include the fixture date range and past/future counts. This check is
-read-only.
+read-only. Current odds use the same local-date rule: all-past rows need a
+refresh, malformed dates cannot be checked, and a mix of past and future rows
+stays usable with a warning about the old rows. Odds date ranges and row counts
+appear in the details expander.
 
 Portal sections are bookmarkable with the `section` query parameter:
 

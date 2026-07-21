@@ -372,6 +372,12 @@ today/future, and invalid-date counts. If every listed match is before today,
 fixtures show `Needs refresh`. Blank, malformed, or unreadable dates show `Not
 checked`. The freshness check never changes a file.
 
+The `Current odds` row also checks match dates. If every odds row is before
+today, it shows `Needs refresh`. If today/future rows exist alongside old rows,
+current odds stay `Fresh` and show a warning so valid prices are not blocked.
+The details table shows earliest/latest odds dates plus past, today/future, and
+invalid-date row counts. The check only reads `current_odds.csv`.
+
 The selected portal section is also stored in the browser URL. For example,
 `?section=odds-import` opens Odds Import and `?section=performance` opens
 Performance Reports after a refresh or from a bookmark. Sidebar changes and

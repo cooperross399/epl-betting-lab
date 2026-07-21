@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 import pandas as pd
 import streamlit as st
 
@@ -22,6 +24,7 @@ from epl_betting_lab.dashboard_portal import (
     resolve_open_next_section,
 )
 from epl_betting_lab.dashboard_actions import (
+    get_stale_current_odds_backup_list,
     run_bet_ledger_report,
     run_create_current_odds_template,
     run_current_odds_completeness,
@@ -38,6 +41,7 @@ from epl_betting_lab.dashboard_actions import (
     run_post_thursday_review,
     run_stale_current_odds_archive_preview,
     run_stale_current_odds_archive_rollback_preview,
+    run_stale_current_odds_backup_list,
     run_stale_current_odds_report,
     run_settlement_preview,
     run_tier_performance_report,
@@ -996,12 +1000,43 @@ def render_tools_and_diagnostics(min_edge: float, max_juice: int, recent_matches
             "Stale odds archive preview",
             run_stale_current_odds_archive_preview,
         )
-    rollback_backup_path = st.text_input(
-        "Pre-archive odds backup path",
+    selected_backup_path = ""
+    backup_list, backup_summary = get_stale_current_odds_backup_list()
+    with st.expander("Available stale odds backups", expanded=True):
+        st.caption(
+            "Choose a readable backup for rollback preview. Listing and selection never change a file."
+        )
+        if st.button("Refresh backup list report", width="content"):
+            run_dashboard_action("Stale odds backup list", run_stale_current_odds_backup_list)
+        if backup_list.empty:
+            st.info(str(backup_summary.get("message", "No stale current-odds backups were found.")))
+        else:
+            st.dataframe(backup_list, width="stretch", hide_index=True)
+            valid_backups = backup_list[backup_list["valid"].eq("Yes")]
+            if valid_backups.empty:
+                st.warning("Backups were found, but none are readable and valid for rollback preview.")
+            else:
+                backup_labels = {
+                    str(row["backup_path"]): (
+                        f"{row['filename_timestamp'] or row['file_modified_at'] or 'Unknown time'} | "
+                        f"{Path(str(row['backup_path'])).name} | {int(row['row_count'])} rows"
+                    )
+                    for _, row in valid_backups.iterrows()
+                }
+                selected_backup_path = st.selectbox(
+                    "Select backup for rollback preview",
+                    options=list(backup_labels),
+                    format_func=lambda path: backup_labels[path],
+                    key="stale_odds_rollback_backup_picker",
+                )
+                st.code(selected_backup_path, language="text")
+    manual_backup_path = st.text_input(
+        "Manual backup path (optional override)",
         placeholder="data/manual/backups/TIMESTAMP_current_odds_pre_stale_archive.csv",
-        help="Choose the CSV backup to compare with current_odds.csv. Preview never restores it.",
+        help="Use this only when the backup is not shown in the picker. Preview never restores it.",
         key="stale_odds_rollback_backup_path",
     )
+    rollback_backup_path = manual_backup_path.strip() or selected_backup_path
     if st.button(
         "Preview stale odds rollback",
         help="Compare a selected backup with current_odds.csv. This never applies rollback.",
@@ -1054,6 +1089,16 @@ def render_tools_and_diagnostics(min_edge: float, max_juice: int, recent_matches
         "Stale odds archive audit",
         "stale_current_odds_archive_audit.md",
         "python scripts/archive_stale_current_odds.py --apply",
+    )
+    render_markdown_expander(
+        "Stale odds backup list report",
+        "stale_current_odds_backup_list.md",
+        "python scripts/list_stale_current_odds_backups.py",
+    )
+    render_table_expander(
+        "Stale odds backup list table",
+        "stale_current_odds_backup_list.csv",
+        "python scripts/list_stale_current_odds_backups.py",
     )
     render_markdown_expander(
         "Stale odds rollback preview",

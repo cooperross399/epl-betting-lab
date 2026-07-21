@@ -5,11 +5,13 @@ from pathlib import Path
 
 import pandas as pd
 
-from epl_betting_lab.config import MANUAL_DIR, OUTPUTS_DIR
+from epl_betting_lab.config import MANUAL_DIR, OUTPUTS_DIR, PROJECT_ROOT
 from epl_betting_lab.reports.stale_current_odds import build_stale_current_odds_report
 
 
 DEFAULT_BACKUPS_DIR = MANUAL_DIR / "backups"
+DEFAULT_ARCHIVE_AUDIT_PATH = OUTPUTS_DIR / "stale_current_odds_archive_audit.csv"
+DEFAULT_ROLLBACK_AUDIT_PATH = OUTPUTS_DIR / "stale_current_odds_archive_rollback_audit.csv"
 BACKUP_SUFFIXES = {
     "_current_odds_pre_stale_archive_rollback.csv": "Pre-rollback recovery",
     "_current_odds_pre_stale_archive.csv": "Pre-archive",
@@ -18,6 +20,16 @@ BACKUP_PATTERNS = [f"*{suffix}" for suffix in BACKUP_SUFFIXES]
 BACKUP_LIST_COLUMNS = [
     "backup_path",
     "backup_type",
+    "created_by_operation",
+    "audit_timestamp",
+    "audit_file_path",
+    "audit_markdown_path",
+    "archive_file_path",
+    "rows_archived",
+    "rows_restored",
+    "rows_replaced",
+    "operation_status",
+    "audit_note",
     "filename_timestamp",
     "filename_status",
     "file_modified_at",
@@ -77,6 +89,16 @@ def _base_record(path: Path) -> dict[str, object]:
     return {
         "backup_path": str(path),
         "backup_type": backup_type,
+        "created_by_operation": "unknown",
+        "audit_timestamp": "",
+        "audit_file_path": "",
+        "audit_markdown_path": "",
+        "archive_file_path": "",
+        "rows_archived": "",
+        "rows_restored": "",
+        "rows_replaced": "",
+        "operation_status": "",
+        "audit_note": "Audit history has not been checked yet.",
         "filename_timestamp": filename_timestamp,
         "filename_status": filename_status,
         "file_modified_at": modified_at,
@@ -179,13 +201,261 @@ def _inspect_backup(path: Path, *, today: date) -> dict[str, object]:
     return record
 
 
+def _canonical_path(path_value: object) -> str:
+    text = str(path_value).strip()
+    if not text:
+        return ""
+    try:
+        path = Path(text).expanduser()
+        if not path.is_absolute():
+            path = PROJECT_ROOT / path
+        return str(path.resolve(strict=False))
+    except (OSError, RuntimeError, ValueError):
+        return ""
+
+
+def _read_audit_markdown(audit_path: Path) -> tuple[str, str]:
+    markdown_path = audit_path.with_suffix(".md")
+    if not markdown_path.exists():
+        return "", ""
+    try:
+        markdown_path.read_text(encoding="utf-8")
+    except (OSError, UnicodeError) as exc:
+        return "", f"Audit markdown `{markdown_path}` is unreadable: {exc}"
+    return str(markdown_path), ""
+
+
+def _audit_text(row: pd.Series, column: str) -> str:
+    if column not in row.index:
+        return ""
+    return str(row[column]).strip()
+
+
+def _audit_link(
+    row: pd.Series,
+    *,
+    operation: str,
+    audit_path: Path,
+    audit_markdown_path: str,
+) -> dict[str, object]:
+    if operation == "archive_apply":
+        operation_id = _audit_text(row, "archive_id") or "ID not recorded"
+        note = f"Archive apply `{operation_id}` created this pre-archive backup."
+        archive_file_path = _audit_text(row, "stale_archive_path")
+        rows_archived = _audit_text(row, "stale_rows_archived")
+        rows_restored = ""
+        rows_replaced = ""
+    else:
+        operation_id = _audit_text(row, "rollback_id") or "ID not recorded"
+        note = (
+            f"Rollback apply `{operation_id}` created this recovery backup before restoring "
+            "the selected older file."
+        )
+        archive_file_path = ""
+        rows_archived = ""
+        rows_restored = _audit_text(row, "rows_restored")
+        rows_replaced = _audit_text(row, "rows_removed_or_replaced")
+
+    audit_timestamp = _audit_text(row, "applied_at")
+    if not audit_timestamp:
+        note = f"{note} The audit timestamp was not recorded."
+    return {
+        "created_by_operation": operation,
+        "audit_timestamp": audit_timestamp,
+        "audit_file_path": str(audit_path),
+        "audit_markdown_path": audit_markdown_path,
+        "archive_file_path": archive_file_path,
+        "rows_archived": rows_archived,
+        "rows_restored": rows_restored,
+        "rows_replaced": rows_replaced,
+        "operation_status": _audit_text(row, "status"),
+        "audit_note": note,
+    }
+
+
+def _load_audit_links(
+    audit_path: Path,
+    *,
+    operation: str,
+    backup_column: str,
+) -> dict[str, object]:
+    markdown_path, markdown_warning = _read_audit_markdown(audit_path)
+    result: dict[str, object] = {
+        "status": "no_history",
+        "message": f"No {operation.replace('_', ' ')} audit history exists yet.",
+        "audit_path": str(audit_path),
+        "audit_markdown_path": markdown_path,
+        "matches": {},
+        "malformed_rows": 0,
+        "warnings": [markdown_warning] if markdown_warning else [],
+    }
+    if not audit_path.exists():
+        if markdown_path:
+            result["message"] = (
+                f"Audit markdown exists at `{markdown_path}`, but `{audit_path}` is missing. "
+                "CSV rows are required for backup matching."
+            )
+        return result
+    try:
+        audit = pd.read_csv(audit_path, dtype=str, keep_default_na=False)
+    except pd.errors.EmptyDataError:
+        result["message"] = f"Audit file `{audit_path}` is empty; no history can be matched yet."
+        return result
+    except pd.errors.ParserError as exc:
+        result.update(
+            {
+                "status": "malformed",
+                "message": f"Audit file `{audit_path}` is malformed CSV: {exc}",
+            }
+        )
+        return result
+    except (OSError, UnicodeError) as exc:
+        result.update(
+            {
+                "status": "unreadable",
+                "message": f"Audit file `{audit_path}` is unreadable: {exc}",
+            }
+        )
+        return result
+
+    if audit.empty:
+        result["message"] = f"Audit file `{audit_path}` has headers but no history rows."
+        return result
+    if backup_column not in audit.columns:
+        result.update(
+            {
+                "status": "malformed",
+                "message": (
+                    f"Audit file `{audit_path}` is missing the required `{backup_column}` column."
+                ),
+            }
+        )
+        return result
+
+    matches: dict[str, dict[str, object]] = {}
+    malformed_rows = 0
+    for _, row in audit.iterrows():
+        canonical_path = _canonical_path(_audit_text(row, backup_column))
+        if not canonical_path:
+            malformed_rows += 1
+            continue
+        matches[canonical_path] = _audit_link(
+            row,
+            operation=operation,
+            audit_path=audit_path,
+            audit_markdown_path=markdown_path,
+        )
+
+    status = "ready" if matches else "malformed"
+    message = f"Loaded {len(matches)} usable {operation.replace('_', ' ')} audit path(s)."
+    if malformed_rows:
+        message = f"{message} Skipped {malformed_rows} malformed row(s) with blank or invalid paths."
+    result.update(
+        {
+            "status": status,
+            "message": message,
+            "matches": matches,
+            "malformed_rows": malformed_rows,
+        }
+    )
+    return result
+
+
+def _unknown_audit_note(audit_results: list[dict[str, object]]) -> str:
+    statuses = {str(result["status"]) for result in audit_results}
+    malformed_rows = sum(int(result.get("malformed_rows", 0)) for result in audit_results)
+    if statuses == {"no_history"}:
+        return "No archive or rollback audit history is available yet. Operation is unknown."
+    problems = [
+        str(result["message"])
+        for result in audit_results
+        if result["status"] in {"unreadable", "malformed"}
+    ]
+    if problems:
+        return "Audit linkage could not be confirmed. " + " ".join(problems)
+    note = "This backup path was not found in the available archive or rollback audit rows."
+    if malformed_rows:
+        note = f"{note} {malformed_rows} malformed audit row(s) were skipped."
+    return f"{note} Operation is unknown."
+
+
+def _link_backup_audits(
+    backup_list: pd.DataFrame,
+    *,
+    archive_audit_path: Path,
+    rollback_audit_path: Path,
+) -> tuple[pd.DataFrame, dict[str, object]]:
+    archive_result = _load_audit_links(
+        archive_audit_path,
+        operation="archive_apply",
+        backup_column="backup_path",
+    )
+    rollback_result = _load_audit_links(
+        rollback_audit_path,
+        operation="rollback_apply",
+        backup_column="pre_rollback_backup_path",
+    )
+    audit_results = [archive_result, rollback_result]
+    unknown_note = _unknown_audit_note(audit_results)
+    linked = backup_list.copy()
+    matched = 0
+    for index, row in linked.iterrows():
+        canonical_path = _canonical_path(row["backup_path"])
+        match = archive_result["matches"].get(canonical_path)
+        if match is None:
+            match = rollback_result["matches"].get(canonical_path)
+        if match is None:
+            linked.at[index, "audit_note"] = unknown_note
+            continue
+        matched += 1
+        for column, value in match.items():
+            linked.at[index, column] = value
+
+    malformed_rows = sum(int(result.get("malformed_rows", 0)) for result in audit_results)
+    warning_messages = [
+        str(warning)
+        for result in audit_results
+        for warning in result.get("warnings", [])
+        if warning
+    ]
+    warning_count = malformed_rows + len(warning_messages)
+    problem_statuses = {"unreadable", "malformed"}
+    if matched == len(linked):
+        link_status = "linked"
+    elif matched:
+        link_status = "partial"
+    elif all(result["status"] == "no_history" for result in audit_results):
+        link_status = "no_history"
+    elif any(result["status"] in problem_statuses for result in audit_results):
+        link_status = "needs_review"
+    else:
+        link_status = "no_matches"
+    summary = {
+        "audit_link_status": link_status,
+        "archive_audit_status": archive_result["status"],
+        "rollback_audit_status": rollback_result["status"],
+        "matched_backups": matched,
+        "unmatched_backups": len(linked) - matched,
+        "malformed_audit_rows": malformed_rows,
+        "audit_warning_count": warning_count,
+        "audit_warning_messages": " ".join(warning_messages),
+        "archive_audit_message": archive_result["message"],
+        "rollback_audit_message": rollback_result["message"],
+    }
+    return linked.reindex(columns=BACKUP_LIST_COLUMNS).fillna(""), summary
+
+
 def build_stale_current_odds_backup_list(
     backups_dir: Path | None = None,
     *,
     today: date | None = None,
+    archive_audit_path: Path | None = None,
+    rollback_audit_path: Path | None = None,
 ) -> tuple[pd.DataFrame, dict[str, object]]:
     """List known stale-odds backups without changing any source file."""
     backups_dir = backups_dir or DEFAULT_BACKUPS_DIR
+    archive_audit_path = archive_audit_path or DEFAULT_ARCHIVE_AUDIT_PATH
+    rollback_audit_path = rollback_audit_path or DEFAULT_ROLLBACK_AUDIT_PATH
     local_today = today or date.today()
     paths: set[Path] = set()
     if backups_dir.exists() and backups_dir.is_dir():
@@ -205,6 +475,16 @@ def build_stale_current_odds_backup_list(
             "valid_backups": 0,
             "invalid_backups": 0,
             "malformed_filename_count": 0,
+            "audit_link_status": "not_checked",
+            "archive_audit_status": "not_checked",
+            "rollback_audit_status": "not_checked",
+            "matched_backups": 0,
+            "unmatched_backups": 0,
+            "malformed_audit_rows": 0,
+            "audit_warning_count": 0,
+            "audit_warning_messages": "",
+            "archive_audit_message": "No backups were available to match.",
+            "rollback_audit_message": "No backups were available to match.",
         }
         return _empty_backup_list(), summary
 
@@ -223,13 +503,19 @@ def build_stale_current_odds_backup_list(
         .drop(columns="_sort_time")
         .reset_index(drop=True)
     )
+    backup_list, audit_summary = _link_backup_audits(
+        backup_list,
+        archive_audit_path=archive_audit_path,
+        rollback_audit_path=rollback_audit_path,
+    )
     valid_count = int(backup_list["valid"].eq("Yes").sum())
     invalid_count = len(backup_list) - valid_count
     malformed_filenames = int(backup_list["filename_status"].ne("Parsed").sum())
     summary = {
         "status": "ready" if valid_count else "needs_review",
         "message": (
-            f"Found {len(backup_list)} backup file(s); {valid_count} can be selected for rollback preview."
+            f"Found {len(backup_list)} backup file(s); {valid_count} can be selected for rollback preview, "
+            f"and {audit_summary['matched_backups']} matched a creator audit entry."
         ),
         "backups_dir": str(backups_dir),
         "checked_date": local_today.isoformat(),
@@ -237,6 +523,7 @@ def build_stale_current_odds_backup_list(
         "valid_backups": valid_count,
         "invalid_backups": invalid_count,
         "malformed_filename_count": malformed_filenames,
+        **audit_summary,
     }
     return backup_list, summary
 
@@ -263,6 +550,18 @@ def render_stale_current_odds_backup_list(
         f"- Malformed filename timestamps: {int(summary.get('malformed_filename_count', 0))}",
         f"- Message: {summary.get('message', '')}",
         "",
+        "## Audit Linkage",
+        "",
+        f"- Link status: {summary.get('audit_link_status', 'not_checked')}",
+        f"- Backups matched to creator operations: {int(summary.get('matched_backups', 0))}",
+        f"- Backups with unknown operations: {int(summary.get('unmatched_backups', 0))}",
+        f"- Malformed audit rows skipped: {int(summary.get('malformed_audit_rows', 0))}",
+        f"- Audit warnings: {summary.get('audit_warning_messages', '') or 'none'}",
+        f"- Archive audit: {summary.get('archive_audit_status', 'not_checked')}",
+        f"- Archive audit note: {summary.get('archive_audit_message', '')}",
+        f"- Rollback audit: {summary.get('rollback_audit_status', 'not_checked')}",
+        f"- Rollback audit note: {summary.get('rollback_audit_message', '')}",
+        "",
         "## Backup Details",
         "",
     ]
@@ -285,6 +584,7 @@ def render_stale_current_odds_backup_list(
             "",
             "Choose a row marked `valid = Yes`, then preview it with "
             "`python scripts/rollback_stale_current_odds_archive.py --backup-path PATH`. "
+            "Prefer a backup with a linked `archive_apply` or `rollback_apply` creator when possible. "
             "The dashboard provides the same selection and preview without an apply button.",
         ]
     )
@@ -296,10 +596,17 @@ def save_stale_current_odds_backup_list(
     output_dir: Path | None = None,
     *,
     today: date | None = None,
+    archive_audit_path: Path | None = None,
+    rollback_audit_path: Path | None = None,
 ) -> dict[str, Path | str]:
     output_dir = output_dir or OUTPUTS_DIR
     output_dir.mkdir(parents=True, exist_ok=True)
-    backup_list, summary = build_stale_current_odds_backup_list(backups_dir, today=today)
+    backup_list, summary = build_stale_current_odds_backup_list(
+        backups_dir,
+        today=today,
+        archive_audit_path=archive_audit_path,
+        rollback_audit_path=rollback_audit_path,
+    )
     csv_path = output_dir / "stale_current_odds_backup_list.csv"
     markdown_path = output_dir / "stale_current_odds_backup_list.md"
     backup_list.to_csv(csv_path, index=False)

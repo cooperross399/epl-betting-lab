@@ -912,11 +912,22 @@ row count, odds date range, stale/current/date-fix counts, and whether it is
 readable and valid for rollback preview. Unreadable files, malformed CSVs, and
 malformed filename timestamps stay visible with clear warnings.
 
+When audit history exists, the same report links each backup to the operation
+that created it. Archive backups match the `backup_path` recorded in
+`stale_current_odds_archive_audit.csv`; rollback recovery backups match the
+`pre_rollback_backup_path` in
+`stale_current_odds_archive_rollback_audit.csv`. The list then shows
+`archive_apply`, `rollback_apply`, or `unknown`, plus the audit timestamp,
+operation status, archive path, archived/restored/replaced row counts, audit
+file paths, and a plain-English note. Missing, unreadable, or malformed audit
+history never hides a backup and never stops the list from running.
+
 In `Tools / Diagnostics`, open `Available stale odds backups`. Readable backups
 can be selected directly and their full path is shown for copying. The selected
 path feeds only `Preview stale odds rollback`; it never applies a rollback or
 edits an odds file. A manual path remains available when a valid backup lives
-outside the standard folder.
+outside the standard folder. The dashboard uses a compact provenance view and
+shows the selected backup's audit explanation below the path.
 
 Portal sections are bookmarkable with the `section` query parameter:
 

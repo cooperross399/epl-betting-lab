@@ -244,17 +244,27 @@ def run_stale_current_odds_archive_rollback_preview(
 
 def get_stale_current_odds_backup_list(
     backups_dir: Path | None = None,
+    archive_audit_path: Path | None = None,
+    rollback_audit_path: Path | None = None,
 ) -> tuple[pd.DataFrame, dict[str, object]]:
-    return build_stale_current_odds_backup_list(backups_dir or MANUAL_DIR / "backups")
+    return build_stale_current_odds_backup_list(
+        backups_dir or MANUAL_DIR / "backups",
+        archive_audit_path=archive_audit_path,
+        rollback_audit_path=rollback_audit_path,
+    )
 
 
 def run_stale_current_odds_backup_list(
     backups_dir: Path | None = None,
     output_dir: Path | None = None,
+    archive_audit_path: Path | None = None,
+    rollback_audit_path: Path | None = None,
 ) -> dict[str, Path | str]:
     return save_stale_current_odds_backup_list(
         backups_dir or MANUAL_DIR / "backups",
         output_dir or OUTPUTS_DIR,
+        archive_audit_path=archive_audit_path,
+        rollback_audit_path=rollback_audit_path,
     )
 
 

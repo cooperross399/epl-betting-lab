@@ -667,6 +667,9 @@ def test_stale_current_odds_backup_list_actions_are_read_only(tmp_path) -> None:
     backups_dir.mkdir()
     backup_path = backups_dir / "2026-07-21_110000_current_odds_pre_stale_archive.csv"
     output_dir = tmp_path / "outputs"
+    output_dir.mkdir()
+    archive_audit_path = output_dir / "stale_current_odds_archive_audit.csv"
+    rollback_audit_path = output_dir / "stale_current_odds_archive_rollback_audit.csv"
     pd.DataFrame([
         {
             "date": "2026-08-21",
@@ -678,13 +681,32 @@ def test_stale_current_odds_backup_list_actions_are_read_only(tmp_path) -> None:
             "book": "FanDuel",
         }
     ]).to_csv(backup_path, index=False)
+    pd.DataFrame([
+        {
+            "archive_id": "dashboard-archive",
+            "applied_at": "2026-07-21T11:00:00-04:00",
+            "status": "applied",
+            "backup_path": str(backup_path),
+            "stale_rows_archived": "1",
+        }
+    ]).to_csv(archive_audit_path, index=False)
     before = backup_path.read_bytes()
 
-    backup_list, summary = get_stale_current_odds_backup_list(backups_dir)
-    paths = run_stale_current_odds_backup_list(backups_dir, output_dir)
+    backup_list, summary = get_stale_current_odds_backup_list(
+        backups_dir,
+        archive_audit_path,
+        rollback_audit_path,
+    )
+    paths = run_stale_current_odds_backup_list(
+        backups_dir,
+        output_dir,
+        archive_audit_path,
+        rollback_audit_path,
+    )
 
     assert summary["status"] == "ready"
     assert backup_list["backup_path"].tolist() == [str(backup_path)]
+    assert backup_list.iloc[0]["created_by_operation"] == "archive_apply"
     assert paths["csv"].name == "stale_current_odds_backup_list.csv"
     assert paths["markdown"].name == "stale_current_odds_backup_list.md"
     assert backup_path.read_bytes() == before

@@ -37,6 +37,7 @@ from epl_betting_lab.dashboard_actions import (
     run_installed_odds_profile_verification,
     run_post_thursday_review,
     run_stale_current_odds_archive_preview,
+    run_stale_current_odds_archive_rollback_preview,
     run_stale_current_odds_report,
     run_settlement_preview,
     run_tier_performance_report,
@@ -995,6 +996,27 @@ def render_tools_and_diagnostics(min_edge: float, max_juice: int, recent_matches
             "Stale odds archive preview",
             run_stale_current_odds_archive_preview,
         )
+    rollback_backup_path = st.text_input(
+        "Pre-archive odds backup path",
+        placeholder="data/manual/backups/TIMESTAMP_current_odds_pre_stale_archive.csv",
+        help="Choose the CSV backup to compare with current_odds.csv. Preview never restores it.",
+        key="stale_odds_rollback_backup_path",
+    )
+    if st.button(
+        "Preview stale odds rollback",
+        help="Compare a selected backup with current_odds.csv. This never applies rollback.",
+        width="content",
+    ):
+        if not rollback_backup_path.strip():
+            st.warning("Enter a pre-archive CSV backup path before previewing rollback.")
+        else:
+            run_dashboard_action(
+                "Stale odds rollback preview",
+                lambda: run_stale_current_odds_archive_rollback_preview(rollback_backup_path),
+            )
+    st.caption(
+        "Rollback apply remains Terminal-only and always creates another backup of current_odds.csv first."
+    )
 
     with st.expander("Weekly workflow checklist", expanded=True):
         render_workflow_checklist()
@@ -1032,6 +1054,21 @@ def render_tools_and_diagnostics(min_edge: float, max_juice: int, recent_matches
         "Stale odds archive audit",
         "stale_current_odds_archive_audit.md",
         "python scripts/archive_stale_current_odds.py --apply",
+    )
+    render_markdown_expander(
+        "Stale odds rollback preview",
+        "stale_current_odds_archive_rollback_preview.md",
+        "python scripts/rollback_stale_current_odds_archive.py --backup-path PATH",
+    )
+    render_table_expander(
+        "Stale odds rollback row changes",
+        "stale_current_odds_archive_rollback_preview.csv",
+        "python scripts/rollback_stale_current_odds_archive.py --backup-path PATH",
+    )
+    render_markdown_expander(
+        "Stale odds rollback audit",
+        "stale_current_odds_archive_rollback_audit.md",
+        "python scripts/rollback_stale_current_odds_archive.py --backup-path PATH --apply",
     )
     with st.expander("Projection model views", expanded=False):
         render_model_workspace(min_edge, max_juice, recent_matches)

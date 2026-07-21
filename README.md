@@ -790,6 +790,7 @@ Preview current odds import
 Preview current odds maintenance
 Report stale current odds
 Preview stale odds archive
+Preview stale odds rollback
 Check odds entry completeness
 Validate current odds
 Generate Thursday best-bets report
@@ -859,6 +860,36 @@ writes stale rows under `data/manual/archive/current_odds_stale/`, verifies the
 archive, and keeps today/future plus date-fix rows in `current_odds.csv`. It
 also writes `stale_current_odds_archive_audit.csv` and `.md` under
 `data/outputs/`. There is no dashboard apply button.
+
+If you need to undo an applied stale-odds archive, first choose the matching
+pre-archive backup and preview the rollback:
+
+```bash
+python scripts/rollback_stale_current_odds_archive.py \
+  --backup-path data/manual/backups/TIMESTAMP_current_odds_pre_stale_archive.csv
+```
+
+Preview writes `stale_current_odds_archive_rollback_preview.csv` and `.md`
+under `data/outputs/`. It shows the current and backup row counts, rows that
+would return, rows that would be replaced, and a clear replacement warning.
+It does not edit either CSV. The `Preview stale odds rollback` button under
+`Tools / Diagnostics` runs this same read-only check after you enter a backup
+path.
+
+Apply is Terminal-only and explicit:
+
+```bash
+python scripts/rollback_stale_current_odds_archive.py \
+  --backup-path data/manual/backups/TIMESTAMP_current_odds_pre_stale_archive.csv \
+  --apply
+```
+
+Before restoring, apply creates another timestamped backup ending in
+`current_odds_pre_stale_archive_rollback.csv`. It then verifies the selected
+backup, restores it atomically, and writes
+`stale_current_odds_archive_rollback_audit.csv` and `.md` under
+`data/outputs/`. Missing, empty, malformed, non-CSV, or same-file backups are
+blocked. There is no dashboard rollback apply button.
 
 Portal sections are bookmarkable with the `section` query parameter:
 

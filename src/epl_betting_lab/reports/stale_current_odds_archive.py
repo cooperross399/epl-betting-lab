@@ -147,10 +147,10 @@ def _error_confirmation_metadata(
     }
 
 
-def _load_confirmation_metadata(
-    output_dir: Path,
+def load_stale_current_odds_archive_confirmation_metadata(
+    metadata_path: Path,
 ) -> tuple[dict[str, object] | None, str, str]:
-    metadata_path = output_dir / CONFIRMATION_METADATA_FILENAME
+    """Load and validate an archive preview confirmation receipt."""
     if not metadata_path.exists():
         return (
             None,
@@ -695,7 +695,11 @@ def archive_stale_current_odds(
     preview, summary = build_stale_current_odds_archive_preview(odds_path, today=today)
     confirmation_metadata: dict[str, object] | None = None
     if apply:
-        stored_metadata, metadata_status, metadata_note = _load_confirmation_metadata(output_dir)
+        stored_metadata, metadata_status, metadata_note = (
+            load_stale_current_odds_archive_confirmation_metadata(
+                output_dir / CONFIRMATION_METADATA_FILENAME
+            )
+        )
         confirmation_fields = _confirmation_gate(
             stored_metadata,
             metadata_status=metadata_status,

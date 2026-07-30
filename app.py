@@ -24,6 +24,7 @@ from epl_betting_lab.dashboard_portal import (
     resolve_open_next_section,
 )
 from epl_betting_lab.dashboard_actions import (
+    get_stale_current_odds_archive_confirmation_status,
     get_stale_current_odds_backup_list,
     run_bet_ledger_report,
     run_create_current_odds_template,
@@ -40,6 +41,7 @@ from epl_betting_lab.dashboard_actions import (
     run_installed_odds_profile_verification,
     run_post_thursday_review,
     run_stale_current_odds_archive_preview,
+    run_stale_current_odds_archive_confirmation_status,
     run_stale_current_odds_archive_rollback_preview,
     run_stale_current_odds_backup_list,
     run_stale_current_odds_report,
@@ -991,22 +993,61 @@ def render_tools_and_diagnostics(min_edge: float, max_juice: int, recent_matches
         run_dashboard_action("Stale current odds report", run_stale_current_odds_report)
     if action_cols[3].button("Refresh dashboard data", width="stretch"):
         st.rerun()
-    if st.button(
+    archive_action_cols = st.columns(2)
+    if archive_action_cols[0].button(
         "Preview stale odds archive",
         help=(
             "Preview which rows would be archived and removed, and create a confirmation ID. "
             "This never applies changes."
         ),
-        width="content",
+        width="stretch",
     ):
         run_dashboard_action(
             "Stale odds archive preview",
             run_stale_current_odds_archive_preview,
         )
+    if archive_action_cols[1].button(
+        "Check stale odds archive confirmation",
+        help="Check whether the latest preview receipt still matches current_odds.csv.",
+        width="stretch",
+    ):
+        run_dashboard_action(
+            "Stale odds archive confirmation status",
+            run_stale_current_odds_archive_confirmation_status,
+        )
     st.caption(
         "Preview creates a reviewed confirmation ID and exact Terminal apply command. "
-        "Archive apply and its override remain Terminal-only."
+        "The confirmation check only reads that receipt and current odds. Apply and override remain Terminal-only."
     )
+    _, archive_confirmation = get_stale_current_odds_archive_confirmation_status()
+    with st.container(border=True):
+        def confirmation_count(field: str) -> object:
+            value = archive_confirmation.get(field, "")
+            return "n/a" if value in {"", None} else value
+
+        st.markdown("**Stale odds archive confirmation**")
+        confirmation_status = str(archive_confirmation.get("status", "Not checked"))
+        confirmation_reason = str(archive_confirmation.get("status_reason", ""))
+        if confirmation_status == "Ready":
+            st.success("Ready: the receipt still matches current_odds.csv.")
+        elif confirmation_status in {"Missing receipt", "Missing current_odds.csv"}:
+            st.info(confirmation_status)
+        elif confirmation_status == "Odds changed after preview":
+            st.warning(confirmation_status)
+        else:
+            st.error(confirmation_status)
+        st.caption(confirmation_reason)
+        st.caption(
+            "Preview/current rows: "
+            f"stale {confirmation_count('preview_stale_row_count')} / "
+            f"{confirmation_count('current_stale_row_count')} | "
+            f"keep {confirmation_count('preview_keep_row_count')} / "
+            f"{confirmation_count('current_keep_row_count')} | "
+            f"manual review {confirmation_count('preview_manual_review_row_count')} / "
+            f"{confirmation_count('current_manual_review_row_count')}"
+        )
+        if archive_confirmation.get("exact_apply_command"):
+            st.code(str(archive_confirmation["exact_apply_command"]), language="bash")
     selected_backup_path = ""
     backup_list, backup_summary = get_stale_current_odds_backup_list()
     with st.expander("Available stale odds backups", expanded=True):
@@ -1150,6 +1191,16 @@ def render_tools_and_diagnostics(min_edge: float, max_juice: int, recent_matches
         "Stale odds archive row plan",
         "stale_current_odds_archive_preview.csv",
         "python scripts/archive_stale_current_odds.py",
+    )
+    render_markdown_expander(
+        "Stale odds archive confirmation status",
+        "stale_current_odds_archive_confirmation_status.md",
+        "python scripts/check_stale_current_odds_archive_confirmation.py",
+    )
+    render_table_expander(
+        "Stale odds archive confirmation details",
+        "stale_current_odds_archive_confirmation_status.csv",
+        "python scripts/check_stale_current_odds_archive_confirmation.py",
     )
     render_markdown_expander(
         "Stale odds archive audit",

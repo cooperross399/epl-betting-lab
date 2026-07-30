@@ -52,7 +52,14 @@ from epl_betting_lab.reports.odds_profile_verification import (
     verify_installed_odds_profile,
 )
 from epl_betting_lab.reports.stale_current_odds import save_stale_current_odds_report
-from epl_betting_lab.reports.stale_current_odds_archive import archive_stale_current_odds
+from epl_betting_lab.reports.stale_current_odds_archive import (
+    CONFIRMATION_METADATA_FILENAME,
+    archive_stale_current_odds,
+)
+from epl_betting_lab.reports.stale_current_odds_archive_confirmation import (
+    build_stale_current_odds_archive_confirmation_status,
+    save_stale_current_odds_archive_confirmation_status,
+)
 from epl_betting_lab.reports.stale_current_odds_archive_rollback import (
     process_stale_current_odds_archive_rollback,
 )
@@ -226,6 +233,27 @@ def run_stale_current_odds_archive_preview(
         current_odds_path or MANUAL_DIR / "current_odds.csv",
         output_dir or OUTPUTS_DIR,
         apply=False,
+    )
+
+
+def get_stale_current_odds_archive_confirmation_status(
+    current_odds_path: Path | None = None,
+    output_dir: Path | None = None,
+) -> tuple[pd.DataFrame, dict[str, object]]:
+    outputs = output_dir or OUTPUTS_DIR
+    return build_stale_current_odds_archive_confirmation_status(
+        current_odds_path or MANUAL_DIR / "current_odds.csv",
+        outputs / CONFIRMATION_METADATA_FILENAME,
+    )
+
+
+def run_stale_current_odds_archive_confirmation_status(
+    current_odds_path: Path | None = None,
+    output_dir: Path | None = None,
+) -> dict[str, Path | str]:
+    return save_stale_current_odds_archive_confirmation_status(
+        current_odds_path or MANUAL_DIR / "current_odds.csv",
+        output_dir or OUTPUTS_DIR,
     )
 
 

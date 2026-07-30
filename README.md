@@ -790,6 +790,7 @@ Preview current odds import
 Preview current odds maintenance
 Report stale current odds
 Preview stale odds archive
+Check stale odds archive confirmation
 Preview stale odds rollback
 Refresh backup list report
 Check odds entry completeness
@@ -852,6 +853,25 @@ stay, and blank or invalid dates that stay for manual fixing. The receipt ties
 the confirmation ID to the odds file path, file checksum, and all three row
 counts. The dashboard offers the same read-only `Preview stale odds archive`
 action under `Tools / Diagnostics`.
+
+To check whether that receipt still matches the latest odds file, run:
+
+```bash
+python scripts/check_stale_current_odds_archive_confirmation.py
+```
+
+This creates
+`data/outputs/stale_current_odds_archive_confirmation_status.csv` and
+`data/outputs/stale_current_odds_archive_confirmation_status.md`. Status is
+`Ready` only when the receipt is valid and its path, SHA-256 checksum, stale
+row count, current row count, and manual-review row count all still match.
+Other statuses explain whether the receipt is missing or invalid, odds changed
+after preview, or `current_odds.csv` is missing or unreadable. A date change
+that changes stale-row classification also invalidates the old receipt.
+
+`Tools / Diagnostics` shows the same result in a compact read-only panel and
+offers `Check stale odds archive confirmation` to regenerate the two status
+files. It never applies the archive or edits an odds file.
 
 After reviewing the preview, copy its exact Terminal-only apply command:
 

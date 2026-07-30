@@ -817,7 +817,11 @@ A matching receipt shows `Ready` with its confirmation ID. Changed odds show
 `Odds changed after preview` and tell you to preview again. A missing receipt
 stays low priority when there are no stale rows, but becomes a warning when
 stale odds need attention. The status is read-only; archive apply remains a
-Terminal-only action documented under `Tools / Diagnostics`.
+Terminal-only action documented under `Tools / Diagnostics`. When stale rows
+exist and the receipt is missing, invalid, changed, or tied to an unreadable
+odds file, Home's `Open this next` button takes you to the stale-odds preview
+and confirmation panel in `Tools / Diagnostics`. Navigation only changes the
+visible portal section; it does not run either check or edit a file.
 
 Home also includes a compact `Data freshness` area. It checks historical
 results, fixtures, current odds, Thursday reports and archives, comparison and

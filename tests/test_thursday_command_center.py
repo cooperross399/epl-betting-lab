@@ -7,7 +7,12 @@ from pathlib import Path
 import pandas as pd
 
 from epl_betting_lab.reports.stale_current_odds_archive import archive_stale_current_odds
-from epl_betting_lab.thursday_command_center import build_thursday_command_center, build_thursday_detail_cue
+from epl_betting_lab.thursday_command_center import (
+    STALE_ODDS_ARCHIVE_REVIEW_CUE,
+    build_archive_confirmation_detail_cue,
+    build_thursday_command_center,
+    build_thursday_detail_cue,
+)
 
 
 def _write_completeness(output_dir: Path, completion: str = "100.0%", incomplete: int = 0) -> None:
@@ -152,6 +157,7 @@ def test_command_center_warns_when_archive_receipt_is_invalidated(tmp_path) -> N
     assert summary.archive_confirmation_message == (
         "Run stale odds archive preview again before applying."
     )
+    assert summary.detail_cue == STALE_ODDS_ARCHIVE_REVIEW_CUE
 
 
 def test_command_center_elevates_missing_receipt_only_when_stale_odds_exist(
@@ -164,6 +170,7 @@ def test_command_center_elevates_missing_receipt_only_when_stale_odds_exist(
 
     assert current.archive_confirmation_status == "Missing receipt"
     assert current.archive_confirmation_level == "info"
+    assert current.detail_cue != STALE_ODDS_ARCHIVE_REVIEW_CUE
 
     _write_current_odds(odds_path, match_date="2000-01-01")
     stale = build_thursday_command_center(tmp_path, odds_path)
@@ -171,24 +178,59 @@ def test_command_center_elevates_missing_receipt_only_when_stale_odds_exist(
     assert stale.archive_confirmation_status == "Missing receipt"
     assert stale.archive_confirmation_level == "warning"
     assert "1 stale odds row(s) need attention" in stale.archive_confirmation_message
+    assert stale.detail_cue == STALE_ODDS_ARCHIVE_REVIEW_CUE
 
 
 def test_command_center_surfaces_invalid_receipt_and_unreadable_odds(tmp_path) -> None:
     odds_path = tmp_path / "current_odds.csv"
     receipt_path = tmp_path / "stale_current_odds_archive_preview.json"
-    _write_current_odds(odds_path)
+    _write_current_odds(odds_path, match_date="2000-01-01")
     receipt_path.write_text("{not-json", encoding="utf-8")
 
     invalid = build_thursday_command_center(tmp_path, odds_path)
 
     assert invalid.archive_confirmation_status == "Invalid receipt"
     assert invalid.archive_confirmation_level == "warning"
+    assert invalid.detail_cue == STALE_ODDS_ARCHIVE_REVIEW_CUE
 
+    archive_stale_current_odds(odds_path, tmp_path)
     odds_path.write_bytes(b"\xff\xfe\x00\x00")
     unreadable = build_thursday_command_center(tmp_path, odds_path)
 
     assert unreadable.archive_confirmation_status == "Unreadable current_odds.csv"
     assert unreadable.archive_confirmation_level == "error"
+    assert unreadable.detail_cue == STALE_ODDS_ARCHIVE_REVIEW_CUE
+
+
+def test_archive_confirmation_detail_cue_uses_safe_fallbacks() -> None:
+    fallback = "Thursday readiness and report details below"
+
+    assert build_archive_confirmation_detail_cue(None, fallback) == fallback
+    assert build_archive_confirmation_detail_cue({"status": "Unexpected"}, fallback) == fallback
+    assert build_archive_confirmation_detail_cue(
+        {
+            "status": "Invalid receipt",
+            "current_stale_row_count": "not-a-count",
+            "preview_stale_row_count": "",
+        },
+        fallback,
+    ) == fallback
+    assert build_archive_confirmation_detail_cue(
+        {
+            "status": "Odds changed after preview",
+            "current_stale_row_count": 0,
+            "preview_stale_row_count": 2,
+        },
+        fallback,
+    ) == fallback
+    assert build_archive_confirmation_detail_cue(
+        {
+            "status": "Unreadable current_odds.csv",
+            "current_stale_row_count": "",
+            "preview_stale_row_count": 2,
+        },
+        fallback,
+    ) == STALE_ODDS_ARCHIVE_REVIEW_CUE
 
 
 def test_detail_cue_maps_recommended_actions_to_dashboard_sections() -> None:

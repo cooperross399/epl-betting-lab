@@ -344,6 +344,47 @@ archived card, then builds the decision queue. If you do not have at least two
 archived Thursday cards yet, it stops and explains that comparison is not
 available yet.
 
+### One safe Thursday Terminal command
+
+To run the whole report-only Thursday package in the correct order:
+
+```bash
+python scripts/run_scheduled_thursday_workflow.py
+```
+
+It runs:
+
+1. Home/data freshness check.
+2. Current odds validation.
+3. Odds completeness check.
+4. Thursday best-bets generation through the existing validation gate.
+5. A dated Thursday archive when generation succeeds.
+6. Latest-archive comparison when at least two archives exist.
+7. The Thursday decision queue when comparison succeeds.
+8. Tier performance from available ledger/archive data.
+
+Read the combined receipt here:
+
+```text
+data/outputs/scheduled_thursday_workflow_summary.md
+data/outputs/scheduled_thursday_workflow_summary.json
+```
+
+The status will be `Ready`, `Warnings only`, `Blocked`, `Partial`, or `Failed`.
+`Partial` commonly means there is only one archive, so comparison must wait for
+another refresh. `Blocked` means serious current-odds issues stopped the card.
+The script never forces generation and never edits protected manual files or
+applies an import, settlement, archive, rollback, or profile change.
+Open `Tools / Diagnostics` to read the latest scheduled workflow summary in a
+collapsed dashboard expander. This display is read-only; run the command from
+Terminal when you intentionally want to refresh the package.
+
+This command is ready to call from a future Thursday GitHub Actions schedule,
+but the schedule is intentionally not added yet. First choose a safe way to
+supply real current odds and fixtures to the runner. GitHub Actions must never
+guess sportsbook prices. A future job can run this command and upload
+`data/outputs/` for review.
+
 The dashboard badge means:
 
 - `Ready`: no serious issues or warnings.

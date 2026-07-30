@@ -379,11 +379,29 @@ Open `Tools / Diagnostics` to read the latest scheduled workflow summary in a
 collapsed dashboard expander. This display is read-only; run the command from
 Terminal when you intentionally want to refresh the package.
 
-This command is ready to call from a future Thursday GitHub Actions schedule,
-but the schedule is intentionally not added yet. First choose a safe way to
-supply real current odds and fixtures to the runner. GitHub Actions must never
-guess sportsbook prices. A future job can run this command and upload
-`data/outputs/` for review.
+### Run it manually from GitHub
+
+1. Open `cooperross399/epl-betting-lab` on GitHub.
+2. Click the **Actions** tab.
+3. Click **Manual Thursday Workflow** in the workflow list.
+4. Click **Run workflow**, leave the branch as `main`, and confirm.
+5. Open the run when it finishes and read the job summary.
+6. Scroll to **Artifacts** and download
+   `scheduled-thursday-reports-RUN_NUMBER-RUN_ATTEMPT`.
+
+The artifact contains whichever `data/outputs/` reports the safe runner could
+create and remains downloadable for 14 days. A `Blocked` run, commonly caused
+by missing current odds on the fresh GitHub runner, is shown as a warning and
+can finish successfully so its summary is still downloadable. A compile,
+test, runtime, unexpected-exit, or artifact-upload failure makes the Action
+fail.
+
+This workflow has only `workflow_dispatch`; it has no cron schedule. Automatic
+Thursday scheduling must wait until the runner has a secure, trustworthy way
+to receive real `current_odds.csv` and upcoming fixtures. You also need to
+choose the intended Thursday timezone and retain manual review of warnings.
+The workflow never guesses sportsbook prices, uses `--force`, edits protected
+manual files, applies changes, or places bets.
 
 The dashboard badge means:
 

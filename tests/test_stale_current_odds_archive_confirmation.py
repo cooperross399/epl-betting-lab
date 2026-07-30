@@ -136,6 +136,9 @@ def test_missing_receipt_has_beginner_friendly_status(tmp_path) -> None:
     assert summary["status"] == "Missing receipt"
     assert summary["confirm_id"] == ""
     assert summary["exact_apply_command"] == ""
+    assert summary["current_stale_row_count"] == 1
+    assert summary["current_keep_row_count"] == 1
+    assert summary["current_manual_review_row_count"] == 1
     assert "Run the stale odds archive preview" in summary["status_reason"]
 
 

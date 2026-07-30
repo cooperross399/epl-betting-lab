@@ -812,6 +812,13 @@ running a report or editing data. When
 the decision queue is current, the cue also shows how many plays are in the
 relevant review group. Missing, stale, or unreadable queues show a refresh note.
 
+The same Home card now shows the latest stale-odds archive confirmation status.
+A matching receipt shows `Ready` with its confirmation ID. Changed odds show
+`Odds changed after preview` and tell you to preview again. A missing receipt
+stays low priority when there are no stale rows, but becomes a warning when
+stale odds need attention. The status is read-only; archive apply remains a
+Terminal-only action documented under `Tools / Diagnostics`.
+
 Home also includes a compact `Data freshness` area. It checks historical
 results, fixtures, current odds, Thursday reports and archives, comparison and
 decision reports, tier performance, and the ledger summary. The main view shows
@@ -823,7 +830,8 @@ details include the fixture date range and past/future counts. This check is
 read-only. Current odds use the same local-date rule: all-past rows need a
 refresh, malformed dates cannot be checked, and a mix of past and future rows
 stays usable with a warning about the old rows. Odds date ranges and row counts
-appear in the details expander.
+appear in the details expander. The expander also repeats the stale-odds archive
+confirmation status and confirmation ID when available.
 
 To see exactly which odds rows belong to past matches, run:
 

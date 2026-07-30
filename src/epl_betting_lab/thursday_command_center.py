@@ -7,6 +7,12 @@ import pandas as pd
 
 from epl_betting_lab.config import MANUAL_DIR, OUTPUTS_DIR
 from epl_betting_lab.current_odds_status import build_current_odds_status
+from epl_betting_lab.reports.stale_current_odds_archive import (
+    CONFIRMATION_METADATA_FILENAME,
+)
+from epl_betting_lab.reports.stale_current_odds_archive_confirmation import (
+    build_stale_current_odds_archive_confirmation_status,
+)
 from epl_betting_lab.reports.thursday_archive_pair import (
     build_thursday_archive_count_change_risk,
     build_thursday_archive_pair,
@@ -31,6 +37,10 @@ class ThursdayCommandCenter:
     recommended_next_action: str
     detail_cue: str
     explanation: str
+    archive_confirmation_status: str
+    archive_confirmation_id: str
+    archive_confirmation_level: str
+    archive_confirmation_message: str
 
 
 def _format_percent(value: float | None) -> str:
@@ -43,6 +53,57 @@ def _format_count(value: int | None) -> str:
     if value is None:
         return "Missing"
     return str(int(value))
+
+
+def _archive_confirmation_home_signal(
+    summary: dict[str, object],
+) -> tuple[str, str]:
+    status = str(summary.get("status", "Not checked"))
+    stale_value = summary.get("current_stale_row_count", "")
+    try:
+        stale_rows = int(stale_value) if stale_value not in {"", None} else None
+    except (TypeError, ValueError):
+        stale_rows = None
+
+    if status == "Ready":
+        return (
+            "success",
+            (
+                "Archive apply receipt is ready. Use the Terminal apply command from "
+                "Tools / Diagnostics if you still want to archive stale rows."
+            ),
+        )
+    if status == "Odds changed after preview":
+        return "warning", "Run stale odds archive preview again before applying."
+    if status == "Missing receipt":
+        if stale_rows:
+            return (
+                "warning",
+                (
+                    f"{stale_rows} stale odds row(s) need attention. "
+                    "Run stale odds archive preview before applying."
+                ),
+            )
+        return (
+            "info",
+            "No archive receipt exists, but no stale odds rows currently need archiving.",
+        )
+    if status == "Invalid receipt":
+        return (
+            "warning",
+            "The receipt is invalid. Run stale odds archive preview again before applying.",
+        )
+    if status == "Missing current_odds.csv":
+        return (
+            "error",
+            "Current odds are missing. Create or import odds before reviewing an archive receipt.",
+        )
+    if status == "Unreadable current_odds.csv":
+        return (
+            "error",
+            "Current odds are unreadable. Fix the CSV before reviewing an archive receipt.",
+        )
+    return "info", "Archive confirmation status is not available yet."
 
 
 COUNTED_ACTION_GROUPS = (
@@ -144,6 +205,13 @@ def build_thursday_command_center(
     count_risk = build_thursday_archive_count_change_risk(output_dir)
     top_reason = build_top_card_movement_reason(output_dir)
     next_action = build_recommended_next_action(output_dir)
+    _, archive_confirmation = build_stale_current_odds_archive_confirmation_status(
+        current_odds,
+        output_dir / CONFIRMATION_METADATA_FILENAME,
+    )
+    archive_confirmation_level, archive_confirmation_message = (
+        _archive_confirmation_home_signal(archive_confirmation)
+    )
 
     if archive_pair["available"]:
         archive_label = str(archive_pair["label"])
@@ -164,4 +232,8 @@ def build_thursday_command_center(
         recommended_next_action=str(next_action["recommended_next_action"]),
         detail_cue=build_thursday_detail_cue(next_action.get("recommended_next_action"), output_dir),
         explanation=readiness.explanation,
+        archive_confirmation_status=str(archive_confirmation["status"]),
+        archive_confirmation_id=str(archive_confirmation.get("confirm_id", "")),
+        archive_confirmation_level=archive_confirmation_level,
+        archive_confirmation_message=archive_confirmation_message,
     )

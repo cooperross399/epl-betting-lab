@@ -92,7 +92,10 @@ from epl_betting_lab.strategies.btts import evaluate_btts
 from epl_betting_lab.strategies.ml_value import evaluate_1x2_value
 from epl_betting_lab.strategies.promoted_fades import flag_promoted_team_spots
 from epl_betting_lab.strategies.totals import evaluate_total_25
-from epl_betting_lab.thursday_command_center import build_thursday_command_center
+from epl_betting_lab.thursday_command_center import (
+    ThursdayCommandCenter,
+    build_thursday_command_center,
+)
 from epl_betting_lab.thursday_readiness import build_thursday_readiness
 from epl_betting_lab.workflow_status import (
     build_data_freshness_status,
@@ -284,7 +287,7 @@ def render_workflow_checklist() -> None:
     st.dataframe(status, width="stretch", hide_index=True)
 
 
-def render_data_freshness() -> None:
+def render_data_freshness(command_center: ThursdayCommandCenter) -> None:
     freshness = build_data_freshness_status()
     counts = freshness["status"].value_counts().to_dict()
 
@@ -338,6 +341,13 @@ def render_data_freshness() -> None:
             "note",
         ]
         st.dataframe(freshness[detail_columns], width="stretch", hide_index=True)
+        st.markdown("**Stale odds archive confirmation**")
+        st.caption(
+            f"{command_center.archive_confirmation_status}. "
+            f"{command_center.archive_confirmation_message}"
+        )
+        if command_center.archive_confirmation_id:
+            st.caption(f"Confirmation ID: `{command_center.archive_confirmation_id}`")
         st.caption("Timestamps use your computer's local time. No files are changed by this check.")
 
 
@@ -366,8 +376,7 @@ def render_open_next_cue(cue: object) -> None:
         st.rerun()
 
 
-def render_command_center_card() -> None:
-    command_center = build_thursday_command_center()
+def render_command_center_card(command_center: ThursdayCommandCenter) -> None:
     ledger = build_ledger_portal_summary()
     units = "Missing" if ledger.profit_units is None else f"{ledger.profit_units:+.3f}u"
     roi = "Missing" if ledger.roi is None else f"{ledger.roi:.1%}"
@@ -393,6 +402,23 @@ def render_command_center_card() -> None:
             command_center.thursday_status,
             f"Current odds: {command_center.current_odds_status}. {command_center.explanation}",
         )
+        archive_confirmation_text = (
+            f"Stale odds archive confirmation: {command_center.archive_confirmation_status}. "
+            f"{command_center.archive_confirmation_message}"
+        )
+        if command_center.archive_confirmation_level == "success":
+            st.success(archive_confirmation_text)
+        elif command_center.archive_confirmation_level == "warning":
+            st.warning(archive_confirmation_text)
+        elif command_center.archive_confirmation_level == "error":
+            st.error(archive_confirmation_text)
+        else:
+            st.caption(archive_confirmation_text)
+        if (
+            command_center.archive_confirmation_status == "Ready"
+            and command_center.archive_confirmation_id
+        ):
+            st.caption(f"Confirmation ID: `{command_center.archive_confirmation_id}`")
         st.info(f"Recommended next action: {command_center.recommended_next_action}")
         render_open_next_cue(command_center.detail_cue)
 
@@ -425,8 +451,9 @@ def render_main_actions() -> None:
 def render_home() -> None:
     st.header("Home / Command Center")
     st.caption("Start here each Thursday. Read the status, then follow the recommended manual step.")
-    render_command_center_card()
-    render_data_freshness()
+    command_center = build_thursday_command_center()
+    render_command_center_card(command_center)
+    render_data_freshness(command_center)
     render_main_actions()
     with st.expander("Weekly workflow file status", expanded=False):
         render_workflow_checklist()

@@ -363,6 +363,21 @@ change files. It
 also shows affected-play counts from `thursday_decision_queue.csv` when that
 file is current, or a short generate/refresh message when it is not usable.
 
+Home also shows the stale-odds archive confirmation receipt:
+
+- `Ready` shows the confirmation ID and points you to the Terminal command in
+  `Tools / Diagnostics`.
+- `Odds changed after preview` tells you to run the stale odds archive preview
+  again before applying.
+- `Missing receipt` stays informational when no stale rows exist, but becomes a
+  warning when stale odds need attention.
+- Invalid receipts and missing or unreadable current odds show a clear warning
+  or error.
+
+This Home line only reads existing files. It never runs preview, applies an
+archive, or edits odds. The same status is repeated inside `Data freshness
+details`.
+
 The Home page `Data freshness` area shows how many important files are `Fresh`,
 `Stale`, `Missing`, `Needs refresh`, or `Not checked`. Follow its plain-English
 recommendation first. Open `Data freshness details` only when you need the exact
@@ -807,8 +822,8 @@ streamlit run app.py
 
 Use the sidebar sections:
 
-- `Home / Command Center` for Thursday readiness, the next action, ledger
-  units/ROI, and pending bets.
+- `Home / Command Center` for Thursday readiness, stale-odds archive
+  confirmation, the next action, ledger units/ROI, and pending bets.
 - `Thursday Card` for odds completeness, validation, and best bets.
 - `Odds Import` for the safe profile and import preview sequence.
 - `Performance Reports` for tiers, backtests, CLV, and profit breakdowns.

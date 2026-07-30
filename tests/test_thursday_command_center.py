@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pandas as pd
 
+from epl_betting_lab.reports.stale_current_odds_archive import archive_stale_current_odds
 from epl_betting_lab.thursday_command_center import build_thursday_command_center, build_thursday_detail_cue
 
 
@@ -49,6 +50,25 @@ def _write_archive(output_dir: Path, generated_at: str) -> None:
     )
 
 
+def _write_current_odds(
+    path: Path,
+    *,
+    match_date: str = "2099-01-01",
+    american_odds: str = "-120",
+) -> None:
+    pd.DataFrame([
+        {
+            "date": match_date,
+            "home_team": "Arsenal",
+            "away_team": "Chelsea",
+            "market": "1x2",
+            "selection": "home",
+            "american_odds": american_odds,
+            "book": "ExampleBook",
+        }
+    ]).to_csv(path, index=False)
+
+
 def test_command_center_reports_missing_state(tmp_path) -> None:
     summary = build_thursday_command_center(tmp_path, tmp_path / "current_odds.csv")
 
@@ -62,9 +82,13 @@ def test_command_center_reports_missing_state(tmp_path) -> None:
     assert summary.top_card_movement_reason == "Not enough archive history"
     assert summary.recommended_next_action.startswith("Generate a Thursday archive first")
     assert summary.detail_cue == "Thursday readiness refresh and Thursday best-bets report"
+    assert summary.archive_confirmation_status == "Missing current_odds.csv"
+    assert summary.archive_confirmation_level == "error"
+    assert summary.archive_confirmation_id == ""
 
 
 def test_command_center_summarizes_ready_workflow(tmp_path) -> None:
+    _write_current_odds(tmp_path / "current_odds.csv")
     _write_completeness(tmp_path)
     _write_validation(tmp_path)
     (tmp_path / "thursday_best_bets.md").write_text("# Thursday\n", encoding="utf-8")
@@ -94,6 +118,77 @@ def test_command_center_summarizes_ready_workflow(tmp_path) -> None:
     assert summary.top_card_movement_reason == "Mostly tier/status changes"
     assert summary.recommended_next_action.startswith("Review candidate upgrades")
     assert summary.detail_cue == "Thursday decision queue: Candidate upgrade - Candidate upgrade: 2 plays"
+    assert summary.archive_confirmation_status == "Missing receipt"
+    assert summary.archive_confirmation_level == "info"
+    assert "no stale odds rows" in summary.archive_confirmation_message.lower()
+
+
+def test_command_center_shows_ready_archive_confirmation(tmp_path) -> None:
+    odds_path = tmp_path / "current_odds.csv"
+    _write_current_odds(odds_path, match_date="2000-01-01")
+    preview = archive_stale_current_odds(odds_path, tmp_path)
+
+    summary = build_thursday_command_center(tmp_path, odds_path)
+
+    assert summary.archive_confirmation_status == "Ready"
+    assert summary.archive_confirmation_level == "success"
+    assert summary.archive_confirmation_id == preview["confirm_id"]
+    assert summary.archive_confirmation_message == (
+        "Archive apply receipt is ready. Use the Terminal apply command from "
+        "Tools / Diagnostics if you still want to archive stale rows."
+    )
+
+
+def test_command_center_warns_when_archive_receipt_is_invalidated(tmp_path) -> None:
+    odds_path = tmp_path / "current_odds.csv"
+    _write_current_odds(odds_path, match_date="2000-01-01")
+    archive_stale_current_odds(odds_path, tmp_path)
+    _write_current_odds(odds_path, match_date="2000-01-01", american_odds="-115")
+
+    summary = build_thursday_command_center(tmp_path, odds_path)
+
+    assert summary.archive_confirmation_status == "Odds changed after preview"
+    assert summary.archive_confirmation_level == "warning"
+    assert summary.archive_confirmation_message == (
+        "Run stale odds archive preview again before applying."
+    )
+
+
+def test_command_center_elevates_missing_receipt_only_when_stale_odds_exist(
+    tmp_path,
+) -> None:
+    odds_path = tmp_path / "current_odds.csv"
+    _write_current_odds(odds_path, match_date="2099-01-01")
+
+    current = build_thursday_command_center(tmp_path, odds_path)
+
+    assert current.archive_confirmation_status == "Missing receipt"
+    assert current.archive_confirmation_level == "info"
+
+    _write_current_odds(odds_path, match_date="2000-01-01")
+    stale = build_thursday_command_center(tmp_path, odds_path)
+
+    assert stale.archive_confirmation_status == "Missing receipt"
+    assert stale.archive_confirmation_level == "warning"
+    assert "1 stale odds row(s) need attention" in stale.archive_confirmation_message
+
+
+def test_command_center_surfaces_invalid_receipt_and_unreadable_odds(tmp_path) -> None:
+    odds_path = tmp_path / "current_odds.csv"
+    receipt_path = tmp_path / "stale_current_odds_archive_preview.json"
+    _write_current_odds(odds_path)
+    receipt_path.write_text("{not-json", encoding="utf-8")
+
+    invalid = build_thursday_command_center(tmp_path, odds_path)
+
+    assert invalid.archive_confirmation_status == "Invalid receipt"
+    assert invalid.archive_confirmation_level == "warning"
+
+    odds_path.write_bytes(b"\xff\xfe\x00\x00")
+    unreadable = build_thursday_command_center(tmp_path, odds_path)
+
+    assert unreadable.archive_confirmation_status == "Unreadable current_odds.csv"
+    assert unreadable.archive_confirmation_level == "error"
 
 
 def test_detail_cue_maps_recommended_actions_to_dashboard_sections() -> None:

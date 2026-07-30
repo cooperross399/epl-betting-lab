@@ -102,21 +102,6 @@ def build_stale_current_odds_archive_confirmation_status(
         metadata=metadata,
     )
 
-    if receipt_status == "Missing preview":
-        return _set_status(
-            record,
-            "Missing receipt",
-            (
-                "No archive confirmation receipt exists yet. Run the stale odds archive preview "
-                "before trying to apply an archive."
-            ),
-        )
-    if metadata is None:
-        return _set_status(
-            record,
-            "Invalid receipt",
-            f"{receipt_note} Run the archive preview again and review the new receipt.",
-        )
     if not odds_path.exists() or not odds_path.is_file():
         return _set_status(
             record,
@@ -150,6 +135,21 @@ def build_stale_current_odds_archive_confirmation_status(
     record["current_keep_row_count"] = current_keep
     record["current_manual_review_row_count"] = current_manual
 
+    if receipt_status == "Missing preview":
+        return _set_status(
+            record,
+            "Missing receipt",
+            (
+                "No archive confirmation receipt exists yet. Run the stale odds archive preview "
+                "before trying to apply an archive."
+            ),
+        )
+    if metadata is None:
+        return _set_status(
+            record,
+            "Invalid receipt",
+            f"{receipt_note} Run the archive preview again and review the new receipt.",
+        )
     if checksum_before != checksum_after:
         return _set_status(
             record,

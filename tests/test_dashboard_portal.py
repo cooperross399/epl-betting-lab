@@ -100,6 +100,9 @@ def test_open_next_cues_map_to_portal_sections() -> None:
     assert resolve_open_next_section("Tier performance report") == "Performance Reports"
     assert resolve_open_next_section("Bet ledger health check") == "Bet Ledger"
     assert resolve_open_next_section("Model projections and diagnostics") == "Tools / Diagnostics"
+    assert resolve_open_next_section(
+        "Tools / Diagnostics: stale odds archive preview and confirmation status"
+    ) == "Tools / Diagnostics"
 
 
 def test_open_next_archive_cue_takes_priority_over_thursday_readiness() -> None:

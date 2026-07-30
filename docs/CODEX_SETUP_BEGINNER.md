@@ -374,6 +374,13 @@ Home also shows the stale-odds archive confirmation receipt:
 - Invalid receipts and missing or unreadable current odds show a clear warning
   or error.
 
+When stale rows are known to exist and the receipt is missing, invalid,
+invalidated by newer odds, or linked to an unreadable odds file, `Open this
+next` points to `Tools / Diagnostics: stale odds archive preview and
+confirmation status`. Clicking its button only opens that portal section.
+Review the two read-only controls there; nothing runs until you choose one,
+and archive apply remains Terminal-only.
+
 This Home line only reads existing files. It never runs preview, applies an
 archive, or edits odds. The same status is repeated inside `Data freshness
 details`.

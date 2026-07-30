@@ -82,7 +82,13 @@ def resolve_open_next_section(cue: object) -> str | None:
             "Bet Ledger",
         ),
         (
-            ("tools / diagnostics", "model projections", "workflow checklist", "diagnostics"),
+            (
+                "tools / diagnostics",
+                "stale odds archive",
+                "model projections",
+                "workflow checklist",
+                "diagnostics",
+            ),
             "Tools / Diagnostics",
         ),
         (

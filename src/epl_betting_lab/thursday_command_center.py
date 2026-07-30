@@ -113,6 +113,15 @@ COUNTED_ACTION_GROUPS = (
     "Recheck odds",
     "Recheck validation",
 )
+STALE_ODDS_ARCHIVE_REVIEW_CUE = (
+    "Tools / Diagnostics: stale odds archive preview and confirmation status"
+)
+STALE_ODDS_ARCHIVE_REVIEW_STATUSES = {
+    "Missing receipt",
+    "Invalid receipt",
+    "Odds changed after preview",
+    "Unreadable current_odds.csv",
+}
 
 
 def _load_decision_queue_counts(output_dir: Path) -> tuple[dict[str, int] | None, str]:
@@ -188,6 +197,40 @@ def build_thursday_detail_cue(recommended_next_action: object, output_dir: Path 
     return "Thursday readiness and report details below"
 
 
+def build_archive_confirmation_detail_cue(
+    archive_confirmation: object,
+    default_cue: object,
+) -> str:
+    """Point stale receipt problems to the read-only Tools review area."""
+    fallback = str(default_cue or "").strip() or "Thursday readiness and report details below"
+    if not isinstance(archive_confirmation, dict):
+        return fallback
+
+    status = str(archive_confirmation.get("status", "")).strip()
+    if status not in STALE_ODDS_ARCHIVE_REVIEW_STATUSES:
+        return fallback
+
+    def row_count(field: str) -> int | None:
+        value = archive_confirmation.get(field, "")
+        if value is None or (isinstance(value, str) and not value.strip()):
+            return None
+        try:
+            return max(int(value), 0)
+        except (TypeError, ValueError):
+            return None
+
+    current_stale_rows = row_count("current_stale_row_count")
+    if current_stale_rows is not None:
+        stale_rows_exist = current_stale_rows > 0
+    else:
+        preview_stale_rows = row_count("preview_stale_row_count")
+        stale_rows_exist = bool(preview_stale_rows)
+
+    if stale_rows_exist:
+        return STALE_ODDS_ARCHIVE_REVIEW_CUE
+    return fallback
+
+
 def build_thursday_command_center(
     output_dir: Path | None = None,
     current_odds: Path | None = None,
@@ -212,6 +255,10 @@ def build_thursday_command_center(
     archive_confirmation_level, archive_confirmation_message = (
         _archive_confirmation_home_signal(archive_confirmation)
     )
+    default_detail_cue = build_thursday_detail_cue(
+        next_action.get("recommended_next_action"),
+        output_dir,
+    )
 
     if archive_pair["available"]:
         archive_label = str(archive_pair["label"])
@@ -230,7 +277,10 @@ def build_thursday_command_center(
         count_change_risk_flag=str(count_risk["risk_flag"]),
         top_card_movement_reason=str(top_reason["top_movement_reason"]),
         recommended_next_action=str(next_action["recommended_next_action"]),
-        detail_cue=build_thursday_detail_cue(next_action.get("recommended_next_action"), output_dir),
+        detail_cue=build_archive_confirmation_detail_cue(
+            archive_confirmation,
+            default_detail_cue,
+        ),
         explanation=readiness.explanation,
         archive_confirmation_status=str(archive_confirmation["status"]),
         archive_confirmation_id=str(archive_confirmation.get("confirm_id", "")),

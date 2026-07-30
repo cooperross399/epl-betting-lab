@@ -14,9 +14,30 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--apply",
         action="store_true",
-        help="Archive stale rows and rewrite current_odds.csv after creating a backup.",
+        help=(
+            "Archive stale rows after confirmation checks and a verified backup. "
+            "Normally requires --confirm-id from preview."
+        ),
     )
-    return parser.parse_args()
+    parser.add_argument(
+        "--confirm-id",
+        default="",
+        help="Confirmation ID copied from the reviewed archive preview. Used only with --apply.",
+    )
+    parser.add_argument(
+        "--allow-unconfirmed-archive",
+        action="store_true",
+        help=(
+            "Terminal-only override when apply cannot match a reviewed preview. "
+            "Requires --apply and writes a prominent audit warning."
+        ),
+    )
+    args = parser.parse_args()
+    if args.confirm_id and not args.apply:
+        parser.error("--confirm-id is used only with --apply")
+    if args.allow_unconfirmed_archive and not args.apply:
+        parser.error("--allow-unconfirmed-archive requires --apply")
+    return args
 
 
 def main() -> None:
@@ -25,11 +46,23 @@ def main() -> None:
         MANUAL_DIR / "current_odds.csv",
         OUTPUTS_DIR,
         apply=args.apply,
+        confirm_id=args.confirm_id,
+        allow_unconfirmed_archive=args.allow_unconfirmed_archive,
     )
     print(f"Status: {paths['status']}")
     print(f"Message: {paths['message']}")
     print(f"Preview CSV: {paths['csv']}")
     print(f"Preview report: {paths['markdown']}")
+    print(f"Preview metadata: {paths['metadata']}")
+    print(f"Confirmation ID: {paths.get('confirm_id', 'Not available')}")
+    print(f"Confirmation ID status: {paths.get('confirm_id_status', 'Not available')}")
+    print(f"Confirmation gate: {paths.get('confirmation_gate_result', 'Not checked')}")
+    print(f"Confirmation note: {paths.get('confirmation_gate_note', '')}")
+    if paths.get("confirmation_gate_result") == "Override used":
+        print(
+            "WARNING: The unconfirmed archive override was used. "
+            "Apply did not match a reviewed preview."
+        )
     if "backup" in paths:
         print(f"Backup: {paths['backup']}")
     if "stale_archive" in paths:

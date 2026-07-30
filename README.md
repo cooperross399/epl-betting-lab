@@ -845,24 +845,35 @@ python scripts/archive_stale_current_odds.py
 
 The default command only writes
 `data/outputs/stale_current_odds_archive_preview.csv` and
-`data/outputs/stale_current_odds_archive_preview.md`. It shows stale rows that
-would be archived/removed, current rows that would stay, and blank or invalid
-dates that stay for manual fixing. The dashboard offers the same read-only
-`Preview stale odds archive` action under `Tools / Diagnostics`.
+`data/outputs/stale_current_odds_archive_preview.md`, plus a small
+`data/outputs/stale_current_odds_archive_preview.json` confirmation receipt.
+It shows stale rows that would be archived/removed, current rows that would
+stay, and blank or invalid dates that stay for manual fixing. The receipt ties
+the confirmation ID to the odds file path, file checksum, and all three row
+counts. The dashboard offers the same read-only `Preview stale odds archive`
+action under `Tools / Diagnostics`.
 
-After reviewing the preview, Terminal-only apply is explicit:
+After reviewing the preview, copy its exact Terminal-only apply command:
 
 ```bash
-python scripts/archive_stale_current_odds.py --apply
+python scripts/archive_stale_current_odds.py \
+  --apply \
+  --confirm-id CONFIRM_ID_FROM_PREVIEW
 ```
 
-Apply first backs up the full odds file under `data/manual/backups/`, then
-writes stale rows under `data/manual/archive/current_odds_stale/`, verifies the
-archive, and keeps today/future plus date-fix rows in `current_odds.csv`. It
-also writes `stale_current_odds_archive_audit.csv` and `.md` under
-`data/outputs/`. Future audit rows record `backup_checksum_sha256` and
-`archive_file_checksum_sha256` after those files are verified. There is no
-dashboard apply button.
+Before changing anything, apply verifies that the confirmation ID, canonical
+odds path, current file checksum, stale-row count, current-row count, and
+manual-review-row count still match the preview. If the file changed, apply
+stops and asks you to preview again. A successful apply first backs up the full
+odds file under `data/manual/backups/`, then writes stale rows under
+`data/manual/archive/current_odds_stale/`, verifies the archive, and keeps
+today/future plus date-fix rows in `current_odds.csv`. It also writes
+`stale_current_odds_archive_audit.csv` and `.md` under `data/outputs/`, including
+the preview/apply checksums, counts, confirmation status, and gate result.
+
+For a rare manually inspected emergency, Terminal has
+`--allow-unconfirmed-archive`. This bypass is prominently recorded in the
+report and audit. There is no dashboard apply or override button.
 
 If you need to undo an applied stale-odds archive, first choose the matching
 pre-archive backup and preview the rollback:

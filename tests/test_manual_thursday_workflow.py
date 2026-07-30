@@ -34,7 +34,22 @@ def test_manual_thursday_workflow_runs_supported_checks_and_runner() -> None:
     assert "python -m compileall -q src scripts app.py" in text
     assert "python -m pytest" in text
     assert "python scripts/run_scheduled_thursday_workflow.py" in text
+    assert "--github-runner-handoff" in text
+    assert '--current-odds-path="$CURRENT_ODDS_PATH"' in text
+    assert '--fixtures-path="$FIXTURES_PATH"' in text
     assert "--force" not in text
+
+
+def test_manual_thursday_workflow_accepts_only_prepared_repository_input_paths() -> None:
+    text = _workflow_text()
+
+    assert "current_odds_path:" in text
+    assert "default: data/manual/current_odds.csv" in text
+    assert "fixtures_path:" in text
+    assert "default: data/manual/upcoming_fixtures.csv" in text
+    assert "expected_current_odds_sha256:" in text
+    assert "expected_fixtures_sha256:" in text
+    assert "persist-credentials: false" in text
 
 
 def test_manual_thursday_workflow_always_uploads_reports_and_writes_summary() -> None:
@@ -46,6 +61,12 @@ def test_manual_thursday_workflow_always_uploads_reports_and_writes_summary() ->
     assert "scheduled_thursday_workflow_summary.json" in text
     assert "$GITHUB_STEP_SUMMARY" in text
     assert "Download it from the **Artifacts** section" in text
+    assert "### Input handoff proof" in text
+    assert "Odds file used:" in text
+    assert "Odds SHA-256:" in text
+    assert "Fixtures freshness:" in text
+    assert "Odds completeness:" in text
+    assert "Card generation allowed:" in text
 
 
 def test_manual_thursday_workflow_allows_blocked_but_fails_runtime_errors() -> None:

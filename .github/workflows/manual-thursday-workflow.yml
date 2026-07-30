@@ -2,6 +2,27 @@ name: Manual Thursday Workflow
 
 on:
   workflow_dispatch:
+    inputs:
+      current_odds_path:
+        description: Repository-relative path to the prepared current odds CSV
+        required: true
+        default: data/manual/current_odds.csv
+        type: string
+      fixtures_path:
+        description: Repository-relative path to the prepared upcoming fixtures CSV
+        required: true
+        default: data/manual/upcoming_fixtures.csv
+        type: string
+      expected_current_odds_sha256:
+        description: Optional SHA-256 for the prepared current odds CSV
+        required: false
+        default: ""
+        type: string
+      expected_fixtures_sha256:
+        description: Optional SHA-256 for the prepared fixtures CSV
+        required: false
+        default: ""
+        type: string
 
 permissions:
   contents: read
@@ -14,6 +35,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -39,10 +62,20 @@ jobs:
       - name: Run safe scheduled Thursday workflow
         id: scheduled
         continue-on-error: true
+        env:
+          CURRENT_ODDS_PATH: ${{ inputs.current_odds_path }}
+          FIXTURES_PATH: ${{ inputs.fixtures_path }}
+          EXPECTED_CURRENT_ODDS_SHA256: ${{ inputs.expected_current_odds_sha256 }}
+          EXPECTED_FIXTURES_SHA256: ${{ inputs.expected_fixtures_sha256 }}
         shell: bash
         run: |
           set +e
-          python scripts/run_scheduled_thursday_workflow.py
+          python scripts/run_scheduled_thursday_workflow.py \
+            --github-runner-handoff \
+            --current-odds-path="$CURRENT_ODDS_PATH" \
+            --fixtures-path="$FIXTURES_PATH" \
+            --expected-current-odds-sha256="$EXPECTED_CURRENT_ODDS_SHA256" \
+            --expected-fixtures-sha256="$EXPECTED_FIXTURES_SHA256"
           exit_code=$?
           set -e
           echo "exit_code=${exit_code}" >> "$GITHUB_OUTPUT"
@@ -100,6 +133,43 @@ jobs:
                   skipped = summary.get("steps_skipped", [])
                   print(f"- Workflow status: **{status}**")
                   print(f"- Recommended next action: {next_action}")
+                  handoff = summary.get("input_handoff")
+                  if isinstance(handoff, dict):
+                      allowed = "Yes" if handoff.get("card_generation_allowed") else "No"
+                      print("")
+                      print("### Input handoff proof")
+                      print(f"- GitHub ref: `{handoff.get('github_ref') or 'not available'}`")
+                      print(f"- GitHub commit: `{handoff.get('github_sha') or 'not available'}`")
+                      print(f"- Odds file used: `{handoff.get('current_odds_path', '')}`")
+                      print(
+                          "- Odds SHA-256: "
+                          f"`{handoff.get('current_odds_checksum_sha256') or 'not available'}`"
+                      )
+                      print(
+                          "- Odds freshness: "
+                          f"**{handoff.get('current_odds_freshness_status', 'Not checked')}**"
+                      )
+                      print(f"- Fixtures file used: `{handoff.get('fixtures_path', '')}`")
+                      print(
+                          "- Fixtures SHA-256: "
+                          f"`{handoff.get('fixtures_checksum_sha256') or 'not available'}`"
+                      )
+                      print(
+                          "- Fixtures freshness: "
+                          f"**{handoff.get('fixtures_freshness_status', 'Not checked')}**"
+                      )
+                      print(
+                          "- Odds validation: "
+                          f"**{handoff.get('validation_status', 'Not checked')}** "
+                          f"({handoff.get('validation_serious_issue_count', 0)} serious, "
+                          f"{handoff.get('validation_warning_count', 0)} warnings)"
+                      )
+                      print(
+                          "- Odds completeness: "
+                          f"**{handoff.get('completeness_status', 'Not checked')}** "
+                          f"({float(handoff.get('completion_percentage', 0.0)):.1%})"
+                      )
+                      print(f"- Card generation allowed: **{allowed}**")
                   if skipped:
                       print(f"- Steps skipped safely: {', '.join(str(step) for step in skipped)}")
           PY

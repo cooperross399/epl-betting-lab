@@ -8,9 +8,16 @@ from typing import Callable
 
 import pandas as pd
 
-from epl_betting_lab.config import MANUAL_DIR, OUTPUTS_DIR, PROCESSED_DIR, RAW_DIR
+from epl_betting_lab.config import (
+    MANUAL_DIR,
+    OUTPUTS_DIR,
+    PROCESSED_DIR,
+    PROJECT_ROOT,
+    RAW_DIR,
+)
 from epl_betting_lab.dashboard_actions import run_thursday_best_bets_report
 from epl_betting_lab.data.loaders import load_matches, load_upcoming_fixtures
+from epl_betting_lab.github_runner_inputs import save_github_runner_input_handoff
 from epl_betting_lab.reports.current_odds_completeness import (
     build_current_odds_completeness,
     render_current_odds_completeness_report,
@@ -311,6 +318,18 @@ def _recommended_next_action(
             "data problem, then rerun the scheduled workflow."
         )
     if status == "Blocked":
+        handoff_blocked = any(
+            step["step"] == "GitHub runner input handoff"
+            and step["status"] == "Blocked"
+            for step in steps
+        )
+        if handoff_blocked:
+            return (
+                "Fix the odds-and-fixtures handoff blockers shown in "
+                "`data/outputs/github_runner_input_handoff.md`, validate the "
+                "prepared files locally, then start the manual GitHub Action again. "
+                "Do not guess missing prices or force the card."
+            )
         return (
             "Fix the serious current-odds validation issues, rerun "
             "`python scripts/validate_current_odds.py`, then rerun this workflow. "
@@ -362,14 +381,57 @@ def _render_summary(summary: dict[str, object]) -> str:
         f"- Run timestamp: {summary['run_timestamp']}",
         f"- Status: **{summary['status']}**",
         f"- Recommended next action: {summary['recommended_next_action']}",
-        "",
-        "## Steps",
-        "",
-        display_steps.to_markdown(index=False),
-        "",
-        "## Key blockers",
-        "",
     ]
+    handoff = summary.get("input_handoff")
+    if isinstance(handoff, dict):
+        allowed = "Yes" if handoff.get("card_generation_allowed") else "No"
+        lines.extend(
+            [
+                "",
+                "## GitHub runner input handoff",
+                "",
+                f"- Handoff status: **{handoff.get('status', 'Not checked')}**",
+                f"- Current odds input: `{handoff.get('current_odds_path', '')}`",
+                (
+                    "- Current odds SHA-256: "
+                    f"`{handoff.get('current_odds_checksum_sha256') or 'not available'}`"
+                ),
+                (
+                    "- Current odds freshness: "
+                    f"**{handoff.get('current_odds_freshness_status', 'Not checked')}**"
+                ),
+                f"- Fixtures input: `{handoff.get('fixtures_path', '')}`",
+                (
+                    "- Fixtures SHA-256: "
+                    f"`{handoff.get('fixtures_checksum_sha256') or 'not available'}`"
+                ),
+                (
+                    "- Fixtures freshness: "
+                    f"**{handoff.get('fixtures_freshness_status', 'Not checked')}**"
+                ),
+                (
+                    "- Current odds validation: "
+                    f"**{handoff.get('validation_status', 'Not checked')}**"
+                ),
+                (
+                    "- Odds completeness: "
+                    f"**{handoff.get('completeness_status', 'Not checked')}** "
+                    f"({float(handoff.get('completion_percentage', 0.0)):.1%})"
+                ),
+                f"- Thursday card generation allowed: **{allowed}**",
+            ]
+        )
+    lines.extend(
+        [
+            "",
+            "## Steps",
+            "",
+            display_steps.to_markdown(index=False),
+            "",
+            "## Key blockers",
+            "",
+        ]
+    )
     lines.extend([f"- {item}" for item in blockers] or ["- None."])
     lines.extend(["", "## Key warnings", ""])
     lines.extend([f"- {item}" for item in warnings] or ["- None."])
@@ -397,16 +459,42 @@ def run_scheduled_thursday_workflow(
     ledger_path: Path | None = None,
     output_dir: Path | None = None,
     run_at: datetime | None = None,
+    require_github_runner_handoff: bool = False,
+    repository_root: Path | None = None,
+    expected_current_odds_sha256: str = "",
+    expected_fixtures_sha256: str = "",
     actions: ScheduledWorkflowActions | None = None,
     progress: Callable[[str, str, str], None] | None = None,
 ) -> dict[str, object]:
     """Run the report-only Thursday package without force or manual-file writes."""
+    repository_root = (repository_root or PROJECT_ROOT).resolve()
     output_dir = output_dir or OUTPUTS_DIR
+
+    def resolve_input(path: Path | None, default: Path) -> Path:
+        selected = path or default
+        return (
+            selected
+            if selected.is_absolute()
+            else (repository_root / selected).resolve(strict=False)
+        )
+
     context = ScheduledWorkflowContext(
-        current_odds_path=current_odds_path or MANUAL_DIR / "current_odds.csv",
-        fixtures_path=fixtures_path or MANUAL_DIR / "upcoming_fixtures.csv",
-        matches_path=matches_path or PROCESSED_DIR / "epl_historical_matches.csv",
-        ledger_path=ledger_path or MANUAL_DIR / "bet_ledger.csv",
+        current_odds_path=resolve_input(
+            current_odds_path,
+            MANUAL_DIR / "current_odds.csv",
+        ),
+        fixtures_path=resolve_input(
+            fixtures_path,
+            MANUAL_DIR / "upcoming_fixtures.csv",
+        ),
+        matches_path=resolve_input(
+            matches_path,
+            PROCESSED_DIR / "epl_historical_matches.csv",
+        ),
+        ledger_path=resolve_input(
+            ledger_path,
+            MANUAL_DIR / "bet_ledger.csv",
+        ),
         output_dir=output_dir,
         run_at=run_at or datetime.now().astimezone(),
     )
@@ -417,6 +505,7 @@ def run_scheduled_thursday_workflow(
     output_files: list[str] = []
     required_failure = False
     optional_problem = False
+    input_handoff: dict[str, object] | None = None
 
     def add_step(
         name: str,
@@ -473,16 +562,100 @@ def run_scheduled_thursday_workflow(
         add_step(name, status, result.message, result)
         return result
 
-    perform("Home/data freshness check", actions.data_freshness, required=False)
-    validation = perform(
-        "Current odds validation",
-        actions.current_odds_validation,
-        required=True,
-        block_on_result=True,
-    )
-    perform("Odds completeness check", actions.odds_completeness, required=True)
+    handoff_paths_safe = True
+    if require_github_runner_handoff:
+        if progress is not None:
+            progress(
+                "GitHub runner input handoff",
+                "Running",
+                "Checking committed odds and fixture inputs.",
+            )
+        try:
+            handoff_result = save_github_runner_input_handoff(
+                output_dir=context.output_dir,
+                current_odds_path=context.current_odds_path,
+                fixtures_path=context.fixtures_path,
+                matches_path=context.matches_path,
+                run_at=context.run_at,
+                repository_root=repository_root,
+                expected_current_odds_sha256=expected_current_odds_sha256,
+                expected_fixtures_sha256=expected_fixtures_sha256,
+            )
+        except Exception as exc:
+            required_failure = True
+            handoff_paths_safe = False
+            add_step(
+                "GitHub runner input handoff",
+                "Failed",
+                f"Input handoff could not be checked: {exc}",
+            )
+        else:
+            input_handoff = dict(handoff_result["summary"])
+            handoff_paths_safe = bool(
+                input_handoff.get("current_odds_path_policy_valid")
+                and input_handoff.get("fixtures_path_policy_valid")
+            )
+            handoff_action = WorkflowActionResult(
+                outputs={
+                    "json": Path(handoff_result["json"]),
+                    "markdown": Path(handoff_result["markdown"]),
+                },
+                message=(
+                    f"Input handoff is {input_handoff['status']}; "
+                    "the selected paths and SHA-256 checksums were recorded."
+                ),
+                warnings=tuple(str(item) for item in input_handoff["warnings"]),
+                blockers=tuple(str(item) for item in input_handoff["blockers"]),
+                metadata=input_handoff,
+            )
+            warnings.extend(handoff_action.warnings)
+            blockers.extend(handoff_action.blockers)
+            add_step(
+                "GitHub runner input handoff",
+                "Blocked" if handoff_action.blockers else (
+                    "Completed with warnings"
+                    if handoff_action.warnings
+                    else "Completed"
+                ),
+                handoff_action.message,
+                handoff_action,
+            )
+
+    if require_github_runner_handoff and not handoff_paths_safe:
+        add_step(
+            "Home/data freshness check",
+            "Skipped",
+            "Skipped because the selected repository input paths did not pass the handoff policy.",
+        )
+        add_step(
+            "Current odds validation",
+            "Blocked",
+            "Not run because the selected current-odds path was not a safe repository CSV path.",
+        )
+        add_step(
+            "Odds completeness check",
+            "Blocked",
+            "Not run because the selected input paths did not pass the handoff policy.",
+        )
+        validation = None
+    else:
+        perform("Home/data freshness check", actions.data_freshness, required=False)
+        validation = perform(
+            "Current odds validation",
+            actions.current_odds_validation,
+            required=True,
+            block_on_result=True,
+        )
+        perform("Odds completeness check", actions.odds_completeness, required=True)
 
     validation_blocked = bool(validation and validation.blockers)
+    handoff_blocked = bool(
+        require_github_runner_handoff
+        and (
+            input_handoff is None
+            or not input_handoff.get("card_generation_allowed", False)
+        )
+    )
     best_bets: WorkflowActionResult | None = None
     archive_ready = False
     if required_failure:
@@ -490,6 +663,15 @@ def run_scheduled_thursday_workflow(
             "Thursday best-bets generation",
             "Skipped",
             "Skipped because a required preflight report failed.",
+        )
+    elif handoff_blocked:
+        add_step(
+            "Thursday best-bets generation",
+            "Skipped",
+            (
+                "Skipped because the GitHub runner odds-and-fixtures handoff is "
+                "blocked. No force mode was used."
+            ),
         )
     elif validation_blocked:
         add_step(
@@ -633,6 +815,7 @@ def run_scheduled_thursday_workflow(
         "key_blockers": _dedupe(blockers),
         "output_files_created": _dedupe(output_files),
         "recommended_next_action": _recommended_next_action(overall_status, steps),
+        "input_handoff": input_handoff,
         "steps": steps,
     }
     if summary["status"] not in OVERALL_STATUSES:

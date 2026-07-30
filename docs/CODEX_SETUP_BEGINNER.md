@@ -398,18 +398,31 @@ python scripts/archive_stale_current_odds.py
 The preview lists rows that would be archived/removed and rows that would
 stay. Blank and invalid dates always stay for you to fix manually. You can run
 the same read-only preview from `Tools / Diagnostics` with `Preview stale odds
-archive`.
+archive`. Preview also writes
+`data/outputs/stale_current_odds_archive_preview.json`, a small receipt that
+connects its confirmation ID to the odds file path, checksum, and row counts.
 
-Only after reviewing the preview, apply from Terminal:
+Only after reviewing the preview, copy the exact apply command shown in its
+markdown report. It looks like:
 
 ```bash
-python scripts/archive_stale_current_odds.py --apply
+python scripts/archive_stale_current_odds.py \
+  --apply \
+  --confirm-id CONFIRM_ID_FROM_PREVIEW
 ```
 
-Apply creates a full backup under `data/manual/backups/`, archives stale rows
-under `data/manual/archive/current_odds_stale/`, verifies that archive, and
-then keeps current and date-fix rows in `current_odds.csv`. Audit files are
-written under `data/outputs/`. The dashboard has no apply button.
+Apply first checks that the file path, checksum, and stale/current/date-fix row
+counts still match what you reviewed. If anything changed, it stops before
+making a backup or editing the odds file; run preview again and use the new
+ID. A successful apply creates a full backup under `data/manual/backups/`,
+archives stale rows under `data/manual/archive/current_odds_stale/`, verifies
+that archive, and then keeps current and date-fix rows in `current_odds.csv`.
+Audit files under `data/outputs/` record the confirmation and both preview/apply
+states.
+
+The Terminal-only `--allow-unconfirmed-archive` flag exists for a rare case
+you have manually inspected. Its use is clearly warned about and saved in the
+audit. The dashboard has no apply or override button.
 
 To undo an applied stale-odds archive, preview a selected pre-archive backup
 first:

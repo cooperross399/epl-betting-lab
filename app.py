@@ -993,13 +993,20 @@ def render_tools_and_diagnostics(min_edge: float, max_juice: int, recent_matches
         st.rerun()
     if st.button(
         "Preview stale odds archive",
-        help="Preview which rows would be archived and removed. This never applies changes.",
+        help=(
+            "Preview which rows would be archived and removed, and create a confirmation ID. "
+            "This never applies changes."
+        ),
         width="content",
     ):
         run_dashboard_action(
             "Stale odds archive preview",
             run_stale_current_odds_archive_preview,
         )
+    st.caption(
+        "Preview creates a reviewed confirmation ID and exact Terminal apply command. "
+        "Archive apply and its override remain Terminal-only."
+    )
     selected_backup_path = ""
     backup_list, backup_summary = get_stale_current_odds_backup_list()
     with st.expander("Available stale odds backups", expanded=True):
@@ -1147,7 +1154,7 @@ def render_tools_and_diagnostics(min_edge: float, max_juice: int, recent_matches
     render_markdown_expander(
         "Stale odds archive audit",
         "stale_current_odds_archive_audit.md",
-        "python scripts/archive_stale_current_odds.py --apply",
+        "python scripts/archive_stale_current_odds.py --apply --confirm-id CONFIRM_ID",
     )
     render_markdown_expander(
         "Stale odds backup list report",

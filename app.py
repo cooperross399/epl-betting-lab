@@ -1008,6 +1008,11 @@ def render_model_workspace(min_edge: float, max_juice: int, recent_matches: int)
 def render_tools_and_diagnostics(min_edge: float, max_juice: int, recent_matches: int) -> None:
     st.header("Tools / Diagnostics")
     st.caption("Advanced model views and file-level checks live here so the weekly workflow stays quiet.")
+    render_markdown_expander(
+        "Scheduled Thursday workflow summary",
+        "scheduled_thursday_workflow_summary.md",
+        "python scripts/run_scheduled_thursday_workflow.py",
+    )
     action_cols = st.columns(4)
     if action_cols[0].button("Create current odds template", width="stretch"):
         run_dashboard_action("Current odds template", run_create_current_odds_template)

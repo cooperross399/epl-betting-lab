@@ -483,6 +483,41 @@ against the previous archived card, then creates the Thursday decision queue.
 If there are not at least two archived cards yet, it stops with a friendly
 message and does not try to build the queue.
 
+For one Terminal command that creates the full safe Thursday report package,
+run:
+
+```bash
+python scripts/run_scheduled_thursday_workflow.py
+```
+
+The command checks Home/data freshness, validates current odds, checks odds
+completeness, generates and archives the Thursday card through the existing
+validation gate, compares the latest two archives when available, builds the
+decision queue when comparison succeeds, and refreshes tier performance. It
+never uses `--force`. Missing prerequisites are skipped or blocked with a
+plain-English explanation.
+
+Every run writes:
+
+```text
+data/outputs/scheduled_thursday_workflow_summary.md
+data/outputs/scheduled_thursday_workflow_summary.json
+```
+
+Possible overall statuses are `Ready`, `Warnings only`, `Blocked`, `Partial`,
+and `Failed`. `Blocked` or `Failed` returns a non-zero Terminal exit code so a
+future GitHub Actions job can alert you. This script is safe to schedule later:
+it only generates reports and archives. It does not edit manual odds/import
+files, the ledger, or profile settings; apply imports, settlements, archives,
+rollbacks, or profile installs; fabricate odds; or place bets.
+The latest markdown summary is also available as a read-only expander under
+`Tools / Diagnostics`; the dashboard does not run the scheduled command.
+
+No GitHub Actions schedule is included yet. Before adding one, decide how the
+runner will receive real `current_odds.csv` and upcoming fixtures without
+guessing prices. A future workflow can run this same command and upload
+`data/outputs/` as an artifact.
+
 The dashboard shows a current-odds status badge:
 
 - `Ready`: no serious issues or warnings.

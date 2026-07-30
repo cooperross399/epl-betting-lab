@@ -479,6 +479,8 @@ def run_thursday_best_bets_report(
     force: bool = False,
     archive: bool = True,
     overwrite_archive: bool = False,
+    matches_path: Path | None = None,
+    fixtures_path: Path | None = None,
 ) -> dict[str, Path]:
     odds_path = current_odds_path or MANUAL_DIR / "current_odds.csv"
     output_dir = output_dir or OUTPUTS_DIR
@@ -492,8 +494,12 @@ def run_thursday_best_bets_report(
         )
         raise CurrentOddsValidationError(validation_stop_message(validation_issues, output_dir))
 
-    matches = load_matches()
-    fixtures = load_upcoming_fixtures()
+    matches = load_matches(matches_path) if matches_path is not None else load_matches()
+    fixtures = (
+        load_upcoming_fixtures(fixtures_path)
+        if fixtures_path is not None
+        else load_upcoming_fixtures()
+    )
     validation_issues = build_current_odds_validation(odds_path, matches=matches, fixtures=fixtures)
     output_dir.mkdir(parents=True, exist_ok=True)
     validation_issues.to_csv(output_dir / "current_odds_validation.csv", index=False)

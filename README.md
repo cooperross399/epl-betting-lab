@@ -513,10 +513,31 @@ rollbacks, or profile installs; fabricate odds; or place bets.
 The latest markdown summary is also available as a read-only expander under
 `Tools / Diagnostics`; the dashboard does not run the scheduled command.
 
-No GitHub Actions schedule is included yet. Before adding one, decide how the
-runner will receive real `current_odds.csv` and upcoming fixtures without
-guessing prices. A future workflow can run this same command and upload
-`data/outputs/` as an artifact.
+### Run the Thursday package manually in GitHub Actions
+
+The repository includes a manual-only workflow at
+`.github/workflows/manual-thursday-workflow.yml`.
+
+1. Open the repository on GitHub and select **Actions**.
+2. Select **Manual Thursday Workflow**.
+3. Select **Run workflow**, choose the `main` branch, and confirm.
+4. Open the finished run and read its job summary.
+5. Download `scheduled-thursday-reports-RUN_NUMBER-RUN_ATTEMPT` from the
+   **Artifacts** section.
+
+The artifact contains the available `data/outputs/` reports and is retained for
+14 days. A missing or blocked odds setup still uploads the validation and
+scheduled-workflow summaries when possible. `Blocked` is shown as a warning
+and is allowed to finish successfully so you can download the explanation.
+Compile failures, test failures, runtime failures, unexpected exit codes, or
+artifact-upload failures make the Action fail.
+
+There is deliberately no Thursday cron trigger. A fresh GitHub runner does not
+automatically have your locally entered real sportsbook odds. Before enabling
+automatic scheduling, define a secure and reliable way to provide
+`current_odds.csv` and current fixtures, validate that source, choose the
+Thursday timezone, and keep a person responsible for reviewing warnings. The
+Action never guesses missing prices and never uses `--force`.
 
 The dashboard shows a current-odds status badge:
 

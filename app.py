@@ -1108,8 +1108,8 @@ def render_tools_and_diagnostics(min_edge: float, max_juice: int, recent_matches
                 lambda: run_stale_current_odds_archive_rollback_preview(rollback_backup_path),
             )
     st.caption(
-        "Rollback apply and checksum-mismatch overrides remain Terminal-only. Apply always creates "
-        "another backup of current_odds.csv first."
+        "Preview creates a confirmation ID and an exact Terminal command. Rollback apply, unconfirmed "
+        "rollback overrides, and checksum-mismatch overrides remain Terminal-only."
     )
 
     with st.expander("Weekly workflow checklist", expanded=True):
@@ -1172,7 +1172,10 @@ def render_tools_and_diagnostics(min_edge: float, max_juice: int, recent_matches
     render_markdown_expander(
         "Stale odds rollback audit",
         "stale_current_odds_archive_rollback_audit.md",
-        "python scripts/rollback_stale_current_odds_archive.py --backup-path PATH --apply",
+        (
+            "python scripts/rollback_stale_current_odds_archive.py "
+            "--backup-path PATH --apply --confirm-id CONFIRM_ID"
+        ),
     )
     with st.expander("Projection model views", expanded=False):
         render_model_workspace(min_edge, max_juice, recent_matches)

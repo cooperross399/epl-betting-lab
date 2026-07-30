@@ -421,21 +421,29 @@ python scripts/rollback_stale_current_odds_archive.py \
 
 The preview compares the selected backup with the current file and writes
 `data/outputs/stale_current_odds_archive_rollback_preview.csv` plus its
-markdown report. It also shows whether the checksum is `Verified`, `Mismatch`,
-or `Not available`, plus the checksum gate result. No odds are changed. In the
-dashboard, open `Tools / Diagnostics`, enter the backup path, and click
-`Preview stale odds rollback` for the same read-only check.
+markdown report and a `.json` preview receipt. The receipt contains a
+confirmation ID tied to the selected paths and the exact checksums of
+`current_odds.csv` and the selected backup. The report also shows whether the
+backup checksum is `Verified`, `Mismatch`, or `Not available`. No odds are
+changed. In the dashboard, open `Tools / Diagnostics`, enter the backup path,
+and click `Preview stale odds rollback` for the same read-only check.
 
-After reviewing the preview, restore only from Terminal:
+After reviewing the preview, copy the exact apply command shown in its markdown
+report. It looks like this:
 
 ```bash
 python scripts/rollback_stale_current_odds_archive.py \
   --backup-path data/manual/backups/TIMESTAMP_current_odds_pre_stale_archive.csv \
-  --apply
+  --apply \
+  --confirm-id CONFIRM_ID_FROM_PREVIEW
 ```
 
-Apply first saves the current file as a new timestamped pre-rollback backup,
-then restores and verifies the selected backup. It records the operation in
+Apply checks that the confirmation ID, backup path, current odds checksum, and
+backup checksum still match what you reviewed. If anything changed, it stops
+before creating a recovery backup or editing odds and tells you to preview
+again. Once the confirmation matches, apply saves the current file as a new
+timestamped pre-rollback backup, then restores and verifies the selected
+backup. It records the operation in
 `data/outputs/stale_current_odds_archive_rollback_audit.csv` and `.md`. Empty,
 malformed, missing, non-CSV, or same-file backups are blocked. The dashboard
 does not offer rollback apply. New archive audit rows record checksums for the
@@ -457,6 +465,7 @@ Terminal-only override:
 python scripts/rollback_stale_current_odds_archive.py \
   --backup-path data/manual/backups/TIMESTAMP_current_odds_pre_stale_archive.csv \
   --apply \
+  --confirm-id CONFIRM_ID_FROM_PREVIEW \
   --allow-checksum-mismatch
 ```
 
@@ -464,6 +473,22 @@ The console, rollback preview, and audit then say `Override used` and warn that
 the file may have changed after creation. They record the checksum status,
 recorded checksum, current checksum, gate result, and gate note. There is no
 dashboard apply or override button.
+
+If the confirmation ID or preview receipt cannot be matched after you manually
+inspect both files, the separate Terminal-only override is:
+
+```bash
+python scripts/rollback_stale_current_odds_archive.py \
+  --backup-path data/manual/backups/TIMESTAMP_current_odds_pre_stale_archive.csv \
+  --apply \
+  --allow-unconfirmed-rollback
+```
+
+Use this only as an exception. The console, preview report, and audit warn that
+apply did not match a reviewed preview. They record the confirmation ID status,
+the preview and apply checksums for both files, the confirmation gate result,
+and its explanation. A known backup checksum mismatch still needs
+`--allow-checksum-mismatch` too. The dashboard has no apply or override button.
 
 List the available backups first so you do not need to find and paste paths:
 

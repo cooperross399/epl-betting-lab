@@ -7,6 +7,7 @@ import pytest
 
 import epl_betting_lab.dashboard_actions as dashboard_actions
 from epl_betting_lab.dashboard_actions import (
+    get_stale_current_odds_archive_confirmation_status,
     get_stale_current_odds_backup_list,
     require_existing_ledger,
     require_existing_current_odds,
@@ -26,6 +27,7 @@ from epl_betting_lab.dashboard_actions import (
     run_post_thursday_review,
     run_settlement_preview,
     run_stale_current_odds_archive_preview,
+    run_stale_current_odds_archive_confirmation_status,
     run_stale_current_odds_archive_rollback_preview,
     run_stale_current_odds_backup_list,
     run_stale_current_odds_report,
@@ -611,6 +613,42 @@ def test_run_stale_current_odds_archive_preview_never_edits_odds(tmp_path) -> No
     assert not (odds_path.parent / "backups").exists()
     assert not (odds_path.parent / "archive").exists()
     assert not (output_dir / "stale_current_odds_archive_audit.csv").exists()
+
+
+def test_stale_archive_confirmation_dashboard_actions_are_read_only(tmp_path) -> None:
+    odds_path = tmp_path / "current_odds.csv"
+    output_dir = tmp_path / "outputs"
+    pd.DataFrame([
+        {
+            "date": "2000-01-01",
+            "home_team": "Arsenal",
+            "away_team": "Coventry",
+            "market": "1x2",
+            "selection": "home",
+            "american_odds": "-150",
+            "book": "FanDuel",
+        }
+    ]).to_csv(odds_path, index=False)
+    run_stale_current_odds_archive_preview(odds_path, output_dir)
+    original = odds_path.read_bytes()
+
+    report, summary = get_stale_current_odds_archive_confirmation_status(
+        odds_path,
+        output_dir,
+    )
+    paths = run_stale_current_odds_archive_confirmation_status(
+        odds_path,
+        output_dir,
+    )
+
+    assert len(report) == 1
+    assert summary["status"] == "Ready"
+    assert paths["status"] == "Ready"
+    assert paths["csv"].name == "stale_current_odds_archive_confirmation_status.csv"
+    assert paths["markdown"].name == "stale_current_odds_archive_confirmation_status.md"
+    assert odds_path.read_bytes() == original
+    assert not (odds_path.parent / "backups").exists()
+    assert not (odds_path.parent / "archive").exists()
 
 
 def test_run_stale_current_odds_archive_rollback_preview_never_edits_odds(tmp_path) -> None:

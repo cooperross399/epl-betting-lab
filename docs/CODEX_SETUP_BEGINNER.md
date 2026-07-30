@@ -402,6 +402,24 @@ archive`. Preview also writes
 `data/outputs/stale_current_odds_archive_preview.json`, a small receipt that
 connects its confirmation ID to the odds file path, checksum, and row counts.
 
+Check that the receipt still matches before applying:
+
+```bash
+python scripts/check_stale_current_odds_archive_confirmation.py
+```
+
+The command writes
+`data/outputs/stale_current_odds_archive_confirmation_status.csv` and `.md`.
+`Ready` means the receipt path, checksum, and row counts still match. `Missing
+receipt`, `Invalid receipt`, `Odds changed after preview`, `Missing
+current_odds.csv`, and `Unreadable current_odds.csv` tell you what to fix.
+When it is not `Ready`, run the archive preview again instead of using the old
+confirmation ID.
+
+In `Tools / Diagnostics`, the compact confirmation panel checks the same state
+without editing anything. `Check stale odds archive confirmation` only
+regenerates the read-only status files. It does not apply an archive.
+
 Only after reviewing the preview, copy the exact apply command shown in its
 markdown report. It looks like:
 
@@ -817,6 +835,7 @@ Preview current odds import
 Preview current odds maintenance
 Report stale current odds
 Preview stale odds archive
+Check stale odds archive confirmation
 Check odds entry completeness
 Validate current odds
 Generate Thursday best-bets report

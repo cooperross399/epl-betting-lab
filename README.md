@@ -518,11 +518,26 @@ The latest markdown summary is also available as a read-only expander under
 The repository includes a manual-only workflow at
 `.github/workflows/manual-thursday-workflow.yml`.
 
+The initial safe handoff uses manually prepared repository files. Before
+starting the Action:
+
+1. Copy `data/manual/current_odds_template.csv` to
+   `data/manual/current_odds.csv`.
+2. Enter real sportsbook prices and update
+   `data/manual/upcoming_fixtures.csv` to the intended upcoming slate.
+3. Run current-odds validation and completeness locally.
+4. Commit both prepared CSVs to a short-lived weekly branch and push it.
+
+Then:
+
 1. Open the repository on GitHub and select **Actions**.
 2. Select **Manual Thursday Workflow**.
-3. Select **Run workflow**, choose the `main` branch, and confirm.
-4. Open the finished run and read its job summary.
-5. Download `scheduled-thursday-reports-RUN_NUMBER-RUN_ATTEMPT` from the
+3. Select **Run workflow** and choose the weekly branch containing the prepared
+   files.
+4. Confirm the repository-relative odds and fixtures paths. Optional SHA-256
+   fields can prove the files match the copies you reviewed locally.
+5. Open the finished run and read its job summary.
+6. Download `scheduled-thursday-reports-RUN_NUMBER-RUN_ATTEMPT` from the
    **Artifacts** section.
 
 The artifact contains the available `data/outputs/` reports and is retained for
@@ -532,12 +547,25 @@ and is allowed to finish successfully so you can download the explanation.
 Compile failures, test failures, runtime failures, unexpected exit codes, or
 artifact-upload failures make the Action fail.
 
+The runner accepts only regular CSV paths inside the checked-out repository. It
+records the selected Git ref and commit, exact paths, calculated SHA-256
+checksums, date freshness, validation results, completeness, and whether card
+generation was allowed. Any past odds/fixture row, malformed date, serious
+validation issue, checksum mismatch, or completeness below 100% blocks the
+card without `--force`.
+
+Read [docs/GITHUB_RUNNER_INPUT_HANDOFF.md](docs/GITHUB_RUNNER_INPUT_HANDOFF.md)
+for copy/paste setup, optional checksum commands, fail-closed rules, and the
+fields shown in the Action receipt. Do not commit credentials or sportsbook
+account information.
+
 There is deliberately no Thursday cron trigger. A fresh GitHub runner does not
-automatically have your locally entered real sportsbook odds. Before enabling
-automatic scheduling, define a secure and reliable way to provide
-`current_odds.csv` and current fixtures, validate that source, choose the
-Thursday timezone, and keep a person responsible for reviewing warnings. The
-Action never guesses missing prices and never uses `--force`.
+automatically source permitted real sportsbook odds. This repository-file
+handoff still needs a person to prepare and review each weekly input. Before
+automatic scheduling, add a trusted automated odds/fixture source, secure its
+credentials, choose the Thursday timezone and cutoff, verify provider mappings,
+and keep a person responsible for reviewing warnings. The Action never guesses
+missing prices and never uses `--force`.
 
 The dashboard shows a current-odds status badge:
 

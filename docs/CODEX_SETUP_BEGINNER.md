@@ -381,12 +381,29 @@ Terminal when you intentionally want to refresh the package.
 
 ### Run it manually from GitHub
 
+First prepare the two files the GitHub runner will read:
+
+```bash
+cp data/manual/current_odds_template.csv data/manual/current_odds.csv
+python scripts/validate_current_odds.py
+python scripts/check_current_odds_completeness.py
+```
+
+Enter only real sportsbook prices. Update `upcoming_fixtures.csv` so it contains
+the upcoming slate you want to analyze, with no past or malformed dates. The
+odds completeness report must show 100%. Commit `current_odds.csv` and
+`upcoming_fixtures.csv` to a short-lived weekly branch, then push that branch.
+Do not put passwords, API keys, or sportsbook account details in these files.
+
 1. Open `cooperross399/epl-betting-lab` on GitHub.
 2. Click the **Actions** tab.
 3. Click **Manual Thursday Workflow** in the workflow list.
-4. Click **Run workflow**, leave the branch as `main`, and confirm.
-5. Open the run when it finishes and read the job summary.
-6. Scroll to **Artifacts** and download
+4. Click **Run workflow** and select the weekly branch containing your prepared
+   odds and fixture files.
+5. Confirm the two repository-relative input paths. You may also paste optional
+   SHA-256 checksums from `shasum -a 256 FILE` for an extra identity check.
+6. Open the run when it finishes and read the job summary.
+7. Scroll to **Artifacts** and download
    `scheduled-thursday-reports-RUN_NUMBER-RUN_ATTEMPT`.
 
 The artifact contains whichever `data/outputs/` reports the safe runner could
@@ -396,12 +413,22 @@ can finish successfully so its summary is still downloadable. A compile,
 test, runtime, unexpected-exit, or artifact-upload failure makes the Action
 fail.
 
+The job summary proves which inputs were used by showing the selected Git ref
+and commit, odds and fixture paths, calculated SHA-256 checksums, freshness,
+validation, completeness, and whether card generation was allowed. The runner
+blocks any past odds/fixture row, invalid date, serious validation issue,
+optional checksum mismatch, or completeness below 100%. It never fills blank
+odds.
+
+The complete handoff guide is in
+`docs/GITHUB_RUNNER_INPUT_HANDOFF.md`.
+
 This workflow has only `workflow_dispatch`; it has no cron schedule. Automatic
-Thursday scheduling must wait until the runner has a secure, trustworthy way
-to receive real `current_odds.csv` and upcoming fixtures. You also need to
-choose the intended Thursday timezone and retain manual review of warnings.
-The workflow never guesses sportsbook prices, uses `--force`, edits protected
-manual files, applies changes, or places bets.
+Thursday scheduling must wait for a trusted permitted source that can refresh
+real odds and fixtures without manual commits. You also need secure credential
+handling, verified provider mappings, an intended Thursday timezone/cutoff, and
+manual ownership of warnings. The workflow never guesses sportsbook prices,
+uses `--force`, edits protected manual files, applies changes, or places bets.
 
 The dashboard badge means:
 

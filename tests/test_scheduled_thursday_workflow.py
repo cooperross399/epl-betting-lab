@@ -4,6 +4,8 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 
+import pandas as pd
+
 from epl_betting_lab.scheduled_thursday_workflow import (
     ScheduledWorkflowActions,
     WorkflowActionResult,
@@ -134,6 +136,39 @@ def _actions(
             "tier_performance_summary.csv",
         ),
     )
+
+
+def _write_complete_runner_inputs(
+    paths: dict[str, Path],
+    *,
+    match_date: str = "2026-08-08",
+) -> None:
+    fixture = {
+        "date": match_date,
+        "home_team": "Arsenal",
+        "away_team": "Chelsea",
+    }
+    pd.DataFrame([fixture]).to_csv(paths["fixtures_path"], index=False)
+    rows = []
+    for market, selection, odds in [
+        ("1x2", "home", -110),
+        ("1x2", "draw", 245),
+        ("1x2", "away", 220),
+        ("total_2_5", "over", -105),
+        ("total_2_5", "under", -115),
+        ("btts", "yes", 105),
+        ("btts", "no", -125),
+    ]:
+        rows.append(
+            {
+                **fixture,
+                "market": market,
+                "selection": selection,
+                "american_odds": odds,
+                "book": "Example Book",
+            }
+        )
+    pd.DataFrame(rows).to_csv(paths["current_odds_path"], index=False)
 
 
 def test_scheduled_workflow_runs_safe_steps_in_order_and_reports_ready(tmp_path) -> None:
@@ -313,3 +348,59 @@ def test_default_workflow_blocks_missing_odds_without_creating_manual_file(
     assert (paths["output_dir"] / "current_odds_validation.csv").exists()
     assert (paths["output_dir"] / "current_odds_completeness.csv").exists()
     assert (paths["output_dir"] / "tier_performance_report.md").exists()
+
+
+def test_scheduled_workflow_records_strict_github_runner_handoff(
+    tmp_path,
+) -> None:
+    paths = _workflow_paths(tmp_path)
+    _write_complete_runner_inputs(paths)
+    calls: list[str] = []
+
+    result = run_scheduled_thursday_workflow(
+        **paths,
+        run_at=FIXED_RUN_AT,
+        repository_root=tmp_path,
+        require_github_runner_handoff=True,
+        actions=_actions(calls),
+    )
+
+    assert result["status"] == "Warnings only"
+    handoff = result["summary"]["input_handoff"]
+    assert handoff["card_generation_allowed"] is True
+    assert handoff["current_odds_path"] == "manual/current_odds.csv"
+    assert handoff["fixtures_path"] == "manual/upcoming_fixtures.csv"
+    assert handoff["completeness_status"] == "Complete"
+    assert (
+        paths["output_dir"] / "github_runner_input_handoff.json"
+    ).exists()
+    assert result["summary"]["steps"][0]["step"] == "GitHub runner input handoff"
+    assert "best_bets" in calls
+
+
+def test_scheduled_workflow_blocks_stale_runner_odds_before_card_generation(
+    tmp_path,
+) -> None:
+    paths = _workflow_paths(tmp_path)
+    _write_complete_runner_inputs(paths, match_date="2026-08-05")
+    calls: list[str] = []
+
+    result = run_scheduled_thursday_workflow(
+        **paths,
+        run_at=FIXED_RUN_AT,
+        repository_root=tmp_path,
+        require_github_runner_handoff=True,
+        actions=_actions(calls),
+    )
+
+    assert result["status"] == "Blocked"
+    assert result["summary"]["input_handoff"]["card_generation_allowed"] is False
+    assert "best_bets" not in calls
+    assert "tier_performance" in calls
+    assert any(
+        "tied to past matches" in blocker
+        for blocker in result["summary"]["key_blockers"]
+    )
+    assert "odds-and-fixtures handoff blockers" in result["summary"][
+        "recommended_next_action"
+    ]

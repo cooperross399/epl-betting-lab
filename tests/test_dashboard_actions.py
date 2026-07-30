@@ -657,6 +657,9 @@ def test_run_stale_current_odds_archive_rollback_preview_never_edits_odds(tmp_pa
     assert paths["status"] == "preview_ready"
     assert paths["csv"].name == "stale_current_odds_archive_rollback_preview.csv"
     assert paths["markdown"].name == "stale_current_odds_archive_rollback_preview.md"
+    assert paths["metadata"].name == "stale_current_odds_archive_rollback_preview.json"
+    assert paths["confirm_id"]
+    assert paths["confirmation_gate_result"] == "Preview ready"
     assert odds_path.read_bytes() == odds_before
     assert backup_path.read_bytes() == backup_before
     assert not (tmp_path / "backups").exists()

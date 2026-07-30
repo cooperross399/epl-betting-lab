@@ -2,9 +2,13 @@ from __future__ import annotations
 
 from collections import Counter
 from datetime import datetime
+from hashlib import sha256
+from hmac import compare_digest
+import json
 import os
 from pathlib import Path
 import re
+import shlex
 import shutil
 from tempfile import NamedTemporaryFile
 from uuid import uuid4
@@ -19,6 +23,8 @@ from epl_betting_lab.reports.stale_current_odds_backup_picker import (
 
 
 DEFAULT_CURRENT_ODDS_PATH = MANUAL_DIR / "current_odds.csv"
+CONFIRMATION_SCHEMA_VERSION = 1
+CONFIRMATION_METADATA_FILENAME = "stale_current_odds_archive_rollback_preview.json"
 CHECKSUM_REPORT_COLUMNS = [
     "checksum_status",
     "recorded_checksum_sha256",
@@ -26,10 +32,21 @@ CHECKSUM_REPORT_COLUMNS = [
     "checksum_gate_result",
     "checksum_gate_note",
 ]
+CONFIRMATION_REPORT_COLUMNS = [
+    "confirm_id",
+    "confirm_id_status",
+    "preview_current_checksum_sha256",
+    "apply_current_checksum_sha256",
+    "preview_backup_checksum_sha256",
+    "apply_backup_checksum_sha256",
+    "confirmation_gate_result",
+    "confirmation_gate_note",
+]
 PREVIEW_PREFIX_COLUMNS = [
     "rollback_action",
     "rollback_reason",
     *CHECKSUM_REPORT_COLUMNS,
+    *CONFIRMATION_REPORT_COLUMNS,
     "source_file",
     "source_row_number",
 ]
@@ -55,9 +72,11 @@ AUDIT_CHECKSUM_COLUMNS = [
     "recovery_backup_checksum_sha256",
     *CHECKSUM_REPORT_COLUMNS,
 ]
+AUDIT_CONFIRMATION_COLUMNS = [*CONFIRMATION_REPORT_COLUMNS]
 AUDIT_COLUMNS = [
     *LEGACY_AUDIT_COLUMNS[:8],
     *AUDIT_CHECKSUM_COLUMNS,
+    *AUDIT_CONFIRMATION_COLUMNS,
     *LEGACY_AUDIT_COLUMNS[8:],
 ]
 
@@ -83,6 +102,220 @@ def _checksum_gate(checksum_status: object, *, allow_mismatch: bool) -> tuple[st
         "No usable audit checksum is available for this backup. Rollback apply is allowed, but its "
         "original integrity cannot be confirmed.",
     )
+
+
+def _canonical_path(path: Path) -> str:
+    try:
+        return str(path.expanduser().resolve(strict=False))
+    except (OSError, RuntimeError, ValueError):
+        return str(path.expanduser())
+
+
+def _confirmation_payload(
+    *,
+    current_odds_path: Path,
+    backup_path: Path,
+    current_checksum: str,
+    backup_checksum: str,
+    generated_at: str,
+) -> dict[str, object]:
+    return {
+        "schema_version": CONFIRMATION_SCHEMA_VERSION,
+        "generated_at": generated_at,
+        "current_odds_path": _canonical_path(current_odds_path),
+        "selected_backup_path": _canonical_path(backup_path),
+        "preview_current_checksum_sha256": current_checksum,
+        "preview_backup_checksum_sha256": backup_checksum,
+    }
+
+
+def _confirmation_id(payload: dict[str, object]) -> str:
+    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return sha256(encoded).hexdigest()
+
+
+def _build_confirmation_metadata(
+    *,
+    current_odds_path: Path,
+    backup_path: Path,
+    current_checksum: str,
+    backup_checksum: str,
+    generated_at: str | None = None,
+) -> dict[str, object]:
+    payload = _confirmation_payload(
+        current_odds_path=current_odds_path,
+        backup_path=backup_path,
+        current_checksum=current_checksum,
+        backup_checksum=backup_checksum,
+        generated_at=generated_at or datetime.now().astimezone().isoformat(timespec="microseconds"),
+    )
+    return {**payload, "confirm_id": _confirmation_id(payload)}
+
+
+def _error_confirmation_metadata(
+    *,
+    current_odds_path: Path,
+    backup_path: Path | None,
+    status: str,
+) -> dict[str, object]:
+    return {
+        "schema_version": CONFIRMATION_SCHEMA_VERSION,
+        "generated_at": datetime.now().astimezone().isoformat(timespec="microseconds"),
+        "current_odds_path": _canonical_path(current_odds_path),
+        "selected_backup_path": _canonical_path(backup_path) if backup_path is not None else "",
+        "preview_current_checksum_sha256": "",
+        "preview_backup_checksum_sha256": "",
+        "confirm_id": "",
+        "status": status,
+    }
+
+
+def _load_confirmation_metadata(
+    output_dir: Path,
+) -> tuple[dict[str, object] | None, str, str]:
+    metadata_path = output_dir / CONFIRMATION_METADATA_FILENAME
+    if not metadata_path.exists():
+        return (
+            None,
+            "Missing preview",
+            "No rollback preview confirmation metadata exists. Run preview mode first.",
+        )
+    try:
+        raw = json.loads(metadata_path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        return (
+            None,
+            "Invalid preview",
+            f"Rollback preview confirmation metadata is unreadable or malformed: {exc}",
+        )
+    if not isinstance(raw, dict):
+        return None, "Invalid preview", "Rollback preview confirmation metadata is not a JSON object."
+
+    required = [
+        "schema_version",
+        "generated_at",
+        "current_odds_path",
+        "selected_backup_path",
+        "preview_current_checksum_sha256",
+        "preview_backup_checksum_sha256",
+        "confirm_id",
+    ]
+    missing = [field for field in required if field not in raw]
+    if missing:
+        return (
+            None,
+            "Invalid preview",
+            "Rollback preview confirmation metadata is missing: " + ", ".join(missing) + ".",
+        )
+    if raw.get("schema_version") != CONFIRMATION_SCHEMA_VERSION:
+        return None, "Invalid preview", "Rollback preview confirmation metadata uses an unsupported version."
+
+    payload = {field: raw[field] for field in required if field != "confirm_id"}
+    expected_id = _confirmation_id(payload)
+    stored_id = str(raw.get("confirm_id", "")).strip()
+    if not re.fullmatch(r"[0-9a-f]{64}", stored_id) or not compare_digest(stored_id, expected_id):
+        return (
+            None,
+            "Invalid preview",
+            "Rollback preview confirmation metadata failed its own confirmation-ID check.",
+        )
+    preview_current = str(raw.get("preview_current_checksum_sha256", "")).strip()
+    preview_backup = str(raw.get("preview_backup_checksum_sha256", "")).strip()
+    if not re.fullmatch(r"[0-9a-f]{64}", preview_current) or not re.fullmatch(
+        r"[0-9a-f]{64}",
+        preview_backup,
+    ):
+        return (
+            None,
+            "Invalid preview",
+            "Rollback preview confirmation metadata does not contain valid file checksums.",
+        )
+    return raw, "Available", "The saved rollback preview confirmation metadata is readable."
+
+
+def _confirmation_gate(
+    metadata: dict[str, object] | None,
+    *,
+    metadata_status: str,
+    metadata_note: str,
+    provided_confirm_id: str | None,
+    current_odds_path: Path,
+    backup_path: Path,
+    apply_current_checksum: str,
+    apply_backup_checksum: str,
+    allow_unconfirmed: bool,
+) -> dict[str, str]:
+    preview_id = str(metadata.get("confirm_id", "")).strip() if metadata else ""
+    preview_current = (
+        str(metadata.get("preview_current_checksum_sha256", "")).strip() if metadata else ""
+    )
+    preview_backup = (
+        str(metadata.get("preview_backup_checksum_sha256", "")).strip() if metadata else ""
+    )
+    supplied_id = str(provided_confirm_id or "").strip()
+
+    if metadata is None:
+        status = metadata_status
+        note = metadata_note
+    elif _canonical_path(current_odds_path) != str(metadata.get("current_odds_path", "")):
+        status = "Current path mismatch"
+        note = "The current_odds.csv path does not match the reviewed rollback preview."
+    elif _canonical_path(backup_path) != str(metadata.get("selected_backup_path", "")):
+        status = "Backup path mismatch"
+        note = "The selected backup path does not match the reviewed rollback preview."
+    elif apply_current_checksum != preview_current:
+        status = "Current odds changed"
+        note = "current_odds.csv changed after the reviewed preview. Run preview mode again."
+    elif apply_backup_checksum != preview_backup:
+        status = "Backup changed"
+        note = "The selected backup changed after the reviewed preview. Run preview mode again."
+    elif not supplied_id:
+        status = "Missing"
+        note = "No confirmation ID was provided. Copy the exact apply command from the preview report."
+    elif not re.fullmatch(r"[0-9a-f]{64}", supplied_id) or not compare_digest(
+        supplied_id,
+        preview_id,
+    ):
+        status = "Invalid"
+        note = "The provided confirmation ID does not match the reviewed rollback preview."
+    else:
+        return {
+            "confirm_id": preview_id,
+            "confirm_id_status": "Matched",
+            "preview_current_checksum_sha256": preview_current,
+            "apply_current_checksum_sha256": apply_current_checksum,
+            "preview_backup_checksum_sha256": preview_backup,
+            "apply_backup_checksum_sha256": apply_backup_checksum,
+            "confirmation_gate_result": "Allowed",
+            "confirmation_gate_note": (
+                "The confirmation ID, selected paths, and both file checksums match the reviewed preview."
+            ),
+        }
+
+    if allow_unconfirmed:
+        return {
+            "confirm_id": preview_id or supplied_id,
+            "confirm_id_status": "Override used",
+            "preview_current_checksum_sha256": preview_current,
+            "apply_current_checksum_sha256": apply_current_checksum,
+            "preview_backup_checksum_sha256": preview_backup,
+            "apply_backup_checksum_sha256": apply_backup_checksum,
+            "confirmation_gate_result": "Override used",
+            "confirmation_gate_note": (
+                f"WARNING: {note} The explicit Terminal-only unconfirmed rollback override was used, "
+                "so apply did not match a reviewed preview."
+            ),
+        }
+    return {
+        "confirm_id": preview_id,
+        "confirm_id_status": status,
+        "preview_current_checksum_sha256": preview_current,
+        "apply_current_checksum_sha256": apply_current_checksum,
+        "preview_backup_checksum_sha256": preview_backup,
+        "apply_backup_checksum_sha256": apply_backup_checksum,
+        "confirmation_gate_result": "Blocked",
+        "confirmation_gate_note": note,
+    }
 
 
 def _read_csv(
@@ -267,6 +500,16 @@ def _error_preview(
         "current_checksum_sha256": "",
         "checksum_gate_result": "Not checked",
         "checksum_gate_note": "Checksum safety was not checked because the selected input could not be read.",
+        "confirm_id": "",
+        "confirm_id_status": "Not available",
+        "preview_current_checksum_sha256": "",
+        "apply_current_checksum_sha256": "",
+        "preview_backup_checksum_sha256": "",
+        "apply_backup_checksum_sha256": "",
+        "confirmation_gate_result": "Not checked",
+        "confirmation_gate_note": (
+            "Preview confirmation was not created because the selected input could not be read."
+        ),
     }
 
 
@@ -321,6 +564,22 @@ def render_stale_current_odds_archive_rollback_preview(
         f"- Gate result: {summary.get('checksum_gate_result', 'Not checked')}",
         f"- Gate note: {summary.get('checksum_gate_note', '') or 'Checksum safety was not checked.'}",
         "",
+        "## Preview Confirmation Gate",
+        "",
+        f"- Confirmation ID: `{summary.get('confirm_id', '') or 'Not available'}`",
+        f"- Confirmation ID status: {summary.get('confirm_id_status', 'Not available')}",
+        "- Preview current odds checksum: "
+        f"`{summary.get('preview_current_checksum_sha256', '') or 'Not available'}`",
+        "- Apply current odds checksum: "
+        f"`{summary.get('apply_current_checksum_sha256', '') or 'Not checked in preview mode'}`",
+        "- Preview backup checksum: "
+        f"`{summary.get('preview_backup_checksum_sha256', '') or 'Not available'}`",
+        "- Apply backup checksum: "
+        f"`{summary.get('apply_backup_checksum_sha256', '') or 'Not checked in preview mode'}`",
+        f"- Gate result: {summary.get('confirmation_gate_result', 'Not checked')}",
+        "- Gate note: "
+        f"{summary.get('confirmation_gate_note', '') or 'Preview confirmation was not checked.'}",
+        "",
         "## Rows Restored From Backup",
         "",
         restored.to_markdown(index=False) if not restored.empty else "No backup-only rows found.",
@@ -334,6 +593,11 @@ def render_stale_current_odds_archive_rollback_preview(
     ]
     if summary.get("applied"):
         lines.append("Rollback completed from Terminal. Review the rollback audit before continuing.")
+    elif summary.get("status") == "confirmation_blocked":
+        lines.append(
+            "Rollback was not applied because this command did not match the reviewed preview. "
+            "Run preview mode again, review the new report, then copy its exact apply command."
+        )
     elif summary.get("status") == "checksum_mismatch_blocked":
         lines.append(
             "Rollback was not applied because the selected backup failed checksum verification. "
@@ -341,20 +605,37 @@ def render_stale_current_odds_archive_rollback_preview(
             "`--allow-checksum-mismatch` override is appropriate."
         )
     elif summary.get("status") == "preview_ready":
+        confirm_id = str(summary.get("confirm_id", "")).strip()
+        if confirm_id:
+            command = (
+                "python scripts/rollback_stale_current_odds_archive.py "
+                f"--backup-path {shlex.quote(str(summary.get('selected_backup_path', '')))} "
+                f"--current-odds {shlex.quote(str(summary.get('current_odds_path', '')))} "
+                f"--apply --confirm-id {shlex.quote(confirm_id)}"
+            )
+            lines.extend(
+                [
+                    "After reviewing this report, copy and run this exact Terminal command:",
+                    "",
+                    "```bash",
+                    command,
+                    "```",
+                ]
+            )
         if summary.get("checksum_gate_result") == "Blocked":
-            lines.append(
-                "Review the backup manually. Normal rollback apply is blocked by the checksum mismatch. "
-                "Only after inspection, Terminal supports the explicit `--allow-checksum-mismatch` override."
+            lines.extend(
+                [
+                    "",
+                    "The checksum gate still blocks normal apply. Only after manually inspecting the backup "
+                    "may you add the Terminal-only `--allow-checksum-mismatch` override.",
+                ]
             )
         elif summary.get("checksum_gate_result") == "Allowed with warning":
-            lines.append(
-                "No audit checksum is available. Review the backup carefully, then apply only from Terminal "
-                "with `python scripts/rollback_stale_current_odds_archive.py --backup-path PATH --apply`."
-            )
-        else:
-            lines.append(
-                "Review the differences above. Apply only from Terminal with "
-                "`python scripts/rollback_stale_current_odds_archive.py --backup-path PATH --apply`."
+            lines.extend(
+                [
+                    "",
+                    "No audit checksum is available. Review the backup especially carefully before applying.",
+                ]
             )
     elif summary.get("status") == "no_changes":
         lines.append("No rollback is needed because the selected backup already matches the current file.")
@@ -384,27 +665,54 @@ def _write_csv_atomic(frame: pd.DataFrame, path: Path) -> None:
             temporary_path.unlink()
 
 
+def _write_json_atomic(payload: dict[str, object], path: Path) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary_path: Path | None = None
+    try:
+        with NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            dir=path.parent,
+            prefix=f".{path.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as handle:
+            temporary_path = Path(handle.name)
+            json.dump(payload, handle, indent=2, sort_keys=True)
+            handle.write("\n")
+        os.replace(temporary_path, path)
+    finally:
+        if temporary_path is not None and temporary_path.exists():
+            temporary_path.unlink()
+
+
 def save_stale_current_odds_archive_rollback_preview(
     preview: pd.DataFrame,
     summary: dict[str, object],
     output_dir: Path | None = None,
+    *,
+    confirmation_metadata: dict[str, object] | None = None,
 ) -> dict[str, Path | str]:
     output_dir = output_dir or OUTPUTS_DIR
     output_dir.mkdir(parents=True, exist_ok=True)
     csv_path = output_dir / "stale_current_odds_archive_rollback_preview.csv"
     markdown_path = output_dir / "stale_current_odds_archive_rollback_preview.md"
+    metadata_path = output_dir / CONFIRMATION_METADATA_FILENAME
     _write_csv_atomic(preview, csv_path)
     markdown_path.write_text(
         render_stale_current_odds_archive_rollback_preview(preview, summary),
         encoding="utf-8",
     )
+    if confirmation_metadata is not None:
+        _write_json_atomic(confirmation_metadata, metadata_path)
     result: dict[str, Path | str] = {
         "csv": csv_path,
         "markdown": markdown_path,
+        "metadata": metadata_path,
         "status": str(summary.get("status", "not_checked")),
         "message": str(summary.get("message", "")),
     }
-    for column in CHECKSUM_REPORT_COLUMNS:
+    for column in [*CHECKSUM_REPORT_COLUMNS, *CONFIRMATION_REPORT_COLUMNS]:
         result[column] = str(summary.get(column, ""))
     return result
 
@@ -430,7 +738,7 @@ def _load_existing_audit(output_dir: Path) -> pd.DataFrame:
             "Existing stale-odds rollback audit is missing required columns and was not overwritten: "
             f"{', '.join(missing)}."
         )
-    for column in AUDIT_CHECKSUM_COLUMNS:
+    for column in [*AUDIT_CHECKSUM_COLUMNS, *AUDIT_CONFIRMATION_COLUMNS]:
         if column not in audit.columns:
             audit[column] = ""
     return audit[AUDIT_COLUMNS]
@@ -453,9 +761,16 @@ def render_stale_current_odds_archive_rollback_audit(audit: pd.DataFrame) -> str
         if latest["checksum_gate_result"] == "Override used"
         else ""
     )
+    confirmation_warning = (
+        "**WARNING: This rollback used the unconfirmed rollback override and did not match a reviewed preview.**"
+        if latest["confirmation_gate_result"] == "Override used"
+        else ""
+    )
     lines.extend(["## Latest Rollback", ""])
     if gate_warning:
         lines.extend([gate_warning, ""])
+    if confirmation_warning:
+        lines.extend([confirmation_warning, ""])
     lines.extend(
         [
             f"- Rollback ID: `{latest['rollback_id']}`",
@@ -469,6 +784,16 @@ def render_stale_current_odds_archive_rollback_audit(audit: pd.DataFrame) -> str
             f"- Current backup checksum: `{latest['current_checksum_sha256'] or 'Not available'}`",
             f"- Checksum gate: {latest['checksum_gate_result'] or 'Not recorded'}",
             f"- Checksum gate note: {latest['checksum_gate_note'] or 'Not recorded'}",
+            f"- Preview confirmation ID: `{latest['confirm_id'] or 'Not recorded'}`",
+            f"- Confirmation ID status: {latest['confirm_id_status'] or 'Not recorded'}",
+            "- Preview current odds checksum: "
+            f"`{latest['preview_current_checksum_sha256'] or 'Not recorded'}`",
+            "- Apply current odds checksum: "
+            f"`{latest['apply_current_checksum_sha256'] or 'Not recorded'}`",
+            f"- Preview backup checksum: `{latest['preview_backup_checksum_sha256'] or 'Not recorded'}`",
+            f"- Apply backup checksum: `{latest['apply_backup_checksum_sha256'] or 'Not recorded'}`",
+            f"- Confirmation gate: {latest['confirmation_gate_result'] or 'Not recorded'}",
+            f"- Confirmation gate note: {latest['confirmation_gate_note'] or 'Not recorded'}",
             f"- Rows before: {latest['current_rows_before']}",
             f"- Rows after: {latest['rows_after']}",
             "",
@@ -524,6 +849,8 @@ def process_stale_current_odds_archive_rollback(
     *,
     apply: bool = False,
     allow_checksum_mismatch: bool = False,
+    confirm_id: str | None = None,
+    allow_unconfirmed_rollback: bool = False,
     timestamp: str | None = None,
     rollback_id: str | None = None,
     applied_at: str | None = None,
@@ -535,6 +862,29 @@ def process_stale_current_odds_archive_rollback(
     if backup_path is not None and str(backup_path).strip():
         selected_backup = Path(str(backup_path).strip()).expanduser()
 
+    def save_input_error(
+        preview_frame: pd.DataFrame,
+        error_summary: dict[str, object],
+    ) -> dict[str, Path | str]:
+        metadata = None
+        if not apply:
+            metadata_backup = (
+                Path(str(error_summary["selected_backup_path"]))
+                if error_summary.get("selected_backup_path")
+                else None
+            )
+            metadata = _error_confirmation_metadata(
+                current_odds_path=current_odds_path,
+                backup_path=metadata_backup,
+                status=str(error_summary.get("status", "not_checked")),
+            )
+        return save_stale_current_odds_archive_rollback_preview(
+            preview_frame,
+            error_summary,
+            output_dir,
+            confirmation_metadata=metadata,
+        )
+
     if selected_backup is None:
         preview, summary = _error_preview(
             "missing_backup_path",
@@ -542,7 +892,7 @@ def process_stale_current_odds_archive_rollback(
             current_odds_path=current_odds_path,
             backup_path=None,
         )
-        return save_stale_current_odds_archive_rollback_preview(preview, summary, output_dir)
+        return save_input_error(preview, summary)
     if not current_odds_path.exists() or not current_odds_path.is_file():
         preview, summary = _error_preview(
             "missing_current_odds",
@@ -550,7 +900,7 @@ def process_stale_current_odds_archive_rollback(
             current_odds_path=current_odds_path,
             backup_path=selected_backup,
         )
-        return save_stale_current_odds_archive_rollback_preview(preview, summary, output_dir)
+        return save_input_error(preview, summary)
     if selected_backup.suffix.lower() != ".csv":
         preview, summary = _error_preview(
             "invalid_backup_path",
@@ -558,7 +908,7 @@ def process_stale_current_odds_archive_rollback(
             current_odds_path=current_odds_path,
             backup_path=selected_backup,
         )
-        return save_stale_current_odds_archive_rollback_preview(preview, summary, output_dir)
+        return save_input_error(preview, summary)
     if not selected_backup.exists() or not selected_backup.is_file():
         preview, summary = _error_preview(
             "missing_backup_path",
@@ -566,7 +916,7 @@ def process_stale_current_odds_archive_rollback(
             current_odds_path=current_odds_path,
             backup_path=selected_backup,
         )
-        return save_stale_current_odds_archive_rollback_preview(preview, summary, output_dir)
+        return save_input_error(preview, summary)
     try:
         if current_odds_path.resolve() == selected_backup.resolve():
             preview, summary = _error_preview(
@@ -575,7 +925,7 @@ def process_stale_current_odds_archive_rollback(
                 current_odds_path=current_odds_path,
                 backup_path=selected_backup,
             )
-            return save_stale_current_odds_archive_rollback_preview(preview, summary, output_dir)
+            return save_input_error(preview, summary)
     except OSError:
         pass
 
@@ -592,7 +942,7 @@ def process_stale_current_odds_archive_rollback(
             current_odds_path=current_odds_path,
             backup_path=selected_backup,
         )
-        return save_stale_current_odds_archive_rollback_preview(preview, summary, output_dir)
+        return save_input_error(preview, summary)
     backup, backup_read_status, backup_error = _read_csv(
         selected_backup,
         label="selected backup",
@@ -606,7 +956,7 @@ def process_stale_current_odds_archive_rollback(
             current_odds_path=current_odds_path,
             backup_path=selected_backup,
         )
-        return save_stale_current_odds_archive_rollback_preview(preview, summary, output_dir)
+        return save_input_error(preview, summary)
 
     preview, summary = build_stale_current_odds_archive_rollback_preview(
         current,
@@ -633,8 +983,53 @@ def process_stale_current_odds_archive_rollback(
             "checksum_gate_note": checksum_gate_note,
         }
     )
-    for column in CHECKSUM_REPORT_COLUMNS:
+    confirmation_metadata: dict[str, object] | None = None
+    if apply:
+        stored_metadata, metadata_status, metadata_note = _load_confirmation_metadata(output_dir)
+        confirmation_fields = _confirmation_gate(
+            stored_metadata,
+            metadata_status=metadata_status,
+            metadata_note=metadata_note,
+            provided_confirm_id=confirm_id,
+            current_odds_path=current_odds_path,
+            backup_path=selected_backup,
+            apply_current_checksum=str(summary["current_sha256_before"]),
+            apply_backup_checksum=str(summary["selected_backup_sha256"]),
+            allow_unconfirmed=allow_unconfirmed_rollback,
+        )
+    else:
+        confirmation_metadata = _build_confirmation_metadata(
+            current_odds_path=current_odds_path,
+            backup_path=selected_backup,
+            current_checksum=str(summary["current_sha256_before"]),
+            backup_checksum=str(summary["selected_backup_sha256"]),
+        )
+        confirmation_fields = {
+            "confirm_id": str(confirmation_metadata["confirm_id"]),
+            "confirm_id_status": (
+                "Preview ready" if summary["status"] == "preview_ready" else "No rollback needed"
+            ),
+            "preview_current_checksum_sha256": str(
+                confirmation_metadata["preview_current_checksum_sha256"]
+            ),
+            "apply_current_checksum_sha256": "",
+            "preview_backup_checksum_sha256": str(
+                confirmation_metadata["preview_backup_checksum_sha256"]
+            ),
+            "apply_backup_checksum_sha256": "",
+            "confirmation_gate_result": (
+                "Preview ready" if summary["status"] == "preview_ready" else "Not needed"
+            ),
+            "confirmation_gate_note": (
+                "Review this preview, then use its confirmation ID in the exact Terminal apply command."
+                if summary["status"] == "preview_ready"
+                else "The selected backup already matches current_odds.csv, so no apply is needed."
+            ),
+        }
+    summary.update(confirmation_fields)
+    for column in [*CHECKSUM_REPORT_COLUMNS, *CONFIRMATION_REPORT_COLUMNS]:
         preview[column] = str(summary[column])
+
     if checksum_gate_result == "Blocked":
         summary["message"] = (
             "Rollback preview created, but the selected backup has a checksum mismatch. "
@@ -650,17 +1045,78 @@ def process_stale_current_odds_archive_rollback(
         summary["message"] = (
             "Checksum mismatch override requested from Terminal. The backup may have changed after creation."
         )
-    paths = save_stale_current_odds_archive_rollback_preview(preview, summary, output_dir)
+    if (
+        apply
+        and summary["status"] == "preview_ready"
+        and summary["confirmation_gate_result"] == "Blocked"
+    ):
+        summary["status"] = "confirmation_blocked"
+        summary["message"] = (
+            "Rollback was not applied because the confirmation ID or previewed file state did not match. "
+            "Run preview mode again and copy its exact apply command."
+        )
+    paths = save_stale_current_odds_archive_rollback_preview(
+        preview,
+        summary,
+        output_dir,
+        confirmation_metadata=confirmation_metadata,
+    )
     if not apply or summary["status"] != "preview_ready":
         return paths
 
     existing_audit = _load_existing_audit(output_dir)
-    current_sha = str(summary["current_sha256_before"])
-    backup_sha = str(summary["selected_backup_sha256"])
-    if not current_sha or source_file_sha256(current_odds_path) != current_sha:
-        raise ValueError("Current odds changed after preview. Rollback was not applied; run preview again.")
-    if not backup_sha or source_file_sha256(selected_backup) != backup_sha:
-        raise ValueError("The selected backup changed after preview. Rollback was not applied; run preview again.")
+    current_sha = str(summary["apply_current_checksum_sha256"])
+    backup_sha = str(summary["apply_backup_checksum_sha256"])
+    try:
+        latest_current_sha = source_file_sha256(current_odds_path)
+        latest_backup_sha = source_file_sha256(selected_backup)
+    except OSError as exc:
+        summary.update(
+            {
+                "status": "confirmation_blocked",
+                "message": "A rollback input became unreadable after confirmation. No file was changed.",
+                "confirm_id_status": "File became unreadable",
+                "confirmation_gate_result": "Blocked",
+                "confirmation_gate_note": (
+                    f"A rollback input became unreadable before the recovery backup was created: {exc}"
+                ),
+            }
+        )
+        for column in CONFIRMATION_REPORT_COLUMNS:
+            preview[column] = str(summary[column])
+        return save_stale_current_odds_archive_rollback_preview(preview, summary, output_dir)
+    if not current_sha or latest_current_sha != current_sha:
+        summary.update(
+            {
+                "status": "confirmation_blocked",
+                "message": "current_odds.csv changed after confirmation. No file was changed.",
+                "confirm_id_status": "Current odds changed",
+                "apply_current_checksum_sha256": latest_current_sha,
+                "confirmation_gate_result": "Blocked",
+                "confirmation_gate_note": (
+                    "current_odds.csv changed after the confirmation gate. Run preview mode again."
+                ),
+            }
+        )
+        for column in CONFIRMATION_REPORT_COLUMNS:
+            preview[column] = str(summary[column])
+        return save_stale_current_odds_archive_rollback_preview(preview, summary, output_dir)
+    if not backup_sha or latest_backup_sha != backup_sha:
+        summary.update(
+            {
+                "status": "confirmation_blocked",
+                "message": "The selected backup changed after confirmation. No file was changed.",
+                "confirm_id_status": "Backup changed",
+                "apply_backup_checksum_sha256": latest_backup_sha,
+                "confirmation_gate_result": "Blocked",
+                "confirmation_gate_note": (
+                    "The selected backup changed after the confirmation gate. Run preview mode again."
+                ),
+            }
+        )
+        for column in CONFIRMATION_REPORT_COLUMNS:
+            preview[column] = str(summary[column])
+        return save_stale_current_odds_archive_rollback_preview(preview, summary, output_dir)
 
     resolved_timestamp = _safe_timestamp(timestamp)
     pre_rollback_backup = (
@@ -720,6 +1176,16 @@ def process_stale_current_odds_archive_rollback(
                 "current_checksum_sha256": summary["current_checksum_sha256"],
                 "checksum_gate_result": summary["checksum_gate_result"],
                 "checksum_gate_note": summary["checksum_gate_note"],
+                "confirm_id": summary["confirm_id"],
+                "confirm_id_status": summary["confirm_id_status"],
+                "preview_current_checksum_sha256": summary[
+                    "preview_current_checksum_sha256"
+                ],
+                "apply_current_checksum_sha256": summary["apply_current_checksum_sha256"],
+                "preview_backup_checksum_sha256": summary["preview_backup_checksum_sha256"],
+                "apply_backup_checksum_sha256": summary["apply_backup_checksum_sha256"],
+                "confirmation_gate_result": summary["confirmation_gate_result"],
+                "confirmation_gate_note": summary["confirmation_gate_note"],
                 "current_sha256_after": current_sha_after,
                 "current_rows_before": len(current),
                 "backup_rows": len(backup),
@@ -738,9 +1204,22 @@ def process_stale_current_odds_archive_rollback(
         raise OSError(
             "Rollback audit could not be written, so the previous current_odds.csv was restored. "
             f"The recovery backup remains at `{pre_rollback_backup}`: {exc}"
-        ) from exc
+            ) from exc
 
-    if summary["checksum_gate_result"] == "Override used":
+    if (
+        summary["checksum_gate_result"] == "Override used"
+        and summary["confirmation_gate_result"] == "Override used"
+    ):
+        applied_message = (
+            "The selected pre-archive backup was restored with checksum and unconfirmed rollback "
+            "overrides. WARNING: the backup may have changed, and apply did not match a reviewed preview."
+        )
+    elif summary["confirmation_gate_result"] == "Override used":
+        applied_message = (
+            "The selected pre-archive backup was restored with the unconfirmed rollback override. "
+            "WARNING: apply did not match a reviewed preview."
+        )
+    elif summary["checksum_gate_result"] == "Override used":
         applied_message = (
             "The selected pre-archive backup was restored with an explicit checksum mismatch override. "
             "WARNING: the backup may have changed after creation."
@@ -762,7 +1241,13 @@ def process_stale_current_odds_archive_rollback(
             "applied_at": resolved_applied_at,
         }
     )
-    paths.update(save_stale_current_odds_archive_rollback_preview(preview, summary, output_dir))
+    paths.update(
+        save_stale_current_odds_archive_rollback_preview(
+            preview,
+            summary,
+            output_dir,
+        )
+    )
     paths.update(
         {
             "status": "applied",

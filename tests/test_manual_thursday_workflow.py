@@ -34,6 +34,8 @@ def test_manual_thursday_workflow_runs_supported_checks_and_runner() -> None:
     assert "python -m compileall -q src scripts app.py" in text
     assert "python -m pytest" in text
     assert "python scripts/run_scheduled_thursday_workflow.py" in text
+    assert "python scripts/verify_github_manual_thursday_run.py" in text
+    assert "id: verification" in text
     assert "--github-runner-handoff" in text
     assert '--current-odds-path="$CURRENT_ODDS_PATH"' in text
     assert '--fixtures-path="$FIXTURES_PATH"' in text
@@ -67,6 +69,8 @@ def test_manual_thursday_workflow_always_uploads_reports_and_writes_summary() ->
     assert "Fixtures freshness:" in text
     assert "Odds completeness:" in text
     assert "Card generation allowed:" in text
+    assert "github_manual_thursday_run_verification.csv" in text
+    assert "### Manual run verification" in text
 
 
 def test_manual_thursday_workflow_allows_blocked_but_fails_runtime_errors() -> None:
@@ -83,6 +87,8 @@ def test_manual_thursday_workflow_allows_blocked_but_fails_runtime_errors() -> N
         r'(?s)\n\s+1\)\n.*runtime failure.*\n\s+exit 1',
         text,
     )
+    assert "VERIFICATION_OUTCOME: ${{ steps.verification.outcome }}" in text
+    assert "Manual Thursday run verification did not produce" in text
 
 
 def test_manual_thursday_workflow_contains_no_apply_actions() -> None:

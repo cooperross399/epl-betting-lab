@@ -86,6 +86,12 @@ jobs:
           fi
           exit "${exit_code}"
 
+      - name: Verify manual Thursday run evidence
+        id: verification
+        if: always()
+        continue-on-error: true
+        run: python scripts/verify_github_manual_thursday_run.py
+
       - name: Upload Thursday reports
         id: upload
         if: always()
@@ -114,6 +120,7 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
           python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import csv
           import json
           from pathlib import Path
 
@@ -172,6 +179,35 @@ jobs:
                       print(f"- Card generation allowed: **{allowed}**")
                   if skipped:
                       print(f"- Steps skipped safely: {', '.join(str(step) for step in skipped)}")
+
+          verification_path = Path(
+              "data/outputs/github_manual_thursday_run_verification.csv"
+          )
+          if not verification_path.exists():
+              print("")
+              print("### Manual run verification")
+              print("- Verdict: **Verification report unavailable**")
+          else:
+              try:
+                  with verification_path.open(encoding="utf-8", newline="") as handle:
+                      rows = list(csv.DictReader(handle))
+              except (OSError, UnicodeError, csv.Error) as exc:
+                  print("")
+                  print("### Manual run verification")
+                  print("- Verdict: **Verification report unreadable**")
+                  print(f"- Verification error: {exc}")
+              else:
+                  verdict_row = next(
+                      (row for row in rows if row.get("category") == "Verdict"),
+                      None,
+                  )
+                  print("")
+                  print("### Manual run verification")
+                  if verdict_row is None:
+                      print("- Verdict: **Missing verdict row**")
+                  else:
+                      print(f"- Verdict: **{verdict_row.get('actual', 'Unknown')}**")
+                      print(f"- Next step: {verdict_row.get('details', '')}")
           PY
 
       - name: Enforce intentional pass/fail result
@@ -180,6 +216,7 @@ jobs:
           COMPILE_OUTCOME: ${{ steps.compile.outcome }}
           TEST_OUTCOME: ${{ steps.tests.outcome }}
           RUNNER_EXIT_CODE: ${{ steps.scheduled.outputs.exit_code }}
+          VERIFICATION_OUTCOME: ${{ steps.verification.outcome }}
           ARTIFACT_OUTCOME: ${{ steps.upload.outcome }}
         shell: bash
         run: |
@@ -189,6 +226,10 @@ jobs:
           fi
           if [[ "${ARTIFACT_OUTCOME}" != "success" ]]; then
             echo "::error::Thursday report artifacts were not uploaded successfully."
+            exit 1
+          fi
+          if [[ "${VERIFICATION_OUTCOME}" != "success" ]]; then
+            echo "::error::Manual Thursday run verification did not produce a trusted ready/blocked verdict."
             exit 1
           fi
           case "${RUNNER_EXIT_CODE}" in

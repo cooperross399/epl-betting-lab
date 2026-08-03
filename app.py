@@ -32,6 +32,7 @@ from epl_betting_lab.dashboard_actions import (
     run_current_odds_import_preview,
     run_current_odds_maintenance_preview,
     run_current_odds_validation,
+    run_github_manual_thursday_verification,
     run_ledger_health_check,
     run_odds_export_conversion_preview,
     run_odds_export_profile_diagnostic,
@@ -1012,6 +1013,56 @@ def render_tools_and_diagnostics(min_edge: float, max_juice: int, recent_matches
         "Scheduled Thursday workflow summary",
         "scheduled_thursday_workflow_summary.md",
         "python scripts/run_scheduled_thursday_workflow.py",
+    )
+    verification_command = "python scripts/verify_github_manual_thursday_run.py"
+    with st.container(border=True):
+        verification_col, action_col = st.columns([3, 1])
+        verification_col.markdown("**Manual GitHub Thursday run verification**")
+        verification_col.caption(
+            "Cross-check the handoff receipt, scheduled summary, and claimed output files."
+        )
+        if action_col.button(
+            "Verify GitHub run",
+            help="This reads report artifacts only and never changes odds or fixtures.",
+            width="stretch",
+        ):
+            run_dashboard_action(
+                "GitHub manual Thursday run verification",
+                run_github_manual_thursday_verification,
+            )
+        verification = read_output_csv(
+            "github_manual_thursday_run_verification.csv"
+        )
+        if verification is None or verification.empty:
+            st.info(
+                "No verification report yet. Run the button above after the GitHub "
+                "artifact outputs are available."
+            )
+        else:
+            verdict_rows = verification[
+                verification["category"].astype(str).eq("Verdict")
+            ]
+            if verdict_rows.empty:
+                st.warning("The verification CSV is missing its verdict row. Regenerate it.")
+            else:
+                verdict = str(verdict_rows.iloc[0].get("actual", "Unknown"))
+                reason = str(verdict_rows.iloc[0].get("details", ""))
+                if verdict == "Verified ready run":
+                    st.success(verdict)
+                elif verdict == "Verified blocked run":
+                    st.warning(verdict)
+                else:
+                    st.error(verdict)
+                st.caption(reason)
+    render_markdown_expander(
+        "GitHub manual Thursday run verification report",
+        "github_manual_thursday_run_verification.md",
+        verification_command,
+    )
+    render_table_expander(
+        "GitHub manual Thursday run verification checks",
+        "github_manual_thursday_run_verification.csv",
+        verification_command,
     )
     action_cols = st.columns(4)
     if action_cols[0].button("Create current odds template", width="stretch"):

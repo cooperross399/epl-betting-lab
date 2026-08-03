@@ -77,6 +77,8 @@ data/outputs/github_runner_input_handoff.json
 data/outputs/github_runner_input_handoff.md
 data/outputs/scheduled_thursday_workflow_summary.json
 data/outputs/scheduled_thursday_workflow_summary.md
+data/outputs/github_manual_thursday_run_verification.csv
+data/outputs/github_manual_thursday_run_verification.md
 ```
 
 They show:
@@ -92,6 +94,34 @@ They show:
 
 This gives you a reviewable receipt without exposing made-up prices because the
 runner never invents missing data.
+
+## Verify a completed manual run
+
+The Action runs this read-only verification automatically after the scheduled
+runner:
+
+```bash
+python scripts/verify_github_manual_thursday_run.py
+```
+
+You can run the same command after placing a downloaded artifact's reports in
+`data/outputs/`. It compares the standalone handoff proof with the copy inside
+the scheduled summary and verifies the Git ref/SHA, exact input paths and
+checksums, freshness, validation, completeness, card permission, workflow
+status, and every output file the runner says it created.
+
+The verdict is one of:
+
+- `Verified ready run`: trusted evidence and expected card files are present.
+- `Verified blocked run`: the safety gate stopped generation as intended.
+- `Incomplete run artifacts`: expected report files are missing.
+- `Missing handoff proof`: the input identity receipt is absent.
+- `Missing scheduled workflow summary`: the workflow receipt is absent.
+- `Failed/untrusted run`: evidence is malformed, inconsistent, or unsafe.
+
+The dashboard shows the latest verification report under
+`Tools / Diagnostics`. Verification only reads report artifacts; it never
+changes odds, fixtures, imports, ledger rows, profiles, or model behavior.
 
 ## Fail-closed rules
 

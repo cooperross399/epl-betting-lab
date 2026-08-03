@@ -540,12 +540,34 @@ Then:
 6. Download `scheduled-thursday-reports-RUN_NUMBER-RUN_ATTEMPT` from the
    **Artifacts** section.
 
+The Action also creates a read-only verification receipt inside the artifact:
+
+```text
+data/outputs/github_manual_thursday_run_verification.csv
+data/outputs/github_manual_thursday_run_verification.md
+```
+
+After downloading an artifact into the project's `data/outputs/` folder, you
+can regenerate the same check locally with:
+
+```bash
+python scripts/verify_github_manual_thursday_run.py
+```
+
+The report cross-checks the standalone input handoff against the handoff copy
+inside the scheduled summary, then checks the Git ref/SHA, input paths and
+checksums, freshness, validation, completeness, card permission, workflow
+status, and claimed output files. Read it under `Tools / Diagnostics` in the
+dashboard. A ready or safely blocked run is verified; missing or inconsistent
+evidence is not trusted.
+
 The artifact contains the available `data/outputs/` reports and is retained for
 14 days. A missing or blocked odds setup still uploads the validation and
 scheduled-workflow summaries when possible. `Blocked` is shown as a warning
 and is allowed to finish successfully so you can download the explanation.
-Compile failures, test failures, runtime failures, unexpected exit codes, or
-artifact-upload failures make the Action fail.
+Compile failures, test failures, runtime failures, unexpected exit codes,
+untrusted/incomplete verification, or artifact-upload failures make the Action
+fail.
 
 The runner accepts only regular CSV paths inside the checked-out repository. It
 records the selected Git ref and commit, exact paths, calculated SHA-256

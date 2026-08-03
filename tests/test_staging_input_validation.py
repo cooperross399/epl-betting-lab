@@ -232,6 +232,11 @@ def test_save_writes_reports_without_changing_staging_files(tmp_path: Path) -> N
     assert Path(result["csv"]).exists()
     assert Path(result["markdown"]).exists()
     payload = json.loads(Path(result["json"]).read_text(encoding="utf-8"))
+    assert payload["generated_at"] == RUN_AT.isoformat(timespec="seconds")
+    assert payload["current_odds_staging"]["row_count"] == len(MARKETS)
+    assert payload["upcoming_fixtures_staging"]["row_count"] == 1
+    assert len(payload["current_odds_staging"]["checksum_sha256"]) == 64
+    assert len(payload["upcoming_fixtures_staging"]["checksum_sha256"]) == 64
     assert payload["files_promoted_or_copied"] is False
     assert payload["cron_enabled"] is False
     assert paths["odds_path"].read_bytes() == original_odds

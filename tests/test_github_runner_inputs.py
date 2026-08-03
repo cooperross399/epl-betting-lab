@@ -12,6 +12,9 @@ from epl_betting_lab.github_runner_inputs import (
     build_github_runner_input_handoff,
     save_github_runner_input_handoff,
 )
+from epl_betting_lab.reports.staging_input_validation import (
+    save_staging_input_validation,
+)
 
 
 RUN_AT = datetime(2026, 8, 6, 12, 0, tzinfo=timezone.utc)
@@ -95,6 +98,30 @@ def _build(root: Path, paths: dict[str, Path], **kwargs) -> dict[str, object]:
         repository_root=root,
         **kwargs,
     )
+
+
+def _write_ready_staging_receipt(
+    root: Path,
+) -> tuple[dict[str, Path], Path]:
+    paths = _write_inputs(root)
+    staging = root / "data" / "staging"
+    staging.mkdir(parents=True)
+    staging_odds = staging / "current_odds_staging.csv"
+    staging_fixtures = staging / "upcoming_fixtures_staging.csv"
+    staging_odds.write_bytes(paths["current_odds_path"].read_bytes())
+    staging_fixtures.write_bytes(paths["fixtures_path"].read_bytes())
+    paths["current_odds_path"] = staging_odds
+    paths["fixtures_path"] = staging_fixtures
+    saved = save_staging_input_validation(
+        staging_odds,
+        staging_fixtures,
+        matches_path=paths["matches_path"],
+        output_dir=paths["output_dir"],
+        repository_root=root,
+        staging_dir=staging,
+        run_at=RUN_AT,
+    )
+    return paths, Path(saved["json"])
 
 
 def test_runner_handoff_records_valid_committed_inputs_and_allows_card(
@@ -259,6 +286,107 @@ def test_runner_handoff_verifies_matching_optional_checksums(tmp_path: Path) -> 
     assert result["current_odds_checksum_status"] == "Verified"
     assert result["fixtures_checksum_status"] == "Verified"
     assert result["card_generation_allowed"] is True
+
+
+def test_runner_handoff_binds_exact_ready_staging_receipt(tmp_path: Path) -> None:
+    paths, receipt_path = _write_ready_staging_receipt(tmp_path)
+
+    result = _build(
+        tmp_path,
+        paths,
+        staging_receipt_path=receipt_path,
+        require_staging_receipt=True,
+    )
+
+    assert result["status"] == "Warnings only"
+    assert result["staging_receipt_required"] is True
+    assert result["staging_receipt_verdict"] == "Ready for handoff"
+    assert result["staging_receipt_binding_status"] == "Verified"
+    assert result["staging_receipt_path_match_status"] == "Verified"
+    assert result["staging_receipt_input_checksum_status"] == "Verified"
+    assert result["staging_receipt_row_count_status"] == "Verified"
+    assert result["card_generation_allowed"] is True
+
+
+def test_runner_handoff_blocks_missing_required_staging_receipt(
+    tmp_path: Path,
+) -> None:
+    paths, _ = _write_ready_staging_receipt(tmp_path)
+
+    result = _build(
+        tmp_path,
+        paths,
+        staging_receipt_path=tmp_path / "data" / "outputs" / "missing.json",
+        require_staging_receipt=True,
+    )
+
+    assert result["staging_receipt_binding_status"] == "Missing"
+    assert result["card_generation_allowed"] is False
+    assert any("receipt is missing" in item for item in result["blockers"])
+
+
+def test_runner_handoff_blocks_changed_staging_file_after_receipt(
+    tmp_path: Path,
+) -> None:
+    paths, receipt_path = _write_ready_staging_receipt(tmp_path)
+    odds = pd.read_csv(paths["current_odds_path"])
+    odds.loc[0, "american_odds"] = -109
+    odds.to_csv(paths["current_odds_path"], index=False)
+
+    result = _build(
+        tmp_path,
+        paths,
+        staging_receipt_path=receipt_path,
+        require_staging_receipt=True,
+    )
+
+    assert result["staging_receipt_current_odds_checksum_status"] == "Mismatch"
+    assert result["staging_receipt_input_checksum_status"] == "Mismatch"
+    assert result["card_generation_allowed"] is False
+    assert any("changed after validation" in item for item in result["blockers"])
+
+
+def test_runner_handoff_blocks_receipt_path_or_verdict_mismatch(
+    tmp_path: Path,
+) -> None:
+    paths, receipt_path = _write_ready_staging_receipt(tmp_path)
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    receipt["verdict"] = "Needs fixes"
+    receipt["current_odds_staging"]["path"] = "data/staging/different.csv"
+    receipt_path.write_text(json.dumps(receipt), encoding="utf-8")
+
+    result = _build(
+        tmp_path,
+        paths,
+        staging_receipt_path=receipt_path,
+        require_staging_receipt=True,
+    )
+
+    assert result["staging_receipt_verdict"] == "Needs fixes"
+    assert result["staging_receipt_path_match_status"] == "Mismatch"
+    assert result["staging_receipt_binding_status"] == "Blocked"
+    assert result["card_generation_allowed"] is False
+
+
+def test_runner_handoff_rejects_non_staging_paths_for_required_receipt(
+    tmp_path: Path,
+) -> None:
+    staging_paths, receipt_path = _write_ready_staging_receipt(tmp_path)
+    manual_paths = _write_inputs(tmp_path / "other")
+
+    result = build_github_runner_input_handoff(
+        current_odds_path=manual_paths["current_odds_path"],
+        fixtures_path=manual_paths["fixtures_path"],
+        matches_path=staging_paths["matches_path"],
+        run_at=RUN_AT,
+        repository_root=tmp_path,
+        staging_receipt_path=receipt_path,
+        require_staging_receipt=True,
+    )
+
+    assert result["staging_receipt_path_match_status"] == "Mismatch"
+    assert result["card_generation_allowed"] is False
+    assert any("inside `data/staging`" in item for item in result["blockers"])
 
 
 def test_runner_handoff_writes_json_and_beginner_markdown(tmp_path: Path) -> None:

@@ -37,6 +37,14 @@ TRUSTED_HANDOFF_FIELDS = (
     "status",
     "github_ref",
     "github_sha",
+    "staging_receipt_required",
+    "staging_receipt_path",
+    "staging_receipt_checksum_sha256",
+    "staging_receipt_verdict",
+    "staging_receipt_generated_at",
+    "staging_receipt_binding_status",
+    "staging_receipt_path_match_status",
+    "staging_receipt_input_checksum_status",
     "current_odds_path",
     "current_odds_checksum_sha256",
     "fixtures_path",
@@ -279,6 +287,20 @@ def build_github_manual_run_verification(
     odds_checksum = str(handoff.get("current_odds_checksum_sha256", ""))
     fixtures_path = str(handoff.get("fixtures_path", ""))
     fixtures_checksum = str(handoff.get("fixtures_checksum_sha256", ""))
+    receipt_required = handoff.get("staging_receipt_required") is True
+    receipt_path = str(handoff.get("staging_receipt_path", ""))
+    receipt_checksum = str(handoff.get("staging_receipt_checksum_sha256", ""))
+    receipt_verdict = str(handoff.get("staging_receipt_verdict", "Not checked"))
+    receipt_generated_at = str(handoff.get("staging_receipt_generated_at", ""))
+    receipt_binding = str(
+        handoff.get("staging_receipt_binding_status", "Not checked")
+    )
+    receipt_path_match = str(
+        handoff.get("staging_receipt_path_match_status", "Not checked")
+    )
+    receipt_checksum_match = str(
+        handoff.get("staging_receipt_input_checksum_status", "Not checked")
+    )
     odds_freshness = str(handoff.get("current_odds_freshness_status", "Not checked"))
     fixtures_freshness = str(handoff.get("fixtures_freshness_status", "Not checked"))
     validation_status = str(handoff.get("validation_status", "Not checked"))
@@ -296,6 +318,12 @@ def build_github_manual_run_verification(
     proof_values = (
         ("Git ref", github_ref),
         ("Git SHA", github_sha),
+        ("Staging receipt required", receipt_required),
+        ("Staging receipt path", receipt_path),
+        ("Staging receipt verdict", receipt_verdict),
+        ("Staging receipt generated at", receipt_generated_at),
+        ("Staging receipt binding", receipt_binding),
+        ("Staging receipt checksum match", receipt_checksum_match),
         ("Odds path", odds_path),
         ("Odds checksum", odds_checksum),
         ("Fixtures path", fixtures_path),
@@ -349,6 +377,22 @@ def build_github_manual_run_verification(
                     SHA256_PATTERN.fullmatch(fixtures_checksum.lower())
                 ),
             }
+            if receipt_required:
+                ready_requirements.update(
+                    {
+                        "Staging receipt path": bool(receipt_path),
+                        "Staging receipt checksum": bool(
+                            SHA256_PATTERN.fullmatch(receipt_checksum.lower())
+                        ),
+                        "Staging receipt verdict": receipt_verdict
+                        == "Ready for handoff",
+                        "Staging receipt binding": receipt_binding == "Verified",
+                        "Staging receipt path match": receipt_path_match
+                        == "Verified",
+                        "Staging receipt input checksums": receipt_checksum_match
+                        == "Verified",
+                    }
+                )
             for label, passed in ready_requirements.items():
                 if not passed:
                     trust_failures.append(
@@ -480,6 +524,14 @@ def build_github_manual_run_verification(
         "next_step": _next_step(verdict),
         "github_ref": github_ref,
         "github_sha": github_sha,
+        "staging_receipt_required": receipt_required,
+        "staging_receipt_path": receipt_path,
+        "staging_receipt_checksum_sha256": receipt_checksum,
+        "staging_receipt_verdict": receipt_verdict,
+        "staging_receipt_generated_at": receipt_generated_at,
+        "staging_receipt_binding_status": receipt_binding,
+        "staging_receipt_path_match_status": receipt_path_match,
+        "staging_receipt_input_checksum_status": receipt_checksum_match,
         "current_odds_path": odds_path,
         "current_odds_checksum_sha256": odds_checksum,
         "fixtures_path": fixtures_path,
@@ -535,6 +587,21 @@ def render_github_manual_run_verification(
         "",
         f"- Git ref: `{summary['github_ref'] or 'not available'}`",
         f"- Git SHA: `{summary['github_sha'] or 'not available'}`",
+        (
+            "- Staging receipt required: **"
+            f"{'Yes' if summary['staging_receipt_required'] else 'No'}**"
+        ),
+        f"- Staging receipt: `{summary['staging_receipt_path'] or 'not provided'}`",
+        f"- Receipt verdict: **{summary['staging_receipt_verdict']}**",
+        (
+            "- Receipt generated at: "
+            f"{summary['staging_receipt_generated_at'] or 'not available'}"
+        ),
+        f"- Receipt binding: **{summary['staging_receipt_binding_status']}**",
+        (
+            "- Receipt input checksums: "
+            f"**{summary['staging_receipt_input_checksum_status']}**"
+        ),
         f"- Odds path: `{summary['current_odds_path'] or 'not available'}`",
         (
             "- Odds SHA-256: "

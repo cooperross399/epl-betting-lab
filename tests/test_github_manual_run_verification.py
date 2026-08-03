@@ -192,6 +192,64 @@ def test_verification_rejects_card_generated_after_block(tmp_path: Path) -> None
     assert any("denied" in item for item in summary["trust_failures"])
 
 
+def test_verification_requires_verified_binding_when_staging_receipt_is_required(
+    tmp_path: Path,
+) -> None:
+    output_dir = tmp_path / "data" / "outputs"
+    paths = _write_run(output_dir, allowed=True)
+    handoff = json.loads(paths["handoff_json"].read_text(encoding="utf-8"))
+    handoff.update(
+        {
+            "staging_receipt_required": True,
+            "staging_receipt_path": "data/outputs/staging_input_validation.json",
+            "staging_receipt_checksum_sha256": "d" * 64,
+            "staging_receipt_verdict": "Ready for handoff",
+            "staging_receipt_generated_at": "2026-08-06T11:30:00+00:00",
+            "staging_receipt_binding_status": "Verified",
+            "staging_receipt_path_match_status": "Verified",
+            "staging_receipt_input_checksum_status": "Verified",
+        }
+    )
+    scheduled = json.loads(paths["scheduled_json"].read_text(encoding="utf-8"))
+    scheduled["input_handoff"] = copy.deepcopy(handoff)
+    paths["handoff_json"].write_text(json.dumps(handoff), encoding="utf-8")
+    paths["scheduled_json"].write_text(json.dumps(scheduled), encoding="utf-8")
+
+    _, summary = build_github_manual_run_verification(output_dir)
+
+    assert summary["verdict"] == "Verified ready run"
+    assert summary["staging_receipt_binding_status"] == "Verified"
+
+
+def test_verification_rejects_unverified_required_staging_receipt(
+    tmp_path: Path,
+) -> None:
+    output_dir = tmp_path / "data" / "outputs"
+    paths = _write_run(output_dir, allowed=True)
+    handoff = json.loads(paths["handoff_json"].read_text(encoding="utf-8"))
+    handoff.update(
+        {
+            "staging_receipt_required": True,
+            "staging_receipt_path": "data/outputs/staging_input_validation.json",
+            "staging_receipt_checksum_sha256": "d" * 64,
+            "staging_receipt_verdict": "Ready for handoff",
+            "staging_receipt_generated_at": "2026-08-06T11:30:00+00:00",
+            "staging_receipt_binding_status": "Blocked",
+            "staging_receipt_path_match_status": "Verified",
+            "staging_receipt_input_checksum_status": "Mismatch",
+        }
+    )
+    scheduled = json.loads(paths["scheduled_json"].read_text(encoding="utf-8"))
+    scheduled["input_handoff"] = copy.deepcopy(handoff)
+    paths["handoff_json"].write_text(json.dumps(handoff), encoding="utf-8")
+    paths["scheduled_json"].write_text(json.dumps(scheduled), encoding="utf-8")
+
+    _, summary = build_github_manual_run_verification(output_dir)
+
+    assert summary["verdict"] == "Failed/untrusted run"
+    assert any("staging receipt binding" in item.lower() for item in summary["trust_failures"])
+
+
 def test_save_verification_writes_csv_and_markdown(tmp_path: Path) -> None:
     output_dir = tmp_path / "data" / "outputs"
     _write_run(output_dir)

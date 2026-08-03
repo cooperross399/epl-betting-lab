@@ -371,11 +371,38 @@ def test_scheduled_workflow_records_strict_github_runner_handoff(
     assert handoff["current_odds_path"] == "manual/current_odds.csv"
     assert handoff["fixtures_path"] == "manual/upcoming_fixtures.csv"
     assert handoff["completeness_status"] == "Complete"
+    assert handoff["staging_receipt_required"] is False
+    assert handoff["staging_receipt_binding_status"] == "Not required"
     assert (
         paths["output_dir"] / "github_runner_input_handoff.json"
     ).exists()
     assert result["summary"]["steps"][0]["step"] == "GitHub runner input handoff"
     assert "best_bets" in calls
+
+
+def test_scheduled_workflow_blocks_when_required_staging_receipt_is_missing(
+    tmp_path,
+) -> None:
+    paths = _workflow_paths(tmp_path)
+    _write_complete_runner_inputs(paths)
+    calls: list[str] = []
+
+    result = run_scheduled_thursday_workflow(
+        **paths,
+        run_at=FIXED_RUN_AT,
+        repository_root=tmp_path,
+        require_github_runner_handoff=True,
+        require_staging_receipt=True,
+        staging_receipt_path=tmp_path / "outputs" / "missing-receipt.json",
+        actions=_actions(calls),
+    )
+
+    assert result["status"] == "Blocked"
+    handoff = result["summary"]["input_handoff"]
+    assert handoff["staging_receipt_binding_status"] == "Missing"
+    assert handoff["card_generation_allowed"] is False
+    assert "best_bets" not in calls
+    assert "tier_performance" in calls
 
 
 def test_scheduled_workflow_blocks_stale_runner_odds_before_card_generation(

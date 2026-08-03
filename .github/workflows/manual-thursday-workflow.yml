@@ -4,14 +4,19 @@ on:
   workflow_dispatch:
     inputs:
       current_odds_path:
-        description: Repository-relative path to the prepared current odds CSV
+        description: Repository-relative path to the validated staging odds CSV
         required: true
-        default: data/manual/current_odds.csv
+        default: data/staging/current_odds_staging.csv
         type: string
       fixtures_path:
-        description: Repository-relative path to the prepared upcoming fixtures CSV
+        description: Repository-relative path to the validated staging fixtures CSV
         required: true
-        default: data/manual/upcoming_fixtures.csv
+        default: data/staging/upcoming_fixtures_staging.csv
+        type: string
+      staging_receipt_path:
+        description: Repository-relative path to the reviewed Ready staging JSON receipt
+        required: true
+        default: data/outputs/staging_input_validation.json
         type: string
       expected_current_odds_sha256:
         description: Optional SHA-256 for the prepared current odds CSV
@@ -65,6 +70,7 @@ jobs:
         env:
           CURRENT_ODDS_PATH: ${{ inputs.current_odds_path }}
           FIXTURES_PATH: ${{ inputs.fixtures_path }}
+          STAGING_RECEIPT_PATH: ${{ inputs.staging_receipt_path }}
           EXPECTED_CURRENT_ODDS_SHA256: ${{ inputs.expected_current_odds_sha256 }}
           EXPECTED_FIXTURES_SHA256: ${{ inputs.expected_fixtures_sha256 }}
         shell: bash
@@ -74,6 +80,8 @@ jobs:
             --github-runner-handoff \
             --current-odds-path="$CURRENT_ODDS_PATH" \
             --fixtures-path="$FIXTURES_PATH" \
+            --staging-receipt-path="$STAGING_RECEIPT_PATH" \
+            --require-staging-receipt \
             --expected-current-odds-sha256="$EXPECTED_CURRENT_ODDS_SHA256" \
             --expected-fixtures-sha256="$EXPECTED_FIXTURES_SHA256"
           exit_code=$?
@@ -147,6 +155,26 @@ jobs:
                       print("### Input handoff proof")
                       print(f"- GitHub ref: `{handoff.get('github_ref') or 'not available'}`")
                       print(f"- GitHub commit: `{handoff.get('github_sha') or 'not available'}`")
+                      print(
+                          "- Staging receipt: "
+                          f"`{handoff.get('staging_receipt_path') or 'not provided'}`"
+                      )
+                      print(
+                          "- Staging receipt verdict: "
+                          f"**{handoff.get('staging_receipt_verdict', 'Not checked')}**"
+                      )
+                      print(
+                          "- Staging receipt generated at: "
+                          f"{handoff.get('staging_receipt_generated_at') or 'not available'}"
+                      )
+                      print(
+                          "- Staging receipt binding: "
+                          f"**{handoff.get('staging_receipt_binding_status', 'Not checked')}**"
+                      )
+                      print(
+                          "- Receipt input checksums: "
+                          f"**{handoff.get('staging_receipt_input_checksum_status', 'Not checked')}**"
+                      )
                       print(f"- Odds file used: `{handoff.get('current_odds_path', '')}`")
                       print(
                           "- Odds SHA-256: "

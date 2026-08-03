@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pandas as pd
@@ -45,6 +46,7 @@ from epl_betting_lab.dashboard_actions import (
     run_stale_current_odds_archive_rollback_preview,
     run_stale_current_odds_backup_list,
     run_stale_current_odds_report,
+    run_staging_input_validation,
     run_settlement_preview,
     run_tier_performance_report,
     run_thursday_best_bets_comparison,
@@ -617,6 +619,49 @@ def render_odds_import() -> None:
         "Apply remains Terminal-only. This page cannot install profiles, restore registry backups, "
         "apply odds imports, or edit current_odds.csv."
     )
+
+    render_import_step("Validate provider staging")
+    st.caption(
+        "Checks real provider odds and fixtures in data/staging before they can be "
+        "considered for the GitHub runner handoff."
+    )
+    if st.button("Validate staging inputs", type="primary", width="stretch"):
+        run_dashboard_action("Staging input validation", run_staging_input_validation)
+    staging_command = "python scripts/validate_staging_inputs.py"
+    staging_status_path = OUTPUTS_DIR / "staging_input_validation.json"
+    if not staging_status_path.exists():
+        st.info("Staging inputs have not been checked yet. Run the button above.")
+    else:
+        try:
+            staging_status = json.loads(
+                staging_status_path.read_text(encoding="utf-8")
+            )
+        except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+            st.warning(f"The staging validation status could not be read: {exc}")
+        else:
+            verdict = str(staging_status.get("verdict", "Not checked"))
+            message = str(staging_status.get("next_step", "Review the report."))
+            if verdict == "Ready for handoff":
+                st.success(f"{verdict}. {message}")
+            elif verdict == "Needs fixes":
+                st.warning(f"{verdict}. {message}")
+            else:
+                st.error(f"{verdict}. {message}")
+    render_markdown_expander(
+        "Staging input validation report",
+        "staging_input_validation.md",
+        staging_command,
+    )
+    render_table_expander(
+        "Staging input validation checks",
+        "staging_input_validation.csv",
+        staging_command,
+    )
+    st.caption(
+        "Dashboard validation is read-only. It never promotes, copies, applies, or "
+        "edits staging or manual files."
+    )
+    st.divider()
 
     render_import_step("Diagnose export")
     if st.button("Diagnose odds export profile", width="stretch"):

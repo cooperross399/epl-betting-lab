@@ -70,6 +70,8 @@ def resolve_open_next_section(cue: object) -> str | None:
                 "installed profile",
                 "rollback preview",
                 "export conversion",
+                "provider staging",
+                "staging inputs",
             ),
             "Odds Import",
         ),
@@ -159,15 +161,16 @@ class OddsImportStep:
 
 
 ODDS_IMPORT_STEPS = (
-    OddsImportStep(1, "Diagnose export", "Find the closest installed column-mapping profile."),
-    OddsImportStep(2, "Suggest profile", "Create a review-only draft when no profile fits."),
-    OddsImportStep(3, "Validate suggested profile", "Test the draft mapping entirely in memory."),
-    OddsImportStep(4, "Preview profile install", "Review the exact registry change before Terminal apply."),
-    OddsImportStep(5, "Verify installed profile", "Check an installed profile against the source export."),
-    OddsImportStep(6, "Rollback preview", "Compare a registry backup without restoring it."),
-    OddsImportStep(7, "Convert export", "Preview standardized odds rows without creating an import file."),
-    OddsImportStep(8, "Preview current odds import", "Validate additions and updates without applying them."),
-    OddsImportStep(9, "View import audits", "Review prior Terminal apply batches and backups."),
+    OddsImportStep(1, "Validate provider staging", "Check provider odds and fixtures before handoff."),
+    OddsImportStep(2, "Diagnose export", "Find the closest installed column-mapping profile."),
+    OddsImportStep(3, "Suggest profile", "Create a review-only draft when no profile fits."),
+    OddsImportStep(4, "Validate suggested profile", "Test the draft mapping entirely in memory."),
+    OddsImportStep(5, "Preview profile install", "Review the exact registry change before Terminal apply."),
+    OddsImportStep(6, "Verify installed profile", "Check an installed profile against the source export."),
+    OddsImportStep(7, "Rollback preview", "Compare a registry backup without restoring it."),
+    OddsImportStep(8, "Convert export", "Preview standardized odds rows without creating an import file."),
+    OddsImportStep(9, "Preview current odds import", "Validate additions and updates without applying them."),
+    OddsImportStep(10, "View import audits", "Review prior Terminal apply batches and backups."),
 )
 
 

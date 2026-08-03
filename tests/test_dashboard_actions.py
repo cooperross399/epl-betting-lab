@@ -31,6 +31,7 @@ from epl_betting_lab.dashboard_actions import (
     run_stale_current_odds_archive_rollback_preview,
     run_stale_current_odds_backup_list,
     run_stale_current_odds_report,
+    run_staging_input_validation,
     run_tier_performance_report,
     run_thursday_best_bets_comparison,
     run_thursday_best_bets_report,
@@ -103,6 +104,35 @@ def test_run_current_odds_validation_writes_report_without_creating_odds_file(tm
     assert paths["csv"].exists()
     assert paths["markdown"].exists()
     assert not odds_path.exists()
+
+
+def test_run_staging_input_validation_is_report_only(tmp_path, monkeypatch) -> None:
+    output_dir = tmp_path / "outputs"
+    odds_path = tmp_path / "staging" / "odds.csv"
+    fixtures_path = tmp_path / "staging" / "fixtures.csv"
+    expected = {
+        "csv": output_dir / "staging_input_validation.csv",
+        "markdown": output_dir / "staging_input_validation.md",
+        "json": output_dir / "staging_input_validation.json",
+        "verdict": "Missing staging inputs",
+    }
+
+    def fake_save(selected_odds, selected_fixtures, *, output_dir):
+        assert selected_odds == odds_path
+        assert selected_fixtures == fixtures_path
+        assert output_dir == tmp_path / "outputs"
+        return expected
+
+    monkeypatch.setattr(
+        dashboard_actions,
+        "save_staging_input_validation",
+        fake_save,
+    )
+
+    assert (
+        run_staging_input_validation(odds_path, fixtures_path, output_dir)
+        == expected
+    )
 
 
 def test_run_create_current_odds_template_creates_file_without_overwrite(tmp_path, monkeypatch) -> None:

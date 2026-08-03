@@ -118,6 +118,40 @@ btts selections: yes, no
 the closing price after the market closes. If it is blank, CLV stays missing
 instead of being guessed.
 
+### Validate provider staging inputs
+
+Future odds/fixtures providers should write their prepared standard CSVs to:
+
+```text
+data/staging/current_odds_staging.csv
+data/staging/upcoming_fixtures_staging.csv
+```
+
+Header-only templates are already in `data/staging/`. After adding real odds
+and current fixtures, run:
+
+```bash
+python scripts/validate_staging_inputs.py
+```
+
+The validator restricts inputs to safe CSV paths inside `data/staging`, records
+SHA-256 checksums, checks required columns and today/future dates, validates
+teams/markets/selections and fixture matching, rejects duplicate odds rows, and
+reuses the existing odds validation, 100% completeness, freshness, and GitHub
+runner handoff gates. It writes:
+
+```text
+data/outputs/staging_input_validation.csv
+data/outputs/staging_input_validation.md
+data/outputs/staging_input_validation.json
+```
+
+Only `Ready for handoff` means the files passed all blocking gates. Validation
+does not copy staging files into `data/manual/`, generate a card, or enable
+cron. The `Odds Import` dashboard section has the same read-only button and
+report display. See [docs/STAGING_INPUTS.md](docs/STAGING_INPUTS.md) for the
+full workflow.
+
 ---
 
 ## Generate a weekly card
@@ -564,8 +598,9 @@ automatically source permitted real sportsbook odds. This repository-file
 handoff still needs a person to prepare and review each weekly input. Before
 automatic scheduling, add a trusted automated odds/fixture source, secure its
 credentials, choose the Thursday timezone and cutoff, verify provider mappings,
-and keep a person responsible for reviewing warnings. The Action never guesses
-missing prices and never uses `--force`.
+define an explicitly reviewed staging-to-handoff step, and keep a person
+responsible for reviewing warnings. The Action never guesses missing prices
+and never uses `--force`.
 
 The dashboard shows a current-odds status badge:
 

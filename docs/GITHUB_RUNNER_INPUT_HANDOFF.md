@@ -7,6 +7,18 @@ you select when starting the Action.
 The runner does not fetch sportsbook prices, fill blank prices, edit the input
 files, use `--force`, or place bets.
 
+Provider-produced files should first pass the separate read-only staging gate:
+
+```bash
+python scripts/validate_staging_inputs.py
+```
+
+That gate reads `data/staging/current_odds_staging.csv` and
+`data/staging/upcoming_fixtures_staging.csv`. A `Ready for handoff` verdict
+means the existing freshness, validation, completeness, and runner handoff
+checks passed. It does not copy or promote the files. If those staging paths
+are intentionally selected for a manual Action, this handoff gate runs again.
+
 ## What to prepare
 
 The default input paths are:

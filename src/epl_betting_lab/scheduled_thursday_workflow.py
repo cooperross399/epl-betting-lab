@@ -411,6 +411,24 @@ def _render_summary(summary: dict[str, object]) -> str:
                     "- Receipt input checksum match: "
                     f"**{handoff.get('staging_receipt_input_checksum_status', 'Not checked')}**"
                 ),
+                (
+                    "- Provider: "
+                    f"**{handoff.get('staging_receipt_provider_name') or 'unknown'}** "
+                    f"({handoff.get('staging_receipt_provider_type', 'unknown')})"
+                ),
+                (
+                    "- Provider policy: "
+                    f"**{handoff.get('staging_provider_policy_status', 'Not checked')}**"
+                ),
+                (
+                    "- Receipt age: "
+                    f"**{handoff.get('staging_receipt_age_status', 'Not checked')}** "
+                    f"({handoff.get('staging_receipt_age_hours')} hour(s))"
+                ),
+                (
+                    "- Thursday cutoff: "
+                    f"**{handoff.get('staging_cutoff_policy_status', 'Not checked')}**"
+                ),
                 f"- Current odds input: `{handoff.get('current_odds_path', '')}`",
                 (
                     "- Current odds SHA-256: "
@@ -485,6 +503,7 @@ def run_scheduled_thursday_workflow(
     expected_fixtures_sha256: str = "",
     staging_receipt_path: Path | None = None,
     require_staging_receipt: bool = False,
+    staging_provider_policy_path: Path | None = None,
     actions: ScheduledWorkflowActions | None = None,
     progress: Callable[[str, str, str], None] | None = None,
 ) -> dict[str, object]:
@@ -606,6 +625,7 @@ def run_scheduled_thursday_workflow(
                 expected_fixtures_sha256=expected_fixtures_sha256,
                 staging_receipt_path=staging_receipt_path,
                 require_staging_receipt=require_staging_receipt,
+                staging_provider_policy_path=staging_provider_policy_path,
             )
         except Exception as exc:
             required_failure = True

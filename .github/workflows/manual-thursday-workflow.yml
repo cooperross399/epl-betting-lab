@@ -18,6 +18,11 @@ on:
         required: true
         default: data/outputs/staging_input_validation.json
         type: string
+      staging_provider_policy_path:
+        description: Repository-relative provider allowlist, receipt age, and cutoff policy
+        required: true
+        default: data/manual/staging_provider_policy.json
+        type: string
       expected_current_odds_sha256:
         description: Optional SHA-256 for the prepared current odds CSV
         required: false
@@ -71,6 +76,7 @@ jobs:
           CURRENT_ODDS_PATH: ${{ inputs.current_odds_path }}
           FIXTURES_PATH: ${{ inputs.fixtures_path }}
           STAGING_RECEIPT_PATH: ${{ inputs.staging_receipt_path }}
+          STAGING_PROVIDER_POLICY_PATH: ${{ inputs.staging_provider_policy_path }}
           EXPECTED_CURRENT_ODDS_SHA256: ${{ inputs.expected_current_odds_sha256 }}
           EXPECTED_FIXTURES_SHA256: ${{ inputs.expected_fixtures_sha256 }}
         shell: bash
@@ -82,6 +88,7 @@ jobs:
             --fixtures-path="$FIXTURES_PATH" \
             --staging-receipt-path="$STAGING_RECEIPT_PATH" \
             --require-staging-receipt \
+            --staging-provider-policy-path="$STAGING_PROVIDER_POLICY_PATH" \
             --expected-current-odds-sha256="$EXPECTED_CURRENT_ODDS_SHA256" \
             --expected-fixtures-sha256="$EXPECTED_FIXTURES_SHA256"
           exit_code=$?
@@ -174,6 +181,25 @@ jobs:
                       print(
                           "- Receipt input checksums: "
                           f"**{handoff.get('staging_receipt_input_checksum_status', 'Not checked')}**"
+                      )
+                      print(
+                          "- Staging provider: "
+                          f"**{handoff.get('staging_receipt_provider_name') or 'unknown'}** "
+                          f"({handoff.get('staging_receipt_provider_type', 'unknown')})"
+                      )
+                      print(
+                          "- Provider policy: "
+                          f"**{handoff.get('staging_provider_policy_status', 'Not checked')}**"
+                      )
+                      print(
+                          "- Receipt age: "
+                          f"**{handoff.get('staging_receipt_age_status', 'Not checked')}** "
+                          f"({handoff.get('staging_receipt_age_hours')} hour(s))"
+                      )
+                      print(
+                          "- Thursday cutoff: "
+                          f"**{handoff.get('staging_cutoff_policy_status', 'Not checked')}** "
+                          f"({handoff.get('staging_thursday_cutoff_at') or 'not available'})"
                       )
                       print(f"- Odds file used: `{handoff.get('current_odds_path', '')}`")
                       print(

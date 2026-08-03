@@ -33,6 +33,32 @@ def _handoff(*, allowed: bool = True) -> dict[str, object]:
     }
 
 
+def _ready_staging_policy_proof() -> dict[str, object]:
+    return {
+        "staging_receipt_required": True,
+        "staging_receipt_path": "data/outputs/staging_input_validation.json",
+        "staging_receipt_checksum_sha256": "d" * 64,
+        "staging_receipt_verdict": "Ready for handoff",
+        "staging_receipt_generated_at": "2026-08-06T11:30:00+00:00",
+        "staging_receipt_binding_status": "Verified",
+        "staging_receipt_path_match_status": "Verified",
+        "staging_receipt_input_checksum_status": "Verified",
+        "staging_receipt_provider_name": "manual_reviewed",
+        "staging_receipt_provider_type": "manual_upload",
+        "staging_provider_policy_path": (
+            "data/manual/staging_provider_policy.json"
+        ),
+        "staging_provider_policy_checksum_sha256": "e" * 64,
+        "staging_provider_policy_match_status": "Verified",
+        "staging_provider_policy_status": "Provider allowed",
+        "staging_provider_allowed": True,
+        "staging_receipt_age_hours": 0.5,
+        "staging_receipt_age_status": "Within age limit",
+        "staging_provider_policy_timezone": "America/New_York",
+        "staging_cutoff_policy_status": "Before cutoff",
+    }
+
+
 def _write_run(output_dir: Path, *, allowed: bool = True) -> dict[str, Path]:
     output_dir.mkdir(parents=True)
     handoff = _handoff(allowed=allowed)
@@ -198,18 +224,7 @@ def test_verification_requires_verified_binding_when_staging_receipt_is_required
     output_dir = tmp_path / "data" / "outputs"
     paths = _write_run(output_dir, allowed=True)
     handoff = json.loads(paths["handoff_json"].read_text(encoding="utf-8"))
-    handoff.update(
-        {
-            "staging_receipt_required": True,
-            "staging_receipt_path": "data/outputs/staging_input_validation.json",
-            "staging_receipt_checksum_sha256": "d" * 64,
-            "staging_receipt_verdict": "Ready for handoff",
-            "staging_receipt_generated_at": "2026-08-06T11:30:00+00:00",
-            "staging_receipt_binding_status": "Verified",
-            "staging_receipt_path_match_status": "Verified",
-            "staging_receipt_input_checksum_status": "Verified",
-        }
-    )
+    handoff.update(_ready_staging_policy_proof())
     scheduled = json.loads(paths["scheduled_json"].read_text(encoding="utf-8"))
     scheduled["input_handoff"] = copy.deepcopy(handoff)
     paths["handoff_json"].write_text(json.dumps(handoff), encoding="utf-8")
@@ -219,6 +234,7 @@ def test_verification_requires_verified_binding_when_staging_receipt_is_required
 
     assert summary["verdict"] == "Verified ready run"
     assert summary["staging_receipt_binding_status"] == "Verified"
+    assert summary["staging_provider_policy_status"] == "Provider allowed"
 
 
 def test_verification_rejects_unverified_required_staging_receipt(
@@ -227,18 +243,9 @@ def test_verification_rejects_unverified_required_staging_receipt(
     output_dir = tmp_path / "data" / "outputs"
     paths = _write_run(output_dir, allowed=True)
     handoff = json.loads(paths["handoff_json"].read_text(encoding="utf-8"))
-    handoff.update(
-        {
-            "staging_receipt_required": True,
-            "staging_receipt_path": "data/outputs/staging_input_validation.json",
-            "staging_receipt_checksum_sha256": "d" * 64,
-            "staging_receipt_verdict": "Ready for handoff",
-            "staging_receipt_generated_at": "2026-08-06T11:30:00+00:00",
-            "staging_receipt_binding_status": "Blocked",
-            "staging_receipt_path_match_status": "Verified",
-            "staging_receipt_input_checksum_status": "Mismatch",
-        }
-    )
+    handoff.update(_ready_staging_policy_proof())
+    handoff["staging_receipt_binding_status"] = "Blocked"
+    handoff["staging_receipt_input_checksum_status"] = "Mismatch"
     scheduled = json.loads(paths["scheduled_json"].read_text(encoding="utf-8"))
     scheduled["input_handoff"] = copy.deepcopy(handoff)
     paths["handoff_json"].write_text(json.dumps(handoff), encoding="utf-8")

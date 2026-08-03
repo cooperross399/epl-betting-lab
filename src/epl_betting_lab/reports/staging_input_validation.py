@@ -8,7 +8,12 @@ from pathlib import Path
 
 import pandas as pd
 
-from epl_betting_lab.config import OUTPUTS_DIR, PROCESSED_DIR, PROJECT_ROOT, STAGING_DIR
+from epl_betting_lab.config import (
+    OUTPUTS_DIR,
+    PROCESSED_DIR,
+    PROJECT_ROOT,
+    STAGING_DIR,
+)
 from epl_betting_lab.data.loaders import load_matches
 from epl_betting_lab.github_runner_inputs import build_github_runner_input_handoff
 from epl_betting_lab.reports.current_odds_completeness import (
@@ -16,6 +21,11 @@ from epl_betting_lab.reports.current_odds_completeness import (
 )
 from epl_betting_lab.reports.current_odds_validation import (
     build_current_odds_validation,
+)
+from epl_betting_lab.staging_provider_policy import (
+    evaluate_staging_provider_policy,
+    load_staging_provenance,
+    load_staging_provider_policy,
 )
 
 
@@ -440,8 +450,9 @@ def _next_step(verdict: str) -> str:
             "but this report did not copy or promote them."
         ),
         "Needs fixes": (
-            "Fix the listed data, freshness, validation, or completeness issues, "
-            "then run `python scripts/validate_staging_inputs.py` again."
+            "Fix the listed provider, receipt timing, data, freshness, validation, "
+            "or completeness issues, then run "
+            "`python scripts/validate_staging_inputs.py` again."
         ),
         "Blocked": (
             "Fix unsafe paths, unreadable CSVs, empty files, or missing required "
@@ -461,13 +472,42 @@ def build_staging_input_validation(
     matches_path: Path | None = None,
     repository_root: Path | None = None,
     staging_dir: Path | None = None,
+    provenance_path: Path | None = None,
+    provider_policy_path: Path | None = None,
     run_at: datetime | None = None,
 ) -> tuple[pd.DataFrame, dict[str, object]]:
     """Validate staging inputs without copying or changing any input file."""
     root = (repository_root or PROJECT_ROOT).resolve()
     staging = (staging_dir or root / "data" / "staging").resolve()
     run_at = run_at or datetime.now().astimezone()
-    selected_matches = matches_path or root / "data" / "processed" / "epl_historical_matches.csv"
+    selected_matches = (
+        matches_path
+        or root / "data" / "processed" / "epl_historical_matches.csv"
+    )
+    selected_provenance = (
+        provenance_path
+        or root / "data" / "staging" / "staging_provenance.json"
+    )
+    selected_policy = (
+        provider_policy_path
+        or root / "data" / "manual" / "staging_provider_policy.json"
+    )
+    provider_policy = load_staging_provider_policy(
+        selected_policy,
+        repository_root=root,
+    )
+    provenance = load_staging_provenance(
+        selected_provenance,
+        repository_root=root,
+        staging_dir=staging,
+        generated_at=run_at,
+    )
+    provider_policy_result = evaluate_staging_provider_policy(
+        provider_policy,
+        provenance,
+        receipt_generated_at=run_at,
+        evaluated_at=run_at,
+    )
     odds = _inspect_staging_file(
         odds_path or staging / ODDS_STAGING_FILENAME,
         label="Current odds staging file",
@@ -489,11 +529,94 @@ def build_staging_input_validation(
     odds_dates = _append_date_checks(rows, odds, today=run_at.date())
     fixture_dates = _append_date_checks(rows, fixtures, today=run_at.date())
     _append_fixture_checks(rows, fixtures)
+    for message in provider_policy.get("blockers", []):
+        _add_check(
+            rows,
+            "error",
+            "Provider policy",
+            "provider_policy_invalid",
+            str(provider_policy.get("path", "")),
+            str(message),
+        )
+    for message in provenance.get("blockers", []):
+        _add_check(
+            rows,
+            "error",
+            "Provider provenance",
+            "provider_provenance_invalid",
+            str(provenance.get("provenance_file_path", "")),
+            str(message),
+        )
+    for message in provenance.get("warnings", []):
+        _add_check(
+            rows,
+            "warning",
+            "Provider provenance",
+            "provider_provenance_warning",
+            str(provenance.get("provenance_file_path", "")),
+            str(message),
+        )
+    _add_check(
+        rows,
+        "info" if provider_policy_result["provider_allowed"] else "error",
+        "Provider policy",
+        "provider_allowed",
+        str(provider_policy.get("path", "")),
+        (
+            f"{provider_policy_result['provider_policy_status']}: "
+            f"{provenance.get('provider_name') or 'unknown'} "
+            f"({provenance.get('provider_type', 'unknown')})."
+        ),
+    )
+    _add_check(
+        rows,
+        "info"
+        if provider_policy_result["receipt_age_status"] == "Within age limit"
+        else "error",
+        "Receipt policy",
+        "receipt_age",
+        str(provider_policy.get("path", "")),
+        (
+            f"{provider_policy_result['receipt_age_status']}; age "
+            f"{provider_policy_result['receipt_age_hours']} hour(s), maximum "
+            f"{provider_policy_result['max_receipt_age_hours']} hour(s)."
+        ),
+    )
+    _add_check(
+        rows,
+        "info"
+        if provider_policy_result["cutoff_policy_status"] == "Before cutoff"
+        else "error",
+        "Receipt policy",
+        "thursday_cutoff",
+        str(provider_policy.get("path", "")),
+        (
+            f"{provider_policy_result['cutoff_policy_status']}; cutoff "
+            f"{provider_policy_result['cutoff_at'] or 'not available'}."
+        ),
+    )
+    policy_messages_already_reported = {
+        str(item) for item in provider_policy.get("blockers", [])
+    } | {str(item) for item in provenance.get("blockers", [])}
+    for message in provider_policy_result.get("blockers", []):
+        if str(message) in policy_messages_already_reported:
+            continue
+        _add_check(
+            rows,
+            "error",
+            "Provider policy",
+            "provider_policy_blocker",
+            str(provider_policy.get("path", "")),
+            str(message),
+        )
 
     missing_inputs = any(
         item.path_safe and not item.exists for item in (odds, fixtures)
     )
-    structural_block = any(item.fatal_codes for item in (odds, fixtures))
+    structural_block = any(item.fatal_codes for item in (odds, fixtures)) or (
+        provider_policy.get("valid") is not True
+        or provenance.get("provenance_status") == "Invalid"
+    )
     processing_block = False
     handoff: dict[str, object] | None = None
     if not missing_inputs and not structural_block:
@@ -590,11 +713,11 @@ def build_staging_input_validation(
     error_count = int((checks["severity"] == "error").sum())
     warning_count = int((checks["severity"] == "warning").sum())
     handoff_allowed = bool(handoff and handoff.get("card_generation_allowed"))
-    if structural_block or processing_block:
-        verdict = "Blocked"
-    elif missing_inputs:
+    if missing_inputs:
         verdict = "Missing staging inputs"
-    elif error_count or not handoff_allowed:
+    elif structural_block or processing_block:
+        verdict = "Blocked"
+    elif error_count or not handoff_allowed or not provider_policy_result["allowed"]:
         verdict = "Needs fixes"
     else:
         verdict = "Ready for handoff"
@@ -604,8 +727,48 @@ def build_staging_input_validation(
     summary = {
         "generated_at": run_at.isoformat(timespec="seconds"),
         "validated_at": run_at.isoformat(timespec="seconds"),
+        "provider_name": provenance.get("provider_name", ""),
+        "provider_type": provenance.get("provider_type", "unknown"),
+        "source_file_path": provenance.get("source_file_path", ""),
+        "source_checksum_sha256": provenance.get("source_checksum_sha256", ""),
+        "generated_by": provenance.get("generated_by", ""),
+        "notes": provenance.get("notes", ""),
+        "provenance": {
+            key: value
+            for key, value in provenance.items()
+            if key not in {"blockers", "warnings"}
+        },
+        "provider_policy": {
+            "path": provider_policy.get("path", ""),
+            "checksum_sha256": provider_policy.get("checksum_sha256", ""),
+            "load_status": provider_policy.get("status", "Policy missing"),
+            "provider_policy_status": provider_policy_result[
+                "provider_policy_status"
+            ],
+            "provider_allowed": provider_policy_result["provider_allowed"],
+            "max_receipt_age_hours": provider_policy_result[
+                "max_receipt_age_hours"
+            ],
+            "receipt_age_hours": provider_policy_result["receipt_age_hours"],
+            "receipt_age_status": provider_policy_result["receipt_age_status"],
+            "timezone": provider_policy_result["timezone"],
+            "thursday_cutoff_time": provider_policy_result[
+                "thursday_cutoff_time"
+            ],
+            "cutoff_at": provider_policy_result["cutoff_at"],
+            "cutoff_policy_status": provider_policy_result[
+                "cutoff_policy_status"
+            ],
+            "allowed": provider_policy_result["allowed"],
+            "blockers": provider_policy_result["blockers"],
+            "warnings": provider_policy_result["warnings"],
+        },
         "verdict": verdict,
-        "handoff_eligible": verdict == "Ready for handoff" and handoff_allowed,
+        "handoff_eligible": (
+            verdict == "Ready for handoff"
+            and handoff_allowed
+            and bool(provider_policy_result["allowed"])
+        ),
         "next_step": _next_step(verdict),
         "current_odds_staging": _file_summary(odds),
         "upcoming_fixtures_staging": _file_summary(fixtures),
@@ -671,6 +834,8 @@ def render_staging_input_validation(
     validation = summary["current_odds_validation"]
     completeness = summary["odds_completeness"]
     handoff = summary["handoff_gate"]
+    provenance = summary["provenance"]
+    provider_policy = summary["provider_policy"]
     lines = [
         "# Staging Odds and Fixtures Validation",
         "",
@@ -699,6 +864,41 @@ def render_staging_input_validation(
             f"- Fixtures: `{fixtures['path']}` | {fixtures['row_count']} row(s) | "
             f"SHA-256 `{fixtures['checksum_sha256'] or 'not available'}`"
         ),
+        "",
+        "## Provider provenance and receipt policy",
+        "",
+        f"- Provider name: **{summary['provider_name'] or 'unknown'}**",
+        f"- Provider type: **{summary['provider_type']}**",
+        f"- Generated by: {summary['generated_by'] or 'not provided'}",
+        (
+            "- Source file: "
+            f"`{summary['source_file_path'] or 'not provided'}`"
+        ),
+        (
+            "- Source SHA-256: "
+            f"`{summary['source_checksum_sha256'] or 'not available'}`"
+        ),
+        (
+            "- Provenance file: "
+            f"`{provenance.get('provenance_file_path') or 'not available'}`"
+        ),
+        (
+            "- Provider policy: "
+            f"**{provider_policy['provider_policy_status']}**"
+        ),
+        (
+            "- Receipt age: "
+            f"**{provider_policy['receipt_age_status']}** "
+            f"({provider_policy['receipt_age_hours']} hour(s); "
+            f"maximum {provider_policy['max_receipt_age_hours']} hour(s))"
+        ),
+        (
+            "- Thursday cutoff: "
+            f"**{provider_policy['cutoff_policy_status']}** at "
+            f"{provider_policy['cutoff_at'] or 'not available'}"
+        ),
+        f"- Policy timezone: {provider_policy['timezone'] or 'not available'}",
+        f"- Notes: {summary['notes'] or 'None.'}",
         "",
         "## Freshness and existing gates",
         "",
@@ -756,6 +956,8 @@ def save_staging_input_validation(
     output_dir: Path | None = None,
     repository_root: Path | None = None,
     staging_dir: Path | None = None,
+    provenance_path: Path | None = None,
+    provider_policy_path: Path | None = None,
     run_at: datetime | None = None,
 ) -> dict[str, object]:
     outputs = output_dir or OUTPUTS_DIR
@@ -765,6 +967,8 @@ def save_staging_input_validation(
         matches_path=matches_path or PROCESSED_DIR / "epl_historical_matches.csv",
         repository_root=repository_root,
         staging_dir=staging_dir or STAGING_DIR,
+        provenance_path=provenance_path,
+        provider_policy_path=provider_policy_path,
         run_at=run_at,
     )
     outputs.mkdir(parents=True, exist_ok=True)
@@ -784,4 +988,13 @@ def save_staging_input_validation(
         "verdict": summary["verdict"],
         "handoff_eligible": summary["handoff_eligible"],
         "next_step": summary["next_step"],
+        "provider_name": summary["provider_name"],
+        "provider_type": summary["provider_type"],
+        "provider_policy_status": summary["provider_policy"][
+            "provider_policy_status"
+        ],
+        "receipt_age_status": summary["provider_policy"]["receipt_age_status"],
+        "cutoff_policy_status": summary["provider_policy"][
+            "cutoff_policy_status"
+        ],
     }

@@ -4,7 +4,12 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from epl_betting_lab.config import OUTPUTS_DIR, STAGING_DIR
+from epl_betting_lab.config import (
+    OUTPUTS_DIR,
+    STAGING_DIR,
+    STAGING_PROVENANCE_PATH,
+    STAGING_PROVIDER_POLICY_PATH,
+)
 from epl_betting_lab.reports.staging_input_validation import (
     FIXTURES_STAGING_FILENAME,
     ODDS_STAGING_FILENAME,
@@ -37,6 +42,18 @@ def parse_args() -> argparse.Namespace:
         default=OUTPUTS_DIR,
         help="Directory for the read-only validation reports.",
     )
+    parser.add_argument(
+        "--provenance-path",
+        type=Path,
+        default=STAGING_PROVENANCE_PATH,
+        help="Provider/source provenance JSON inside data/staging.",
+    )
+    parser.add_argument(
+        "--provider-policy-path",
+        type=Path,
+        default=STAGING_PROVIDER_POLICY_PATH,
+        help="Allowed provider, receipt age, timezone, and Thursday cutoff policy.",
+    )
     return parser.parse_args()
 
 
@@ -46,9 +63,18 @@ def main() -> int:
         args.odds_path,
         args.fixtures_path,
         output_dir=args.output_dir,
+        provenance_path=args.provenance_path,
+        provider_policy_path=args.provider_policy_path,
     )
     print("EPL Betting Lab - Staging Input Validation")
     print(f"Verdict: {result['verdict']}")
+    print(
+        "Provider: "
+        f"{result['provider_name'] or 'unknown'} ({result['provider_type']})"
+    )
+    print(f"Provider policy: {result['provider_policy_status']}")
+    print(f"Receipt age policy: {result['receipt_age_status']}")
+    print(f"Thursday cutoff policy: {result['cutoff_policy_status']}")
     print(
         "Eligible for handoff: "
         f"{'yes' if result['handoff_eligible'] else 'no'}"

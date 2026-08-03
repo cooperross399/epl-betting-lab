@@ -28,7 +28,9 @@ The default Action input paths are:
 ```text
 data/staging/current_odds_staging.csv
 data/staging/upcoming_fixtures_staging.csv
+data/staging/staging_provenance.json
 data/outputs/staging_input_validation.json
+data/manual/staging_provider_policy.json
 ```
 
 Create the two staging CSVs from their templates, enter only real prices, and
@@ -38,6 +40,7 @@ analyze.
 ```bash
 cp data/staging/current_odds_staging_template.csv data/staging/current_odds_staging.csv
 cp data/staging/upcoming_fixtures_staging_template.csv data/staging/upcoming_fixtures_staging.csv
+cp data/staging/staging_provenance_template.json data/staging/staging_provenance.json
 python scripts/validate_staging_inputs.py
 ```
 
@@ -50,11 +53,22 @@ Before committing:
 5. Fix blank or malformed dates.
 6. Make sure completeness is 100% for the prepared fixture slate.
 7. Review heavy juice around or worse than `-160` and totals-under warnings.
+8. Set the provider name/type, source, and generator in
+   `staging_provenance.json`; never put an API key or login in it.
+9. Run validation close enough to the GitHub run to stay within the provider
+   policy's receipt-age limit.
+
+The default `data/manual/staging_provider_policy.json` allows the named
+`manual_reviewed` provider, accepts known provider types, disallows unknown
+providers, limits receipts to 12 hours, and sets the Thursday cutoff to 10:00
+AM `America/New_York`. Adjust the allowlist only after reviewing a real source.
+The policy is itself checksum-bound to the receipt.
 
 Confirm `data/outputs/staging_input_validation.md` says `Ready for handoff`.
-Commit both unchanged staging CSVs and the matching JSON receipt to a
-short-lived weekly branch, then push that branch. Never put sportsbook
-passwords, API keys, account numbers, or other secrets in either CSV.
+Commit both unchanged staging CSVs, the provenance declaration, the policy,
+and the matching JSON receipt to a short-lived weekly branch, then push that
+branch. Never put sportsbook passwords, API keys, account numbers, or other
+secrets in a staging or provenance file.
 Repository files and generated artifacts may be visible to anyone who can
 access the repository.
 
@@ -77,7 +91,8 @@ A mismatch blocks the card.
 2. Open **Actions**, then **Manual Thursday Workflow**.
 3. Select **Run workflow**.
 4. Select the weekly branch containing the prepared files.
-5. Confirm the repository-relative odds, fixtures, and staging receipt paths.
+5. Confirm the repository-relative odds, fixtures, staging receipt, and provider
+   policy paths.
 6. Optionally enter the two expected SHA-256 values.
 7. Run the workflow.
 
@@ -102,6 +117,8 @@ They show:
 
 - selected GitHub ref and commit SHA
 - staging receipt path, verdict, generated timestamp, and receipt checksum
+- provider name/type, source provenance, receipt age, and generated-by value
+- provider policy path/checksum, timezone, age limit, and cutoff status
 - receipt path, input checksum, and row-count match status
 - exact repository-relative odds and fixture paths
 - calculated file SHA-256 checksums
@@ -151,6 +168,10 @@ Card generation is blocked when:
 - selected paths do not match the receipt or are not inside `data/staging`
 - either staging file checksum or row count changed after validation
 - the receipt does not record acceptable freshness, validation, and completeness
+- the provider policy is missing/malformed or changed after receipt creation
+- the provider name/type is not allowed, or unknown providers are disallowed
+- the receipt is older than the configured maximum age
+- the receipt was generated after the configured Thursday cutoff
 - either file is missing, unreadable, empty, outside the repository, or not CSV
 - an optional expected checksum does not match
 - odds or fixtures contain any past-match rows
@@ -166,14 +187,15 @@ the available reports so you can read why it stopped.
 ## Why cron is still off
 
 The handoff is intentionally manual. A person still has to source real prices,
-validate and review the staging receipt, commit the files, choose the correct
-branch, and review warnings. Before enabling a Thursday schedule, the project
-still needs:
+declare their provenance, validate and review the staging receipt, commit the
+files, choose the correct branch, and review warnings. Before enabling a
+Thursday schedule, the project still needs:
 
 - a trusted and permitted automated odds source
 - an automated fixture refresh with date checks
 - secure credentials that are never written to artifacts or logs
-- an agreed Thursday timezone and cutoff time
+- evidence that provider staging refreshes consistently finish before the
+  configured Thursday cutoff
 - ownership for reviewing warnings and blocked runs
 - evidence that the automated source maps teams, markets, and selections
   correctly

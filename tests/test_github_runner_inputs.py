@@ -89,12 +89,18 @@ def _write_inputs(
     }
 
 
-def _build(root: Path, paths: dict[str, Path], **kwargs) -> dict[str, object]:
+def _build(
+    root: Path,
+    paths: dict[str, Path],
+    *,
+    run_at: datetime = RUN_AT,
+    **kwargs,
+) -> dict[str, object]:
     return build_github_runner_input_handoff(
         current_odds_path=paths["current_odds_path"],
         fixtures_path=paths["fixtures_path"],
         matches_path=paths["matches_path"],
-        run_at=RUN_AT,
+        run_at=run_at,
         repository_root=root,
         **kwargs,
     )
@@ -102,6 +108,8 @@ def _build(root: Path, paths: dict[str, Path], **kwargs) -> dict[str, object]:
 
 def _write_ready_staging_receipt(
     root: Path,
+    *,
+    receipt_run_at: datetime = RUN_AT,
 ) -> tuple[dict[str, Path], Path]:
     paths = _write_inputs(root)
     staging = root / "data" / "staging"
@@ -110,8 +118,38 @@ def _write_ready_staging_receipt(
     staging_fixtures = staging / "upcoming_fixtures_staging.csv"
     staging_odds.write_bytes(paths["current_odds_path"].read_bytes())
     staging_fixtures.write_bytes(paths["fixtures_path"].read_bytes())
+    policy_path = root / "data" / "manual" / "staging_provider_policy.json"
+    policy_path.write_text(
+        json.dumps(
+            {
+                "allowed_provider_names": ["manual_reviewed"],
+                "allowed_provider_types": ["manual_upload"],
+                "allow_unknown_providers": False,
+                "max_receipt_age_hours": 12,
+                "timezone": "America/New_York",
+                "thursday_cutoff_time": "10:00",
+            }
+        ),
+        encoding="utf-8",
+    )
+    provenance_path = staging / "staging_provenance.json"
+    provenance_path.write_text(
+        json.dumps(
+            {
+                "provider_name": "manual_reviewed",
+                "provider_type": "manual_upload",
+                "source_file_path": "data/staging/current_odds_staging.csv",
+                "source_checksum_sha256": "",
+                "generated_by": "test suite",
+                "notes": "Ready receipt fixture.",
+            }
+        ),
+        encoding="utf-8",
+    )
     paths["current_odds_path"] = staging_odds
     paths["fixtures_path"] = staging_fixtures
+    paths["staging_provider_policy_path"] = policy_path
+    paths["staging_provenance_path"] = provenance_path
     saved = save_staging_input_validation(
         staging_odds,
         staging_fixtures,
@@ -119,7 +157,7 @@ def _write_ready_staging_receipt(
         output_dir=paths["output_dir"],
         repository_root=root,
         staging_dir=staging,
-        run_at=RUN_AT,
+        run_at=receipt_run_at,
     )
     return paths, Path(saved["json"])
 
@@ -305,7 +343,74 @@ def test_runner_handoff_binds_exact_ready_staging_receipt(tmp_path: Path) -> Non
     assert result["staging_receipt_path_match_status"] == "Verified"
     assert result["staging_receipt_input_checksum_status"] == "Verified"
     assert result["staging_receipt_row_count_status"] == "Verified"
+    assert result["staging_receipt_provider_name"] == "manual_reviewed"
+    assert result["staging_provider_policy_match_status"] == "Verified"
+    assert result["staging_provider_policy_status"] == "Provider allowed"
+    assert result["staging_receipt_age_status"] == "Within age limit"
+    assert result["staging_cutoff_policy_status"] == "Before cutoff"
     assert result["card_generation_allowed"] is True
+
+
+def test_runner_handoff_blocks_receipt_older_than_policy_limit(
+    tmp_path: Path,
+) -> None:
+    paths, receipt_path = _write_ready_staging_receipt(tmp_path)
+
+    result = _build(
+        tmp_path,
+        paths,
+        run_at=datetime(2026, 8, 7, 2, 0, tzinfo=timezone.utc),
+        staging_receipt_path=receipt_path,
+        require_staging_receipt=True,
+    )
+
+    assert result["staging_receipt_age_status"] == "Receipt too old"
+    assert result["card_generation_allowed"] is False
+    assert any("at most 12 hours" in item for item in result["blockers"])
+
+
+def test_runner_handoff_blocks_provider_not_allowed_by_current_policy(
+    tmp_path: Path,
+) -> None:
+    paths, receipt_path = _write_ready_staging_receipt(tmp_path)
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    receipt["provider_name"] = "unapproved_feed"
+    receipt_path.write_text(json.dumps(receipt), encoding="utf-8")
+
+    result = _build(
+        tmp_path,
+        paths,
+        staging_receipt_path=receipt_path,
+        require_staging_receipt=True,
+    )
+
+    assert result["staging_provider_policy_status"] == "Provider not allowed"
+    assert result["card_generation_allowed"] is False
+
+
+def test_runner_handoff_blocks_when_provider_policy_changed_after_receipt(
+    tmp_path: Path,
+) -> None:
+    paths, receipt_path = _write_ready_staging_receipt(tmp_path)
+    policy = json.loads(
+        paths["staging_provider_policy_path"].read_text(encoding="utf-8")
+    )
+    policy["max_receipt_age_hours"] = 6
+    paths["staging_provider_policy_path"].write_text(
+        json.dumps(policy),
+        encoding="utf-8",
+    )
+
+    result = _build(
+        tmp_path,
+        paths,
+        staging_receipt_path=receipt_path,
+        require_staging_receipt=True,
+    )
+
+    assert result["staging_provider_policy_match_status"] == "Mismatch"
+    assert result["card_generation_allowed"] is False
+    assert any("Validate staging again" in item for item in result["blockers"])
 
 
 def test_runner_handoff_blocks_missing_required_staging_receipt(

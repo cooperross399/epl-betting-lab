@@ -125,10 +125,12 @@ Future odds/fixtures providers should write their prepared standard CSVs to:
 ```text
 data/staging/current_odds_staging.csv
 data/staging/upcoming_fixtures_staging.csv
+data/staging/staging_provenance.json
 ```
 
-Header-only templates are already in `data/staging/`. After adding real odds
-and current fixtures, run:
+Templates are already in `data/staging/`. After adding real odds/current
+fixtures and identifying their provider in `staging_provenance.json`, review
+`data/manual/staging_provider_policy.json`, then run:
 
 ```bash
 python scripts/validate_staging_inputs.py
@@ -136,9 +138,10 @@ python scripts/validate_staging_inputs.py
 
 The validator restricts inputs to safe CSV paths inside `data/staging`, records
 SHA-256 checksums, checks required columns and today/future dates, validates
-teams/markets/selections and fixture matching, rejects duplicate odds rows, and
-reuses the existing odds validation, 100% completeness, freshness, and GitHub
-runner handoff gates. It writes:
+teams/markets/selections and fixture matching, rejects duplicate odds rows,
+enforces provider/receipt-age/Thursday-cutoff policy, and reuses the existing
+odds validation, 100% completeness, freshness, and GitHub runner handoff gates.
+It writes:
 
 ```text
 data/outputs/staging_input_validation.csv
@@ -564,9 +567,15 @@ starting the Action:
 
 1. Put real provider prices in `data/staging/current_odds_staging.csv` and the
    matching slate in `data/staging/upcoming_fixtures_staging.csv`.
-2. Run `python scripts/validate_staging_inputs.py`.
-3. Confirm the verdict is `Ready for handoff` and review its warnings.
-4. Commit both unchanged staging CSVs plus
+2. Copy `data/staging/staging_provenance_template.json` to
+   `data/staging/staging_provenance.json`, then identify the provider and source.
+3. Review `data/manual/staging_provider_policy.json`. The default policy allows
+   named, reviewed sources, limits receipts to 12 hours, and requires creation
+   by 10:00 AM `America/New_York` on Thursday.
+4. Run `python scripts/validate_staging_inputs.py` near the Thursday run.
+5. Confirm the verdict is `Ready for handoff` and review its warnings.
+6. Commit both unchanged staging CSVs, the provenance declaration, the provider
+   policy, plus
    `data/outputs/staging_input_validation.json` to one short-lived weekly
    branch, then push it.
 
@@ -576,8 +585,8 @@ Then:
 2. Select **Manual Thursday Workflow**.
 3. Select **Run workflow** and choose the weekly branch containing the prepared
    files.
-4. Confirm the repository-relative odds, fixtures, and staging receipt paths.
-   Optional SHA-256 fields provide an additional identity check.
+4. Confirm the repository-relative odds, fixtures, staging receipt, and provider
+   policy paths. Optional SHA-256 fields provide an additional identity check.
 5. Open the finished run and read its job summary.
 6. Download `scheduled-thursday-reports-RUN_NUMBER-RUN_ATTEMPT` from the
    **Artifacts** section.
@@ -611,14 +620,16 @@ Compile failures, test failures, runtime failures, unexpected exit codes,
 untrusted/incomplete verification, or artifact-upload failures make the Action
 fail.
 
-The runner accepts only regular staging CSVs and a regular JSON receipt inside
-the checked-out repository. It records the selected Git ref and commit, exact
-paths, receipt timestamp and verdict, calculated SHA-256 checksums, receipt
-binding status, date freshness, validation results, completeness, and whether
+The runner accepts only regular staging CSVs, a regular JSON receipt, and a
+valid provider policy inside the checked-out repository. It records the
+selected Git ref and commit, exact paths, receipt timestamp and age, provider
+name/type, source provenance, calculated SHA-256 checksums, policy checksum,
+cutoff status, date freshness, validation results, completeness, and whether
 card generation was allowed. A missing or non-Ready receipt, changed staging
-file, path mismatch, past odds/fixture row, malformed date, serious validation
-issue, checksum mismatch, or completeness below 100% blocks the card without
-`--force`.
+file or provider policy, unapproved/unknown provider, receipt older than the
+policy limit, receipt created after the Thursday cutoff, path mismatch, past
+odds/fixture row, malformed date, serious validation issue, checksum mismatch,
+or completeness below 100% blocks the card without `--force`.
 
 Read [docs/GITHUB_RUNNER_INPUT_HANDOFF.md](docs/GITHUB_RUNNER_INPUT_HANDOFF.md)
 for copy/paste setup, optional checksum commands, fail-closed rules, and the
@@ -628,11 +639,11 @@ account information.
 There is deliberately no Thursday cron trigger. A fresh GitHub runner does not
 automatically source permitted real sportsbook odds. This repository-file
 handoff still needs a person to prepare and review each weekly input. Before
-automatic scheduling, add a trusted automated odds/fixture source, secure its
-credentials, choose the Thursday timezone and cutoff, verify provider mappings,
-keep a person responsible for refreshing provider data, validating the staging
-receipt, and reviewing warnings. The Action never guesses missing prices and
-never uses `--force`.
+automatic scheduling, connect a trusted automated odds/fixture source, secure
+its credentials, prove that it refreshes staging before the configured cutoff,
+verify provider mappings over repeated runs, and assign ownership for blocked
+runs and warnings. The Action never guesses missing prices and never uses
+`--force`.
 
 The dashboard shows a current-odds status badge:
 

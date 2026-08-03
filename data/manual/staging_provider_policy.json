@@ -1,0 +1,15 @@
+{
+  "allowed_provider_names": [
+    "manual_reviewed"
+  ],
+  "allowed_provider_types": [
+    "manual_upload",
+    "sportsbook_export",
+    "odds_api",
+    "fixture_provider"
+  ],
+  "allow_unknown_providers": false,
+  "max_receipt_age_hours": 12,
+  "timezone": "America/New_York",
+  "thursday_cutoff_time": "10:00"
+}

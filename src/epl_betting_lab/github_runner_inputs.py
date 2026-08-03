@@ -18,6 +18,11 @@ from epl_betting_lab.reports.current_odds_completeness import (
 from epl_betting_lab.reports.current_odds_validation import (
     build_current_odds_validation,
 )
+from epl_betting_lab.staging_provider_policy import (
+    evaluate_staging_provider_policy,
+    load_staging_provider_policy,
+    receipt_provenance_from_payload,
+)
 from epl_betting_lab.workflow_status import (
     inspect_current_odds_date_freshness,
     inspect_fixture_date_freshness,
@@ -210,6 +215,8 @@ def _inspect_staging_receipt(
     repository_root: Path,
     odds: _PathInspection,
     fixtures: _PathInspection,
+    provider_policy_path: Path,
+    evaluated_at: datetime,
 ) -> dict[str, object]:
     """Bind selected inputs to a previously reviewed staging receipt."""
     result: dict[str, object] = {
@@ -237,6 +244,23 @@ def _inspect_staging_receipt(
         "recorded_fixtures_row_count": None,
         "current_current_odds_row_count": None,
         "current_fixtures_row_count": None,
+        "provider_name": "",
+        "provider_type": "unknown",
+        "source_file_path": "",
+        "source_checksum_sha256": "",
+        "generated_by": "",
+        "notes": "",
+        "provider_policy_path": "",
+        "provider_policy_checksum_sha256": "",
+        "provider_policy_match_status": "Not checked",
+        "provider_policy_status": "Not checked",
+        "provider_allowed": False,
+        "receipt_age_hours": None,
+        "receipt_age_status": "Not checked",
+        "provider_policy_timezone": "",
+        "thursday_cutoff_time": "",
+        "thursday_cutoff_at": "",
+        "cutoff_policy_status": "Not checked",
         "blockers": [],
         "warnings": [],
     }
@@ -318,6 +342,15 @@ def _inspect_staging_receipt(
     ).strip()
     result["verdict"] = verdict or "Missing"
     result["generated_at"] = generated_at
+    receipt_provenance = receipt_provenance_from_payload(payload)
+    result["provider_name"] = receipt_provenance["provider_name"]
+    result["provider_type"] = receipt_provenance["provider_type"]
+    result["source_file_path"] = receipt_provenance["source_file_path"]
+    result["source_checksum_sha256"] = receipt_provenance[
+        "source_checksum_sha256"
+    ]
+    result["generated_by"] = receipt_provenance["generated_by"]
+    result["notes"] = receipt_provenance["notes"]
     if verdict != READY_STAGING_VERDICT:
         blockers.append(
             "The staging receipt verdict must be `Ready for handoff`; "
@@ -557,6 +590,64 @@ def _inspect_staging_receipt(
     if receipt_handoff_allowed is not True:
         blockers.append("The staging receipt's existing handoff gate did not allow a card.")
 
+    current_provider_policy = load_staging_provider_policy(
+        provider_policy_path,
+        repository_root=repository_root,
+    )
+    receipt_policy = payload.get("provider_policy")
+    receipt_policy = receipt_policy if isinstance(receipt_policy, dict) else {}
+    recorded_policy_path = str(receipt_policy.get("path", "")).strip()
+    recorded_policy_checksum = str(
+        receipt_policy.get("checksum_sha256", "")
+    ).strip().lower()
+    current_policy_path = str(current_provider_policy.get("path", "")).strip()
+    current_policy_checksum = str(
+        current_provider_policy.get("checksum_sha256", "")
+    ).strip().lower()
+    result["provider_policy_path"] = current_policy_path
+    result["provider_policy_checksum_sha256"] = current_policy_checksum
+    policy_matches = (
+        bool(recorded_policy_path)
+        and bool(recorded_policy_checksum)
+        and recorded_policy_path == current_policy_path
+        and recorded_policy_checksum == current_policy_checksum
+    )
+    result["provider_policy_match_status"] = (
+        "Verified" if policy_matches else "Mismatch"
+    )
+    if not policy_matches:
+        blockers.append(
+            "The current staging provider policy path/checksum does not match the "
+            "policy recorded in the Ready receipt. Validate staging again."
+        )
+    if receipt_policy.get("allowed") is not True:
+        blockers.append("The staging receipt did not pass its provider policy checks.")
+
+    provider_policy_result = evaluate_staging_provider_policy(
+        current_provider_policy,
+        receipt_provenance,
+        receipt_generated_at=generated_at,
+        evaluated_at=evaluated_at,
+    )
+    result["provider_policy_status"] = provider_policy_result[
+        "provider_policy_status"
+    ]
+    result["provider_allowed"] = provider_policy_result["provider_allowed"]
+    result["receipt_age_hours"] = provider_policy_result["receipt_age_hours"]
+    result["receipt_age_status"] = provider_policy_result[
+        "receipt_age_status"
+    ]
+    result["provider_policy_timezone"] = provider_policy_result["timezone"]
+    result["thursday_cutoff_time"] = provider_policy_result[
+        "thursday_cutoff_time"
+    ]
+    result["thursday_cutoff_at"] = provider_policy_result["cutoff_at"]
+    result["cutoff_policy_status"] = provider_policy_result[
+        "cutoff_policy_status"
+    ]
+    blockers.extend(str(item) for item in provider_policy_result["blockers"])
+    warnings.extend(str(item) for item in provider_policy_result["warnings"])
+
     receipt_warning_count = _receipt_int(payload.get("warning_count")) or 0
     if receipt_warning_count:
         warnings.append(
@@ -590,6 +681,7 @@ def build_github_runner_input_handoff(
     expected_fixtures_sha256: str = "",
     staging_receipt_path: Path | None = None,
     require_staging_receipt: bool = False,
+    staging_provider_policy_path: Path | None = None,
     github_repository: str | None = None,
     github_ref: str | None = None,
     github_sha: str | None = None,
@@ -617,6 +709,11 @@ def build_github_runner_input_handoff(
         repository_root=root,
         odds=odds,
         fixtures=fixtures,
+        provider_policy_path=(
+            staging_provider_policy_path
+            or root / "data" / "manual" / "staging_provider_policy.json"
+        ),
+        evaluated_at=run_at,
     )
     blockers.extend(str(item) for item in staging_receipt["blockers"])
     warnings.extend(str(item) for item in staging_receipt["warnings"])
@@ -894,6 +991,43 @@ def build_github_runner_input_handoff(
         "staging_receipt_current_fixtures_row_count": staging_receipt[
             "current_fixtures_row_count"
         ],
+        "staging_receipt_provider_name": staging_receipt["provider_name"],
+        "staging_receipt_provider_type": staging_receipt["provider_type"],
+        "staging_receipt_source_file_path": staging_receipt[
+            "source_file_path"
+        ],
+        "staging_receipt_source_checksum_sha256": staging_receipt[
+            "source_checksum_sha256"
+        ],
+        "staging_receipt_generated_by": staging_receipt["generated_by"],
+        "staging_receipt_notes": staging_receipt["notes"],
+        "staging_provider_policy_path": staging_receipt[
+            "provider_policy_path"
+        ],
+        "staging_provider_policy_checksum_sha256": staging_receipt[
+            "provider_policy_checksum_sha256"
+        ],
+        "staging_provider_policy_match_status": staging_receipt[
+            "provider_policy_match_status"
+        ],
+        "staging_provider_policy_status": staging_receipt[
+            "provider_policy_status"
+        ],
+        "staging_provider_allowed": staging_receipt["provider_allowed"],
+        "staging_receipt_age_hours": staging_receipt["receipt_age_hours"],
+        "staging_receipt_age_status": staging_receipt["receipt_age_status"],
+        "staging_provider_policy_timezone": staging_receipt[
+            "provider_policy_timezone"
+        ],
+        "staging_thursday_cutoff_time": staging_receipt[
+            "thursday_cutoff_time"
+        ],
+        "staging_thursday_cutoff_at": staging_receipt[
+            "thursday_cutoff_at"
+        ],
+        "staging_cutoff_policy_status": staging_receipt[
+            "cutoff_policy_status"
+        ],
         "current_odds_path": odds.display_path,
         "current_odds_checksum_sha256": odds.checksum_sha256,
         "current_odds_expected_checksum_sha256": (
@@ -1030,6 +1164,29 @@ def render_github_runner_input_handoff(summary: dict[str, object]) -> str:
             "- Row count match: "
             f"**{summary.get('staging_receipt_row_count_status', 'Not checked')}**"
         ),
+        (
+            "- Provider: "
+            f"**{summary.get('staging_receipt_provider_name') or 'unknown'}** "
+            f"({summary.get('staging_receipt_provider_type', 'unknown')})"
+        ),
+        (
+            "- Provider policy: "
+            f"**{summary.get('staging_provider_policy_status', 'Not checked')}**"
+        ),
+        (
+            "- Provider policy snapshot match: "
+            f"**{summary.get('staging_provider_policy_match_status', 'Not checked')}**"
+        ),
+        (
+            "- Receipt age: "
+            f"**{summary.get('staging_receipt_age_status', 'Not checked')}** "
+            f"({summary.get('staging_receipt_age_hours')} hour(s))"
+        ),
+        (
+            "- Thursday cutoff: "
+            f"**{summary.get('staging_cutoff_policy_status', 'Not checked')}** "
+            f"({summary.get('staging_thursday_cutoff_at') or 'not available'})"
+        ),
         "",
         "## Input proof",
         "",
@@ -1100,6 +1257,7 @@ def save_github_runner_input_handoff(
     expected_fixtures_sha256: str = "",
     staging_receipt_path: Path | None = None,
     require_staging_receipt: bool = False,
+    staging_provider_policy_path: Path | None = None,
 ) -> dict[str, object]:
     summary = build_github_runner_input_handoff(
         current_odds_path=current_odds_path,
@@ -1111,6 +1269,7 @@ def save_github_runner_input_handoff(
         expected_fixtures_sha256=expected_fixtures_sha256,
         staging_receipt_path=staging_receipt_path,
         require_staging_receipt=require_staging_receipt,
+        staging_provider_policy_path=staging_provider_policy_path,
     )
     output_dir.mkdir(parents=True, exist_ok=True)
     json_path = output_dir / HANDOFF_JSON_FILENAME

@@ -406,12 +406,32 @@ Do not put passwords, API keys, or sportsbook account details in these files.
 7. Scroll to **Artifacts** and download
    `scheduled-thursday-reports-RUN_NUMBER-RUN_ATTEMPT`.
 
+The Action checks its own evidence before it finishes. Downloaded artifacts
+include:
+
+```text
+data/outputs/github_manual_thursday_run_verification.csv
+data/outputs/github_manual_thursday_run_verification.md
+```
+
+Open `Tools / Diagnostics` to read the verification verdict, or place the
+downloaded reports in `data/outputs/` and run:
+
+```bash
+python scripts/verify_github_manual_thursday_run.py
+```
+
+`Verified ready run` means the handoff passed and the expected card files were
+found. `Verified blocked run` means the safety gate stopped the card as
+intended. Missing, incomplete, or inconsistent proof must be fixed before you
+trust any recommendation from that run.
+
 The artifact contains whichever `data/outputs/` reports the safe runner could
 create and remains downloadable for 14 days. A `Blocked` run, commonly caused
 by missing current odds on the fresh GitHub runner, is shown as a warning and
 can finish successfully so its summary is still downloadable. A compile,
-test, runtime, unexpected-exit, or artifact-upload failure makes the Action
-fail.
+test, runtime, unexpected-exit, verification, or artifact-upload failure makes
+the Action fail.
 
 The job summary proves which inputs were used by showing the selected Git ref
 and commit, odds and fixture paths, calculated SHA-256 checksums, freshness,

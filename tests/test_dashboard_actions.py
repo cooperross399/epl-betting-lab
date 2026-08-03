@@ -17,6 +17,7 @@ from epl_betting_lab.dashboard_actions import (
     run_current_odds_import_preview,
     run_current_odds_maintenance_preview,
     run_current_odds_validation,
+    run_github_manual_thursday_verification,
     run_ledger_health_check,
     run_odds_export_conversion_preview,
     run_odds_export_profile_diagnostic,
@@ -1064,3 +1065,27 @@ def test_dashboard_report_actions_write_outputs_without_editing_ledger(tmp_path)
     assert health_paths["markdown"].name == "bet_ledger_health_check.md"
     assert settlement_paths["markdown"].name == "bet_settlement_preview.md"
     assert ledger_path.read_text(encoding="utf-8") == original
+
+
+def test_run_github_manual_thursday_verification_uses_selected_output_dir(
+    tmp_path, monkeypatch
+) -> None:
+    output_dir = tmp_path / "outputs"
+    expected = {
+        "csv": output_dir / "github_manual_thursday_run_verification.csv",
+        "markdown": output_dir / "github_manual_thursday_run_verification.md",
+        "verdict": "Verified blocked run",
+        "next_step": "Fix the listed blockers.",
+    }
+
+    def fake_save(selected_output_dir):
+        assert selected_output_dir == output_dir
+        return expected
+
+    monkeypatch.setattr(
+        dashboard_actions,
+        "save_github_manual_run_verification",
+        fake_save,
+    )
+
+    assert run_github_manual_thursday_verification(output_dir) == expected

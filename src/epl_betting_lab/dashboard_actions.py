@@ -22,6 +22,9 @@ from epl_betting_lab.reports.current_odds_completeness import save_current_odds_
 from epl_betting_lab.reports.current_odds_import import process_current_odds_import
 from epl_betting_lab.reports.current_odds_template import create_current_odds_template
 from epl_betting_lab.reports.current_odds_maintenance import maintain_current_odds
+from epl_betting_lab.reports.github_manual_run_verification import (
+    save_github_manual_run_verification,
+)
 from epl_betting_lab.reports.odds_export_conversion import (
     OddsExportConversionError,
     convert_odds_export,
@@ -439,6 +442,12 @@ def run_tier_performance_report(
     output_dir: Path | None = None,
 ) -> dict[str, Path]:
     return save_tier_performance_reports(ledger_path or MANUAL_DIR / "bet_ledger.csv", output_dir or OUTPUTS_DIR)
+
+
+def run_github_manual_thursday_verification(
+    output_dir: Path | None = None,
+) -> dict[str, object]:
+    return save_github_manual_run_verification(output_dir or OUTPUTS_DIR)
 
 
 def run_post_thursday_review(

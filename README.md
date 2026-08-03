@@ -128,9 +128,24 @@ data/staging/upcoming_fixtures_staging.csv
 data/staging/staging_provenance.json
 ```
 
-Templates are already in `data/staging/`. After adding real odds/current
-fixtures and identifying their provider in `staging_provenance.json`, review
-`data/manual/staging_provider_policy.json`, then run:
+The first controlled provider adapter prepares that bundle from two local
+source files. Copy the source templates, enter only reviewed real data, and run
+the Terminal-only adapter:
+
+```bash
+cp data/staging/source_current_odds_template.csv data/staging/source_current_odds.csv
+cp data/staging/source_upcoming_fixtures_template.csv data/staging/source_upcoming_fixtures.csv
+python scripts/run_manual_staging_provider.py
+```
+
+The adapter records source/staging SHA-256 checksums and provenance but does not
+judge whether the odds or fixtures are valid. It stops rather than replacing an
+existing staging bundle. After reviewing the old bundle, intentional replacement
+requires `python scripts/run_manual_staging_provider.py --overwrite-staging`.
+There is no dashboard provider-run button.
+
+Next, review `data/manual/staging_provider_policy.json` and run the independent
+eligibility gate:
 
 ```bash
 python scripts/validate_staging_inputs.py
@@ -565,10 +580,10 @@ The repository includes a manual-only workflow at
 The safe handoff uses a reviewed `Ready for handoff` staging receipt. Before
 starting the Action:
 
-1. Put real provider prices in `data/staging/current_odds_staging.csv` and the
-   matching slate in `data/staging/upcoming_fixtures_staging.csv`.
-2. Copy `data/staging/staging_provenance_template.json` to
-   `data/staging/staging_provenance.json`, then identify the provider and source.
+1. Put real provider prices in `data/staging/source_current_odds.csv` and the
+   matching slate in `data/staging/source_upcoming_fixtures.csv`.
+2. Run `python scripts/run_manual_staging_provider.py` to create the staging
+   bundle and provenance without touching manual production files.
 3. Review `data/manual/staging_provider_policy.json`. The default policy allows
    named, reviewed sources, limits receipts to 12 hours, and requires creation
    by 10:00 AM `America/New_York` on Thursday.

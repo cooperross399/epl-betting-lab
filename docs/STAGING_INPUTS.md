@@ -12,20 +12,49 @@ data/staging/upcoming_fixtures_staging.csv
 data/staging/staging_provenance.json
 ```
 
-Start with the header-only templates:
+## Prepare them with the manual provider adapter
+
+The first provider is a controlled, Terminal-only adapter. Start with its
+header-only source templates:
 
 ```bash
-cp data/staging/current_odds_staging_template.csv data/staging/current_odds_staging.csv
-cp data/staging/upcoming_fixtures_staging_template.csv data/staging/upcoming_fixtures_staging.csv
-cp data/staging/staging_provenance_template.json data/staging/staging_provenance.json
+cp data/staging/source_current_odds_template.csv data/staging/source_current_odds.csv
+cp data/staging/source_upcoming_fixtures_template.csv data/staging/source_upcoming_fixtures.csv
 ```
 
-Enter or import only real provider prices. Never guess a missing price.
+Enter or import only real provider prices and fixtures into those source files.
+Never guess a missing price. Then run:
 
-In `staging_provenance.json`, identify the source without putting credentials
-in the file. Supported provider types are `manual_upload`, `sportsbook_export`,
-`odds_api`, `fixture_provider`, and `unknown`. Set `source_file_path` to a file
-inside `data/staging/`; a blank source checksum is calculated during validation.
+```bash
+python scripts/run_manual_staging_provider.py
+```
+
+The adapter performs only basic path, readability, non-empty-file, and copy
+safety checks. It copies the prepared CSV bytes and creates
+`staging_provenance.json` with provider identity, source/staging paths, row
+counts, SHA-256 checksums, generator, timestamp, and notes. Review:
+
+```text
+data/outputs/manual_staging_provider_report.md
+data/outputs/manual_staging_provider_report.json
+```
+
+If any staging output already exists, the command stops without changing the
+bundle. After reviewing the old files, replace all three outputs intentionally
+with:
+
+```bash
+python scripts/run_manual_staging_provider.py --overwrite-staging
+```
+
+There is no dashboard write button. This keeps source-to-staging writes an
+intentional Terminal step. The adapter does not validate betting fields, copy
+anything into `data/manual/`, generate picks, or enable cron.
+
+If you prepare staging files without the adapter, start from the older staging
+templates and complete `staging_provenance_template.json` manually. Never put
+credentials in provenance. Supported provider types are `manual_upload`,
+`sportsbook_export`, `odds_api`, `fixture_provider`, and `unknown`.
 
 The checked-in policy at `data/manual/staging_provider_policy.json` controls:
 
@@ -43,6 +72,9 @@ receipt.
 ```bash
 python scripts/validate_staging_inputs.py
 ```
+
+Validation is the actual eligibility gate. A successful provider run by itself
+does **not** mean the data is ready for GitHub or Thursday analysis.
 
 This creates:
 

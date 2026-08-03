@@ -33,16 +33,21 @@ data/outputs/staging_input_validation.json
 data/manual/staging_provider_policy.json
 ```
 
-Create the two staging CSVs from their templates, enter only real prices, and
-keep the fixture file limited to the upcoming slate you want the runner to
-analyze.
+Prepare the two controlled source CSVs, enter only real prices, and keep the
+fixture file limited to the upcoming slate you want the runner to analyze.
 
 ```bash
-cp data/staging/current_odds_staging_template.csv data/staging/current_odds_staging.csv
-cp data/staging/upcoming_fixtures_staging_template.csv data/staging/upcoming_fixtures_staging.csv
-cp data/staging/staging_provenance_template.json data/staging/staging_provenance.json
+cp data/staging/source_current_odds_template.csv data/staging/source_current_odds.csv
+cp data/staging/source_upcoming_fixtures_template.csv data/staging/source_upcoming_fixtures.csv
+python scripts/run_manual_staging_provider.py
 python scripts/validate_staging_inputs.py
 ```
+
+The provider adapter writes only the staging bundle and provenance. It stops if
+the staging outputs already exist; replacement requires the explicit
+`--overwrite-staging` Terminal flag. Its basic copy checks are not the handoff
+gate. Only the following staging validation can produce a `Ready for handoff`
+receipt.
 
 Before committing:
 

@@ -1,0 +1,8 @@
+{
+  "provider_name": "manual_reviewed",
+  "provider_type": "manual_upload",
+  "source_file_path": "data/staging/current_odds_staging.csv",
+  "source_checksum_sha256": "",
+  "generated_by": "REVIEW_NEEDED",
+  "notes": "Replace REVIEW_NEEDED and review the source before validation."
+}

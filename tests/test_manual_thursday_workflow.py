@@ -40,6 +40,10 @@ def test_manual_thursday_workflow_runs_supported_checks_and_runner() -> None:
     assert '--current-odds-path="$CURRENT_ODDS_PATH"' in text
     assert '--fixtures-path="$FIXTURES_PATH"' in text
     assert '--staging-receipt-path="$STAGING_RECEIPT_PATH"' in text
+    assert (
+        '--staging-provider-policy-path="$STAGING_PROVIDER_POLICY_PATH"'
+        in text
+    )
     assert "--require-staging-receipt" in text
     assert "--force" not in text
 
@@ -53,6 +57,8 @@ def test_manual_thursday_workflow_accepts_only_prepared_repository_input_paths()
     assert "default: data/staging/upcoming_fixtures_staging.csv" in text
     assert "staging_receipt_path:" in text
     assert "default: data/outputs/staging_input_validation.json" in text
+    assert "staging_provider_policy_path:" in text
+    assert "default: data/manual/staging_provider_policy.json" in text
     assert "expected_current_odds_sha256:" in text
     assert "expected_fixtures_sha256:" in text
     assert "persist-credentials: false" in text
@@ -72,6 +78,10 @@ def test_manual_thursday_workflow_always_uploads_reports_and_writes_summary() ->
     assert "Staging receipt generated at:" in text
     assert "Staging receipt binding:" in text
     assert "Receipt input checksums:" in text
+    assert "Staging provider:" in text
+    assert "Provider policy:" in text
+    assert "Receipt age:" in text
+    assert "Thursday cutoff:" in text
     assert "Odds file used:" in text
     assert "Odds SHA-256:" in text
     assert "Fixtures freshness:" in text

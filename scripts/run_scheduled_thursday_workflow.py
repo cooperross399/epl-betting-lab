@@ -61,6 +61,14 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Block the GitHub handoff unless a matching Ready staging receipt passes.",
     )
+    parser.add_argument(
+        "--staging-provider-policy-path",
+        type=Path,
+        help=(
+            "Provider allowlist, maximum receipt age, timezone, and Thursday "
+            "cutoff policy JSON."
+        ),
+    )
     return parser.parse_args()
 
 
@@ -79,6 +87,7 @@ def main() -> int:
         expected_fixtures_sha256=args.expected_fixtures_sha256,
         staging_receipt_path=args.staging_receipt_path,
         require_staging_receipt=args.require_staging_receipt,
+        staging_provider_policy_path=args.staging_provider_policy_path,
         progress=_print_progress,
     )
     status = str(result["status"])
@@ -96,6 +105,23 @@ def main() -> int:
             print(
                 "Staging receipt binding: "
                 f"{input_handoff.get('staging_receipt_binding_status', 'Not checked')}"
+            )
+            print(
+                "Provider policy: "
+                f"{input_handoff.get('staging_provider_policy_status', 'Not checked')}"
+            )
+            print(
+                "Provider: "
+                f"{input_handoff.get('staging_receipt_provider_name') or 'unknown'} "
+                f"({input_handoff.get('staging_receipt_provider_type', 'unknown')})"
+            )
+            print(
+                "Receipt age: "
+                f"{input_handoff.get('staging_receipt_age_status', 'Not checked')}"
+            )
+            print(
+                "Thursday cutoff: "
+                f"{input_handoff.get('staging_cutoff_policy_status', 'Not checked')}"
             )
         print(f"Current odds input: {input_handoff['current_odds_path']}")
         print(f"Upcoming fixtures input: {input_handoff['fixtures_path']}")

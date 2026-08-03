@@ -7,6 +7,8 @@ PROCESSED_DIR = DATA_DIR / "processed"
 MANUAL_DIR = DATA_DIR / "manual"
 STAGING_DIR = DATA_DIR / "staging"
 OUTPUTS_DIR = DATA_DIR / "outputs"
+STAGING_PROVENANCE_PATH = STAGING_DIR / "staging_provenance.json"
+STAGING_PROVIDER_POLICY_PATH = MANUAL_DIR / "staging_provider_policy.json"
 
 DEFAULT_SEASONS = ["2122", "2223", "2324", "2425", "2526"]
 LEAGUE_CODE = "E0"  # English Premier League on Football-Data.co.uk

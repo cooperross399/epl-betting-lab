@@ -26,8 +26,10 @@ MARKETS = (
 
 def _write_ready_inputs(root: Path) -> dict[str, Path]:
     staging = root / "data" / "staging"
+    manual = root / "data" / "manual"
     processed = root / "data" / "processed"
     staging.mkdir(parents=True)
+    manual.mkdir(parents=True)
     processed.mkdir(parents=True)
     fixture = {
         "date": "2026-08-08",
@@ -66,22 +68,57 @@ def _write_ready_inputs(root: Path) -> dict[str, Path]:
             }
         ]
     ).to_csv(matches_path, index=False)
+    policy_path = manual / "staging_provider_policy.json"
+    policy_path.write_text(
+        json.dumps(
+            {
+                "allowed_provider_names": ["manual_reviewed"],
+                "allowed_provider_types": ["manual_upload"],
+                "allow_unknown_providers": False,
+                "max_receipt_age_hours": 12,
+                "timezone": "America/New_York",
+                "thursday_cutoff_time": "10:00",
+            }
+        ),
+        encoding="utf-8",
+    )
+    provenance_path = staging / "staging_provenance.json"
+    provenance_path.write_text(
+        json.dumps(
+            {
+                "provider_name": "manual_reviewed",
+                "provider_type": "manual_upload",
+                "source_file_path": "data/staging/current_odds_staging.csv",
+                "source_checksum_sha256": "",
+                "generated_by": "test suite",
+                "notes": "Fixed-time staging fixture.",
+            }
+        ),
+        encoding="utf-8",
+    )
     return {
         "staging_dir": staging,
         "odds_path": odds_path,
         "fixtures_path": fixtures_path,
         "matches_path": matches_path,
+        "policy_path": policy_path,
+        "provenance_path": provenance_path,
     }
 
 
-def _build(root: Path, paths: dict[str, Path]):
+def _build(
+    root: Path,
+    paths: dict[str, Path],
+    *,
+    run_at: datetime = RUN_AT,
+):
     return build_staging_input_validation(
         paths["odds_path"],
         paths["fixtures_path"],
         matches_path=paths["matches_path"],
         repository_root=root,
         staging_dir=paths["staging_dir"],
-        run_at=RUN_AT,
+        run_at=run_at,
     )
 
 
@@ -96,7 +133,51 @@ def test_ready_staging_inputs_pass_existing_handoff_gate(tmp_path: Path) -> None
     assert summary["odds_completeness"]["status"] == "Complete"
     assert summary["odds_completeness"]["completion_percentage"] == 1.0
     assert summary["handoff_gate"]["card_generation_allowed"] is True
+    assert summary["provider_name"] == "manual_reviewed"
+    assert summary["provider_type"] == "manual_upload"
+    assert summary["provider_policy"]["provider_policy_status"] == "Provider allowed"
+    assert summary["provider_policy"]["receipt_age_status"] == "Within age limit"
+    assert summary["provider_policy"]["cutoff_policy_status"] == "Before cutoff"
     assert "existing_handoff_gate" in set(checks["check"])
+
+
+def test_disallowed_provider_needs_fixes(tmp_path: Path) -> None:
+    paths = _write_ready_inputs(tmp_path)
+    provenance = json.loads(paths["provenance_path"].read_text(encoding="utf-8"))
+    provenance["provider_name"] = "unapproved_feed"
+    paths["provenance_path"].write_text(json.dumps(provenance), encoding="utf-8")
+
+    checks, summary = _build(tmp_path, paths)
+
+    assert summary["verdict"] == "Needs fixes"
+    assert summary["handoff_eligible"] is False
+    assert summary["provider_policy"]["provider_policy_status"] == "Provider not allowed"
+    assert "provider_allowed" in set(checks["check"])
+
+
+def test_missing_provider_policy_blocks_validation(tmp_path: Path) -> None:
+    paths = _write_ready_inputs(tmp_path)
+    paths["policy_path"].unlink()
+
+    checks, summary = _build(tmp_path, paths)
+
+    assert summary["verdict"] == "Blocked"
+    assert summary["handoff_eligible"] is False
+    assert summary["provider_policy"]["load_status"] == "Policy missing"
+    assert "provider_policy_invalid" in set(checks["check"])
+
+
+def test_staging_validation_after_thursday_cutoff_needs_fixes(
+    tmp_path: Path,
+) -> None:
+    paths = _write_ready_inputs(tmp_path)
+    after_cutoff = datetime(2026, 8, 6, 14, 1, tzinfo=timezone.utc)
+
+    _, summary = _build(tmp_path, paths, run_at=after_cutoff)
+
+    assert summary["verdict"] == "Needs fixes"
+    assert summary["provider_policy"]["cutoff_policy_status"] == "After cutoff"
+    assert summary["handoff_eligible"] is False
 
 
 def test_missing_staging_inputs_get_missing_verdict(tmp_path: Path) -> None:
@@ -200,7 +281,7 @@ def test_missing_required_columns_block_validation(tmp_path: Path) -> None:
 def test_path_outside_staging_is_blocked_without_reading_it(tmp_path: Path) -> None:
     paths = _write_ready_inputs(tmp_path)
     outside = tmp_path / "data" / "manual" / "current_odds.csv"
-    outside.parent.mkdir(parents=True)
+    outside.parent.mkdir(parents=True, exist_ok=True)
     outside.write_text("not,a,staging,file\n", encoding="utf-8")
     paths["odds_path"] = outside
 
@@ -233,6 +314,11 @@ def test_save_writes_reports_without_changing_staging_files(tmp_path: Path) -> N
     assert Path(result["markdown"]).exists()
     payload = json.loads(Path(result["json"]).read_text(encoding="utf-8"))
     assert payload["generated_at"] == RUN_AT.isoformat(timespec="seconds")
+    assert payload["provider_name"] == "manual_reviewed"
+    assert payload["provider_type"] == "manual_upload"
+    assert payload["generated_by"] == "test suite"
+    assert len(payload["provider_policy"]["checksum_sha256"]) == 64
+    assert payload["provider_policy"]["allowed"] is True
     assert payload["current_odds_staging"]["row_count"] == len(MARKETS)
     assert payload["upcoming_fixtures_staging"]["row_count"] == 1
     assert len(payload["current_odds_staging"]["checksum_sha256"]) == 64

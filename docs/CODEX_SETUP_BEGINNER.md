@@ -98,10 +98,22 @@ data/staging/upcoming_fixtures_staging.csv
 data/staging/staging_provenance.json
 ```
 
-Copy the two CSV templates and `staging_provenance_template.json`, then let the
-provider or your manual preparation fill the CSVs with real data. In the
-provenance file, identify who supplied the data and how it arrived. Never put a
-password or API key there. Validate them with:
+For the first controlled provider, copy the source templates and fill them with
+real, reviewed data:
+
+```bash
+cp data/staging/source_current_odds_template.csv data/staging/source_current_odds.csv
+cp data/staging/source_upcoming_fixtures_template.csv data/staging/source_upcoming_fixtures.csv
+python scripts/run_manual_staging_provider.py
+```
+
+The command writes only the three staging outputs and provider run reports. It
+records who supplied the data and SHA-256 checksums, but never guesses odds.
+If staging outputs already exist, it stops. Use `--overwrite-staging` only
+after reviewing them and deciding to replace the whole bundle. Provider writes
+remain Terminal-only.
+
+Then validate the generated staging files:
 
 ```bash
 python scripts/validate_staging_inputs.py
@@ -427,9 +439,9 @@ Terminal when you intentionally want to refresh the package.
 First prepare and validate the staging files the GitHub runner will read:
 
 ```bash
-cp data/staging/current_odds_staging_template.csv data/staging/current_odds_staging.csv
-cp data/staging/upcoming_fixtures_staging_template.csv data/staging/upcoming_fixtures_staging.csv
-cp data/staging/staging_provenance_template.json data/staging/staging_provenance.json
+cp data/staging/source_current_odds_template.csv data/staging/source_current_odds.csv
+cp data/staging/source_upcoming_fixtures_template.csv data/staging/source_upcoming_fixtures.csv
+python scripts/run_manual_staging_provider.py
 python scripts/validate_staging_inputs.py
 ```
 

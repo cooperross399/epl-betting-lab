@@ -87,6 +87,33 @@ replace it intentionally with:
 python scripts/create_current_odds_template.py --overwrite
 ```
 
+### Provider staging files
+
+A future permitted odds/fixtures provider should write standard CSVs to a
+holding area first, not directly into your manual files:
+
+```text
+data/staging/current_odds_staging.csv
+data/staging/upcoming_fixtures_staging.csv
+```
+
+Copy the header-only staging templates, then let the provider or your manual
+preparation fill them with real data. Validate them with:
+
+```bash
+python scripts/validate_staging_inputs.py
+```
+
+Read `data/outputs/staging_input_validation.md`. `Ready for handoff` means the
+staging paths, schema, dates, odds, fixture matching, validation, completeness,
+and existing GitHub handoff gate passed. `Needs fixes`, `Blocked`, or `Missing
+staging inputs` means the files are not eligible. The command never copies the
+files into `data/manual/` or generates picks.
+
+The first step under dashboard `Odds Import` is `Validate provider staging`.
+It runs the same report-only check. Full instructions are in
+`docs/STAGING_INPUTS.md`.
+
 If your sportsbook or odds site gives you a CSV export with different column
 names, save it as `data/manual/sportsbook_export.csv`, then run:
 
@@ -447,8 +474,9 @@ This workflow has only `workflow_dispatch`; it has no cron schedule. Automatic
 Thursday scheduling must wait for a trusted permitted source that can refresh
 real odds and fixtures without manual commits. You also need secure credential
 handling, verified provider mappings, an intended Thursday timezone/cutoff, and
-manual ownership of warnings. The workflow never guesses sportsbook prices,
-uses `--force`, edits protected manual files, applies changes, or places bets.
+an explicitly reviewed staging-to-handoff step plus manual ownership of
+warnings. The workflow never guesses sportsbook prices, uses `--force`, edits
+protected manual files, applies changes, or places bets.
 
 The dashboard badge means:
 

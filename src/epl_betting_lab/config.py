@@ -5,6 +5,7 @@ DATA_DIR = PROJECT_ROOT / "data"
 RAW_DIR = DATA_DIR / "raw"
 PROCESSED_DIR = DATA_DIR / "processed"
 MANUAL_DIR = DATA_DIR / "manual"
+STAGING_DIR = DATA_DIR / "staging"
 OUTPUTS_DIR = DATA_DIR / "outputs"
 
 DEFAULT_SEASONS = ["2122", "2223", "2324", "2425", "2526"]

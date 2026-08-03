@@ -75,8 +75,9 @@ def test_portal_breadcrumb_falls_back_to_home_for_bad_state() -> None:
 
 
 def test_odds_import_steps_preserve_the_safe_workflow_order() -> None:
-    assert [step.number for step in ODDS_IMPORT_STEPS] == list(range(1, 10))
+    assert [step.number for step in ODDS_IMPORT_STEPS] == list(range(1, 11))
     assert [step.label for step in ODDS_IMPORT_STEPS] == [
+        "Validate provider staging",
         "Diagnose export",
         "Suggest profile",
         "Validate suggested profile",
@@ -94,6 +95,7 @@ def test_open_next_cues_map_to_portal_sections() -> None:
         "Thursday readiness refresh and Thursday best-bets report"
     ) == "Thursday Card"
     assert resolve_open_next_section("Odds import profile install") == "Odds Import"
+    assert resolve_open_next_section("Validate provider staging inputs") == "Odds Import"
     assert resolve_open_next_section(
         "Post-refresh Thursday review and Latest Thursday snapshot comparison"
     ) == "Archives & Comparisons"

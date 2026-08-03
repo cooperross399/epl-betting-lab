@@ -54,6 +54,9 @@ from epl_betting_lab.reports.odds_profile_verification import (
     InstalledOddsProfileVerificationError,
     verify_installed_odds_profile,
 )
+from epl_betting_lab.reports.staging_input_validation import (
+    save_staging_input_validation,
+)
 from epl_betting_lab.reports.stale_current_odds import save_stale_current_odds_report
 from epl_betting_lab.reports.stale_current_odds_archive import (
     CONFIRMATION_METADATA_FILENAME,
@@ -130,6 +133,18 @@ def run_current_odds_validation(
     output_dir: Path | None = None,
 ) -> dict[str, Path]:
     return save_current_odds_validation(current_odds_path or MANUAL_DIR / "current_odds.csv", output_dir or OUTPUTS_DIR)
+
+
+def run_staging_input_validation(
+    odds_path: Path | None = None,
+    fixtures_path: Path | None = None,
+    output_dir: Path | None = None,
+) -> dict[str, object]:
+    return save_staging_input_validation(
+        odds_path,
+        fixtures_path,
+        output_dir=output_dir or OUTPUTS_DIR,
+    )
 
 
 def run_current_odds_completeness(

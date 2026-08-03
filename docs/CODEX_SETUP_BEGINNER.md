@@ -110,6 +110,12 @@ and existing GitHub handoff gate passed. `Needs fixes`, `Blocked`, or `Missing
 staging inputs` means the files are not eligible. The command never copies the
 files into `data/manual/` or generates picks.
 
+For a manual GitHub run, commit the two unchanged staging CSVs and
+`data/outputs/staging_input_validation.json` to the same weekly branch. The
+JSON is the receipt that binds the Action to the exact paths, checksums, row
+counts, and Ready validation you reviewed. Editing either CSV after validation
+blocks the run until you validate again and use the new receipt.
+
 The first step under dashboard `Odds Import` is `Validate provider staging`.
 It runs the same report-only check. Full instructions are in
 `docs/STAGING_INPUTS.md`.
@@ -408,27 +414,28 @@ Terminal when you intentionally want to refresh the package.
 
 ### Run it manually from GitHub
 
-First prepare the two files the GitHub runner will read:
+First prepare and validate the staging files the GitHub runner will read:
 
 ```bash
-cp data/manual/current_odds_template.csv data/manual/current_odds.csv
-python scripts/validate_current_odds.py
-python scripts/check_current_odds_completeness.py
+cp data/staging/current_odds_staging_template.csv data/staging/current_odds_staging.csv
+cp data/staging/upcoming_fixtures_staging_template.csv data/staging/upcoming_fixtures_staging.csv
+python scripts/validate_staging_inputs.py
 ```
 
-Enter only real sportsbook prices. Update `upcoming_fixtures.csv` so it contains
-the upcoming slate you want to analyze, with no past or malformed dates. The
-odds completeness report must show 100%. Commit `current_odds.csv` and
-`upcoming_fixtures.csv` to a short-lived weekly branch, then push that branch.
-Do not put passwords, API keys, or sportsbook account details in these files.
+Enter only real sportsbook prices. Keep the fixture staging file limited to the
+upcoming slate, with no past or malformed dates. The staging verdict must say
+`Ready for handoff`. Commit both unchanged staging CSVs and
+`data/outputs/staging_input_validation.json` to a short-lived weekly branch,
+then push that branch. Do not put passwords, API keys, or sportsbook account
+details in these files.
 
 1. Open `cooperross399/epl-betting-lab` on GitHub.
 2. Click the **Actions** tab.
 3. Click **Manual Thursday Workflow** in the workflow list.
 4. Click **Run workflow** and select the weekly branch containing your prepared
    odds and fixture files.
-5. Confirm the two repository-relative input paths. You may also paste optional
-   SHA-256 checksums from `shasum -a 256 FILE` for an extra identity check.
+5. Confirm the odds, fixtures, and staging receipt paths. You may also paste
+   optional SHA-256 checksums from `shasum -a 256 FILE` for an extra check.
 6. Open the run when it finishes and read the job summary.
 7. Scroll to **Artifacts** and download
    `scheduled-thursday-reports-RUN_NUMBER-RUN_ATTEMPT`.
@@ -461,11 +468,12 @@ test, runtime, unexpected-exit, verification, or artifact-upload failure makes
 the Action fail.
 
 The job summary proves which inputs were used by showing the selected Git ref
-and commit, odds and fixture paths, calculated SHA-256 checksums, freshness,
-validation, completeness, and whether card generation was allowed. The runner
-blocks any past odds/fixture row, invalid date, serious validation issue,
-optional checksum mismatch, or completeness below 100%. It never fills blank
-odds.
+and commit, staging receipt path/verdict/time, receipt binding status, odds and
+fixture paths, calculated SHA-256 checksums, freshness, validation,
+completeness, and whether card generation was allowed. A missing or non-Ready
+receipt, changed file, path mismatch, past row, invalid date, serious
+validation issue, checksum mismatch, or completeness below 100% blocks the
+card. The runner never fills blank odds.
 
 The complete handoff guide is in
 `docs/GITHUB_RUNNER_INPUT_HANDOFF.md`.
@@ -474,9 +482,9 @@ This workflow has only `workflow_dispatch`; it has no cron schedule. Automatic
 Thursday scheduling must wait for a trusted permitted source that can refresh
 real odds and fixtures without manual commits. You also need secure credential
 handling, verified provider mappings, an intended Thursday timezone/cutoff, and
-an explicitly reviewed staging-to-handoff step plus manual ownership of
-warnings. The workflow never guesses sportsbook prices, uses `--force`, edits
-protected manual files, applies changes, or places bets.
+reliable automated staging refreshes plus manual ownership of warnings. The
+workflow never guesses sportsbook prices, uses `--force`, edits protected
+manual files, applies changes, or places bets.
 
 The dashboard badge means:
 

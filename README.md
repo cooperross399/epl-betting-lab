@@ -152,6 +152,13 @@ cron. The `Odds Import` dashboard section has the same read-only button and
 report display. See [docs/STAGING_INPUTS.md](docs/STAGING_INPUTS.md) for the
 full workflow.
 
+The JSON output is the staging receipt used by the manual GitHub Action. It
+records the exact staging paths, SHA-256 checksums, row counts, freshness,
+validation, and completeness state. After a `Ready for handoff` result, commit
+the two unchanged staging CSVs and that JSON receipt to the same short-lived
+weekly branch. If either CSV changes afterward, the Action blocks the card
+until you validate again and use the new receipt.
+
 ---
 
 ## Generate a weekly card
@@ -552,15 +559,16 @@ The latest markdown summary is also available as a read-only expander under
 The repository includes a manual-only workflow at
 `.github/workflows/manual-thursday-workflow.yml`.
 
-The initial safe handoff uses manually prepared repository files. Before
+The safe handoff uses a reviewed `Ready for handoff` staging receipt. Before
 starting the Action:
 
-1. Copy `data/manual/current_odds_template.csv` to
-   `data/manual/current_odds.csv`.
-2. Enter real sportsbook prices and update
-   `data/manual/upcoming_fixtures.csv` to the intended upcoming slate.
-3. Run current-odds validation and completeness locally.
-4. Commit both prepared CSVs to a short-lived weekly branch and push it.
+1. Put real provider prices in `data/staging/current_odds_staging.csv` and the
+   matching slate in `data/staging/upcoming_fixtures_staging.csv`.
+2. Run `python scripts/validate_staging_inputs.py`.
+3. Confirm the verdict is `Ready for handoff` and review its warnings.
+4. Commit both unchanged staging CSVs plus
+   `data/outputs/staging_input_validation.json` to one short-lived weekly
+   branch, then push it.
 
 Then:
 
@@ -568,8 +576,8 @@ Then:
 2. Select **Manual Thursday Workflow**.
 3. Select **Run workflow** and choose the weekly branch containing the prepared
    files.
-4. Confirm the repository-relative odds and fixtures paths. Optional SHA-256
-   fields can prove the files match the copies you reviewed locally.
+4. Confirm the repository-relative odds, fixtures, and staging receipt paths.
+   Optional SHA-256 fields provide an additional identity check.
 5. Open the finished run and read its job summary.
 6. Download `scheduled-thursday-reports-RUN_NUMBER-RUN_ATTEMPT` from the
    **Artifacts** section.
@@ -603,12 +611,14 @@ Compile failures, test failures, runtime failures, unexpected exit codes,
 untrusted/incomplete verification, or artifact-upload failures make the Action
 fail.
 
-The runner accepts only regular CSV paths inside the checked-out repository. It
-records the selected Git ref and commit, exact paths, calculated SHA-256
-checksums, date freshness, validation results, completeness, and whether card
-generation was allowed. Any past odds/fixture row, malformed date, serious
-validation issue, checksum mismatch, or completeness below 100% blocks the
-card without `--force`.
+The runner accepts only regular staging CSVs and a regular JSON receipt inside
+the checked-out repository. It records the selected Git ref and commit, exact
+paths, receipt timestamp and verdict, calculated SHA-256 checksums, receipt
+binding status, date freshness, validation results, completeness, and whether
+card generation was allowed. A missing or non-Ready receipt, changed staging
+file, path mismatch, past odds/fixture row, malformed date, serious validation
+issue, checksum mismatch, or completeness below 100% blocks the card without
+`--force`.
 
 Read [docs/GITHUB_RUNNER_INPUT_HANDOFF.md](docs/GITHUB_RUNNER_INPUT_HANDOFF.md)
 for copy/paste setup, optional checksum commands, fail-closed rules, and the
@@ -620,9 +630,9 @@ automatically source permitted real sportsbook odds. This repository-file
 handoff still needs a person to prepare and review each weekly input. Before
 automatic scheduling, add a trusted automated odds/fixture source, secure its
 credentials, choose the Thursday timezone and cutoff, verify provider mappings,
-define an explicitly reviewed staging-to-handoff step, and keep a person
-responsible for reviewing warnings. The Action never guesses missing prices
-and never uses `--force`.
+keep a person responsible for refreshing provider data, validating the staging
+receipt, and reviewing warnings. The Action never guesses missing prices and
+never uses `--force`.
 
 The dashboard shows a current-odds status badge:
 

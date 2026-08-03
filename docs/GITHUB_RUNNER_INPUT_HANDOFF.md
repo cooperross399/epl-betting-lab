@@ -1,8 +1,9 @@
 # GitHub Runner Odds and Fixtures Handoff
 
-This is the first safe input method for the manual Thursday GitHub Action. It
-uses real odds and fixtures that you prepare, review, and commit to the branch
-you select when starting the Action.
+This is the safe staging-receipt input method for the manual Thursday GitHub
+Action. It uses real odds and fixtures that you prepare, validate, review, and
+commit with their Ready receipt to the branch you select when starting the
+Action.
 
 The runner does not fetch sportsbook prices, fill blank prices, edit the input
 files, use `--force`, or place bets.
@@ -16,26 +17,28 @@ python scripts/validate_staging_inputs.py
 That gate reads `data/staging/current_odds_staging.csv` and
 `data/staging/upcoming_fixtures_staging.csv`. A `Ready for handoff` verdict
 means the existing freshness, validation, completeness, and runner handoff
-checks passed. It does not copy or promote the files. If those staging paths
-are intentionally selected for a manual Action, this handoff gate runs again.
+checks passed. It does not copy or promote the files. The manual Action binds
+its selected files to `data/outputs/staging_input_validation.json`, then runs
+the normal gates again.
 
 ## What to prepare
 
-The default input paths are:
+The default Action input paths are:
 
 ```text
-data/manual/current_odds.csv
-data/manual/upcoming_fixtures.csv
+data/staging/current_odds_staging.csv
+data/staging/upcoming_fixtures_staging.csv
+data/outputs/staging_input_validation.json
 ```
 
-`current_odds.csv` is not committed by default. Create it locally from the
-existing template, enter real prices, and update the fixture file to contain
-only the upcoming slate you want the runner to analyze.
+Create the two staging CSVs from their templates, enter only real prices, and
+keep the fixture file limited to the upcoming slate you want the runner to
+analyze.
 
 ```bash
-cp data/manual/current_odds_template.csv data/manual/current_odds.csv
-python scripts/validate_current_odds.py
-python scripts/check_current_odds_completeness.py
+cp data/staging/current_odds_staging_template.csv data/staging/current_odds_staging.csv
+cp data/staging/upcoming_fixtures_staging_template.csv data/staging/upcoming_fixtures_staging.csv
+python scripts/validate_staging_inputs.py
 ```
 
 Before committing:
@@ -48,10 +51,12 @@ Before committing:
 6. Make sure completeness is 100% for the prepared fixture slate.
 7. Review heavy juice around or worse than `-160` and totals-under warnings.
 
-Commit both prepared files to a short-lived weekly branch, then push that
-branch. Never put sportsbook passwords, API keys, account numbers, or other
-secrets in either CSV. Repository files and generated artifacts may be visible
-to anyone who can access the repository.
+Confirm `data/outputs/staging_input_validation.md` says `Ready for handoff`.
+Commit both unchanged staging CSVs and the matching JSON receipt to a
+short-lived weekly branch, then push that branch. Never put sportsbook
+passwords, API keys, account numbers, or other secrets in either CSV.
+Repository files and generated artifacts may be visible to anyone who can
+access the repository.
 
 ## Optional checksum confirmation
 
@@ -59,8 +64,8 @@ The Action always calculates and reports SHA-256 checksums. You can also enter
 the expected checksums when starting the workflow:
 
 ```bash
-shasum -a 256 data/manual/current_odds.csv
-shasum -a 256 data/manual/upcoming_fixtures.csv
+shasum -a 256 data/staging/current_odds_staging.csv
+shasum -a 256 data/staging/upcoming_fixtures_staging.csv
 ```
 
 Copy only the 64-character checksum into the matching optional workflow field.
@@ -72,7 +77,7 @@ A mismatch blocks the card.
 2. Open **Actions**, then **Manual Thursday Workflow**.
 3. Select **Run workflow**.
 4. Select the weekly branch containing the prepared files.
-5. Confirm or change the repository-relative odds and fixtures paths.
+5. Confirm the repository-relative odds, fixtures, and staging receipt paths.
 6. Optionally enter the two expected SHA-256 values.
 7. Run the workflow.
 
@@ -96,6 +101,8 @@ data/outputs/github_manual_thursday_run_verification.md
 They show:
 
 - selected GitHub ref and commit SHA
+- staging receipt path, verdict, generated timestamp, and receipt checksum
+- receipt path, input checksum, and row-count match status
 - exact repository-relative odds and fixture paths
 - calculated file SHA-256 checksums
 - optional checksum match status
@@ -139,6 +146,11 @@ changes odds, fixtures, imports, ledger rows, profiles, or model behavior.
 
 Card generation is blocked when:
 
+- the staging receipt is missing, unreadable, malformed, or outside the repository
+- the receipt verdict is not `Ready for handoff`
+- selected paths do not match the receipt or are not inside `data/staging`
+- either staging file checksum or row count changed after validation
+- the receipt does not record acceptable freshness, validation, and completeness
 - either file is missing, unreadable, empty, outside the repository, or not CSV
 - an optional expected checksum does not match
 - odds or fixtures contain any past-match rows
@@ -154,8 +166,9 @@ the available reports so you can read why it stopped.
 ## Why cron is still off
 
 The handoff is intentionally manual. A person still has to source real prices,
-prepare the slate, commit the files, choose the correct branch, and review
-warnings. Before enabling a Thursday schedule, the project still needs:
+validate and review the staging receipt, commit the files, choose the correct
+branch, and review warnings. Before enabling a Thursday schedule, the project
+still needs:
 
 - a trusted and permitted automated odds source
 - an automated fixture refresh with date checks

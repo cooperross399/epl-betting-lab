@@ -27,6 +27,7 @@ from epl_betting_lab.workflow_status import (
 HANDOFF_JSON_FILENAME = "github_runner_input_handoff.json"
 HANDOFF_MARKDOWN_FILENAME = "github_runner_input_handoff.md"
 SHA256_PATTERN = re.compile(r"^[0-9a-fA-F]{64}$")
+READY_STAGING_VERDICT = "Ready for handoff"
 
 
 @dataclass(frozen=True)
@@ -159,6 +160,416 @@ def _inspect_repository_csv(
     )
 
 
+def _receipt_value(
+    payload: dict[str, object],
+    section: str,
+    field: str,
+    default: object = "",
+) -> object:
+    value = payload.get(section)
+    if not isinstance(value, dict):
+        return default
+    return value.get(field, default)
+
+
+def _receipt_int(value: object) -> int | None:
+    if isinstance(value, bool):
+        return None
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _receipt_float(value: object) -> float | None:
+    if isinstance(value, bool):
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _csv_row_count(path: Path) -> tuple[int | None, str]:
+    try:
+        frame = pd.read_csv(path, dtype=str, keep_default_na=False)
+    except (
+        OSError,
+        UnicodeError,
+        pd.errors.EmptyDataError,
+        pd.errors.ParserError,
+    ) as exc:
+        return None, str(exc)
+    return int(len(frame)), ""
+
+
+def _inspect_staging_receipt(
+    staging_receipt_path: Path | None,
+    *,
+    required: bool,
+    repository_root: Path,
+    odds: _PathInspection,
+    fixtures: _PathInspection,
+) -> dict[str, object]:
+    """Bind selected inputs to a previously reviewed staging receipt."""
+    result: dict[str, object] = {
+        "required": required,
+        "path": "",
+        "path_policy_valid": not required,
+        "available": False,
+        "receipt_checksum_sha256": "",
+        "verdict": "Not checked",
+        "generated_at": "",
+        "binding_status": "Not required" if not required else "Missing",
+        "path_match_status": "Not checked",
+        "input_checksum_status": "Not checked",
+        "current_odds_checksum_status": "Not checked",
+        "fixtures_checksum_status": "Not checked",
+        "row_count_status": "Not checked",
+        "freshness_status": "Not checked",
+        "validation_status": "Not checked",
+        "completeness_status": "Not checked",
+        "recorded_current_odds_path": "",
+        "recorded_fixtures_path": "",
+        "recorded_current_odds_sha256": "",
+        "recorded_fixtures_sha256": "",
+        "recorded_current_odds_row_count": None,
+        "recorded_fixtures_row_count": None,
+        "current_current_odds_row_count": None,
+        "current_fixtures_row_count": None,
+        "blockers": [],
+        "warnings": [],
+    }
+    blockers: list[str] = []
+    warnings: list[str] = []
+    if staging_receipt_path is None:
+        if required:
+            blockers.append(
+                "A Ready staging validation receipt is required. Run "
+                "`python scripts/validate_staging_inputs.py`, review the result, "
+                "and pass its JSON receipt path."
+            )
+        result["blockers"] = blockers
+        return result
+
+    raw_text = str(staging_receipt_path).strip()
+    candidate = (
+        staging_receipt_path
+        if staging_receipt_path.is_absolute()
+        else repository_root / staging_receipt_path
+    )
+    lexical_path = candidate.absolute()
+    resolved = candidate.resolve(strict=False)
+    display_path = _display_path(resolved, repository_root)
+    result["path"] = display_path
+    path_policy_valid = True
+    if not raw_text or raw_text == ".":
+        blockers.append("The staging receipt path is blank.")
+        path_policy_valid = False
+    try:
+        resolved.relative_to(repository_root)
+    except ValueError:
+        blockers.append(
+            "The staging receipt must be a repository-relative JSON file inside "
+            f"`{repository_root}`."
+        )
+        path_policy_valid = False
+    if resolved.suffix.lower() != ".json":
+        blockers.append("The staging receipt must use a `.json` file path.")
+        path_policy_valid = False
+    if path_policy_valid and _contains_symlink(lexical_path, repository_root):
+        blockers.append("The staging receipt cannot use a symbolic link.")
+        path_policy_valid = False
+    result["path_policy_valid"] = path_policy_valid
+    if not path_policy_valid:
+        result["binding_status"] = "Invalid"
+        result["blockers"] = _dedupe(blockers)
+        return result
+    if not resolved.exists():
+        blockers.append(f"The staging receipt is missing: `{display_path}`.")
+        result["binding_status"] = "Missing"
+        result["blockers"] = blockers
+        return result
+    if not resolved.is_file():
+        blockers.append(f"The staging receipt is not a regular file: `{display_path}`.")
+        result["binding_status"] = "Invalid"
+        result["blockers"] = blockers
+        return result
+
+    try:
+        receipt_checksum = _sha256(resolved)
+        payload = json.loads(resolved.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        blockers.append(f"The staging receipt could not be read as JSON: {exc}")
+        result["binding_status"] = "Invalid"
+        result["blockers"] = blockers
+        return result
+    if not isinstance(payload, dict):
+        blockers.append("The staging receipt JSON root must be an object.")
+        result["binding_status"] = "Invalid"
+        result["blockers"] = blockers
+        return result
+
+    result["available"] = True
+    result["receipt_checksum_sha256"] = receipt_checksum
+    verdict = str(payload.get("verdict", "")).strip()
+    generated_at = str(
+        payload.get("generated_at") or payload.get("validated_at") or ""
+    ).strip()
+    result["verdict"] = verdict or "Missing"
+    result["generated_at"] = generated_at
+    if verdict != READY_STAGING_VERDICT:
+        blockers.append(
+            "The staging receipt verdict must be `Ready for handoff`; "
+            f"the receipt says `{verdict or 'missing'}`."
+        )
+    if payload.get("handoff_eligible") is not True:
+        blockers.append("The staging receipt does not mark these files handoff eligible.")
+    if not generated_at:
+        blockers.append("The staging receipt is missing its generated_at timestamp.")
+    else:
+        try:
+            datetime.fromisoformat(generated_at.replace("Z", "+00:00"))
+        except ValueError:
+            blockers.append("The staging receipt generated_at timestamp is invalid.")
+
+    recorded_odds_path = str(
+        _receipt_value(payload, "current_odds_staging", "path")
+    ).strip()
+    recorded_fixtures_path = str(
+        _receipt_value(payload, "upcoming_fixtures_staging", "path")
+    ).strip()
+    result["recorded_current_odds_path"] = recorded_odds_path
+    result["recorded_fixtures_path"] = recorded_fixtures_path
+    expected_staging_dir = (repository_root / "data" / "staging").resolve()
+    selected_paths_are_staging = True
+    for selected_path, label in (
+        (odds.path, "current odds"),
+        (fixtures.path, "upcoming fixtures"),
+    ):
+        try:
+            selected_path.relative_to(expected_staging_dir)
+        except ValueError:
+            selected_paths_are_staging = False
+            blockers.append(
+                f"The selected {label} file must be inside `data/staging` when "
+                "a staging receipt is required."
+            )
+    paths_match = (
+        selected_paths_are_staging
+        and bool(recorded_odds_path)
+        and bool(recorded_fixtures_path)
+        and recorded_odds_path == odds.display_path
+        and recorded_fixtures_path == fixtures.display_path
+    )
+    result["path_match_status"] = "Verified" if paths_match else "Mismatch"
+    if not paths_match:
+        blockers.append(
+            "The selected odds/fixtures paths do not match the paths recorded in "
+            "the staging receipt."
+        )
+
+    recorded_odds_checksum = str(
+        _receipt_value(payload, "current_odds_staging", "checksum_sha256")
+    ).strip().lower()
+    recorded_fixtures_checksum = str(
+        _receipt_value(payload, "upcoming_fixtures_staging", "checksum_sha256")
+    ).strip().lower()
+    result["recorded_current_odds_sha256"] = recorded_odds_checksum
+    result["recorded_fixtures_sha256"] = recorded_fixtures_checksum
+
+    def checksum_status(recorded: str, current: str, label: str) -> str:
+        if not SHA256_PATTERN.fullmatch(recorded):
+            blockers.append(f"The staging receipt has no valid SHA-256 for {label}.")
+            return "Invalid"
+        if not current:
+            blockers.append(f"The current {label} checksum is not available.")
+            return "Not available"
+        if recorded != current.lower():
+            blockers.append(
+                f"The current {label} checksum does not match the Ready staging "
+                "receipt. The file changed after validation."
+            )
+            return "Mismatch"
+        return "Verified"
+
+    odds_checksum_status = checksum_status(
+        recorded_odds_checksum,
+        odds.checksum_sha256,
+        "current odds staging file",
+    )
+    fixtures_checksum_status = checksum_status(
+        recorded_fixtures_checksum,
+        fixtures.checksum_sha256,
+        "upcoming fixtures staging file",
+    )
+    result["current_odds_checksum_status"] = odds_checksum_status
+    result["fixtures_checksum_status"] = fixtures_checksum_status
+    result["input_checksum_status"] = (
+        "Verified"
+        if odds_checksum_status == fixtures_checksum_status == "Verified"
+        else "Mismatch"
+        if "Mismatch" in {odds_checksum_status, fixtures_checksum_status}
+        else "Invalid"
+    )
+
+    recorded_odds_rows = _receipt_int(
+        _receipt_value(payload, "current_odds_staging", "row_count", None)
+    )
+    recorded_fixture_rows = _receipt_int(
+        _receipt_value(payload, "upcoming_fixtures_staging", "row_count", None)
+    )
+    result["recorded_current_odds_row_count"] = recorded_odds_rows
+    result["recorded_fixtures_row_count"] = recorded_fixture_rows
+    current_odds_rows, odds_row_error = (
+        _csv_row_count(odds.path) if odds.available else (None, "input unavailable")
+    )
+    current_fixture_rows, fixture_row_error = (
+        _csv_row_count(fixtures.path)
+        if fixtures.available
+        else (None, "input unavailable")
+    )
+    result["current_current_odds_row_count"] = current_odds_rows
+    result["current_fixtures_row_count"] = current_fixture_rows
+    rows_match = (
+        recorded_odds_rows is not None
+        and recorded_fixture_rows is not None
+        and recorded_odds_rows > 0
+        and recorded_fixture_rows > 0
+        and recorded_odds_rows == current_odds_rows
+        and recorded_fixture_rows == current_fixture_rows
+    )
+    result["row_count_status"] = "Verified" if rows_match else "Mismatch"
+    if not rows_match:
+        detail = "; ".join(
+            item for item in (odds_row_error, fixture_row_error) if item
+        )
+        blockers.append(
+            "The current staging row counts do not match the Ready receipt."
+            + (f" {detail}" if detail else "")
+        )
+
+    odds_past = _receipt_int(
+        _receipt_value(payload, "current_odds_date_freshness", "past_rows", None)
+    )
+    odds_future = _receipt_int(
+        _receipt_value(
+            payload,
+            "current_odds_date_freshness",
+            "today_or_future_rows",
+            None,
+        )
+    )
+    odds_invalid = _receipt_int(
+        _receipt_value(
+            payload,
+            "current_odds_date_freshness",
+            "invalid_date_rows",
+            None,
+        )
+    )
+    fixtures_past = _receipt_int(
+        _receipt_value(payload, "fixture_date_freshness", "past_rows", None)
+    )
+    fixtures_future = _receipt_int(
+        _receipt_value(
+            payload,
+            "fixture_date_freshness",
+            "today_or_future_rows",
+            None,
+        )
+    )
+    fixtures_invalid = _receipt_int(
+        _receipt_value(
+            payload,
+            "fixture_date_freshness",
+            "invalid_date_rows",
+            None,
+        )
+    )
+    freshness_ready = (
+        odds_past == 0
+        and odds_invalid == 0
+        and odds_future is not None
+        and odds_future > 0
+        and fixtures_past == 0
+        and fixtures_invalid == 0
+        and fixtures_future is not None
+        and fixtures_future > 0
+    )
+    result["freshness_status"] = "Ready" if freshness_ready else "Blocked"
+    if not freshness_ready:
+        blockers.append("The staging receipt does not show acceptable input freshness.")
+
+    validation_status = str(
+        _receipt_value(payload, "current_odds_validation", "status")
+    ).strip()
+    validation_serious = _receipt_int(
+        _receipt_value(
+            payload,
+            "current_odds_validation",
+            "serious_issue_count",
+            None,
+        )
+    )
+    validation_ready = validation_status == "Ready" and validation_serious == 0
+    result["validation_status"] = "Ready" if validation_ready else "Blocked"
+    if not validation_ready:
+        blockers.append("The staging receipt does not show a clean odds validation.")
+
+    completeness_status = str(
+        _receipt_value(payload, "odds_completeness", "status")
+    ).strip()
+    completion_percentage = _receipt_float(
+        _receipt_value(
+            payload,
+            "odds_completeness",
+            "completion_percentage",
+            None,
+        )
+    )
+    incomplete_matches = _receipt_int(
+        _receipt_value(
+            payload,
+            "odds_completeness",
+            "matches_incomplete",
+            None,
+        )
+    )
+    completeness_ready = (
+        completeness_status == "Complete"
+        and completion_percentage is not None
+        and completion_percentage >= 1.0
+        and incomplete_matches == 0
+    )
+    result["completeness_status"] = (
+        "Complete" if completeness_ready else "Blocked"
+    )
+    if not completeness_ready:
+        blockers.append("The staging receipt does not show 100% odds completeness.")
+
+    receipt_handoff_allowed = _receipt_value(
+        payload,
+        "handoff_gate",
+        "card_generation_allowed",
+        False,
+    )
+    if receipt_handoff_allowed is not True:
+        blockers.append("The staging receipt's existing handoff gate did not allow a card.")
+
+    receipt_warning_count = _receipt_int(payload.get("warning_count")) or 0
+    if receipt_warning_count:
+        warnings.append(
+            f"The Ready staging receipt contains {receipt_warning_count} warning(s). "
+            "Review them before trusting the card."
+        )
+
+    result["blockers"] = _dedupe(blockers)
+    result["warnings"] = _dedupe(warnings)
+    result["binding_status"] = "Verified" if not blockers else "Blocked"
+    return result
+
+
 def _issue_codes(issues: pd.DataFrame, severity: str) -> list[str]:
     if issues.empty or not {"severity", "issue"}.issubset(issues.columns):
         return []
@@ -177,6 +588,8 @@ def build_github_runner_input_handoff(
     repository_root: Path | None = None,
     expected_current_odds_sha256: str = "",
     expected_fixtures_sha256: str = "",
+    staging_receipt_path: Path | None = None,
+    require_staging_receipt: bool = False,
     github_repository: str | None = None,
     github_ref: str | None = None,
     github_sha: str | None = None,
@@ -198,6 +611,15 @@ def build_github_runner_input_handoff(
     )
     blockers = list(odds.blockers) + list(fixtures.blockers)
     warnings: list[str] = []
+    staging_receipt = _inspect_staging_receipt(
+        staging_receipt_path,
+        required=require_staging_receipt,
+        repository_root=root,
+        odds=odds,
+        fixtures=fixtures,
+    )
+    blockers.extend(str(item) for item in staging_receipt["blockers"])
+    warnings.extend(str(item) for item in staging_receipt["warnings"])
 
     odds_freshness = None
     if odds.available:
@@ -398,7 +820,11 @@ def build_github_runner_input_handoff(
     return {
         "run_timestamp": run_at.isoformat(timespec="seconds"),
         "status": status,
-        "source_mode": "workflow_dispatch repository files",
+        "source_mode": (
+            "Ready staging validation receipt"
+            if require_staging_receipt
+            else "workflow_dispatch repository files"
+        ),
         "repository_root": str(root),
         "github_repository": github_repository
         if github_repository is not None
@@ -408,6 +834,66 @@ def build_github_runner_input_handoff(
         "github_run_id": github_run_id
         if github_run_id is not None
         else os.getenv("GITHUB_RUN_ID", ""),
+        "staging_receipt_required": require_staging_receipt,
+        "staging_receipt_path": staging_receipt["path"],
+        "staging_receipt_path_policy_valid": staging_receipt[
+            "path_policy_valid"
+        ],
+        "staging_receipt_available": staging_receipt["available"],
+        "staging_receipt_checksum_sha256": staging_receipt[
+            "receipt_checksum_sha256"
+        ],
+        "staging_receipt_verdict": staging_receipt["verdict"],
+        "staging_receipt_generated_at": staging_receipt["generated_at"],
+        "staging_receipt_binding_status": staging_receipt["binding_status"],
+        "staging_receipt_path_match_status": staging_receipt[
+            "path_match_status"
+        ],
+        "staging_receipt_input_checksum_status": staging_receipt[
+            "input_checksum_status"
+        ],
+        "staging_receipt_current_odds_checksum_status": staging_receipt[
+            "current_odds_checksum_status"
+        ],
+        "staging_receipt_fixtures_checksum_status": staging_receipt[
+            "fixtures_checksum_status"
+        ],
+        "staging_receipt_row_count_status": staging_receipt[
+            "row_count_status"
+        ],
+        "staging_receipt_freshness_status": staging_receipt[
+            "freshness_status"
+        ],
+        "staging_receipt_validation_status": staging_receipt[
+            "validation_status"
+        ],
+        "staging_receipt_completeness_status": staging_receipt[
+            "completeness_status"
+        ],
+        "staging_receipt_recorded_current_odds_path": staging_receipt[
+            "recorded_current_odds_path"
+        ],
+        "staging_receipt_recorded_fixtures_path": staging_receipt[
+            "recorded_fixtures_path"
+        ],
+        "staging_receipt_recorded_current_odds_sha256": staging_receipt[
+            "recorded_current_odds_sha256"
+        ],
+        "staging_receipt_recorded_fixtures_sha256": staging_receipt[
+            "recorded_fixtures_sha256"
+        ],
+        "staging_receipt_recorded_current_odds_row_count": staging_receipt[
+            "recorded_current_odds_row_count"
+        ],
+        "staging_receipt_recorded_fixtures_row_count": staging_receipt[
+            "recorded_fixtures_row_count"
+        ],
+        "staging_receipt_current_current_odds_row_count": staging_receipt[
+            "current_current_odds_row_count"
+        ],
+        "staging_receipt_current_fixtures_row_count": staging_receipt[
+            "current_fixtures_row_count"
+        ],
         "current_odds_path": odds.display_path,
         "current_odds_checksum_sha256": odds.checksum_sha256,
         "current_odds_expected_checksum_sha256": (
@@ -510,6 +996,41 @@ def render_github_runner_input_handoff(summary: dict[str, object]) -> str:
         f"- GitHub ref: `{summary['github_ref'] or 'not available'}`",
         f"- GitHub commit: `{summary['github_sha'] or 'not available'}`",
         "",
+        "## Staging receipt binding",
+        "",
+        (
+            "- Required: "
+            f"**{'Yes' if summary.get('staging_receipt_required') else 'No'}**"
+        ),
+        (
+            "- Receipt path: "
+            f"`{summary.get('staging_receipt_path') or 'not provided'}`"
+        ),
+        (
+            "- Receipt verdict: "
+            f"**{summary.get('staging_receipt_verdict', 'Not checked')}**"
+        ),
+        (
+            "- Receipt generated at: "
+            f"{summary.get('staging_receipt_generated_at') or 'not available'}"
+        ),
+        (
+            "- Receipt binding: "
+            f"**{summary.get('staging_receipt_binding_status', 'Not checked')}**"
+        ),
+        (
+            "- Selected path match: "
+            f"**{summary.get('staging_receipt_path_match_status', 'Not checked')}**"
+        ),
+        (
+            "- Input checksum match: "
+            f"**{summary.get('staging_receipt_input_checksum_status', 'Not checked')}**"
+        ),
+        (
+            "- Row count match: "
+            f"**{summary.get('staging_receipt_row_count_status', 'Not checked')}**"
+        ),
+        "",
         "## Input proof",
         "",
         "| Input | Repository path | SHA-256 | Checksum status | Date freshness |",
@@ -577,6 +1098,8 @@ def save_github_runner_input_handoff(
     repository_root: Path | None = None,
     expected_current_odds_sha256: str = "",
     expected_fixtures_sha256: str = "",
+    staging_receipt_path: Path | None = None,
+    require_staging_receipt: bool = False,
 ) -> dict[str, object]:
     summary = build_github_runner_input_handoff(
         current_odds_path=current_odds_path,
@@ -586,6 +1109,8 @@ def save_github_runner_input_handoff(
         repository_root=repository_root,
         expected_current_odds_sha256=expected_current_odds_sha256,
         expected_fixtures_sha256=expected_fixtures_sha256,
+        staging_receipt_path=staging_receipt_path,
+        require_staging_receipt=require_staging_receipt,
     )
     output_dir.mkdir(parents=True, exist_ok=True)
     json_path = output_dir / HANDOFF_JSON_FILENAME

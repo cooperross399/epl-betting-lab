@@ -391,6 +391,26 @@ def _render_summary(summary: dict[str, object]) -> str:
                 "## GitHub runner input handoff",
                 "",
                 f"- Handoff status: **{handoff.get('status', 'Not checked')}**",
+                (
+                    "- Staging receipt: "
+                    f"`{handoff.get('staging_receipt_path') or 'not provided'}`"
+                ),
+                (
+                    "- Staging receipt verdict: "
+                    f"**{handoff.get('staging_receipt_verdict', 'Not checked')}**"
+                ),
+                (
+                    "- Staging receipt generated at: "
+                    f"{handoff.get('staging_receipt_generated_at') or 'not available'}"
+                ),
+                (
+                    "- Staging receipt binding: "
+                    f"**{handoff.get('staging_receipt_binding_status', 'Not checked')}**"
+                ),
+                (
+                    "- Receipt input checksum match: "
+                    f"**{handoff.get('staging_receipt_input_checksum_status', 'Not checked')}**"
+                ),
                 f"- Current odds input: `{handoff.get('current_odds_path', '')}`",
                 (
                     "- Current odds SHA-256: "
@@ -463,10 +483,14 @@ def run_scheduled_thursday_workflow(
     repository_root: Path | None = None,
     expected_current_odds_sha256: str = "",
     expected_fixtures_sha256: str = "",
+    staging_receipt_path: Path | None = None,
+    require_staging_receipt: bool = False,
     actions: ScheduledWorkflowActions | None = None,
     progress: Callable[[str, str, str], None] | None = None,
 ) -> dict[str, object]:
     """Run the report-only Thursday package without force or manual-file writes."""
+    if require_staging_receipt:
+        require_github_runner_handoff = True
     repository_root = (repository_root or PROJECT_ROOT).resolve()
     output_dir = output_dir or OUTPUTS_DIR
 
@@ -580,6 +604,8 @@ def run_scheduled_thursday_workflow(
                 repository_root=repository_root,
                 expected_current_odds_sha256=expected_current_odds_sha256,
                 expected_fixtures_sha256=expected_fixtures_sha256,
+                staging_receipt_path=staging_receipt_path,
+                require_staging_receipt=require_staging_receipt,
             )
         except Exception as exc:
             required_failure = True

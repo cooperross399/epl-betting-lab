@@ -58,6 +58,37 @@ The validator checks:
 validator never copies files into `data/manual/`, applies an import, generates
 a Thursday card, or places a bet.
 
+## Bind a manual GitHub run to the receipt
+
+The JSON report is a machine-readable receipt. It includes:
+
+- `generated_at` and the `Ready for handoff` verdict
+- exact repository-relative odds and fixture paths
+- SHA-256 checksums and row counts for both files
+- odds and fixture date freshness
+- current-odds validation and completeness status
+- whether the existing GitHub handoff gate allowed card generation
+
+After reviewing a Ready result, commit these exact files to the same weekly
+branch:
+
+```text
+data/staging/current_odds_staging.csv
+data/staging/upcoming_fixtures_staging.csv
+data/outputs/staging_input_validation.json
+```
+
+In **Actions > Manual Thursday Workflow**, select that branch and keep the
+three matching workflow paths. The runner rechecks the receipt and all normal
+freshness, validation, and completeness gates. If a staging CSV changes after
+validation, its checksum and possibly its row count no longer match, so card
+generation is blocked. Run validation again and review the replacement receipt
+instead of bypassing the gate.
+
+The receipt does not promote or copy staging data into `data/manual/`. The
+scheduled runner reads the selected staging CSVs directly for that report-only
+run.
+
 ## Dashboard
 
 Open `Odds Import`, then use `Validate staging inputs`. The dashboard shows the
@@ -66,6 +97,6 @@ verdict plus expandable markdown and CSV details. This button is read-only.
 ## Why cron remains disabled
 
 The project still needs a trusted and permitted provider, secure credential
-handling, verified provider mappings, a chosen Thursday timezone/cutoff, and an
-explicitly reviewed staging-to-handoff promotion design. Until those pieces
-exist, the GitHub workflow remains manual-only and no cron trigger is enabled.
+handling, verified provider mappings, a chosen Thursday timezone/cutoff, and
+reliable automated staging refreshes. Until those pieces exist, the GitHub
+workflow remains manual-only and no cron trigger is enabled.

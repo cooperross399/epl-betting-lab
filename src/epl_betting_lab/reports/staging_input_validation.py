@@ -602,6 +602,7 @@ def build_staging_input_validation(
         raise ValueError(f"Unexpected staging validation verdict: {verdict}")
 
     summary = {
+        "generated_at": run_at.isoformat(timespec="seconds"),
         "validated_at": run_at.isoformat(timespec="seconds"),
         "verdict": verdict,
         "handoff_eligible": verdict == "Ready for handoff" and handoff_allowed,
@@ -682,6 +683,7 @@ def render_staging_input_validation(
         "## Verdict",
         "",
         f"- **{summary['verdict']}**",
+        f"- Receipt generated at: {summary['generated_at']}",
         f"- Eligible for handoff: **{'Yes' if summary['handoff_eligible'] else 'No'}**",
         f"- Serious issues: {summary['serious_issue_count']}",
         f"- Warnings: {summary['warning_count']}",

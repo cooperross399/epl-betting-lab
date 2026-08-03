@@ -48,6 +48,19 @@ def parse_args() -> argparse.Namespace:
         default="",
         help="Optional SHA-256 entered at dispatch to confirm the selected fixture file.",
     )
+    parser.add_argument(
+        "--staging-receipt-path",
+        type=Path,
+        help=(
+            "Ready staging validation JSON receipt that must match the selected "
+            "odds and fixtures files."
+        ),
+    )
+    parser.add_argument(
+        "--require-staging-receipt",
+        action="store_true",
+        help="Block the GitHub handoff unless a matching Ready staging receipt passes.",
+    )
     return parser.parse_args()
 
 
@@ -64,6 +77,8 @@ def main() -> int:
         require_github_runner_handoff=args.github_runner_handoff,
         expected_current_odds_sha256=args.expected_current_odds_sha256,
         expected_fixtures_sha256=args.expected_fixtures_sha256,
+        staging_receipt_path=args.staging_receipt_path,
+        require_staging_receipt=args.require_staging_receipt,
         progress=_print_progress,
     )
     status = str(result["status"])
@@ -73,6 +88,15 @@ def main() -> int:
     input_handoff = summary.get("input_handoff")
     if isinstance(input_handoff, dict):
         print(f"Input handoff status: {input_handoff['status']}")
+        if input_handoff.get("staging_receipt_required"):
+            print(
+                "Staging receipt: "
+                f"{input_handoff.get('staging_receipt_path') or 'not provided'}"
+            )
+            print(
+                "Staging receipt binding: "
+                f"{input_handoff.get('staging_receipt_binding_status', 'Not checked')}"
+            )
         print(f"Current odds input: {input_handoff['current_odds_path']}")
         print(f"Upcoming fixtures input: {input_handoff['fixtures_path']}")
         print(

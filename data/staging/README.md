@@ -29,14 +29,16 @@ contain credentials. The provider command is Terminal-only and does not
 validate or promote data.
 
 The policy at `data/manual/staging_provider_policy.json` controls allowed
-providers, the maximum receipt age, and the Thursday cutoff. Run
+providers, maximum provider-run and receipt ages, and the Thursday cutoff. Run
 `python scripts/validate_staging_inputs.py` after the adapter and before
 considering these files for the GitHub runner handoff.
 
 Validation recalculates all four checksums and verifies each source/staging
 pair. Any mismatch, missing file, unreadable file, or missing required checksum
 blocks handoff. Missing provenance is also blocked unless the reviewed provider
-policy explicitly allows it.
+policy explicitly allows it. The provider `generated_at` must be timezone-aware,
+not in the future, and within the provider-run age limit; this timestamp is
+created by the provider and should never be edited just to pass validation.
 
 Validation is read-only. It does not copy staging files into `data/manual/`,
 promote inputs, enable cron, or place bets.

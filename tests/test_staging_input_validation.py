@@ -74,6 +74,15 @@ def _refresh_provider_provenance(paths: dict[str, Path]) -> None:
     )
 
 
+def _set_provider_timestamp(paths: dict[str, Path], timestamp: str | None) -> None:
+    provenance = json.loads(paths["provenance_path"].read_text(encoding="utf-8"))
+    if timestamp is None:
+        provenance.pop("generated_at", None)
+    else:
+        provenance["generated_at"] = timestamp
+    paths["provenance_path"].write_text(json.dumps(provenance), encoding="utf-8")
+
+
 def _write_ready_inputs(root: Path) -> dict[str, Path]:
     staging = root / "data" / "staging"
     manual = root / "data" / "manual"
@@ -129,6 +138,7 @@ def _write_ready_inputs(root: Path) -> dict[str, Path]:
                 "allow_unknown_providers": False,
                 "allow_missing_provenance": False,
                 "max_receipt_age_hours": 12,
+                "max_provider_run_age_hours": 12,
                 "timezone": "America/New_York",
                 "thursday_cutoff_time": "10:00",
             }
@@ -178,6 +188,9 @@ def test_ready_staging_inputs_pass_existing_handoff_gate(tmp_path: Path) -> None
     assert summary["handoff_gate"]["card_generation_allowed"] is True
     assert summary["provider_name"] == "manual_reviewed"
     assert summary["provider_type"] == "manual_upload"
+    assert summary["provider_generated_at"] == RUN_AT.isoformat(timespec="seconds")
+    assert summary["provider_run_age_minutes"] == 0.0
+    assert summary["provider_age_status"] == "Fresh"
     assert summary["provider_policy"]["provider_policy_status"] == "Provider allowed"
     assert summary["provider_policy"]["receipt_age_status"] == "Within age limit"
     assert summary["provider_policy"]["cutoff_policy_status"] == "Before cutoff"
@@ -313,13 +326,73 @@ def test_policy_can_explicitly_allow_missing_provenance(tmp_path: Path) -> None:
 
     _, summary = _build(tmp_path, paths)
 
-    assert summary["verdict"] == "Ready for handoff"
-    assert summary["handoff_eligible"] is True
+    assert summary["verdict"] == "Needs fixes"
+    assert summary["handoff_eligible"] is False
+    assert summary["provider_age_status"] == "Missing"
     assert summary["provider_policy"]["allow_missing_provenance"] is True
     assert (
         summary["provider_policy"]["provider_policy_status"]
         == "Missing provenance allowed"
     )
+
+
+def test_old_provider_run_blocks_ready_handoff(tmp_path: Path) -> None:
+    paths = _write_ready_inputs(tmp_path)
+    _set_provider_timestamp(paths, "2026-08-05T23:59:00+00:00")
+
+    checks, summary = _build(tmp_path, paths)
+
+    assert summary["verdict"] == "Needs fixes"
+    assert summary["handoff_eligible"] is False
+    assert summary["provider_age_status"] == "Too old"
+    assert summary["provider_run_age_minutes"] == 721.0
+    assert (
+        summary["provider_age_note"]
+        == "Provider run is too old. Rerun the staging provider before validation."
+    )
+    assert "provider_age_status" in set(checks["check"])
+
+
+def test_provider_timestamp_in_future_blocks_ready_handoff(tmp_path: Path) -> None:
+    paths = _write_ready_inputs(tmp_path)
+    _set_provider_timestamp(paths, "2026-08-06T12:01:00+00:00")
+
+    _, summary = _build(tmp_path, paths)
+
+    assert summary["provider_age_status"] == "Future timestamp"
+    assert summary["handoff_eligible"] is False
+    assert summary["provider_age_note"] == (
+        "Provider timestamp is in the future. Check the system clock or "
+        "provenance file."
+    )
+
+
+def test_missing_or_invalid_provider_timestamp_blocks_ready_handoff(
+    tmp_path: Path,
+) -> None:
+    for index, (timestamp, expected_status) in enumerate((
+        (None, "Missing"),
+        ("not-a-timestamp", "Invalid"),
+        ("2026-08-06T11:00:00", "Invalid"),
+    )):
+        paths = _write_ready_inputs(tmp_path / f"case_{index}")
+        _set_provider_timestamp(paths, timestamp)
+
+        _, summary = _build(paths["staging_dir"].parents[1], paths)
+
+        assert summary["provider_age_status"] == expected_status
+        assert summary["handoff_eligible"] is False
+
+
+def test_provider_timestamp_at_policy_limit_is_still_fresh(tmp_path: Path) -> None:
+    paths = _write_ready_inputs(tmp_path)
+    _set_provider_timestamp(paths, "2026-08-06T00:00:00+00:00")
+
+    _, summary = _build(tmp_path, paths)
+
+    assert summary["provider_run_age_minutes"] == 720.0
+    assert summary["provider_age_status"] == "Fresh"
+    assert summary["verdict"] == "Ready for handoff"
 
 
 def test_missing_recorded_checksum_blocks_handoff(tmp_path: Path) -> None:
@@ -533,6 +606,8 @@ def test_save_writes_reports_without_changing_staging_files(tmp_path: Path) -> N
     assert payload["generated_at"] == RUN_AT.isoformat(timespec="seconds")
     assert payload["provider_name"] == "manual_reviewed"
     assert payload["provider_type"] == "manual_upload"
+    assert payload["provider_age_status"] == "Fresh"
+    assert payload["provider_run_age_minutes"] == 0.0
     assert payload["generated_by"] == "test suite"
     assert len(payload["provider_policy"]["checksum_sha256"]) == 64
     assert payload["provider_policy"]["allowed"] is True
@@ -544,6 +619,7 @@ def test_save_writes_reports_without_changing_staging_files(tmp_path: Path) -> N
     assert "source_odds_checksum_status" in set(
         pd.read_csv(result["csv"])["check"]
     )
+    assert "provider_age_status" in set(pd.read_csv(result["csv"])["check"])
     assert "Source-to-staging checksum proof" in Path(result["markdown"]).read_text(
         encoding="utf-8"
     )

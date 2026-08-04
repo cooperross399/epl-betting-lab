@@ -19,6 +19,7 @@ from epl_betting_lab.reports.current_odds_validation import (
     build_current_odds_validation,
 )
 from epl_betting_lab.staging_provider_policy import (
+    evaluate_provider_run_age,
     evaluate_staging_provider_policy,
     load_staging_provider_policy,
     receipt_provenance_from_payload,
@@ -248,6 +249,11 @@ def _inspect_staging_receipt(
         "provider_type": "unknown",
         "source_file_path": "",
         "source_checksum_sha256": "",
+        "provider_generated_at": "",
+        "recorded_provider_age_status": "Not checked",
+        "provider_run_age_minutes": None,
+        "provider_age_status": "Not checked",
+        "provider_age_note": "",
         "provenance_status": "Not checked",
         "provenance_binding_status": "Not checked",
         "provenance_note": "",
@@ -357,6 +363,12 @@ def _inspect_staging_receipt(
     result["source_file_path"] = receipt_provenance["source_file_path"]
     result["source_checksum_sha256"] = receipt_provenance[
         "source_checksum_sha256"
+    ]
+    result["provider_generated_at"] = receipt_provenance[
+        "provider_generated_at"
+    ]
+    result["recorded_provider_age_status"] = receipt_provenance[
+        "provider_age_status"
     ]
     result["provenance_status"] = receipt_provenance["provenance_status"]
     result["provenance_note"] = receipt_provenance["provenance_note"]
@@ -676,6 +688,24 @@ def _inspect_staging_receipt(
     ]
     blockers.extend(str(item) for item in provider_policy_result["blockers"])
     warnings.extend(str(item) for item in provider_policy_result["warnings"])
+
+    provider_age_result = evaluate_provider_run_age(
+        current_provider_policy,
+        str(receipt_provenance["provider_generated_at"]),
+        evaluated_at=evaluated_at,
+    )
+    result["provider_run_age_minutes"] = provider_age_result[
+        "provider_run_age_minutes"
+    ]
+    result["provider_age_status"] = provider_age_result["provider_age_status"]
+    result["provider_age_note"] = provider_age_result["provider_age_note"]
+    if receipt_provenance["provider_age_status"] != "Fresh":
+        blockers.append(
+            "The staging receipt does not record a Fresh provider run. Validate "
+            "staging again after rerunning the provider."
+        )
+    if provider_age_result["provider_age_status"] != "Fresh":
+        blockers.append(str(provider_age_result["provider_age_note"]))
 
     proof_statuses = (
         result["source_odds_checksum_status"],
@@ -1059,6 +1089,21 @@ def build_github_runner_input_handoff(
         "staging_receipt_source_checksum_sha256": staging_receipt[
             "source_checksum_sha256"
         ],
+        "staging_receipt_provider_generated_at": staging_receipt[
+            "provider_generated_at"
+        ],
+        "staging_receipt_recorded_provider_age_status": staging_receipt[
+            "recorded_provider_age_status"
+        ],
+        "staging_receipt_provider_run_age_minutes": staging_receipt[
+            "provider_run_age_minutes"
+        ],
+        "staging_receipt_provider_age_status": staging_receipt[
+            "provider_age_status"
+        ],
+        "staging_receipt_provider_age_note": staging_receipt[
+            "provider_age_note"
+        ],
         "staging_receipt_provenance_status": staging_receipt[
             "provenance_status"
         ],
@@ -1261,6 +1306,12 @@ def render_github_runner_input_handoff(summary: dict[str, object]) -> str:
         (
             "- Provider checksum proof: "
             f"**{summary.get('staging_receipt_provenance_binding_status', 'Not checked')}**"
+        ),
+        (
+            "- Provider run age: "
+            f"**{summary.get('staging_receipt_provider_age_status', 'Not checked')}** "
+            f"({summary.get('staging_receipt_provider_run_age_minutes')} minute(s); "
+            f"generated {summary.get('staging_receipt_provider_generated_at') or 'not available'})"
         ),
         (
             "- Source odds / fixtures: "

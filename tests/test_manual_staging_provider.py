@@ -234,6 +234,7 @@ def test_provider_output_can_pass_the_separate_staging_gate(tmp_path: Path) -> N
                 "allow_unknown_providers": False,
                 "allow_missing_provenance": False,
                 "max_receipt_age_hours": 12,
+                "max_provider_run_age_hours": 12,
                 "timezone": "America/New_York",
                 "thursday_cutoff_time": "10:00",
             }
@@ -270,6 +271,7 @@ def test_provider_output_can_pass_the_separate_staging_gate(tmp_path: Path) -> N
     assert validation["handoff_eligible"] is True
     assert validation["provider_name"] == "manual_reviewed"
     assert validation["provider_type"] == "manual_upload"
+    assert validation["provider_age_status"] == "Fresh"
     assert validation["provenance_status"] == "Verified"
     assert validation["source_odds_checksum_status"] == "Verified"
     assert validation["source_fixtures_checksum_status"] == "Verified"

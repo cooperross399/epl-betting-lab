@@ -144,6 +144,7 @@ def load_staging_provider_policy(
         "allow_unknown_providers": False,
         "allow_missing_provenance": False,
         "max_receipt_age_hours": None,
+        "max_provider_run_age_hours": None,
         "timezone": "",
         "thursday_cutoff_time": "",
         "blockers": [],
@@ -223,6 +224,19 @@ def load_staging_provider_policy(
     if max_age is None or max_age <= 0:
         policy_blockers.append("max_receipt_age_hours must be a positive number.")
 
+    provider_age_value = payload.get("max_provider_run_age_hours", age_value)
+    if isinstance(provider_age_value, bool):
+        max_provider_age = None
+    else:
+        try:
+            max_provider_age = float(provider_age_value)
+        except (TypeError, ValueError):
+            max_provider_age = None
+    if max_provider_age is None or max_provider_age <= 0:
+        policy_blockers.append(
+            "max_provider_run_age_hours must be a positive number."
+        )
+
     timezone_name = str(payload.get("timezone", "")).strip()
     try:
         ZoneInfo(timezone_name)
@@ -240,6 +254,7 @@ def load_staging_provider_policy(
             "allow_unknown_providers": allow_unknown,
             "allow_missing_provenance": allow_missing_provenance,
             "max_receipt_age_hours": max_age,
+            "max_provider_run_age_hours": max_provider_age,
             "timezone": timezone_name,
             "thursday_cutoff_time": cutoff_text,
             "blockers": list(dict.fromkeys(policy_blockers)),
@@ -589,6 +604,14 @@ def receipt_provenance_from_payload(payload: dict[str, object]) -> dict[str, obj
         ).strip(),
         "generated_by": str(payload.get("generated_by", "")).strip(),
         "generated_at": str(payload.get("generated_at", "")).strip(),
+        "provider_generated_at": str(
+            payload.get("provider_generated_at", "")
+        ).strip(),
+        "provider_run_age_minutes": payload.get("provider_run_age_minutes"),
+        "provider_age_status": str(
+            payload.get("provider_age_status", "Not checked")
+        ).strip(),
+        "provider_age_note": str(payload.get("provider_age_note", "")).strip(),
         "notes": str(payload.get("notes", "")).strip(),
         "blockers": [],
         "warnings": [],
@@ -604,6 +627,105 @@ def _parse_aware_timestamp(value: datetime | str) -> datetime | None:
         except ValueError:
             return None
     return parsed if parsed.tzinfo is not None else None
+
+
+def evaluate_provider_run_age(
+    policy: dict[str, object],
+    provider_generated_at: datetime | str,
+    *,
+    evaluated_at: datetime,
+) -> dict[str, object]:
+    """Classify provider provenance age without changing any input files."""
+    raw_timestamp = (
+        provider_generated_at.isoformat()
+        if isinstance(provider_generated_at, datetime)
+        else str(provider_generated_at).strip()
+    )
+    result: dict[str, object] = {
+        "provider_generated_at": raw_timestamp,
+        "provider_run_age_minutes": None,
+        "max_provider_run_age_hours": policy.get("max_provider_run_age_hours"),
+        "provider_age_status": "Policy unavailable",
+        "provider_age_note": (
+            "Provider age could not be checked because the provider policy is "
+            "missing or invalid."
+        ),
+        "fresh": False,
+    }
+    if policy.get("valid") is not True or policy.get(
+        "max_provider_run_age_hours"
+    ) is None:
+        return result
+    if not raw_timestamp:
+        result.update(
+            {
+                "provider_age_status": "Missing",
+                "provider_age_note": "No provider timestamp found. Rerun the provider.",
+            }
+        )
+        return result
+
+    provider_timestamp = _parse_aware_timestamp(raw_timestamp)
+    if provider_timestamp is None:
+        result.update(
+            {
+                "provider_age_status": "Invalid",
+                "provider_age_note": (
+                    "Provider generated_at must be a valid timezone-aware timestamp. "
+                    "Rerun the provider."
+                ),
+            }
+        )
+        return result
+    evaluation_timestamp = _parse_aware_timestamp(evaluated_at)
+    if evaluation_timestamp is None:
+        result["provider_age_note"] = (
+            "Provider age could not be checked because the validation clock is not "
+            "timezone-aware."
+        )
+        return result
+
+    age_minutes = (
+        evaluation_timestamp.astimezone(ZoneInfo("UTC"))
+        - provider_timestamp.astimezone(ZoneInfo("UTC"))
+    ).total_seconds() / 60
+    result["provider_run_age_minutes"] = round(age_minutes, 3)
+    if age_minutes < 0:
+        result.update(
+            {
+                "provider_age_status": "Future timestamp",
+                "provider_age_note": (
+                    "Provider timestamp is in the future. Check the system clock or "
+                    "provenance file."
+                ),
+            }
+        )
+        return result
+
+    max_age_hours = float(policy["max_provider_run_age_hours"])
+    if age_minutes > max_age_hours * 60:
+        result.update(
+            {
+                "provider_age_status": "Too old",
+                "provider_age_note": (
+                    "Provider run is too old. Rerun the staging provider before "
+                    "validation."
+                ),
+            }
+        )
+        return result
+
+    result.update(
+        {
+            "provider_age_status": "Fresh",
+            "provider_age_note": (
+                f"Provider run is {age_minutes:.1f} minute(s) old; policy allows "
+                f"up to {max_age_hours:g} hour(s)."
+            ),
+            "fresh": True,
+        }
+    )
+    return result
 
 
 def evaluate_staging_provider_policy(

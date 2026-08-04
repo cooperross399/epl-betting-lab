@@ -62,6 +62,7 @@ The checked-in policy at `data/manual/staging_provider_policy.json` controls:
 - whether an unknown provider is allowed
 - whether missing provenance is allowed (`false` by default)
 - maximum receipt age (12 hours by default)
+- maximum provider-run age (12 hours by default)
 - policy timezone (`America/New_York` by default)
 - Thursday automation cutoff (10:00 AM by default)
 
@@ -98,6 +99,8 @@ The validator checks:
 - the current source odds, source fixtures, staging odds, and staging fixtures
   each match the SHA-256 checksum recorded by the provider
 - each source file still matches its corresponding staging file byte-for-byte
+- provider `generated_at` is present, timezone-aware, not in the future, and
+  within `max_provider_run_age_hours`
 - provider name/type and source provenance are declared and allowed by policy
 - the receipt is within the maximum age policy
 - the receipt was generated no later than the Thursday cutoff in the policy
@@ -136,6 +139,13 @@ edited. Rerun the provider intentionally, then rerun validation; do not edit a
 receipt checksum by hand. “No provenance receipt found” also blocks by default.
 The policy can explicitly allow no-provenance staging, but that exception is
 visible as a warning and should be used only for a reviewed manual process.
+Provider age is still required: missing provenance cannot produce a Ready
+receipt when there is no provider timestamp to verify.
+
+Provider age has its own status: `Fresh`, `Too old`, `Future timestamp`,
+`Missing`, `Invalid`, or `Policy unavailable`. `Fresh` is the only status that
+can be eligible for handoff. If it is too old, rerun the manual staging provider
+and then validation. Do not edit `generated_at` by hand.
 
 After reviewing a Ready result, commit these exact files to the same weekly
 branch:
@@ -150,11 +160,12 @@ data/outputs/staging_input_validation.json
 
 In **Actions > Manual Thursday Workflow**, select that branch and keep the
 four matching workflow paths. The runner rechecks the receipt, provider policy,
-and all normal freshness, validation, and completeness gates. If a staging CSV
-or policy changes after validation, its checksum no longer matches, so card
-generation is blocked. A receipt that becomes older than the policy limit is
-also blocked. Run validation again and review the replacement receipt instead
-of bypassing the gate.
+provider-run age, and all normal freshness, validation, and completeness gates.
+If a staging CSV or policy changes after validation, its checksum no longer
+matches, so card generation is blocked. A receipt that becomes older than the
+policy limit is also blocked. A provider run that was Fresh during validation
+but becomes too old before the Action starts is blocked too. Rerun the provider
+and validation instead of bypassing the gate.
 
 The receipt does not promote or copy staging data into `data/manual/`. The
 scheduled runner reads the selected staging CSVs directly for that report-only
@@ -163,8 +174,8 @@ run.
 ## Dashboard
 
 Open `Odds Import`, then use `Validate staging inputs`. The dashboard shows the
-verdict, compact provider proof and source/staging pair statuses, plus expandable
-markdown and CSV details. This button is read-only.
+verdict, compact provider proof, provider age, and source/staging pair statuses,
+plus expandable markdown and CSV details. This button is read-only.
 
 ## Why cron remains disabled
 

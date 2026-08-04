@@ -648,12 +648,16 @@ def render_odds_import() -> None:
                 st.warning(f"{verdict}. {message}")
             else:
                 st.error(f"{verdict}. {message}")
-            proof_columns = st.columns(3)
+            proof_columns = st.columns(4)
             proof_columns[0].metric(
                 "Provider proof",
                 str(staging_status.get("provenance_status", "Not checked")),
             )
             proof_columns[1].metric(
+                "Provider age",
+                str(staging_status.get("provider_age_status", "Not checked")),
+            )
+            proof_columns[2].metric(
                 "Odds pair",
                 str(
                     staging_status.get(
@@ -661,7 +665,7 @@ def render_odds_import() -> None:
                     )
                 ),
             )
-            proof_columns[2].metric(
+            proof_columns[3].metric(
                 "Fixtures pair",
                 str(
                     staging_status.get(
@@ -679,6 +683,11 @@ def render_odds_import() -> None:
             provenance_note = str(staging_status.get("provenance_note", "")).strip()
             if provenance_note and staging_status.get("provenance_status") != "Verified":
                 st.warning(provenance_note)
+            provider_age_note = str(
+                staging_status.get("provider_age_note", "")
+            ).strip()
+            if provider_age_note and staging_status.get("provider_age_status") != "Fresh":
+                st.warning(provider_age_note)
     render_markdown_expander(
         "Staging input validation report",
         "staging_input_validation.md",

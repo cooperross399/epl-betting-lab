@@ -156,6 +156,11 @@ SHA-256 checksums, checks required columns and today/future dates, validates
 teams/markets/selections and fixture matching, rejects duplicate odds rows,
 enforces provider/receipt-age/Thursday-cutoff policy, and reuses the existing
 odds validation, 100% completeness, freshness, and GitHub runner handoff gates.
+It also re-hashes both provider source files and both staging files, compares
+them with `staging_provenance.json`, and confirms each source/staging pair still
+matches byte-for-byte. A missing file, unreadable file, absent checksum, or
+checksum mismatch blocks `Ready for handoff`. Missing provenance is blocked by
+default through `allow_missing_provenance: false` in the provider policy.
 It writes:
 
 ```text

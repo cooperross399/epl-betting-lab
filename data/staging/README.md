@@ -24,13 +24,19 @@ writes these expected validation inputs:
 It stops if any output already exists. Review the existing bundle first and use
 `--overwrite-staging` only when replacing all three outputs is intentional.
 The generated provenance identifies both source files and their SHA-256
-checksums; it must never contain credentials. The provider command is
-Terminal-only and does not validate or promote data.
+checksums plus both copied staging files and their checksums; it must never
+contain credentials. The provider command is Terminal-only and does not
+validate or promote data.
 
 The policy at `data/manual/staging_provider_policy.json` controls allowed
 providers, the maximum receipt age, and the Thursday cutoff. Run
 `python scripts/validate_staging_inputs.py` after the adapter and before
 considering these files for the GitHub runner handoff.
+
+Validation recalculates all four checksums and verifies each source/staging
+pair. Any mismatch, missing file, unreadable file, or missing required checksum
+blocks handoff. Missing provenance is also blocked unless the reviewed provider
+policy explicitly allows it.
 
 Validation is read-only. It does not copy staging files into `data/manual/`,
 promote inputs, enable cron, or place bets.

@@ -9,6 +9,7 @@
     "fixture_provider"
   ],
   "allow_unknown_providers": false,
+  "allow_missing_provenance": false,
   "max_receipt_age_hours": 12,
   "timezone": "America/New_York",
   "thursday_cutoff_time": "10:00"

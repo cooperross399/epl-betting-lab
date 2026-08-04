@@ -14,6 +14,7 @@ POLICY = {
     "allowed_provider_names": ["manual_reviewed", "trusted_feed"],
     "allowed_provider_types": ["manual_upload", "odds_api"],
     "allow_unknown_providers": False,
+    "allow_missing_provenance": False,
     "max_receipt_age_hours": 12,
     "timezone": "America/New_York",
     "thursday_cutoff_time": "10:00",
@@ -30,7 +31,7 @@ THURSDAY_BEFORE_CUTOFF = datetime(
 
 def _load_policy(root: Path, payload: dict[str, object] | None = None):
     policy_path = root / "data" / "manual" / "staging_provider_policy.json"
-    policy_path.parent.mkdir(parents=True)
+    policy_path.parent.mkdir(parents=True, exist_ok=True)
     policy_path.write_text(json.dumps(payload or POLICY), encoding="utf-8")
     return load_staging_provider_policy(policy_path, repository_root=root)
 
@@ -42,6 +43,7 @@ def _provenance(
     return {
         "provider_name": provider_name,
         "provider_type": provider_type,
+        "provenance_status": "Verified",
         "blockers": [],
         "warnings": [],
     }
@@ -153,3 +155,38 @@ def test_missing_or_malformed_policy_fails_closed(tmp_path: Path) -> None:
             "Policy missing",
             "Policy malformed",
         }
+
+
+def test_missing_provenance_is_blocked_unless_policy_explicitly_allows_it(
+    tmp_path: Path,
+) -> None:
+    missing_provenance = {
+        "provider_name": "",
+        "provider_type": "unknown",
+        "provenance_status": "Missing",
+        "blockers": [],
+        "warnings": [],
+    }
+    policy = _load_policy(tmp_path)
+
+    blocked = evaluate_staging_provider_policy(
+        policy,
+        missing_provenance,
+        receipt_generated_at=THURSDAY_BEFORE_CUTOFF,
+        evaluated_at=THURSDAY_BEFORE_CUTOFF,
+    )
+
+    assert blocked["allowed"] is False
+    assert blocked["provider_policy_status"] == "Missing provenance blocked"
+
+    permissive_policy = dict(POLICY, allow_missing_provenance=True)
+    allowed = evaluate_staging_provider_policy(
+        _load_policy(tmp_path, permissive_policy),
+        missing_provenance,
+        receipt_generated_at=THURSDAY_BEFORE_CUTOFF,
+        evaluated_at=THURSDAY_BEFORE_CUTOFF,
+    )
+
+    assert allowed["allowed"] is True
+    assert allowed["provider_policy_status"] == "Missing provenance allowed"
+    assert allowed["warnings"]

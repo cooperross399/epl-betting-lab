@@ -60,6 +60,7 @@ The checked-in policy at `data/manual/staging_provider_policy.json` controls:
 
 - allowed provider names and provider types
 - whether an unknown provider is allowed
+- whether missing provenance is allowed (`false` by default)
 - maximum receipt age (12 hours by default)
 - policy timezone (`America/New_York` by default)
 - Thursday automation cutoff (10:00 AM by default)
@@ -94,7 +95,9 @@ The validator checks:
 - odds rows match the staged fixtures
 - duplicate odds and duplicate fixture rows are flagged
 - the existing GitHub runner handoff gate would allow the inputs
-- SHA-256 checksums are recorded for later identity review
+- the current source odds, source fixtures, staging odds, and staging fixtures
+  each match the SHA-256 checksum recorded by the provider
+- each source file still matches its corresponding staging file byte-for-byte
 - provider name/type and source provenance are declared and allowed by policy
 - the receipt is within the maximum age policy
 - the receipt was generated no later than the Thursday cutoff in the policy
@@ -123,6 +126,16 @@ The JSON report is a machine-readable receipt. It includes:
 - odds and fixture date freshness
 - current-odds validation and completeness status
 - whether the existing GitHub handoff gate allowed card generation
+- `Verified`, `Mismatch`, `Not available`, `Missing file`, or `Unreadable file`
+  checksum status for all four provider files and both source/staging pairs
+
+The proof is fail-closed. “Provider ran, but source odds changed afterward”
+means the prepared source was edited after the adapter recorded it. “Provider
+ran, but staging odds changed afterward” means the copied staging output was
+edited. Rerun the provider intentionally, then rerun validation; do not edit a
+receipt checksum by hand. “No provenance receipt found” also blocks by default.
+The policy can explicitly allow no-provenance staging, but that exception is
+visible as a warning and should be used only for a reviewed manual process.
 
 After reviewing a Ready result, commit these exact files to the same weekly
 branch:
@@ -150,7 +163,8 @@ run.
 ## Dashboard
 
 Open `Odds Import`, then use `Validate staging inputs`. The dashboard shows the
-verdict plus expandable markdown and CSV details. This button is read-only.
+verdict, compact provider proof and source/staging pair statuses, plus expandable
+markdown and CSV details. This button is read-only.
 
 ## Why cron remains disabled
 

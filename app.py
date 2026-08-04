@@ -648,6 +648,37 @@ def render_odds_import() -> None:
                 st.warning(f"{verdict}. {message}")
             else:
                 st.error(f"{verdict}. {message}")
+            proof_columns = st.columns(3)
+            proof_columns[0].metric(
+                "Provider proof",
+                str(staging_status.get("provenance_status", "Not checked")),
+            )
+            proof_columns[1].metric(
+                "Odds pair",
+                str(
+                    staging_status.get(
+                        "odds_checksum_pair_status", "Not checked"
+                    )
+                ),
+            )
+            proof_columns[2].metric(
+                "Fixtures pair",
+                str(
+                    staging_status.get(
+                        "fixtures_checksum_pair_status", "Not checked"
+                    )
+                ),
+            )
+            st.caption(
+                "Recorded checksum status: "
+                f"source odds {staging_status.get('source_odds_checksum_status', 'Not checked')}; "
+                f"source fixtures {staging_status.get('source_fixtures_checksum_status', 'Not checked')}; "
+                f"staging odds {staging_status.get('staging_odds_checksum_status', 'Not checked')}; "
+                f"staging fixtures {staging_status.get('staging_fixtures_checksum_status', 'Not checked')}."
+            )
+            provenance_note = str(staging_status.get("provenance_note", "")).strip()
+            if provenance_note and staging_status.get("provenance_status") != "Verified":
+                st.warning(provenance_note)
     render_markdown_expander(
         "Staging input validation report",
         "staging_input_validation.md",

@@ -192,6 +192,20 @@ jobs:
                           f"**{handoff.get('staging_provider_policy_status', 'Not checked')}**"
                       )
                       print(
+                          "- Provider checksum proof: "
+                          f"**{handoff.get('staging_receipt_provenance_binding_status', 'Not checked')}**"
+                      )
+                      print(
+                          "- Source odds / fixtures checksums: "
+                          f"**{handoff.get('staging_receipt_source_odds_checksum_status', 'Not checked')}** / "
+                          f"**{handoff.get('staging_receipt_source_fixtures_checksum_status', 'Not checked')}**"
+                      )
+                      print(
+                          "- Staging odds / fixtures provenance checksums: "
+                          f"**{handoff.get('staging_receipt_staging_odds_provenance_checksum_status', 'Not checked')}** / "
+                          f"**{handoff.get('staging_receipt_staging_fixtures_provenance_checksum_status', 'Not checked')}**"
+                      )
+                      print(
                           "- Receipt age: "
                           f"**{handoff.get('staging_receipt_age_status', 'Not checked')}** "
                           f"({handoff.get('staging_receipt_age_hours')} hour(s))"

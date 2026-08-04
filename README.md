@@ -225,6 +225,29 @@ checksums/provenance, safe quota headers, policy state, and unresolved blockers.
 evidence. The script and dashboard button cannot edit the provider policy,
 allowlist a provider, promote staging, or enable cron.
 
+After the checklist is ready and you have reviewed its exact shadow evidence,
+preview a separate human decision receipt:
+
+```bash
+python scripts/create_provider_human_acceptance_receipt.py \
+  --provider odds_api \
+  --reviewer-name "Cooper Ross" \
+  --decision approved_for_allowlist_pr \
+  --notes "Reviewed the checklist and archived live shadow runs."
+```
+
+Preview is the default and writes nothing. Add `--write-receipt` only after the
+Terminal preview looks right. Written receipts bind the checklist, each reviewed
+shadow archive, the latest matching comparison when available, and the provider
+policy when available by path and SHA-256 checksum. They are saved as
+`provider_human_acceptance_receipt.{json,md,csv}` and archived under
+`data/outputs/archive/provider_acceptance_receipts/`. A non-ready approval is
+blocked unless the reviewer intentionally uses the Terminal-only
+`--allow-not-ready-approval` override, which is prominently recorded. The Odds
+Import dashboard displays the latest receipt but cannot create one. A receipt
+documents review only; a separate allowlist PR is still required, and cron stays
+disabled.
+
 Next, review `data/manual/staging_provider_policy.json` and run the independent
 eligibility gate:
 

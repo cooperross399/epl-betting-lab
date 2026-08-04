@@ -240,6 +240,58 @@ provider runs, policy edits, staging promotion, and cron remain unavailable in
 the dashboard. Cron stays disabled until a person reviews repeated live
 evidence, credentials, ownership, failure handling, and the policy change.
 
+## Human provider acceptance receipt
+
+Create this receipt only after a person has read a provider acceptance checklist
+and the reviewed shadow-run evidence. Start with a preview:
+
+```bash
+python scripts/create_provider_human_acceptance_receipt.py \
+  --provider odds_api \
+  --reviewer-name "Cooper Ross" \
+  --decision approved_for_allowlist_pr \
+  --notes "Reviewed the bound provider evidence."
+```
+
+The supported decisions are `approved_for_allowlist_pr`, `rejected`, and
+`needs_more_shadow_runs`. Preview mode writes nothing. After checking the
+provider, decision, checklist verdict, evidence paths, and warnings shown in
+Terminal, intentionally write the receipt:
+
+```bash
+python scripts/create_provider_human_acceptance_receipt.py \
+  --provider odds_api \
+  --reviewer-name "Cooper Ross" \
+  --decision approved_for_allowlist_pr \
+  --notes "Reviewed the bound provider evidence." \
+  --write-receipt
+```
+
+Approval is refused unless the checklist verdict is `Ready for human allowlist
+review`. A rare, intentional exception requires the Terminal-only
+`--allow-not-ready-approval` flag and is recorded as an override in the receipt.
+The receipt binds these exact inputs:
+
+- acceptance checklist path, verdict, generated time, and SHA-256 checksum
+- every reviewed shadow archive path and deterministic archive-bundle checksum
+- latest matching shadow comparison path and checksum when available
+- provider policy path and checksum when available
+- reviewer, decision, notes, and receipt timestamp
+
+Written reports are:
+
+```text
+data/outputs/provider_human_acceptance_receipt.json
+data/outputs/provider_human_acceptance_receipt.md
+data/outputs/provider_human_acceptance_receipt.csv
+data/outputs/archive/provider_acceptance_receipts/YYYY-MM-DD/
+```
+
+The Odds Import dashboard displays the latest receipt and evidence table only.
+It has no create, approval, allowlist, promotion, or cron control. Even an
+`approved_for_allowlist_pr` receipt only says a separate human-reviewed policy PR
+may be considered; it does not edit `staging_provider_policy.json`.
+
 If you prepare staging files without the adapter, start from the older staging
 templates and complete `staging_provenance_template.json` manually. Never put
 credentials in provenance. Supported provider types are `manual_upload`,

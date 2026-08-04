@@ -707,9 +707,23 @@ def render_odds_import() -> None:
         "odds_api_staging_provider_report.md",
         "python scripts/run_provider_staging.py --provider odds_api --dry-run",
     )
+    shadow_command = (
+        "python scripts/run_provider_shadow_verification.py "
+        "--provider odds_api --dry-run"
+    )
+    render_markdown_expander(
+        "Latest provider shadow verification",
+        "provider_shadow_verification.md",
+        shadow_command,
+    )
+    render_table_expander(
+        "Provider shadow verification checks",
+        "provider_shadow_verification.csv",
+        shadow_command,
+    )
     st.caption(
-        "Provider dry-run/live commands remain Terminal-only so dashboard users "
-        "cannot expose secrets or overwrite staging files."
+        "Provider and shadow-run commands remain Terminal-only so dashboard users "
+        "cannot expose secrets, fetch live data, or overwrite staging files."
     )
     st.divider()
 

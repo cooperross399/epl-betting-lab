@@ -806,11 +806,32 @@ def render_odds_import() -> None:
         "provider_acceptance_checklist.csv",
         acceptance_command,
     )
+    st.markdown("#### Human provider acceptance receipt")
+    receipt_command = (
+        "python scripts/create_provider_human_acceptance_receipt.py "
+        f"--provider {selected_shadow_provider} --reviewer-name \"YOUR NAME\" "
+        "--decision needs_more_shadow_runs --notes \"YOUR REVIEW NOTES\" "
+        "--write-receipt"
+    )
+    st.caption(
+        "Receipts can only be created intentionally from Terminal after human "
+        "review. This dashboard display cannot approve or allowlist a provider."
+    )
+    render_markdown_expander(
+        "Latest human provider acceptance receipt",
+        "provider_human_acceptance_receipt.md",
+        receipt_command,
+    )
+    render_table_expander(
+        "Human acceptance receipt evidence",
+        "provider_human_acceptance_receipt.csv",
+        receipt_command,
+    )
     st.caption(
         "Provider and shadow-run commands remain Terminal-only so dashboard users "
         "cannot expose secrets, fetch live data, overwrite staging files, allowlist "
-        "a provider, or enable cron. History comparison and acceptance checks are "
-        "report-only."
+        "a provider, create an acceptance receipt, or enable cron. History "
+        "comparison, acceptance checks, and receipt display are report-only."
     )
     st.divider()
 

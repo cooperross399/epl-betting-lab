@@ -197,6 +197,31 @@ checksums, quota headers, policy state, and blockers. `Ready for human allowlist
 review` does not add the provider to the policy. A person must still inspect the
 evidence and make any policy edit separately. Cron remains disabled.
 
+When the checklist says `Ready for human allowlist review`, preview a human
+decision receipt from Terminal:
+
+```bash
+python scripts/create_provider_human_acceptance_receipt.py \
+  --provider odds_api \
+  --reviewer-name "Cooper Ross" \
+  --decision approved_for_allowlist_pr \
+  --notes "Reviewed the checklist and its shadow archives."
+```
+
+Nothing is written during preview. Read the evidence paths, checksums, verdict,
+and warnings in Terminal. If they match what you reviewed, rerun the exact
+command printed by the script; it adds `--write-receipt`. The receipt records the
+checklist, reviewed archive bundles, latest matching comparison when available,
+provider policy when available, reviewer, decision, and notes. It writes JSON,
+Markdown, and CSV files and a dated archive. The Odds Import dashboard can show
+the latest receipt, but it cannot create or approve one.
+
+Choices are `approved_for_allowlist_pr`, `rejected`, or
+`needs_more_shadow_runs`. Approval is blocked when the checklist is not ready.
+There is a clearly recorded Terminal-only override for exceptional documentation,
+but using it still does not allowlist the provider. Any policy edit needs a
+separate reviewed PR, and cron remains disabled.
+
 Then validate the generated staging files:
 
 ```bash

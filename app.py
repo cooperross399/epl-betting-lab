@@ -702,6 +702,15 @@ def render_odds_import() -> None:
         "Dashboard validation is read-only. It never promotes, copies, applies, or "
         "edits staging or manual files."
     )
+    render_markdown_expander(
+        "Latest odds API staging provider report",
+        "odds_api_staging_provider_report.md",
+        "python scripts/run_provider_staging.py --provider odds_api --dry-run",
+    )
+    st.caption(
+        "Provider dry-run/live commands remain Terminal-only so dashboard users "
+        "cannot expose secrets or overwrite staging files."
+    )
     st.divider()
 
     render_import_step("Diagnose export")

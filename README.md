@@ -144,6 +144,36 @@ existing staging bundle. After reviewing the old bundle, intentional replacement
 requires `python scripts/run_manual_staging_provider.py --overwrite-staging`.
 There is no dashboard provider-run button.
 
+The shared provider registry also includes an offline-first The Odds API
+skeleton. Its default command is a no-network dry-run:
+
+```bash
+python scripts/run_provider_staging.py --provider manual --dry-run
+python scripts/run_provider_staging.py --provider odds_api --dry-run
+```
+
+Live odds API mode is Terminal-only and explicit. Put the key in the
+`EPL_ODDS_API_KEY` environment variable (or a future GitHub Secret), never in a
+CSV, JSON file, command argument, or commit:
+
+```bash
+export EPL_ODDS_API_KEY='your-secret-key'
+python scripts/run_provider_staging.py --provider odds_api --live
+```
+
+The provider copies only returned prices. It writes normalized source/staging
+CSVs, `staging_provenance.json`, raw JSON evidence under `data/staging/raw/`,
+and `data/outputs/odds_api_staging_provider_report.*`. The first skeleton asks
+the featured endpoint for 1X2 and totals. If BTTS or another required row is not
+returned, it stays missing and staging completeness blocks the bundle rather
+than guessing a price. Existing staging files still require the explicit
+`--overwrite-staging` flag.
+
+The default provider policy remains manual-only. Add `the_odds_api` to the
+allowlist only after reviewing real provider output, team names, market mapping,
+raw evidence, and repeated validation results. A completed provider run is not
+approval for handoff.
+
 Next, review `data/manual/staging_provider_policy.json` and run the independent
 eligibility gate:
 
@@ -175,8 +205,9 @@ data/outputs/staging_input_validation.json
 Only `Ready for handoff` means the files passed all blocking gates. Validation
 does not copy staging files into `data/manual/`, generate a card, or enable
 cron. The `Odds Import` dashboard section has the same read-only button and
-report display. See [docs/STAGING_INPUTS.md](docs/STAGING_INPUTS.md) for the
-full workflow.
+report display, plus a read-only view of the latest odds API provider report.
+The dashboard never runs a live provider. See
+[docs/STAGING_INPUTS.md](docs/STAGING_INPUTS.md) for the full workflow.
 
 The JSON output is the staging receipt used by the manual GitHub Action. It
 records the exact staging paths, SHA-256 checksums, row counts, freshness,

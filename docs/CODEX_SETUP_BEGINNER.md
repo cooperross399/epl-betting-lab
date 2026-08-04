@@ -113,6 +113,34 @@ If staging outputs already exist, it stops. Use `--overwrite-staging` only
 after reviewing them and deciding to replace the whole bundle. Provider writes
 remain Terminal-only.
 
+You can also preview the shared provider framework without calling an API or
+writing staging files:
+
+```bash
+python scripts/run_provider_staging.py --provider manual --dry-run
+python scripts/run_provider_staging.py --provider odds_api --dry-run
+```
+
+The `odds_api` option is the first real-provider skeleton. It is offline by
+default. Live mode is an intentional Terminal step and reads its key only from
+the environment:
+
+```bash
+export EPL_ODDS_API_KEY='your-secret-key'
+python scripts/run_provider_staging.py --provider odds_api --live
+```
+
+Never paste the key into a CSV, JSON file, notes field, command argument, or
+Git commit. The provider report shows only whether a key was configured. A live
+run archives the raw response under `data/staging/raw/`, records checksums, and
+prepares normalized source/staging CSVs. It never invents a missing price.
+
+The first skeleton may return only 1X2 and totals from the featured endpoint.
+If BTTS or another required row is absent, that is expected to block staging
+completeness. Do not fill the gap with a guessed price. The default policy also
+keeps `the_odds_api` disallowed until you have reviewed real output and
+deliberately approved the provider name.
+
 Then validate the generated staging files:
 
 ```bash
@@ -147,8 +175,8 @@ reviewed. Editing either CSV or the policy after validation blocks the run
 until you validate again and use the new receipt.
 
 The first step under dashboard `Odds Import` is `Validate provider staging`.
-It runs the same report-only check. Full instructions are in
-`docs/STAGING_INPUTS.md`.
+It runs the same report-only check and shows the latest odds API provider report
+without running the provider. Full instructions are in `docs/STAGING_INPUTS.md`.
 
 If your sportsbook or odds site gives you a CSV export with different column
 names, save it as `data/manual/sportsbook_export.csv`, then run:

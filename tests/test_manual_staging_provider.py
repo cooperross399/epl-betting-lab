@@ -232,6 +232,7 @@ def test_provider_output_can_pass_the_separate_staging_gate(tmp_path: Path) -> N
                 "allowed_provider_names": ["manual_reviewed"],
                 "allowed_provider_types": ["manual_upload"],
                 "allow_unknown_providers": False,
+                "allow_missing_provenance": False,
                 "max_receipt_age_hours": 12,
                 "timezone": "America/New_York",
                 "thursday_cutoff_time": "10:00",
@@ -269,6 +270,11 @@ def test_provider_output_can_pass_the_separate_staging_gate(tmp_path: Path) -> N
     assert validation["handoff_eligible"] is True
     assert validation["provider_name"] == "manual_reviewed"
     assert validation["provider_type"] == "manual_upload"
+    assert validation["provenance_status"] == "Verified"
+    assert validation["source_odds_checksum_status"] == "Verified"
+    assert validation["source_fixtures_checksum_status"] == "Verified"
+    assert validation["staging_odds_checksum_status"] == "Verified"
+    assert validation["staging_fixtures_checksum_status"] == "Verified"
     assert validation["source_file_path"] == (
         f"data/staging/{SOURCE_ODDS_FILENAME}"
     )

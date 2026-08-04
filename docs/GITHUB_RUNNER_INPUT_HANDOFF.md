@@ -49,6 +49,12 @@ the staging outputs already exist; replacement requires the explicit
 gate. Only the following staging validation can produce a `Ready for handoff`
 receipt.
 
+During validation, the project recalculates checksums for both controlled source
+files and both staging files. All four must match the provider provenance, and
+each source/staging pair must match. The Ready receipt carries these proof
+statuses into the GitHub handoff; the runner blocks receipts without verified
+proof unless the checked-in policy explicitly permits missing provenance.
+
 Before committing:
 
 1. Fill every supported market row with a real numeric `american_odds` value.
@@ -65,8 +71,9 @@ Before committing:
 
 The default `data/manual/staging_provider_policy.json` allows the named
 `manual_reviewed` provider, accepts known provider types, disallows unknown
-providers, limits receipts to 12 hours, and sets the Thursday cutoff to 10:00
-AM `America/New_York`. Adjust the allowlist only after reviewing a real source.
+providers and missing provenance, limits receipts to 12 hours, and sets the
+Thursday cutoff to 10:00 AM `America/New_York`. Adjust the policy only after
+reviewing a real source.
 The policy is itself checksum-bound to the receipt.
 
 Confirm `data/outputs/staging_input_validation.md` says `Ready for handoff`.

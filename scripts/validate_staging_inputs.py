@@ -73,6 +73,22 @@ def main() -> int:
         f"{result['provider_name'] or 'unknown'} ({result['provider_type']})"
     )
     print(f"Provider policy: {result['provider_policy_status']}")
+    print(f"Provider provenance: {result['provenance_status']}")
+    print(
+        "Source checksums (odds / fixtures): "
+        f"{result['source_odds_checksum_status']} / "
+        f"{result['source_fixtures_checksum_status']}"
+    )
+    print(
+        "Staging checksums (odds / fixtures): "
+        f"{result['staging_odds_checksum_status']} / "
+        f"{result['staging_fixtures_checksum_status']}"
+    )
+    print(
+        "Source-to-staging pairs (odds / fixtures): "
+        f"{result['odds_checksum_pair_status']} / "
+        f"{result['fixtures_checksum_pair_status']}"
+    )
     print(f"Receipt age policy: {result['receipt_age_status']}")
     print(f"Thursday cutoff policy: {result['cutoff_policy_status']}")
     print(

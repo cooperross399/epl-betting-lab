@@ -18,6 +18,36 @@ PROVIDER_TYPES = (
 SHA256_PATTERN = re.compile(r"^[0-9a-fA-F]{64}$")
 TIME_PATTERN = re.compile(r"^(?:[01]\d|2[0-3]):[0-5]\d$")
 UNKNOWN_PROVIDER_NAMES = {"", "unknown", "not available", "not_available"}
+PROVENANCE_FILE_SPECS = (
+    (
+        "source_odds",
+        "source_files",
+        "current_odds",
+        "source_current_odds.csv",
+        "source odds",
+    ),
+    (
+        "source_fixtures",
+        "source_files",
+        "upcoming_fixtures",
+        "source_upcoming_fixtures.csv",
+        "source fixtures",
+    ),
+    (
+        "staging_odds",
+        "staging_files",
+        "current_odds",
+        "current_odds_staging.csv",
+        "staging odds",
+    ),
+    (
+        "staging_fixtures",
+        "staging_files",
+        "upcoming_fixtures",
+        "upcoming_fixtures_staging.csv",
+        "staging fixtures",
+    ),
+)
 
 
 def file_sha256(path: Path) -> str:
@@ -112,6 +142,7 @@ def load_staging_provider_policy(
         "allowed_provider_names": [],
         "allowed_provider_types": [],
         "allow_unknown_providers": False,
+        "allow_missing_provenance": False,
         "max_receipt_age_hours": None,
         "timezone": "",
         "thursday_cutoff_time": "",
@@ -176,6 +207,11 @@ def load_staging_provider_policy(
         policy_blockers.append("allow_unknown_providers must be true or false.")
         allow_unknown = False
 
+    allow_missing_provenance = payload.get("allow_missing_provenance", False)
+    if not isinstance(allow_missing_provenance, bool):
+        policy_blockers.append("allow_missing_provenance must be true or false.")
+        allow_missing_provenance = False
+
     age_value = payload.get("max_receipt_age_hours")
     if isinstance(age_value, bool):
         max_age = None
@@ -202,6 +238,7 @@ def load_staging_provider_policy(
             "allowed_provider_names": allowed_names,
             "allowed_provider_types": allowed_types,
             "allow_unknown_providers": allow_unknown,
+            "allow_missing_provenance": allow_missing_provenance,
             "max_receipt_age_hours": max_age,
             "timezone": timezone_name,
             "thursday_cutoff_time": cutoff_text,
@@ -214,6 +251,139 @@ def load_staging_provider_policy(
         result["status"] = "Policy loaded"
         result["valid"] = True
     return result
+
+
+def _verify_provenance_file(
+    payload: dict[str, object],
+    *,
+    field_name: str,
+    section_name: str,
+    entry_name: str,
+    expected_filename: str,
+    label: str,
+    repository_root: Path,
+    staging_dir: Path,
+) -> dict[str, object]:
+    expected_path = (staging_dir / expected_filename).resolve(strict=False)
+    expected_display = display_repository_path(expected_path, repository_root)
+    result: dict[str, object] = {
+        "field_name": field_name,
+        "label": label,
+        "path": expected_display,
+        "declared_path": "",
+        "recorded_checksum_sha256": "",
+        "current_checksum_sha256": "",
+        "status": "Not available",
+        "note": "",
+        "blocker": "",
+    }
+    section = payload.get(section_name)
+    entry = section.get(entry_name) if isinstance(section, dict) else None
+    if not isinstance(entry, dict):
+        note = f"Provenance has no checksum entry for {label}."
+        result.update({"note": note, "blocker": note})
+        return result
+
+    declared_path_text = str(entry.get("path", "")).strip()
+    recorded_checksum = str(entry.get("checksum_sha256", "")).strip().lower()
+    result["declared_path"] = declared_path_text
+    result["recorded_checksum_sha256"] = recorded_checksum
+    if not declared_path_text:
+        note = f"Provenance does not record a path for {label}."
+        result.update({"note": note, "blocker": note})
+        return result
+    if not SHA256_PATTERN.fullmatch(recorded_checksum):
+        note = f"Provenance does not record a valid SHA-256 checksum for {label}."
+        result.update({"note": note, "blocker": note})
+        return result
+
+    declared_candidate = Path(declared_path_text)
+    if ".." in declared_candidate.parts:
+        note = f"The provenance path for {label} contains path traversal (`..`)."
+        result.update({"note": note, "blocker": note})
+        return result
+    lexical_path = (
+        declared_candidate
+        if declared_candidate.is_absolute()
+        else repository_root / declared_candidate
+    )
+    try:
+        declared_path = lexical_path.resolve(strict=False)
+    except (OSError, RuntimeError, ValueError) as exc:
+        note = f"The provenance path for {label} is unreadable: {exc}"
+        result.update(
+            {"status": "Unreadable file", "note": note, "blocker": note}
+        )
+        return result
+    if declared_path != expected_path:
+        note = (
+            f"The provenance path for {label} must be `{expected_display}`; "
+            f"it declares `{display_repository_path(declared_path, repository_root)}`."
+        )
+        result.update({"note": note, "blocker": note})
+        return result
+    if _contains_symlink(lexical_path.absolute(), repository_root):
+        note = f"The provenance path for {label} cannot use a symbolic link."
+        result.update(
+            {"status": "Unreadable file", "note": note, "blocker": note}
+        )
+        return result
+    if not declared_path.exists():
+        note = f"The provenance file for {label} is missing: `{expected_display}`."
+        result.update({"status": "Missing file", "note": note, "blocker": note})
+        return result
+    if not declared_path.is_file():
+        note = f"The provenance path for {label} is not a readable file."
+        result.update(
+            {"status": "Unreadable file", "note": note, "blocker": note}
+        )
+        return result
+    try:
+        current_checksum = file_sha256(declared_path)
+    except OSError as exc:
+        note = f"The provenance file for {label} could not be read: {exc}"
+        result.update(
+            {"status": "Unreadable file", "note": note, "blocker": note}
+        )
+        return result
+
+    result["current_checksum_sha256"] = current_checksum
+    if current_checksum != recorded_checksum:
+        changed_notes = {
+            "source_odds": "Provider ran, but source odds changed afterward.",
+            "source_fixtures": "Provider ran, but source fixtures changed afterward.",
+            "staging_odds": "Provider ran, but staging odds changed afterward.",
+            "staging_fixtures": (
+                "Provider ran, but staging fixtures changed afterward."
+            ),
+        }
+        note = changed_notes[field_name]
+        result.update({"status": "Mismatch", "note": note, "blocker": note})
+        return result
+
+    result.update(
+        {
+            "status": "Verified",
+            "note": f"Current {label} matches its recorded SHA-256 checksum.",
+        }
+    )
+    return result
+
+
+def _checksum_pair_status(
+    source: dict[str, object],
+    staging: dict[str, object],
+    *,
+    label: str,
+) -> tuple[str, str]:
+    statuses = {str(source["status"]), str(staging["status"])}
+    precedence = ("Unreadable file", "Missing file", "Mismatch", "Not available")
+    for status in precedence:
+        if status in statuses:
+            return status, f"The {label} source/staging pair is not verified."
+    if source["current_checksum_sha256"] != staging["current_checksum_sha256"]:
+        return "Mismatch", f"The current source and staging {label} checksums differ."
+    return "Verified", f"Source and staging {label} match each other."
 
 
 def load_staging_provenance(
@@ -240,7 +410,16 @@ def load_staging_provenance(
         "source_file_path": "",
         "source_checksum_sha256": "",
         "source_checksum_status": "Not available",
+        "source_odds_checksum_status": "Not available",
+        "source_fixtures_checksum_status": "Not available",
+        "staging_odds_checksum_status": "Not available",
+        "staging_fixtures_checksum_status": "Not available",
+        "odds_checksum_pair_status": "Not available",
+        "fixtures_checksum_pair_status": "Not available",
+        "checksum_verification": {},
+        "provenance_note": "No provenance receipt found.",
         "generated_by": "",
+        "provider_generated_at": "",
         "generated_at": generated_at.isoformat(timespec="seconds"),
         "notes": "",
         "blockers": [],
@@ -249,10 +428,12 @@ def load_staging_provenance(
     if blockers:
         result["provenance_status"] = "Invalid"
         result["blockers"] = blockers
+        result["provenance_note"] = " ".join(blockers)
         return result
     if not resolved.exists():
         result["warnings"] = [
-            f"Staging provenance is missing: `{display_path}`. Provider is unknown."
+            "No provenance receipt found. Staging is blocked unless the provider "
+            "policy explicitly allows missing provenance."
         ]
         return result
     if not resolved.is_file():
@@ -260,28 +441,28 @@ def load_staging_provenance(
         result["blockers"] = [
             f"Staging provenance is not a regular file: `{display_path}`."
         ]
+        result["provenance_note"] = str(result["blockers"][0])
         return result
 
     payload, read_error = _read_json_object(resolved)
     if payload is None:
         result["provenance_status"] = "Invalid"
         result["blockers"] = [f"Staging provenance could not be read: {read_error}"]
+        result["provenance_note"] = str(result["blockers"][0])
         return result
     try:
         result["provenance_file_checksum_sha256"] = file_sha256(resolved)
     except OSError as exc:
         result["provenance_status"] = "Invalid"
         result["blockers"] = [f"Staging provenance could not be hashed: {exc}"]
+        result["provenance_note"] = str(result["blockers"][0])
         return result
 
     provider_name = str(payload.get("provider_name", "")).strip()
     provider_type = str(payload.get("provider_type", "unknown")).strip()
     generated_by = str(payload.get("generated_by", "")).strip()
+    provider_generated_at = str(payload.get("generated_at", "")).strip()
     notes = str(payload.get("notes", "")).strip()
-    source_path_text = str(payload.get("source_file_path", "")).strip()
-    recorded_source_checksum = str(
-        payload.get("source_checksum_sha256", "")
-    ).strip().lower()
     provenance_blockers: list[str] = []
     provenance_warnings: list[str] = []
     if provider_type not in PROVIDER_TYPES:
@@ -295,79 +476,81 @@ def load_staging_provenance(
             "generated_by is blank. Add the person, provider job, or workflow name."
         )
 
-    source_checksum = ""
-    source_checksum_status = "Not available"
-    if source_path_text:
-        source_candidate = Path(source_path_text)
-        source_path = (
-            source_candidate
-            if source_candidate.is_absolute()
-            else root / source_candidate
-        ).resolve(strict=False)
-        source_path_text = display_repository_path(source_path, root)
-        try:
-            source_path.relative_to(staging_dir.resolve())
-        except ValueError:
-            provenance_blockers.append(
-                "source_file_path must point to a file inside `data/staging`."
-            )
-        lexical_source_path = (
-            source_candidate
-            if source_candidate.is_absolute()
-            else root / source_candidate
+    verification: dict[str, dict[str, object]] = {}
+    for field_name, section_name, entry_name, filename, label in PROVENANCE_FILE_SPECS:
+        verification[field_name] = _verify_provenance_file(
+            payload,
+            field_name=field_name,
+            section_name=section_name,
+            entry_name=entry_name,
+            expected_filename=filename,
+            label=label,
+            repository_root=root,
+            staging_dir=staging_dir.resolve(),
         )
-        if _contains_symlink(lexical_source_path, root):
-            provenance_blockers.append("source_file_path cannot use a symbolic link.")
-        if not source_path.exists() or not source_path.is_file():
-            provenance_blockers.append(
-                f"Provenance source file is missing or not a file: `{source_path_text}`."
-            )
-        else:
-            try:
-                source_checksum = file_sha256(source_path)
-            except OSError as exc:
-                provenance_blockers.append(
-                    f"Provenance source file could not be hashed: {exc}"
-                )
-            else:
-                if recorded_source_checksum:
-                    if not SHA256_PATTERN.fullmatch(recorded_source_checksum):
-                        provenance_blockers.append(
-                            "source_checksum_sha256 must contain 64 hexadecimal characters."
-                        )
-                        source_checksum_status = "Invalid"
-                    elif recorded_source_checksum != source_checksum:
-                        provenance_blockers.append(
-                            "source_file_path no longer matches source_checksum_sha256."
-                        )
-                        source_checksum_status = "Mismatch"
-                    else:
-                        source_checksum_status = "Verified"
-                else:
-                    source_checksum_status = "Calculated"
-    elif recorded_source_checksum:
-        if SHA256_PATTERN.fullmatch(recorded_source_checksum):
-            source_checksum = recorded_source_checksum
-            source_checksum_status = "Recorded only"
-            provenance_warnings.append(
-                "A source checksum was supplied without source_file_path, so the source "
-                "file could not be rechecked."
-            )
-        else:
-            provenance_blockers.append(
-                "source_checksum_sha256 must contain 64 hexadecimal characters."
-            )
-            source_checksum_status = "Invalid"
+        blocker = str(verification[field_name].get("blocker", ""))
+        if blocker:
+            provenance_blockers.append(blocker)
+
+    odds_pair_status, odds_pair_note = _checksum_pair_status(
+        verification["source_odds"],
+        verification["staging_odds"],
+        label="odds",
+    )
+    fixtures_pair_status, fixtures_pair_note = _checksum_pair_status(
+        verification["source_fixtures"],
+        verification["staging_fixtures"],
+        label="fixtures",
+    )
+    if odds_pair_status == "Mismatch":
+        provenance_blockers.append(odds_pair_note)
+    if fixtures_pair_status == "Mismatch":
+        provenance_blockers.append(fixtures_pair_note)
+
+    failed_notes = [
+        str(item["note"])
+        for item in verification.values()
+        if item["status"] != "Verified"
+    ]
+    if odds_pair_status != "Verified":
+        failed_notes.append(odds_pair_note)
+    if fixtures_pair_status != "Verified":
+        failed_notes.append(fixtures_pair_note)
+    provenance_note = (
+        " ".join(dict.fromkeys(failed_notes))
+        if failed_notes
+        else (
+            "All four files match provenance, and both source-to-staging "
+            "checksum pairs are verified."
+        )
+    )
+    source_odds = verification["source_odds"]
+    source_path_text = str(source_odds["declared_path"])
+    source_checksum = str(source_odds["current_checksum_sha256"])
+    source_checksum_status = str(source_odds["status"])
 
     result.update(
         {
-            "provenance_status": "Invalid" if provenance_blockers else "Loaded",
+            "provenance_status": "Invalid" if provenance_blockers else "Verified",
             "provider_name": provider_name,
             "provider_type": provider_type,
             "source_file_path": source_path_text,
             "source_checksum_sha256": source_checksum,
             "source_checksum_status": source_checksum_status,
+            "source_odds_checksum_status": source_odds["status"],
+            "source_fixtures_checksum_status": verification["source_fixtures"][
+                "status"
+            ],
+            "staging_odds_checksum_status": verification["staging_odds"]["status"],
+            "staging_fixtures_checksum_status": verification["staging_fixtures"][
+                "status"
+            ],
+            "odds_checksum_pair_status": odds_pair_status,
+            "fixtures_checksum_pair_status": fixtures_pair_status,
+            "checksum_verification": verification,
+            "provenance_note": provenance_note,
             "generated_by": generated_by,
+            "provider_generated_at": provider_generated_at,
             "notes": notes,
             "blockers": list(dict.fromkeys(provenance_blockers)),
             "warnings": list(dict.fromkeys(provenance_warnings)),
@@ -378,6 +561,26 @@ def load_staging_provenance(
 
 def receipt_provenance_from_payload(payload: dict[str, object]) -> dict[str, object]:
     return {
+        "provenance_status": str(payload.get("provenance_status", "")).strip(),
+        "provenance_note": str(payload.get("provenance_note", "")).strip(),
+        "source_odds_checksum_status": str(
+            payload.get("source_odds_checksum_status", "Not available")
+        ).strip(),
+        "source_fixtures_checksum_status": str(
+            payload.get("source_fixtures_checksum_status", "Not available")
+        ).strip(),
+        "staging_odds_checksum_status": str(
+            payload.get("staging_odds_checksum_status", "Not available")
+        ).strip(),
+        "staging_fixtures_checksum_status": str(
+            payload.get("staging_fixtures_checksum_status", "Not available")
+        ).strip(),
+        "odds_checksum_pair_status": str(
+            payload.get("odds_checksum_pair_status", "Not available")
+        ).strip(),
+        "fixtures_checksum_pair_status": str(
+            payload.get("fixtures_checksum_pair_status", "Not available")
+        ).strip(),
         "provider_name": str(payload.get("provider_name", "")).strip(),
         "provider_type": str(payload.get("provider_type", "unknown")).strip(),
         "source_file_path": str(payload.get("source_file_path", "")).strip(),
@@ -422,6 +625,7 @@ def evaluate_staging_provider_policy(
         "provider_allowed": False,
         "provider_name": str(provenance.get("provider_name", "")).strip(),
         "provider_type": str(provenance.get("provider_type", "unknown")).strip(),
+        "allow_missing_provenance": bool(policy.get("allow_missing_provenance")),
         "max_receipt_age_hours": policy.get("max_receipt_age_hours"),
         "receipt_age_hours": None,
         "receipt_age_status": "Not checked",
@@ -442,6 +646,11 @@ def evaluate_staging_provider_policy(
 
     provider_name = str(provenance.get("provider_name", "")).strip()
     provider_type = str(provenance.get("provider_type", "unknown")).strip()
+    provenance_status = str(provenance.get("provenance_status", "")).strip()
+    missing_provenance_allowed = (
+        provenance_status == "Missing"
+        and bool(policy.get("allow_missing_provenance"))
+    )
     unknown_provider = (
         provider_name.casefold() in UNKNOWN_PROVIDER_NAMES
         or provider_type == "unknown"
@@ -453,7 +662,21 @@ def evaluate_staging_provider_policy(
     allowed_types = {
         str(item).strip() for item in policy.get("allowed_provider_types", [])
     }
-    if unknown_provider:
+    if missing_provenance_allowed:
+        result["provider_policy_status"] = "Missing provenance allowed"
+        provider_allowed = True
+        warnings.append(
+            "No provenance receipt found, but the staging provider policy "
+            "explicitly allows missing provenance. Review this manual exception."
+        )
+    elif provenance_status == "Missing":
+        result["provider_policy_status"] = "Missing provenance blocked"
+        provider_allowed = False
+        blockers.append(
+            "No provenance receipt found. The staging provider policy does not "
+            "allow missing provenance."
+        )
+    elif unknown_provider:
         result["provider_policy_status"] = "Unknown provider"
         provider_allowed = bool(policy.get("allow_unknown_providers")) and (
             provider_type == "unknown" or provider_type in allowed_types

@@ -248,6 +248,15 @@ def _inspect_staging_receipt(
         "provider_type": "unknown",
         "source_file_path": "",
         "source_checksum_sha256": "",
+        "provenance_status": "Not checked",
+        "provenance_binding_status": "Not checked",
+        "provenance_note": "",
+        "source_odds_checksum_status": "Not checked",
+        "source_fixtures_checksum_status": "Not checked",
+        "staging_odds_provenance_checksum_status": "Not checked",
+        "staging_fixtures_provenance_checksum_status": "Not checked",
+        "odds_checksum_pair_status": "Not checked",
+        "fixtures_checksum_pair_status": "Not checked",
         "generated_by": "",
         "notes": "",
         "provider_policy_path": "",
@@ -348,6 +357,26 @@ def _inspect_staging_receipt(
     result["source_file_path"] = receipt_provenance["source_file_path"]
     result["source_checksum_sha256"] = receipt_provenance[
         "source_checksum_sha256"
+    ]
+    result["provenance_status"] = receipt_provenance["provenance_status"]
+    result["provenance_note"] = receipt_provenance["provenance_note"]
+    result["source_odds_checksum_status"] = receipt_provenance[
+        "source_odds_checksum_status"
+    ]
+    result["source_fixtures_checksum_status"] = receipt_provenance[
+        "source_fixtures_checksum_status"
+    ]
+    result["staging_odds_provenance_checksum_status"] = receipt_provenance[
+        "staging_odds_checksum_status"
+    ]
+    result["staging_fixtures_provenance_checksum_status"] = receipt_provenance[
+        "staging_fixtures_checksum_status"
+    ]
+    result["odds_checksum_pair_status"] = receipt_provenance[
+        "odds_checksum_pair_status"
+    ]
+    result["fixtures_checksum_pair_status"] = receipt_provenance[
+        "fixtures_checksum_pair_status"
     ]
     result["generated_by"] = receipt_provenance["generated_by"]
     result["notes"] = receipt_provenance["notes"]
@@ -647,6 +676,37 @@ def _inspect_staging_receipt(
     ]
     blockers.extend(str(item) for item in provider_policy_result["blockers"])
     warnings.extend(str(item) for item in provider_policy_result["warnings"])
+
+    proof_statuses = (
+        result["source_odds_checksum_status"],
+        result["source_fixtures_checksum_status"],
+        result["staging_odds_provenance_checksum_status"],
+        result["staging_fixtures_provenance_checksum_status"],
+        result["odds_checksum_pair_status"],
+        result["fixtures_checksum_pair_status"],
+    )
+    provenance_verified = (
+        result["provenance_status"] == "Verified"
+        and all(status == "Verified" for status in proof_statuses)
+    )
+    missing_provenance_allowed = (
+        result["provenance_status"] == "Missing"
+        and bool(current_provider_policy.get("allow_missing_provenance"))
+    )
+    if provenance_verified:
+        result["provenance_binding_status"] = "Verified"
+    elif missing_provenance_allowed:
+        result["provenance_binding_status"] = "Missing provenance allowed"
+        warnings.append(
+            "The staging receipt has no provider checksum proof, but the current "
+            "policy explicitly allows missing provenance. Review this exception."
+        )
+    else:
+        result["provenance_binding_status"] = "Blocked"
+        blockers.append(
+            "The Ready staging receipt does not contain verified source-to-staging "
+            "checksum proof. Validate staging again after running the provider."
+        )
 
     receipt_warning_count = _receipt_int(payload.get("warning_count")) or 0
     if receipt_warning_count:
@@ -999,6 +1059,31 @@ def build_github_runner_input_handoff(
         "staging_receipt_source_checksum_sha256": staging_receipt[
             "source_checksum_sha256"
         ],
+        "staging_receipt_provenance_status": staging_receipt[
+            "provenance_status"
+        ],
+        "staging_receipt_provenance_binding_status": staging_receipt[
+            "provenance_binding_status"
+        ],
+        "staging_receipt_provenance_note": staging_receipt["provenance_note"],
+        "staging_receipt_source_odds_checksum_status": staging_receipt[
+            "source_odds_checksum_status"
+        ],
+        "staging_receipt_source_fixtures_checksum_status": staging_receipt[
+            "source_fixtures_checksum_status"
+        ],
+        "staging_receipt_staging_odds_provenance_checksum_status": staging_receipt[
+            "staging_odds_provenance_checksum_status"
+        ],
+        "staging_receipt_staging_fixtures_provenance_checksum_status": staging_receipt[
+            "staging_fixtures_provenance_checksum_status"
+        ],
+        "staging_receipt_odds_checksum_pair_status": staging_receipt[
+            "odds_checksum_pair_status"
+        ],
+        "staging_receipt_fixtures_checksum_pair_status": staging_receipt[
+            "fixtures_checksum_pair_status"
+        ],
         "staging_receipt_generated_by": staging_receipt["generated_by"],
         "staging_receipt_notes": staging_receipt["notes"],
         "staging_provider_policy_path": staging_receipt[
@@ -1172,6 +1257,25 @@ def render_github_runner_input_handoff(summary: dict[str, object]) -> str:
         (
             "- Provider policy: "
             f"**{summary.get('staging_provider_policy_status', 'Not checked')}**"
+        ),
+        (
+            "- Provider checksum proof: "
+            f"**{summary.get('staging_receipt_provenance_binding_status', 'Not checked')}**"
+        ),
+        (
+            "- Source odds / fixtures: "
+            f"**{summary.get('staging_receipt_source_odds_checksum_status', 'Not checked')}** / "
+            f"**{summary.get('staging_receipt_source_fixtures_checksum_status', 'Not checked')}**"
+        ),
+        (
+            "- Staging odds / fixtures: "
+            f"**{summary.get('staging_receipt_staging_odds_provenance_checksum_status', 'Not checked')}** / "
+            f"**{summary.get('staging_receipt_staging_fixtures_provenance_checksum_status', 'Not checked')}**"
+        ),
+        (
+            "- Source-to-staging odds / fixtures pairs: "
+            f"**{summary.get('staging_receipt_odds_checksum_pair_status', 'Not checked')}** / "
+            f"**{summary.get('staging_receipt_fixtures_checksum_pair_status', 'Not checked')}**"
         ),
         (
             "- Provider policy snapshot match: "

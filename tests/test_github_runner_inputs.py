@@ -116,8 +116,12 @@ def _write_ready_staging_receipt(
     staging.mkdir(parents=True)
     staging_odds = staging / "current_odds_staging.csv"
     staging_fixtures = staging / "upcoming_fixtures_staging.csv"
+    source_odds = staging / "source_current_odds.csv"
+    source_fixtures = staging / "source_upcoming_fixtures.csv"
     staging_odds.write_bytes(paths["current_odds_path"].read_bytes())
     staging_fixtures.write_bytes(paths["fixtures_path"].read_bytes())
+    source_odds.write_bytes(paths["current_odds_path"].read_bytes())
+    source_fixtures.write_bytes(paths["fixtures_path"].read_bytes())
     policy_path = root / "data" / "manual" / "staging_provider_policy.json"
     policy_path.write_text(
         json.dumps(
@@ -125,6 +129,7 @@ def _write_ready_staging_receipt(
                 "allowed_provider_names": ["manual_reviewed"],
                 "allowed_provider_types": ["manual_upload"],
                 "allow_unknown_providers": False,
+                "allow_missing_provenance": False,
                 "max_receipt_age_hours": 12,
                 "timezone": "America/New_York",
                 "thursday_cutoff_time": "10:00",
@@ -138,9 +143,44 @@ def _write_ready_staging_receipt(
             {
                 "provider_name": "manual_reviewed",
                 "provider_type": "manual_upload",
-                "source_file_path": "data/staging/current_odds_staging.csv",
-                "source_checksum_sha256": "",
+                "source_file_path": "data/staging/source_current_odds.csv",
+                "source_checksum_sha256": hashlib.sha256(
+                    source_odds.read_bytes()
+                ).hexdigest(),
+                "source_files": {
+                    "current_odds": {
+                        "path": "data/staging/source_current_odds.csv",
+                        "checksum_sha256": hashlib.sha256(
+                            source_odds.read_bytes()
+                        ).hexdigest(),
+                        "row_count": len(pd.read_csv(source_odds)),
+                    },
+                    "upcoming_fixtures": {
+                        "path": "data/staging/source_upcoming_fixtures.csv",
+                        "checksum_sha256": hashlib.sha256(
+                            source_fixtures.read_bytes()
+                        ).hexdigest(),
+                        "row_count": len(pd.read_csv(source_fixtures)),
+                    },
+                },
+                "staging_files": {
+                    "current_odds": {
+                        "path": "data/staging/current_odds_staging.csv",
+                        "checksum_sha256": hashlib.sha256(
+                            staging_odds.read_bytes()
+                        ).hexdigest(),
+                        "row_count": len(pd.read_csv(staging_odds)),
+                    },
+                    "upcoming_fixtures": {
+                        "path": "data/staging/upcoming_fixtures_staging.csv",
+                        "checksum_sha256": hashlib.sha256(
+                            staging_fixtures.read_bytes()
+                        ).hexdigest(),
+                        "row_count": len(pd.read_csv(staging_fixtures)),
+                    },
+                },
                 "generated_by": "test suite",
+                "generated_at": receipt_run_at.isoformat(timespec="seconds"),
                 "notes": "Ready receipt fixture.",
             }
         ),
@@ -346,9 +386,41 @@ def test_runner_handoff_binds_exact_ready_staging_receipt(tmp_path: Path) -> Non
     assert result["staging_receipt_provider_name"] == "manual_reviewed"
     assert result["staging_provider_policy_match_status"] == "Verified"
     assert result["staging_provider_policy_status"] == "Provider allowed"
+    assert result["staging_receipt_provenance_status"] == "Verified"
+    assert result["staging_receipt_provenance_binding_status"] == "Verified"
+    assert result["staging_receipt_source_odds_checksum_status"] == "Verified"
+    assert result["staging_receipt_source_fixtures_checksum_status"] == "Verified"
+    assert (
+        result["staging_receipt_staging_odds_provenance_checksum_status"]
+        == "Verified"
+    )
+    assert (
+        result["staging_receipt_staging_fixtures_provenance_checksum_status"]
+        == "Verified"
+    )
     assert result["staging_receipt_age_status"] == "Within age limit"
     assert result["staging_cutoff_policy_status"] == "Before cutoff"
     assert result["card_generation_allowed"] is True
+
+
+def test_runner_handoff_blocks_receipt_without_verified_provider_proof(
+    tmp_path: Path,
+) -> None:
+    paths, receipt_path = _write_ready_staging_receipt(tmp_path)
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    receipt["source_odds_checksum_status"] = "Mismatch"
+    receipt_path.write_text(json.dumps(receipt), encoding="utf-8")
+
+    result = _build(
+        tmp_path,
+        paths,
+        staging_receipt_path=receipt_path,
+        require_staging_receipt=True,
+    )
+
+    assert result["staging_receipt_provenance_binding_status"] == "Blocked"
+    assert result["card_generation_allowed"] is False
+    assert any("source-to-staging checksum proof" in item for item in result["blockers"])
 
 
 def test_runner_handoff_blocks_receipt_older_than_policy_limit(

@@ -1,8 +1,34 @@
 {
+  "schema_version": 1,
   "provider_name": "manual_reviewed",
   "provider_type": "manual_upload",
-  "source_file_path": "data/staging/current_odds_staging.csv",
+  "source_file_path": "data/staging/source_current_odds.csv",
   "source_checksum_sha256": "",
+  "source_files": {
+    "current_odds": {
+      "path": "data/staging/source_current_odds.csv",
+      "checksum_sha256": "",
+      "row_count": 0
+    },
+    "upcoming_fixtures": {
+      "path": "data/staging/source_upcoming_fixtures.csv",
+      "checksum_sha256": "",
+      "row_count": 0
+    }
+  },
+  "staging_files": {
+    "current_odds": {
+      "path": "data/staging/current_odds_staging.csv",
+      "checksum_sha256": "",
+      "row_count": 0
+    },
+    "upcoming_fixtures": {
+      "path": "data/staging/upcoming_fixtures_staging.csv",
+      "checksum_sha256": "",
+      "row_count": 0
+    }
+  },
   "generated_by": "REVIEW_NEEDED",
-  "notes": "Replace REVIEW_NEEDED and review the source before validation."
+  "generated_at": "REVIEW_NEEDED",
+  "notes": "Run the manual staging provider to create real checksums."
 }

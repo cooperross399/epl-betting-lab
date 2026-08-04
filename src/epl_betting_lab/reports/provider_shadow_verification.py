@@ -16,6 +16,9 @@ from epl_betting_lab.providers.base import (
 )
 from epl_betting_lab.providers.provider_registry import create_provider
 from epl_betting_lab.reports.current_odds_template import SUPPORTED_MARKETS
+from epl_betting_lab.reports.provider_shadow_history import (
+    archive_provider_shadow_run,
+)
 from epl_betting_lab.reports.staging_input_validation import (
     save_staging_input_validation,
 )
@@ -932,10 +935,26 @@ def save_provider_shadow_verification(
         csv_path,
         checks.to_csv(index=False, lineterminator="\n").encode("utf-8"),
     )
+    archive = archive_provider_shadow_run(
+        summary,
+        verification_paths={
+            "json": json_path,
+            "markdown": markdown_path,
+            "csv": csv_path,
+        },
+        provider_report_paths={
+            "json": provider_result.get("report_json"),
+            "markdown": provider_result.get("report_markdown"),
+        },
+        staging_validation_paths=validation_outputs,
+        output_dir=outputs,
+        archived_at=generated_at,
+    )
     return {
         "summary": summary,
         "checks": checks,
         "json": json_path,
         "markdown": markdown_path,
         "csv": csv_path,
+        "archive": archive,
     }

@@ -166,6 +166,22 @@ provider policy or protected files, and live mode is not available in the
 dashboard. Use GitHub Secrets rather than committed files if credentials are
 added to a future manual GitHub workflow.
 
+Each shadow report is kept as a dated snapshot in
+`data/outputs/archive/provider_shadow_runs/`. Run the provider several times on
+different slates or refreshes, then compare the newest two snapshots:
+
+```bash
+python scripts/compare_provider_shadow_runs.py --provider odds_api
+```
+
+Open `data/outputs/provider_shadow_run_comparison.md`, or use the read-only
+history area on the Odds Import dashboard. Check that team and fixture mapping,
+bookmakers, 1X2/totals/BTTS coverage, completeness, checksum proof, staging
+verdicts, and quota behavior remain understandable. Two stable runs still get
+`Needs more shadow runs`; three or more consistent runs can become
+`Stable enough for review`, which still requires a person to decide what comes
+next. The tool never edits the provider allowlist or enables cron.
+
 Then validate the generated staging files:
 
 ```bash

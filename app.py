@@ -42,6 +42,7 @@ from epl_betting_lab.dashboard_actions import (
     run_odds_profile_install_preview,
     run_installed_odds_profile_verification,
     run_post_thursday_review,
+    run_provider_shadow_run_comparison,
     run_stale_current_odds_archive_preview,
     run_stale_current_odds_archive_confirmation_status,
     run_stale_current_odds_archive_rollback_preview,
@@ -78,6 +79,9 @@ from epl_betting_lab.reports.odds_profile_install import (
 )
 from epl_betting_lab.reports.odds_profile_verification import (
     InstalledOddsProfileVerificationError,
+)
+from epl_betting_lab.reports.provider_shadow_history import (
+    list_recent_provider_shadow_runs,
 )
 from epl_betting_lab.reports.thursday_archive_pair import (
     build_thursday_archive_history_details,
@@ -721,9 +725,71 @@ def render_odds_import() -> None:
         "provider_shadow_verification.csv",
         shadow_command,
     )
+    st.markdown("#### Provider shadow history")
+    shadow_history = list_recent_provider_shadow_runs(OUTPUTS_DIR, limit=20)
+    if not shadow_history:
+        st.info(
+            "No archived shadow runs exist yet. Run the Terminal shadow command "
+            "above; every completed report run now creates an archive snapshot."
+        )
+        selected_shadow_provider = "odds_api"
+    else:
+        provider_options = sorted(
+            {
+                str(item.get("provider_key") or item.get("provider_name")).strip()
+                for item in shadow_history
+                if str(item.get("provider_key") or item.get("provider_name")).strip()
+            }
+        )
+        selected_shadow_provider = st.selectbox(
+            "Provider history to compare",
+            provider_options or ["odds_api"],
+            key="provider_shadow_history_provider",
+        )
+        selected_history = [
+            item
+            for item in shadow_history
+            if selected_shadow_provider
+            in {str(item.get("provider_key")), str(item.get("provider_name"))}
+        ]
+        with st.expander("Recent provider shadow runs", expanded=False):
+            history_columns = [
+                "generated_at",
+                "provider_name",
+                "mode",
+                "verdict",
+                "archive_integrity_status",
+                "archive_path",
+            ]
+            st.dataframe(
+                pd.DataFrame(selected_history, columns=history_columns),
+                width="stretch",
+                hide_index=True,
+            )
+
+    comparison_command = (
+        "python scripts/compare_provider_shadow_runs.py "
+        f"--provider {selected_shadow_provider}"
+    )
+    if st.button("Compare latest provider shadow runs", width="stretch"):
+        run_dashboard_action(
+            "Provider shadow run comparison",
+            lambda: run_provider_shadow_run_comparison(selected_shadow_provider),
+        )
+    render_markdown_expander(
+        "Latest provider shadow run comparison",
+        "provider_shadow_run_comparison.md",
+        comparison_command,
+    )
+    render_table_expander(
+        "Provider shadow comparison details",
+        "provider_shadow_run_comparison.csv",
+        comparison_command,
+    )
     st.caption(
         "Provider and shadow-run commands remain Terminal-only so dashboard users "
-        "cannot expose secrets, fetch live data, or overwrite staging files."
+        "cannot expose secrets, fetch live data, overwrite staging files, allowlist "
+        "a provider, or enable cron. History comparison is report-only."
     )
     st.divider()
 

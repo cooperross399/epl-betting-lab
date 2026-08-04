@@ -195,6 +195,22 @@ safe API usage headers. `Shadow ready for review` means only that the technical
 checks passed. It does not generate trusted picks, edit the allowlist, promote
 staging files, enable cron, or place bets. Live mode remains Terminal-only.
 
+Every dry or live shadow report is also saved under
+`data/outputs/archive/provider_shadow_runs/YYYY-MM-DD/HHMMSS_PROVIDER/`. After
+at least two runs for the same provider, compare the latest pair:
+
+```bash
+python scripts/compare_provider_shadow_runs.py --provider odds_api
+```
+
+The comparison writes `provider_shadow_run_comparison.{json,md,csv}` and shows
+mapping, fixture, bookmaker, market, checksum, completeness, policy, staging,
+warning/blocker, and safe quota changes. The Odds Import dashboard lists recent
+archives and can regenerate this report without running a provider. Review at
+least three consistent shadow runs before treating `Stable enough for review`
+as evidence for a manual allowlist discussion. It is not approval and cron
+remains disabled.
+
 Next, review `data/manual/staging_provider_policy.json` and run the independent
 eligibility gate:
 

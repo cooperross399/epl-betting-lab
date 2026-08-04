@@ -97,6 +97,7 @@ def main() -> int:
     print(f"Markdown: {result['markdown']}")
     print(f"CSV: {result['csv']}")
     print(f"JSON: {result['json']}")
+    print(f"Archived snapshot: {result['archive']['directory']}")
     print(
         "Safety: no trusted picks, policy edits, staging promotion, cron, bets, "
         "or secret output."

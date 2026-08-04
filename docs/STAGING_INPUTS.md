@@ -51,6 +51,67 @@ There is no dashboard write button. This keeps source-to-staging writes an
 intentional Terminal step. The adapter does not validate betting fields, copy
 anything into `data/manual/`, generate picks, or enable cron.
 
+## Provider adapter framework and odds API skeleton
+
+`scripts/run_provider_staging.py` is the shared entry point for registered
+providers. It requires `--provider` and defaults to dry-run:
+
+```bash
+python scripts/run_provider_staging.py --provider manual --dry-run
+python scripts/run_provider_staging.py --provider odds_api --dry-run
+```
+
+Dry-run writes only a provider report under `data/outputs/`. It makes no API
+request and writes no staging files. The registered provider code lives in:
+
+```text
+src/epl_betting_lab/providers/base.py
+src/epl_betting_lab/providers/provider_registry.py
+src/epl_betting_lab/providers/odds_api_staging_provider.py
+```
+
+The first real-provider skeleton follows The Odds API v4 EPL event/odds shape.
+Live mode requires an environment-only key:
+
+```bash
+export EPL_ODDS_API_KEY='your-secret-key'
+python scripts/run_provider_staging.py --provider odds_api --live
+```
+
+Do not put the key in a command argument, `.csv`, provenance JSON, notes, or a
+commit. A future GitHub run must receive it through GitHub Secrets. The adapter
+never prints or writes the key.
+
+An intentional live run can write only provider evidence under `data/staging/`
+and its generated report under `data/outputs/`:
+
+```text
+data/staging/source_current_odds.csv
+data/staging/source_upcoming_fixtures.csv
+data/staging/current_odds_staging.csv
+data/staging/upcoming_fixtures_staging.csv
+data/staging/staging_provenance.json
+data/staging/raw/TIMESTAMP_CHECKSUM_odds_api_response.json
+data/outputs/odds_api_staging_provider_report.json
+data/outputs/odds_api_staging_provider_report.md
+```
+
+The normalized source CSVs and staging CSVs are byte-identical so the existing
+checksum-pair gate still works. Provenance also records the provider name/type,
+generated timestamp, source URL without credentials, raw response checksum,
+normalized/staging checksums, generator, and notes.
+
+The skeleton requests featured 1X2 and totals data and parses BTTS only when it
+is present in provider evidence. It never fills a missing market. Missing BTTS,
+unsupported team naming, partial fixtures, malformed responses, or empty odds
+remain visible and can block the separate staging validator. The checked-in
+provider policy intentionally does not allow `the_odds_api` yet; review real
+output before deliberately adding that provider name.
+
+Provider network/writes stay Terminal-only. The Odds Import dashboard displays
+the latest report but cannot fetch, overwrite staging, expose a secret, validate
+automatically, promote data, or place a bet.
+
 If you prepare staging files without the adapter, start from the older staging
 templates and complete `staging_provenance_template.json` manually. Never put
 credentials in provenance. Supported provider types are `manual_upload`,
@@ -175,12 +236,15 @@ run.
 
 Open `Odds Import`, then use `Validate staging inputs`. The dashboard shows the
 verdict, compact provider proof, provider age, and source/staging pair statuses,
-plus expandable markdown and CSV details. This button is read-only.
+plus expandable markdown and CSV details. The latest odds API staging provider
+report is display-only below it. No provider live/dry-run button is exposed.
+These dashboard controls are read-only.
 
 ## Why cron remains disabled
 
-The project still needs a trusted and permitted automated provider, secure
-credential handling, verified provider mappings, reliable pre-cutoff staging
-refreshes, and ownership for blocked runs. The policy defines a cutoff; it does
-not fetch fresh inputs. Until those pieces work reliably over repeated manual
-runs, the GitHub workflow remains manual-only and no cron trigger is enabled.
+The provider adapter is still a manually triggered skeleton. Its real team and
+market mappings, BTTS coverage, quota behavior, secret injection, failure
+alerts, and pre-cutoff reliability need repeated review before automation. The
+policy defines a cutoff; it does not fetch fresh inputs. Until those pieces work
+reliably over repeated manual runs, the GitHub workflow remains manual-only and
+no cron trigger is enabled.

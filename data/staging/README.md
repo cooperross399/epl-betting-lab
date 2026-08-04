@@ -21,6 +21,25 @@ writes these expected validation inputs:
 - `upcoming_fixtures_staging.csv`
 - `staging_provenance.json`
 
+The shared provider command also includes an offline-first odds API skeleton:
+
+```bash
+python scripts/run_provider_staging.py --provider odds_api --dry-run
+```
+
+Dry-run makes no network request and writes no staging files. Live mode must be
+run intentionally from Terminal with `EPL_ODDS_API_KEY` set in the environment:
+
+```bash
+export EPL_ODDS_API_KEY='your-secret-key'
+python scripts/run_provider_staging.py --provider odds_api --live
+```
+
+Never store the key in this folder. A live run can add raw JSON evidence under
+`data/staging/raw/` and normalized source/staging CSVs with checksums. It copies
+only returned prices; missing markets remain missing for validation to flag.
+The default policy does not allow `the_odds_api` until real output is reviewed.
+
 It stops if any output already exists. Review the existing bundle first and use
 `--overwrite-staging` only when replacing all three outputs is intentional.
 The generated provenance identifies both source files and their SHA-256

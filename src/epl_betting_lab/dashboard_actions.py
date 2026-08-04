@@ -54,6 +54,9 @@ from epl_betting_lab.reports.odds_profile_verification import (
     InstalledOddsProfileVerificationError,
     verify_installed_odds_profile,
 )
+from epl_betting_lab.reports.provider_shadow_history import (
+    save_provider_shadow_run_comparison,
+)
 from epl_betting_lab.reports.staging_input_validation import (
     save_staging_input_validation,
 )
@@ -446,6 +449,16 @@ def run_installed_odds_profile_verification(
 
 def run_thursday_best_bets_comparison(output_dir: Path | None = None) -> dict[str, Path]:
     return save_thursday_best_bets_comparison(output_dir or OUTPUTS_DIR)
+
+
+def run_provider_shadow_run_comparison(
+    provider_name: str = "odds_api",
+    output_dir: Path | None = None,
+) -> dict[str, object]:
+    return save_provider_shadow_run_comparison(
+        provider_name,
+        output_dir or OUTPUTS_DIR,
+    )
 
 
 def run_thursday_decision_queue(output_dir: Path | None = None) -> dict[str, Path]:

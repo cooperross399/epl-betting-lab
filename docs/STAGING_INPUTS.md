@@ -169,6 +169,36 @@ does not expose a live-run button. Repeated successful shadow runs, reviewed
 team mappings, acceptable market coverage, understood quota behavior, and a
 clear owner for failures are still required before allowlisting or cron.
 
+## Shadow-run history and comparison
+
+Every shadow verification archives its JSON, markdown, CSV, available provider
+report, available staging validation report, and safe SHA-256 metadata under:
+
+```text
+data/outputs/archive/provider_shadow_runs/YYYY-MM-DD/HHMMSS_PROVIDER/
+```
+
+Archive names are collision-safe, so a second run in the same second creates a
+new folder instead of replacing reviewed evidence. Compare the latest two runs
+for one provider with:
+
+```bash
+python scripts/compare_provider_shadow_runs.py --provider odds_api
+```
+
+The outputs are `data/outputs/provider_shadow_run_comparison.json`, `.md`, and
+`.csv`. They compare verdicts, exact team and fixture coverage, bookmakers,
+1X2/totals/BTTS rows, completeness, source/staging checksum proof, policy,
+staging validation, safe quota headers, and warnings/blockers added or removed.
+Comparison verdicts are `Stable enough for review`, `Needs more shadow runs`,
+`Coverage changed`, `Mapping issue`, `Market coverage issue`,
+`Provider policy issue`, and `Failed/untrusted`.
+
+The Odds Import dashboard shows recent snapshots and a report-only comparison
+button. It cannot run a live provider, allowlist one, promote staging, expose a
+secret, or enable cron. Treat three consistent runs as a minimum review cue,
+not automatic provider approval.
+
 If you prepare staging files without the adapter, start from the older staging
 templates and complete `staging_provenance_template.json` manually. Never put
 credentials in provenance. Supported provider types are `manual_upload`,

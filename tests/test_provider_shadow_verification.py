@@ -200,6 +200,8 @@ def test_dry_run_never_calls_network_or_writes_staging(tmp_path: Path) -> None:
     assert Path(result["json"]).is_file()
     assert Path(result["markdown"]).is_file()
     assert Path(result["csv"]).is_file()
+    assert Path(result["archive"]["directory"]).is_dir()
+    assert Path(result["archive"]["metadata"]).is_file()
 
 
 def test_live_shadow_blocks_without_environment_credential(tmp_path: Path) -> None:
@@ -261,6 +263,11 @@ def test_complete_live_shadow_is_ready_for_manual_review(tmp_path: Path) -> None
     assert summary["safety"]["trusted_picks_generated"] is False
     assert summary["safety"]["cron_enabled"] is False
     assert summary["safety"]["bets_placed"] is False
+    archive_files = {
+        path.name for path in Path(result["archive"]["directory"]).iterdir()
+    }
+    assert "provider_run_report.json" in archive_files
+    assert "staging_input_validation.json" in archive_files
 
 
 def test_missing_btts_is_reported_without_fabrication(tmp_path: Path) -> None:
@@ -320,6 +327,8 @@ def test_shadow_reports_safe_quota_and_bookmaker_coverage_without_secret(
     }
     for path in (result["json"], result["markdown"], result["csv"]):
         assert SECRET not in Path(path).read_text(encoding="utf-8")
+    for path in Path(result["archive"]["directory"]).iterdir():
+        assert SECRET not in path.read_text(encoding="utf-8")
     assert "authorization" not in Path(result["json"]).read_text(encoding="utf-8")
 
 

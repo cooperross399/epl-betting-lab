@@ -54,6 +54,9 @@ from epl_betting_lab.reports.odds_profile_verification import (
     InstalledOddsProfileVerificationError,
     verify_installed_odds_profile,
 )
+from epl_betting_lab.reports.provider_acceptance_checklist import (
+    save_provider_acceptance_checklist,
+)
 from epl_betting_lab.reports.provider_shadow_history import (
     save_provider_shadow_run_comparison,
 )
@@ -456,6 +459,16 @@ def run_provider_shadow_run_comparison(
     output_dir: Path | None = None,
 ) -> dict[str, object]:
     return save_provider_shadow_run_comparison(
+        provider_name,
+        output_dir or OUTPUTS_DIR,
+    )
+
+
+def run_provider_acceptance_checklist(
+    provider_name: str = "odds_api",
+    output_dir: Path | None = None,
+) -> dict[str, object]:
+    return save_provider_acceptance_checklist(
         provider_name,
         output_dir or OUTPUTS_DIR,
     )

@@ -42,6 +42,7 @@ from epl_betting_lab.dashboard_actions import (
     run_odds_profile_install_preview,
     run_installed_odds_profile_verification,
     run_post_thursday_review,
+    run_provider_acceptance_checklist,
     run_provider_shadow_run_comparison,
     run_stale_current_odds_archive_preview,
     run_stale_current_odds_archive_confirmation_status,
@@ -786,10 +787,30 @@ def render_odds_import() -> None:
         "provider_shadow_run_comparison.csv",
         comparison_command,
     )
+    acceptance_command = (
+        "python scripts/generate_provider_acceptance_checklist.py "
+        f"--provider {selected_shadow_provider}"
+    )
+    if st.button("Generate provider acceptance checklist", width="stretch"):
+        run_dashboard_action(
+            "Provider acceptance checklist",
+            lambda: run_provider_acceptance_checklist(selected_shadow_provider),
+        )
+    render_markdown_expander(
+        "Provider acceptance checklist",
+        "provider_acceptance_checklist.md",
+        acceptance_command,
+    )
+    render_table_expander(
+        "Provider acceptance requirements",
+        "provider_acceptance_checklist.csv",
+        acceptance_command,
+    )
     st.caption(
         "Provider and shadow-run commands remain Terminal-only so dashboard users "
         "cannot expose secrets, fetch live data, overwrite staging files, allowlist "
-        "a provider, or enable cron. History comparison is report-only."
+        "a provider, or enable cron. History comparison and acceptance checks are "
+        "report-only."
     )
     st.divider()
 

@@ -211,6 +211,20 @@ least three consistent shadow runs before treating `Stable enough for review`
 as evidence for a manual allowlist discussion. It is not approval and cron
 remains disabled.
 
+After collecting live runs, generate the separate acceptance checklist:
+
+```bash
+python scripts/generate_provider_acceptance_checklist.py --provider odds_api
+```
+
+It reviews the latest five live runs and requires at least three completed live
+runs by default. It checks archive trust, mapping and fixture stability,
+bookmakers, 1X2/totals/BTTS reporting, staging success, provider age,
+checksums/provenance, safe quota headers, policy state, and unresolved blockers.
+`Ready for human allowlist review` means only that a person may review the
+evidence. The script and dashboard button cannot edit the provider policy,
+allowlist a provider, promote staging, or enable cron.
+
 Next, review `data/manual/staging_provider_policy.json` and run the independent
 eligibility gate:
 

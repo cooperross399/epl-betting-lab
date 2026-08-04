@@ -141,6 +141,31 @@ completeness. Do not fill the gap with a guessed price. The default policy also
 keeps `the_odds_api` disallowed until you have reviewed real output and
 deliberately approved the provider name.
 
+Before making any allowlist decision, run a shadow verification. Start with the
+safe no-network mode:
+
+```bash
+python scripts/run_provider_shadow_verification.py --provider odds_api --dry-run
+```
+
+Seeing `Blocked` in the dry-run report is expected. The command checked its safe
+setup, but it deliberately did not fetch evidence that could prove readiness.
+
+When you intentionally want to test real provider output and have set
+`EPL_ODDS_API_KEY` in your environment, run:
+
+```bash
+python scripts/run_provider_shadow_verification.py --provider odds_api --live
+```
+
+Read `data/outputs/provider_shadow_verification.md`. It explains team-name,
+fixture, bookmaker, market, BTTS, completeness, checksum, provider-age, policy,
+and safe quota results. A `Shadow ready for review` verdict is still not
+permission to generate picks automatically. The report does not edit the
+provider policy or protected files, and live mode is not available in the
+dashboard. Use GitHub Secrets rather than committed files if credentials are
+added to a future manual GitHub workflow.
+
 Then validate the generated staging files:
 
 ```bash

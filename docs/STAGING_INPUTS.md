@@ -112,6 +112,63 @@ Provider network/writes stay Terminal-only. The Odds Import dashboard displays
 the latest report but cannot fetch, overwrite staging, expose a secret, validate
 automatically, promote data, or place a bet.
 
+## Controlled live shadow verification
+
+A shadow run asks, "Can this provider produce a technically usable bundle?"
+It does not ask the model for picks and does not approve the provider. Start
+with the no-network dry-run:
+
+```bash
+python scripts/run_provider_shadow_verification.py --provider odds_api --dry-run
+```
+
+The dry-run command itself exits successfully when the preview works, but its
+report verdict remains `Blocked`: no live evidence was fetched, so provider
+usability cannot honestly be proven yet.
+
+For an intentional live shadow run, set the key only in your local environment:
+
+```bash
+export EPL_ODDS_API_KEY='your-secret-key'
+python scripts/run_provider_shadow_verification.py --provider odds_api --live
+```
+
+A future GitHub runner must receive the same variable through GitHub Secrets;
+never commit the key or pass it as a command argument. If staging evidence
+already exists, the provider blocks replacement. Review it first, then use
+`--overwrite-staging` only when replacing the whole staging bundle is
+intentional.
+
+Live shadow mode runs the registered provider, writes only staging/evidence and
+provider reports, then calls the existing staging validation and handoff gates.
+It creates:
+
+```text
+data/outputs/provider_shadow_verification.json
+data/outputs/provider_shadow_verification.md
+data/outputs/provider_shadow_verification.csv
+```
+
+The report covers raw evidence, source/staging checksums, provider age, exact
+team-name reference coverage, fixture matching, bookmakers, 1X2/totals/BTTS
+coverage, missing selections, odds completeness, provider policy status, and
+safe quota headers when the provider returns them. BTTS remains missing when it
+is unavailable; the verifier never invents a price.
+
+Shadow verdicts are:
+
+- `Shadow ready for review`: technical gates passed, but manual review remains.
+- `Needs mapping fixes`: team or fixture identities need reviewed mappings.
+- `Needs market coverage review`: required market rows are incomplete.
+- `Needs provider policy review`: data passed but the provider is not allowed.
+- `Blocked`: a credential, evidence, age, validation, or safety gate stopped it.
+- `Failed`: a runtime/reporting failure prevented verification.
+
+The `Odds Import` dashboard displays the latest markdown and CSV reports. It
+does not expose a live-run button. Repeated successful shadow runs, reviewed
+team mappings, acceptable market coverage, understood quota behavior, and a
+clear owner for failures are still required before allowlisting or cron.
+
 If you prepare staging files without the adapter, start from the older staging
 templates and complete `staging_provenance_template.json` manually. Never put
 credentials in provenance. Supported provider types are `manual_upload`,

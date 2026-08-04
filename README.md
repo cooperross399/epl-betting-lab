@@ -174,6 +174,27 @@ allowlist only after reviewing real provider output, team names, market mapping,
 raw evidence, and repeated validation results. A completed provider run is not
 approval for handoff.
 
+Use the controlled shadow verifier before considering that policy change. Its
+default mode makes no network request:
+
+```bash
+python scripts/run_provider_shadow_verification.py --provider odds_api --dry-run
+```
+
+After setting `EPL_ODDS_API_KEY` in your environment, an intentional live shadow
+run writes staging evidence, runs the existing staging validation gates, and
+creates `data/outputs/provider_shadow_verification.{json,md,csv}`:
+
+```bash
+python scripts/run_provider_shadow_verification.py --provider odds_api --live
+```
+
+The report checks team-name mapping, fixture matching, bookmaker and market
+coverage, BTTS gaps, completeness, checksums, provider age, policy status, and
+safe API usage headers. `Shadow ready for review` means only that the technical
+checks passed. It does not generate trusted picks, edit the allowlist, promote
+staging files, enable cron, or place bets. Live mode remains Terminal-only.
+
 Next, review `data/manual/staging_provider_policy.json` and run the independent
 eligibility gate:
 

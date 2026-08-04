@@ -388,18 +388,35 @@ def _provider_matches(record: Mapping[str, object], provider_name: str) -> bool:
     }
 
 
+def load_provider_shadow_run_history(
+    output_dir: Path | None = None,
+    *,
+    provider_name: str | None = None,
+    limit: int | None = None,
+) -> list[dict[str, object]]:
+    """Load newest-first archived records, including verified summary evidence."""
+    outputs = (output_dir or OUTPUTS_DIR).resolve()
+    records = _discover_archives(outputs)
+    if provider_name:
+        records = [item for item in records if _provider_matches(item, provider_name)]
+    if limit is not None:
+        return records[: max(0, limit)]
+    return records
+
+
 def list_recent_provider_shadow_runs(
     output_dir: Path | None = None,
     *,
     provider_name: str | None = None,
     limit: int = 10,
 ) -> list[dict[str, object]]:
-    outputs = (output_dir or OUTPUTS_DIR).resolve()
-    records = _discover_archives(outputs)
-    if provider_name:
-        records = [item for item in records if _provider_matches(item, provider_name)]
+    records = load_provider_shadow_run_history(
+        output_dir,
+        provider_name=provider_name,
+        limit=limit,
+    )
     visible = []
-    for record in records[: max(0, limit)]:
+    for record in records:
         visible.append(
             {
                 key: value

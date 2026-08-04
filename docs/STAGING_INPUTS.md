@@ -199,6 +199,47 @@ button. It cannot run a live provider, allowlist one, promote staging, expose a
 secret, or enable cron. Treat three consistent runs as a minimum review cue,
 not automatic provider approval.
 
+## Provider acceptance checklist
+
+The acceptance checklist applies the minimum-run and stability policy across
+archived live shadow runs:
+
+```bash
+python scripts/generate_provider_acceptance_checklist.py --provider odds_api
+```
+
+Defaults are three completed live runs inside the latest five live-run
+archives. Change them only for an intentional review:
+
+```bash
+python scripts/generate_provider_acceptance_checklist.py \
+  --provider odds_api --minimum-runs 5 --review-window 5
+```
+
+Dry runs never count. The report evaluates failed/untrusted history, mapping and
+fixture stability, bookmaker consistency, 1X2 and totals coverage, explicit
+BTTS availability, staging technical success, provider freshness,
+archive/source/staging/provenance checksums, safe quota headers, policy state,
+and unresolved blockers. It writes:
+
+```text
+data/outputs/provider_acceptance_checklist.json
+data/outputs/provider_acceptance_checklist.md
+data/outputs/provider_acceptance_checklist.csv
+```
+
+The possible verdicts are `Ready for human allowlist review`, `Needs more
+shadow runs`, `Needs mapping fixes`, `Needs market coverage review`, `Needs
+quota review`, `Needs provider policy review`, and `Not trusted`. A consistently
+disallowed provider may become ready for **human review** because that is the
+question the report answers. It never changes `staging_provider_policy.json` or
+approves the provider itself.
+
+The Odds Import dashboard button only regenerates these report files. Live
+provider runs, policy edits, staging promotion, and cron remain unavailable in
+the dashboard. Cron stays disabled until a person reviews repeated live
+evidence, credentials, ownership, failure handling, and the policy change.
+
 If you prepare staging files without the adapter, start from the older staging
 templates and complete `staging_provenance_template.json` manually. Never put
 credentials in provenance. Supported provider types are `manual_upload`,

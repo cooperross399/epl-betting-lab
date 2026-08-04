@@ -182,6 +182,21 @@ verdicts, and quota behavior remain understandable. Two stable runs still get
 `Stable enough for review`, which still requires a person to decide what comes
 next. The tool never edits the provider allowlist or enables cron.
 
+Once you have at least three completed live shadow runs, generate the
+read-only provider acceptance checklist:
+
+```bash
+python scripts/generate_provider_acceptance_checklist.py --provider odds_api
+```
+
+Read `data/outputs/provider_acceptance_checklist.md`, or use **Generate provider
+acceptance checklist** under Odds Import. The default checklist reviews the
+latest five live runs and requires three completed runs. Dry runs do not count.
+It checks mappings, fixtures, books, market coverage, staging results, age,
+checksums, quota headers, policy state, and blockers. `Ready for human allowlist
+review` does not add the provider to the policy. A person must still inspect the
+evidence and make any policy edit separately. Cron remains disabled.
+
 Then validate the generated staging files:
 
 ```bash

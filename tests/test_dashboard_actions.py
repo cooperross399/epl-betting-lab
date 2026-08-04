@@ -26,6 +26,7 @@ from epl_betting_lab.dashboard_actions import (
     run_odds_profile_install_preview,
     run_installed_odds_profile_verification,
     run_post_thursday_review,
+    run_provider_acceptance_checklist,
     run_provider_shadow_run_comparison,
     run_settlement_preview,
     run_stale_current_odds_archive_preview,
@@ -1140,3 +1141,23 @@ def test_provider_shadow_comparison_dashboard_action_is_report_only(
     )
 
     assert run_provider_shadow_run_comparison("odds_api", output_dir) == expected
+
+
+def test_provider_acceptance_dashboard_action_is_report_only(
+    tmp_path, monkeypatch
+) -> None:
+    output_dir = tmp_path / "outputs"
+    expected = {"verdict": "Needs more shadow runs"}
+
+    def fake_save(provider_name, selected_output_dir):
+        assert provider_name == "odds_api"
+        assert selected_output_dir == output_dir
+        return expected
+
+    monkeypatch.setattr(
+        dashboard_actions,
+        "save_provider_acceptance_checklist",
+        fake_save,
+    )
+
+    assert run_provider_acceptance_checklist("odds_api", output_dir) == expected

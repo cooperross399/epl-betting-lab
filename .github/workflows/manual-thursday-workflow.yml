@@ -196,6 +196,11 @@ jobs:
                           f"**{handoff.get('staging_receipt_provenance_binding_status', 'Not checked')}**"
                       )
                       print(
+                          "- Provider run age: "
+                          f"**{handoff.get('staging_receipt_provider_age_status', 'Not checked')}** "
+                          f"({handoff.get('staging_receipt_provider_run_age_minutes')} minute(s))"
+                      )
+                      print(
                           "- Source odds / fixtures checksums: "
                           f"**{handoff.get('staging_receipt_source_odds_checksum_status', 'Not checked')}** / "
                           f"**{handoff.get('staging_receipt_source_fixtures_checksum_status', 'Not checked')}**"

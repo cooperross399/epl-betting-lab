@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pandas as pd
@@ -110,6 +110,7 @@ def _write_ready_staging_receipt(
     root: Path,
     *,
     receipt_run_at: datetime = RUN_AT,
+    provider_generated_at: datetime | None = None,
 ) -> tuple[dict[str, Path], Path]:
     paths = _write_inputs(root)
     staging = root / "data" / "staging"
@@ -131,6 +132,7 @@ def _write_ready_staging_receipt(
                 "allow_unknown_providers": False,
                 "allow_missing_provenance": False,
                 "max_receipt_age_hours": 12,
+                "max_provider_run_age_hours": 12,
                 "timezone": "America/New_York",
                 "thursday_cutoff_time": "10:00",
             }
@@ -180,7 +182,9 @@ def _write_ready_staging_receipt(
                     },
                 },
                 "generated_by": "test suite",
-                "generated_at": receipt_run_at.isoformat(timespec="seconds"),
+                "generated_at": (
+                    provider_generated_at or receipt_run_at
+                ).isoformat(timespec="seconds"),
                 "notes": "Ready receipt fixture.",
             }
         ),
@@ -386,6 +390,11 @@ def test_runner_handoff_binds_exact_ready_staging_receipt(tmp_path: Path) -> Non
     assert result["staging_receipt_provider_name"] == "manual_reviewed"
     assert result["staging_provider_policy_match_status"] == "Verified"
     assert result["staging_provider_policy_status"] == "Provider allowed"
+    assert result["staging_receipt_provider_generated_at"] == RUN_AT.isoformat(
+        timespec="seconds"
+    )
+    assert result["staging_receipt_provider_age_status"] == "Fresh"
+    assert result["staging_receipt_provider_run_age_minutes"] == 0.0
     assert result["staging_receipt_provenance_status"] == "Verified"
     assert result["staging_receipt_provenance_binding_status"] == "Verified"
     assert result["staging_receipt_source_odds_checksum_status"] == "Verified"
@@ -439,6 +448,30 @@ def test_runner_handoff_blocks_receipt_older_than_policy_limit(
     assert result["staging_receipt_age_status"] == "Receipt too old"
     assert result["card_generation_allowed"] is False
     assert any("at most 12 hours" in item for item in result["blockers"])
+
+
+def test_runner_handoff_rechecks_provider_age_after_ready_receipt(
+    tmp_path: Path,
+) -> None:
+    paths, receipt_path = _write_ready_staging_receipt(
+        tmp_path,
+        provider_generated_at=RUN_AT - timedelta(hours=11),
+    )
+
+    result = _build(
+        tmp_path,
+        paths,
+        run_at=RUN_AT + timedelta(hours=2),
+        staging_receipt_path=receipt_path,
+        require_staging_receipt=True,
+    )
+
+    assert result["staging_receipt_age_status"] == "Within age limit"
+    assert result["staging_receipt_recorded_provider_age_status"] == "Fresh"
+    assert result["staging_receipt_provider_age_status"] == "Too old"
+    assert result["staging_receipt_provider_run_age_minutes"] == 780.0
+    assert result["card_generation_allowed"] is False
+    assert any("Provider run is too old" in item for item in result["blockers"])
 
 
 def test_runner_handoff_blocks_provider_not_allowed_by_current_policy(

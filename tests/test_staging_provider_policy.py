@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from epl_betting_lab.staging_provider_policy import (
+    evaluate_provider_run_age,
     evaluate_staging_provider_policy,
     load_staging_provider_policy,
 )
@@ -16,6 +17,7 @@ POLICY = {
     "allow_unknown_providers": False,
     "allow_missing_provenance": False,
     "max_receipt_age_hours": 12,
+    "max_provider_run_age_hours": 12,
     "timezone": "America/New_York",
     "thursday_cutoff_time": "10:00",
 }
@@ -190,3 +192,57 @@ def test_missing_provenance_is_blocked_unless_policy_explicitly_allows_it(
     assert allowed["allowed"] is True
     assert allowed["provider_policy_status"] == "Missing provenance allowed"
     assert allowed["warnings"]
+
+
+def test_provider_run_age_is_timezone_aware_and_fresh(tmp_path: Path) -> None:
+    policy = _load_policy(tmp_path)
+
+    result = evaluate_provider_run_age(
+        policy,
+        "2026-08-06T08:59:00-04:00",
+        evaluated_at=THURSDAY_BEFORE_CUTOFF,
+    )
+
+    assert result["provider_age_status"] == "Fresh"
+    assert result["provider_run_age_minutes"] == 60.0
+    assert result["fresh"] is True
+
+
+def test_provider_run_age_blocks_old_future_missing_and_invalid_timestamps(
+    tmp_path: Path,
+) -> None:
+    policy = _load_policy(tmp_path)
+    cases = (
+        ("2026-08-05T20:00:00+00:00", "Too old"),
+        ("2026-08-06T14:00:00+00:00", "Future timestamp"),
+        ("", "Missing"),
+        ("not-a-timestamp", "Invalid"),
+        ("2026-08-06T12:00:00", "Invalid"),
+    )
+
+    for timestamp, expected_status in cases:
+        result = evaluate_provider_run_age(
+            policy,
+            timestamp,
+            evaluated_at=THURSDAY_BEFORE_CUTOFF,
+        )
+        assert result["provider_age_status"] == expected_status
+        assert result["fresh"] is False
+
+
+def test_provider_run_age_fails_closed_when_policy_is_unavailable(
+    tmp_path: Path,
+) -> None:
+    missing_policy = load_staging_provider_policy(
+        tmp_path / "data" / "manual" / "missing.json",
+        repository_root=tmp_path,
+    )
+
+    result = evaluate_provider_run_age(
+        missing_policy,
+        THURSDAY_BEFORE_CUTOFF,
+        evaluated_at=THURSDAY_BEFORE_CUTOFF,
+    )
+
+    assert result["provider_age_status"] == "Policy unavailable"
+    assert result["fresh"] is False

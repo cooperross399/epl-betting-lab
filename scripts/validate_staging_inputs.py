@@ -52,7 +52,10 @@ def parse_args() -> argparse.Namespace:
         "--provider-policy-path",
         type=Path,
         default=STAGING_PROVIDER_POLICY_PATH,
-        help="Allowed provider, receipt age, timezone, and Thursday cutoff policy.",
+        help=(
+            "Allowed provider, provider/receipt age, timezone, and Thursday "
+            "cutoff policy."
+        ),
     )
     return parser.parse_args()
 
@@ -73,6 +76,11 @@ def main() -> int:
         f"{result['provider_name'] or 'unknown'} ({result['provider_type']})"
     )
     print(f"Provider policy: {result['provider_policy_status']}")
+    print(
+        "Provider run age: "
+        f"{result['provider_age_status']} "
+        f"({result['provider_run_age_minutes']} minute(s))"
+    )
     print(f"Provider provenance: {result['provenance_status']}")
     print(
         "Source checksums (odds / fixtures): "

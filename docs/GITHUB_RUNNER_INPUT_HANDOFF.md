@@ -54,6 +54,10 @@ files and both staging files. All four must match the provider provenance, and
 each source/staging pair must match. The Ready receipt carries these proof
 statuses into the GitHub handoff; the runner blocks receipts without verified
 proof unless the checked-in policy explicitly permits missing provenance.
+The provider's `generated_at` is checked separately against
+`max_provider_run_age_hours`. GitHub recalculates that age when the Action runs,
+so a provider bundle can age out even while its validation receipt remains
+otherwise valid.
 
 Before committing:
 
@@ -71,9 +75,9 @@ Before committing:
 
 The default `data/manual/staging_provider_policy.json` allows the named
 `manual_reviewed` provider, accepts known provider types, disallows unknown
-providers and missing provenance, limits receipts to 12 hours, and sets the
-Thursday cutoff to 10:00 AM `America/New_York`. Adjust the policy only after
-reviewing a real source.
+providers and missing provenance, limits receipts and provider runs to 12
+hours, and sets the Thursday cutoff to 10:00 AM `America/New_York`. Adjust the
+policy only after reviewing a real source.
 The policy is itself checksum-bound to the receipt.
 
 Confirm `data/outputs/staging_input_validation.md` says `Ready for handoff`.

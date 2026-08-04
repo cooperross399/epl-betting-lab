@@ -160,7 +160,10 @@ It also re-hashes both provider source files and both staging files, compares
 them with `staging_provenance.json`, and confirms each source/staging pair still
 matches byte-for-byte. A missing file, unreadable file, absent checksum, or
 checksum mismatch blocks `Ready for handoff`. Missing provenance is blocked by
-default through `allow_missing_provenance: false` in the provider policy.
+default through `allow_missing_provenance: false` in the provider policy. The
+provider's timezone-aware `generated_at` must also be present, not in the
+future, and no older than `max_provider_run_age_hours` (12 hours by default).
+This is separate from the age of the validation receipt itself.
 It writes:
 
 ```text

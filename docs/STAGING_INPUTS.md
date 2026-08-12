@@ -472,6 +472,55 @@ table. This checker can later be wired into a PR-only CI job for changes to
 a provider, promote staging, run providers, generate picks, place bets, or
 enable cron. Provider allowlisting and cron remain separate approvals.
 
+## Run the provider-policy PR gate
+
+Use the same gate locally before pushing a provider-policy PR:
+
+```bash
+python scripts/check_provider_policy_pr_gate.py --provider odds_api
+```
+
+Local change detection compares the current branch and working tree with
+`origin/main` or `main`. GitHub Actions passes the pull request base and head
+commit SHAs explicitly. If `data/manual/staging_provider_policy.json` is not in
+the changed-file set, the verdict is `Provider policy PR gate not applicable`
+and the command exits successfully.
+
+When the policy changes, the gate requires all of the following in the PR
+checkout:
+
+- a Ready provider allowlist PR preview
+- a human receipt verification with `Verified for allowlist PR review`
+- a conformance report with `Conforms to preview`
+- a rebuilt bundle that includes the conformance report and current policy
+- a bundle verification with `Evidence bundle verified for PR approval review`
+- no newly enabled cron, schedule, or automation setting
+
+The gate does not merely trust those saved verdict strings. It reruns evidence
+bundle verification and policy conformance in memory against the checked-out
+files, then checks bundle IDs, checksums, providers, policy checksums, and
+review states. Outputs are:
+
+```text
+data/outputs/provider_policy_pr_gate.json
+data/outputs/provider_policy_pr_gate.md
+data/outputs/provider_policy_pr_gate.csv
+```
+
+Statuses are `Passed`, `Not applicable`, `Missing verified bundle`, `Missing
+conformance report`, `Conformance failed`, `Receipt verification failed`,
+`Unsafe automation change`, and `Failed`. Final verdicts are `Provider policy
+PR gate passed`, `Provider policy PR gate not applicable`, `Provider policy PR
+gate blocked`, and `Provider policy PR gate failed`.
+
+`.github/workflows/provider-policy-pr-gate.yml` is pull-request-only and uses
+read-only repository permissions. It needs no secrets, never runs live
+providers, and uploads the gate reports even when blocked. The Odds Import
+dashboard displays the latest report and can run the same report-only local
+check. Passing proves evidence/conformance for review; only merging the separate
+human-reviewed policy PR changes allowlisting. Cron remains disabled until a
+different explicit review enables it.
+
 If you prepare staging files without the adapter, start from the older staging
 templates and complete `staging_provenance_template.json` manually. Never put
 credentials in provenance. Supported provider types are `manual_upload`,

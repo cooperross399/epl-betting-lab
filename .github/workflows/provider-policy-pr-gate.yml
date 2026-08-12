@@ -1,0 +1,78 @@
+name: Provider Policy PR Gate
+
+on:
+  pull_request:
+    paths:
+      - data/manual/staging_provider_policy.json
+      - data/outputs/provider_allowlist_evidence_bundle_verification.json
+      - data/outputs/provider_allowlist_pr_conformance.json
+      - data/outputs/provider_allowlist_pr_preview.json
+      - data/outputs/provider_human_acceptance_receipt_verification.json
+      - data/outputs/provider_human_acceptance_receipt.json
+      - data/outputs/provider_acceptance_checklist.json
+      - data/outputs/provider_shadow_run_comparison.json
+      - data/outputs/archive/provider_allowlist_evidence_bundles/**
+      - scripts/check_provider_policy_pr_gate.py
+      - src/epl_betting_lab/reports/provider_policy_pr_gate.py
+      - src/epl_betting_lab/reports/provider_allowlist_evidence_bundle_verification.py
+      - src/epl_betting_lab/reports/provider_allowlist_pr_conformance.py
+      - .github/workflows/provider-policy-pr-gate.yml
+
+permissions:
+  contents: read
+
+jobs:
+  verify-provider-policy-evidence:
+    name: Verify provider policy evidence
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out pull request
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install project
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install -e .
+
+      - name: Check provider policy PR gate
+        run: |
+          python scripts/check_provider_policy_pr_gate.py \
+            --provider odds_api \
+            --base-ref "${{ github.event.pull_request.base.sha }}" \
+            --head-ref "${{ github.event.pull_request.head.sha }}"
+
+      - name: Add gate report to job summary
+        if: always()
+        shell: bash
+        run: |
+          if [[ -f data/outputs/provider_policy_pr_gate.md ]]; then
+            cat data/outputs/provider_policy_pr_gate.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "## Provider Policy PR Gate" >> "$GITHUB_STEP_SUMMARY"
+            echo "The gate did not produce a report." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload provider policy gate reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: provider-policy-pr-gate
+          path: |
+            data/outputs/provider_policy_pr_gate.json
+            data/outputs/provider_policy_pr_gate.md
+            data/outputs/provider_policy_pr_gate.csv
+          if-no-files-found: warn
+          retention-days: 14

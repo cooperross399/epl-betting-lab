@@ -301,6 +301,24 @@ Markdown, and CSV reports. It does not apply the policy change, allowlist the
 provider, or enable cron. It can later become a PR-only CI check after that
 separate workflow is reviewed.
 
+Provider-policy PRs are also checked automatically by the PR-only **Provider
+Policy PR Gate** workflow. Before opening that PR, run:
+
+```bash
+python scripts/check_provider_policy_pr_gate.py --provider odds_api
+```
+
+If `staging_provider_policy.json` did not change, `Not applicable` is a normal
+passing result. If it did change, commit the Ready preview, verified receipt
+report, conforming policy report, rebuilt evidence bundle/archive, and verified
+bundle report reviewed for that exact policy. The Action reruns the read-only
+checks and blocks missing, stale, mismatched, nonconforming, or automation-
+enabling evidence. Reports are available in `provider_policy_pr_gate.md` and
+the GitHub Actions artifact. The **Check provider policy PR gate** button under
+Odds Import only regenerates this local report. Neither the button nor Action
+edits policy, uses secrets, runs a provider, allowlists anything, or enables
+cron.
+
 Then validate the generated staging files:
 
 ```bash

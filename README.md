@@ -337,6 +337,24 @@ and rebuild/review the evidence. This read-only command is suitable for a
 future PR-only CI check, but it does not edit policy, allowlist the provider, or
 enable cron.
 
+Provider-policy pull requests now have that CI gate. Run the same check locally
+with:
+
+```bash
+python scripts/check_provider_policy_pr_gate.py --provider odds_api
+```
+
+`.github/workflows/provider-policy-pr-gate.yml` runs only for pull requests
+that touch the provider policy or its review evidence. If the policy itself is
+unchanged, the gate reports `Provider policy PR gate not applicable` and exits
+successfully. If it changed, the PR must include a Ready preview, verified
+human receipt, conforming policy report, and a post-conformance rebuilt and
+verified evidence bundle. The gate reruns bundle verification and conformance
+in memory, blocks unsafe cron/automation additions, and writes
+`provider_policy_pr_gate.{json,md,csv}`. It uses read-only repository
+permissions, no secrets, and no live provider calls. Passing the check does not
+apply policy, allowlist a provider automatically, or enable cron.
+
 Next, review `data/manual/staging_provider_policy.json` and run the independent
 eligibility gate:
 

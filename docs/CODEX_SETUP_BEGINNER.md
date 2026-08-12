@@ -283,6 +283,24 @@ non-ready evidence blocks the ready verdict. Dated copies are kept under
 `data/outputs/archive/provider_allowlist_evidence_bundles/` for PR review. This
 button only writes reports; it cannot change policy or enable cron.
 
+Right before a provider-policy PR is approved, verify that its archived review
+bundle and every evidence file are still unchanged:
+
+```bash
+python scripts/verify_provider_allowlist_evidence_bundle.py --provider odds_api
+```
+
+You can also click **Verify provider allowlist evidence bundle** under Odds
+Import. Read
+`data/outputs/provider_allowlist_evidence_bundle_verification.md`. A verdict of
+`Evidence bundle verified for PR approval review` confirms that all bound
+checksums and the deterministic bundle ID still match. A missing file or
+checksum mismatch means the reviewed evidence changed, so stop and rebuild the
+bundle after reviewing the new evidence. The verifier only writes its JSON,
+Markdown, and CSV reports. It does not apply the policy change, allowlist the
+provider, or enable cron. It can later become a PR-only CI check after that
+separate workflow is reviewed.
+
 Then validate the generated staging files:
 
 ```bash

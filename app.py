@@ -45,6 +45,7 @@ from epl_betting_lab.dashboard_actions import (
     run_provider_acceptance_checklist,
     run_provider_allowlist_pr_conformance,
     run_provider_allowlist_evidence_bundle,
+    run_provider_allowlist_evidence_bundle_verification,
     run_provider_allowlist_pr_preview,
     run_provider_human_acceptance_receipt_verification,
     run_provider_shadow_run_comparison,
@@ -913,13 +914,35 @@ def render_odds_import() -> None:
         "provider_allowlist_evidence_bundle.csv",
         evidence_bundle_command,
     )
+    evidence_verification_command = (
+        "python scripts/verify_provider_allowlist_evidence_bundle.py "
+        f"--provider {selected_shadow_provider}"
+    )
+    if st.button("Verify provider allowlist evidence bundle", width="stretch"):
+        run_dashboard_action(
+            "Provider allowlist evidence bundle verification",
+            lambda: run_provider_allowlist_evidence_bundle_verification(
+                selected_shadow_provider
+            ),
+        )
+    render_markdown_expander(
+        "Provider allowlist evidence bundle verification",
+        "provider_allowlist_evidence_bundle_verification.md",
+        evidence_verification_command,
+    )
+    render_table_expander(
+        "Provider allowlist evidence verification checks",
+        "provider_allowlist_evidence_bundle_verification.csv",
+        evidence_verification_command,
+    )
     st.caption(
         "Provider and shadow-run commands remain Terminal-only so dashboard users "
         "cannot expose secrets, fetch live data, overwrite staging files, allowlist "
         "a provider, create an acceptance receipt, or enable cron. History "
         "comparison, acceptance checks, receipt display, and receipt verification "
         "are report-only. The allowlist PR preview, conformance checker, and "
-        "checksum-bound evidence bundle also write reports only."
+        "checksum-bound evidence bundle and its approval-time verifier also write "
+        "reports only."
     )
     st.divider()
 

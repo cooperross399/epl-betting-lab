@@ -425,6 +425,53 @@ It does not create or verify receipts by side effect, edit policy, allowlist a
 provider, run a provider, promote staging, generate picks, place bets, or enable
 cron. Provider allowlisting and any future cron decision remain separate PRs.
 
+## Verify the evidence bundle before PR approval
+
+Immediately before a provider allowlist PR is approved, verify the latest
+archived evidence bundle:
+
+```bash
+python scripts/verify_provider_allowlist_evidence_bundle.py --provider odds_api
+```
+
+To verify one particular archived bundle, add a repository-local path:
+
+```bash
+python scripts/verify_provider_allowlist_evidence_bundle.py \
+  --provider odds_api \
+  --bundle-path data/outputs/archive/provider_allowlist_evidence_bundles/YYYY-MM-DD/RUN/provider_allowlist_evidence_bundle.json
+```
+
+The checker reads the bundle without changing it. It verifies the requested
+provider and ready verdict, then re-hashes every manifest entry: the allowlist
+preview, receipt verification, human receipt, acceptance checklist, matching
+shadow comparison, reviewed shadow archive bundles and files, provider policy,
+and conformance report when applicable. It also rebuilds the deterministic
+bundle checksum and ID from sorted evidence paths and current checksums.
+
+Outputs are:
+
+```text
+data/outputs/provider_allowlist_evidence_bundle_verification.json
+data/outputs/provider_allowlist_evidence_bundle_verification.md
+data/outputs/provider_allowlist_evidence_bundle_verification.csv
+```
+
+Evidence statuses are `Verified`, `Missing evidence`, `Checksum mismatch`,
+`Bundle ID mismatch`, `Malformed bundle`, `Not ready`, and `Not applicable`.
+Final verdicts distinguish a verified bundle from missing evidence, changed
+evidence, an internal bundle mismatch, malformed bundle data, and non-ready
+review state. A checksum mismatch means the bytes reviewed earlier are no
+longer the bytes on disk; do not approve the policy PR until the evidence is
+rebuilt and reviewed again.
+
+The Odds Import dashboard's **Verify provider allowlist evidence bundle**
+button runs this same read-only report and displays the Markdown and check
+table. This checker can later be wired into a PR-only CI job for changes to
+`staging_provider_policy.json`. It does not itself edit that policy, allowlist
+a provider, promote staging, run providers, generate picks, place bets, or
+enable cron. Provider allowlisting and cron remain separate approvals.
+
 If you prepare staging files without the adapter, start from the older staging
 templates and complete `staging_provenance_template.json` manually. Never put
 credentials in provenance. Supported provider types are `manual_upload`,

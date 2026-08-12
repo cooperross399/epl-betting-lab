@@ -265,6 +265,24 @@ new cron/automation settings fail closed. Extra policy edits are risky because
 they were not covered by the human-reviewed preview. This check only reviews
 files; it does not edit policy, allowlist the provider, or enable cron.
 
+After the Ready preview, gather the exact evidence into one checksum-bound
+package. Before the policy PR, conformance is `Not applicable`; during PR
+review, run conformance and build the bundle again:
+
+```bash
+python scripts/build_provider_allowlist_evidence_bundle.py --provider odds_api
+```
+
+You can also click **Build provider allowlist evidence bundle** under Odds
+Import. Read `data/outputs/provider_allowlist_evidence_bundle.md` first. A ready
+bundle includes the preview, human receipt and verification, acceptance
+checklist, matching shadow comparison, every reviewed shadow archive file,
+provider policy, and conformance report when one exists. Each file is re-hashed,
+and the combined paths and checksums produce the bundle ID. Missing, changed, or
+non-ready evidence blocks the ready verdict. Dated copies are kept under
+`data/outputs/archive/provider_allowlist_evidence_bundles/` for PR review. This
+button only writes reports; it cannot change policy or enable cron.
+
 Then validate the generated staging files:
 
 ```bash

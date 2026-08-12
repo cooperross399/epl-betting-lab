@@ -388,6 +388,43 @@ dashboard button runs this read-only report only. Even `Conforms to preview`
 does not allowlist through the dashboard or enable cron; merge approval and any
 future scheduling decision remain separate human steps.
 
+## Build the provider allowlist evidence bundle
+
+After a Ready preview, create one checksum-bound review package. Before an
+allowlist PR is opened, conformance is `Not applicable`. During PR review, run
+the conformance checker and build the package again:
+
+```bash
+python scripts/build_provider_allowlist_evidence_bundle.py --provider odds_api
+```
+
+The builder reads existing evidence only. It requires a Ready allowlist preview,
+a `Verified for allowlist PR review` receipt verification, the exact human
+acceptance receipt, a Ready acceptance checklist, its matching latest shadow-run
+comparison, all receipt-reviewed shadow archive files, and the bound provider
+policy. A conformance report is included when it exists; before the policy PR it
+is shown as `Not applicable`.
+
+Every included file is hashed again with SHA-256. The sorted repository-relative
+paths and current checksums form a deterministic bundle checksum and bundle ID.
+The outputs are:
+
+```text
+data/outputs/provider_allowlist_evidence_bundle.json
+data/outputs/provider_allowlist_evidence_bundle.md
+data/outputs/provider_allowlist_evidence_bundle.csv
+data/outputs/archive/provider_allowlist_evidence_bundles/YYYY-MM-DD/
+```
+
+Evidence rows report `Included`, `Missing`, `Checksum mismatch`, `Stale`, or
+`Not applicable`. Final verdicts are `Evidence bundle ready for PR review`,
+`Missing required evidence`, `Evidence changed`, or `Not ready for PR review`.
+The Odds Import dashboard's **Build provider allowlist evidence bundle** button
+runs the same report-only builder and displays the Markdown and evidence table.
+It does not create or verify receipts by side effect, edit policy, allowlist a
+provider, run a provider, promote staging, generate picks, place bets, or enable
+cron. Provider allowlisting and any future cron decision remain separate PRs.
+
 If you prepare staging files without the adapter, start from the older staging
 templates and complete `staging_provenance_template.json` manually. Never put
 credentials in provenance. Supported provider types are `manual_upload`,

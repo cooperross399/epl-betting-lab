@@ -297,6 +297,26 @@ The **Check provider allowlist PR conformance** dashboard button runs the same
 read-only comparison. A `Conforms to preview` verdict supports policy PR review;
 it does not edit policy, allowlist a provider by itself, or enable cron.
 
+Build the exact allowlist review evidence after the Ready preview. Before the
+policy PR is opened, conformance is `Not applicable`; during PR review, run the
+conformance checker and rebuild the bundle:
+
+```bash
+python scripts/build_provider_allowlist_evidence_bundle.py --provider odds_api
+```
+
+The command recalculates SHA-256 checksums for the Ready allowlist preview,
+verified human receipt and verification report, acceptance checklist, matching
+shadow comparison, every receipt-reviewed shadow archive file, current provider
+policy, and optional conformance report. It writes
+`provider_allowlist_evidence_bundle.{json,md,csv}` and dated snapshots under
+`data/outputs/archive/provider_allowlist_evidence_bundles/`. The deterministic
+bundle ID is derived from the included evidence paths and current checksums, so
+changed or missing evidence cannot quietly retain the same identity. Use the
+**Build provider allowlist evidence bundle** button under Odds Import for the
+same report-only action. Even `Evidence bundle ready for PR review` does not
+edit policy, allowlist a provider, or enable cron.
+
 Next, review `data/manual/staging_provider_policy.json` and run the independent
 eligibility gate:
 

@@ -281,6 +281,22 @@ PR text. The **Preview provider allowlist PR** dashboard button performs the
 same report-only action. It never edits `staging_provider_policy.json`; a
 separate human-reviewed PR is still required, and cron remains disabled.
 
+On that separate policy branch, verify that the actual policy change matches the
+reviewed preview exactly:
+
+```bash
+python scripts/check_provider_allowlist_pr_conformance.py --provider odds_api
+```
+
+The checker reads the existing preview and current policy, re-hashes the bound
+receipt-verification report, verifies provider identity and every proposed
+field, and rejects missing values, changed values, unrelated policy edits, or
+new cron/automation settings. It writes
+`provider_allowlist_pr_conformance.{json,md,csv}` with an expected/actual diff.
+The **Check provider allowlist PR conformance** dashboard button runs the same
+read-only comparison. A `Conforms to preview` verdict supports policy PR review;
+it does not edit policy, allowlist a provider by itself, or enable cron.
+
 Next, review `data/manual/staging_provider_policy.json` and run the independent
 eligibility gate:
 

@@ -43,6 +43,7 @@ from epl_betting_lab.dashboard_actions import (
     run_installed_odds_profile_verification,
     run_post_thursday_review,
     run_provider_acceptance_checklist,
+    run_provider_allowlist_pr_conformance,
     run_provider_allowlist_pr_preview,
     run_provider_human_acceptance_receipt_verification,
     run_provider_shadow_run_comparison,
@@ -869,12 +870,34 @@ def render_odds_import() -> None:
         "provider_allowlist_pr_preview.csv",
         allowlist_preview_command,
     )
+    conformance_command = (
+        "python scripts/check_provider_allowlist_pr_conformance.py "
+        f"--provider {selected_shadow_provider}"
+    )
+    if st.button("Check provider allowlist PR conformance", width="stretch"):
+        run_dashboard_action(
+            "Provider allowlist PR conformance",
+            lambda: run_provider_allowlist_pr_conformance(
+                selected_shadow_provider
+            ),
+        )
+    render_markdown_expander(
+        "Provider allowlist PR conformance check",
+        "provider_allowlist_pr_conformance.md",
+        conformance_command,
+    )
+    render_table_expander(
+        "Provider allowlist expected vs actual fields",
+        "provider_allowlist_pr_conformance.csv",
+        conformance_command,
+    )
     st.caption(
         "Provider and shadow-run commands remain Terminal-only so dashboard users "
         "cannot expose secrets, fetch live data, overwrite staging files, allowlist "
         "a provider, create an acceptance receipt, or enable cron. History "
         "comparison, acceptance checks, receipt display, and receipt verification "
-        "are report-only. The allowlist PR preview also writes reports only."
+        "are report-only. The allowlist PR preview and conformance checker also "
+        "write reports only."
     )
     st.divider()
 

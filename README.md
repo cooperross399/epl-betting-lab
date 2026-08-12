@@ -265,6 +265,22 @@ mismatch means the reviewed evidence changed; stop and create a new checklist
 and receipt after reviewing it again. Even `Verified for allowlist PR review`
 does not edit policy or enable cron.
 
+After verification succeeds, preview the exact separate policy PR before anyone
+edits the provider policy:
+
+```bash
+python scripts/preview_provider_allowlist_pr.py --provider odds_api
+```
+
+The preview requires `Verified for allowlist PR review`, confirms that the bound
+receipt and current policy still match, and writes
+`provider_allowlist_pr_preview.{json,md,csv}`. It shows current and proposed
+policy JSON, a unified diff, provider age/cutoff controls, required markets,
+known limitations such as unavailable BTTS, evidence checksums, and recommended
+PR text. The **Preview provider allowlist PR** dashboard button performs the
+same report-only action. It never edits `staging_provider_policy.json`; a
+separate human-reviewed PR is still required, and cron remains disabled.
+
 Next, review `data/manual/staging_provider_policy.json` and run the independent
 eligibility gate:
 

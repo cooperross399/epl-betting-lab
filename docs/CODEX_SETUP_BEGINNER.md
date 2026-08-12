@@ -236,6 +236,20 @@ regenerate the checklist and receipt after reviewing the current evidence. The
 best verdict, `Verified for allowlist PR review`, still only supports a later
 human-reviewed policy PR. It does not allowlist the provider or enable cron.
 
+Next, preview that possible policy PR without changing the policy:
+
+```bash
+python scripts/preview_provider_allowlist_pr.py --provider odds_api
+```
+
+Read `data/outputs/provider_allowlist_pr_preview.md`, or click **Preview provider
+allowlist PR** under Odds Import. A Ready preview shows the exact current and
+proposed JSON, the diff, reviewed markets and limitations, receipt evidence,
+and suggested PR title/description. A blocked preview tells you which receipt,
+verification, or policy evidence needs attention. The preview cannot edit the
+policy or allowlist anything. A person must still open and review a separate
+policy PR, and cron remains disabled.
+
 Then validate the generated staging files:
 
 ```bash

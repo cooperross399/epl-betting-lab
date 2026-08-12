@@ -48,6 +48,7 @@ from epl_betting_lab.dashboard_actions import (
     run_provider_allowlist_evidence_bundle_verification,
     run_provider_allowlist_pr_preview,
     run_provider_human_acceptance_receipt_verification,
+    run_provider_policy_pr_gate,
     run_provider_shadow_run_comparison,
     run_stale_current_odds_archive_preview,
     run_stale_current_odds_archive_confirmation_status,
@@ -935,14 +936,33 @@ def render_odds_import() -> None:
         "provider_allowlist_evidence_bundle_verification.csv",
         evidence_verification_command,
     )
+    policy_gate_command = (
+        "python scripts/check_provider_policy_pr_gate.py "
+        f"--provider {selected_shadow_provider}"
+    )
+    if st.button("Check provider policy PR gate", width="stretch"):
+        run_dashboard_action(
+            "Provider policy PR gate",
+            lambda: run_provider_policy_pr_gate(selected_shadow_provider),
+        )
+    render_markdown_expander(
+        "Provider policy PR gate",
+        "provider_policy_pr_gate.md",
+        policy_gate_command,
+    )
+    render_table_expander(
+        "Provider policy PR gate checks",
+        "provider_policy_pr_gate.csv",
+        policy_gate_command,
+    )
     st.caption(
         "Provider and shadow-run commands remain Terminal-only so dashboard users "
         "cannot expose secrets, fetch live data, overwrite staging files, allowlist "
         "a provider, create an acceptance receipt, or enable cron. History "
         "comparison, acceptance checks, receipt display, and receipt verification "
         "are report-only. The allowlist PR preview, conformance checker, and "
-        "checksum-bound evidence bundle and its approval-time verifier also write "
-        "reports only."
+        "checksum-bound evidence bundle, its approval-time verifier, and the PR "
+        "gate also write reports only."
     )
     st.divider()
 

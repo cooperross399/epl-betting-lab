@@ -32,6 +32,7 @@ from epl_betting_lab.dashboard_actions import (
     run_provider_allowlist_evidence_bundle_verification,
     run_provider_allowlist_pr_preview,
     run_provider_human_acceptance_receipt_verification,
+    run_provider_policy_pr_gate,
     run_provider_shadow_run_comparison,
     run_settlement_preview,
     run_stale_current_odds_archive_preview,
@@ -1315,3 +1316,23 @@ def test_provider_allowlist_evidence_bundle_verification_dashboard_action_is_rea
         output_dir,
         bundle_path,
     ) == expected
+
+
+def test_provider_policy_pr_gate_dashboard_action_is_report_only(
+    tmp_path, monkeypatch
+) -> None:
+    output_dir = tmp_path / "outputs"
+    expected = {"verdict": "Provider policy PR gate not applicable"}
+
+    def fake_save(provider_name, selected_output_dir):
+        assert provider_name == "odds_api"
+        assert selected_output_dir == output_dir
+        return expected
+
+    monkeypatch.setattr(
+        dashboard_actions,
+        "save_provider_policy_pr_gate",
+        fake_save,
+    )
+
+    assert run_provider_policy_pr_gate("odds_api", output_dir) == expected

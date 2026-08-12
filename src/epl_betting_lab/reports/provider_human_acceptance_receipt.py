@@ -126,7 +126,7 @@ def _safe_archive_path(value: object, output_dir: Path) -> Path:
     return resolved
 
 
-def _archive_bundle_checksum(archive_dir: Path) -> tuple[str, int]:
+def calculate_shadow_archive_bundle_checksum(archive_dir: Path) -> tuple[str, int]:
     files: list[Path] = []
     for path in archive_dir.rglob("*"):
         if path.is_symlink():
@@ -151,7 +151,7 @@ def _archive_bundle_checksum(archive_dir: Path) -> tuple[str, int]:
     return digest.hexdigest(), len(files)
 
 
-def _current_archive_integrity(archive_dir: Path) -> tuple[str, str]:
+def verify_shadow_archive_integrity(archive_dir: Path) -> tuple[str, str]:
     metadata_path = archive_dir / ARCHIVE_METADATA_FILENAME
     try:
         metadata = _read_json_object(metadata_path, "shadow archive metadata")
@@ -270,9 +270,11 @@ def load_provider_human_acceptance_evidence(
                 f"Reviewed shadow run {index} is malformed."
             )
         archive_dir = _safe_archive_path(reviewed.get("archive_path"), outputs)
-        bundle_checksum, file_count = _archive_bundle_checksum(archive_dir)
+        bundle_checksum, file_count = calculate_shadow_archive_bundle_checksum(
+            archive_dir
+        )
         current_integrity_status, current_integrity_note = (
-            _current_archive_integrity(archive_dir)
+            verify_shadow_archive_integrity(archive_dir)
         )
         metadata_path = archive_dir / ARCHIVE_METADATA_FILENAME
         metadata_checksum = file_sha256(metadata_path) if metadata_path.is_file() else ""
@@ -389,7 +391,10 @@ def load_provider_human_acceptance_evidence(
     return evidence, archive_set_warnings + comparison_warnings + policy_warnings
 
 
-def _receipt_id(payload: Mapping[str, object], created_at: datetime) -> str:
+def calculate_provider_human_acceptance_receipt_id(
+    payload: Mapping[str, object],
+    created_at: datetime,
+) -> str:
     digest = sha256(
         json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
     ).hexdigest()[:12]
@@ -501,7 +506,10 @@ def build_provider_human_acceptance_receipt(
             "checksum_sha256"
         ),
     }
-    receipt_id = _receipt_id(identity_payload, created_at)
+    receipt_id = calculate_provider_human_acceptance_receipt_id(
+        identity_payload,
+        created_at,
+    )
     return {
         "schema_version": 1,
         "receipt_id": receipt_id,

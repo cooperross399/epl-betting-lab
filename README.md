@@ -248,6 +248,23 @@ Import dashboard displays the latest receipt but cannot create one. A receipt
 documents review only; a separate allowlist PR is still required, and cron stays
 disabled.
 
+Before considering that separate PR, independently verify that the approved
+receipt still matches every file the reviewer saw:
+
+```bash
+python scripts/verify_provider_human_acceptance_receipt.py --provider odds_api
+```
+
+The verifier recalculates the checklist, reviewed shadow archive bundles and
+metadata, latest live archive set, matching comparison, and provider policy
+checksums. It also verifies the provider, reviewer, decision, timestamp,
+checklist verdict, evidence paths, approval gate, and receipt ID. Results are
+written to `provider_human_acceptance_receipt_verification.{json,md,csv}` and
+can be regenerated from the read-only Odds Import dashboard button. A checksum
+mismatch means the reviewed evidence changed; stop and create a new checklist
+and receipt after reviewing it again. Even `Verified for allowlist PR review`
+does not edit policy or enable cron.
+
 Next, review `data/manual/staging_provider_policy.json` and run the independent
 eligibility gate:
 

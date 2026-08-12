@@ -43,6 +43,7 @@ from epl_betting_lab.dashboard_actions import (
     run_installed_odds_profile_verification,
     run_post_thursday_review,
     run_provider_acceptance_checklist,
+    run_provider_human_acceptance_receipt_verification,
     run_provider_shadow_run_comparison,
     run_stale_current_odds_archive_preview,
     run_stale_current_odds_archive_confirmation_status,
@@ -827,11 +828,33 @@ def render_odds_import() -> None:
         "provider_human_acceptance_receipt.csv",
         receipt_command,
     )
+    verification_command = (
+        "python scripts/verify_provider_human_acceptance_receipt.py "
+        f"--provider {selected_shadow_provider}"
+    )
+    if st.button("Verify latest human acceptance receipt", width="stretch"):
+        run_dashboard_action(
+            "Human acceptance receipt verification",
+            lambda: run_provider_human_acceptance_receipt_verification(
+                selected_shadow_provider
+            ),
+        )
+    render_markdown_expander(
+        "Latest human acceptance receipt verification",
+        "provider_human_acceptance_receipt_verification.md",
+        verification_command,
+    )
+    render_table_expander(
+        "Human acceptance receipt verification checks",
+        "provider_human_acceptance_receipt_verification.csv",
+        verification_command,
+    )
     st.caption(
         "Provider and shadow-run commands remain Terminal-only so dashboard users "
         "cannot expose secrets, fetch live data, overwrite staging files, allowlist "
         "a provider, create an acceptance receipt, or enable cron. History "
-        "comparison, acceptance checks, and receipt display are report-only."
+        "comparison, acceptance checks, receipt display, and receipt verification "
+        "are report-only."
     )
     st.divider()
 

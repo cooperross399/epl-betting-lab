@@ -222,6 +222,20 @@ There is a clearly recorded Terminal-only override for exceptional documentation
 but using it still does not allowlist the provider. Any policy edit needs a
 separate reviewed PR, and cron remains disabled.
 
+Before opening that separate PR, verify that none of the reviewed files changed:
+
+```bash
+python scripts/verify_provider_human_acceptance_receipt.py --provider odds_api
+```
+
+Read `data/outputs/provider_human_acceptance_receipt_verification.md`, or click
+**Verify latest human acceptance receipt** under Odds Import. The checker reads
+the latest receipt by default and recalculates every bound evidence checksum. A
+checksum mismatch means the file no longer matches what the reviewer approved;
+regenerate the checklist and receipt after reviewing the current evidence. The
+best verdict, `Verified for allowlist PR review`, still only supports a later
+human-reviewed policy PR. It does not allowlist the provider or enable cron.
+
 Then validate the generated staging files:
 
 ```bash

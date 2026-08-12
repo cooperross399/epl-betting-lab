@@ -292,6 +292,37 @@ It has no create, approval, allowlist, promotion, or cron control. Even an
 `approved_for_allowlist_pr` receipt only says a separate human-reviewed policy PR
 may be considered; it does not edit `staging_provider_policy.json`.
 
+## Verify a human acceptance receipt
+
+Run an independent read-only verification before considering an allowlist PR:
+
+```bash
+python scripts/verify_provider_human_acceptance_receipt.py --provider odds_api
+```
+
+Use `--receipt-path PATH` to verify a specific archived receipt. The verifier
+recalculates the SHA-256 checksum for the acceptance checklist, each reviewed
+shadow archive bundle and its metadata, the matching shadow comparison when
+bound, and the provider policy when bound. It also confirms that the recorded
+latest live archive set is still current and checks the provider, reviewer,
+decision, timestamp, checklist verdict, approval gate, evidence paths, and
+receipt ID.
+
+Outputs are:
+
+```text
+data/outputs/provider_human_acceptance_receipt_verification.json
+data/outputs/provider_human_acceptance_receipt_verification.md
+data/outputs/provider_human_acceptance_receipt_verification.csv
+```
+
+The Odds Import dashboard has a **Verify latest human acceptance receipt**
+button that only regenerates these reports. `Checksum mismatch` or `Stale
+evidence` means the reviewer-approved evidence changed, so stop and create a
+new checklist and receipt after another human review. Even a `Verified for
+allowlist PR review` verdict does not edit policy, allowlist a provider, promote
+staging, run a live provider, or enable cron. Those remain separate decisions.
+
 If you prepare staging files without the adapter, start from the older staging
 templates and complete `staging_provenance_template.json` manually. Never put
 credentials in provenance. Supported provider types are `manual_upload`,

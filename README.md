@@ -317,6 +317,26 @@ changed or missing evidence cannot quietly retain the same identity. Use the
 same report-only action. Even `Evidence bundle ready for PR review` does not
 edit policy, allowlist a provider, or enable cron.
 
+Immediately before approving the separate provider-policy PR, re-hash the
+latest archived bundle and every file it binds:
+
+```bash
+python scripts/verify_provider_allowlist_evidence_bundle.py --provider odds_api
+```
+
+The verifier selects the latest archived bundle for that provider by default;
+use `--bundle-path PATH` to inspect a specific repository-local bundle. It
+recalculates every evidence checksum, the deterministic bundle checksum/ID,
+the provider-policy checksum, and the recorded preview, receipt-verification,
+and conformance verdicts. Results are written to
+`provider_allowlist_evidence_bundle_verification.{json,md,csv}` and are also
+available from **Verify provider allowlist evidence bundle** under Odds Import.
+`Evidence bundle verified for PR approval review` means the reviewed bytes are
+unchanged. A missing file, checksum mismatch, or bundle-ID mismatch means stop
+and rebuild/review the evidence. This read-only command is suitable for a
+future PR-only CI check, but it does not edit policy, allowlist the provider, or
+enable cron.
+
 Next, review `data/manual/staging_provider_policy.json` and run the independent
 eligibility gate:
 

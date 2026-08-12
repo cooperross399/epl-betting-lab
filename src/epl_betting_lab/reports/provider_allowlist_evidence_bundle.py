@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections import Counter
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from copy import deepcopy
 from datetime import datetime
 from hashlib import sha256
@@ -516,19 +516,20 @@ def _collect_reviewed_archives(
     return normalized_paths, relationship_issues
 
 
-def _bundle_manifest(
+def calculate_provider_allowlist_evidence_bundle_identity(
     provider_key: str,
-    rows: list[dict[str, object]],
-) -> tuple[list[dict[str, str]], str, str]:
+    evidence_manifest: Sequence[Mapping[str, object]],
+) -> tuple[str, str]:
+    """Return the canonical checksum and ID for a provider evidence manifest."""
     entries = {
         (
-            _clean(row.get("evidence_path")),
-            _clean(row.get("current_checksum_sha256")),
+            _clean(item.get("path")),
+            _clean(item.get("checksum_sha256")).casefold(),
         )
-        for row in rows
-        if _clean(row.get("evidence_path"))
+        for item in evidence_manifest
+        if _clean(item.get("path"))
         and SHA256_PATTERN.fullmatch(
-            _clean(row.get("current_checksum_sha256")).casefold()
+            _clean(item.get("checksum_sha256")).casefold()
         )
     }
     manifest = [
@@ -547,6 +548,32 @@ def _bundle_manifest(
         ).encode("utf-8")
     ).hexdigest()
     bundle_id = f"{_slug(provider_key)}-allowlist-evidence-{digest[:16]}"
+    return digest, bundle_id
+
+
+def _bundle_manifest(
+    provider_key: str,
+    rows: list[dict[str, object]],
+) -> tuple[list[dict[str, str]], str, str]:
+    entries = {
+        (
+            _clean(row.get("evidence_path")),
+            _clean(row.get("current_checksum_sha256")).casefold(),
+        )
+        for row in rows
+        if _clean(row.get("evidence_path"))
+        and SHA256_PATTERN.fullmatch(
+            _clean(row.get("current_checksum_sha256")).casefold()
+        )
+    }
+    manifest = [
+        {"path": path, "checksum_sha256": checksum}
+        for path, checksum in sorted(entries)
+    ]
+    digest, bundle_id = calculate_provider_allowlist_evidence_bundle_identity(
+        provider_key,
+        manifest,
+    )
     return manifest, digest, bundle_id
 
 

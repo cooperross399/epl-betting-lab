@@ -6,10 +6,19 @@ from pathlib import Path
 
 from epl_betting_lab.providers.base import file_sha256
 from epl_betting_lab.reports.provider_allowlist_evidence_bundle import (
+    BUNDLE_JSON_FILENAME,
     BUNDLE_VERDICTS,
     EVIDENCE_STATUSES,
     build_provider_allowlist_evidence_bundle,
+    calculate_provider_allowlist_evidence_bundle_identity,
     save_provider_allowlist_evidence_bundle,
+)
+from epl_betting_lab.reports.provider_allowlist_evidence_bundle_verification import (
+    VERIFICATION_STATUSES,
+    VERIFICATION_VERDICTS,
+    VERIFIED_VERDICT,
+    build_provider_allowlist_evidence_bundle_verification,
+    save_provider_allowlist_evidence_bundle_verification,
 )
 from epl_betting_lab.reports.provider_allowlist_pr_preview import READY_STATUS
 from epl_betting_lab.reports.provider_allowlist_pr_conformance import (
@@ -491,3 +500,275 @@ def test_save_writes_latest_and_dated_archived_bundle(tmp_path: Path) -> None:
     markdown = result["markdown"].read_text(encoding="utf-8")
     assert "Nothing was applied" in markdown
     assert "Allowlist The Odds API staging provider" in markdown
+
+
+def _save_ready_bundle(root: Path, fixture: dict[str, object]) -> dict[str, object]:
+    return save_provider_allowlist_evidence_bundle(
+        "odds_api",
+        fixture["outputs"],
+        policy_path=fixture["policy"],
+        repository_root=root,
+        run_at=RUN_AT,
+    )
+
+
+def _verify_bundle(
+    root: Path,
+    fixture: dict[str, object],
+    *,
+    bundle_path: Path | None = None,
+):
+    return build_provider_allowlist_evidence_bundle_verification(
+        "odds_api",
+        fixture["outputs"],
+        bundle_path=bundle_path,
+        repository_root=root,
+        run_at=RUN_AT,
+    )
+
+
+def test_bundle_verification_statuses_and_verdicts_are_explicit() -> None:
+    assert VERIFICATION_STATUSES == (
+        "Verified",
+        "Missing evidence",
+        "Checksum mismatch",
+        "Bundle ID mismatch",
+        "Malformed bundle",
+        "Not ready",
+        "Not applicable",
+    )
+    assert VERIFICATION_VERDICTS == (
+        "Evidence bundle verified for PR approval review",
+        "Missing required evidence",
+        "Evidence changed",
+        "Bundle mismatch",
+        "Malformed bundle",
+        "Not ready for PR approval review",
+    )
+
+
+def test_latest_archived_ready_bundle_verifies(tmp_path: Path) -> None:
+    fixture = _prepare_ready_evidence(tmp_path)
+    saved = _save_ready_bundle(tmp_path, fixture)
+
+    checks, summary = _verify_bundle(tmp_path, fixture)
+
+    assert summary["verdict"] == VERIFIED_VERDICT
+    assert summary["bundle_source"] == "Latest archived provider bundle"
+    assert summary["bundle_path"] == _repository_path(
+        tmp_path,
+        saved["archive_paths"]["provider_allowlist_evidence_bundle.json"],
+    )
+    assert summary["bundle_id"] == summary["current_evidence_bundle_id"]
+    assert summary["bundle_checksum_sha256"] == (
+        summary["current_evidence_bundle_checksum_sha256"]
+    )
+    assert set(checks["status"]) <= {"Verified", "Not applicable"}
+    policy = checks.loc[checks["check"] == "Provider policy checksum"].iloc[0]
+    assert policy["status"] == "Verified"
+
+
+def test_bundle_verification_detects_changed_evidence(tmp_path: Path) -> None:
+    fixture = _prepare_ready_evidence(tmp_path)
+    _save_ready_bundle(tmp_path, fixture)
+    checklist = json.loads(fixture["checklist"].read_text(encoding="utf-8"))
+    checklist["changed_after_bundle"] = True
+    _write_json(fixture["checklist"], checklist)
+
+    checks, summary = _verify_bundle(tmp_path, fixture)
+
+    assert summary["verdict"] == "Evidence changed"
+    changed = checks.loc[
+        checks["evidence_path"] == _repository_path(
+            tmp_path,
+            fixture["checklist"],
+        )
+    ].iloc[0]
+    assert changed["status"] == "Checksum mismatch"
+
+
+def test_bundle_verification_detects_missing_required_evidence(
+    tmp_path: Path,
+) -> None:
+    fixture = _prepare_ready_evidence(tmp_path)
+    _save_ready_bundle(tmp_path, fixture)
+    fixture["comparison"].unlink()
+
+    checks, summary = _verify_bundle(tmp_path, fixture)
+
+    assert summary["verdict"] == "Missing required evidence"
+    missing = checks.loc[
+        checks["evidence_path"] == _repository_path(
+            tmp_path,
+            fixture["comparison"],
+        )
+    ].iloc[0]
+    assert missing["status"] == "Missing evidence"
+
+
+def test_bundle_verification_detects_internal_bundle_id_tampering(
+    tmp_path: Path,
+) -> None:
+    fixture = _prepare_ready_evidence(tmp_path)
+    saved = _save_ready_bundle(tmp_path, fixture)
+    bundle_path = saved["archive_paths"]["provider_allowlist_evidence_bundle.json"]
+    bundle = json.loads(bundle_path.read_text(encoding="utf-8"))
+    bundle["bundle_id"] = "odds-api-allowlist-evidence-tampered"
+    _write_json(bundle_path, bundle)
+
+    checks, summary = _verify_bundle(
+        tmp_path,
+        fixture,
+        bundle_path=bundle_path,
+    )
+
+    assert summary["verdict"] == "Bundle mismatch"
+    identity = checks.loc[
+        checks["check"] == "Recorded manifest identity"
+    ].iloc[0]
+    assert identity["status"] == "Bundle ID mismatch"
+
+
+def test_bundle_verification_rejects_omitted_required_evidence_category(
+    tmp_path: Path,
+) -> None:
+    fixture = _prepare_ready_evidence(tmp_path)
+    saved = _save_ready_bundle(tmp_path, fixture)
+    bundle_path = saved["archive_paths"]["provider_allowlist_evidence_bundle.json"]
+    bundle = json.loads(bundle_path.read_text(encoding="utf-8"))
+    omitted_paths = {
+        row["evidence_path"]
+        for row in bundle["evidence"]
+        if row["evidence_type"] == "provider_acceptance_checklist"
+    }
+    bundle["evidence"] = [
+        row
+        for row in bundle["evidence"]
+        if row["evidence_type"] != "provider_acceptance_checklist"
+    ]
+    bundle["evidence_manifest"] = [
+        row
+        for row in bundle["evidence_manifest"]
+        if row["path"] not in omitted_paths
+    ]
+    bundle["evidence_file_count"] = len(bundle["evidence_manifest"])
+    checksum, bundle_id = calculate_provider_allowlist_evidence_bundle_identity(
+        "odds_api",
+        bundle["evidence_manifest"],
+    )
+    bundle["bundle_checksum_sha256"] = checksum
+    bundle["bundle_id"] = bundle_id
+    _write_json(bundle_path, bundle)
+
+    checks, summary = _verify_bundle(
+        tmp_path,
+        fixture,
+        bundle_path=bundle_path,
+    )
+
+    assert summary["verdict"] == "Missing required evidence"
+    missing = checks.loc[
+        (checks["check"] == "Required evidence category")
+        & (checks["evidence_type"] == "provider_acceptance_checklist")
+    ].iloc[0]
+    assert missing["status"] == "Missing evidence"
+
+
+def test_bundle_verification_rejects_malformed_bundle(tmp_path: Path) -> None:
+    fixture = _prepare_ready_evidence(tmp_path)
+    bundle_path = fixture["outputs"] / "malformed_bundle.json"
+    bundle_path.write_text("{not-json", encoding="utf-8")
+
+    checks, summary = _verify_bundle(
+        tmp_path,
+        fixture,
+        bundle_path=bundle_path,
+    )
+
+    assert summary["verdict"] == "Malformed bundle"
+    assert checks.iloc[0]["status"] == "Malformed bundle"
+
+
+def test_bundle_verification_does_not_read_outside_repository(
+    tmp_path: Path,
+) -> None:
+    fixture = _prepare_ready_evidence(tmp_path)
+    outside_path = tmp_path.parent / f"{tmp_path.name}_outside_bundle.json"
+    _write_json(outside_path, {"verdict": "Evidence bundle ready for PR review"})
+
+    checks, summary = _verify_bundle(
+        tmp_path,
+        fixture,
+        bundle_path=outside_path,
+    )
+
+    assert summary["verdict"] == "Malformed bundle"
+    assert checks.iloc[0]["check"] == "Bundle path safety"
+    assert checks.iloc[0]["status"] == "Malformed bundle"
+
+
+def test_default_latest_output_without_archive_is_not_approval_ready(
+    tmp_path: Path,
+) -> None:
+    fixture = _prepare_ready_evidence(tmp_path)
+    saved = _save_ready_bundle(tmp_path, fixture)
+    archived_bundle = json.loads(
+        saved["archive_paths"][BUNDLE_JSON_FILENAME].read_text(encoding="utf-8")
+    )
+    fallback_outputs = tmp_path / "data" / "fallback_outputs"
+    fallback_bundle = fallback_outputs / BUNDLE_JSON_FILENAME
+    _write_json(fallback_bundle, archived_bundle)
+
+    checks, summary = build_provider_allowlist_evidence_bundle_verification(
+        "odds_api",
+        fallback_outputs,
+        repository_root=tmp_path,
+        run_at=RUN_AT,
+    )
+
+    assert summary["verdict"] == "Not ready for PR approval review"
+    selection = checks.loc[
+        checks["check"] == "Archived bundle selection"
+    ].iloc[0]
+    assert selection["status"] == "Not ready"
+
+
+def test_bundle_verification_rejects_non_ready_original_bundle(
+    tmp_path: Path,
+) -> None:
+    fixture = _prepare_ready_evidence(tmp_path)
+    saved = _save_ready_bundle(tmp_path, fixture)
+    bundle_path = saved["archive_paths"]["provider_allowlist_evidence_bundle.json"]
+    bundle = json.loads(bundle_path.read_text(encoding="utf-8"))
+    bundle["verdict"] = "Not ready for PR review"
+    _write_json(bundle_path, bundle)
+
+    checks, summary = _verify_bundle(
+        tmp_path,
+        fixture,
+        bundle_path=bundle_path,
+    )
+
+    assert summary["verdict"] == "Not ready for PR approval review"
+    original = checks.loc[checks["check"] == "Original bundle verdict"].iloc[0]
+    assert original["status"] == "Not ready"
+
+
+def test_save_bundle_verification_writes_read_only_reports(tmp_path: Path) -> None:
+    fixture = _prepare_ready_evidence(tmp_path)
+    _save_ready_bundle(tmp_path, fixture)
+
+    result = save_provider_allowlist_evidence_bundle_verification(
+        "odds_api",
+        fixture["outputs"],
+        repository_root=tmp_path,
+        run_at=RUN_AT,
+    )
+
+    assert result["verdict"] == VERIFIED_VERDICT
+    assert result["json"].is_file()
+    assert result["markdown"].is_file()
+    assert result["csv"].is_file()
+    markdown = result["markdown"].read_text(encoding="utf-8")
+    assert "Nothing was applied" in markdown
+    assert "Evidence bundle verified for PR approval review" in markdown

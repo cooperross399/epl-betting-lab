@@ -63,6 +63,9 @@ from epl_betting_lab.reports.provider_allowlist_pr_conformance import (
 from epl_betting_lab.reports.provider_allowlist_evidence_bundle import (
     save_provider_allowlist_evidence_bundle,
 )
+from epl_betting_lab.reports.provider_allowlist_evidence_bundle_verification import (
+    save_provider_allowlist_evidence_bundle_verification,
+)
 from epl_betting_lab.reports.provider_allowlist_pr_preview import (
     save_provider_allowlist_pr_preview,
 )
@@ -533,6 +536,18 @@ def run_provider_allowlist_evidence_bundle(
         provider_name,
         output_dir or OUTPUTS_DIR,
         policy_path=policy_path,
+    )
+
+
+def run_provider_allowlist_evidence_bundle_verification(
+    provider_name: str = "odds_api",
+    output_dir: Path | None = None,
+    bundle_path: Path | None = None,
+) -> dict[str, object]:
+    return save_provider_allowlist_evidence_bundle_verification(
+        provider_name,
+        output_dir or OUTPUTS_DIR,
+        bundle_path=bundle_path,
     )
 
 

@@ -27,6 +27,7 @@ from epl_betting_lab.dashboard_actions import (
     run_installed_odds_profile_verification,
     run_post_thursday_review,
     run_provider_acceptance_checklist,
+    run_provider_allowlist_pr_conformance,
     run_provider_allowlist_pr_preview,
     run_provider_human_acceptance_receipt_verification,
     run_provider_shadow_run_comparison,
@@ -1214,4 +1215,39 @@ def test_provider_allowlist_preview_dashboard_action_is_report_only(
         "odds_api",
         output_dir,
         verification_path,
+    ) == expected
+
+
+def test_provider_allowlist_conformance_dashboard_action_is_report_only(
+    tmp_path, monkeypatch
+) -> None:
+    output_dir = tmp_path / "outputs"
+    preview_path = output_dir / "selected_preview.json"
+    policy_path = tmp_path / "policy.json"
+    expected = {"verdict": "Conforms to preview"}
+
+    def fake_save(
+        provider_name,
+        selected_output_dir,
+        *,
+        preview_path=None,
+        policy_path=None,
+    ):
+        assert provider_name == "odds_api"
+        assert selected_output_dir == output_dir
+        assert preview_path == output_dir / "selected_preview.json"
+        assert policy_path == tmp_path / "policy.json"
+        return expected
+
+    monkeypatch.setattr(
+        dashboard_actions,
+        "save_provider_allowlist_pr_conformance",
+        fake_save,
+    )
+
+    assert run_provider_allowlist_pr_conformance(
+        "odds_api",
+        output_dir,
+        preview_path,
+        policy_path,
     ) == expected

@@ -250,6 +250,21 @@ verification, or policy evidence needs attention. The preview cannot edit the
 policy or allowlist anything. A person must still open and review a separate
 policy PR, and cron remains disabled.
 
+After the separate policy PR changes `staging_provider_policy.json`, compare it
+with the reviewed preview:
+
+```bash
+python scripts/check_provider_allowlist_pr_conformance.py --provider odds_api
+```
+
+You can also click **Check provider allowlist PR conformance** under Odds Import.
+Read `data/outputs/provider_allowlist_pr_conformance.md`. `Conforms to preview`
+means the full policy matches the previewed result exactly. Missing fields,
+changed values, extra provider-policy edits, changed verification evidence, or
+new cron/automation settings fail closed. Extra policy edits are risky because
+they were not covered by the human-reviewed preview. This check only reviews
+files; it does not edit policy, allowlist the provider, or enable cron.
+
 Then validate the generated staging files:
 
 ```bash

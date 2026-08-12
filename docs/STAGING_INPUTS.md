@@ -355,6 +355,39 @@ provider, promote staging, or enable cron. A separate human-reviewed policy PR
 is always required after a Ready preview. Cron still requires another later
 decision.
 
+## Check an allowlist PR against its preview
+
+After a separate policy PR applies the proposed JSON change, run:
+
+```bash
+python scripts/check_provider_allowlist_pr_conformance.py --provider odds_api
+```
+
+Optional `--preview-path PATH` and `--policy-path PATH` arguments let a reviewer
+select repository-local JSON files explicitly. The checker requires a Ready
+allowlist preview, verifies its provider identity, and recalculates the SHA-256
+of the receipt-verification report bound by that preview. It then compares the
+entire policy with the previewed after-policy, including every provider field,
+allowed-provider lists, run-age limit, cutoff, required markets, limitations,
+receipt ID, reviewer, timestamps, and verification checksum.
+
+Outputs are:
+
+```text
+data/outputs/provider_allowlist_pr_conformance.json
+data/outputs/provider_allowlist_pr_conformance.md
+data/outputs/provider_allowlist_pr_conformance.csv
+```
+
+`Missing field`, `Value mismatch`, and `Unexpected policy edit` identify policy
+differences. `Preview not verified` and `Missing preview` identify evidence
+problems. `Malformed policy` blocks comparison, and `Unsafe automation change`
+flags a newly enabled cron, schedule, or automation setting. Extra policy edits
+are rejected because they were not part of the reviewed preview. The Odds Import
+dashboard button runs this read-only report only. Even `Conforms to preview`
+does not allowlist through the dashboard or enable cron; merge approval and any
+future scheduling decision remain separate human steps.
+
 If you prepare staging files without the adapter, start from the older staging
 templates and complete `staging_provenance_template.json` manually. Never put
 credentials in provenance. Supported provider types are `manual_upload`,

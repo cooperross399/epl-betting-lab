@@ -27,6 +27,7 @@ from epl_betting_lab.dashboard_actions import (
     run_installed_odds_profile_verification,
     run_post_thursday_review,
     run_provider_acceptance_checklist,
+    run_provider_allowlist_pr_preview,
     run_provider_human_acceptance_receipt_verification,
     run_provider_shadow_run_comparison,
     run_settlement_preview,
@@ -1187,4 +1188,30 @@ def test_provider_human_acceptance_verification_dashboard_action_is_report_only(
         "odds_api",
         output_dir,
         receipt_path,
+    ) == expected
+
+
+def test_provider_allowlist_preview_dashboard_action_is_report_only(
+    tmp_path, monkeypatch
+) -> None:
+    output_dir = tmp_path / "outputs"
+    verification_path = output_dir / "selected_verification.json"
+    expected = {"status": "Ready for separate allowlist PR"}
+
+    def fake_save(provider_name, selected_output_dir, *, verification_path=None):
+        assert provider_name == "odds_api"
+        assert selected_output_dir == output_dir
+        assert verification_path == output_dir / "selected_verification.json"
+        return expected
+
+    monkeypatch.setattr(
+        dashboard_actions,
+        "save_provider_allowlist_pr_preview",
+        fake_save,
+    )
+
+    assert run_provider_allowlist_pr_preview(
+        "odds_api",
+        output_dir,
+        verification_path,
     ) == expected

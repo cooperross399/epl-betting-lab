@@ -323,6 +323,38 @@ new checklist and receipt after another human review. Even a `Verified for
 allowlist PR review` verdict does not edit policy, allowlist a provider, promote
 staging, run a live provider, or enable cron. Those remain separate decisions.
 
+## Preview an allowlist policy PR
+
+Only after receipt verification returns `Verified for allowlist PR review`, run:
+
+```bash
+python scripts/preview_provider_allowlist_pr.py --provider odds_api
+```
+
+Use `--verification-path PATH` to select a specific verification JSON. The
+preview fails closed unless that report is fully verified and still matches its
+human receipt and the current provider policy. It writes:
+
+```text
+data/outputs/provider_allowlist_pr_preview.json
+data/outputs/provider_allowlist_pr_preview.md
+data/outputs/provider_allowlist_pr_preview.csv
+```
+
+The Markdown report contains the exact proposed provider fields, current policy,
+proposed policy, unified diff, evidence receipt ID, verification checksum,
+reviewer and timestamps, blockers, and suggested PR title/description. For the
+current Odds API adapter, the proposal requires 1X2 and 2.5 totals and records
+that BTTS is not requested or fabricated. Existing freshness, completeness,
+checksum, receipt, and cutoff gates remain mandatory.
+
+The Odds Import dashboard's **Preview provider allowlist PR** button performs
+the same read-only report generation. It does not rerun verification as a side
+effect, edit `staging_provider_policy.json`, allowlist a provider, run a
+provider, promote staging, or enable cron. A separate human-reviewed policy PR
+is always required after a Ready preview. Cron still requires another later
+decision.
+
 If you prepare staging files without the adapter, start from the older staging
 templates and complete `staging_provenance_template.json` manually. Never put
 credentials in provenance. Supported provider types are `manual_upload`,

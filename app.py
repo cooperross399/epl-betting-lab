@@ -945,6 +945,46 @@ def render_odds_import() -> None:
             "Provider policy PR gate",
             lambda: run_provider_policy_pr_gate(selected_shadow_provider),
         )
+    policy_gate_status_path = OUTPUTS_DIR / "provider_policy_pr_gate.json"
+    if policy_gate_status_path.exists():
+        try:
+            policy_gate_status = json.loads(
+                policy_gate_status_path.read_text(encoding="utf-8")
+            )
+        except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+            st.warning(f"The provider policy gate receipt could not be read: {exc}")
+        else:
+            st.caption("Latest provider policy gate receipt")
+            receipt_columns = st.columns(4)
+            receipt_columns[0].metric(
+                "Receipt binding",
+                str(policy_gate_status.get("receipt_binding_status", "Not checked")),
+            )
+            receipt_columns[1].metric(
+                "Base SHA",
+                str(policy_gate_status.get("base_sha", ""))[:12] or "Missing",
+            )
+            receipt_columns[2].metric(
+                "Head SHA",
+                str(policy_gate_status.get("head_sha", ""))[:12] or "Missing",
+            )
+            receipt_columns[3].metric(
+                "Changed files",
+                str(policy_gate_status.get("changed_files_digest", ""))[:12]
+                or "Missing",
+            )
+            st.code(
+                "Gate receipt ID: "
+                f"{policy_gate_status.get('gate_receipt_id') or 'Not issued'}\n"
+                "Changed-files SHA-256: "
+                f"{policy_gate_status.get('changed_files_digest') or 'Missing'}",
+                language=None,
+            )
+    else:
+        st.info(
+            "No provider policy gate receipt is available yet. Run the report-only "
+            "check above or review the PR Action summary."
+        )
     render_markdown_expander(
         "Provider policy PR gate",
         "provider_policy_pr_gate.md",

@@ -65,7 +65,20 @@ def main() -> int:
     print(f"Provider: {summary['provider_name']} ({summary['provider_key']})")
     print(f"Policy changed: {'yes' if summary['policy_changed'] else 'no'}")
     print(f"Detection: {detection['source']}")
+    print(f"Gate mode: {summary.get('gate_mode') or 'Unknown'}")
+    print(f"Base SHA: {summary.get('base_sha') or 'Missing'}")
+    print(f"Head SHA: {summary.get('head_sha') or 'Missing'}")
     print(f"Verdict: {summary['verdict']}")
+    print(
+        "Receipt binding: "
+        f"{summary.get('receipt_binding_status') or 'Unknown'}"
+    )
+    print(f"Gate receipt ID: {summary.get('gate_receipt_id') or 'Not issued'}")
+    print(
+        "Changed-files digest: "
+        f"{summary.get('changed_files_digest') or 'Missing'}"
+    )
+    print(f"Evidence digest: {summary.get('evidence_digest') or 'Missing'}")
     if summary["blockers"]:
         print("Blocking issues:")
         for blocker in summary["blockers"]:

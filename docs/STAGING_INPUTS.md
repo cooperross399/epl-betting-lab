@@ -513,13 +513,43 @@ conformance report`, `Conformance failed`, `Receipt verification failed`,
 PR gate passed`, `Provider policy PR gate not applicable`, `Provider policy PR
 gate blocked`, and `Provider policy PR gate failed`.
 
+### Provider-policy gate receipt
+
+A policy-changing gate can pass only when `receipt_binding_status` is `Bound`.
+The gate resolves and records the exact base, head, and merge-base commit SHAs,
+then hashes the head/worktree version of every normalized changed path. It also
+records the provider policy checksum before and after the proposed change and
+the SHA-256 checksums of the bundle-verification, conformance, preview, and
+human-receipt-verification reports used by the gate.
+
+Canonical sorted records produce three supporting digests:
+
+- `changed_files_digest` binds changed paths to their content hashes.
+- `evidence_digest` binds the required evidence-report paths and hashes.
+- `policy_change_digest` binds the policy path and before/after hashes.
+
+The deterministic `gate_receipt_id` then binds the provider, base/head SHAs,
+changed-file records, current policy checksum, evidence records, and final gate
+verdict. The generation timestamp is deliberately not part of the identity, so
+an unchanged rerun has the same ID. The ID changes when a compared SHA, changed
+path, file contents, policy contents, evidence report, or final verdict changes.
+
+Receipt-binding statuses are `Bound`, `Missing Git context`, `Missing
+changed-file digest`, `Missing evidence digest`, `Digest mismatch`, and `Not
+applicable`. Missing Git context or digest material blocks a policy-changing
+gate. A no-policy-change run remains safely `Not applicable` and does not claim
+that allowlist evidence was approved.
+
 `.github/workflows/provider-policy-pr-gate.yml` is pull-request-only and uses
-read-only repository permissions. It needs no secrets, never runs live
-providers, and uploads the gate reports even when blocked. The Odds Import
-dashboard displays the latest report and can run the same report-only local
-check. Passing proves evidence/conformance for review; only merging the separate
-human-reviewed policy PR changes allowlisting. Cron remains disabled until a
-different explicit review enables it.
+read-only repository permissions. It checks out the exact PR head SHA, passes
+the base/head SHAs to the gate, appends the receipt-bearing Markdown to the job
+summary, and uploads the reports even when blocked. It needs no secrets and
+never runs live providers. The Odds Import dashboard displays the latest
+receipt ID, base/head SHAs, changed-files digest, and binding status alongside
+the existing report and can run the same report-only local check. Passing
+proves evidence/conformance for review; only merging the separate human-reviewed
+policy PR changes allowlisting. Cron remains disabled until a different
+explicit review enables it.
 
 If you prepare staging files without the adapter, start from the older staging
 templates and complete `staging_provenance_template.json` manually. Never put

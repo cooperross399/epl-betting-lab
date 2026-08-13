@@ -319,6 +319,18 @@ Odds Import only regenerates this local report. Neither the button nor Action
 edits policy, uses secrets, runs a provider, allowlists anything, or enables
 cron.
 
+For a real policy change, look for receipt binding **Bound** and a Gate receipt
+ID in the report or Action summary. That ID is a fingerprint of the exact PR
+base/head commits, changed files and contents, before/after policy, evidence
+reports, and final verdict. The generation time is not included, so an
+unchanged rerun keeps the same ID. A different file, policy, evidence report,
+or compared commit changes the ID. **Missing Git context**, **Missing
+changed-file digest**, **Missing evidence digest**, or **Digest mismatch**
+blocks a policy-changing PR. The Odds Import page shows the latest ID,
+base/head SHAs, changed-files digest, and binding status without changing any
+file. This proves what was checked; it still does not apply the policy,
+allowlist a provider, or enable cron.
+
 Then validate the generated staging files:
 
 ```bash

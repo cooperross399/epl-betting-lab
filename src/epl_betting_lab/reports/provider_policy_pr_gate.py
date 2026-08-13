@@ -4,6 +4,7 @@ from collections import Counter
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from datetime import datetime
+from hashlib import sha256
 import json
 import os
 from pathlib import Path
@@ -13,7 +14,11 @@ import subprocess
 import pandas as pd
 
 from epl_betting_lab.config import OUTPUTS_DIR, PROJECT_ROOT
-from epl_betting_lab.providers.base import atomic_write_report, path_contains_symlink
+from epl_betting_lab.providers.base import (
+    atomic_write_report,
+    file_sha256,
+    path_contains_symlink,
+)
 from epl_betting_lab.providers.provider_registry import create_provider
 from epl_betting_lab.reports.provider_allowlist_evidence_bundle_verification import (
     VERIFICATION_JSON_FILENAME as BUNDLE_VERIFICATION_JSON_FILENAME,
@@ -50,6 +55,11 @@ CONFORMANCE_FAILED_STATUS = "Conformance failed"
 RECEIPT_FAILED_STATUS = "Receipt verification failed"
 UNSAFE_AUTOMATION_STATUS_GATE = "Unsafe automation change"
 FAILED_STATUS = "Failed"
+BOUND_STATUS = "Bound"
+MISSING_GIT_CONTEXT_STATUS = "Missing Git context"
+MISSING_CHANGED_FILE_DIGEST_STATUS = "Missing changed-file digest"
+MISSING_EVIDENCE_DIGEST_STATUS = "Missing evidence digest"
+DIGEST_MISMATCH_STATUS = "Digest mismatch"
 
 GATE_STATUSES = (
     PASSED_STATUS,
@@ -60,6 +70,20 @@ GATE_STATUSES = (
     RECEIPT_FAILED_STATUS,
     UNSAFE_AUTOMATION_STATUS_GATE,
     FAILED_STATUS,
+    BOUND_STATUS,
+    MISSING_GIT_CONTEXT_STATUS,
+    MISSING_CHANGED_FILE_DIGEST_STATUS,
+    MISSING_EVIDENCE_DIGEST_STATUS,
+    DIGEST_MISMATCH_STATUS,
+)
+
+RECEIPT_BINDING_STATUSES = (
+    BOUND_STATUS,
+    MISSING_GIT_CONTEXT_STATUS,
+    MISSING_CHANGED_FILE_DIGEST_STATUS,
+    MISSING_EVIDENCE_DIGEST_STATUS,
+    DIGEST_MISMATCH_STATUS,
+    NOT_APPLICABLE_STATUS,
 )
 
 PASSED_VERDICT = "Provider policy PR gate passed"
@@ -81,9 +105,18 @@ GATE_COLUMNS = (
     "observed",
     "status",
     "details",
+    "gate_receipt_id",
+    "base_sha",
+    "head_sha",
+    "changed_files_digest",
+    "evidence_digest",
+    "policy_change_digest",
+    "receipt_binding_status",
 )
 
 _SAFE_GIT_REF = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._/@:+~^{}-]*$")
+_SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
+_GIT_COMMIT_PATTERN = re.compile(r"^(?:[0-9a-f]{40}|[0-9a-f]{64})$")
 
 
 @dataclass(frozen=True)
@@ -93,6 +126,10 @@ class PolicyChangeDetection:
     source: str
     base_ref: str = ""
     head_ref: str = ""
+    base_sha: str = ""
+    head_sha: str = ""
+    merge_base_sha: str = ""
+    gate_mode: str = ""
     error: str = ""
 
 
@@ -164,6 +201,25 @@ def _git_command(
     return completed.stdout, ""
 
 
+def _git_binary_command(
+    repository_root: Path,
+    args: Sequence[str],
+) -> tuple[bytes, str]:
+    try:
+        completed = subprocess.run(
+            ["git", *args],
+            cwd=repository_root,
+            check=False,
+            capture_output=True,
+        )
+    except OSError as exc:
+        return b"", f"Git could not run: {exc}"
+    if completed.returncode != 0:
+        detail = completed.stderr.decode("utf-8", errors="replace").strip()
+        return b"", f"Git command failed: {detail or 'unknown error'}"
+    return completed.stdout, ""
+
+
 def _git_ref_exists(repository_root: Path, reference: str) -> bool:
     if not _valid_git_ref(reference):
         return False
@@ -172,6 +228,66 @@ def _git_ref_exists(repository_root: Path, reference: str) -> bool:
         ["rev-parse", "--verify", "--quiet", f"{reference}^{{commit}}"],
     )
     return not error
+
+
+def _resolve_git_commit(repository_root: Path, reference: str) -> tuple[str, str]:
+    if not _valid_git_ref(reference):
+        return "", f"Unsafe or malformed Git ref: `{reference or 'blank'}`."
+    output, error = _git_command(
+        repository_root,
+        ["rev-parse", "--verify", f"{reference}^{{commit}}"],
+    )
+    return (_clean(output.splitlines()[0]) if output else ""), error
+
+
+def _resolve_git_comparison(
+    repository_root: Path,
+    *,
+    base_ref: str,
+    head_ref: str,
+) -> tuple[str, str, str, str]:
+    base_sha, base_error = _resolve_git_commit(repository_root, base_ref)
+    head_sha, head_error = _resolve_git_commit(repository_root, head_ref)
+    if base_error or head_error:
+        return base_sha, head_sha, "", base_error or head_error
+    merge_base, merge_error = _git_command(
+        repository_root,
+        ["merge-base", base_sha, head_sha],
+    )
+    return base_sha, head_sha, _clean(merge_base), merge_error
+
+
+def _working_tree_changed_files(repository_root: Path) -> tuple[set[str], str]:
+    output, error = _git_command(
+        repository_root,
+        ["diff", "--no-renames", "--name-only", "HEAD", "--"],
+    )
+    if error:
+        return set(), error
+    return {
+        normalized
+        for line in output.splitlines()
+        if (normalized := _normalize_changed_file(line))
+    }, ""
+
+
+def _is_ci_pull_request(environment: Mapping[str, str]) -> bool:
+    return (
+        _clean(environment.get("GITHUB_ACTIONS")).casefold() == "true"
+        and _clean(environment.get("GITHUB_EVENT_NAME")).casefold().startswith(
+            "pull_request"
+        )
+    )
+
+
+def _gate_mode(
+    environment: Mapping[str, str],
+    *,
+    working_tree_changed: bool,
+) -> str:
+    if _is_ci_pull_request(environment):
+        return "ci_pr"
+    return "local_worktree" if working_tree_changed else "local_git"
 
 
 def _git_changed_files(
@@ -212,6 +328,11 @@ def detect_provider_policy_change(
 ) -> PolicyChangeDetection:
     root = (repository_root or PROJECT_ROOT).resolve()
     expected = _normalize_changed_file(policy_relative_path)
+    env = environment if environment is not None else os.environ
+    selected_base = _clean(base_ref or env.get("PROVIDER_POLICY_BASE_REF"))
+    selected_head = _clean(
+        head_ref or env.get("PROVIDER_POLICY_HEAD_REF") or "HEAD"
+    )
     if changed_files is not None:
         normalized = tuple(
             sorted(
@@ -222,25 +343,51 @@ def detect_provider_policy_change(
                 }
             )
         )
+        working, working_error = _working_tree_changed_files(root)
+        base_sha = ""
+        head_sha = ""
+        merge_base_sha = ""
+        comparison_error = ""
+        if selected_base:
+            base_sha, head_sha, merge_base_sha, comparison_error = (
+                _resolve_git_comparison(
+                    root,
+                    base_ref=selected_base,
+                    head_ref=selected_head,
+                )
+            )
+        elif head_ref:
+            comparison_error = "A head ref was supplied without a base ref."
         return PolicyChangeDetection(
             policy_changed=expected in normalized,
             changed_files=normalized,
             source="Provided changed-file list",
-            base_ref=_clean(base_ref),
-            head_ref=_clean(head_ref),
+            base_ref=selected_base,
+            head_ref=selected_head if selected_base or head_ref else "",
+            base_sha=base_sha,
+            head_sha=head_sha,
+            merge_base_sha=merge_base_sha,
+            gate_mode=_gate_mode(
+                env,
+                working_tree_changed=bool(working),
+            ),
+            error=comparison_error or (working_error if selected_base else ""),
         )
 
-    env = environment if environment is not None else os.environ
-    selected_base = _clean(base_ref or env.get("PROVIDER_POLICY_BASE_REF"))
-    selected_head = _clean(
-        head_ref or env.get("PROVIDER_POLICY_HEAD_REF") or "HEAD"
-    )
     if selected_base:
         files, error = _git_changed_files(
             root,
             base_ref=selected_base,
             head_ref=selected_head,
             merge_base=False,
+        )
+        working, working_error = _working_tree_changed_files(root)
+        base_sha, head_sha, merge_base_sha, comparison_error = (
+            _resolve_git_comparison(
+                root,
+                base_ref=selected_base,
+                head_ref=selected_head,
+            )
         )
         normalized = tuple(sorted(files))
         return PolicyChangeDetection(
@@ -249,7 +396,14 @@ def detect_provider_policy_change(
             source="Explicit base/head Git diff",
             base_ref=selected_base,
             head_ref=selected_head,
-            error=error,
+            base_sha=base_sha,
+            head_sha=head_sha,
+            merge_base_sha=merge_base_sha,
+            gate_mode=_gate_mode(
+                env,
+                working_tree_changed=bool(working),
+            ),
+            error=error or comparison_error or working_error,
         )
     if head_ref:
         return PolicyChangeDetection(
@@ -257,6 +411,7 @@ def detect_provider_policy_change(
             changed_files=(),
             source="Explicit base/head Git diff",
             head_ref=selected_head,
+            gate_mode=_gate_mode(env, working_tree_changed=False),
             error="A head ref was supplied without a base ref.",
         )
 
@@ -274,6 +429,7 @@ def detect_provider_policy_change(
             changed_files=(),
             source="Local Git fallback",
             head_ref="HEAD",
+            gate_mode="local_git",
             error=(
                 "Could not find origin/main, main, origin/master, or master. "
                 "Pass --base-ref and --head-ref explicitly."
@@ -285,23 +441,24 @@ def detect_provider_policy_change(
         head_ref="HEAD",
         merge_base=True,
     )
-    working_output, working_error = _git_command(
+    working, working_error = _working_tree_changed_files(root)
+    base_sha, head_sha, merge_base_sha, comparison_error = _resolve_git_comparison(
         root,
-        ["diff", "--no-renames", "--name-only", "HEAD", "--"],
+        base_ref=local_base,
+        head_ref="HEAD",
     )
-    working = {
-        normalized
-        for line in working_output.splitlines()
-        if (normalized := _normalize_changed_file(line))
-    }
-    error = committed_error or working_error
+    error = committed_error or working_error or comparison_error
     files = committed | working
     return PolicyChangeDetection(
         policy_changed=expected in files,
         changed_files=tuple(sorted(files)),
         source="Local Git diff against default branch",
         base_ref=local_base,
-        head_ref="HEAD plus working tree",
+        head_ref="HEAD",
+        base_sha=base_sha,
+        head_sha=head_sha,
+        merge_base_sha=merge_base_sha,
+        gate_mode=_gate_mode(env, working_tree_changed=bool(working)),
         error=error,
     )
 
@@ -356,6 +513,407 @@ def _load_json_evidence(
     return path, payload, read_error
 
 
+def _canonical_sha256(payload: object) -> str:
+    return sha256(
+        json.dumps(
+            payload,
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")
+    ).hexdigest()
+
+
+def _valid_repository_relative_path(value: str) -> bool:
+    path = Path(value)
+    return (
+        bool(value)
+        and not path.is_absolute()
+        and ".." not in path.parts
+        and (not path.parts or path.parts[0] != ".git")
+    )
+
+
+def _git_file_checksum(
+    repository_root: Path,
+    *,
+    commit_sha: str,
+    relative_path: str,
+) -> tuple[str, str]:
+    if not _GIT_COMMIT_PATTERN.fullmatch(commit_sha.casefold()):
+        return "", "Git commit SHA is missing or malformed."
+    if not _valid_repository_relative_path(relative_path):
+        return "", f"Unsafe repository path: `{relative_path}`."
+    content, error = _git_binary_command(
+        repository_root,
+        ["show", f"{commit_sha}:{relative_path}"],
+    )
+    return (sha256(content).hexdigest() if not error else ""), error
+
+
+def _current_file_checksum(
+    path: Path,
+    *,
+    repository_root: Path,
+) -> tuple[str, str]:
+    try:
+        resolved = path.resolve(strict=False)
+        resolved.relative_to(repository_root)
+    except (OSError, RuntimeError, ValueError):
+        return "", "File path must stay inside the repository."
+    if path_contains_symlink(path.absolute(), repository_root):
+        return "", "Symbolic links are not accepted for receipt evidence."
+    if not resolved.exists():
+        return "", "File is missing."
+    if not resolved.is_file() or resolved.is_symlink():
+        return "", "Path is not a regular, non-symlinked file."
+    try:
+        return file_sha256(resolved), ""
+    except OSError as exc:
+        return "", f"File could not be hashed: {exc}"
+
+
+def _deleted_path_checksum(relative_path: str) -> str:
+    return _canonical_sha256(
+        {
+            "path": relative_path,
+            "state": "deleted_from_head_or_worktree",
+        }
+    )
+
+
+def _changed_file_digest_records(
+    detection: PolicyChangeDetection,
+    *,
+    repository_root: Path,
+) -> tuple[list[dict[str, str]], str, list[str]]:
+    records: list[dict[str, str]] = []
+    issues: list[str] = []
+    comparison_start = detection.merge_base_sha or detection.base_sha
+    for relative_path in sorted(set(detection.changed_files)):
+        checksum = ""
+        status = "Hashed"
+        source = "working tree" if detection.gate_mode == "local_worktree" else "head commit"
+        error = ""
+        if detection.gate_mode == "local_worktree":
+            candidate = repository_root / relative_path
+            checksum, error = _current_file_checksum(
+                candidate,
+                repository_root=repository_root,
+            )
+            if error and "missing" in error.casefold():
+                head_checksum, head_error = _git_file_checksum(
+                    repository_root,
+                    commit_sha=detection.head_sha,
+                    relative_path=relative_path,
+                )
+                base_checksum, base_error = _git_file_checksum(
+                    repository_root,
+                    commit_sha=comparison_start,
+                    relative_path=relative_path,
+                )
+                if (head_checksum or base_checksum) and (not head_checksum or not head_error):
+                    checksum = _deleted_path_checksum(relative_path)
+                    status = "Deleted"
+                    source = "deletion marker"
+                    error = ""
+                elif not base_error and base_checksum:
+                    checksum = _deleted_path_checksum(relative_path)
+                    status = "Deleted"
+                    source = "deletion marker"
+                    error = ""
+        else:
+            checksum, error = _git_file_checksum(
+                repository_root,
+                commit_sha=detection.head_sha,
+                relative_path=relative_path,
+            )
+            if error:
+                base_checksum, base_error = _git_file_checksum(
+                    repository_root,
+                    commit_sha=comparison_start,
+                    relative_path=relative_path,
+                )
+                if not base_error and base_checksum:
+                    checksum = _deleted_path_checksum(relative_path)
+                    status = "Deleted"
+                    source = "deletion marker"
+                    error = ""
+        if error or not _SHA256_PATTERN.fullmatch(checksum.casefold()):
+            status = "Missing digest"
+            issues.append(f"`{relative_path}` could not be bound: {error or 'invalid digest'}")
+        records.append(
+            {
+                "path": relative_path,
+                "checksum_sha256": checksum.casefold(),
+                "status": status,
+                "content_source": source,
+            }
+        )
+    if all(
+        _SHA256_PATTERN.fullmatch(record["checksum_sha256"])
+        for record in records
+    ):
+        digest = _canonical_sha256(
+            [
+                {
+                    "path": record["path"],
+                    "checksum_sha256": record["checksum_sha256"],
+                }
+                for record in records
+            ]
+        )
+    else:
+        digest = ""
+    return records, digest, issues
+
+
+def _evidence_digest_records(
+    evidence_paths: Mapping[str, Path],
+    *,
+    repository_root: Path,
+    required: bool,
+) -> tuple[list[dict[str, str]], str, list[str]]:
+    records: list[dict[str, str]] = []
+    issues: list[str] = []
+    for field_name, path in sorted(evidence_paths.items()):
+        checksum, error = _current_file_checksum(
+            path,
+            repository_root=repository_root,
+        )
+        relative_path = _display_path(path, repository_root)
+        status = "Included" if checksum else "Missing digest"
+        if required and (error or not _SHA256_PATTERN.fullmatch(checksum.casefold())):
+            issues.append(
+                f"`{relative_path}` could not be bound: {error or 'invalid digest'}"
+            )
+        records.append(
+            {
+                "field": field_name,
+                "path": relative_path,
+                "checksum_sha256": checksum.casefold(),
+                "status": status,
+            }
+        )
+    valid_records = [
+        {
+            "field": record["field"],
+            "path": record["path"],
+            "checksum_sha256": record["checksum_sha256"],
+        }
+        for record in records
+        if _SHA256_PATTERN.fullmatch(record["checksum_sha256"])
+    ]
+    if required and len(valid_records) != len(evidence_paths):
+        digest = ""
+    else:
+        digest = _canonical_sha256(valid_records)
+    return records, digest, issues
+
+
+def calculate_provider_policy_gate_receipt_identity(
+    *,
+    provider_key: str,
+    base_sha: str,
+    head_sha: str,
+    changed_file_digests: Sequence[Mapping[str, object]],
+    changed_files_digest: str,
+    policy_checksum_after_sha256: str,
+    evidence_checksums: Sequence[Mapping[str, object]],
+    evidence_digest: str,
+    final_verdict: str,
+) -> tuple[str, str]:
+    """Return the canonical checksum and ID for one exact gate comparison."""
+    normalized_changed = sorted(
+        (
+            {
+                "path": _normalize_changed_file(item.get("path")),
+                "checksum_sha256": _clean(item.get("checksum_sha256")).casefold(),
+            }
+            for item in changed_file_digests
+        ),
+        key=lambda item: (item["path"], item["checksum_sha256"]),
+    )
+    normalized_evidence = sorted(
+        (
+            {
+                "field": _clean(item.get("field")),
+                "path": _normalize_changed_file(item.get("path")),
+                "checksum_sha256": _clean(item.get("checksum_sha256")).casefold(),
+            }
+            for item in evidence_checksums
+        ),
+        key=lambda item: (item["field"], item["path"], item["checksum_sha256"]),
+    )
+    payload = {
+        "provider_key": _slug(provider_key),
+        "base_sha": _clean(base_sha).casefold(),
+        "head_sha": _clean(head_sha).casefold(),
+        "changed_files": normalized_changed,
+        "changed_files_digest": _clean(changed_files_digest).casefold(),
+        "policy_checksum_after_sha256": _clean(
+            policy_checksum_after_sha256
+        ).casefold(),
+        "evidence": normalized_evidence,
+        "evidence_digest": _clean(evidence_digest).casefold(),
+        "final_verdict": _clean(final_verdict),
+    }
+    digest = _canonical_sha256(payload)
+    return digest, f"{_slug(provider_key)}-provider-policy-gate-{digest}"
+
+
+def _build_receipt_binding(
+    *,
+    provider_key: str,
+    detection: PolicyChangeDetection,
+    repository_root: Path,
+    policy_relative_path: str,
+    evidence_paths: Mapping[str, Path],
+) -> dict[str, object]:
+    changed_records, changed_digest, changed_issues = _changed_file_digest_records(
+        detection,
+        repository_root=repository_root,
+    )
+    evidence_records, evidence_digest, evidence_issues = _evidence_digest_records(
+        evidence_paths,
+        repository_root=repository_root,
+        required=detection.policy_changed,
+    )
+    comparison_start = detection.merge_base_sha or detection.base_sha
+    policy_before, _ = _git_file_checksum(
+        repository_root,
+        commit_sha=comparison_start,
+        relative_path=policy_relative_path,
+    )
+    changed_by_path = {record["path"]: record for record in changed_records}
+    policy_record = changed_by_path.get(policy_relative_path, {})
+    policy_after = (
+        _clean(policy_record.get("checksum_sha256")).casefold()
+        if _clean(policy_record.get("status")) != "Deleted"
+        else ""
+    )
+    if not policy_after:
+        if detection.gate_mode == "local_worktree":
+            policy_after, _ = _current_file_checksum(
+                repository_root / policy_relative_path,
+                repository_root=repository_root,
+            )
+        else:
+            policy_after, _ = _git_file_checksum(
+                repository_root,
+                commit_sha=detection.head_sha,
+                relative_path=policy_relative_path,
+            )
+    policy_change_digest = (
+        _canonical_sha256(
+            {
+                "path": policy_relative_path,
+                "before_checksum_sha256": policy_before.casefold(),
+                "after_checksum_sha256": policy_after.casefold(),
+            }
+        )
+        if _SHA256_PATTERN.fullmatch(policy_after.casefold())
+        else ""
+    )
+
+    mismatches: list[str] = []
+    checked_out_head, checked_out_error = _resolve_git_commit(
+        repository_root,
+        "HEAD",
+    )
+    comparison_context_status = BOUND_STATUS
+    if not detection.base_sha or not detection.head_sha:
+        comparison_context_status = MISSING_GIT_CONTEXT_STATUS
+    elif detection.gate_mode != "local_worktree" and checked_out_error:
+        comparison_context_status = MISSING_GIT_CONTEXT_STATUS
+    elif (
+        detection.gate_mode != "local_worktree"
+        and not checked_out_error
+        and checked_out_head != detection.head_sha
+    ):
+        comparison_context_status = DIGEST_MISMATCH_STATUS
+        mismatches.append(
+            "The checked-out HEAD does not match the requested comparison head SHA."
+        )
+
+    for record in evidence_records:
+        changed_record = changed_by_path.get(record["path"])
+        if (
+            changed_record
+            and _SHA256_PATTERN.fullmatch(record["checksum_sha256"])
+            and _SHA256_PATTERN.fullmatch(changed_record["checksum_sha256"])
+            and record["checksum_sha256"] != changed_record["checksum_sha256"]
+        ):
+            mismatches.append(
+                f"Evidence digest for `{record['path']}` differs from its changed-file digest."
+            )
+    if (
+        policy_record
+        and _SHA256_PATTERN.fullmatch(policy_after.casefold())
+        and _SHA256_PATTERN.fullmatch(
+            _clean(policy_record.get("checksum_sha256")).casefold()
+        )
+        and policy_after.casefold()
+        != _clean(policy_record.get("checksum_sha256")).casefold()
+    ):
+        mismatches.append(
+            "The current provider-policy checksum differs from its changed-file digest."
+        )
+
+    evidence_checksums = {
+        record["field"]: record["checksum_sha256"] for record in evidence_records
+    }
+    if not detection.policy_changed:
+        binding_status = NOT_APPLICABLE_STATUS
+        binding_note = (
+            "No provider-policy change was detected, so approval evidence binding "
+            "is not required."
+        )
+    elif comparison_context_status != BOUND_STATUS:
+        binding_status = comparison_context_status
+        binding_note = "Exact PR base/head Git context is unavailable or inconsistent."
+    elif changed_issues or not changed_digest or not policy_change_digest:
+        binding_status = MISSING_CHANGED_FILE_DIGEST_STATUS
+        binding_note = " ".join(changed_issues) or (
+            "One or more changed files or the current policy could not be hashed."
+        )
+    elif evidence_issues or not evidence_digest:
+        binding_status = MISSING_EVIDENCE_DIGEST_STATUS
+        binding_note = " ".join(evidence_issues) or (
+            "One or more required evidence reports could not be hashed."
+        )
+    elif mismatches:
+        binding_status = DIGEST_MISMATCH_STATUS
+        binding_note = " ".join(mismatches)
+    else:
+        binding_status = BOUND_STATUS
+        binding_note = (
+            "The exact Git comparison, changed-file contents, current policy, and "
+            "required evidence reports are checksum-bound."
+        )
+
+    return {
+        "provider_key": provider_key,
+        "base_sha": detection.base_sha,
+        "head_sha": detection.head_sha,
+        "merge_base_sha": detection.merge_base_sha,
+        "gate_mode": detection.gate_mode,
+        "changed_file_digests": changed_records,
+        "changed_files_digest": changed_digest,
+        "policy_checksum_before_sha256": policy_before.casefold(),
+        "policy_checksum_after_sha256": policy_after.casefold(),
+        "policy_change_digest": policy_change_digest,
+        "evidence_reports": evidence_records,
+        "evidence_digest": evidence_digest,
+        **evidence_checksums,
+        "comparison_context_status": comparison_context_status,
+        "receipt_binding_status": binding_status,
+        "receipt_binding_note": binding_note,
+        "digest_mismatches": mismatches,
+        "gate_receipt_checksum_sha256": "",
+        "gate_receipt_id": "",
+    }
+
+
 def _add_check(
     rows: list[dict[str, object]],
     *,
@@ -378,6 +936,13 @@ def _add_check(
             "observed": _clean(observed),
             "status": status,
             "details": details,
+            "gate_receipt_id": "",
+            "base_sha": "",
+            "head_sha": "",
+            "changed_files_digest": "",
+            "evidence_digest": "",
+            "policy_change_digest": "",
+            "receipt_binding_status": "",
         }
     )
 
@@ -412,7 +977,7 @@ def _gate_verdict(rows: Sequence[Mapping[str, object]]) -> str:
         return FAILED_VERDICT
     if statuses == {NOT_APPLICABLE_STATUS}:
         return NOT_APPLICABLE_VERDICT
-    if statuses and statuses <= {PASSED_STATUS}:
+    if statuses and statuses <= {PASSED_STATUS, BOUND_STATUS}:
         return PASSED_VERDICT
     return BLOCKED_VERDICT
 
@@ -423,7 +988,7 @@ def _blockers(rows: Sequence[Mapping[str, object]]) -> list[str]:
             f"{row.get('check', 'Check')}: {row.get('details', '')}"
             for row in rows
             if _clean(row.get("status"))
-            not in {PASSED_STATUS, NOT_APPLICABLE_STATUS}
+            not in {PASSED_STATUS, BOUND_STATUS, NOT_APPLICABLE_STATUS}
         )
     )
 
@@ -433,6 +998,8 @@ def _build_summary(
     provider_key: str,
     provider_name: str,
     detection: PolicyChangeDetection,
+    policy_relative_path: str,
+    receipt_binding: dict[str, object],
     rows: list[dict[str, object]],
     run_at: datetime | None,
 ) -> dict[str, object]:
@@ -440,19 +1007,122 @@ def _build_summary(
     if verdict not in GATE_VERDICTS:
         raise ValueError(f"Unexpected provider policy PR gate verdict: {verdict}")
     status_counts = Counter(_clean(row.get("status")) for row in rows)
-    return {
-        "schema_version": 1,
-        "generated_at": (run_at or datetime.now().astimezone()).isoformat(
-            timespec="seconds"
+    generated_at = (run_at or datetime.now().astimezone()).isoformat(
+        timespec="seconds"
+    )
+    binding_status = _clean(receipt_binding.get("receipt_binding_status"))
+    can_issue_receipt = (
+        binding_status == BOUND_STATUS
+        or (
+            binding_status == NOT_APPLICABLE_STATUS
+            and _clean(receipt_binding.get("comparison_context_status"))
+            == BOUND_STATUS
+        )
+    )
+    if can_issue_receipt:
+        receipt_checksum, receipt_id = calculate_provider_policy_gate_receipt_identity(
+            provider_key=provider_key,
+            base_sha=_clean(receipt_binding.get("base_sha")),
+            head_sha=_clean(receipt_binding.get("head_sha")),
+            changed_file_digests=(
+                receipt_binding.get("changed_file_digests")
+                if isinstance(receipt_binding.get("changed_file_digests"), list)
+                else []
+            ),
+            changed_files_digest=_clean(
+                receipt_binding.get("changed_files_digest")
+            ),
+            policy_checksum_after_sha256=_clean(
+                receipt_binding.get("policy_checksum_after_sha256")
+            ),
+            evidence_checksums=(
+                receipt_binding.get("evidence_reports")
+                if isinstance(receipt_binding.get("evidence_reports"), list)
+                else []
+            ),
+            evidence_digest=_clean(receipt_binding.get("evidence_digest")),
+            final_verdict=verdict,
+        )
+        receipt_binding["gate_receipt_checksum_sha256"] = receipt_checksum
+        receipt_binding["gate_receipt_id"] = receipt_id
+
+    common_row_fields = {
+        "gate_receipt_id": _clean(receipt_binding.get("gate_receipt_id")),
+        "base_sha": _clean(receipt_binding.get("base_sha")),
+        "head_sha": _clean(receipt_binding.get("head_sha")),
+        "changed_files_digest": _clean(
+            receipt_binding.get("changed_files_digest")
         ),
+        "evidence_digest": _clean(receipt_binding.get("evidence_digest")),
+        "policy_change_digest": _clean(
+            receipt_binding.get("policy_change_digest")
+        ),
+        "receipt_binding_status": binding_status,
+    }
+    for row in rows:
+        row.update(common_row_fields)
+
+    return {
+        "schema_version": 2,
+        "generated_at": generated_at,
+        "gate_generated_at": generated_at,
         "provider_key": provider_key,
         "provider_name": provider_name,
-        "policy_path": POLICY_RELATIVE_PATH,
+        "policy_path": policy_relative_path,
         "policy_changed": detection.policy_changed,
+        "base_sha": _clean(receipt_binding.get("base_sha")),
+        "head_sha": _clean(receipt_binding.get("head_sha")),
+        "merge_base_sha": _clean(receipt_binding.get("merge_base_sha")),
+        "gate_mode": _clean(receipt_binding.get("gate_mode")),
+        "changed_files": list(detection.changed_files),
+        "changed_file_digests": receipt_binding.get("changed_file_digests", []),
+        "changed_files_digest": _clean(
+            receipt_binding.get("changed_files_digest")
+        ),
+        "policy_checksum_before_sha256": _clean(
+            receipt_binding.get("policy_checksum_before_sha256")
+        ),
+        "policy_checksum_after_sha256": _clean(
+            receipt_binding.get("policy_checksum_after_sha256")
+        ),
+        "policy_change_digest": _clean(
+            receipt_binding.get("policy_change_digest")
+        ),
+        "evidence_reports": receipt_binding.get("evidence_reports", []),
+        "evidence_bundle_verification_checksum_sha256": _clean(
+            receipt_binding.get(
+                "evidence_bundle_verification_checksum_sha256"
+            )
+        ),
+        "conformance_report_checksum_sha256": _clean(
+            receipt_binding.get("conformance_report_checksum_sha256")
+        ),
+        "preview_report_checksum_sha256": _clean(
+            receipt_binding.get("preview_report_checksum_sha256")
+        ),
+        "receipt_verification_report_checksum_sha256": _clean(
+            receipt_binding.get("receipt_verification_report_checksum_sha256")
+        ),
+        "evidence_digest": _clean(receipt_binding.get("evidence_digest")),
+        "comparison_context_status": _clean(
+            receipt_binding.get("comparison_context_status")
+        ),
+        "receipt_binding_status": binding_status,
+        "receipt_binding_note": _clean(
+            receipt_binding.get("receipt_binding_note")
+        ),
+        "gate_receipt_checksum_sha256": _clean(
+            receipt_binding.get("gate_receipt_checksum_sha256")
+        ),
+        "gate_receipt_id": _clean(receipt_binding.get("gate_receipt_id")),
         "change_detection": {
             "source": detection.source,
             "base_ref": detection.base_ref,
             "head_ref": detection.head_ref,
+            "base_sha": detection.base_sha,
+            "head_sha": detection.head_sha,
+            "merge_base_sha": detection.merge_base_sha,
+            "gate_mode": detection.gate_mode,
             "changed_files": list(detection.changed_files),
             "error": detection.error,
         },
@@ -499,6 +1169,7 @@ def build_provider_policy_pr_gate(
     provider_key = provider.provider_key
     provider_display_name = provider.provider_name
     selected_policy = policy_path or root / POLICY_RELATIVE_PATH
+    policy_relative = POLICY_RELATIVE_PATH
     try:
         policy_relative = selected_policy.resolve(strict=False).relative_to(root).as_posix()
     except (OSError, RuntimeError, ValueError):
@@ -530,10 +1201,19 @@ def build_provider_policy_pr_gate(
             observed="Unknown",
             details=detection.error,
         )
+        receipt_binding = _build_receipt_binding(
+            provider_key=provider_key,
+            detection=detection,
+            repository_root=root,
+            policy_relative_path=policy_relative,
+            evidence_paths={},
+        )
         summary = _build_summary(
             provider_key=provider_key,
             provider_name=provider_display_name,
             detection=detection,
+            policy_relative_path=policy_relative,
+            receipt_binding=receipt_binding,
             rows=rows,
             run_at=run_at,
         )
@@ -553,10 +1233,19 @@ def build_provider_policy_pr_gate(
                 "required for this PR."
             ),
         )
+        receipt_binding = _build_receipt_binding(
+            provider_key=provider_key,
+            detection=detection,
+            repository_root=root,
+            policy_relative_path=policy_relative,
+            evidence_paths={},
+        )
         summary = _build_summary(
             provider_key=provider_key,
             provider_name=provider_display_name,
             detection=detection,
+            policy_relative_path=policy_relative,
+            receipt_binding=receipt_binding,
             rows=rows,
             run_at=run_at,
         )
@@ -821,10 +1510,35 @@ def build_provider_policy_pr_gate(
         ),
     )
 
+    receipt_binding = _build_receipt_binding(
+        provider_key=provider_key,
+        detection=detection,
+        repository_root=root,
+        policy_relative_path=policy_relative,
+        evidence_paths={
+            "evidence_bundle_verification_checksum_sha256": bundle_file,
+            "conformance_report_checksum_sha256": conformance_file,
+            "preview_report_checksum_sha256": preview_file,
+            "receipt_verification_report_checksum_sha256": receipt_file,
+        },
+    )
+    _add_check(
+        rows,
+        category="Receipt binding",
+        check="Deterministic PR comparison receipt",
+        status=_clean(receipt_binding.get("receipt_binding_status")),
+        evidence_path=POLICY_RELATIVE_PATH,
+        expected=BOUND_STATUS,
+        observed=_clean(receipt_binding.get("receipt_binding_status")),
+        details=_clean(receipt_binding.get("receipt_binding_note")),
+    )
+
     summary = _build_summary(
         provider_key=provider_key,
         provider_name=provider_display_name,
         detection=detection,
+        policy_relative_path=policy_relative,
+        receipt_binding=receipt_binding,
         rows=rows,
         run_at=run_at,
     )
@@ -848,6 +1562,30 @@ def render_provider_policy_pr_gate(
         if isinstance(changed_files, list) and changed_files
         else ["- None detected."]
     )
+    changed_digest_records = summary.get("changed_file_digests")
+    changed_digest_lines = (
+        [
+            f"- `{item.get('path', '')}`: "
+            f"`{item.get('checksum_sha256', '') or 'Missing'}` "
+            f"({item.get('status', 'Unknown')}, {item.get('content_source', 'unknown source')})"
+            for item in changed_digest_records
+            if isinstance(item, Mapping)
+        ]
+        if isinstance(changed_digest_records, list) and changed_digest_records
+        else ["- No changed-file content digests were recorded."]
+    )
+    evidence_records = summary.get("evidence_reports")
+    evidence_lines = (
+        [
+            f"- `{item.get('path', '')}`: "
+            f"`{item.get('checksum_sha256', '') or 'Missing'}` "
+            f"({item.get('status', 'Unknown')})"
+            for item in evidence_records
+            if isinstance(item, Mapping)
+        ]
+        if isinstance(evidence_records, list) and evidence_records
+        else ["- Not applicable or unavailable."]
+    )
     lines = [
         "# Provider Policy PR Gate",
         "",
@@ -861,13 +1599,40 @@ def render_provider_policy_pr_gate(
         f"- Provider: **{summary.get('provider_name', '')}** "
         f"(`{summary.get('provider_key', '')}`)",
         f"- Policy changed: **{'Yes' if summary.get('policy_changed') else 'No'}**",
+        f"- Gate mode: `{summary.get('gate_mode', '') or 'Unknown'}`",
+        f"- Generated at: `{summary.get('gate_generated_at', '') or 'Unknown'}`",
         f"- Detection source: {detection.get('source', 'Unknown')}",
-        f"- Base: `{detection.get('base_ref', '') or 'Not supplied'}`",
-        f"- Head: `{detection.get('head_ref', '') or 'Not supplied'}`",
+        f"- Base ref: `{detection.get('base_ref', '') or 'Not supplied'}`",
+        f"- Head ref: `{detection.get('head_ref', '') or 'Not supplied'}`",
+        f"- Base SHA: `{summary.get('base_sha', '') or 'Missing'}`",
+        f"- Head SHA: `{summary.get('head_sha', '') or 'Missing'}`",
+        f"- Merge base SHA: `{summary.get('merge_base_sha', '') or 'Not available'}`",
+        "",
+        "## Gate receipt",
+        "",
+        f"- Receipt binding: **{summary.get('receipt_binding_status', 'Unknown')}**",
+        f"- Comparison context: **{summary.get('comparison_context_status', 'Unknown')}**",
+        f"- Gate receipt ID: `{summary.get('gate_receipt_id', '') or 'Not issued'}`",
+        f"- Gate receipt SHA-256: "
+        f"`{summary.get('gate_receipt_checksum_sha256', '') or 'Not issued'}`",
+        f"- Changed-files digest: "
+        f"`{summary.get('changed_files_digest', '') or 'Missing'}`",
+        f"- Evidence digest: `{summary.get('evidence_digest', '') or 'Missing'}`",
+        f"- Policy-change digest: "
+        f"`{summary.get('policy_change_digest', '') or 'Missing'}`",
+        f"- Binding note: {summary.get('receipt_binding_note', '') or 'No note.'}",
         "",
         "## Changed files",
         "",
         *changed_lines,
+        "",
+        "## Changed-file content digests",
+        "",
+        *changed_digest_lines,
+        "",
+        "## Evidence report digests",
+        "",
+        *evidence_lines,
         "",
         "## Blockers",
         "",

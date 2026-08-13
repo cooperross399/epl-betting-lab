@@ -355,6 +355,20 @@ in memory, blocks unsafe cron/automation additions, and writes
 permissions, no secrets, and no live provider calls. Passing the check does not
 apply policy, allowlist a provider automatically, or enable cron.
 
+For a policy-changing PR, a pass now also requires a checksum-bound gate
+receipt. The receipt records the exact base, head, and merge-base SHAs; hashes
+every changed file from the checked head or local working tree; hashes the
+policy before and after; and hashes the verified bundle, conformance, preview,
+and human-receipt reports used by the gate. Those sorted records produce a
+deterministic `gate_receipt_id`, so rerunning unchanged inputs produces the same
+ID while any changed SHA, file content, evidence report, policy, or verdict
+produces a different one. The PR Action checks out the exact head SHA and puts
+the receipt ID and digests in its job summary and downloadable reports. The
+Odds Import dashboard shows the latest receipt ID, base/head SHAs,
+changed-files digest, and binding status. `Not applicable` remains safe when no
+provider-policy change is present; a policy change cannot pass unless receipt
+binding is `Bound`.
+
 Next, review `data/manual/staging_provider_policy.json` and run the independent
 eligibility gate:
 

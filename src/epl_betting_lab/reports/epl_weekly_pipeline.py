@@ -42,6 +42,10 @@ from epl_betting_lab.reports.epl_weekly_pipeline_verification_sidecar import (
     SIDECAR_NOT_READY_VERDICT,
     save_epl_weekly_pipeline_verification_sidecar,
 )
+from epl_betting_lab.reports.epl_weekly_pipeline_verification_sidecar_verification import (
+    SIDECAR_VERIFICATION_MARKDOWN_FILENAME,
+    save_epl_weekly_pipeline_verification_sidecar_verification,
+)
 from epl_betting_lab.reports.thursday_best_bets import list_recent_thursday_archives
 from epl_betting_lab.reports.thursday_decision_queue import ACTION_PRIORITY
 from epl_betting_lab.scheduled_thursday_workflow import (
@@ -93,6 +97,10 @@ RECEIPT_VERIFIED_VERDICT = "Weekly pipeline receipt verified"
 RECEIPT_NOT_READY_VERDICT = "Weekly pipeline receipt not ready"
 RECEIPT_PENDING_VERDICT = "Pending archive verification"
 RECEIPT_ERROR_VERDICT = "Weekly pipeline receipt verification failed"
+SIDECAR_VERIFIED_VERDICT = "Weekly verification sidecar verified"
+SIDECAR_VERIFICATION_NOT_READY_VERDICT = "Weekly verification sidecar not ready"
+SIDECAR_VERIFICATION_PENDING_VERDICT = "Pending sidecar verification"
+SIDECAR_VERIFICATION_ERROR_VERDICT = "Weekly verification sidecar verification failed"
 
 
 @dataclass(frozen=True)
@@ -418,6 +426,31 @@ def _render_markdown(summary: dict[str, object]) -> str:
             "- Verification sidecar archive: "
             f"`{summary.get('verification_sidecar_archive_path') or 'Not available'}`"
         ),
+        (
+            "- Sidecar verification: "
+            f"**{summary.get('sidecar_verification_verdict') or 'Not checked'}**"
+        ),
+        (
+            "- Sidecar verification status: "
+            f"{summary.get('sidecar_verification_status') or 'Not checked'}"
+        ),
+        (
+            "- Sidecar verification receipt IDs: "
+            f"`{summary.get('sidecar_verification_original_id') or 'Not available'}` / "
+            f"`{summary.get('sidecar_verification_recalculated_id') or 'Not available'}`"
+        ),
+        (
+            "- Sidecar verification mismatches: "
+            f"{int(summary.get('sidecar_verification_mismatch_count', 0) or 0)}"
+        ),
+        (
+            "- Sidecar verification report: "
+            f"`{summary.get('sidecar_verification_report_path') or 'Not available'}`"
+        ),
+        (
+            "- Sidecar archive checked: "
+            f"`{summary.get('sidecar_verification_archive_path') or 'Not available'}`"
+        ),
         f"- Latest pipeline comparison: **{summary['pipeline_comparison_verdict']}**",
         f"- Recommended next human action: {summary['recommended_next_action']}",
         (
@@ -516,6 +549,27 @@ def _render_step_csv(
         ),
         "verification_sidecar_report_path": summary.get(
             "verification_sidecar_report_path", ""
+        ),
+        "sidecar_verification_verdict": summary.get(
+            "sidecar_verification_verdict", ""
+        ),
+        "sidecar_verification_status": summary.get(
+            "sidecar_verification_status", ""
+        ),
+        "sidecar_verification_original_id": summary.get(
+            "sidecar_verification_original_id", ""
+        ),
+        "sidecar_verification_recalculated_id": summary.get(
+            "sidecar_verification_recalculated_id", ""
+        ),
+        "sidecar_verification_mismatch_count": int(
+            summary.get("sidecar_verification_mismatch_count", 0) or 0
+        ),
+        "sidecar_verification_report_path": summary.get(
+            "sidecar_verification_report_path", ""
+        ),
+        "sidecar_verification_archive_path": summary.get(
+            "sidecar_verification_archive_path", ""
         ),
     }
     rows = []
@@ -936,6 +990,15 @@ def run_epl_weekly_pipeline(
             "verification_sidecar_report_path": str(
                 context.output_dir / SIDECAR_MARKDOWN_FILENAME
             ),
+            "sidecar_verification_verdict": SIDECAR_VERIFICATION_PENDING_VERDICT,
+            "sidecar_verification_status": "Pending",
+            "sidecar_verification_original_id": "",
+            "sidecar_verification_recalculated_id": "",
+            "sidecar_verification_mismatch_count": 0,
+            "sidecar_verification_report_path": str(
+                context.output_dir / SIDECAR_VERIFICATION_MARKDOWN_FILENAME
+            ),
+            "sidecar_verification_archive_path": "",
         }
     )
     # Seal the canonical receipt before adding its own verification result.
@@ -1089,6 +1152,7 @@ def run_epl_weekly_pipeline(
             output_dir=context.output_dir,
             archived_at=context.run_at,
         )
+        sidecar_archive_path = str(sidecar_result.get("archive_dir", ""))
         sidecar_summary = sidecar_result.get("summary", {})
         if not isinstance(sidecar_summary, dict):
             raise ValueError("Verification sidecar returned a malformed summary.")
@@ -1098,7 +1162,6 @@ def run_epl_weekly_pipeline(
         sidecar_receipt_id = str(
             sidecar_summary.get("sidecar_receipt_id", "")
         ).strip()
-        sidecar_archive_path = str(sidecar_result.get("archive_dir", ""))
         sidecar_report_path = str(sidecar_result.get("markdown", ""))
         sidecar_outputs = {
             key: Path(value)
@@ -1168,6 +1231,167 @@ def run_epl_weekly_pipeline(
             ),
         )
 
+    sidecar_verification_result: dict[str, object] | None = None
+    sidecar_verification_verdict = SIDECAR_VERIFICATION_ERROR_VERDICT
+    sidecar_verification_status = "Failed"
+    sidecar_verification_original_id = ""
+    sidecar_verification_recalculated_id = ""
+    sidecar_verification_mismatch_count = 1
+    sidecar_verification_report_path = ""
+    sidecar_verification_archive_path = sidecar_archive_path
+    if progress is not None:
+        progress(
+            "Weekly verification sidecar verification",
+            "Running",
+            "Verifying the exact sidecar archive created by this weekly run.",
+        )
+    if not sidecar_archive_path:
+        final_status = "Failed"
+        sidecar_verification_status = "Blocked"
+        sidecar_verification_verdict = "Missing weekly verification sidecar"
+        sidecar_verification_message = (
+            "Sidecar verification stopped safely because this run did not return a "
+            "sidecar archive path. No older sidecar was selected instead."
+        )
+        blockers.append(sidecar_verification_message)
+        add_step(
+            "Weekly verification sidecar verification",
+            "Blocked",
+            sidecar_verification_message,
+            WorkflowActionResult(
+                message=sidecar_verification_message,
+                blockers=(sidecar_verification_message,),
+                metadata={
+                    "verdict": sidecar_verification_verdict,
+                    "sidecar_archive_path": "",
+                    "mismatch_count": sidecar_verification_mismatch_count,
+                },
+            ),
+        )
+    else:
+        try:
+            sidecar_verification_result = (
+                save_epl_weekly_pipeline_verification_sidecar_verification(
+                    sidecar_path=Path(sidecar_archive_path),
+                    output_dir=context.output_dir,
+                    generated_at=context.run_at,
+                )
+            )
+            sidecar_verification_summary = sidecar_verification_result.get(
+                "summary", {}
+            )
+            if not isinstance(sidecar_verification_summary, dict):
+                raise ValueError(
+                    "Sidecar verification returned a malformed summary."
+                )
+            sidecar_verification_verdict = str(
+                sidecar_verification_summary.get(
+                    "verdict", SIDECAR_VERIFICATION_ERROR_VERDICT
+                )
+            ).strip()
+            sidecar_verification_original_id = str(
+                sidecar_verification_summary.get(
+                    "original_sidecar_receipt_id", ""
+                )
+            ).strip()
+            sidecar_verification_recalculated_id = str(
+                sidecar_verification_summary.get(
+                    "recalculated_sidecar_receipt_id", ""
+                )
+            ).strip()
+            sidecar_verification_mismatch_count = int(
+                sidecar_verification_summary.get("mismatch_count", 0) or 0
+            )
+            sidecar_verification_report_path = str(
+                sidecar_verification_result.get("markdown", "")
+            )
+            sidecar_verification_archive_path = sidecar_archive_path
+            sidecar_verification_outputs = {
+                key: Path(value)
+                for key, value in sidecar_verification_result.items()
+                if key in {"json", "markdown", "csv"} and value
+            }
+
+            if sidecar_verification_verdict == SIDECAR_VERIFIED_VERDICT:
+                sidecar_verification_status = "Verified"
+                sidecar_verification_step_status = "Completed"
+                sidecar_verification_message = (
+                    "The just-created verification sidecar and its referenced sealed "
+                    "pipeline archive passed independent verification."
+                )
+                sidecar_verification_warnings: tuple[str, ...] = ()
+                sidecar_verification_blockers: tuple[str, ...] = ()
+            elif (
+                sidecar_verification_verdict
+                == SIDECAR_VERIFICATION_NOT_READY_VERDICT
+                and sidecar_verdict == SIDECAR_NOT_READY_VERDICT
+                and sidecar_verification_mismatch_count == 0
+            ):
+                sidecar_verification_status = "Not ready"
+                sidecar_verification_step_status = "Completed with warnings"
+                sidecar_verification_message = (
+                    "The sidecar is structurally consistent, but the underlying weekly "
+                    "run was not ready for card review."
+                )
+                sidecar_verification_warnings = (sidecar_verification_message,)
+                sidecar_verification_blockers = ()
+                warnings.append(sidecar_verification_message)
+            else:
+                sidecar_verification_status = "Failed"
+                sidecar_verification_step_status = "Failed"
+                sidecar_verification_message = (
+                    "Sidecar verification failed closed: "
+                    f"{sidecar_verification_verdict}."
+                )
+                sidecar_verification_warnings = ()
+                sidecar_verification_blockers = (sidecar_verification_message,)
+                blockers.append(sidecar_verification_message)
+                final_status = "Failed"
+
+            add_step(
+                "Weekly verification sidecar verification",
+                sidecar_verification_step_status,
+                sidecar_verification_message,
+                WorkflowActionResult(
+                    outputs=sidecar_verification_outputs,
+                    message=sidecar_verification_message,
+                    warnings=sidecar_verification_warnings,
+                    blockers=sidecar_verification_blockers,
+                    metadata={
+                        "verdict": sidecar_verification_verdict,
+                        "status": sidecar_verification_status,
+                        "sidecar_archive_path": sidecar_verification_archive_path,
+                        "original_sidecar_receipt_id": (
+                            sidecar_verification_original_id
+                        ),
+                        "recalculated_sidecar_receipt_id": (
+                            sidecar_verification_recalculated_id
+                        ),
+                        "mismatch_count": sidecar_verification_mismatch_count,
+                    },
+                ),
+            )
+        except Exception as exc:
+            final_status = "Failed"
+            sidecar_verification_message = (
+                f"Sidecar verification failed unexpectedly: {exc}"
+            )
+            blockers.append(sidecar_verification_message)
+            add_step(
+                "Weekly verification sidecar verification",
+                "Failed",
+                sidecar_verification_message,
+                WorkflowActionResult(
+                    message=sidecar_verification_message,
+                    blockers=(sidecar_verification_message,),
+                    metadata={
+                        "verdict": sidecar_verification_verdict,
+                        "sidecar_archive_path": sidecar_verification_archive_path,
+                        "mismatch_count": sidecar_verification_mismatch_count,
+                    },
+                ),
+            )
+
     summary.update(
         {
             "status": final_status,
@@ -1199,6 +1423,19 @@ def run_epl_weekly_pipeline(
             "verification_sidecar_receipt_id": sidecar_receipt_id,
             "verification_sidecar_archive_path": sidecar_archive_path,
             "verification_sidecar_report_path": sidecar_report_path,
+            "sidecar_verification_verdict": sidecar_verification_verdict,
+            "sidecar_verification_status": sidecar_verification_status,
+            "sidecar_verification_original_id": sidecar_verification_original_id,
+            "sidecar_verification_recalculated_id": (
+                sidecar_verification_recalculated_id
+            ),
+            "sidecar_verification_mismatch_count": (
+                sidecar_verification_mismatch_count
+            ),
+            "sidecar_verification_report_path": sidecar_verification_report_path,
+            "sidecar_verification_archive_path": (
+                sidecar_verification_archive_path
+            ),
         }
     )
     safe_summary = _write_live_pipeline_outputs(
@@ -1216,5 +1453,6 @@ def run_epl_weekly_pipeline(
         "comparison": history_plan["comparison"],
         "receipt_verification": verification_result,
         "verification_sidecar": sidecar_result,
+        "verification_sidecar_verification": sidecar_verification_result,
         "summary": safe_summary,
     }

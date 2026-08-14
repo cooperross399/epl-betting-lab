@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from datetime import datetime, timezone
+from hashlib import sha256
 from pathlib import Path
 
 import pandas as pd
@@ -58,6 +59,14 @@ def _paths(tmp_path: Path, *, include_odds: bool = True) -> dict[str, Path]:
         "ledger_path": ledger,
         "output_dir": outputs,
         "repository_root": tmp_path,
+    }
+
+
+def _tree_checksums(path: Path) -> dict[str, str]:
+    return {
+        item.relative_to(path).as_posix(): sha256(item.read_bytes()).hexdigest()
+        for item in sorted(path.rglob("*"))
+        if item.is_file()
     }
 
 
@@ -288,6 +297,24 @@ def test_weekly_pipeline_runs_all_safe_steps_in_order_and_preserves_inputs(tmp_p
     assert (sidecar_dir / "epl_weekly_pipeline_receipt_verification.json").is_file()
     assert (sidecar_dir / "epl_weekly_pipeline_receipt_verification.md").is_file()
     assert (sidecar_dir / "epl_weekly_pipeline_receipt_verification.csv").is_file()
+    assert saved["sidecar_verification_verdict"] == (
+        "Weekly verification sidecar verified"
+    )
+    assert saved["sidecar_verification_status"] == "Verified"
+    assert saved["sidecar_verification_original_id"] == saved[
+        "verification_sidecar_receipt_id"
+    ]
+    assert saved["sidecar_verification_recalculated_id"] == saved[
+        "verification_sidecar_receipt_id"
+    ]
+    assert saved["sidecar_verification_mismatch_count"] == 0
+    assert saved["sidecar_verification_report_path"] in saved[
+        "generated_report_paths"
+    ]
+    assert Path(saved["sidecar_verification_archive_path"]) == sidecar_dir
+    assert result["verification_sidecar_verification"]["verdict"] == (
+        "Weekly verification sidecar verified"
+    )
     assert saved["pipeline_comparison_verdict"] == "Missing prior run"
     archive_dir = Path(saved["pipeline_archive_path"])
     assert Path(saved["archive_path"]) == archive_dir
@@ -314,12 +341,24 @@ def test_weekly_pipeline_runs_all_safe_steps_in_order_and_preserves_inputs(tmp_p
         "verification_sidecar_receipt_id",
         "verification_sidecar_archive_path",
         "verification_sidecar_report_path",
+        "sidecar_verification_verdict",
+        "sidecar_verification_status",
+        "sidecar_verification_original_id",
+        "sidecar_verification_recalculated_id",
+        "sidecar_verification_mismatch_count",
+        "sidecar_verification_report_path",
+        "sidecar_verification_archive_path",
     ):
         assert column in pipeline_csv.columns
     pipeline_markdown = result["markdown"].read_text(encoding="utf-8")
     assert "Receipt verification: **Weekly pipeline receipt verified**" in pipeline_markdown
     assert "Receipt verification mismatches: 0" in pipeline_markdown
     assert "Verification sidecar: **Verification sidecar archived**" in pipeline_markdown
+    assert (
+        "Sidecar verification: **Weekly verification sidecar verified**"
+        in pipeline_markdown
+    )
+    assert "Sidecar verification mismatches: 0" in pipeline_markdown
     assert paths["current_odds_path"].read_bytes() == odds_before
     assert paths["ledger_path"].read_bytes() == ledger_before
 
@@ -393,6 +432,43 @@ def test_weekly_pipeline_sidecar_uses_the_just_created_archive_and_verifier_path
         "markdown": result["receipt_verification"]["markdown"],
         "csv": result["receipt_verification"]["csv"],
     }
+
+
+def test_weekly_pipeline_verifies_the_sidecar_path_it_just_created(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    paths = _paths(tmp_path)
+    calls: list[str] = []
+    verified_paths: list[Path] = []
+    original = (
+        weekly_pipeline_module.save_epl_weekly_pipeline_verification_sidecar_verification
+    )
+
+    def capture_verification(*, sidecar_path, output_dir, generated_at):
+        verified_paths.append(Path(sidecar_path))
+        return original(
+            sidecar_path=sidecar_path,
+            output_dir=output_dir,
+            generated_at=generated_at,
+        )
+
+    monkeypatch.setattr(
+        weekly_pipeline_module,
+        "save_epl_weekly_pipeline_verification_sidecar_verification",
+        capture_verification,
+    )
+
+    result = run_epl_weekly_pipeline(
+        **paths,
+        run_at=FIXED_RUN_AT,
+        actions=_actions(calls),
+    )
+
+    assert verified_paths == [Path(result["verification_sidecar"]["archive_dir"])]
+    assert verified_paths[0] == Path(
+        result["summary"]["sidecar_verification_archive_path"]
+    )
 
 
 def test_first_archive_skips_comparison_without_downgrading_ready_status(tmp_path) -> None:
@@ -496,12 +572,27 @@ def test_missing_current_odds_reports_needs_odds_without_creating_file(tmp_path)
     assert result["summary"]["verification_sidecar_verdict"] == (
         "Verification sidecar not ready"
     )
+    assert result["summary"]["sidecar_verification_verdict"] == (
+        "Weekly verification sidecar not ready"
+    )
+    assert result["summary"]["sidecar_verification_status"] == "Not ready"
+    assert result["summary"]["sidecar_verification_mismatch_count"] == 0
+    assert result["summary"]["sidecar_verification_original_id"] == result[
+        "summary"
+    ]["verification_sidecar_receipt_id"]
+    assert result["status"] == "Needs odds"
     verification_step = next(
         step
         for step in result["summary"]["steps"]
         if step["step"] == "Weekly pipeline receipt verification"
     )
     assert verification_step["status"] == "Completed with warnings"
+    sidecar_verification_step = next(
+        step
+        for step in result["summary"]["steps"]
+        if step["step"] == "Weekly verification sidecar verification"
+    )
+    assert sidecar_verification_step["status"] == "Completed with warnings"
 
 
 def test_archive_corruption_is_surfaced_without_crashing(tmp_path, monkeypatch) -> None:
@@ -621,6 +712,132 @@ def test_unexpected_verification_sidecar_error_is_reported_without_crashing(
         and step["status"] == "Failed"
         for step in result["summary"]["steps"]
     )
+    assert result["summary"]["sidecar_verification_verdict"] == (
+        "Missing weekly verification sidecar"
+    )
+    assert result["summary"]["sidecar_verification_status"] == "Blocked"
+
+
+def test_sidecar_corruption_is_surfaced_without_crashing(tmp_path, monkeypatch) -> None:
+    paths = _paths(tmp_path)
+    calls: list[str] = []
+    original = weekly_pipeline_module.save_epl_weekly_pipeline_verification_sidecar
+
+    def save_then_corrupt(**kwargs):
+        result = original(**kwargs)
+        Path(
+            result["archive_dir"],
+            "epl_weekly_pipeline_verification_sidecar.md",
+        ).write_text("# Corrupted after sidecar creation\n", encoding="utf-8")
+        return result
+
+    monkeypatch.setattr(
+        weekly_pipeline_module,
+        "save_epl_weekly_pipeline_verification_sidecar",
+        save_then_corrupt,
+    )
+
+    result = run_epl_weekly_pipeline(
+        **paths,
+        run_at=FIXED_RUN_AT,
+        actions=_actions(calls),
+    )
+
+    assert result["status"] == "Failed"
+    assert result["summary"]["sidecar_verification_verdict"] == (
+        "Weekly verification sidecar changed"
+    )
+    assert result["summary"]["sidecar_verification_status"] == "Failed"
+    assert result["summary"]["sidecar_verification_mismatch_count"] >= 1
+    assert any(
+        step["step"] == "Weekly verification sidecar verification"
+        and step["status"] == "Failed"
+        for step in result["summary"]["steps"]
+    )
+
+
+def test_unexpected_sidecar_verification_error_is_reported_without_crashing(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    paths = _paths(tmp_path)
+    calls: list[str] = []
+
+    def fail_verification(**_kwargs):
+        raise RuntimeError("sidecar verifier broke")
+
+    monkeypatch.setattr(
+        weekly_pipeline_module,
+        "save_epl_weekly_pipeline_verification_sidecar_verification",
+        fail_verification,
+    )
+
+    result = run_epl_weekly_pipeline(
+        **paths,
+        run_at=FIXED_RUN_AT,
+        actions=_actions(calls),
+    )
+
+    assert result["status"] == "Failed"
+    assert result["summary"]["sidecar_verification_verdict"] == (
+        "Weekly verification sidecar verification failed"
+    )
+    assert result["summary"]["sidecar_verification_status"] == "Failed"
+    assert any(
+        "sidecar verifier broke" in blocker
+        for blocker in result["summary"]["key_blockers"]
+    )
+
+
+def test_automatic_verification_does_not_modify_sealed_archives(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    paths = _paths(tmp_path)
+    calls: list[str] = []
+    sealed: dict[str, object] = {}
+    original_history = weekly_pipeline_module.save_prepared_epl_weekly_pipeline_history
+    original_sidecar = weekly_pipeline_module.save_epl_weekly_pipeline_verification_sidecar
+
+    def capture_history(*args, **kwargs):
+        result = original_history(*args, **kwargs)
+        archive_dir = Path(result["archive_dir"])
+        sealed["pipeline_dir"] = archive_dir
+        sealed["pipeline_checksums"] = _tree_checksums(archive_dir)
+        return result
+
+    def capture_sidecar(**kwargs):
+        result = original_sidecar(**kwargs)
+        archive_dir = Path(result["archive_dir"])
+        sealed["sidecar_dir"] = archive_dir
+        sealed["sidecar_checksums"] = _tree_checksums(archive_dir)
+        return result
+
+    monkeypatch.setattr(
+        weekly_pipeline_module,
+        "save_prepared_epl_weekly_pipeline_history",
+        capture_history,
+    )
+    monkeypatch.setattr(
+        weekly_pipeline_module,
+        "save_epl_weekly_pipeline_verification_sidecar",
+        capture_sidecar,
+    )
+
+    result = run_epl_weekly_pipeline(
+        **paths,
+        run_at=FIXED_RUN_AT,
+        actions=_actions(calls),
+    )
+
+    assert result["summary"]["sidecar_verification_status"] == "Verified"
+    pipeline_dir = Path(sealed["pipeline_dir"])
+    sidecar_dir = Path(sealed["sidecar_dir"])
+    assert _tree_checksums(pipeline_dir) == sealed["pipeline_checksums"]
+    assert _tree_checksums(sidecar_dir) == sealed["sidecar_checksums"]
+    assert not Path(result["summary"]["sidecar_verification_report_path"]).is_relative_to(
+        sidecar_dir
+    )
 
 
 def test_stale_core_data_blocks_card_with_needs_data_refresh(tmp_path) -> None:
@@ -702,4 +919,8 @@ def test_dashboard_home_exposes_weekly_pipeline_button_and_summary() -> None:
     assert '"epl_weekly_pipeline.md"' in app_source
     assert "receipt_verification_verdict" in app_source
     assert "receipt_verification_mismatch_count" in app_source
+    assert "sidecar_verification_verdict" in app_source
+    assert "sidecar_verification_original_id" in app_source
+    assert "sidecar_verification_recalculated_id" in app_source
+    assert "sidecar_verification_report_path" in app_source
     assert "apply_epl_weekly_pipeline" not in app_source

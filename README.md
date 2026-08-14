@@ -836,9 +836,10 @@ freshness, validates current odds, checks 100% odds completeness, generates and
 archives the gated Thursday card, compares the latest two archives when they
 exist, builds the decision queue, checks ledger health, refreshes the ledger
 summary, generates tier performance, seals the weekly pipeline archive, and
-immediately verifies that exact new archive. A first archive is useful on its
-own; comparison and the decision queue simply wait until a second snapshot
-exists.
+immediately verifies that exact new archive. It then creates a checksum-bound
+verification sidecar and independently verifies that exact new sidecar. A first
+archive is useful on its own; comparison and the decision queue simply wait
+until a second snapshot exists.
 
 The pipeline blocks card generation when core data is stale, odds are missing,
 serious validation issues exist, or expected odds rows are incomplete. It never
@@ -904,7 +905,14 @@ data/outputs/epl_weekly_pipeline_verification_sidecar.md
 data/outputs/epl_weekly_pipeline_verification_sidecar.csv
 ```
 
-Before Week 1 review, independently verify the latest archived sidecar:
+The weekly command immediately verifies the exact sidecar folder returned by
+that archive operation; it does not scan for a different latest folder. The
+live pipeline JSON, Markdown, and CSV include the sidecar verification verdict
+and status, original and recalculated sidecar receipt IDs, mismatch count,
+verification report path, and verified sidecar archive path. The sealed
+pipeline archive and sealed sidecar archive are not rewritten afterward.
+
+To manually recheck the latest sidecar later, run:
 
 ```bash
 python scripts/verify_epl_weekly_pipeline_verification_sidecar.py
@@ -948,9 +956,9 @@ Read the final verdict this way:
 A checksum mismatch means the current bytes differ from those recorded by the
 sidecar. Stop and inspect or rerun the weekly pipeline before relying on that
 evidence. The `Verify Weekly Verification Sidecar` dashboard button performs
-the same read-only check. Home shows the latest verdict, original/recalculated
-sidecar IDs, and mismatch count; `Archives & Comparisons` shows the full report
-and verification table.
+the same read-only check. Home shows the verdict bound to the latest weekly run,
+original/recalculated sidecar IDs, mismatch count, and report path; `Archives &
+Comparisons` shows the full report and verification table.
 
 You can regenerate either report-only step from Terminal:
 
@@ -959,8 +967,9 @@ python scripts/archive_epl_weekly_pipeline.py
 python scripts/compare_epl_weekly_pipeline_runs.py
 ```
 
-The weekly command already performs this check. To manually recheck the latest
-receipt or inspect an older one, run:
+The weekly command already verifies both its sealed pipeline receipt and its
+sealed verification sidecar. To manually recheck the latest evidence or inspect
+an older one, run:
 
 ```bash
 python scripts/verify_epl_weekly_pipeline_receipt.py
@@ -991,11 +1000,12 @@ unreadable evidence. Home shows the latest sidecar verdict, receipt ID, and
 archive path. `Archives & Comparisons` shows recent sidecars and the latest
 sidecar report. These displays are read-only.
 
-For Week 1, a verified first archive plus an archived sidecar gives you a sealed
-baseline even though comparison still says `Missing prior run`. If the sidecar
-says `not ready`, fix the stated missing odds/data issue and rerun the weekly
-pipeline. If it says `missing` or `failed`, inspect the latest sidecar report and
-rerun the weekly pipeline before relying on that proof.
+For Week 1, a verified first archive plus a verified sidecar gives you a sealed
+baseline even though comparison still says `Missing prior run`. Missing odds can
+produce `Weekly verification sidecar not ready` with zero mismatches: the proof
+is intact, but there is no card-ready run yet. Fix the stated odds/data issue and
+rerun. A `changed`, `missing`, `malformed`, or referenced-archive verdict fails
+closed and should be inspected before relying on that proof.
 
 The automatic verdicts mean:
 

@@ -584,6 +584,64 @@ and uploads all reports. The Odds Import dashboard only writes/displays these
 reports; it cannot edit policy, allowlist the provider, run live providers, or
 enable cron.
 
+### Archive a verified gate receipt
+
+Preserve the exact gate review package after receipt verification:
+
+```bash
+python scripts/archive_provider_policy_pr_gate_verification.py --provider odds_api
+```
+
+The command copies the gate and receipt-verification JSON, Markdown, and CSV
+reports, plus available allowlist bundle-verification, conformance, preview, and
+human-receipt-verification reports. Dated packages are stored at:
+
+```text
+data/outputs/archive/provider_policy_pr_gate_verifications/YYYY-MM-DD/HHMMSS_PROVIDER/
+```
+
+Latest-run summaries are also written to:
+
+```text
+data/outputs/provider_policy_pr_gate_verification_archive.json
+data/outputs/provider_policy_pr_gate_verification_archive.md
+data/outputs/provider_policy_pr_gate_verification_archive.csv
+```
+
+The archive records the provider, verification verdict, gate receipt IDs,
+base/head/merge-base SHAs, changed-file/evidence/policy digests, and available
+GitHub PR number/URL, run ID/attempt, workflow, job, actor, and repository. It
+re-hashes every copied file. Canonical sorted metadata and file checksums produce
+the deterministic archive receipt; `archived_at` is not part of the identity,
+so identical review evidence and PR/run metadata produce the same receipt ID.
+Changed evidence or metadata produces a different ID.
+
+Only `Gate receipt verified for PR approval` can create an approval-ready
+archive. Non-passing or incomplete runs can still preserve a diagnostic package,
+but the verdict says it is not approval-ready. The archive does not edit policy,
+allowlist a provider, promote staging, or enable cron.
+
+### Make the PR gate required
+
+The workflow runs on every pull request, not only policy-changing pull requests.
+That guarantees the stable **Provider Policy PR Gate** job reports either a pass
+or a safe not-applicable result and can be selected as a required check.
+
+A repository administrator must configure this manually in GitHub:
+
+1. Open **Settings > Rules > Rulesets** for the repository (or **Branches >
+   Branch protection rules** on repositories using the older settings).
+2. Create or edit the rule targeting `main`.
+3. Enable required status checks.
+4. Select **Provider Policy PR Gate**.
+5. Save the rule after reviewing its effect on other pull requests.
+
+No script or workflow changes branch protection automatically. Repository rules
+are an administrative control, while this project only supplies the stable,
+secret-free, PR-only check. A pass validates evidence for review; the provider is
+allowlisted only if the separate human-reviewed policy PR is merged. Cron remains
+disabled until an independent later decision.
+
 If you prepare staging files without the adapter, start from the older staging
 templates and complete `staging_provenance_template.json` manually. Never put
 credentials in provenance. Supported provider types are `manual_upload`,

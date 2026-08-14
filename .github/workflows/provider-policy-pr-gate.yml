@@ -2,32 +2,19 @@ name: Provider Policy PR Gate
 
 on:
   pull_request:
-    paths:
-      - data/manual/staging_provider_policy.json
-      - data/outputs/provider_allowlist_evidence_bundle_verification.json
-      - data/outputs/provider_allowlist_pr_conformance.json
-      - data/outputs/provider_allowlist_pr_preview.json
-      - data/outputs/provider_human_acceptance_receipt_verification.json
-      - data/outputs/provider_human_acceptance_receipt.json
-      - data/outputs/provider_acceptance_checklist.json
-      - data/outputs/provider_shadow_run_comparison.json
-      - data/outputs/archive/provider_allowlist_evidence_bundles/**
-      - scripts/check_provider_policy_pr_gate.py
-      - scripts/verify_provider_policy_pr_gate_receipt.py
-      - src/epl_betting_lab/reports/provider_policy_pr_gate.py
-      - src/epl_betting_lab/reports/provider_policy_pr_gate_receipt_verification.py
-      - src/epl_betting_lab/reports/provider_allowlist_evidence_bundle_verification.py
-      - src/epl_betting_lab/reports/provider_allowlist_pr_conformance.py
-      - .github/workflows/provider-policy-pr-gate.yml
 
 permissions:
   contents: read
 
 jobs:
   verify-provider-policy-evidence:
-    name: Verify provider policy evidence
+    name: Provider Policy PR Gate
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    env:
+      PROVIDER_POLICY_PR_NUMBER: ${{ github.event.pull_request.number }}
+      PROVIDER_POLICY_PR_URL: ${{ github.event.pull_request.html_url }}
+      PROVIDER_POLICY_JOB_NAME: Provider Policy PR Gate
 
     steps:
       - name: Check out pull request
@@ -63,6 +50,12 @@ jobs:
           python scripts/verify_provider_policy_pr_gate_receipt.py \
             --provider odds_api
 
+      - name: Archive provider policy PR gate verification
+        if: always()
+        run: |
+          python scripts/archive_provider_policy_pr_gate_verification.py \
+            --provider odds_api
+
       - name: Add gate receipt report to job summary
         if: always()
         shell: bash
@@ -85,6 +78,17 @@ jobs:
             echo "The receipt verifier did not produce a report." >> "$GITHUB_STEP_SUMMARY"
           fi
 
+      - name: Add gate verification archive to job summary
+        if: always()
+        shell: bash
+        run: |
+          if [[ -f data/outputs/provider_policy_pr_gate_verification_archive.md ]]; then
+            cat data/outputs/provider_policy_pr_gate_verification_archive.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "## Provider Policy PR Gate Verification Archive" >> "$GITHUB_STEP_SUMMARY"
+            echo "The verification archive did not produce a report." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
       - name: Upload provider policy gate reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -97,5 +101,9 @@ jobs:
             data/outputs/provider_policy_pr_gate_receipt_verification.json
             data/outputs/provider_policy_pr_gate_receipt_verification.md
             data/outputs/provider_policy_pr_gate_receipt_verification.csv
+            data/outputs/provider_policy_pr_gate_verification_archive.json
+            data/outputs/provider_policy_pr_gate_verification_archive.md
+            data/outputs/provider_policy_pr_gate_verification_archive.csv
+            data/outputs/archive/provider_policy_pr_gate_verifications/**
           if-no-files-found: warn
           retention-days: 14

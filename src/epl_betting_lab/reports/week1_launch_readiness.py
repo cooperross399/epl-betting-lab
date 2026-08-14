@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from datetime import date, datetime
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from typing import Any
 
 import pandas as pd
@@ -19,11 +20,13 @@ from epl_betting_lab.reports.current_odds_validation import (
     build_current_odds_validation,
     render_current_odds_validation_report,
 )
+from epl_betting_lab.reports.fixture_slate_preview import (
+    build_fixture_slate_preview,
+    save_fixture_slate_preview,
+)
 from epl_betting_lab.workflow_status import (
     CurrentOddsDateFreshness,
-    FixtureDateFreshness,
     inspect_current_odds_date_freshness,
-    inspect_fixture_date_freshness,
 )
 
 
@@ -40,6 +43,13 @@ READINESS_STATUSES = {
 ATTENTION_COLUMNS = [
     "final_readiness_status",
     "fixture_status",
+    "slate_status",
+    "slate_selection_mode",
+    "selected_matchweek_label",
+    "selected_date_from",
+    "selected_date_to",
+    "included_fixture_count",
+    "fixture_issue_count",
     "odds_file_status",
     "odds_completeness_percentage",
     "missing_odds_count",
@@ -60,7 +70,11 @@ ATTENTION_COLUMNS = [
     "details",
 ]
 
-MISSING_ODDS_ISSUES = {"missing_american_odds", "missing_expected_market_row"}
+MISSING_ODDS_ISSUES = {
+    "empty_current_odds_csv",
+    "missing_american_odds",
+    "missing_expected_market_row",
+}
 VALIDATION_DUPLICATES_FROM_COMPLETENESS = {
     "missing_american_odds",
     "non_numeric_american_odds",
@@ -85,6 +99,28 @@ def _json_records(frame: pd.DataFrame) -> list[dict[str, object]]:
     if frame.empty:
         return []
     return json.loads(frame.where(pd.notna(frame), "").to_json(orient="records"))
+
+
+def _normalized_fixture_key(frame: pd.DataFrame) -> pd.Series:
+    parsed_dates = pd.to_datetime(frame["date"], errors="coerce").dt.strftime("%Y-%m-%d")
+    return (
+        parsed_dates.fillna("")
+        + "|"
+        + frame["home_team"].fillna("").astype(str).str.strip().str.lower()
+        + "|"
+        + frame["away_team"].fillna("").astype(str).str.strip().str.lower()
+    )
+
+
+def _odds_for_selected_slate(
+    odds: pd.DataFrame,
+    selected_fixtures: pd.DataFrame,
+) -> pd.DataFrame:
+    required = {"date", "home_team", "away_team"}
+    if not required.issubset(odds.columns) or not required.issubset(selected_fixtures.columns):
+        return odds.iloc[0:0].copy()
+    selected_keys = set(_normalized_fixture_key(selected_fixtures))
+    return odds.loc[_normalized_fixture_key(odds).isin(selected_keys)].copy()
 
 
 def _attention_row(
@@ -113,12 +149,6 @@ def _attention_row(
         "recommended_action": recommended_action,
         "details": details,
     }
-
-
-def _fixture_status_text(freshness: FixtureDateFreshness) -> str:
-    if freshness.status == "Fresh":
-        return f"Fresh ({freshness.today_or_future_fixtures or 0} upcoming match(es))"
-    return freshness.status or "Not checked"
 
 
 def _odds_status_text(
@@ -192,6 +222,7 @@ def _render_markdown(summary: dict[str, object], attention: pd.DataFrame) -> str
     ] if not attention.empty else attention
     fixture_rows = attention[attention["category"] == "Fixtures"] if not attention.empty else attention
     missing_books = attention[attention["category"] == "Missing book"] if not attention.empty else attention
+    selected_fixtures = pd.DataFrame(summary.get("selected_fixtures", []))
     table_columns = [
         "date",
         "home_team",
@@ -211,6 +242,7 @@ def _render_markdown(summary: dict[str, object], attention: pd.DataFrame) -> str
         "## Launch summary",
         "",
         f"- Final readiness status: **{summary['status']}**",
+        f"- Selected slate status: **{summary['slate_status']}**",
         f"- Fixture status: **{summary['fixture_status']}**",
         f"- Odds file status: **{summary['odds_file_status']}**",
         f"- Odds completeness: **{float(summary['odds_completeness_percentage']):.1%}**",
@@ -228,13 +260,42 @@ def _render_markdown(summary: dict[str, object], attention: pd.DataFrame) -> str
         "## Fixtures",
         "",
         f"- File: `{summary['fixtures_path']}`",
-        f"- Upcoming matches found: {int(summary['upcoming_fixture_count'])}",
-        f"- Week 1 matches found when matchweek data is available: {int(summary['week1_fixture_count'])}",
+        f"- Selection mode: {summary['slate_selection_mode']}",
+        f"- Target matchweek: {summary['selected_matchweek_label'] or 'Not available'}",
+        (
+            "- Selected date window: "
+            f"{summary['selected_date_from'] or 'Open'} to {summary['selected_date_to'] or 'Open'}"
+        ),
+        f"- Included fixtures: {int(summary['included_fixture_count'])}",
+        f"- Excluded past fixtures: {int(summary['excluded_past_fixture_count'])}",
+        f"- Excluded later fixtures: {int(summary['excluded_future_fixture_count'])}",
+        f"- Fixture issues: {int(summary['fixture_issue_count'])}",
         f"- Earliest fixture date: {summary['earliest_fixture_date'] or 'Not available'}",
         f"- Latest fixture date: {summary['latest_fixture_date'] or 'Not available'}",
+        f"- First included fixture: {summary['first_fixture'] or 'Not available'}",
+        f"- Last included fixture: {summary['last_fixture'] or 'Not available'}",
+        (
+            "- Blank template created from this selected slate: "
+            f"{'Yes' if summary['template_created_from_slate'] else 'No'}"
+        ),
         f"- Fixture note: {summary['fixture_note']}",
         "",
+        "### Included matches",
+        "",
     ]
+    included_columns = [
+        column
+        for column in ["date", "home_team", "away_team", "matchweek", "week"]
+        if column in selected_fixtures.columns
+    ]
+    lines.extend(
+        [
+            selected_fixtures[included_columns].to_markdown(index=False)
+            if not selected_fixtures.empty
+            else "No matches are currently confirmed for template generation.",
+            "",
+        ]
+    )
     if not fixture_rows.empty:
         lines.extend([fixture_rows[table_columns].to_markdown(index=False), ""])
 
@@ -265,6 +326,18 @@ def _render_markdown(summary: dict[str, object], attention: pd.DataFrame) -> str
             "",
             "```bash",
             "python scripts/run_week1_launch_readiness.py",
+            "```",
+            "",
+            "Choose an inclusive date window when needed:",
+            "",
+            "```bash",
+            "python scripts/run_week1_launch_readiness.py --date-from YYYY-MM-DD --date-to YYYY-MM-DD",
+            "```",
+            "",
+            "Or select a labeled matchweek when the fixture CSV contains `matchweek` or `week`:",
+            "",
+            "```bash",
+            "python scripts/run_week1_launch_readiness.py --matchweek 1",
             "```",
             "",
             "Run the weekly pipeline only after this report says Ready for weekly pipeline:",
@@ -310,6 +383,13 @@ def _write_outputs(
     for column, value in {
         "final_readiness_status": summary["status"],
         "fixture_status": summary["fixture_status"],
+        "slate_status": summary["slate_status"],
+        "slate_selection_mode": summary["slate_selection_mode"],
+        "selected_matchweek_label": summary["selected_matchweek_label"],
+        "selected_date_from": summary["selected_date_from"],
+        "selected_date_to": summary["selected_date_to"],
+        "included_fixture_count": summary["included_fixture_count"],
+        "fixture_issue_count": summary["fixture_issue_count"],
         "odds_file_status": summary["odds_file_status"],
         "odds_completeness_percentage": summary["odds_completeness_percentage"],
         "missing_odds_count": summary["missing_odds_count"],
@@ -356,6 +436,21 @@ def _base_summary(
         "fixture_status": "Not checked",
         "fixture_note": "Fixture checks have not run yet.",
         "fixtures_path": str(fixtures_path),
+        "slate_status": "Blocked",
+        "slate_selection_mode": "Not checked",
+        "selected_matchweek_label": "",
+        "selected_date_from": "",
+        "selected_date_to": "",
+        "included_fixture_count": 0,
+        "excluded_past_fixture_count": 0,
+        "excluded_future_fixture_count": 0,
+        "fixture_issue_count": 0,
+        "first_fixture": "",
+        "last_fixture": "",
+        "selected_fixtures": [],
+        "template_created_from_slate": False,
+        "fixture_slate_preview_paths": {},
+        "slate_next_human_action": "",
         "upcoming_fixture_count": 0,
         "week1_fixture_count": 0,
         "earliest_fixture_date": "",
@@ -374,6 +469,8 @@ def _base_summary(
         "missing_book_count": 0,
         "stale_odds_row_count": 0,
         "current_odds_row_count": 0,
+        "odds_rows_in_selected_slate": 0,
+        "odds_rows_outside_selected_slate": 0,
         "invalid_odds_date_row_count": 0,
         "earliest_odds_date": "",
         "latest_odds_date": "",
@@ -406,6 +503,10 @@ def _finish(
         template_created=bool(summary.get("template_created")),
         missing_books=int(summary.get("missing_book_count", 0)),
     )
+    if summary.get("slate_status") != "Slate ready" and summary.get(
+        "slate_next_human_action"
+    ):
+        summary["next_human_action"] = str(summary["slate_next_human_action"])
     return _write_outputs(summary, attention, output_dir)
 
 
@@ -416,6 +517,9 @@ def run_week1_launch_readiness(
     *,
     overwrite_template: bool = False,
     book: str = "",
+    date_from: date | None = None,
+    date_to: date | None = None,
+    matchweek: str | None = None,
     today: date | None = None,
     now: datetime | None = None,
 ) -> dict[str, object]:
@@ -431,136 +535,121 @@ def run_week1_launch_readiness(
         now=now,
     )
     attention: list[dict[str, object]] = []
+    slate_preview = build_fixture_slate_preview(
+        fixtures_path,
+        today=today,
+        date_from=date_from,
+        date_to=date_to,
+        matchweek=matchweek,
+        now=now,
+    )
+    slate_result = save_fixture_slate_preview(slate_preview, output_dir)
+    slate_summary = slate_result["summary"]
+    slate_rows = slate_result["rows"]
+    selected_fixtures = slate_result["included_fixtures"]
+    if not isinstance(slate_summary, dict):
+        raise TypeError("Fixture slate summary must be a dictionary.")
+    if not isinstance(slate_rows, pd.DataFrame) or not isinstance(selected_fixtures, pd.DataFrame):
+        raise TypeError("Fixture slate rows must be data frames.")
 
-    if not fixtures_path.exists():
-        summary["fixture_status"] = "Missing"
-        summary["fixture_note"] = "No upcoming fixtures file was found."
-        summary["odds_file_status"] = (
-            "Existing file preserved" if current_odds_path.exists() else "Not created without fixtures"
-        )
-        attention.append(
-            _attention_row(
-                category="Fixtures",
-                severity="error",
-                issue="missing_upcoming_fixtures",
-                recommended_action="Add current Week 1 fixtures before creating an odds template.",
-                details=f"Missing {fixtures_path}.",
-            )
-        )
-        return _finish(summary, attention, output_dir, status="Missing fixtures")
-
-    try:
-        fixtures = pd.read_csv(fixtures_path, dtype=str).fillna("")
-    except (OSError, UnicodeError, pd.errors.EmptyDataError, pd.errors.ParserError) as exc:
-        summary["fixture_status"] = "Unreadable"
-        summary["fixture_note"] = f"Upcoming fixtures could not be read: {exc}"
-        summary["odds_file_status"] = (
-            "Existing file preserved" if current_odds_path.exists() else "Not created without readable fixtures"
-        )
-        attention.append(
-            _attention_row(
-                category="Fixtures",
-                severity="error",
-                issue="unreadable_upcoming_fixtures",
-                recommended_action="Fix the fixture CSV, then rerun launch readiness.",
-                details=summary["fixture_note"],
-            )
-        )
-        return _finish(summary, attention, output_dir, status="Blocked")
-
-    required_fixture_columns = {"date", "home_team", "away_team"}
-    missing_fixture_columns = sorted(required_fixture_columns - set(fixtures.columns))
-    if fixtures.empty or missing_fixture_columns:
-        issue = "empty_upcoming_fixtures" if fixtures.empty else "missing_fixture_columns"
-        detail = (
-            "The upcoming fixtures file has no rows."
-            if fixtures.empty
-            else f"Missing required fixture column(s): {', '.join(missing_fixture_columns)}."
-        )
-        summary["fixture_status"] = "Needs refresh"
-        summary["fixture_note"] = detail
-        summary["odds_file_status"] = (
-            "Existing file preserved" if current_odds_path.exists() else "Not created from invalid fixtures"
-        )
-        attention.append(
-            _attention_row(
-                category="Fixtures",
-                severity="error",
-                issue=issue,
-                recommended_action="Replace the file with current Week 1 fixtures.",
-                details=detail,
-            )
-        )
-        return _finish(summary, attention, output_dir, status="Needs fixture refresh")
-
-    fixture_freshness = inspect_fixture_date_freshness(fixtures_path, today=today)
     summary.update(
         {
-            "fixture_status": _fixture_status_text(fixture_freshness),
-            "fixture_note": fixture_freshness.note,
-            "earliest_fixture_date": fixture_freshness.earliest_date,
-            "latest_fixture_date": fixture_freshness.latest_date,
-            "past_fixture_count": int(fixture_freshness.past_fixtures or 0),
-            "invalid_fixture_date_count": int(fixture_freshness.invalid_fixture_dates or 0),
+            "fixture_status": str(slate_summary["status"]),
+            "fixture_note": str(slate_summary["status_reason"]),
+            "slate_status": str(slate_summary["status"]),
+            "slate_selection_mode": str(slate_summary["selection_mode"]),
+            "selected_matchweek_label": str(
+                slate_summary.get("target_matchweek_label", "")
+            ),
+            "selected_date_from": str(slate_summary.get("selected_date_from", "")),
+            "selected_date_to": str(slate_summary.get("selected_date_to", "")),
+            "included_fixture_count": int(slate_summary["included_fixture_count"]),
+            "excluded_past_fixture_count": int(
+                slate_summary["excluded_past_fixture_count"]
+            ),
+            "excluded_future_fixture_count": int(
+                slate_summary["excluded_future_fixture_count"]
+            ),
+            "fixture_issue_count": int(slate_summary["fixture_issue_count"]),
+            "first_fixture": str(slate_summary.get("first_fixture", "")),
+            "last_fixture": str(slate_summary.get("last_fixture", "")),
+            "selected_fixtures": _json_records(selected_fixtures),
+            "upcoming_fixture_count": int(slate_summary["included_fixture_count"]),
+            "week1_fixture_count": int(slate_summary["included_fixture_count"]),
+            "earliest_fixture_date": str(
+                slate_summary.get("earliest_fixture_date", "")
+            ),
+            "latest_fixture_date": str(slate_summary.get("latest_fixture_date", "")),
+            "past_fixture_count": int(slate_summary["excluded_past_fixture_count"]),
+            "invalid_fixture_date_count": int(slate_summary["malformed_date_count"]),
+            "fixture_slate_preview_paths": {
+                "json": str(slate_result["json"]),
+                "markdown": str(slate_result["markdown"]),
+                "csv": str(slate_result["csv"]),
+            },
+            "slate_next_human_action": str(slate_summary["next_human_action"]),
         }
     )
-    if fixture_freshness.status != "Fresh":
-        summary["odds_file_status"] = (
-            "Existing file preserved" if current_odds_path.exists() else "Not created from stale/invalid fixtures"
-        )
-        attention.append(
-            _attention_row(
-                category="Fixtures",
-                severity="error",
-                issue="fixtures_not_fresh",
-                recommended_action="Refresh or fix fixture dates before creating/filling Week 1 odds.",
-                details=fixture_freshness.note,
-            )
-        )
-        return _finish(summary, attention, output_dir, status="Needs fixture refresh")
 
-    parsed_fixture_dates = pd.to_datetime(fixtures["date"], errors="coerce")
-    future_mask = parsed_fixture_dates.dt.date >= today
-    upcoming_fixtures = fixtures.loc[future_mask].copy()
-    blank_team_mask = (
-        upcoming_fixtures["home_team"].astype(str).str.strip().eq("")
-        | upcoming_fixtures["away_team"].astype(str).str.strip().eq("")
-    )
-    summary["upcoming_fixture_count"] = int(len(upcoming_fixtures))
-    week_column = next((column for column in ("matchweek", "week") if column in upcoming_fixtures.columns), None)
-    summary["week1_fixture_count"] = (
-        int(upcoming_fixtures[week_column].astype(str).str.strip().eq("1").sum())
-        if week_column
-        else int(len(upcoming_fixtures))
-    )
-    if upcoming_fixtures.empty or blank_team_mask.any():
-        detail = (
-            "No current/upcoming fixture rows remain after date filtering."
-            if upcoming_fixtures.empty
-            else f"{int(blank_team_mask.sum())} upcoming fixture row(s) have a blank team name."
+    issue_rows = slate_rows[
+        slate_rows["disposition"].isin(
+            ["Fixture date issue", "Fixture team issue", "Duplicate fixture"]
         )
-        summary["fixture_status"] = "Needs refresh"
-        summary["fixture_note"] = detail
-        summary["odds_file_status"] = (
-            "Existing file preserved" if current_odds_path.exists() else "Not created from invalid fixtures"
-        )
+    ]
+    for _, row in issue_rows.iterrows():
         attention.append(
             _attention_row(
                 category="Fixtures",
                 severity="error",
-                issue="invalid_upcoming_fixture_rows",
-                recommended_action="Fix the upcoming fixture rows before creating/filling odds.",
-                details=detail,
+                issue=_clean(row.get("disposition")).lower().replace(" ", "_"),
+                recommended_action="Fix this fixture row, then confirm the slate again.",
+                details=_clean(row.get("reason")),
+                source=row,
             )
         )
-        return _finish(summary, attention, output_dir, status="Needs fixture refresh")
+
+    if slate_summary["status"] != "Slate ready":
+        if not attention:
+            issue = (
+                "missing_upcoming_fixtures"
+                if not fixtures_path.exists()
+                else str(slate_summary["status"]).lower().replace(" ", "_")
+            )
+            attention.append(
+                _attention_row(
+                    category="Fixtures",
+                    severity="error",
+                    issue=issue,
+                    recommended_action=str(slate_summary["next_human_action"]),
+                    details=str(slate_summary["status_reason"]),
+                )
+            )
+        summary["odds_file_status"] = (
+            "Existing file preserved"
+            if current_odds_path.exists()
+            else "Not created without a ready slate"
+        )
+        if not fixtures_path.exists():
+            summary["fixture_status"] = "Missing"
+            status = "Missing fixtures"
+        elif slate_summary["status"] in {
+            "Empty slate",
+            "Needs fixture refresh",
+            "Fixture date issues",
+            "Fixture team issues",
+            "Duplicate fixtures",
+        }:
+            status = "Needs fixture refresh"
+        else:
+            status = "Blocked"
+        return _finish(summary, attention, output_dir, status=status)
 
     template_created = False
     template_overwritten = False
     if not current_odds_path.exists() or overwrite_template:
         try:
             _, template, _ = create_current_odds_template(
-                upcoming_fixtures,
+                selected_fixtures,
                 current_odds_path,
                 overwrite=overwrite_template,
                 book=book,
@@ -597,19 +686,31 @@ def run_week1_launch_readiness(
 
     summary["template_created"] = template_created
     summary["template_overwritten"] = template_overwritten
+    summary["template_created_from_slate"] = template_created
+    slate_summary["template_created_from_slate"] = template_created
+    slate_summary["template_path"] = str(current_odds_path) if template_created else ""
+    save_fixture_slate_preview(slate_preview, output_dir)
 
+    validation_fixtures = slate_rows.loc[
+        ~slate_rows["has_date_issue"] & ~slate_rows["has_team_issue"],
+        ["date", "home_team", "away_team"],
+    ].drop_duplicates()
     try:
         odds = pd.read_csv(current_odds_path, dtype=str).fillna("")
         odds_freshness = inspect_current_odds_date_freshness(current_odds_path, today=today)
         validation = build_current_odds_validation(
             current_odds_path,
             matches=pd.DataFrame(),
-            fixtures=upcoming_fixtures,
+            fixtures=validation_fixtures,
         )
-        completeness, completeness_summary = build_current_odds_completeness(
-            current_odds_path,
-            fixtures=upcoming_fixtures,
-        )
+        scoped_odds = _odds_for_selected_slate(odds, selected_fixtures)
+        with TemporaryDirectory(prefix="epl-week1-slate-") as temporary_dir:
+            scoped_odds_path = Path(temporary_dir) / "current_odds.csv"
+            scoped_odds.to_csv(scoped_odds_path, index=False)
+            completeness, completeness_summary = build_current_odds_completeness(
+                scoped_odds_path,
+                fixtures=selected_fixtures,
+            )
     except (OSError, UnicodeError, pd.errors.EmptyDataError, pd.errors.ParserError) as exc:
         summary["odds_file_status"] = f"Unreadable: {exc}"
         attention.append(
@@ -629,6 +730,8 @@ def run_week1_launch_readiness(
         template_overwritten=template_overwritten,
     )
     summary["current_odds_row_count"] = int(len(odds))
+    summary["odds_rows_in_selected_slate"] = int(len(scoped_odds))
+    summary["odds_rows_outside_selected_slate"] = int(len(odds) - len(scoped_odds))
     summary["stale_odds_row_count"] = int(odds_freshness.past_rows or 0)
     summary["invalid_odds_date_row_count"] = int(odds_freshness.invalid_date_rows or 0)
     summary["earliest_odds_date"] = odds_freshness.earliest_date
@@ -671,9 +774,9 @@ def run_week1_launch_readiness(
 
     for _, row in validation.iterrows():
         issue = _clean(row.get("issue"))
-        if issue == "missing_american_odds":
+        if issue in {"empty_current_odds_csv", "missing_american_odds"}:
             category = "Missing odds"
-            action = "Enter a real sportsbook American price."
+            action = "Enter the missing real sportsbook American prices."
         elif issue == "missing_book":
             category = "Missing book"
             action = "Add the sportsbook name when known."

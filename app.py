@@ -502,7 +502,7 @@ def render_main_actions() -> None:
         width="stretch",
         help=(
             "Check fixtures and odds readiness. If current_odds.csv is missing, create "
-            "a blank non-overwriting template from current fixtures."
+            "a blank non-overwriting template from the confirmed next fixture slate."
         ),
     ):
         run_dashboard_action("Week 1 Launch Readiness", run_week1_launch_readiness)
@@ -560,6 +560,14 @@ def render_week1_launch_readiness_summary() -> None:
             missing_odds = int(summary.get("missing_odds_count", 0) or 0)
         except (TypeError, ValueError):
             missing_odds = 0
+        try:
+            included_fixtures = int(summary.get("included_fixture_count", 0) or 0)
+        except (TypeError, ValueError):
+            included_fixtures = 0
+        try:
+            fixture_issues = int(summary.get("fixture_issue_count", 0) or 0)
+        except (TypeError, ValueError):
+            fixture_issues = 0
         fixture_metric = fixture_status.split(" (", 1)[0]
         if odds_status.startswith("Blank template"):
             odds_metric = "Blank template"
@@ -578,6 +586,40 @@ def render_week1_launch_readiness_summary() -> None:
         metrics[3].metric("Missing odds", missing_odds)
         st.caption(f"Fixtures: {fixture_status}. Odds file: {odds_status}.")
 
+        slate_status = str(summary.get("slate_status", "Not checked"))
+        date_from = str(summary.get("selected_date_from", "") or "Open")
+        date_to = str(summary.get("selected_date_to", "") or "Open")
+        slate_metrics = st.columns(3)
+        slate_metrics[0].metric("Selected slate", slate_status)
+        slate_metrics[1].metric("Included fixtures", included_fixtures)
+        slate_metrics[2].metric("Fixture issues", fixture_issues)
+        st.caption(f"Selected window: {date_from} to {date_to}.")
+        first_fixture = str(summary.get("first_fixture", "") or "Not available")
+        last_fixture = str(summary.get("last_fixture", "") or "Not available")
+        st.caption(f"First: {first_fixture}. Last: {last_fixture}.")
+
+        slate_rows = read_output_csv("fixture_slate_preview.csv")
+        with st.expander("Included Week 1 matches"):
+            if slate_rows is None:
+                st.info("Run Week 1 Launch Readiness to create the fixture slate preview.")
+            elif slate_rows.empty or "disposition" not in slate_rows.columns:
+                st.info("No confirmed fixture rows are available yet.")
+            else:
+                included = slate_rows[slate_rows["disposition"] == "Included"]
+                display_columns = [
+                    column
+                    for column in ["date", "home_team", "away_team", "matchweek"]
+                    if column in included.columns
+                ]
+                if included.empty:
+                    st.info("No fixtures are included in the current selected slate.")
+                else:
+                    st.dataframe(
+                        included[display_columns],
+                        width="stretch",
+                        hide_index=True,
+                    )
+
         next_action = str(
             summary.get(
                 "next_human_action",
@@ -593,7 +635,7 @@ def render_week1_launch_readiness_summary() -> None:
 
         if bool(summary.get("template_created")):
             st.caption(
-                "A blank current_odds.csv template was created from current/upcoming fixtures. "
+                "A blank current_odds.csv template was created from the confirmed selected slate. "
                 "No prices were filled automatically."
             )
         st.caption(
@@ -603,6 +645,11 @@ def render_week1_launch_readiness_summary() -> None:
         render_markdown_expander(
             "Full Week 1 launch report",
             "week1_launch_readiness.md",
+            command,
+        )
+        render_markdown_expander(
+            "Fixture slate preview",
+            "fixture_slate_preview.md",
             command,
         )
 

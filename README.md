@@ -831,13 +831,27 @@ Before the first weekly pipeline run, use one safe setup command:
 python scripts/run_week1_launch_readiness.py
 ```
 
-The command checks that `data/manual/upcoming_fixtures.csv` contains current or
-future Week 1 matches, then checks `data/manual/current_odds.csv` with the
-existing date-freshness, validation, and completeness rules. If the odds file
-does not exist and fixtures are usable, it creates a blank seven-market row
-template for each upcoming fixture. Every `american_odds` value stays blank.
-Fill those cells with real sportsbook prices and add book names, then run the
-same readiness command again.
+The command first creates a matchweek-aware fixture slate preview. When the CSV
+has `matchweek` or `week`, it selects the label attached to the earliest
+upcoming fixture. Otherwise, it selects the first upcoming date cluster and
+stops before the next fixture gap longer than three days. The report shows the
+selected window, included matches, past and later excluded matches, malformed
+dates, missing teams, and duplicates before any template is created.
+
+Use an explicit inclusive date window or a labeled matchweek when needed:
+
+```bash
+python scripts/run_week1_launch_readiness.py --date-from 2026-08-21 --date-to 2026-08-24
+python scripts/run_week1_launch_readiness.py --matchweek 1
+```
+
+`--matchweek` fails with an explanation when the fixture file does not contain
+a supported matchweek field. An empty slate, all-past slate, malformed date,
+missing selected team, or selected duplicate blocks template creation. If the
+odds file does not exist and the slate is `Slate ready`, the workflow creates a
+blank seven-market row template using only those confirmed fixtures. Every
+`american_odds` value stays blank. Fill those cells with real sportsbook
+prices and add book names, then run the same readiness command again.
 
 An existing `current_odds.csv` is always preserved by default. Intentional
 replacement is available only from Terminal:
@@ -858,7 +872,14 @@ rows, malformed dates, and stale past-match odds. It writes:
 data/outputs/week1_launch_readiness.json
 data/outputs/week1_launch_readiness.md
 data/outputs/week1_launch_readiness.csv
+data/outputs/fixture_slate_preview.json
+data/outputs/fixture_slate_preview.md
+data/outputs/fixture_slate_preview.csv
 ```
+
+Slate statuses are `Slate ready`, `Empty slate`, `Needs fixture refresh`,
+`Fixture date issues`, `Fixture team issues`, `Duplicate fixtures`, or
+`Blocked`.
 
 Its final status is `Ready for weekly pipeline`, `Needs odds filled`, `Needs
 fixture refresh`, `Needs odds fixes`, `Missing fixtures`, `Blocked`, or
@@ -869,9 +890,11 @@ python scripts/run_epl_weekly_pipeline.py
 ```
 
 Home also includes `Run Week 1 Launch Readiness` and a compact status panel for
-fixtures, the odds file, completion percentage, missing prices, and the exact
-next human action. The setup never invents odds, places bets, runs providers,
-applies settlement, allowlists providers, enables cron, or changes the model.
+the selected slate/window, included fixture and issue counts, first/last match,
+the odds file, completion percentage, missing prices, and the exact next human
+action. Expand `Included Week 1 matches` or `Fixture slate preview` to confirm
+the slate. The setup never invents odds, places bets, runs providers, applies
+settlement, allowlists providers, enables cron, or changes the model.
 
 ### Main weekly EPL command
 

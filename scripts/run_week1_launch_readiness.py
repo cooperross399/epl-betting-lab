@@ -2,9 +2,19 @@
 from __future__ import annotations
 
 import argparse
+from datetime import date
 from pathlib import Path
 
 from epl_betting_lab.reports.week1_launch_readiness import run_week1_launch_readiness
+
+
+def _iso_date(value: str) -> date:
+    try:
+        return date.fromisoformat(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError(
+            f"Expected YYYY-MM-DD, received {value!r}."
+        ) from exc
 
 
 def parse_args() -> argparse.Namespace:
@@ -35,6 +45,20 @@ def parse_args() -> argparse.Namespace:
         help="Optional sportsbook name to prefill when a blank template is created.",
     )
     parser.add_argument(
+        "--date-from",
+        type=_iso_date,
+        help="Inclusive slate start date in YYYY-MM-DD format.",
+    )
+    parser.add_argument(
+        "--date-to",
+        type=_iso_date,
+        help="Inclusive slate end date in YYYY-MM-DD format.",
+    )
+    parser.add_argument(
+        "--matchweek",
+        help="Select this matchweek label when the fixture CSV has matchweek or week.",
+    )
+    parser.add_argument(
         "--overwrite-template",
         action="store_true",
         help=(
@@ -58,9 +82,20 @@ def main() -> int:
         output_dir=args.output_dir,
         overwrite_template=args.overwrite_template,
         book=args.book,
+        date_from=args.date_from,
+        date_to=args.date_to,
+        matchweek=args.matchweek,
     )
     summary = result["summary"]
     print(f"Final readiness status: {result['status']}")
+    print(f"Selected slate status: {summary['slate_status']}")
+    print(f"Selection mode: {summary['slate_selection_mode']}")
+    print(
+        "Selected window: "
+        f"{summary['selected_date_from'] or 'Open'} to {summary['selected_date_to'] or 'Open'}"
+    )
+    print(f"Included fixtures: {summary['included_fixture_count']}")
+    print(f"Fixture issues: {summary['fixture_issue_count']}")
     print(f"Fixture status: {summary['fixture_status']}")
     print(f"Odds file status: {summary['odds_file_status']}")
     print(f"Odds completeness: {float(summary['odds_completeness_percentage']):.1%}")

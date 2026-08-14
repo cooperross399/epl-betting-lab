@@ -57,10 +57,16 @@ def test_missing_odds_file_creates_blank_template_safely(tmp_path) -> None:
     assert created["american_odds"].eq("").all()
     assert (output_dir / "current_odds_validation.csv").exists()
     assert (output_dir / "current_odds_completeness.csv").exists()
+    assert (output_dir / "fixture_slate_preview.json").exists()
+    assert (output_dir / "fixture_slate_preview.md").exists()
+    assert (output_dir / "fixture_slate_preview.csv").exists()
     assert result["json"].exists()
     assert result["markdown"].exists()
     assert result["csv"].exists()
     assert "never invents prices" in result["markdown"].read_text(encoding="utf-8")
+    readiness_rows = pd.read_csv(result["csv"])
+    assert readiness_rows.iloc[0]["slate_status"] == "Slate ready"
+    assert readiness_rows.iloc[0]["included_fixture_count"] == 1
 
 
 def test_existing_odds_file_is_not_overwritten_by_default(tmp_path) -> None:
@@ -139,6 +145,126 @@ def test_all_past_fixtures_need_refresh_without_creating_odds(tmp_path) -> None:
 
     assert result["status"] == "Needs fixture refresh"
     assert "all in the past" in result["summary"]["fixture_note"]
+    assert not odds_path.exists()
+
+
+def test_template_uses_only_default_selected_slate(tmp_path) -> None:
+    fixtures_path = tmp_path / "upcoming_fixtures.csv"
+    odds_path = tmp_path / "current_odds.csv"
+    pd.DataFrame(
+        [
+            {
+                "date": "2026-08-21",
+                "home_team": "Arsenal",
+                "away_team": "Coventry",
+            },
+            {
+                "date": "2026-08-28",
+                "home_team": "Liverpool",
+                "away_team": "Everton",
+            },
+        ]
+    ).to_csv(fixtures_path, index=False)
+
+    result = run_week1_launch_readiness(
+        fixtures_path,
+        odds_path,
+        tmp_path / "outputs",
+        today=TODAY,
+    )
+
+    template = pd.read_csv(odds_path, dtype=str).fillna("")
+    assert result["status"] == "Needs odds filled"
+    assert result["summary"]["included_fixture_count"] == 1
+    assert result["summary"]["excluded_future_fixture_count"] == 1
+    assert result["summary"]["template_created_from_slate"] is True
+    assert len(template) == 7
+    assert set(template["home_team"]) == {"Arsenal"}
+
+
+def test_date_window_drives_template_generation(tmp_path) -> None:
+    fixtures_path = tmp_path / "upcoming_fixtures.csv"
+    odds_path = tmp_path / "current_odds.csv"
+    pd.DataFrame(
+        [
+            {
+                "date": "2026-08-21",
+                "home_team": "Arsenal",
+                "away_team": "Coventry",
+            },
+            {
+                "date": "2026-08-28",
+                "home_team": "Liverpool",
+                "away_team": "Everton",
+            },
+        ]
+    ).to_csv(fixtures_path, index=False)
+
+    result = run_week1_launch_readiness(
+        fixtures_path,
+        odds_path,
+        tmp_path / "outputs",
+        date_from=date(2026, 8, 28),
+        date_to=date(2026, 8, 28),
+        today=TODAY,
+    )
+
+    template = pd.read_csv(odds_path, dtype=str).fillna("")
+    assert result["summary"]["selected_date_from"] == "2026-08-28"
+    assert result["summary"]["selected_date_to"] == "2026-08-28"
+    assert set(template["home_team"]) == {"Liverpool"}
+
+
+def test_matchweek_flag_drives_template_generation(tmp_path) -> None:
+    fixtures_path = tmp_path / "upcoming_fixtures.csv"
+    odds_path = tmp_path / "current_odds.csv"
+    pd.DataFrame(
+        [
+            {
+                "date": "2026-08-21",
+                "home_team": "Arsenal",
+                "away_team": "Coventry",
+                "matchweek": "1",
+            },
+            {
+                "date": "2026-08-28",
+                "home_team": "Liverpool",
+                "away_team": "Everton",
+                "matchweek": "2",
+            },
+        ]
+    ).to_csv(fixtures_path, index=False)
+
+    result = run_week1_launch_readiness(
+        fixtures_path,
+        odds_path,
+        tmp_path / "outputs",
+        matchweek="2",
+        today=TODAY,
+    )
+
+    template = pd.read_csv(odds_path, dtype=str).fillna("")
+    assert result["summary"]["selected_matchweek_label"] == "2"
+    assert result["summary"]["slate_selection_mode"] == "Matchweek"
+    assert set(template["home_team"]) == {"Liverpool"}
+
+
+def test_empty_selected_slate_does_not_create_template(tmp_path) -> None:
+    fixtures_path = tmp_path / "upcoming_fixtures.csv"
+    odds_path = tmp_path / "current_odds.csv"
+    _fixtures(fixtures_path)
+
+    result = run_week1_launch_readiness(
+        fixtures_path,
+        odds_path,
+        tmp_path / "outputs",
+        date_from=date(2026, 9, 1),
+        date_to=date(2026, 9, 2),
+        today=TODAY,
+    )
+
+    assert result["status"] == "Needs fixture refresh"
+    assert result["summary"]["slate_status"] == "Empty slate"
     assert not odds_path.exists()
 
 

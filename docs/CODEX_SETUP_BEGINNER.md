@@ -673,15 +673,29 @@ Before your first weekly pipeline run, start here:
 python scripts/run_week1_launch_readiness.py
 ```
 
-This command checks that `data/manual/upcoming_fixtures.csv` has current or
-future matches. It then checks `data/manual/current_odds.csv` for complete real
-prices, valid teams/markets/selections, book names, and stale match dates.
+This command first confirms the fixture slate. If the fixture file has a
+`matchweek` or `week` column, it selects the label on the earliest upcoming
+match. Otherwise, it selects the first upcoming cluster of dates. The report
+shows included matches, past matches, later excluded matches, date issues,
+missing teams, and duplicates before it considers creating an odds template.
 
-If `current_odds.csv` is missing, the command safely creates it from the
-upcoming fixtures. The new rows cover 1X2, total 2.5, and BTTS, but every odds
-cell is blank. The system never guesses or invents a price. Open the file, fill
-`american_odds` with real sportsbook prices, add the book names, and run the
-readiness command again.
+To choose the slate yourself, use an inclusive date window or an available
+matchweek label:
+
+```bash
+python scripts/run_week1_launch_readiness.py --date-from 2026-08-21 --date-to 2026-08-24
+python scripts/run_week1_launch_readiness.py --matchweek 1
+```
+
+If the fixture file has no matchweek field, the matchweek command stops safely
+and tells you to use dates instead. Empty, stale, malformed, incomplete, or
+duplicate selected slates do not create an odds template.
+
+If `current_odds.csv` is missing and the slate is ready, the command safely
+creates it from only the included fixtures. The new rows cover 1X2, total 2.5,
+and BTTS, but every odds cell is blank. The system never guesses or invents a
+price. Open the file, fill `american_odds` with real sportsbook prices, add the
+book names, and run the readiness command again.
 
 If `current_odds.csv` already exists, the command reads it without replacing
 it. The Home dashboard button has the same non-overwriting behavior. Only this
@@ -698,7 +712,14 @@ The report appears at:
 data/outputs/week1_launch_readiness.md
 data/outputs/week1_launch_readiness.json
 data/outputs/week1_launch_readiness.csv
+data/outputs/fixture_slate_preview.md
+data/outputs/fixture_slate_preview.json
+data/outputs/fixture_slate_preview.csv
 ```
+
+On Home, the Week 1 panel shows the selected window, included fixture count,
+fixture issue count, first and last match, and an expandable included-match
+table. Confirm that list before filling prices.
 
 Read the exact next action in the report. `Needs odds filled` means enter the
 listed real prices. `Needs odds fixes` means repair invalid, duplicate,

@@ -33,6 +33,7 @@ from epl_betting_lab.dashboard_actions import (
     run_current_odds_import_preview,
     run_current_odds_maintenance_preview,
     run_current_odds_validation,
+    run_epl_weekly_pipeline,
     run_github_manual_thursday_verification,
     run_ledger_health_check,
     run_odds_export_conversion_preview,
@@ -126,6 +127,17 @@ def read_output_csv(filename: str) -> pd.DataFrame | None:
     if not path.exists():
         return None
     return pd.read_csv(path)
+
+
+def read_output_json(filename: str) -> dict[str, object] | None:
+    path = OUTPUTS_DIR / filename
+    if not path.exists():
+        return None
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError):
+        return None
+    return payload if isinstance(payload, dict) else None
 
 
 def show_missing_report(filename: str, command: str) -> None:
@@ -293,6 +305,32 @@ def run_dashboard_post_thursday_review() -> None:
         st.rerun()
 
 
+def run_dashboard_weekly_pipeline() -> None:
+    with st.status("Running the safe Weekly EPL Pipeline", expanded=True) as status_panel:
+        def progress(step_name: str, step_status: str, message: str) -> None:
+            if step_status != "Running":
+                status_panel.write(f"**{step_name}:** {step_status}. {message}")
+
+        try:
+            result = run_epl_weekly_pipeline(progress=progress)
+        except Exception as exc:
+            status_panel.update(label="Weekly EPL Pipeline failed", state="error")
+            st.error("Weekly EPL Pipeline failed unexpectedly.")
+            st.exception(exc)
+            return
+
+        final_status = str(result["status"])
+        state = "error" if final_status == "Failed" else "complete"
+        status_panel.update(label=f"Weekly EPL Pipeline: {final_status}", state=state)
+        next_action = str(result["summary"]["recommended_next_action"])
+        if final_status == "Ready for card review":
+            st.success(next_action)
+        elif final_status == "Card generated with warnings":
+            st.warning(next_action)
+        else:
+            st.error(next_action)
+
+
 def render_workflow_checklist() -> None:
     status = build_workflow_status()
     counts = status["status"].value_counts().to_dict()
@@ -448,10 +486,19 @@ def render_command_center_card(command_center: ThursdayCommandCenter) -> None:
 
 def render_main_actions() -> None:
     st.subheader("Main actions")
+    if st.button(
+        "Run Weekly EPL Pipeline",
+        type="primary",
+        width="stretch",
+        help=(
+            "Run freshness, odds gates, the Thursday card package, ledger reports, "
+            "and tier performance without force or apply actions."
+        ),
+    ):
+        run_dashboard_weekly_pipeline()
     action_cols = st.columns(3)
     if action_cols[0].button(
         "Run Thursday readiness refresh",
-        type="primary",
         width="stretch",
     ):
         run_dashboard_refresh_sequence()
@@ -460,8 +507,59 @@ def render_main_actions() -> None:
     if action_cols[2].button("Generate tier performance report", width="stretch"):
         run_dashboard_action("Tier performance report", run_tier_performance_report)
     st.caption(
-        "These actions regenerate reports only. They do not force a card, apply an import, settle a bet, or place a bet."
+        "The weekly pipeline is the main report-only command. These actions do not force a card, "
+        "apply an import or settlement, edit manual files, run live providers, or place a bet."
     )
+
+
+def render_weekly_pipeline_summary() -> None:
+    command = "python scripts/run_epl_weekly_pipeline.py"
+    summary = read_output_json("epl_weekly_pipeline.json")
+    with st.container(border=True):
+        st.subheader("Latest Weekly EPL Pipeline")
+        if summary is None:
+            st.info(
+                "No weekly pipeline summary is available yet. Run the main button above or "
+                f"`{command}` from Terminal."
+            )
+            return
+
+        status = str(summary.get("status", "Blocked"))
+        card_counts = summary.get("card_counts", {})
+        if not isinstance(card_counts, dict):
+            card_counts = {}
+        queue_counts = summary.get("decision_queue_counts", {})
+        if not isinstance(queue_counts, dict):
+            queue_counts = {}
+        metrics = st.columns(4)
+        metrics[0].metric("Pipeline status", status)
+        metrics[1].metric("Best bets", int(card_counts.get("best_bets", 0) or 0))
+        metrics[2].metric("Leans", int(card_counts.get("leans", 0) or 0))
+        metrics[3].metric(
+            "Queue plays",
+            sum(int(value or 0) for value in queue_counts.values()),
+        )
+        recommendation = str(
+            summary.get(
+                "recommended_next_action",
+                "Review the detailed summary before trusting the Thursday card.",
+            )
+        )
+        if status == "Ready for card review":
+            st.success(recommendation)
+        elif status == "Failed":
+            st.error(recommendation)
+        else:
+            st.warning(recommendation)
+        st.caption(
+            "This summary is report-only. It did not edit odds or the ledger, use force mode, "
+            "apply settlement, run a live provider, enable cron, or place a bet."
+        )
+        render_markdown_expander(
+            "Full weekly pipeline summary",
+            "epl_weekly_pipeline.md",
+            command,
+        )
 
 
 def render_home() -> None:
@@ -471,6 +569,7 @@ def render_home() -> None:
     render_command_center_card(command_center)
     render_data_freshness(command_center)
     render_main_actions()
+    render_weekly_pipeline_summary()
     with st.expander("Weekly workflow file status", expanded=False):
         render_workflow_checklist()
 

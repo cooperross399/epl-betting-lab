@@ -665,6 +665,49 @@ archived card, then builds the decision queue. If you do not have at least two
 archived Thursday cards yet, it stops and explains that comparison is not
 available yet.
 
+### Main weekly EPL command
+
+Use this as the normal one-command weekly workflow:
+
+```bash
+python scripts/run_epl_weekly_pipeline.py
+```
+
+It automatically runs the safe steps in this order:
+
+1. Data freshness and workflow status.
+2. Current odds validation.
+3. Current odds completeness.
+4. Gated Thursday best-bets generation and dated archive.
+5. Latest-two archive comparison when two snapshots exist.
+6. Thursday decision queue when comparison succeeds.
+7. Bet ledger health check.
+8. Bet ledger summary.
+9. Tier performance report.
+
+The card step requires fresh historical/fixture inputs, no serious odds
+validation issues, and 100% expected odds completion. Missing or blocked inputs
+produce a clear final status instead of force-generating a card. On Week 1,
+the first card archive is still successful; comparison waits for your next
+snapshot.
+
+Read the final report here:
+
+```text
+data/outputs/epl_weekly_pipeline.md
+data/outputs/epl_weekly_pipeline.json
+data/outputs/epl_weekly_pipeline.csv
+```
+
+You can run the same safe workflow from Home with `Run Weekly EPL Pipeline`.
+Home then shows the latest status, best-bet/lean counts, decision-queue count,
+and recommended next human action.
+
+The pipeline does not import odds, edit `current_odds.csv` or the ledger, apply
+settlement, use force mode, archive/rollback stale odds, promote staging, run a
+live provider, allowlist a provider, enable cron, fabricate odds, or place a
+bet. Prices and all betting decisions remain manual.
+
 ### One safe Thursday Terminal command
 
 To run the whole report-only Thursday package in the correct order:
@@ -1272,9 +1315,10 @@ Use the sidebar sections:
 - `Archives & Comparisons` for saved cards, comparisons, and decision queue.
 - `Tools / Diagnostics` for projections, form, model views, and file checks.
 
-The three main Home buttons are:
+The main weekly button and focused Home buttons are:
 
 ```text
+Run Weekly EPL Pipeline
 Run Thursday readiness refresh
 Run post-refresh Thursday review
 Generate tier performance report

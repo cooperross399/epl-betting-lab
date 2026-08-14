@@ -904,6 +904,54 @@ data/outputs/epl_weekly_pipeline_verification_sidecar.md
 data/outputs/epl_weekly_pipeline_verification_sidecar.csv
 ```
 
+Before Week 1 review, independently verify the latest archived sidecar:
+
+```bash
+python scripts/verify_epl_weekly_pipeline_verification_sidecar.py
+```
+
+To inspect a specific older sidecar, pass its dated folder or metadata JSON:
+
+```bash
+python scripts/verify_epl_weekly_pipeline_verification_sidecar.py \
+  --sidecar-path data/outputs/archive/epl_weekly_pipeline_verifications/YYYY-MM-DD/HHMMSS_RECEIPT_ID/
+```
+
+The verifier re-hashes the sidecar JSON/Markdown/CSV views and all three copied
+automatic verification reports. It rebuilds the canonical sidecar checksum and
+`epl-weekly-verification-...` receipt ID, cross-checks the archived verifier
+verdict, receipt IDs, mismatch count, and archive path, then independently
+recalculates the referenced sealed pipeline receipt. Neither archive is changed.
+
+Verification writes only these separate reports:
+
+```text
+data/outputs/epl_weekly_pipeline_verification_sidecar_verification.json
+data/outputs/epl_weekly_pipeline_verification_sidecar_verification.md
+data/outputs/epl_weekly_pipeline_verification_sidecar_verification.csv
+```
+
+Read the final verdict this way:
+
+- `Weekly verification sidecar verified`: the sidecar, copied verifier reports,
+  deterministic sidecar receipt, and referenced sealed pipeline receipt match.
+- `Weekly verification sidecar changed`: sidecar metadata, a report view, copied
+  verification evidence, checksum, or receipt ID changed.
+- `Missing weekly verification sidecar`: no archived sidecar is available.
+- `Malformed weekly verification sidecar`: the sidecar metadata cannot be
+  safely interpreted.
+- `Referenced pipeline archive changed`: the bound sealed pipeline archive is
+  missing or no longer recalculates to its recorded receipt ID.
+- `Weekly verification sidecar not ready`: integrity evidence is preserved, but
+  the original weekly run or sidecar was not ready for card review.
+
+A checksum mismatch means the current bytes differ from those recorded by the
+sidecar. Stop and inspect or rerun the weekly pipeline before relying on that
+evidence. The `Verify Weekly Verification Sidecar` dashboard button performs
+the same read-only check. Home shows the latest verdict, original/recalculated
+sidecar IDs, and mismatch count; `Archives & Comparisons` shows the full report
+and verification table.
+
 You can regenerate either report-only step from Terminal:
 
 ```bash
@@ -917,6 +965,7 @@ receipt or inspect an older one, run:
 ```bash
 python scripts/verify_epl_weekly_pipeline_receipt.py
 python scripts/archive_epl_weekly_pipeline_verification.py
+python scripts/verify_epl_weekly_pipeline_verification_sidecar.py
 ```
 
 To verify a specific older receipt, provide its dated archive folder or archive

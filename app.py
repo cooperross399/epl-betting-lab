@@ -36,6 +36,7 @@ from epl_betting_lab.dashboard_actions import (
     run_epl_weekly_pipeline,
     run_epl_weekly_pipeline_comparison,
     run_epl_weekly_pipeline_receipt_verification,
+    run_epl_weekly_pipeline_verification_sidecar_verification,
     run_github_manual_thursday_verification,
     run_ledger_health_check,
     run_odds_export_conversion_preview,
@@ -587,6 +588,35 @@ def render_weekly_pipeline_summary() -> None:
             f"`{sidecar_receipt_id or 'Not available'}`."
         )
         st.caption(f"Sidecar archive: `{sidecar_archive_path or 'Not available'}`")
+        sidecar_verification = read_output_json(
+            "epl_weekly_pipeline_verification_sidecar_verification.json"
+        )
+        if sidecar_verification is None:
+            st.caption(
+                "Sidecar verification: Not checked. Open Archives & Comparisons to "
+                "verify the latest sidecar before Week 1 review."
+            )
+        else:
+            sidecar_check_verdict = str(
+                sidecar_verification.get("verdict", "Not checked")
+            )
+            sidecar_original_id = str(
+                sidecar_verification.get("original_sidecar_receipt_id", "")
+            ).strip()
+            sidecar_recalculated_id = str(
+                sidecar_verification.get("recalculated_sidecar_receipt_id", "")
+            ).strip()
+            sidecar_mismatches = int(
+                sidecar_verification.get("mismatch_count", 0) or 0
+            )
+            st.caption(
+                f"Sidecar verification: {sidecar_check_verdict}; mismatches/blockers: "
+                f"{sidecar_mismatches}."
+            )
+            st.caption(
+                f"Sidecar IDs: `{sidecar_original_id or 'Not available'}` / "
+                f"`{sidecar_recalculated_id or 'Not available'}`."
+            )
         st.caption(f"Change since previous run: {comparison_verdict}")
         important_changes = summary.get("important_changes_since_previous_run", [])
         if isinstance(important_changes, list) and important_changes:
@@ -1733,6 +1763,50 @@ def render_archives_and_comparisons() -> None:
         "python scripts/verify_epl_weekly_pipeline_receipt.py",
     )
     st.subheader("Weekly pipeline verification sidecars")
+    if st.button(
+        "Verify Weekly Verification Sidecar",
+        width="stretch",
+        help=(
+            "Re-hash the latest archived sidecar, its copied verifier reports, and "
+            "its referenced sealed pipeline receipt without editing either archive."
+        ),
+    ):
+        run_dashboard_action(
+            "Weekly verification sidecar verification",
+            run_epl_weekly_pipeline_verification_sidecar_verification,
+        )
+    sidecar_verification = read_output_json(
+        "epl_weekly_pipeline_verification_sidecar_verification.json"
+    )
+    if sidecar_verification is None:
+        st.caption(
+            "No sidecar verification report yet. The button checks the latest archive "
+            "without editing it."
+        )
+    else:
+        sidecar_verification_metrics = st.columns(2)
+        sidecar_verification_metrics[0].metric(
+            "Sidecar verification",
+            str(sidecar_verification.get("verdict", "Not checked")),
+        )
+        sidecar_verification_metrics[1].metric(
+            "Mismatches / blockers",
+            int(sidecar_verification.get("mismatch_count", 0) or 0),
+        )
+        st.caption(
+            "Sidecar receipt: "
+            f"`{sidecar_verification.get('original_sidecar_receipt_id') or 'Missing'}` "
+            "(recalculated: "
+            f"`{sidecar_verification.get('recalculated_sidecar_receipt_id') or 'Missing'}`)."
+        )
+        st.caption(
+            "Sidecar archive: "
+            f"`{sidecar_verification.get('sidecar_archive_path') or 'Missing'}`"
+        )
+        st.caption(
+            "Referenced pipeline archive: "
+            f"`{sidecar_verification.get('referenced_pipeline_archive_path') or 'Missing'}`"
+        )
     sidecars = list_recent_epl_weekly_pipeline_verification_sidecars()
     if sidecars.empty:
         st.info(
@@ -1750,6 +1824,17 @@ def render_archives_and_comparisons() -> None:
         "Weekly verification sidecar evidence",
         "epl_weekly_pipeline_verification_sidecar.csv",
         "python scripts/archive_epl_weekly_pipeline_verification.py",
+    )
+    render_markdown_expander(
+        "Latest weekly verification sidecar verification",
+        "epl_weekly_pipeline_verification_sidecar_verification.md",
+        "python scripts/verify_epl_weekly_pipeline_verification_sidecar.py",
+        expanded=True,
+    )
+    render_table_expander(
+        "Weekly verification sidecar verification table",
+        "epl_weekly_pipeline_verification_sidecar_verification.csv",
+        "python scripts/verify_epl_weekly_pipeline_verification_sidecar.py",
     )
     render_markdown_expander(
         "Latest weekly pipeline comparison",

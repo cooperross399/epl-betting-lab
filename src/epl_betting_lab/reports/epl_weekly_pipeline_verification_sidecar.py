@@ -285,7 +285,9 @@ def _same_path(left: object, right: Path) -> bool:
     return Path(text).resolve(strict=False) == right.resolve(strict=False)
 
 
-def _render_markdown(summary: Mapping[str, object], evidence: pd.DataFrame) -> str:
+def render_epl_weekly_pipeline_verification_sidecar(
+    summary: Mapping[str, object], evidence: pd.DataFrame
+) -> str:
     blockers = summary.get("blockers", [])
     blocker_items = blockers if isinstance(blockers, list) else []
     lines = [
@@ -335,7 +337,9 @@ def _render_markdown(summary: Mapping[str, object], evidence: pd.DataFrame) -> s
     return "\n".join(lines) + "\n"
 
 
-def _render_csv(summary: Mapping[str, object], evidence: pd.DataFrame) -> bytes:
+def render_epl_weekly_pipeline_verification_sidecar_csv(
+    summary: Mapping[str, object], evidence: pd.DataFrame
+) -> bytes:
     rows = evidence.copy()
     prefix = {
         "sidecar_verdict": summary.get("verdict", ""),
@@ -560,10 +564,12 @@ def save_epl_weekly_pipeline_verification_sidecar(
         SIDECAR_JSON_FILENAME: (
             json.dumps(_json_safe(summary), indent=2, sort_keys=True) + "\n"
         ).encode("utf-8"),
-        SIDECAR_MARKDOWN_FILENAME: _render_markdown(summary, evidence).encode(
-            "utf-8"
+        SIDECAR_MARKDOWN_FILENAME: render_epl_weekly_pipeline_verification_sidecar(
+            summary, evidence
+        ).encode("utf-8"),
+        SIDECAR_CSV_FILENAME: render_epl_weekly_pipeline_verification_sidecar_csv(
+            summary, evidence
         ),
-        SIDECAR_CSV_FILENAME: _render_csv(summary, evidence),
     }
     latest_paths: dict[str, Path] = {}
     archive_paths: dict[str, Path] = {}

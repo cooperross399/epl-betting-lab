@@ -758,6 +758,43 @@ data/outputs/epl_weekly_pipeline_verification_sidecar.md
 data/outputs/epl_weekly_pipeline_verification_sidecar.csv
 ```
 
+Before relying on that proof for Week 1, verify the latest archived sidecar:
+
+```bash
+python scripts/verify_epl_weekly_pipeline_verification_sidecar.py
+```
+
+For an older sidecar, select its folder explicitly:
+
+```bash
+python scripts/verify_epl_weekly_pipeline_verification_sidecar.py \
+  --sidecar-path data/outputs/archive/epl_weekly_pipeline_verifications/YYYY-MM-DD/HHMMSS_RECEIPT_ID/
+```
+
+This checker reads the sidecar metadata, sidecar Markdown/CSV, copied receipt
+verification JSON/Markdown/CSV, and the referenced sealed pipeline archive. It
+recalculates every copied report checksum, the deterministic sidecar checksum
+and receipt ID, and the sealed pipeline receipt ID. It writes only:
+
+```text
+data/outputs/epl_weekly_pipeline_verification_sidecar_verification.json
+data/outputs/epl_weekly_pipeline_verification_sidecar_verification.md
+data/outputs/epl_weekly_pipeline_verification_sidecar_verification.csv
+```
+
+`Weekly verification sidecar verified` means the archived proof still matches.
+`Weekly verification sidecar changed` means sidecar metadata, a report, or a
+receipt identity changed. `Missing weekly verification sidecar` and `Malformed
+weekly verification sidecar` identify missing or unreadable proof. `Referenced
+pipeline archive changed` means the sealed archive is missing or no longer
+matches its receipt. `Weekly verification sidecar not ready` preserves a valid
+record of a blocked or missing-odds run without calling it card-ready.
+
+A checksum mismatch means the file bytes changed after the sidecar was created.
+Do not trust that Week 1 proof until you inspect the mismatch or rerun the weekly
+pipeline. The sealed pipeline archive and sidecar archive are never rewritten by
+this checker.
+
 The sidecar receipt ID stays the same for identical evidence and changes when
 the pipeline receipt/archive, verifier verdict, mismatch count, or any verifier
 report byte changes. Same-second runs receive `_02`, `_03`, and later folder
@@ -794,6 +831,11 @@ otherwise intact, ready receipt from verifying.
 Home also shows the sidecar verdict, sidecar receipt ID, and sidecar archive
 path. `Archives & Comparisons` lists recent sidecars and displays the latest
 sidecar report. These views only read report files.
+
+Home also shows the latest sidecar verification verdict, original/recalculated
+sidecar IDs, and mismatch count when a check has been run. Under `Archives &
+Comparisons`, use `Verify Weekly Verification Sidecar` to regenerate the
+read-only report and inspect its full verification table.
 
 Home shows the latest receipt ID, archive folder, comparison verdict, and top
 change. Open `Archives & Comparisons` for the recent run table and full

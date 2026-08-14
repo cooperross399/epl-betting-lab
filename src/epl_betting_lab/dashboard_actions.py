@@ -31,6 +31,9 @@ from epl_betting_lab.reports.epl_weekly_pipeline_history import (
 from epl_betting_lab.reports.epl_weekly_pipeline_receipt_verification import (
     save_epl_weekly_pipeline_receipt_verification,
 )
+from epl_betting_lab.reports.epl_weekly_pipeline_verification_sidecar_verification import (
+    save_epl_weekly_pipeline_verification_sidecar_verification,
+)
 from epl_betting_lab.reports.odds_export_conversion import (
     OddsExportConversionError,
     convert_odds_export,
@@ -638,6 +641,16 @@ def run_epl_weekly_pipeline_receipt_verification(
 ) -> dict[str, object]:
     return save_epl_weekly_pipeline_receipt_verification(
         archive_path=archive_path,
+        output_dir=output_dir or OUTPUTS_DIR,
+    )
+
+
+def run_epl_weekly_pipeline_verification_sidecar_verification(
+    output_dir: Path | None = None,
+    sidecar_path: Path | None = None,
+) -> dict[str, object]:
+    return save_epl_weekly_pipeline_verification_sidecar_verification(
+        sidecar_path=sidecar_path,
         output_dir=output_dir or OUTPUTS_DIR,
     )
 

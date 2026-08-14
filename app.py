@@ -68,6 +68,7 @@ from epl_betting_lab.dashboard_actions import (
     run_thursday_best_bets_report,
     run_thursday_decision_queue,
     run_thursday_readiness_refresh,
+    run_week1_launch_readiness,
 )
 from epl_betting_lab.data.loaders import load_matches, load_upcoming_fixtures, load_current_odds
 from epl_betting_lab.models.poisson_goals import PoissonGoalsModel
@@ -495,7 +496,17 @@ def render_command_center_card(command_center: ThursdayCommandCenter) -> None:
 
 def render_main_actions() -> None:
     st.subheader("Main actions")
-    if st.button(
+    launch_cols = st.columns(2)
+    if launch_cols[0].button(
+        "Run Week 1 Launch Readiness",
+        width="stretch",
+        help=(
+            "Check fixtures and odds readiness. If current_odds.csv is missing, create "
+            "a blank non-overwriting template from current fixtures."
+        ),
+    ):
+        run_dashboard_action("Week 1 Launch Readiness", run_week1_launch_readiness)
+    if launch_cols[1].button(
         "Run Weekly EPL Pipeline",
         type="primary",
         width="stretch",
@@ -517,9 +528,83 @@ def render_main_actions() -> None:
     if action_cols[2].button("Generate tier performance report", width="stretch"):
         run_dashboard_action("Tier performance report", run_tier_performance_report)
     st.caption(
-        "The weekly pipeline is the main report-only command. These actions do not force a card, "
-        "apply an import or settlement, edit manual files, run live providers, or place a bet."
+        "Week 1 setup can create only a missing blank odds template. It never overwrites an "
+        "existing odds file from the dashboard. The weekly pipeline and focused actions do not "
+        "force a card, apply an import or settlement, run live providers, or place a bet."
     )
+
+
+def render_week1_launch_readiness_summary() -> None:
+    command = "python scripts/run_week1_launch_readiness.py"
+    summary = read_output_json("week1_launch_readiness.json")
+    with st.container(border=True):
+        st.subheader("Week 1 launch readiness")
+        if summary is None:
+            st.info(
+                "No Week 1 readiness report is available yet. Run the setup button above or "
+                f"`{command}` from Terminal."
+            )
+            st.caption(
+                "A missing current_odds.csv can receive a blank template. Existing odds are preserved."
+            )
+            return
+
+        status = str(summary.get("status", "Blocked"))
+        fixture_status = str(summary.get("fixture_status", "Not checked"))
+        odds_status = str(summary.get("odds_file_status", "Not checked"))
+        try:
+            completeness = float(summary.get("odds_completeness_percentage", 0.0) or 0.0)
+        except (TypeError, ValueError):
+            completeness = 0.0
+        try:
+            missing_odds = int(summary.get("missing_odds_count", 0) or 0)
+        except (TypeError, ValueError):
+            missing_odds = 0
+        fixture_metric = fixture_status.split(" (", 1)[0]
+        if odds_status.startswith("Blank template"):
+            odds_metric = "Blank template"
+        elif odds_status.startswith("Existing file preserved"):
+            odds_metric = "Existing"
+        elif odds_status == "Not checked":
+            odds_metric = "Not checked"
+        else:
+            odds_metric = "Needs review"
+
+        st.markdown(f"**Status:** {status}")
+        metrics = st.columns(4)
+        metrics[0].metric("Fixtures", fixture_metric)
+        metrics[1].metric("Odds file", odds_metric)
+        metrics[2].metric("Odds complete", f"{completeness:.1%}")
+        metrics[3].metric("Missing odds", missing_odds)
+        st.caption(f"Fixtures: {fixture_status}. Odds file: {odds_status}.")
+
+        next_action = str(
+            summary.get(
+                "next_human_action",
+                "Rerun Week 1 Launch Readiness before the weekly pipeline.",
+            )
+        )
+        if status == "Ready for weekly pipeline":
+            st.success(next_action)
+        elif status in {"Needs odds filled", "Needs fixture refresh", "Missing fixtures"}:
+            st.warning(next_action)
+        else:
+            st.error(next_action)
+
+        if bool(summary.get("template_created")):
+            st.caption(
+                "A blank current_odds.csv template was created from current/upcoming fixtures. "
+                "No prices were filled automatically."
+            )
+        st.caption(
+            "Existing odds are never overwritten here. Intentional replacement is Terminal-only "
+            "with `python scripts/run_week1_launch_readiness.py --overwrite-template`."
+        )
+        render_markdown_expander(
+            "Full Week 1 launch report",
+            "week1_launch_readiness.md",
+            command,
+        )
 
 
 def render_weekly_pipeline_summary() -> None:
@@ -678,6 +763,7 @@ def render_home() -> None:
     render_command_center_card(command_center)
     render_data_freshness(command_center)
     render_main_actions()
+    render_week1_launch_readiness_summary()
     render_weekly_pipeline_summary()
     with st.expander("Weekly workflow file status", expanded=False):
         render_workflow_checklist()

@@ -21,6 +21,16 @@ from epl_betting_lab.reports.bet_ledger_health import (
     save_bet_ledger_health_check,
 )
 from epl_betting_lab.reports.current_odds_validation import CurrentOddsValidationError
+from epl_betting_lab.reports.epl_weekly_pipeline_history import (
+    PIPELINE_ARCHIVE_CSV_FILENAME,
+    PIPELINE_ARCHIVE_JSON_FILENAME,
+    PIPELINE_ARCHIVE_MARKDOWN_FILENAME,
+    PIPELINE_COMPARISON_CSV_FILENAME,
+    PIPELINE_COMPARISON_JSON_FILENAME,
+    PIPELINE_COMPARISON_MARKDOWN_FILENAME,
+    prepare_epl_weekly_pipeline_history,
+    save_prepared_epl_weekly_pipeline_history,
+)
 from epl_betting_lab.reports.thursday_best_bets import list_recent_thursday_archives
 from epl_betting_lab.reports.thursday_decision_queue import ACTION_PRIORITY
 from epl_betting_lab.scheduled_thursday_workflow import (
@@ -369,6 +379,9 @@ def _render_markdown(summary: dict[str, object]) -> str:
         "",
         f"- Run timestamp: {summary['run_timestamp']}",
         f"- Final status: **{summary['status']}**",
+        f"- Pipeline receipt ID: `{summary['pipeline_receipt_id']}`",
+        f"- Pipeline archive: `{summary['pipeline_archive_path']}`",
+        f"- Latest pipeline comparison: **{summary['pipeline_comparison_verdict']}**",
         f"- Recommended next human action: {summary['recommended_next_action']}",
         (
             f"- Thursday card: {counts['best_bets']} best bet(s), {counts['leans']} lean(s), "
@@ -405,6 +418,11 @@ def _render_markdown(summary: dict[str, object]) -> str:
     lines.extend([f"- {item}" for item in summary["key_blockers"]] or ["- None."])
     lines.extend(["", "## Key warnings", ""])
     lines.extend([f"- {item}" for item in summary["key_warnings"]] or ["- None."])
+    lines.extend(["", "## Important changes since the previous run", ""])
+    lines.extend(
+        [f"- {item}" for item in summary["important_changes_since_previous_run"]]
+        or ["- No comparison detail is available."]
+    )
     lines.extend(["", "## Generated report paths", ""])
     lines.extend(
         [f"- `{path}`" for path in summary["generated_report_paths"]]
@@ -738,7 +756,18 @@ def run_epl_weekly_pipeline(
     json_path = context.output_dir / PIPELINE_JSON_FILENAME
     markdown_path = context.output_dir / PIPELINE_MARKDOWN_FILENAME
     csv_path = context.output_dir / PIPELINE_CSV_FILENAME
-    output_files.extend([str(json_path), str(markdown_path), str(csv_path)])
+    history_output_paths = [
+        context.output_dir / PIPELINE_ARCHIVE_JSON_FILENAME,
+        context.output_dir / PIPELINE_ARCHIVE_MARKDOWN_FILENAME,
+        context.output_dir / PIPELINE_ARCHIVE_CSV_FILENAME,
+        context.output_dir / PIPELINE_COMPARISON_JSON_FILENAME,
+        context.output_dir / PIPELINE_COMPARISON_MARKDOWN_FILENAME,
+        context.output_dir / PIPELINE_COMPARISON_CSV_FILENAME,
+    ]
+    output_files.extend(
+        [str(json_path), str(markdown_path), str(csv_path)]
+        + [str(path) for path in history_output_paths]
+    )
     summary = {
         "run_timestamp": context.run_at.isoformat(timespec="seconds"),
         "status": final_status,
@@ -775,6 +804,27 @@ def run_epl_weekly_pipeline(
         },
         "steps": steps,
     }
+    history_plan = prepare_epl_weekly_pipeline_history(
+        summary,
+        output_dir=context.output_dir,
+        archived_at=context.run_at,
+    )
+    summary.update(
+        {
+            "pipeline_receipt_id": history_plan["manifest"]["receipt_id"],
+            "pipeline_receipt_checksum_sha256": history_plan["manifest"][
+                "receipt_checksum_sha256"
+            ],
+            "pipeline_archive_path": str(history_plan["archive_dir"]),
+            "pipeline_comparison_verdict": history_plan["comparison"]["verdict"],
+            "pipeline_comparison_path": str(
+                context.output_dir / PIPELINE_COMPARISON_MARKDOWN_FILENAME
+            ),
+            "important_changes_since_previous_run": history_plan["comparison"][
+                "important_changes"
+            ],
+        }
+    )
     safe_summary = _json_safe(summary)
     atomic_write_report(
         json_path,
@@ -785,10 +835,18 @@ def run_epl_weekly_pipeline(
         (_render_markdown(safe_summary) + "\n").encode("utf-8"),
     )
     atomic_write_report(csv_path, _render_step_csv(steps))
+    history_result = save_prepared_epl_weekly_pipeline_history(
+        history_plan,
+        pipeline_summary=safe_summary,
+        pipeline_markdown_path=markdown_path,
+        pipeline_csv_path=csv_path,
+    )
     return {
         "status": final_status,
         "json": json_path,
         "markdown": markdown_path,
         "csv": csv_path,
+        "archive": history_result,
+        "comparison": history_plan["comparison"],
         "summary": safe_summary,
     }

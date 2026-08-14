@@ -258,6 +258,13 @@ def test_weekly_pipeline_runs_all_safe_steps_in_order_and_preserves_inputs(tmp_p
     assert saved["safety"]["force_mode_used"] is False
     assert saved["safety"]["settlement_applied"] is False
     assert saved["safety"]["bets_placed"] is False
+    assert saved["pipeline_receipt_id"].startswith("epl-weekly-")
+    assert saved["pipeline_comparison_verdict"] == "Missing prior run"
+    archive_dir = Path(saved["pipeline_archive_path"])
+    assert archive_dir == paths["output_dir"] / "archive/epl_weekly_pipeline/2026-08-13/090000"
+    assert (archive_dir / "epl_weekly_pipeline.json").exists()
+    assert (archive_dir / "epl_weekly_pipeline.md").exists()
+    assert (archive_dir / "epl_weekly_pipeline.csv").exists()
     assert paths["current_odds_path"].read_bytes() == odds_before
     assert paths["ledger_path"].read_bytes() == ledger_before
 
@@ -278,6 +285,32 @@ def test_first_archive_skips_comparison_without_downgrading_ready_status(tmp_pat
     statuses = {step["step"]: step["status"] for step in result["summary"]["steps"]}
     assert statuses["Thursday best-bets comparison"] == "Skipped"
     assert statuses["Thursday decision queue"] == "Skipped"
+
+
+def test_second_weekly_pipeline_run_compares_its_receipt_automatically(tmp_path) -> None:
+    paths = _paths(tmp_path)
+    first_calls: list[str] = []
+    second_calls: list[str] = []
+
+    first = run_epl_weekly_pipeline(
+        **paths,
+        run_at=FIXED_RUN_AT,
+        actions=_actions(first_calls),
+    )
+    second = run_epl_weekly_pipeline(
+        **paths,
+        run_at=FIXED_RUN_AT,
+        actions=_actions(second_calls),
+    )
+
+    assert first["summary"]["pipeline_comparison_verdict"] == "Missing prior run"
+    assert second["summary"]["pipeline_comparison_verdict"] == "Stable ready state"
+    assert first["summary"]["pipeline_archive_path"] != second["summary"][
+        "pipeline_archive_path"
+    ]
+    assert second["comparison"]["important_changes"] == [
+        "No meaningful weekly workflow changes were detected."
+    ]
 
 
 def test_incomplete_odds_block_card_but_keep_independent_reports_running(tmp_path) -> None:

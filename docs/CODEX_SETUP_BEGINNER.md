@@ -673,6 +673,40 @@ Use this as the normal one-command weekly workflow:
 python scripts/run_epl_weekly_pipeline.py
 ```
 
+Each run automatically saves a dated audit receipt under:
+
+```text
+data/outputs/archive/epl_weekly_pipeline/YYYY-MM-DD/HHMMSS/
+```
+
+That folder keeps the pipeline JSON, markdown, CSV, and copies of the key
+reports used by the run. The receipt ID starts with `epl-weekly-` and changes
+when the status, blockers, step results, card counts, decision queue, ledger
+health, or a referenced report checksum changes. If two runs finish in the same
+second, the second folder gets `_02` so the first is not overwritten.
+
+The weekly command also compares the latest receipt with the previous receipt.
+The first run says `Missing prior run`; that is normal and does not block a
+ready first card. Future runs can say `Stable ready state`, `Improved`, `New
+blockers`, `More review needed`, or `Failed`.
+
+To rebuild only the report archive or comparison, use:
+
+```bash
+python scripts/archive_epl_weekly_pipeline.py
+python scripts/compare_epl_weekly_pipeline_runs.py
+```
+
+Home shows the latest receipt ID, archive folder, comparison verdict, and top
+change. Open `Archives & Comparisons` for the recent run table and full
+comparison. These controls only create or read report files. They cannot import
+odds, edit manual data, apply settlement, run live providers, change provider
+policy, enable cron, fabricate odds, or place bets.
+
+For Week 1, the first receipt is the audit baseline. Starting with Week 2, the
+comparison makes new blockers and card/queue/ledger changes easy to review
+before any manual betting decision.
+
 It automatically runs the safe steps in this order:
 
 1. Data freshness and workflow status.

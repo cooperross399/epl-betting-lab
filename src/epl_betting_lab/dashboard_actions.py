@@ -25,6 +25,9 @@ from epl_betting_lab.reports.current_odds_maintenance import maintain_current_od
 from epl_betting_lab.reports.github_manual_run_verification import (
     save_github_manual_run_verification,
 )
+from epl_betting_lab.reports.epl_weekly_pipeline_history import (
+    compare_latest_epl_weekly_pipeline_runs,
+)
 from epl_betting_lab.reports.odds_export_conversion import (
     OddsExportConversionError,
     convert_odds_export,
@@ -618,6 +621,12 @@ def run_epl_weekly_pipeline(
         output_dir=output_dir or OUTPUTS_DIR,
         progress=progress,
     )
+
+
+def run_epl_weekly_pipeline_comparison(
+    output_dir: Path | None = None,
+) -> dict[str, object]:
+    return compare_latest_epl_weekly_pipeline_runs(output_dir or OUTPUTS_DIR)
 
 
 def run_github_manual_thursday_verification(

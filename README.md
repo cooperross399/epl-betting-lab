@@ -344,10 +344,11 @@ with:
 python scripts/check_provider_policy_pr_gate.py --provider odds_api
 ```
 
-`.github/workflows/provider-policy-pr-gate.yml` runs only for pull requests
-that touch the provider policy or its review evidence. If the policy itself is
-unchanged, the gate reports `Provider policy PR gate not applicable` and exits
-successfully. If it changed, the PR must include a Ready preview, verified
+`.github/workflows/provider-policy-pr-gate.yml` runs for every pull request so
+its stable **Provider Policy PR Gate** job can be selected as a required branch
+protection check. If the policy itself is unchanged, the gate reports
+`Provider policy PR gate not applicable` and exits successfully. If it changed,
+the PR must include a Ready preview, verified
 human receipt, conforming policy report, and a post-conformance rebuilt and
 verified evidence bundle. The gate reruns bundle verification and conformance
 in memory, blocks unsafe cron/automation additions, and writes
@@ -388,6 +389,32 @@ The PR-only workflow runs this check after the gate and publishes
 artifact. The Odds Import dashboard can regenerate and display the same
 read-only reports. Verification proves which bytes were checked; it does not
 apply policy, allowlist a provider, or enable cron.
+
+Successful and blocked gate verifications can be preserved with:
+
+```bash
+python scripts/archive_provider_policy_pr_gate_verification.py --provider odds_api
+```
+
+The command copies the gate and verifier JSON/Markdown/CSV plus available
+allowlist evidence reports into
+`data/outputs/archive/provider_policy_pr_gate_verifications/YYYY-MM-DD/`.
+It records PR number/URL and GitHub run, attempt, workflow, job, actor, and
+repository when Actions supplies them. A deterministic archive receipt binds
+that metadata, the gate IDs/SHAs/digests, and every archived file checksum;
+the wall-clock archive time is excluded so identical inputs keep the same ID.
+Only `Gate receipt verified for PR approval` produces an approval-ready archive.
+The PR workflow runs this archive step automatically and publishes the latest
+archive report and dated package as artifacts. The Odds Import page shows the
+latest archive verdict, archive receipt ID, gate receipt ID, and PR/run context.
+
+To make this a required check, a repository administrator must open GitHub
+**Settings > Rules > Rulesets** (or **Branches > Branch protection rules**),
+require status checks for `main`, and select **Provider Policy PR Gate**. The
+project deliberately does not modify repository rules through an API: branch
+protection is an administrative decision. A passing check validates preserved
+evidence only; merging the separate policy PR is still what changes the
+allowlist, and cron remains disabled.
 
 Next, review `data/manual/staging_provider_policy.json` and run the independent
 eligibility gate:

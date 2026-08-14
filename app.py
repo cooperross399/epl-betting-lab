@@ -50,6 +50,7 @@ from epl_betting_lab.dashboard_actions import (
     run_provider_human_acceptance_receipt_verification,
     run_provider_policy_pr_gate,
     run_provider_policy_pr_gate_receipt_verification,
+    run_provider_policy_pr_gate_verification_archive,
     run_provider_shadow_run_comparison,
     run_stale_current_odds_archive_preview,
     run_stale_current_odds_archive_confirmation_status,
@@ -1080,6 +1081,95 @@ def render_odds_import() -> None:
         "provider_policy_pr_gate_receipt_verification.csv",
         gate_receipt_verification_command,
     )
+    gate_verification_archive_command = (
+        "python scripts/archive_provider_policy_pr_gate_verification.py "
+        f"--provider {selected_shadow_provider}"
+    )
+    if st.button("Archive provider policy gate verification", width="stretch"):
+        run_dashboard_action(
+            "Provider policy gate verification archive",
+            lambda: run_provider_policy_pr_gate_verification_archive(
+                selected_shadow_provider
+            ),
+        )
+    gate_verification_archive_path = (
+        OUTPUTS_DIR / "provider_policy_pr_gate_verification_archive.json"
+    )
+    if gate_verification_archive_path.exists():
+        try:
+            gate_verification_archive = json.loads(
+                gate_verification_archive_path.read_text(encoding="utf-8")
+            )
+        except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+            st.warning(
+                f"The latest gate verification archive could not be read: {exc}"
+            )
+        else:
+            st.caption("Latest provider policy gate verification archive")
+            archive_columns = st.columns(4)
+            archive_columns[0].metric(
+                "Archive verdict",
+                str(gate_verification_archive.get("verdict", "Not checked")),
+            )
+            archive_columns[1].metric(
+                "Archive receipt",
+                str(gate_verification_archive.get("archive_receipt_id", ""))[-12:]
+                or "Missing",
+            )
+            archive_columns[2].metric(
+                "Gate receipt",
+                str(gate_verification_archive.get("gate_receipt_id", ""))[-12:]
+                or "Missing",
+            )
+            archive_columns[3].metric(
+                "PR / run",
+                str(
+                    gate_verification_archive.get("pr_number")
+                    or gate_verification_archive.get("github_run_id")
+                    or "Local"
+                ),
+            )
+            archive_receipt = (
+                gate_verification_archive.get("archive_receipt_id") or "Missing"
+            )
+            gate_receipt = (
+                gate_verification_archive.get("gate_receipt_id") or "Missing"
+            )
+            pr_context = (
+                gate_verification_archive.get("pr_url")
+                or gate_verification_archive.get("pr_number")
+                or "Local/not available"
+            )
+            run_context = (
+                gate_verification_archive.get("github_run_url")
+                or gate_verification_archive.get("github_run_id")
+                or "Local/not available"
+            )
+            st.code(
+                (
+                    f"Archive receipt ID: {archive_receipt}\n"
+                    f"Gate receipt ID: {gate_receipt}\n"
+                    f"PR: {pr_context}\n"
+                    f"GitHub run: {run_context}"
+                ),
+                language=None,
+            )
+    else:
+        st.info(
+            "No archived gate verification is available yet. The PR-only check "
+            "archives its receipt verification automatically, or you can run the "
+            "report-only archive command above."
+        )
+    render_markdown_expander(
+        "Provider policy gate verification archive",
+        "provider_policy_pr_gate_verification_archive.md",
+        gate_verification_archive_command,
+    )
+    render_table_expander(
+        "Provider policy gate archived files",
+        "provider_policy_pr_gate_verification_archive.csv",
+        gate_verification_archive_command,
+    )
     st.caption(
         "Provider and shadow-run commands remain Terminal-only so dashboard users "
         "cannot expose secrets, fetch live data, overwrite staging files, allowlist "
@@ -1087,7 +1177,8 @@ def render_odds_import() -> None:
         "comparison, acceptance checks, receipt display, and receipt verification "
         "are report-only. The allowlist PR preview, conformance checker, and "
         "checksum-bound evidence bundle, its approval-time verifier, and the PR "
-        "gate and its receipt verifier also write reports only."
+        "gate, its receipt verifier, and its checksum-bound verification archive "
+        "also write reports only."
     )
     st.divider()
 

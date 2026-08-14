@@ -349,6 +349,28 @@ gate. `--diagnostic` is for troubleshooting only and cannot approve a receipt.
 The Action and dashboard remain read-only; neither can apply policy, allowlist a
 provider, or enable cron.
 
+Archive the checked receipt for the PR review record with:
+
+```bash
+python scripts/archive_provider_policy_pr_gate_verification.py --provider odds_api
+```
+
+The package is saved under
+`data/outputs/archive/provider_policy_pr_gate_verifications/YYYY-MM-DD/` and
+includes the gate reports, verification reports, related evidence when present,
+checksums, gate IDs, commit SHAs, and GitHub PR/run details when available. Only
+the exact verdict `Gate receipt verified for PR approval` is labeled approval-
+ready. A blocked run may still be archived for troubleshooting, but it is clearly
+marked not ready. The same report appears under Odds Import.
+
+The PR workflow now runs on every pull request and exposes one stable check named
+**Provider Policy PR Gate**. A repository administrator can require it for
+`main` in GitHub **Settings > Rules > Rulesets**, or in the older branch
+protection screen under required status checks. This setting is intentionally
+manual because changing repository protections is an administrative action.
+Passing preserves and validates evidence; it does not edit the provider policy,
+allowlist a provider, or enable cron.
+
 Then validate the generated staging files:
 
 ```bash

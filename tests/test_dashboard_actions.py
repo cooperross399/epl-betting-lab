@@ -34,6 +34,7 @@ from epl_betting_lab.dashboard_actions import (
     run_provider_human_acceptance_receipt_verification,
     run_provider_policy_pr_gate,
     run_provider_policy_pr_gate_receipt_verification,
+    run_provider_policy_pr_gate_verification_archive,
     run_provider_shadow_run_comparison,
     run_settlement_preview,
     run_stale_current_odds_archive_preview,
@@ -1367,4 +1368,35 @@ def test_provider_policy_pr_gate_receipt_verification_dashboard_action_is_report
         "odds_api",
         output_dir,
         gate_path,
+    ) == expected
+
+
+def test_provider_policy_pr_gate_verification_archive_dashboard_action_is_report_only(
+    tmp_path, monkeypatch
+) -> None:
+    output_dir = tmp_path / "outputs"
+    verification_path = output_dir / "selected_verification.json"
+    expected = {"verdict": "Verification archive ready for approval review"}
+
+    def fake_save(
+        provider_name,
+        selected_output_dir,
+        *,
+        verification_path=None,
+    ):
+        assert provider_name == "odds_api"
+        assert selected_output_dir == output_dir
+        assert verification_path == output_dir / "selected_verification.json"
+        return expected
+
+    monkeypatch.setattr(
+        dashboard_actions,
+        "save_provider_policy_pr_gate_verification_archive",
+        fake_save,
+    )
+
+    assert run_provider_policy_pr_gate_verification_archive(
+        "odds_api",
+        output_dir,
+        verification_path,
     ) == expected

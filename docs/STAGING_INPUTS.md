@@ -551,6 +551,39 @@ proves evidence/conformance for review; only merging the separate human-reviewed
 policy PR changes allowlisting. Cron remains disabled until a different
 explicit review enables it.
 
+### Verify the Provider Policy PR Gate receipt
+
+After the gate has produced a passing receipt, verify it again from the exact PR
+checkout before approval:
+
+```bash
+python scripts/verify_provider_policy_pr_gate_receipt.py --provider odds_api
+```
+
+The checker requires the recorded base, head, and merge-base commits to remain
+available and requires the checked-out `HEAD` to match the receipt. It rebuilds
+the normalized changed-file set, hashes each current changed path, recalculates
+the policy before/after digest, re-hashes the bundle verification, conformance,
+preview, and human receipt verification reports, and regenerates the receipt ID.
+It writes:
+
+```text
+data/outputs/provider_policy_pr_gate_receipt_verification.json
+data/outputs/provider_policy_pr_gate_receipt_verification.md
+data/outputs/provider_policy_pr_gate_receipt_verification.csv
+```
+
+`Gate receipt verified for PR approval` is the only approval-capable verdict.
+Changed Git context, paths, file bytes, policy, evidence, digests, receipt ID, or
+an original blocked/failed gate stops approval. `Gate receipt not applicable`
+remains a safe success only when no provider-policy change was detected. The
+optional `--diagnostic` flag can explain missing Git context but deliberately
+cannot produce an approval verdict. The PR-only workflow runs this verifier
+after the gate, exposes the receipt IDs and digest checks in the job summary,
+and uploads all reports. The Odds Import dashboard only writes/displays these
+reports; it cannot edit policy, allowlist the provider, run live providers, or
+enable cron.
+
 If you prepare staging files without the adapter, start from the older staging
 templates and complete `staging_provenance_template.json` manually. Never put
 credentials in provenance. Supported provider types are `manual_upload`,

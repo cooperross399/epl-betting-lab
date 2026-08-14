@@ -369,6 +369,26 @@ changed-files digest, and binding status. `Not applicable` remains safe when no
 provider-policy change is present; a policy change cannot pass unless receipt
 binding is `Bound`.
 
+Immediately before approving a policy PR, independently reproduce that gate
+receipt from the checked-out PR commits and current evidence:
+
+```bash
+python scripts/verify_provider_policy_pr_gate_receipt.py --provider odds_api
+```
+
+The verifier re-resolves the recorded base, head, and merge-base commits,
+rebuilds the changed-file list and hashes, re-hashes the current provider policy
+and every bound evidence report, and recalculates all aggregate digests and the
+deterministic gate receipt ID. A passing result is `Gate receipt verified for PR
+approval`. Missing Git commits, changed files, changed policy/evidence, malformed
+receipts, or an original non-passing gate fail closed. Use `--diagnostic` only
+to inspect unavailable Git context; diagnostic mode can never approve a receipt.
+The PR-only workflow runs this check after the gate and publishes
+`provider_policy_pr_gate_receipt_verification.{json,md,csv}` in its summary and
+artifact. The Odds Import dashboard can regenerate and display the same
+read-only reports. Verification proves which bytes were checked; it does not
+apply policy, allowlist a provider, or enable cron.
+
 Next, review `data/manual/staging_provider_policy.json` and run the independent
 eligibility gate:
 

@@ -33,6 +33,7 @@ from epl_betting_lab.dashboard_actions import (
     run_provider_allowlist_pr_preview,
     run_provider_human_acceptance_receipt_verification,
     run_provider_policy_pr_gate,
+    run_provider_policy_pr_gate_receipt_verification,
     run_provider_shadow_run_comparison,
     run_settlement_preview,
     run_stale_current_odds_archive_preview,
@@ -1336,3 +1337,34 @@ def test_provider_policy_pr_gate_dashboard_action_is_report_only(
     )
 
     assert run_provider_policy_pr_gate("odds_api", output_dir) == expected
+
+
+def test_provider_policy_pr_gate_receipt_verification_dashboard_action_is_report_only(
+    tmp_path, monkeypatch
+) -> None:
+    output_dir = tmp_path / "outputs"
+    gate_path = output_dir / "selected_gate.json"
+    expected = {"verdict": "Gate receipt verified for PR approval"}
+
+    def fake_save(
+        provider_name,
+        selected_output_dir,
+        *,
+        gate_report_path=None,
+    ):
+        assert provider_name == "odds_api"
+        assert selected_output_dir == output_dir
+        assert gate_report_path == gate_path
+        return expected
+
+    monkeypatch.setattr(
+        dashboard_actions,
+        "save_provider_policy_pr_gate_receipt_verification",
+        fake_save,
+    )
+
+    assert run_provider_policy_pr_gate_receipt_verification(
+        "odds_api",
+        output_dir,
+        gate_path,
+    ) == expected

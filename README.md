@@ -823,6 +823,56 @@ against the previous archived card, then creates the Thursday decision queue.
 If there are not at least two archived cards yet, it stops with a friendly
 message and does not try to build the queue.
 
+### Week 1 launch setup
+
+Before the first weekly pipeline run, use one safe setup command:
+
+```bash
+python scripts/run_week1_launch_readiness.py
+```
+
+The command checks that `data/manual/upcoming_fixtures.csv` contains current or
+future Week 1 matches, then checks `data/manual/current_odds.csv` with the
+existing date-freshness, validation, and completeness rules. If the odds file
+does not exist and fixtures are usable, it creates a blank seven-market row
+template for each upcoming fixture. Every `american_odds` value stays blank.
+Fill those cells with real sportsbook prices and add book names, then run the
+same readiness command again.
+
+An existing `current_odds.csv` is always preserved by default. Intentional
+replacement is available only from Terminal:
+
+```bash
+python scripts/run_week1_launch_readiness.py --overwrite-template
+```
+
+That flag replaces the existing file with a blank template, so use it only
+after manually deciding the old prices should be discarded. The dashboard
+button never supplies this flag and cannot overwrite existing odds.
+
+The launch report identifies exact fixture/market rows that still need prices,
+blank books, invalid teams/markets/selections, non-numeric prices, duplicate
+rows, malformed dates, and stale past-match odds. It writes:
+
+```text
+data/outputs/week1_launch_readiness.json
+data/outputs/week1_launch_readiness.md
+data/outputs/week1_launch_readiness.csv
+```
+
+Its final status is `Ready for weekly pipeline`, `Needs odds filled`, `Needs
+fixture refresh`, `Needs odds fixes`, `Missing fixtures`, `Blocked`, or
+`Failed`. When it says `Ready for weekly pipeline`, run:
+
+```bash
+python scripts/run_epl_weekly_pipeline.py
+```
+
+Home also includes `Run Week 1 Launch Readiness` and a compact status panel for
+fixtures, the odds file, completion percentage, missing prices, and the exact
+next human action. The setup never invents odds, places bets, runs providers,
+applies settlement, allowlists providers, enables cron, or changes the model.
+
 ### Main weekly EPL command
 
 For the complete local weekly workflow, run one command:
@@ -1513,6 +1563,7 @@ The main weekly button and focused report buttons are visible on
 `Home / Command Center`:
 
 ```text
+Run Week 1 Launch Readiness
 Run Weekly EPL Pipeline
 Run Thursday readiness refresh
 Run post-refresh Thursday review

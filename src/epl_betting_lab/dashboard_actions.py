@@ -121,6 +121,9 @@ from epl_betting_lab.reports.thursday_best_bets import (
 from epl_betting_lab.reports.thursday_best_bets_comparison import save_thursday_best_bets_comparison
 from epl_betting_lab.reports.thursday_decision_queue import save_thursday_decision_queue
 from epl_betting_lab.reports.tier_performance import save_tier_performance_reports
+from epl_betting_lab.reports.week1_launch_readiness import (
+    run_week1_launch_readiness as save_week1_launch_readiness,
+)
 from epl_betting_lab.strategies.btts import evaluate_btts
 from epl_betting_lab.strategies.ml_value import evaluate_1x2_value
 from epl_betting_lab.strategies.totals import evaluate_total_25
@@ -626,6 +629,20 @@ def run_epl_weekly_pipeline(
     return run_pipeline(
         output_dir=output_dir or OUTPUTS_DIR,
         progress=progress,
+    )
+
+
+def run_week1_launch_readiness(
+    fixtures_path: Path | None = None,
+    current_odds_path: Path | None = None,
+    output_dir: Path | None = None,
+) -> dict[str, object]:
+    """Run the safe dashboard setup path without exposing template overwrite."""
+    return save_week1_launch_readiness(
+        fixtures_path=fixtures_path or MANUAL_DIR / "upcoming_fixtures.csv",
+        current_odds_path=current_odds_path or MANUAL_DIR / "current_odds.csv",
+        output_dir=output_dir or OUTPUTS_DIR,
+        overwrite_template=False,
     )
 
 

@@ -665,6 +665,54 @@ archived card, then builds the decision queue. If you do not have at least two
 archived Thursday cards yet, it stops and explains that comparison is not
 available yet.
 
+### Week 1: prepare fixtures and odds first
+
+Before your first weekly pipeline run, start here:
+
+```bash
+python scripts/run_week1_launch_readiness.py
+```
+
+This command checks that `data/manual/upcoming_fixtures.csv` has current or
+future matches. It then checks `data/manual/current_odds.csv` for complete real
+prices, valid teams/markets/selections, book names, and stale match dates.
+
+If `current_odds.csv` is missing, the command safely creates it from the
+upcoming fixtures. The new rows cover 1X2, total 2.5, and BTTS, but every odds
+cell is blank. The system never guesses or invents a price. Open the file, fill
+`american_odds` with real sportsbook prices, add the book names, and run the
+readiness command again.
+
+If `current_odds.csv` already exists, the command reads it without replacing
+it. The Home dashboard button has the same non-overwriting behavior. Only this
+explicit Terminal command can replace an existing file with a new blank
+template:
+
+```bash
+python scripts/run_week1_launch_readiness.py --overwrite-template
+```
+
+The report appears at:
+
+```text
+data/outputs/week1_launch_readiness.md
+data/outputs/week1_launch_readiness.json
+data/outputs/week1_launch_readiness.csv
+```
+
+Read the exact next action in the report. `Needs odds filled` means enter the
+listed real prices. `Needs odds fixes` means repair invalid, duplicate,
+non-numeric, stale, or malformed rows. `Needs fixture refresh` or `Missing
+fixtures` means update the fixture file first. Once it says `Ready for weekly
+pipeline`, run:
+
+```bash
+python scripts/run_epl_weekly_pipeline.py
+```
+
+Neither command places a bet. Week 1 launch readiness also refuses live
+providers, settlement apply, provider allowlisting, cron, and model changes.
+
 ### Main weekly EPL command
 
 Use this as the normal one-command weekly workflow:
@@ -1555,6 +1603,7 @@ Use the sidebar sections:
 The main weekly button and focused Home buttons are:
 
 ```text
+Run Week 1 Launch Readiness
 Run Weekly EPL Pipeline
 Run Thursday readiness refresh
 Run post-refresh Thursday review

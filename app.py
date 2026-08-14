@@ -588,27 +588,27 @@ def render_weekly_pipeline_summary() -> None:
             f"`{sidecar_receipt_id or 'Not available'}`."
         )
         st.caption(f"Sidecar archive: `{sidecar_archive_path or 'Not available'}`")
-        sidecar_verification = read_output_json(
-            "epl_weekly_pipeline_verification_sidecar_verification.json"
-        )
-        if sidecar_verification is None:
+        sidecar_check_verdict = str(
+            summary.get("sidecar_verification_verdict", "")
+        ).strip()
+        if not sidecar_check_verdict:
             st.caption(
-                "Sidecar verification: Not checked. Open Archives & Comparisons to "
-                "verify the latest sidecar before Week 1 review."
+                "Sidecar verification: Not recorded by this pipeline run. Rerun the "
+                "Weekly EPL Pipeline or use the manual check in Archives & Comparisons."
             )
         else:
-            sidecar_check_verdict = str(
-                sidecar_verification.get("verdict", "Not checked")
-            )
             sidecar_original_id = str(
-                sidecar_verification.get("original_sidecar_receipt_id", "")
+                summary.get("sidecar_verification_original_id", "")
             ).strip()
             sidecar_recalculated_id = str(
-                sidecar_verification.get("recalculated_sidecar_receipt_id", "")
+                summary.get("sidecar_verification_recalculated_id", "")
             ).strip()
             sidecar_mismatches = int(
-                sidecar_verification.get("mismatch_count", 0) or 0
+                summary.get("sidecar_verification_mismatch_count", 0) or 0
             )
+            sidecar_verification_report = str(
+                summary.get("sidecar_verification_report_path", "")
+            ).strip()
             st.caption(
                 f"Sidecar verification: {sidecar_check_verdict}; mismatches/blockers: "
                 f"{sidecar_mismatches}."
@@ -616,6 +616,10 @@ def render_weekly_pipeline_summary() -> None:
             st.caption(
                 f"Sidecar IDs: `{sidecar_original_id or 'Not available'}` / "
                 f"`{sidecar_recalculated_id or 'Not available'}`."
+            )
+            st.caption(
+                "Sidecar verification report: "
+                f"`{sidecar_verification_report or 'Not available'}`"
             )
         st.caption(f"Change since previous run: {comparison_verdict}")
         important_changes = summary.get("important_changes_since_previous_run", [])
@@ -1740,8 +1744,8 @@ def render_archives_and_comparisons() -> None:
             run_epl_weekly_pipeline_receipt_verification,
         )
     history_note.caption(
-        "Each Weekly EPL Pipeline run archives and verifies its exact new receipt automatically. "
-        "Comparison needs two receipts."
+        "Each Weekly EPL Pipeline run archives and verifies its exact new receipt, then "
+        "archives and independently verifies the exact new sidecar. Comparison needs two receipts."
     )
     pipeline_history = list_recent_epl_weekly_pipeline_runs()
     if pipeline_history.empty:

@@ -758,7 +758,13 @@ data/outputs/epl_weekly_pipeline_verification_sidecar.md
 data/outputs/epl_weekly_pipeline_verification_sidecar.csv
 ```
 
-Before relying on that proof for Week 1, verify the latest archived sidecar:
+The weekly command now verifies that exact new sidecar automatically after it is
+created. It uses the archive path returned by the sidecar operation, so it does
+not accidentally select an older or newer folder. The live weekly summary then
+records the verification verdict/status, original and recalculated sidecar
+receipt IDs, mismatch count, report path, and checked sidecar archive path.
+
+To manually recheck the latest sidecar later, run:
 
 ```bash
 python scripts/verify_epl_weekly_pipeline_verification_sidecar.py
@@ -793,7 +799,8 @@ record of a blocked or missing-odds run without calling it card-ready.
 A checksum mismatch means the file bytes changed after the sidecar was created.
 Do not trust that Week 1 proof until you inspect the mismatch or rerun the weekly
 pipeline. The sealed pipeline archive and sidecar archive are never rewritten by
-this checker.
+the automatic or manual checker. Verification reports stay in `data/outputs/`,
+outside both sealed folders.
 
 The sidecar receipt ID stays the same for identical evidence and changes when
 the pipeline receipt/archive, verifier verdict, mismatch count, or any verifier
@@ -832,10 +839,10 @@ Home also shows the sidecar verdict, sidecar receipt ID, and sidecar archive
 path. `Archives & Comparisons` lists recent sidecars and displays the latest
 sidecar report. These views only read report files.
 
-Home also shows the latest sidecar verification verdict, original/recalculated
-sidecar IDs, and mismatch count when a check has been run. Under `Archives &
-Comparisons`, use `Verify Weekly Verification Sidecar` to regenerate the
-read-only report and inspect its full verification table.
+Home shows the sidecar verification result recorded by the latest weekly run,
+including original/recalculated sidecar IDs, mismatch count, and report path.
+Under `Archives & Comparisons`, use `Verify Weekly Verification Sidecar` to
+regenerate the read-only report and inspect its full verification table.
 
 Home shows the latest receipt ID, archive folder, comparison verdict, and top
 change. Open `Archives & Comparisons` for the recent run table and full
@@ -843,11 +850,14 @@ comparison. These controls only create or read report files. They cannot import
 odds, edit manual data, apply settlement, run live providers, change provider
 policy, enable cron, fabricate odds, or place bets.
 
-For Week 1, enter and validate real current odds first, then look for a verified
-receipt with zero mismatches. `Missing prior run` is expected because there is
-no comparison baseline yet. Missing odds instead produce a safe not-ready
-receipt. Starting with Week 2, the comparison makes new blockers and
-card/queue/ledger changes easy to review before any manual betting decision.
+For Week 1, enter and validate real current odds first, then look for both a
+verified pipeline receipt and a verified sidecar with zero mismatches. `Missing
+prior run` is expected because there is no comparison baseline yet. Missing odds
+can produce safe `not ready` results with zero mismatches: the archives are
+structurally intact, but the run is not card-ready. A `changed`, `missing`, or
+`malformed` result requires inspection or a rerun. Starting with Week 2, the
+comparison makes new blockers and card/queue/ledger changes easy to review
+before any manual betting decision.
 
 Verification reads reports and writes only verification outputs. It cannot edit
 odds or the ledger, import data, run providers, apply settlement, change
@@ -865,7 +875,8 @@ It automatically runs the safe steps in this order:
 8. Bet ledger summary.
 9. Tier performance report.
 10. Weekly pipeline archive, latest-two comparison, exact-archive receipt
-    verification, and checksum-bound verification sidecar archival.
+    verification, checksum-bound verification sidecar archival, and exact-sidecar
+    verification.
 
 The card step requires fresh historical/fixture inputs, no serious odds
 validation issues, and 100% expected odds completion. Missing or blocked inputs
@@ -884,7 +895,7 @@ data/outputs/epl_weekly_pipeline.csv
 You can run the same safe workflow from Home with `Run Weekly EPL Pipeline`.
 Home then shows the latest status, best-bet/lean counts, decision-queue count,
 archive receipt ID/path, automatic verification verdict and mismatch count,
-and recommended next human action.
+sidecar verification verdict and receipt IDs, and recommended next human action.
 
 The pipeline does not import odds, edit `current_odds.csv` or the ledger, apply
 settlement, use force mode, archive/rollback stale odds, promote staging, run a

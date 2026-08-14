@@ -95,6 +95,20 @@ def main() -> int:
         "Verification sidecar archive: "
         f"{summary['verification_sidecar_archive_path'] or 'Not available'}"
     )
+    print(
+        "Sidecar verification: "
+        f"{summary['sidecar_verification_verdict']} "
+        f"({summary['sidecar_verification_mismatch_count']} mismatch(es))"
+    )
+    print(
+        "Verified sidecar IDs: "
+        f"{summary['sidecar_verification_original_id'] or 'Not available'} / "
+        f"{summary['sidecar_verification_recalculated_id'] or 'Not available'}"
+    )
+    print(
+        "Sidecar verification report: "
+        f"{summary['sidecar_verification_report_path'] or 'Not available'}"
+    )
     print(f"Comparison verdict: {summary['pipeline_comparison_verdict']}")
     print("No bets were placed and no protected manual files were edited.")
 

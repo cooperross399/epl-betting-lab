@@ -28,6 +28,9 @@ from epl_betting_lab.reports.github_manual_run_verification import (
 from epl_betting_lab.reports.epl_weekly_pipeline_history import (
     compare_latest_epl_weekly_pipeline_runs,
 )
+from epl_betting_lab.reports.epl_weekly_pipeline_receipt_verification import (
+    save_epl_weekly_pipeline_receipt_verification,
+)
 from epl_betting_lab.reports.odds_export_conversion import (
     OddsExportConversionError,
     convert_odds_export,
@@ -627,6 +630,16 @@ def run_epl_weekly_pipeline_comparison(
     output_dir: Path | None = None,
 ) -> dict[str, object]:
     return compare_latest_epl_weekly_pipeline_runs(output_dir or OUTPUTS_DIR)
+
+
+def run_epl_weekly_pipeline_receipt_verification(
+    output_dir: Path | None = None,
+    archive_path: Path | None = None,
+) -> dict[str, object]:
+    return save_epl_weekly_pipeline_receipt_verification(
+        archive_path=archive_path,
+        output_dir=output_dir or OUTPUTS_DIR,
+    )
 
 
 def run_github_manual_thursday_verification(

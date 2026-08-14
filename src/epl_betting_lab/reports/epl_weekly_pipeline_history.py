@@ -728,7 +728,9 @@ def prepare_epl_weekly_pipeline_history(
     }
 
 
-def _archive_markdown(manifest: Mapping[str, object]) -> str:
+def render_epl_weekly_pipeline_archive_receipt(
+    manifest: Mapping[str, object],
+) -> str:
     snapshot = manifest.get("summary_snapshot", {})
     counts = snapshot.get("card_counts", {}) if isinstance(snapshot, Mapping) else {}
     queue = (
@@ -764,7 +766,13 @@ def _archive_markdown(manifest: Mapping[str, object]) -> str:
     lines.extend(["", "## Bound reports", ""])
     inventory = manifest.get("report_inventory", [])
     if inventory:
-        table = pd.DataFrame(inventory).drop(columns=["note"], errors="ignore")
+        table = pd.DataFrame(inventory)
+        visible_columns = [
+            column
+            for column in ("path", "status", "checksum_sha256", "size_bytes")
+            if column in table.columns
+        ]
+        table = table[visible_columns]
         lines.append(table.to_markdown(index=False))
     else:
         lines.append("No referenced reports were available to bind.")
@@ -779,7 +787,9 @@ def _archive_markdown(manifest: Mapping[str, object]) -> str:
     return "\n".join(lines)
 
 
-def _archive_csv(manifest: Mapping[str, object]) -> bytes:
+def render_epl_weekly_pipeline_archive_csv(
+    manifest: Mapping[str, object],
+) -> bytes:
     rows: list[dict[str, object]] = [
         {
             "category": "Run",
@@ -951,8 +961,10 @@ def save_prepared_epl_weekly_pipeline_history(
     archive_json_bytes = (
         json.dumps(_json_safe(manifest), indent=2, sort_keys=True) + "\n"
     ).encode("utf-8")
-    archive_markdown_bytes = (_archive_markdown(manifest) + "\n").encode("utf-8")
-    archive_csv_bytes = _archive_csv(manifest)
+    archive_markdown_bytes = (
+        render_epl_weekly_pipeline_archive_receipt(manifest) + "\n"
+    ).encode("utf-8")
+    archive_csv_bytes = render_epl_weekly_pipeline_archive_csv(manifest)
     for path, content in (
         (archive_json, archive_json_bytes),
         (archive_markdown, archive_markdown_bytes),

@@ -879,6 +879,41 @@ python scripts/archive_epl_weekly_pipeline.py
 python scripts/compare_epl_weekly_pipeline_runs.py
 ```
 
+Before reviewing the archived card package, verify the latest receipt:
+
+```bash
+python scripts/verify_epl_weekly_pipeline_receipt.py
+```
+
+To verify a specific older receipt, provide its dated archive folder or archive
+receipt JSON:
+
+```bash
+python scripts/verify_epl_weekly_pipeline_receipt.py \
+  --archive-path data/outputs/archive/epl_weekly_pipeline/YYYY-MM-DD/HHMMSS/
+```
+
+The verifier recalculates the deterministic receipt ID, checks required archive
+JSON/markdown/CSV files, re-hashes archived pipeline files and copied reports,
+compares status/steps/blockers/card counts/queue counts/ledger health, and checks
+the original report paths when they still exist. A checksum mismatch means a
+bound file no longer contains the exact bytes recorded by the weekly receipt.
+Stop and inspect or rerun the pipeline instead of trusting that archive.
+
+Verification writes:
+
+```text
+data/outputs/epl_weekly_pipeline_receipt_verification.json
+data/outputs/epl_weekly_pipeline_receipt_verification.md
+data/outputs/epl_weekly_pipeline_receipt_verification.csv
+```
+
+Use `Verify Weekly Pipeline Receipt` under `Archives & Comparisons`; Home also
+shows the latest verdict, original/recalculated receipt IDs, archive path, and
+mismatch count. An intact first Week 1 receipt can verify even when its
+comparison says `Missing prior run`. Verification only proves report integrity;
+it does not approve a bet.
+
 Latest archive and comparison reports are written to
 `data/outputs/epl_weekly_pipeline_archive.*` and
 `data/outputs/epl_weekly_pipeline_comparison.*`. Home shows the latest receipt,
@@ -897,6 +932,8 @@ the initial card package. Later receipts make weekly changes auditable without
 automating a betting decision. Archiving and comparison only copy/read report
 outputs; they do not edit odds or the ledger, use force mode, apply settlement,
 run providers, change allowlists, enable cron, fabricate odds, or place bets.
+Receipt verification has the same boundary: it reads reports and writes only
+verification outputs.
 
 For one Terminal command that creates the full safe Thursday report package,
 run:

@@ -844,6 +844,49 @@ including original/recalculated sidecar IDs, mismatch count, and report path.
 Under `Archives & Comparisons`, use `Verify Weekly Verification Sidecar` to
 regenerate the read-only report and inspect its full verification table.
 
+After that automatic check, the same weekly command archives its verification
+reports separately under:
+
+```text
+data/outputs/archive/epl_weekly_pipeline_sidecar_verifications/YYYY-MM-DD/HHMMSS_RECEIPT_ID/
+```
+
+This is intentionally outside both sealed folders. The pipeline archive is the
+original weekly receipt. The verification sidecar preserves proof that the
+pipeline receipt was checked. The sidecar-verification archive preserves proof
+that the sidecar itself was checked. None of these later steps rewrites either
+sealed archive.
+
+Its `epl-weekly-sidecar-check-...` ID is deterministic from the pipeline and
+sidecar receipt IDs, sealed sidecar path, verifier verdict/status, mismatch
+count, and copied verifier report paths and SHA-256 checksums. Identical proof
+keeps the same ID even when archived again; changed proof gets a different ID.
+
+The latest report views are:
+
+```text
+data/outputs/epl_weekly_pipeline_sidecar_verification_archive.json
+data/outputs/epl_weekly_pipeline_sidecar_verification_archive.md
+data/outputs/epl_weekly_pipeline_sidecar_verification_archive.csv
+```
+
+`Sidecar verification archived` is ready for review. `Sidecar verification not
+ready` means the archive is structurally preserved but the underlying weekly
+run still needs odds or data. `Missing sidecar verification report` and
+`Sidecar verification archive failed` fail closed; inspect the blockers and
+rerun the weekly pipeline before relying on the proof.
+
+For a manual report-only copy of the latest verifier outputs, run:
+
+```bash
+python scripts/archive_epl_weekly_pipeline_sidecar_verification.py
+```
+
+Home shows the latest archive verdict, receipt ID, and folder. `Archives &
+Comparisons` lists recent sidecar-verification receipts and the latest report.
+For Week 1, this gives you durable proof of the full archive/check chain even
+when `Missing prior run` is expected. It still does not approve or place a bet.
+
 Home shows the latest receipt ID, archive folder, comparison verdict, and top
 change. Open `Archives & Comparisons` for the recent run table and full
 comparison. These controls only create or read report files. They cannot import
@@ -875,8 +918,8 @@ It automatically runs the safe steps in this order:
 8. Bet ledger summary.
 9. Tier performance report.
 10. Weekly pipeline archive, latest-two comparison, exact-archive receipt
-    verification, checksum-bound verification sidecar archival, and exact-sidecar
-    verification.
+    verification, checksum-bound verification sidecar archival, exact-sidecar
+    verification, and separate sidecar-verification receipt archival.
 
 The card step requires fresh historical/fixture inputs, no serious odds
 validation issues, and 100% expected odds completion. Missing or blocked inputs

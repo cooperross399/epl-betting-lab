@@ -912,6 +912,54 @@ and status, original and recalculated sidecar receipt IDs, mismatch count,
 verification report path, and verified sidecar archive path. The sealed
 pipeline archive and sealed sidecar archive are not rewritten afterward.
 
+The command then preserves that automatic sidecar-verification result in a
+third, separate receipt folder:
+
+```text
+data/outputs/archive/epl_weekly_pipeline_sidecar_verifications/YYYY-MM-DD/HHMMSS_RECEIPT_ID/
+```
+
+This folder contains exact copies of the sidecar-verification JSON, Markdown,
+and CSV plus lightweight archive metadata. Its deterministic
+`epl-weekly-sidecar-check-...` receipt ID binds the sealed pipeline receipt ID,
+sealed sidecar receipt ID and path, verifier verdict/status, original and
+recalculated sidecar IDs, mismatch count, and every copied report path and
+SHA-256 checksum. The archive timestamp and destination suffix are excluded,
+so identical evidence has the same receipt ID; changed report bytes or bound
+receipt details produce a different ID. Same-second archives use `_02`, `_03`,
+and later suffixes instead of overwriting earlier proof.
+
+The latest receipt views are written to:
+
+```text
+data/outputs/epl_weekly_pipeline_sidecar_verification_archive.json
+data/outputs/epl_weekly_pipeline_sidecar_verification_archive.md
+data/outputs/epl_weekly_pipeline_sidecar_verification_archive.csv
+```
+
+Read the archive verdict this way:
+
+- `Sidecar verification archived`: verified proof was copied and checksum-checked.
+- `Sidecar verification not ready`: an intact blocked or missing-odds run was
+  preserved, but it is not ready for card review.
+- `Missing sidecar verification report`: a required verifier report was absent.
+- `Sidecar verification archive failed`: evidence, receipt IDs, paths, or
+  verifier metadata were inconsistent or unsafe.
+
+To preserve the current verifier reports again without rerunning the weekly
+workflow, use:
+
+```bash
+python scripts/archive_epl_weekly_pipeline_sidecar_verification.py
+```
+
+The sealed pipeline and sidecar folders are inputs only and remain byte-for-byte
+unchanged. If the result is `not ready`, fix the stated odds/data prerequisite
+and rerun the weekly pipeline. If it is `missing` or `failed`, inspect the
+archive report before trusting the Week 1 proof. Home shows the archive verdict,
+receipt ID, and path; `Archives & Comparisons` lists recent receipts and the
+latest evidence table.
+
 To manually recheck the latest sidecar later, run:
 
 ```bash

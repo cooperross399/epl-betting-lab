@@ -823,6 +823,42 @@ against the previous archived card, then creates the Thursday decision queue.
 If there are not at least two archived cards yet, it stops with a friendly
 message and does not try to build the queue.
 
+### Main weekly EPL command
+
+For the complete local weekly workflow, run one command:
+
+```bash
+python scripts/run_epl_weekly_pipeline.py
+```
+
+This is the main Week 1 and in-season command. In order, it checks data
+freshness, validates current odds, checks 100% odds completeness, generates and
+archives the gated Thursday card, compares the latest two archives when they
+exist, builds the decision queue, checks ledger health, refreshes the ledger
+summary, and generates tier performance. A first archive is useful on its own;
+comparison and the decision queue simply wait until a second snapshot exists.
+
+The pipeline blocks card generation when core data is stale, odds are missing,
+serious validation issues exist, or expected odds rows are incomplete. It never
+uses force mode. It also refuses to import odds, edit manual files, apply
+settlement, archive or roll back stale odds, promote staging, run live
+providers, allowlist providers, enable cron, fabricate odds, or place bets.
+
+Every run writes:
+
+```text
+data/outputs/epl_weekly_pipeline.json
+data/outputs/epl_weekly_pipeline.md
+data/outputs/epl_weekly_pipeline.csv
+```
+
+The final status is `Ready for card review`, `Card generated with warnings`,
+`Needs odds`, `Needs odds fixes`, `Needs data refresh`, `Blocked`, or `Failed`.
+The summary includes card counts, decision-queue counts, ledger health, all
+step outcomes, report paths, and the next manual action. The same workflow is
+available from the Home button `Run Weekly EPL Pipeline`, with the latest
+summary directly below the Home actions.
+
 For one Terminal command that creates the full safe Thursday report package,
 run:
 
@@ -1229,9 +1265,11 @@ python scripts/settle_bet_ledger.py
 python scripts/run_backtest.py
 ```
 
-The three most important report buttons are visible on `Home / Command Center`:
+The main weekly button and focused report buttons are visible on
+`Home / Command Center`:
 
 ```text
+Run Weekly EPL Pipeline
 Run Thursday readiness refresh
 Run post-refresh Thursday review
 Generate tier performance report

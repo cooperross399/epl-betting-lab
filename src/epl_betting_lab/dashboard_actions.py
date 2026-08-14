@@ -605,6 +605,21 @@ def run_tier_performance_report(
     return save_tier_performance_reports(ledger_path or MANUAL_DIR / "bet_ledger.csv", output_dir or OUTPUTS_DIR)
 
 
+def run_epl_weekly_pipeline(
+    output_dir: Path | None = None,
+    progress=None,
+) -> dict[str, object]:
+    # Local import avoids the dashboard -> scheduled workflow -> dashboard import cycle.
+    from epl_betting_lab.reports.epl_weekly_pipeline import (
+        run_epl_weekly_pipeline as run_pipeline,
+    )
+
+    return run_pipeline(
+        output_dir=output_dir or OUTPUTS_DIR,
+        progress=progress,
+    )
+
+
 def run_github_manual_thursday_verification(
     output_dir: Path | None = None,
 ) -> dict[str, object]:

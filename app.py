@@ -49,6 +49,7 @@ from epl_betting_lab.dashboard_actions import (
     run_provider_allowlist_pr_preview,
     run_provider_human_acceptance_receipt_verification,
     run_provider_policy_pr_gate,
+    run_provider_policy_pr_gate_receipt_verification,
     run_provider_shadow_run_comparison,
     run_stale_current_odds_archive_preview,
     run_stale_current_odds_archive_confirmation_status,
@@ -995,6 +996,90 @@ def render_odds_import() -> None:
         "provider_policy_pr_gate.csv",
         policy_gate_command,
     )
+    gate_receipt_verification_command = (
+        "python scripts/verify_provider_policy_pr_gate_receipt.py "
+        f"--provider {selected_shadow_provider}"
+    )
+    if st.button("Verify provider policy PR gate receipt", width="stretch"):
+        run_dashboard_action(
+            "Provider policy PR gate receipt verification",
+            lambda: run_provider_policy_pr_gate_receipt_verification(
+                selected_shadow_provider
+            ),
+        )
+    gate_receipt_verification_path = (
+        OUTPUTS_DIR / "provider_policy_pr_gate_receipt_verification.json"
+    )
+    if gate_receipt_verification_path.exists():
+        try:
+            gate_receipt_verification = json.loads(
+                gate_receipt_verification_path.read_text(encoding="utf-8")
+            )
+        except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+            st.warning(f"The gate receipt verification could not be read: {exc}")
+        else:
+            st.caption("Latest provider policy gate receipt verification")
+            verification_columns = st.columns(4)
+            verification_columns[0].metric(
+                "Verification",
+                str(gate_receipt_verification.get("verdict", "Not checked")),
+            )
+            verification_columns[1].metric(
+                "Git context",
+                str(
+                    gate_receipt_verification.get(
+                        "comparison_context_status", "Not checked"
+                    )
+                ),
+            )
+            verification_columns[2].metric(
+                "Original ID",
+                str(
+                    gate_receipt_verification.get("original_gate_receipt_id", "")
+                )[-12:]
+                or "Missing",
+            )
+            verification_columns[3].metric(
+                "Recalculated ID",
+                str(
+                    gate_receipt_verification.get(
+                        "recalculated_gate_receipt_id", ""
+                    )
+                )[-12:]
+                or "Unavailable",
+            )
+            mismatch_count = len(
+                gate_receipt_verification.get("mismatches", [])
+                if isinstance(gate_receipt_verification.get("mismatches"), list)
+                else []
+            )
+            st.code(
+                "Original gate receipt ID: "
+                f"{gate_receipt_verification.get('original_gate_receipt_id') or 'Missing'}\n"
+                "Recalculated gate receipt ID: "
+                f"{gate_receipt_verification.get('recalculated_gate_receipt_id') or 'Unavailable'}",
+                language=None,
+            )
+            st.caption(
+                f"Base {str(gate_receipt_verification.get('base_sha', ''))[:12] or 'Missing'} "
+                f"vs head {str(gate_receipt_verification.get('head_sha', ''))[:12] or 'Missing'}; "
+                f"{mismatch_count} mismatch/blocker(s)."
+            )
+    else:
+        st.info(
+            "No gate receipt verification is available yet. Run the read-only "
+            "verification after the Provider Policy PR Gate creates its receipt."
+        )
+    render_markdown_expander(
+        "Provider policy PR gate receipt verification",
+        "provider_policy_pr_gate_receipt_verification.md",
+        gate_receipt_verification_command,
+    )
+    render_table_expander(
+        "Provider policy PR gate receipt verification checks",
+        "provider_policy_pr_gate_receipt_verification.csv",
+        gate_receipt_verification_command,
+    )
     st.caption(
         "Provider and shadow-run commands remain Terminal-only so dashboard users "
         "cannot expose secrets, fetch live data, overwrite staging files, allowlist "
@@ -1002,7 +1087,7 @@ def render_odds_import() -> None:
         "comparison, acceptance checks, receipt display, and receipt verification "
         "are report-only. The allowlist PR preview, conformance checker, and "
         "checksum-bound evidence bundle, its approval-time verifier, and the PR "
-        "gate also write reports only."
+        "gate and its receipt verifier also write reports only."
     )
     st.divider()
 

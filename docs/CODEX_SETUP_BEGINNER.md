@@ -331,6 +331,24 @@ base/head SHAs, changed-files digest, and binding status without changing any
 file. This proves what was checked; it still does not apply the policy,
 allowlist a provider, or enable cron.
 
+Before approving that policy PR, verify the saved gate receipt one more time:
+
+```bash
+python scripts/verify_provider_policy_pr_gate_receipt.py --provider odds_api
+```
+
+Read
+`data/outputs/provider_policy_pr_gate_receipt_verification.md`, or click
+**Verify provider policy PR gate receipt** under Odds Import. The checker uses
+the recorded PR base/head commits to rebuild the changed-file list and hashes,
+then re-hashes the policy and every evidence report before recalculating the
+receipt ID. `Gate receipt verified for PR approval` means those exact inputs
+still match. If Git context is missing, a file changed, evidence changed, the
+policy changed, or the original gate did not pass, stop and rerun/review the PR
+gate. `--diagnostic` is for troubleshooting only and cannot approve a receipt.
+The Action and dashboard remain read-only; neither can apply policy, allowlist a
+provider, or enable cron.
+
 Then validate the generated staging files:
 
 ```bash

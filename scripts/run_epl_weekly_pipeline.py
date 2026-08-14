@@ -76,6 +76,16 @@ def main() -> int:
     print(f"CSV step log: {result['csv']}")
     print(f"Pipeline receipt ID: {summary['pipeline_receipt_id']}")
     print(f"Archive folder: {summary['pipeline_archive_path']}")
+    print(
+        "Archive verification: "
+        f"{summary['receipt_verification_verdict']} "
+        f"({summary['receipt_verification_mismatch_count']} mismatch(es))"
+    )
+    print(
+        "Verified receipt IDs: "
+        f"{summary['receipt_verification_original_id'] or 'Not available'} / "
+        f"{summary['receipt_verification_recalculated_id'] or 'Not available'}"
+    )
     print(f"Comparison verdict: {summary['pipeline_comparison_verdict']}")
     print("No bets were placed and no protected manual files were edited.")
 

@@ -497,7 +497,8 @@ def render_main_actions() -> None:
         width="stretch",
         help=(
             "Run freshness, odds gates, the Thursday card package, ledger reports, "
-            "and tier performance without force or apply actions."
+            "tier performance, archive creation, and exact-archive receipt verification "
+            "without force or apply actions."
         ),
     ):
         run_dashboard_weekly_pipeline()
@@ -544,8 +545,20 @@ def render_weekly_pipeline_summary() -> None:
             "Queue plays",
             sum(int(value or 0) for value in queue_counts.values()),
         )
-        receipt_id = str(summary.get("pipeline_receipt_id", "")).strip()
-        archive_path = str(summary.get("pipeline_archive_path", "")).strip()
+        receipt_id = str(
+            summary.get("archive_receipt_id")
+            or summary.get("pipeline_receipt_id", "")
+        ).strip()
+        archive_path = str(
+            summary.get("archive_path")
+            or summary.get("pipeline_archive_path", "")
+        ).strip()
+        verification_verdict = str(
+            summary.get("receipt_verification_verdict", "Not checked")
+        ).strip()
+        verification_mismatch_count = int(
+            summary.get("receipt_verification_mismatch_count", 0) or 0
+        )
         comparison_verdict = str(
             summary.get("pipeline_comparison_verdict", "Missing prior run")
         )
@@ -553,6 +566,10 @@ def render_weekly_pipeline_summary() -> None:
             f"**Pipeline receipt**  \n`{receipt_id or 'Not available'}`"
         )
         st.caption(f"Archive: `{archive_path or 'Not available'}`")
+        st.caption(
+            f"Archive verification: {verification_verdict or 'Not checked'}; "
+            f"mismatches/blockers: {verification_mismatch_count}."
+        )
         st.caption(f"Change since previous run: {comparison_verdict}")
         important_changes = summary.get("important_changes_since_previous_run", [])
         if isinstance(important_changes, list) and important_changes:
@@ -573,7 +590,6 @@ def render_weekly_pipeline_summary() -> None:
             "This summary is report-only. It did not edit odds or the ledger, use force mode, "
             "apply settlement, run a live provider, enable cron, or place a bet."
         )
-        render_weekly_pipeline_verification_summary()
         render_markdown_expander(
             "Full weekly pipeline summary",
             "epl_weekly_pipeline.md",
@@ -1677,7 +1693,8 @@ def render_archives_and_comparisons() -> None:
             run_epl_weekly_pipeline_receipt_verification,
         )
     history_note.caption(
-        "Each Weekly EPL Pipeline run archives automatically. Comparison needs two receipts."
+        "Each Weekly EPL Pipeline run archives and verifies its exact new receipt automatically. "
+        "Comparison needs two receipts."
     )
     pipeline_history = list_recent_epl_weekly_pipeline_runs()
     if pipeline_history.empty:

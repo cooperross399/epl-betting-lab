@@ -259,14 +259,86 @@ def test_weekly_pipeline_runs_all_safe_steps_in_order_and_preserves_inputs(tmp_p
     assert saved["safety"]["settlement_applied"] is False
     assert saved["safety"]["bets_placed"] is False
     assert saved["pipeline_receipt_id"].startswith("epl-weekly-")
+    assert saved["archive_receipt_id"] == saved["pipeline_receipt_id"]
+    assert saved["receipt_verification_verdict"] == (
+        "Weekly pipeline receipt verified"
+    )
+    assert saved["receipt_verification_status"] == "Verified"
+    assert saved["receipt_verification_original_id"] == saved[
+        "pipeline_receipt_id"
+    ]
+    assert saved["receipt_verification_recalculated_id"] == saved[
+        "pipeline_receipt_id"
+    ]
+    assert saved["receipt_verification_mismatch_count"] == 0
+    assert saved["receipt_verification_report_path"] in saved[
+        "generated_report_paths"
+    ]
     assert saved["pipeline_comparison_verdict"] == "Missing prior run"
     archive_dir = Path(saved["pipeline_archive_path"])
+    assert Path(saved["archive_path"]) == archive_dir
     assert archive_dir == paths["output_dir"] / "archive/epl_weekly_pipeline/2026-08-13/090000"
     assert (archive_dir / "epl_weekly_pipeline.json").exists()
     assert (archive_dir / "epl_weekly_pipeline.md").exists()
     assert (archive_dir / "epl_weekly_pipeline.csv").exists()
+    archived_pipeline = json.loads(
+        (archive_dir / "epl_weekly_pipeline.json").read_text(encoding="utf-8")
+    )
+    assert archived_pipeline["receipt_verification_status"] == "Pending"
+    assert archived_pipeline["archive_receipt_id"] == saved["archive_receipt_id"]
+    pipeline_csv = pd.read_csv(result["csv"])
+    for column in (
+        "archive_receipt_id",
+        "archive_path",
+        "receipt_verification_verdict",
+        "receipt_verification_status",
+        "receipt_verification_original_id",
+        "receipt_verification_recalculated_id",
+        "receipt_verification_mismatch_count",
+        "receipt_verification_report_path",
+    ):
+        assert column in pipeline_csv.columns
+    pipeline_markdown = result["markdown"].read_text(encoding="utf-8")
+    assert "Receipt verification: **Weekly pipeline receipt verified**" in pipeline_markdown
+    assert "Receipt verification mismatches: 0" in pipeline_markdown
     assert paths["current_odds_path"].read_bytes() == odds_before
     assert paths["ledger_path"].read_bytes() == ledger_before
+
+
+def test_weekly_pipeline_verifies_the_archive_path_it_just_created(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    paths = _paths(tmp_path)
+    calls: list[str] = []
+    verified_paths: list[Path] = []
+    original = weekly_pipeline_module.save_epl_weekly_pipeline_receipt_verification
+
+    def capture_verification(*, archive_path, output_dir, generated_at):
+        verified_paths.append(Path(archive_path))
+        return original(
+            archive_path=archive_path,
+            output_dir=output_dir,
+            generated_at=generated_at,
+        )
+
+    monkeypatch.setattr(
+        weekly_pipeline_module,
+        "save_epl_weekly_pipeline_receipt_verification",
+        capture_verification,
+    )
+
+    result = run_epl_weekly_pipeline(
+        **paths,
+        run_at=FIXED_RUN_AT,
+        actions=_actions(calls),
+    )
+
+    assert verified_paths == [Path(result["summary"]["archive_path"])]
+    assert verified_paths[0] == Path(result["archive"]["archive_dir"])
+    assert result["receipt_verification"]["verdict"] == (
+        "Weekly pipeline receipt verified"
+    )
 
 
 def test_first_archive_skips_comparison_without_downgrading_ready_status(tmp_path) -> None:
@@ -362,6 +434,93 @@ def test_missing_current_odds_reports_needs_odds_without_creating_file(tmp_path)
     assert result["status"] == "Needs odds"
     assert "best_bets" not in calls
     assert not paths["current_odds_path"].exists()
+    assert result["summary"]["receipt_verification_verdict"] == (
+        "Weekly pipeline receipt not ready"
+    )
+    assert result["summary"]["receipt_verification_status"] == "Not ready"
+    assert result["summary"]["receipt_verification_mismatch_count"] == 0
+    verification_step = next(
+        step
+        for step in result["summary"]["steps"]
+        if step["step"] == "Weekly pipeline receipt verification"
+    )
+    assert verification_step["status"] == "Completed with warnings"
+
+
+def test_archive_corruption_is_surfaced_without_crashing(tmp_path, monkeypatch) -> None:
+    paths = _paths(tmp_path)
+    calls: list[str] = []
+    original = weekly_pipeline_module.save_prepared_epl_weekly_pipeline_history
+
+    def save_then_corrupt(*args, **kwargs):
+        result = original(*args, **kwargs)
+        Path(result["archive_dir"], "epl_weekly_pipeline.md").write_text(
+            "# Corrupted after archive\n",
+            encoding="utf-8",
+        )
+        return result
+
+    monkeypatch.setattr(
+        weekly_pipeline_module,
+        "save_prepared_epl_weekly_pipeline_history",
+        save_then_corrupt,
+    )
+
+    result = run_epl_weekly_pipeline(
+        **paths,
+        run_at=FIXED_RUN_AT,
+        actions=_actions(calls),
+    )
+
+    assert result["status"] == "Failed"
+    assert result["summary"]["receipt_verification_verdict"] == (
+        "Weekly pipeline receipt changed"
+    )
+    assert result["summary"]["receipt_verification_status"] == "Failed"
+    assert result["summary"]["receipt_verification_mismatch_count"] >= 1
+    assert any(
+        step["step"] == "Weekly pipeline receipt verification"
+        and step["status"] == "Failed"
+        for step in result["summary"]["steps"]
+    )
+    assert any(
+        "Archive verification failed closed" in blocker
+        for blocker in result["summary"]["key_blockers"]
+    )
+
+
+def test_unexpected_receipt_verification_error_is_reported_without_crashing(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    paths = _paths(tmp_path)
+    calls: list[str] = []
+
+    def fail_verification(**_kwargs):
+        raise RuntimeError("verification writer broke")
+
+    monkeypatch.setattr(
+        weekly_pipeline_module,
+        "save_epl_weekly_pipeline_receipt_verification",
+        fail_verification,
+    )
+
+    result = run_epl_weekly_pipeline(
+        **paths,
+        run_at=FIXED_RUN_AT,
+        actions=_actions(calls),
+    )
+
+    assert result["status"] == "Failed"
+    assert result["summary"]["receipt_verification_verdict"] == (
+        "Weekly pipeline receipt verification failed"
+    )
+    assert result["summary"]["receipt_verification_status"] == "Failed"
+    assert result["summary"]["receipt_verification_mismatch_count"] == 1
+    assert any(
+        "verification writer broke" in blocker
+        for blocker in result["summary"]["key_blockers"]
+    )
 
 
 def test_stale_core_data_blocks_card_with_needs_data_refresh(tmp_path) -> None:
@@ -441,3 +600,6 @@ def test_dashboard_home_exposes_weekly_pipeline_button_and_summary() -> None:
     assert '"Run Weekly EPL Pipeline"' in app_source
     assert '"Latest Weekly EPL Pipeline"' in app_source
     assert '"epl_weekly_pipeline.md"' in app_source
+    assert "receipt_verification_verdict" in app_source
+    assert "receipt_verification_mismatch_count" in app_source
+    assert "apply_epl_weekly_pipeline" not in app_source

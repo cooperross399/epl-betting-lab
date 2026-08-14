@@ -835,8 +835,10 @@ This is the main Week 1 and in-season command. In order, it checks data
 freshness, validates current odds, checks 100% odds completeness, generates and
 archives the gated Thursday card, compares the latest two archives when they
 exist, builds the decision queue, checks ledger health, refreshes the ledger
-summary, and generates tier performance. A first archive is useful on its own;
-comparison and the decision queue simply wait until a second snapshot exists.
+summary, generates tier performance, seals the weekly pipeline archive, and
+immediately verifies that exact new archive. A first archive is useful on its
+own; comparison and the decision queue simply wait until a second snapshot
+exists.
 
 The pipeline blocks card generation when core data is stale, odds are missing,
 serious validation issues exist, or expected odds rows are incomplete. It never
@@ -872,6 +874,13 @@ The comparison verdict is `Stable ready state`, `Improved`, `New blockers`,
 `More review needed`, `Missing prior run`, or `Failed`. A first run is still a
 useful baseline and safely reports `Missing prior run`.
 
+After the archive and comparison are written, the same command automatically
+runs receipt verification against the archive folder returned by that run. It
+does not guess which archive is latest. The live pipeline JSON, markdown, and
+CSV then include the archive receipt ID/path, verification verdict/status,
+original and recalculated receipt IDs, mismatch count, and verification report
+path. The sealed archive is not rewritten after verification.
+
 You can regenerate either report-only step from Terminal:
 
 ```bash
@@ -879,7 +888,8 @@ python scripts/archive_epl_weekly_pipeline.py
 python scripts/compare_epl_weekly_pipeline_runs.py
 ```
 
-Before reviewing the archived card package, verify the latest receipt:
+The weekly command already performs this check. To manually recheck the latest
+receipt or inspect an older one, run:
 
 ```bash
 python scripts/verify_epl_weekly_pipeline_receipt.py
@@ -900,6 +910,17 @@ the original report paths when they still exist. A checksum mismatch means a
 bound file no longer contains the exact bytes recorded by the weekly receipt.
 Stop and inspect or rerun the pipeline instead of trusting that archive.
 
+The automatic verdicts mean:
+
+- `Weekly pipeline receipt verified`: the sealed archive matches its receipt and
+  the weekly run is ready for manual card review.
+- `Weekly pipeline receipt not ready`: archive integrity passed, but the weekly
+  run itself was blocked or lacked required inputs such as current odds. This is
+  safe and does not turn a missing-odds run into a software failure.
+- `Weekly pipeline receipt changed`: a bound file, checksum, receipt field, or
+  referenced live report changed. The live pipeline summary fails closed and
+  should not be used until the mismatch is inspected or the pipeline is rerun.
+
 Verification writes:
 
 ```text
@@ -908,11 +929,12 @@ data/outputs/epl_weekly_pipeline_receipt_verification.md
 data/outputs/epl_weekly_pipeline_receipt_verification.csv
 ```
 
-Use `Verify Weekly Pipeline Receipt` under `Archives & Comparisons`; Home also
-shows the latest verdict, original/recalculated receipt IDs, archive path, and
-mismatch count. An intact first Week 1 receipt can verify even when its
-comparison says `Missing prior run`. Verification only proves report integrity;
-it does not approve a bet.
+Home shows the just-created archive path and receipt ID plus its automatic
+verification verdict and mismatch count. Use `Verify Weekly Pipeline Receipt`
+under `Archives & Comparisons` for an explicit recheck and the detailed table.
+An intact first Week 1 receipt can verify even when its comparison says `Missing
+prior run`. Verification only proves report integrity; it does not approve a
+bet.
 
 Latest archive and comparison reports are written to
 `data/outputs/epl_weekly_pipeline_archive.*` and
@@ -923,17 +945,18 @@ Comparisons` shows recent weekly receipts and the full latest comparison.
 The final status is `Ready for card review`, `Card generated with warnings`,
 `Needs odds`, `Needs odds fixes`, `Needs data refresh`, `Blocked`, or `Failed`.
 The summary includes card counts, decision-queue counts, ledger health, all
-step outcomes, report paths, and the next manual action. The same workflow is
-available from the Home button `Run Weekly EPL Pipeline`, with the latest
-summary directly below the Home actions.
+step outcomes, archive verification linkage, report paths, and the next manual
+action. The same workflow is available from the Home button `Run Weekly EPL
+Pipeline`, with the latest summary directly below the Home actions.
 
-For Week 1, the first receipt proves exactly which inputs and reports produced
-the initial card package. Later receipts make weekly changes auditable without
-automating a betting decision. Archiving and comparison only copy/read report
-outputs; they do not edit odds or the ledger, use force mode, apply settlement,
-run providers, change allowlists, enable cron, fabricate odds, or place bets.
-Receipt verification has the same boundary: it reads reports and writes only
-verification outputs.
+For Week 1, fill and validate real current odds before the run, then require a
+verified receipt with zero mismatches before reviewing the initial card. A
+missing prior comparison is expected; missing odds instead produce a safe
+not-ready receipt. Later receipts make weekly changes auditable without
+automating a betting decision. Archiving, comparison, and verification only
+copy/read report outputs; they do not edit odds or the ledger, use force mode,
+apply settlement, run providers, change allowlists, enable cron, fabricate odds,
+or place bets.
 
 For one Terminal command that creates the full safe Thursday report package,
 run:

@@ -690,6 +690,12 @@ The first run says `Missing prior run`; that is normal and does not block a
 ready first card. Future runs can say `Stable ready state`, `Improved`, `New
 blockers`, `More review needed`, or `Failed`.
 
+The command then verifies the exact archive folder it just created. It uses the
+folder returned by the archive step, so it cannot accidentally verify a
+different "latest" run. Home and the live weekly summary show the archive path,
+archive receipt ID, verification verdict, original/recalculated receipt IDs,
+mismatch count, and verification report path.
+
 To rebuild only the report archive or comparison, use:
 
 ```bash
@@ -697,8 +703,8 @@ python scripts/archive_epl_weekly_pipeline.py
 python scripts/compare_epl_weekly_pipeline_runs.py
 ```
 
-Before you review the card, verify that the latest archived receipt still
-matches its reports:
+This verification now runs automatically. To recheck the latest receipt later,
+or to check an older receipt manually, use:
 
 ```bash
 python scripts/verify_epl_weekly_pipeline_receipt.py
@@ -718,6 +724,17 @@ report path when that file still exists. `Checksum mismatch` means the file is
 not byte-for-byte identical to what the receipt recorded. Do not trust that
 archive until you inspect the change or rerun the weekly pipeline.
 
+Read the automatic verdict this way:
+
+- `Weekly pipeline receipt verified` means the receipt and bound reports match,
+  and the weekly run is ready for manual card review.
+- `Weekly pipeline receipt not ready` means the archive is structurally sound,
+  but the weekly run was blocked or missing required odds/data. Fix the stated
+  input issue and rerun; this is not treated as a program crash.
+- `Weekly pipeline receipt changed` means a checksum, receipt field, archived
+  file, or available live report no longer matches. Stop and inspect the
+  mismatch or rerun the pipeline.
+
 The reports are:
 
 ```text
@@ -726,10 +743,11 @@ data/outputs/epl_weekly_pipeline_receipt_verification.md
 data/outputs/epl_weekly_pipeline_receipt_verification.csv
 ```
 
-The `Verify Weekly Pipeline Receipt` button is in `Archives & Comparisons`, and
-Home shows the latest verdict and mismatch count. On Week 1, `Missing prior run`
-is normal comparison metadata and does not prevent an otherwise intact, ready
-receipt from verifying.
+The `Verify Weekly Pipeline Receipt` button in `Archives & Comparisons` remains
+available for an explicit recheck. Home automatically shows the latest run's
+archive receipt ID/path, verification verdict, and mismatch count. On Week 1,
+`Missing prior run` is normal comparison metadata and does not prevent an
+otherwise intact, ready receipt from verifying.
 
 Home shows the latest receipt ID, archive folder, comparison verdict, and top
 change. Open `Archives & Comparisons` for the recent run table and full
@@ -737,9 +755,11 @@ comparison. These controls only create or read report files. They cannot import
 odds, edit manual data, apply settlement, run live providers, change provider
 policy, enable cron, fabricate odds, or place bets.
 
-For Week 1, the first receipt is the audit baseline. Starting with Week 2, the
-comparison makes new blockers and card/queue/ledger changes easy to review
-before any manual betting decision.
+For Week 1, enter and validate real current odds first, then look for a verified
+receipt with zero mismatches. `Missing prior run` is expected because there is
+no comparison baseline yet. Missing odds instead produce a safe not-ready
+receipt. Starting with Week 2, the comparison makes new blockers and
+card/queue/ledger changes easy to review before any manual betting decision.
 
 Verification reads reports and writes only verification outputs. It cannot edit
 odds or the ledger, import data, run providers, apply settlement, change
@@ -756,6 +776,8 @@ It automatically runs the safe steps in this order:
 7. Bet ledger health check.
 8. Bet ledger summary.
 9. Tier performance report.
+10. Weekly pipeline archive, latest-two comparison, and exact-archive receipt
+    verification.
 
 The card step requires fresh historical/fixture inputs, no serious odds
 validation issues, and 100% expected odds completion. Missing or blocked inputs
@@ -773,6 +795,7 @@ data/outputs/epl_weekly_pipeline.csv
 
 You can run the same safe workflow from Home with `Run Weekly EPL Pipeline`.
 Home then shows the latest status, best-bet/lean counts, decision-queue count,
+archive receipt ID/path, automatic verification verdict and mismatch count,
 and recommended next human action.
 
 The pipeline does not import odds, edit `current_odds.csv` or the ledger, apply

@@ -852,12 +852,51 @@ data/outputs/epl_weekly_pipeline.md
 data/outputs/epl_weekly_pipeline.csv
 ```
 
+Every completed run also creates a collision-safe dated receipt folder:
+
+```text
+data/outputs/archive/epl_weekly_pipeline/YYYY-MM-DD/HHMMSS/
+```
+
+The folder contains copies of the pipeline JSON, markdown, and CSV plus the key
+reports referenced by that run. Its deterministic `epl-weekly-...` receipt ID
+binds the run timestamp, final status, step outcomes, blockers, card and decision
+queue counts, ledger health, and referenced report checksums. Running twice in
+the same second creates a `_02`, `_03`, and so on folder instead of overwriting
+an earlier receipt.
+
+The pipeline automatically compares the newest receipt with the previous one.
+It reports status, blockers, step outcomes, best-bet/lean/pass counts, decision
+queue counts, ledger health, report paths/checksums, and next-action changes.
+The comparison verdict is `Stable ready state`, `Improved`, `New blockers`,
+`More review needed`, `Missing prior run`, or `Failed`. A first run is still a
+useful baseline and safely reports `Missing prior run`.
+
+You can regenerate either report-only step from Terminal:
+
+```bash
+python scripts/archive_epl_weekly_pipeline.py
+python scripts/compare_epl_weekly_pipeline_runs.py
+```
+
+Latest archive and comparison reports are written to
+`data/outputs/epl_weekly_pipeline_archive.*` and
+`data/outputs/epl_weekly_pipeline_comparison.*`. Home shows the latest receipt,
+archive path, comparison verdict, and most important change. `Archives &
+Comparisons` shows recent weekly receipts and the full latest comparison.
+
 The final status is `Ready for card review`, `Card generated with warnings`,
 `Needs odds`, `Needs odds fixes`, `Needs data refresh`, `Blocked`, or `Failed`.
 The summary includes card counts, decision-queue counts, ledger health, all
 step outcomes, report paths, and the next manual action. The same workflow is
 available from the Home button `Run Weekly EPL Pipeline`, with the latest
 summary directly below the Home actions.
+
+For Week 1, the first receipt proves exactly which inputs and reports produced
+the initial card package. Later receipts make weekly changes auditable without
+automating a betting decision. Archiving and comparison only copy/read report
+outputs; they do not edit odds or the ledger, use force mode, apply settlement,
+run providers, change allowlists, enable cron, fabricate odds, or place bets.
 
 For one Terminal command that creates the full safe Thursday report package,
 run:

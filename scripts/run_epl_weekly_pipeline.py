@@ -74,6 +74,9 @@ def main() -> int:
     print(f"Markdown summary: {result['markdown']}")
     print(f"JSON summary: {result['json']}")
     print(f"CSV step log: {result['csv']}")
+    print(f"Pipeline receipt ID: {summary['pipeline_receipt_id']}")
+    print(f"Archive folder: {summary['pipeline_archive_path']}")
+    print(f"Comparison verdict: {summary['pipeline_comparison_verdict']}")
     print("No bets were placed and no protected manual files were edited.")
 
     if result["status"] == "Failed":

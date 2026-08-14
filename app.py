@@ -34,6 +34,7 @@ from epl_betting_lab.dashboard_actions import (
     run_current_odds_maintenance_preview,
     run_current_odds_validation,
     run_epl_weekly_pipeline,
+    run_epl_weekly_pipeline_comparison,
     run_github_manual_thursday_verification,
     run_ledger_health_check,
     run_odds_export_conversion_preview,
@@ -73,6 +74,9 @@ from epl_betting_lab.reports.current_odds_validation import CurrentOddsValidatio
 from epl_betting_lab.reports.current_odds_import_audit import (
     load_current_odds_import_audit,
     summarize_current_odds_import_batches,
+)
+from epl_betting_lab.reports.epl_weekly_pipeline_history import (
+    list_recent_epl_weekly_pipeline_runs,
 )
 from epl_betting_lab.reports.odds_export_conversion import OddsExportConversionError
 from epl_betting_lab.reports.odds_export_profile_diagnostic import (
@@ -539,6 +543,19 @@ def render_weekly_pipeline_summary() -> None:
             "Queue plays",
             sum(int(value or 0) for value in queue_counts.values()),
         )
+        receipt_id = str(summary.get("pipeline_receipt_id", "")).strip()
+        archive_path = str(summary.get("pipeline_archive_path", "")).strip()
+        comparison_verdict = str(
+            summary.get("pipeline_comparison_verdict", "Missing prior run")
+        )
+        st.markdown(
+            f"**Pipeline receipt**  \n`{receipt_id or 'Not available'}`"
+        )
+        st.caption(f"Archive: `{archive_path or 'Not available'}`")
+        st.caption(f"Change since previous run: {comparison_verdict}")
+        important_changes = summary.get("important_changes_since_previous_run", [])
+        if isinstance(important_changes, list) and important_changes:
+            st.caption(f"Important change: {important_changes[0]}")
         recommendation = str(
             summary.get(
                 "recommended_next_action",
@@ -1608,6 +1625,44 @@ def render_archives_and_comparisons() -> None:
         "Thursday decision queue table",
         "thursday_decision_queue.csv",
         "python scripts/generate_thursday_decision_queue.py",
+    )
+
+    st.subheader("Weekly pipeline run history")
+    history_action, history_note = st.columns([1, 3])
+    if history_action.button(
+        "Compare weekly pipeline runs",
+        width="stretch",
+        help="Regenerate the latest-two comparison from archived report receipts only.",
+    ):
+        run_dashboard_action(
+            "EPL weekly pipeline comparison",
+            run_epl_weekly_pipeline_comparison,
+        )
+    history_note.caption(
+        "Each Weekly EPL Pipeline run archives automatically. Comparison needs two receipts."
+    )
+    pipeline_history = list_recent_epl_weekly_pipeline_runs()
+    if pipeline_history.empty:
+        st.info(
+            "No weekly pipeline receipts are archived yet. Run Weekly EPL Pipeline from Home."
+        )
+    else:
+        st.dataframe(pipeline_history, width="stretch", hide_index=True)
+    render_markdown_expander(
+        "Latest weekly pipeline comparison",
+        "epl_weekly_pipeline_comparison.md",
+        "python scripts/compare_epl_weekly_pipeline_runs.py",
+        expanded=True,
+    )
+    render_table_expander(
+        "Weekly pipeline comparison table",
+        "epl_weekly_pipeline_comparison.csv",
+        "python scripts/compare_epl_weekly_pipeline_runs.py",
+    )
+    render_markdown_expander(
+        "Latest weekly pipeline archive receipt",
+        "epl_weekly_pipeline_archive.md",
+        "python scripts/archive_epl_weekly_pipeline.py",
     )
 
 

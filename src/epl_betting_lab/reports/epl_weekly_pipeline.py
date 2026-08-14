@@ -31,6 +31,10 @@ from epl_betting_lab.reports.epl_weekly_pipeline_history import (
     prepare_epl_weekly_pipeline_history,
     save_prepared_epl_weekly_pipeline_history,
 )
+from epl_betting_lab.reports.epl_weekly_pipeline_receipt_verification import (
+    VERIFICATION_MARKDOWN_FILENAME,
+    save_epl_weekly_pipeline_receipt_verification,
+)
 from epl_betting_lab.reports.thursday_best_bets import list_recent_thursday_archives
 from epl_betting_lab.reports.thursday_decision_queue import ACTION_PRIORITY
 from epl_betting_lab.scheduled_thursday_workflow import (
@@ -78,6 +82,10 @@ EXPECTED_INPUT_ERRORS = (
     pd.errors.ParserError,
     CurrentOddsValidationError,
 )
+RECEIPT_VERIFIED_VERDICT = "Weekly pipeline receipt verified"
+RECEIPT_NOT_READY_VERDICT = "Weekly pipeline receipt not ready"
+RECEIPT_PENDING_VERDICT = "Pending archive verification"
+RECEIPT_ERROR_VERDICT = "Weekly pipeline receipt verification failed"
 
 
 @dataclass(frozen=True)
@@ -381,6 +389,16 @@ def _render_markdown(summary: dict[str, object]) -> str:
         f"- Final status: **{summary['status']}**",
         f"- Pipeline receipt ID: `{summary['pipeline_receipt_id']}`",
         f"- Pipeline archive: `{summary['pipeline_archive_path']}`",
+        f"- Archive receipt ID: `{summary.get('archive_receipt_id') or 'Not available'}`",
+        f"- Archive path: `{summary.get('archive_path') or 'Not available'}`",
+        (
+            "- Receipt verification: "
+            f"**{summary.get('receipt_verification_verdict') or 'Not checked'}**"
+        ),
+        (
+            "- Receipt verification mismatches: "
+            f"{int(summary.get('receipt_verification_mismatch_count', 0) or 0)}"
+        ),
         f"- Latest pipeline comparison: **{summary['pipeline_comparison_verdict']}**",
         f"- Recommended next human action: {summary['recommended_next_action']}",
         (
@@ -443,11 +461,37 @@ def _render_markdown(summary: dict[str, object]) -> str:
     return "\n".join(lines)
 
 
-def _render_step_csv(steps: list[dict[str, object]]) -> bytes:
+def _render_step_csv(
+    steps: list[dict[str, object]],
+    summary: dict[str, object],
+) -> bytes:
+    verification_fields = {
+        "archive_receipt_id": summary.get("archive_receipt_id", ""),
+        "archive_path": summary.get("archive_path", ""),
+        "receipt_verification_verdict": summary.get(
+            "receipt_verification_verdict", ""
+        ),
+        "receipt_verification_status": summary.get(
+            "receipt_verification_status", ""
+        ),
+        "receipt_verification_original_id": summary.get(
+            "receipt_verification_original_id", ""
+        ),
+        "receipt_verification_recalculated_id": summary.get(
+            "receipt_verification_recalculated_id", ""
+        ),
+        "receipt_verification_mismatch_count": int(
+            summary.get("receipt_verification_mismatch_count", 0) or 0
+        ),
+        "receipt_verification_report_path": summary.get(
+            "receipt_verification_report_path", ""
+        ),
+    }
     rows = []
     for step in steps:
         rows.append(
             {
+                **verification_fields,
                 "step": step["step"],
                 "status": step["status"],
                 "message": step["message"],
@@ -458,6 +502,28 @@ def _render_step_csv(steps: list[dict[str, object]]) -> bytes:
             }
         )
     return pd.DataFrame(rows).to_csv(index=False).encode("utf-8")
+
+
+def _write_live_pipeline_outputs(
+    summary: dict[str, object],
+    *,
+    json_path: Path,
+    markdown_path: Path,
+    csv_path: Path,
+) -> dict[str, object]:
+    safe_value = _json_safe(summary)
+    if not isinstance(safe_value, dict):
+        raise TypeError("Weekly pipeline summary must serialize to a JSON object.")
+    atomic_write_report(
+        json_path,
+        (json.dumps(safe_value, indent=2, sort_keys=True) + "\n").encode("utf-8"),
+    )
+    atomic_write_report(
+        markdown_path,
+        (_render_markdown(safe_value) + "\n").encode("utf-8"),
+    )
+    atomic_write_report(csv_path, _render_step_csv(summary["steps"], safe_value))
+    return safe_value
 
 
 def run_epl_weekly_pipeline(
@@ -823,23 +889,175 @@ def run_epl_weekly_pipeline(
             "important_changes_since_previous_run": history_plan["comparison"][
                 "important_changes"
             ],
+            "archive_receipt_id": history_plan["manifest"]["receipt_id"],
+            "archive_path": str(history_plan["archive_dir"]),
+            "receipt_verification_verdict": RECEIPT_PENDING_VERDICT,
+            "receipt_verification_status": "Pending",
+            "receipt_verification_original_id": "",
+            "receipt_verification_recalculated_id": "",
+            "receipt_verification_mismatch_count": 0,
+            "receipt_verification_report_path": str(
+                context.output_dir / VERIFICATION_MARKDOWN_FILENAME
+            ),
         }
     )
-    safe_summary = _json_safe(summary)
-    atomic_write_report(
-        json_path,
-        (json.dumps(safe_summary, indent=2, sort_keys=True) + "\n").encode("utf-8"),
+    # Seal the canonical receipt before adding its own verification result.
+    safe_summary = _write_live_pipeline_outputs(
+        summary,
+        json_path=json_path,
+        markdown_path=markdown_path,
+        csv_path=csv_path,
     )
-    atomic_write_report(
-        markdown_path,
-        (_render_markdown(safe_summary) + "\n").encode("utf-8"),
-    )
-    atomic_write_report(csv_path, _render_step_csv(steps))
     history_result = save_prepared_epl_weekly_pipeline_history(
         history_plan,
         pipeline_summary=safe_summary,
         pipeline_markdown_path=markdown_path,
         pipeline_csv_path=csv_path,
+    )
+
+    verification_result: dict[str, object] | None = None
+    verification_verdict = RECEIPT_ERROR_VERDICT
+    verification_status = "Failed"
+    verification_original_id = ""
+    verification_recalculated_id = ""
+    verification_mismatch_count = 1
+    verification_report_path = ""
+    if progress is not None:
+        progress(
+            "Weekly pipeline receipt verification",
+            "Running",
+            "Verifying the archive created by this weekly run.",
+        )
+    try:
+        verification_result = save_epl_weekly_pipeline_receipt_verification(
+            archive_path=Path(history_result["archive_dir"]),
+            output_dir=context.output_dir,
+            generated_at=context.run_at,
+        )
+        verification_summary = verification_result.get("summary", {})
+        if not isinstance(verification_summary, dict):
+            raise ValueError("Receipt verification returned a malformed summary.")
+        verification_verdict = str(
+            verification_summary.get("verdict", RECEIPT_ERROR_VERDICT)
+        ).strip()
+        verification_original_id = str(
+            verification_summary.get("original_receipt_id", "")
+        ).strip()
+        verification_recalculated_id = str(
+            verification_summary.get("recalculated_receipt_id", "")
+        ).strip()
+        verification_mismatch_count = int(
+            verification_summary.get("mismatch_count", 0) or 0
+        )
+        verification_report_path = str(verification_result.get("markdown", ""))
+        verification_outputs = {
+            key: Path(value)
+            for key, value in verification_result.items()
+            if key in {"json", "markdown", "csv"} and value
+        }
+
+        if verification_verdict == RECEIPT_VERIFIED_VERDICT:
+            verification_status = "Verified"
+            step_status = "Completed"
+            verification_message = (
+                "The newly created weekly pipeline archive passed receipt verification."
+            )
+            verification_warnings: tuple[str, ...] = ()
+            verification_blockers: tuple[str, ...] = ()
+        elif verification_verdict == RECEIPT_NOT_READY_VERDICT:
+            verification_status = "Not ready"
+            step_status = "Completed with warnings"
+            verification_message = (
+                "The archive is structurally consistent, but this weekly run was not ready "
+                "for card review."
+            )
+            verification_warnings = (verification_message,)
+            verification_blockers = ()
+            warnings.append(verification_message)
+        else:
+            verification_status = "Failed"
+            step_status = "Failed"
+            verification_message = (
+                f"Archive verification failed closed: {verification_verdict}."
+            )
+            verification_warnings = ()
+            verification_blockers = (verification_message,)
+            blockers.append(verification_message)
+            final_status = "Failed"
+
+        add_step(
+            "Weekly pipeline receipt verification",
+            step_status,
+            verification_message,
+            WorkflowActionResult(
+                outputs=verification_outputs,
+                message=verification_message,
+                warnings=verification_warnings,
+                blockers=verification_blockers,
+                metadata={
+                    "archive_path": str(history_result["archive_dir"]),
+                    "archive_receipt_id": history_result["receipt_id"],
+                    "verdict": verification_verdict,
+                    "original_receipt_id": verification_original_id,
+                    "recalculated_receipt_id": verification_recalculated_id,
+                    "mismatch_count": verification_mismatch_count,
+                },
+            ),
+        )
+    except Exception as exc:
+        final_status = "Failed"
+        verification_message = f"Receipt verification failed unexpectedly: {exc}"
+        blockers.append(verification_message)
+        add_step(
+            "Weekly pipeline receipt verification",
+            "Failed",
+            verification_message,
+            WorkflowActionResult(
+                message=verification_message,
+                blockers=(verification_message,),
+                metadata={
+                    "archive_path": str(history_result["archive_dir"]),
+                    "archive_receipt_id": history_result["receipt_id"],
+                    "verdict": verification_verdict,
+                    "mismatch_count": verification_mismatch_count,
+                },
+            ),
+        )
+
+    summary.update(
+        {
+            "status": final_status,
+            "steps_run": [
+                str(step["step"])
+                for step in steps
+                if step["status"] not in {"Skipped", "Blocked"}
+            ],
+            "steps_skipped": [
+                str(step["step"]) for step in steps if step["status"] == "Skipped"
+            ],
+            "steps_blocked": [
+                str(step["step"]) for step in steps if step["status"] == "Blocked"
+            ],
+            "key_blockers": _dedupe(blockers),
+            "key_warnings": _dedupe(warnings),
+            "generated_report_paths": _dedupe(output_files),
+            "recommended_next_action": _recommended_next_action(final_status),
+            "steps": steps,
+            "archive_receipt_id": history_result["receipt_id"],
+            "archive_path": str(history_result["archive_dir"]),
+            "receipt_verification_verdict": verification_verdict,
+            "receipt_verification_status": verification_status,
+            "receipt_verification_original_id": verification_original_id,
+            "receipt_verification_recalculated_id": verification_recalculated_id,
+            "receipt_verification_mismatch_count": verification_mismatch_count,
+            "receipt_verification_report_path": verification_report_path,
+        }
+    )
+    safe_summary = _write_live_pipeline_outputs(
+        summary,
+        json_path=json_path,
+        markdown_path=markdown_path,
+        csv_path=csv_path,
     )
     return {
         "status": final_status,
@@ -848,5 +1066,6 @@ def run_epl_weekly_pipeline(
         "csv": csv_path,
         "archive": history_result,
         "comparison": history_plan["comparison"],
+        "receipt_verification": verification_result,
         "summary": safe_summary,
     }

@@ -86,6 +86,15 @@ def main() -> int:
         f"{summary['receipt_verification_original_id'] or 'Not available'} / "
         f"{summary['receipt_verification_recalculated_id'] or 'Not available'}"
     )
+    print(
+        "Verification sidecar: "
+        f"{summary['verification_sidecar_verdict']} "
+        f"({summary['verification_sidecar_receipt_id'] or 'no receipt ID'})"
+    )
+    print(
+        "Verification sidecar archive: "
+        f"{summary['verification_sidecar_archive_path'] or 'Not available'}"
+    )
     print(f"Comparison verdict: {summary['pipeline_comparison_verdict']}")
     print("No bets were placed and no protected manual files were edited.")
 

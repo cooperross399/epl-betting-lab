@@ -79,6 +79,9 @@ from epl_betting_lab.reports.current_odds_import_audit import (
 from epl_betting_lab.reports.epl_weekly_pipeline_history import (
     list_recent_epl_weekly_pipeline_runs,
 )
+from epl_betting_lab.reports.epl_weekly_pipeline_verification_sidecar import (
+    list_recent_epl_weekly_pipeline_verification_sidecars,
+)
 from epl_betting_lab.reports.odds_export_conversion import OddsExportConversionError
 from epl_betting_lab.reports.odds_export_profile_diagnostic import (
     OddsExportProfileDiagnosticError,
@@ -497,8 +500,8 @@ def render_main_actions() -> None:
         width="stretch",
         help=(
             "Run freshness, odds gates, the Thursday card package, ledger reports, "
-            "tier performance, archive creation, and exact-archive receipt verification "
-            "without force or apply actions."
+            "tier performance, archive creation, exact-archive receipt verification, "
+            "and its checksum-bound sidecar without force or apply actions."
         ),
     ):
         run_dashboard_weekly_pipeline()
@@ -570,6 +573,20 @@ def render_weekly_pipeline_summary() -> None:
             f"Archive verification: {verification_verdict or 'Not checked'}; "
             f"mismatches/blockers: {verification_mismatch_count}."
         )
+        sidecar_verdict = str(
+            summary.get("verification_sidecar_verdict", "Not archived")
+        ).strip()
+        sidecar_receipt_id = str(
+            summary.get("verification_sidecar_receipt_id", "")
+        ).strip()
+        sidecar_archive_path = str(
+            summary.get("verification_sidecar_archive_path", "")
+        ).strip()
+        st.caption(
+            f"Verification sidecar: {sidecar_verdict or 'Not archived'}; receipt: "
+            f"`{sidecar_receipt_id or 'Not available'}`."
+        )
+        st.caption(f"Sidecar archive: `{sidecar_archive_path or 'Not available'}`")
         st.caption(f"Change since previous run: {comparison_verdict}")
         important_changes = summary.get("important_changes_since_previous_run", [])
         if isinstance(important_changes, list) and important_changes:
@@ -1714,6 +1731,25 @@ def render_archives_and_comparisons() -> None:
         "Weekly pipeline receipt verification table",
         "epl_weekly_pipeline_receipt_verification.csv",
         "python scripts/verify_epl_weekly_pipeline_receipt.py",
+    )
+    st.subheader("Weekly pipeline verification sidecars")
+    sidecars = list_recent_epl_weekly_pipeline_verification_sidecars()
+    if sidecars.empty:
+        st.info(
+            "No verification sidecars are archived yet. Run Weekly EPL Pipeline from Home."
+        )
+    else:
+        st.dataframe(sidecars, width="stretch", hide_index=True)
+    render_markdown_expander(
+        "Latest weekly verification sidecar",
+        "epl_weekly_pipeline_verification_sidecar.md",
+        "python scripts/archive_epl_weekly_pipeline_verification.py",
+        expanded=True,
+    )
+    render_table_expander(
+        "Weekly verification sidecar evidence",
+        "epl_weekly_pipeline_verification_sidecar.csv",
+        "python scripts/archive_epl_weekly_pipeline_verification.py",
     )
     render_markdown_expander(
         "Latest weekly pipeline comparison",

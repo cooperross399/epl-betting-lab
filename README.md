@@ -881,6 +881,29 @@ CSV then include the archive receipt ID/path, verification verdict/status,
 original and recalculated receipt IDs, mismatch count, and verification report
 path. The sealed archive is not rewritten after verification.
 
+The command then archives that exact verification JSON, Markdown, and CSV as a
+checksum-bound sidecar under:
+
+```text
+data/outputs/archive/epl_weekly_pipeline_verifications/YYYY-MM-DD/HHMMSS_RECEIPT_ID/
+```
+
+The deterministic `epl-weekly-verification-...` sidecar receipt binds the weekly
+pipeline receipt ID and archive path, verification verdict/status, original and
+recalculated receipt IDs, mismatch count, and each copied verification report's
+path and SHA-256 checksum. Identical evidence produces the same sidecar ID;
+changed evidence produces a different one. Same-second runs use `_02`, `_03`,
+and later suffixes instead of overwriting a prior sidecar. This separate folder
+preserves the post-archive proof without changing the sealed pipeline archive.
+
+The current sidecar views are also written to:
+
+```text
+data/outputs/epl_weekly_pipeline_verification_sidecar.json
+data/outputs/epl_weekly_pipeline_verification_sidecar.md
+data/outputs/epl_weekly_pipeline_verification_sidecar.csv
+```
+
 You can regenerate either report-only step from Terminal:
 
 ```bash
@@ -893,6 +916,7 @@ receipt or inspect an older one, run:
 
 ```bash
 python scripts/verify_epl_weekly_pipeline_receipt.py
+python scripts/archive_epl_weekly_pipeline_verification.py
 ```
 
 To verify a specific older receipt, provide its dated archive folder or archive
@@ -909,6 +933,20 @@ compares status/steps/blockers/card counts/queue counts/ledger health, and check
 the original report paths when they still exist. A checksum mismatch means a
 bound file no longer contains the exact bytes recorded by the weekly receipt.
 Stop and inspect or rerun the pipeline instead of trusting that archive.
+
+The sidecar verdict is `Verification sidecar archived` when all three verifier
+reports were copied and checksum-verified, `Verification sidecar not ready` for
+an intact but blocked weekly run, `Missing verification report` when a required
+verifier output is absent, or `Verification sidecar failed` for inconsistent or
+unreadable evidence. Home shows the latest sidecar verdict, receipt ID, and
+archive path. `Archives & Comparisons` shows recent sidecars and the latest
+sidecar report. These displays are read-only.
+
+For Week 1, a verified first archive plus an archived sidecar gives you a sealed
+baseline even though comparison still says `Missing prior run`. If the sidecar
+says `not ready`, fix the stated missing odds/data issue and rerun the weekly
+pipeline. If it says `missing` or `failed`, inspect the latest sidecar report and
+rerun the weekly pipeline before relying on that proof.
 
 The automatic verdicts mean:
 

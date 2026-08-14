@@ -697,6 +697,40 @@ python scripts/archive_epl_weekly_pipeline.py
 python scripts/compare_epl_weekly_pipeline_runs.py
 ```
 
+Before you review the card, verify that the latest archived receipt still
+matches its reports:
+
+```bash
+python scripts/verify_epl_weekly_pipeline_receipt.py
+```
+
+For an older run, copy its folder path from `Archives & Comparisons` and run:
+
+```bash
+python scripts/verify_epl_weekly_pipeline_receipt.py \
+  --archive-path data/outputs/archive/epl_weekly_pipeline/YYYY-MM-DD/HHMMSS/
+```
+
+The verifier checks the receipt ID, pipeline status, step results, blockers,
+best-bet/lean/pass counts, decision queue, ledger health, comparison label, and
+SHA-256 checksums for archived files and reports. It also checks an original
+report path when that file still exists. `Checksum mismatch` means the file is
+not byte-for-byte identical to what the receipt recorded. Do not trust that
+archive until you inspect the change or rerun the weekly pipeline.
+
+The reports are:
+
+```text
+data/outputs/epl_weekly_pipeline_receipt_verification.json
+data/outputs/epl_weekly_pipeline_receipt_verification.md
+data/outputs/epl_weekly_pipeline_receipt_verification.csv
+```
+
+The `Verify Weekly Pipeline Receipt` button is in `Archives & Comparisons`, and
+Home shows the latest verdict and mismatch count. On Week 1, `Missing prior run`
+is normal comparison metadata and does not prevent an otherwise intact, ready
+receipt from verifying.
+
 Home shows the latest receipt ID, archive folder, comparison verdict, and top
 change. Open `Archives & Comparisons` for the recent run table and full
 comparison. These controls only create or read report files. They cannot import
@@ -706,6 +740,10 @@ policy, enable cron, fabricate odds, or place bets.
 For Week 1, the first receipt is the audit baseline. Starting with Week 2, the
 comparison makes new blockers and card/queue/ledger changes easy to review
 before any manual betting decision.
+
+Verification reads reports and writes only verification outputs. It cannot edit
+odds or the ledger, import data, run providers, apply settlement, change
+provider policy, enable cron, fabricate odds, or place bets.
 
 It automatically runs the safe steps in this order:
 

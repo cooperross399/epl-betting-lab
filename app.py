@@ -35,6 +35,7 @@ from epl_betting_lab.dashboard_actions import (
     run_current_odds_validation,
     run_epl_weekly_pipeline,
     run_epl_weekly_pipeline_comparison,
+    run_epl_weekly_pipeline_receipt_verification,
     run_github_manual_thursday_verification,
     run_ledger_health_check,
     run_odds_export_conversion_preview,
@@ -572,11 +573,39 @@ def render_weekly_pipeline_summary() -> None:
             "This summary is report-only. It did not edit odds or the ledger, use force mode, "
             "apply settlement, run a live provider, enable cron, or place a bet."
         )
+        render_weekly_pipeline_verification_summary()
         render_markdown_expander(
             "Full weekly pipeline summary",
             "epl_weekly_pipeline.md",
             command,
         )
+
+
+def render_weekly_pipeline_verification_summary() -> None:
+    verification = read_output_json("epl_weekly_pipeline_receipt_verification.json")
+    st.markdown("**Latest receipt verification**")
+    if verification is None:
+        st.caption(
+            "Not checked yet. Use Verify Weekly Pipeline Receipt in Archives & Comparisons."
+        )
+        return
+
+    verdict = str(verification.get("verdict", "Malformed weekly pipeline archive"))
+    mismatch_count = int(verification.get("mismatch_count", 0) or 0)
+    original_id = str(verification.get("original_receipt_id", "")).strip()
+    recalculated_id = str(verification.get("recalculated_receipt_id", "")).strip()
+    archive_path = str(verification.get("archive_path", "")).strip()
+    if verdict == "Weekly pipeline receipt verified":
+        st.success(verdict)
+    elif verdict == "Weekly pipeline receipt not ready":
+        st.warning(verdict)
+    else:
+        st.error(verdict)
+    st.caption(
+        f"Receipt: `{original_id or 'Not available'}`; recalculated: "
+        f"`{recalculated_id or 'Not available'}`; mismatches/blockers: {mismatch_count}."
+    )
+    st.caption(f"Verified archive: `{archive_path or 'Not available'}`")
 
 
 def render_home() -> None:
@@ -1628,7 +1657,7 @@ def render_archives_and_comparisons() -> None:
     )
 
     st.subheader("Weekly pipeline run history")
-    history_action, history_note = st.columns([1, 3])
+    history_action, verification_action, history_note = st.columns([1, 1, 2])
     if history_action.button(
         "Compare weekly pipeline runs",
         width="stretch",
@@ -1637,6 +1666,15 @@ def render_archives_and_comparisons() -> None:
         run_dashboard_action(
             "EPL weekly pipeline comparison",
             run_epl_weekly_pipeline_comparison,
+        )
+    if verification_action.button(
+        "Verify Weekly Pipeline Receipt",
+        width="stretch",
+        help="Re-hash the latest archived pipeline receipt and reports without editing inputs.",
+    ):
+        run_dashboard_action(
+            "Weekly pipeline receipt verification",
+            run_epl_weekly_pipeline_receipt_verification,
         )
     history_note.caption(
         "Each Weekly EPL Pipeline run archives automatically. Comparison needs two receipts."
@@ -1648,6 +1686,18 @@ def render_archives_and_comparisons() -> None:
         )
     else:
         st.dataframe(pipeline_history, width="stretch", hide_index=True)
+    render_weekly_pipeline_verification_summary()
+    render_markdown_expander(
+        "Weekly pipeline receipt verification",
+        "epl_weekly_pipeline_receipt_verification.md",
+        "python scripts/verify_epl_weekly_pipeline_receipt.py",
+        expanded=True,
+    )
+    render_table_expander(
+        "Weekly pipeline receipt verification table",
+        "epl_weekly_pipeline_receipt_verification.csv",
+        "python scripts/verify_epl_weekly_pipeline_receipt.py",
+    )
     render_markdown_expander(
         "Latest weekly pipeline comparison",
         "epl_weekly_pipeline_comparison.md",

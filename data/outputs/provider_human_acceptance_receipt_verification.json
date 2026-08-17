@@ -1,0 +1,296 @@
+{
+  "checklist_verdict": "Ready for human allowlist review",
+  "checks": [
+    {
+      "category": "Receipt",
+      "check": "Receipt JSON",
+      "details": "Receipt JSON is readable.",
+      "evidence_path": "data/outputs/provider_human_acceptance_receipt.json",
+      "expected": "Readable receipt JSON object",
+      "observed": "635160dd9f1c6496288695e87ad876ac5362d8d27faf874a78de8bd4d111a17e",
+      "status": "Verified"
+    },
+    {
+      "category": "Receipt fields",
+      "check": "Provider",
+      "details": "The requested provider must match the receipt provider.",
+      "evidence_path": "",
+      "expected": "odds_api",
+      "observed": "odds_api",
+      "status": "Verified"
+    },
+    {
+      "category": "Receipt fields",
+      "check": "Reviewer",
+      "details": "",
+      "evidence_path": "",
+      "expected": "Non-empty reviewer name",
+      "observed": "cooperross399",
+      "status": "Verified"
+    },
+    {
+      "category": "Receipt fields",
+      "check": "Created at",
+      "details": "",
+      "evidence_path": "",
+      "expected": "Timezone-aware ISO timestamp",
+      "observed": "2026-08-17T15:52:17-04:00",
+      "status": "Verified"
+    },
+    {
+      "category": "Receipt fields",
+      "check": "Decision",
+      "details": "",
+      "evidence_path": "",
+      "expected": "approved_for_allowlist_pr",
+      "observed": "approved_for_allowlist_pr",
+      "status": "Verified"
+    },
+    {
+      "category": "Evidence",
+      "check": "Provider acceptance checklist checksum",
+      "details": "Current file checksum matches the human receipt.",
+      "evidence_path": "data/outputs/provider_acceptance_checklist.json",
+      "expected": "7aa6af6017dcf0b243fa43add16307df4877d77f8b079aa0d9ac9e324331dd98",
+      "observed": "7aa6af6017dcf0b243fa43add16307df4877d77f8b079aa0d9ac9e324331dd98",
+      "status": "Verified"
+    },
+    {
+      "category": "Receipt fields",
+      "check": "Checklist verdict",
+      "details": "Receipt and current checklist verdicts must agree.",
+      "evidence_path": "",
+      "expected": "Ready for human allowlist review",
+      "observed": "Ready for human allowlist review",
+      "status": "Verified"
+    },
+    {
+      "category": "Evidence",
+      "check": "Checklist provider",
+      "details": "",
+      "evidence_path": "",
+      "expected": "odds_api",
+      "observed": "odds_api",
+      "status": "Verified"
+    },
+    {
+      "category": "Evidence",
+      "check": "Reviewed shadow archive 1 bundle checksum",
+      "details": "Current archive contains 9 file(s).",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-17/151717_odds_api",
+      "expected": "350e8968939101ed4f96b65b40abea897318695fc14494007cbcaa7d5065af96",
+      "observed": "350e8968939101ed4f96b65b40abea897318695fc14494007cbcaa7d5065af96",
+      "status": "Verified"
+    },
+    {
+      "category": "Evidence",
+      "check": "Reviewed shadow archive 1 metadata checksum",
+      "details": "",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-17/151717_odds_api/archive_metadata.json",
+      "expected": "3fcfd33f2651d126856db4512df948fe6f15efe4599bf22bfb95cb2a428dcf4c",
+      "observed": "3fcfd33f2651d126856db4512df948fe6f15efe4599bf22bfb95cb2a428dcf4c",
+      "status": "Verified"
+    },
+    {
+      "category": "Evidence",
+      "check": "Reviewed shadow archive 1 archive integrity",
+      "details": "Verified 8 archived report checksum(s).",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-17/151717_odds_api",
+      "expected": "Verified",
+      "observed": "Verified",
+      "status": "Verified"
+    },
+    {
+      "category": "Evidence",
+      "check": "Reviewed shadow archive 2 bundle checksum",
+      "details": "Current archive contains 9 file(s).",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-17/151711_odds_api",
+      "expected": "9548e60f62463182766da19fabfb5228a473fe395bc167abea691aad335fd735",
+      "observed": "9548e60f62463182766da19fabfb5228a473fe395bc167abea691aad335fd735",
+      "status": "Verified"
+    },
+    {
+      "category": "Evidence",
+      "check": "Reviewed shadow archive 2 metadata checksum",
+      "details": "",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-17/151711_odds_api/archive_metadata.json",
+      "expected": "410652f1d2d5ec77a9088fd4e18710b58441b9de34bdaaca78c364ec2cf3d8a4",
+      "observed": "410652f1d2d5ec77a9088fd4e18710b58441b9de34bdaaca78c364ec2cf3d8a4",
+      "status": "Verified"
+    },
+    {
+      "category": "Evidence",
+      "check": "Reviewed shadow archive 2 archive integrity",
+      "details": "Verified 8 archived report checksum(s).",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-17/151711_odds_api",
+      "expected": "Verified",
+      "observed": "Verified",
+      "status": "Verified"
+    },
+    {
+      "category": "Evidence",
+      "check": "Reviewed shadow archive 3 bundle checksum",
+      "details": "Current archive contains 9 file(s).",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-17/151706_odds_api",
+      "expected": "03e810ba7a46d193774e99f05e8f67cf21dfae96caa64b767577a951377c50df",
+      "observed": "03e810ba7a46d193774e99f05e8f67cf21dfae96caa64b767577a951377c50df",
+      "status": "Verified"
+    },
+    {
+      "category": "Evidence",
+      "check": "Reviewed shadow archive 3 metadata checksum",
+      "details": "",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-17/151706_odds_api/archive_metadata.json",
+      "expected": "f80f7e619ceee625685a2834b57e2270476abfc022b97562d833432ec5ee8ca5",
+      "observed": "f80f7e619ceee625685a2834b57e2270476abfc022b97562d833432ec5ee8ca5",
+      "status": "Verified"
+    },
+    {
+      "category": "Evidence",
+      "check": "Reviewed shadow archive 3 archive integrity",
+      "details": "Verified 8 archived report checksum(s).",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-17/151706_odds_api",
+      "expected": "Verified",
+      "observed": "Verified",
+      "status": "Verified"
+    },
+    {
+      "category": "Evidence",
+      "check": "Reviewed shadow archive 4 bundle checksum",
+      "details": "Current archive contains 9 file(s).",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-17/151700_odds_api",
+      "expected": "1fd4711908ca3ccc01d0144ef30064250bddb1ba9de18877ea9222e1aa14e760",
+      "observed": "1fd4711908ca3ccc01d0144ef30064250bddb1ba9de18877ea9222e1aa14e760",
+      "status": "Verified"
+    },
+    {
+      "category": "Evidence",
+      "check": "Reviewed shadow archive 4 metadata checksum",
+      "details": "",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-17/151700_odds_api/archive_metadata.json",
+      "expected": "55781d1f8de48409c7d2471280e9d6f9fe54de087f1ca26d18c4ff7a4f61fd20",
+      "observed": "55781d1f8de48409c7d2471280e9d6f9fe54de087f1ca26d18c4ff7a4f61fd20",
+      "status": "Verified"
+    },
+    {
+      "category": "Evidence",
+      "check": "Reviewed shadow archive 4 archive integrity",
+      "details": "Verified 8 archived report checksum(s).",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-17/151700_odds_api",
+      "expected": "Verified",
+      "observed": "Verified",
+      "status": "Verified"
+    },
+    {
+      "category": "Evidence",
+      "check": "Reviewed shadow archive 5 bundle checksum",
+      "details": "Current archive contains 9 file(s).",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-17/151655_odds_api",
+      "expected": "68478b7192e7004b4e7426223e39e06d7074b3704681c5072409669ec9432471",
+      "observed": "68478b7192e7004b4e7426223e39e06d7074b3704681c5072409669ec9432471",
+      "status": "Verified"
+    },
+    {
+      "category": "Evidence",
+      "check": "Reviewed shadow archive 5 metadata checksum",
+      "details": "",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-17/151655_odds_api/archive_metadata.json",
+      "expected": "684562bde7e3fc35d21fb7f5c1c1da47af288c3afe8ba1a7caab1842cdc6e21c",
+      "observed": "684562bde7e3fc35d21fb7f5c1c1da47af288c3afe8ba1a7caab1842cdc6e21c",
+      "status": "Verified"
+    },
+    {
+      "category": "Evidence",
+      "check": "Reviewed shadow archive 5 archive integrity",
+      "details": "Verified 8 archived report checksum(s).",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-17/151655_odds_api",
+      "expected": "Verified",
+      "observed": "Verified",
+      "status": "Verified"
+    },
+    {
+      "category": "Evidence",
+      "check": "Latest live archive set",
+      "details": "The same latest live archives remain current and bound.",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs",
+      "expected": "[\"archive/provider_shadow_runs/2026-08-17/151655_odds_api\", \"archive/provider_shadow_runs/2026-08-17/151700_odds_api\", \"archive/provider_shadow_runs/2026-08-17/151706_odds_api\", \"archive/provider_shadow_runs/2026-08-17/151711_odds_api\", \"archive/provider_shadow_runs/2026-08-17/151717_odds_api\"]",
+      "observed": "[\"archive/provider_shadow_runs/2026-08-17/151655_odds_api\", \"archive/provider_shadow_runs/2026-08-17/151700_odds_api\", \"archive/provider_shadow_runs/2026-08-17/151706_odds_api\", \"archive/provider_shadow_runs/2026-08-17/151711_odds_api\", \"archive/provider_shadow_runs/2026-08-17/151717_odds_api\"]",
+      "status": "Verified"
+    },
+    {
+      "category": "Evidence",
+      "check": "Matching shadow comparison checksum",
+      "details": "Current file checksum matches the human receipt.",
+      "evidence_path": "data/outputs/provider_shadow_run_comparison.json",
+      "expected": "17bd99391c54fcb732f1be6e4350b1cd2f30ec15b7dc32677e01299ca665211d",
+      "observed": "17bd99391c54fcb732f1be6e4350b1cd2f30ec15b7dc32677e01299ca665211d",
+      "status": "Verified"
+    },
+    {
+      "category": "Evidence",
+      "check": "Shadow comparison provider",
+      "details": "",
+      "evidence_path": "",
+      "expected": "odds_api",
+      "observed": "odds_api",
+      "status": "Verified"
+    },
+    {
+      "category": "Evidence",
+      "check": "Provider policy checksum",
+      "details": "Current file checksum matches the human receipt.",
+      "evidence_path": "data/manual/staging_provider_policy.json",
+      "expected": "23d88241a66c9cc86b59d4278694b4e1522fd48048c268e0744dd217020b21d3",
+      "observed": "23d88241a66c9cc86b59d4278694b4e1522fd48048c268e0744dd217020b21d3",
+      "status": "Verified"
+    },
+    {
+      "category": "Receipt fields",
+      "check": "Approval gate",
+      "details": "",
+      "evidence_path": "",
+      "expected": "Passed without override",
+      "observed": "Passed",
+      "status": "Verified"
+    },
+    {
+      "category": "Receipt fields",
+      "check": "Receipt ID",
+      "details": "Receipt ID binds human fields and recorded evidence checksums.",
+      "evidence_path": "",
+      "expected": "odds_api-20260817T155217-0400-8204291a2b19",
+      "observed": "odds_api-20260817T155217-0400-8204291a2b19",
+      "status": "Verified"
+    }
+  ],
+  "decision": "approved_for_allowlist_pr",
+  "generated_at": "2026-08-17T15:52:18-04:00",
+  "next_step": "A separate human-reviewed provider allowlist PR may now be considered. This verifier does not edit policy or enable cron.",
+  "provider_key": "odds_api",
+  "provider_name": "the_odds_api",
+  "receipt_checksum_sha256": "635160dd9f1c6496288695e87ad876ac5362d8d27faf874a78de8bd4d111a17e",
+  "receipt_created_at": "2026-08-17T15:52:17-04:00",
+  "receipt_id": "odds_api-20260817T155217-0400-8204291a2b19",
+  "receipt_path": "data/outputs/provider_human_acceptance_receipt.json",
+  "reviewer_name": "cooperross399",
+  "safety": {
+    "bets_placed": false,
+    "cron_enabled": false,
+    "live_provider_run": false,
+    "manual_or_production_files_edited": false,
+    "provider_allowlisted": false,
+    "provider_policy_edited": false,
+    "read_only_evidence_check": true,
+    "staging_promoted": false
+  },
+  "status_counts": {
+    "Checksum mismatch": 0,
+    "Decision not approval": 0,
+    "Malformed receipt": 0,
+    "Missing evidence": 0,
+    "Not ready": 0,
+    "Stale evidence": 0,
+    "Verified": 29
+  },
+  "verdict": "Verified for allowlist PR review"
+}

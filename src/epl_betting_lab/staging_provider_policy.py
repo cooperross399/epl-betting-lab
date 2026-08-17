@@ -141,6 +141,7 @@ def load_staging_provider_policy(
         "valid": False,
         "allowed_provider_names": [],
         "allowed_provider_types": [],
+        "allowed_markets": None,
         "allow_unknown_providers": False,
         "allow_missing_provenance": False,
         "max_receipt_age_hours": None,
@@ -203,6 +204,26 @@ def load_staging_provider_policy(
     else:
         allowed_types = list(dict.fromkeys(item.strip() for item in types_value))
 
+    # Optional per-market allowlist. Absent means "no market restriction", which
+    # keeps every existing policy file valid. When present it is the reviewed
+    # set of markets an allowlisted provider may supply for automated picks, so
+    # a market that later becomes complete cannot join the card without a
+    # deliberate policy change.
+    markets_value = payload.get("allowed_markets")
+    if markets_value is None:
+        allowed_markets: list[str] | None = None
+    elif not isinstance(markets_value, list) or not all(
+        isinstance(item, str) and item.strip() for item in markets_value
+    ):
+        policy_blockers.append(
+            "allowed_markets must be a JSON list of non-blank market keys."
+        )
+        allowed_markets = []
+    else:
+        allowed_markets = list(
+            dict.fromkeys(item.strip().lower() for item in markets_value)
+        )
+
     allow_unknown = payload.get("allow_unknown_providers")
     if not isinstance(allow_unknown, bool):
         policy_blockers.append("allow_unknown_providers must be true or false.")
@@ -251,6 +272,7 @@ def load_staging_provider_policy(
         {
             "allowed_provider_names": allowed_names,
             "allowed_provider_types": allowed_types,
+            "allowed_markets": allowed_markets,
             "allow_unknown_providers": allow_unknown,
             "allow_missing_provenance": allow_missing_provenance,
             "max_receipt_age_hours": max_age,

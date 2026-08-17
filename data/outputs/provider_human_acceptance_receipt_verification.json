@@ -7,7 +7,7 @@
       "details": "Receipt JSON is readable.",
       "evidence_path": "data/outputs/provider_human_acceptance_receipt.json",
       "expected": "Readable receipt JSON object",
-      "observed": "635160dd9f1c6496288695e87ad876ac5362d8d27faf874a78de8bd4d111a17e",
+      "observed": "59e8324e81895782f9ca135b422638e4a3edb0cddda45367bcce1f0772e6f5bf",
       "status": "Verified"
     },
     {
@@ -34,7 +34,7 @@
       "details": "",
       "evidence_path": "",
       "expected": "Timezone-aware ISO timestamp",
-      "observed": "2026-08-17T15:52:17-04:00",
+      "observed": "2026-08-17T16:03:07-04:00",
       "status": "Verified"
     },
     {
@@ -51,8 +51,8 @@
       "check": "Provider acceptance checklist checksum",
       "details": "Current file checksum matches the human receipt.",
       "evidence_path": "data/outputs/provider_acceptance_checklist.json",
-      "expected": "7aa6af6017dcf0b243fa43add16307df4877d77f8b079aa0d9ac9e324331dd98",
-      "observed": "7aa6af6017dcf0b243fa43add16307df4877d77f8b079aa0d9ac9e324331dd98",
+      "expected": "c525fa657a3a51c237f870d9fbfb3cce1a0765e96bafd3ed031478174744fd8d",
+      "observed": "c525fa657a3a51c237f870d9fbfb3cce1a0765e96bafd3ed031478174744fd8d",
       "status": "Verified"
     },
     {
@@ -222,8 +222,8 @@
       "check": "Matching shadow comparison checksum",
       "details": "Current file checksum matches the human receipt.",
       "evidence_path": "data/outputs/provider_shadow_run_comparison.json",
-      "expected": "17bd99391c54fcb732f1be6e4350b1cd2f30ec15b7dc32677e01299ca665211d",
-      "observed": "17bd99391c54fcb732f1be6e4350b1cd2f30ec15b7dc32677e01299ca665211d",
+      "expected": "8c1ab882133936657fa4961aab0909acbfb0f4676783e0e27ad8be0959677650",
+      "observed": "8c1ab882133936657fa4961aab0909acbfb0f4676783e0e27ad8be0959677650",
       "status": "Verified"
     },
     {
@@ -258,19 +258,19 @@
       "check": "Receipt ID",
       "details": "Receipt ID binds human fields and recorded evidence checksums.",
       "evidence_path": "",
-      "expected": "odds_api-20260817T155217-0400-8204291a2b19",
-      "observed": "odds_api-20260817T155217-0400-8204291a2b19",
+      "expected": "odds_api-20260817T160307-0400-20fb55e75c14",
+      "observed": "odds_api-20260817T160307-0400-20fb55e75c14",
       "status": "Verified"
     }
   ],
   "decision": "approved_for_allowlist_pr",
-  "generated_at": "2026-08-17T15:52:18-04:00",
+  "generated_at": "2026-08-17T16:03:08-04:00",
   "next_step": "A separate human-reviewed provider allowlist PR may now be considered. This verifier does not edit policy or enable cron.",
   "provider_key": "odds_api",
   "provider_name": "the_odds_api",
-  "receipt_checksum_sha256": "635160dd9f1c6496288695e87ad876ac5362d8d27faf874a78de8bd4d111a17e",
-  "receipt_created_at": "2026-08-17T15:52:17-04:00",
-  "receipt_id": "odds_api-20260817T155217-0400-8204291a2b19",
+  "receipt_checksum_sha256": "59e8324e81895782f9ca135b422638e4a3edb0cddda45367bcce1f0772e6f5bf",
+  "receipt_created_at": "2026-08-17T16:03:07-04:00",
+  "receipt_id": "odds_api-20260817T160307-0400-20fb55e75c14",
   "receipt_path": "data/outputs/provider_human_acceptance_receipt.json",
   "reviewer_name": "cooperross399",
   "safety": {

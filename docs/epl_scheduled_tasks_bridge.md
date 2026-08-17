@@ -281,6 +281,44 @@ failure records a warning and leaves the market **missing** — never fabricated
 
 ---
 
+## Generating the automated card
+
+```bash
+# 1. refresh provider evidence (live; archives staging first is your call)
+PYTHONPATH=src .venv/bin/python scripts/run_provider_shadow_verification.py \
+    --provider odds_api --live --overwrite-staging --include-event-markets
+
+# 2. derive the card input from eligible markets
+PYTHONPATH=src .venv/bin/python scripts/run_api_first_card_workflow.py
+
+# 3. generate the card
+PYTHONPATH=src .venv/bin/python scripts/run_automated_card.py
+
+# 4. refresh the routine bridges
+PYTHONPATH=src .venv/bin/python scripts/run_epl_model_task.py
+PYTHONPATH=src .venv/bin/python scripts/run_epl_card_task.py
+PYTHONPATH=src .venv/bin/python scripts/run_epl_settle_preview_task.py
+```
+
+Outputs `data/outputs/automated_card.{md,json}` with best bets, leans,
+passes/avoids, unit suggestions, model edges, the active odds source, and the
+market eligibility breakdown.
+
+The card **refuses to generate** unless the provider is allowlisted, staging
+validation is handoff-eligible, at least one market is eligible, and the derived
+input exists. A blocked card returns empty lists, never placeholders.
+
+Market rows are filtered twice — before and after report assembly — so an
+excluded market cannot reach published picks. Unit suggestions read the
+confidence tier the model already assigned (A→1.0, B→0.75, C→0.5); an
+unrecognised tier gets no suggestion rather than a guessed one.
+
+> Passes and avoids are model judgements about markets that were priced and
+> modelled. A market the provider could not supply is **excluded**, which is a
+> different thing, and the report keeps them apart.
+
+---
+
 ## Provider trust / allowlist path
 
 ```bash
@@ -292,9 +330,38 @@ acceptance checklist, coverage by scope, market eligibility, quota, and safety
 flags, plus the exact approval still needed.
 
 The existing acceptance process is used, not bypassed: it requires **3 completed
-live shadow runs**. Allowlisting is a human edit to
-`data/manual/staging_provider_policy.json`; no script in this repository makes
-that change.
+live shadow runs** and a clean review window. Allowlisting is an edit to
+`data/manual/staging_provider_policy.json`.
+
+### Per-market allowlisting
+
+The policy accepts an optional `allowed_markets` list. Absent means no market
+restriction; present means markets outside it are disabled for automated picks.
+This exists so a market that later becomes complete cannot silently join the
+card — completeness is not consent.
+
+```json
+"allowed_provider_names": ["manual_reviewed", "the_odds_api"],
+"allowed_markets": ["1x2", "btts"]
+```
+
+### The PR gate needs a human receipt
+
+Changing the policy triggers the **Provider Policy PR Gate** workflow, which
+requires a bound evidence chain including a human acceptance receipt naming a
+reviewer:
+
+```bash
+PYTHONPATH=src .venv/bin/python scripts/create_provider_human_acceptance_receipt.py \
+    --provider odds_api \
+    --reviewer-name "Your Name" \
+    --decision approved_for_allowlist_pr \
+    --notes "Reviewed shadow evidence for 1X2 and BTTS." \
+    --write-receipt
+```
+
+This receipt records that **a named person** reviewed the evidence. It is
+deliberately not something the automation issues on your behalf.
 
 ---
 

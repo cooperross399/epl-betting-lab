@@ -2,9 +2,14 @@ name: Provider Policy PR Gate
 
 on:
   pull_request:
+  # Re-run when the reviewer approves in the GitHub UI, so the gate can pick up
+  # the approval without anyone touching a terminal.
+  pull_request_review:
+    types: [submitted, edited]
 
 permissions:
   contents: read
+  pull-requests: read
 
 jobs:
   verify-provider-policy-evidence:
@@ -36,6 +41,28 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
           python -m pip install -e .
+
+      - name: Create receipt from GitHub approval
+        # The human act is a GitHub review or comment by an allowed reviewer.
+        # This only verifies and transcribes it; it cannot author an approval.
+        # Allowed to fail so a missing approval surfaces as the gate's own
+        # "receipt missing" result rather than an opaque step crash.
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python scripts/generate_provider_acceptance_checklist.py --provider odds_api || true
+          python scripts/build_provider_allowlist_evidence_bundle.py --provider odds_api || true
+          python scripts/create_receipt_from_github_approval.py \
+            --pr "${{ github.event.pull_request.number }}" \
+            --repository "${{ github.repository }}" \
+            --provider odds_api \
+            --markets "1x2,btts" \
+            --write-receipt
+          python scripts/verify_provider_human_acceptance_receipt.py --provider odds_api || true
+          python scripts/preview_provider_allowlist_pr.py --provider odds_api || true
+          python scripts/check_provider_allowlist_pr_conformance.py --provider odds_api || true
+          python scripts/verify_provider_allowlist_evidence_bundle.py --provider odds_api || true
 
       - name: Check provider policy PR gate
         run: |

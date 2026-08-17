@@ -1,0 +1,95 @@
+{
+  "blockers": [],
+  "card_input_path": "data/staging/automated_card_current_odds.csv",
+  "card_input_written": true,
+  "eligibility": {
+    "any_market_eligible": true,
+    "disabled_markets": [],
+    "eligible_markets": [
+      "1x2",
+      "btts"
+    ],
+    "excluded_markets": [
+      "total_2_5"
+    ],
+    "fixtures_in_window": 10,
+    "gate_failures": [],
+    "incomplete_markets": [
+      "total_2_5"
+    ],
+    "markets": [
+      {
+        "bookmaker_count": 9,
+        "fabricated": false,
+        "fixtures_covered": 10,
+        "fixtures_expected": 10,
+        "market": "1x2",
+        "missing_fixtures": [],
+        "reason": "`1x2` covers all 10 fixtures in the selected window with passing mapping, validation, and freshness.",
+        "row_count": 270,
+        "status": "eligible",
+        "usable_for_picks": true
+      },
+      {
+        "bookmaker_count": 7,
+        "fabricated": false,
+        "fixtures_covered": 8,
+        "fixtures_expected": 10,
+        "market": "total_2_5",
+        "missing_fixtures": [
+          "2026-08-23: Man City vs Bournemouth",
+          "2026-08-23: Newcastle vs Liverpool"
+        ],
+        "reason": "`total_2_5` covers 8 of 10 fixtures in the selected window. The market is excluded rather than partially used.",
+        "row_count": 80,
+        "status": "incomplete",
+        "usable_for_picks": false
+      },
+      {
+        "bookmaker_count": 5,
+        "fabricated": false,
+        "fixtures_covered": 10,
+        "fixtures_expected": 10,
+        "market": "btts",
+        "missing_fixtures": [],
+        "reason": "`btts` covers all 10 fixtures in the selected window with passing mapping, validation, and freshness.",
+        "row_count": 98,
+        "status": "eligible",
+        "usable_for_picks": true
+      }
+    ],
+    "note": "Excluded markets are unavailable, incomplete, or deliberately disabled. They are never reported as passes or no-value calls, and no missing price was invented.",
+    "unavailable_markets": [],
+    "warnings": [
+      "Incomplete market(s): total_2_5. Excluded from automated picks rather than used for a subset of fixtures."
+    ],
+    "window_label": "2026-08-21 through 2026-08-24"
+  },
+  "excluded_markets": [
+    "total_2_5"
+  ],
+  "fixtures_in_window": 10,
+  "generated_at": "2026-08-17T19:17:30+00:00",
+  "included_markets": [
+    "1x2",
+    "btts"
+  ],
+  "manual_entry_required": false,
+  "notes": [
+    "Included markets: ['1x2', 'btts']. Excluded: ['total_2_5'].",
+    "50 row(s) derived from real provider quotes. No price was fabricated and no manual entry is required."
+  ],
+  "policy_disabled_markets": [],
+  "report": "Automated Card Input",
+  "row_count": 50,
+  "safety": {
+    "bets_placed": false,
+    "manual_odds_entry_required": false,
+    "odds_fabricated": false,
+    "protected_files_written": false,
+    "provider_allowlisted": false,
+    "settlement_applied": false
+  },
+  "status": "Card input ready",
+  "window_label": "2026-08-21 through 2026-08-24"
+}

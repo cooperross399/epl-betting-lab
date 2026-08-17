@@ -1,0 +1,102 @@
+{
+  "acceptance": {
+    "completed_live_runs": 5,
+    "required_live_runs": 3,
+    "runs_remaining": 0,
+    "verdict": "Ready for human allowlist review"
+  },
+  "coverage_summary": {
+    "full_upcoming_fixtures": {
+      "coverage_percentage": 0.5,
+      "covered_fixture_count": 10,
+      "denominator": "every fixture in data/manual/upcoming_fixtures.csv",
+      "expected_fixture_count": 20,
+      "missing_fixtures": [
+        "2026-08-28: crystal palace vs man city",
+        "2026-08-29: aston villa vs arsenal",
+        "2026-08-29: bournemouth vs everton",
+        "2026-08-29: coventry vs hull",
+        "2026-08-29: liverpool vs nott'm forest",
+        "2026-08-29: tottenham vs newcastle",
+        "2026-08-30: chelsea vs brighton",
+        "2026-08-30: leeds vs brentford",
+        "2026-08-30: man united vs ipswich",
+        "2026-08-30: sunderland vs fulham"
+      ],
+      "scope": "full_upcoming_fixtures",
+      "status": "Incomplete"
+    },
+    "provider_returned": {
+      "coverage_percentage": 1.0,
+      "covered_fixture_count": 10,
+      "denominator": "fixtures the provider actually returned in this run",
+      "expected_fixture_count": 10,
+      "missing_fixtures": [],
+      "scope": "provider_returned",
+      "status": "Complete"
+    },
+    "selected_week1_window": {
+      "coverage_percentage": 1.0,
+      "covered_fixture_count": 10,
+      "denominator": "fixtures inside the selected Week 1 window (2026-08-21 through 2026-08-24)",
+      "expected_fixture_count": 10,
+      "missing_fixtures": [],
+      "scope": "selected_week1_window",
+      "status": "Complete"
+    },
+    "team_mapping_coverage": 1.0,
+    "team_mapping_status": "Verified",
+    "unmapped_teams": []
+  },
+  "currently_allowlisted": false,
+  "evidence_errors": [],
+  "exact_approval_needed": "Add `\"the_odds_api\"` to `allowed_provider_names` in `data/manual/staging_provider_policy.json`. This packet does not and cannot make that edit; it requires your explicit approval.",
+  "generated_at": "2026-08-17T18:05:20+00:00",
+  "market_eligibility_summary": {
+    "btts_status": "Available",
+    "card_input_rows": 50,
+    "disabled_markets": [],
+    "excluded_markets": [
+      "total_2_5"
+    ],
+    "included_markets": [
+      "1x2",
+      "btts"
+    ],
+    "incomplete_markets": [
+      "total_2_5"
+    ],
+    "manual_entry_required": false,
+    "unavailable_markets": []
+  },
+  "outstanding_requirements": [
+    "Explicit human approval to add `the_odds_api` to `allowed_provider_names` in `data/manual/staging_provider_policy.json`."
+  ],
+  "policy_allowed_provider_names": [
+    "manual_reviewed"
+  ],
+  "policy_path": "/Users/cooperross/Downloads/epl-betting-lab/data/manual/staging_provider_policy.json",
+  "provider_name": "the_odds_api",
+  "quota_summary": {
+    "requests_remaining": "424",
+    "requests_used": "76",
+    "status": "Available"
+  },
+  "ready_for_human_approval": true,
+  "report": "Provider Trust Packet",
+  "safety": {
+    "bets_placed": false,
+    "picks_generated": false,
+    "policy_edited": false,
+    "provider_allowlisted": false
+  },
+  "safety_flags": {
+    "bets_placed": false,
+    "cron_enabled": false,
+    "manual_or_production_files_edited": false,
+    "provider_policy_edited": false,
+    "secrets_written_or_printed": false,
+    "staging_promoted": false,
+    "trusted_picks_generated": false
+  }
+}

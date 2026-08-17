@@ -1,0 +1,153 @@
+{
+  "bundle_checksum_sha256": "a7c07f43eeccf89376f7daf2181c9f0fe530973b5959eb9820a2cfb18777f2de",
+  "bundle_id": "odds_api-allowlist-evidence-a7c07f43eeccf893",
+  "bundle_storage": {
+    "archive_directory": "data/outputs/archive/provider_allowlist_evidence_bundles/2026-08-17/151729_odds_api_a7c07f43eecc",
+    "latest_csv_path": "data/outputs/provider_allowlist_evidence_bundle.csv",
+    "latest_json_path": "data/outputs/provider_allowlist_evidence_bundle.json",
+    "latest_markdown_path": "data/outputs/provider_allowlist_evidence_bundle.md"
+  },
+  "checklist_verdict": "Ready for human allowlist review",
+  "conformance_verdict": "Not applicable",
+  "evidence": [
+    {
+      "current_checksum_sha256": "606c716557072566e10367de0e8bd96acb4c962437fa4b00e4e91a707c85f575",
+      "details": "Preview is not Ready for a separate allowlist PR. Ready preview is missing recommended PR text.",
+      "evidence_path": "data/outputs/provider_allowlist_pr_preview.json",
+      "evidence_type": "provider_allowlist_pr_preview",
+      "expected_checksum_sha256": "",
+      "generated_at": "2026-08-17T15:14:10-04:00",
+      "required": "Yes",
+      "status": "Stale",
+      "verdict": "Blocked"
+    },
+    {
+      "current_checksum_sha256": "b054f130f1042667641fa6252c330ae37d36eecc5d247ba71855e01d98278241",
+      "details": "Human receipt verification is not Verified for allowlist PR review. Receipt verification does not record approval. Receipt verification does not record a Ready acceptance checklist.",
+      "evidence_path": "data/outputs/provider_human_acceptance_receipt_verification.json",
+      "evidence_type": "provider_human_acceptance_receipt_verification",
+      "expected_checksum_sha256": "b054f130f1042667641fa6252c330ae37d36eecc5d247ba71855e01d98278241",
+      "generated_at": "2026-08-12T15:02:15-04:00",
+      "required": "Yes",
+      "status": "Stale",
+      "verdict": "Missing evidence"
+    },
+    {
+      "current_checksum_sha256": "",
+      "details": "receipt is missing.",
+      "evidence_path": "data/outputs/provider_human_acceptance_receipt.json",
+      "evidence_type": "provider_human_acceptance_receipt",
+      "expected_checksum_sha256": "",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Missing",
+      "verdict": ""
+    },
+    {
+      "current_checksum_sha256": "7aa6af6017dcf0b243fa43add16307df4877d77f8b079aa0d9ac9e324331dd98",
+      "details": "Human receipt does not bind the checklist checksum. Human receipt references a different checklist file.",
+      "evidence_path": "data/outputs/provider_acceptance_checklist.json",
+      "evidence_type": "provider_acceptance_checklist",
+      "expected_checksum_sha256": "",
+      "generated_at": "2026-08-17T15:17:20-04:00",
+      "required": "Yes",
+      "status": "Stale",
+      "verdict": "Ready for human allowlist review"
+    },
+    {
+      "current_checksum_sha256": "",
+      "details": "The human receipt does not bind any reviewed shadow archive.",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs",
+      "evidence_type": "reviewed_shadow_archives",
+      "expected_checksum_sha256": "",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Missing",
+      "verdict": ""
+    },
+    {
+      "current_checksum_sha256": "bd726c676cc3a63e1ec9fe283881febbedd08b04513abf4d6e2c2aacce0d081f",
+      "details": "Human receipt does not bind the comparison checksum. Human receipt did not bind a shadow comparison. Human receipt references a different comparison file. Shadow comparison is not stable enough for review. Human receipt records a different comparison verdict. Shadow comparison does not identify the newest two reviewed live archives. No reviewed shadow archives are bound by the receipt.",
+      "evidence_path": "data/outputs/provider_shadow_run_comparison.json",
+      "evidence_type": "provider_shadow_run_comparison",
+      "expected_checksum_sha256": "",
+      "generated_at": "2026-08-04T11:59:59-04:00",
+      "required": "Yes",
+      "status": "Stale",
+      "verdict": "Needs more shadow runs"
+    },
+    {
+      "current_checksum_sha256": "",
+      "details": "No policy change has been checked yet; conformance is optional before PR review.",
+      "evidence_path": "data/outputs/provider_allowlist_pr_conformance.json",
+      "evidence_type": "provider_allowlist_pr_conformance",
+      "expected_checksum_sha256": "",
+      "generated_at": "",
+      "required": "No",
+      "status": "Not applicable",
+      "verdict": ""
+    },
+    {
+      "current_checksum_sha256": "23d88241a66c9cc86b59d4278694b4e1522fd48048c268e0744dd217020b21d3",
+      "details": "Human receipt did not bind the provider policy. Human receipt references a different provider policy file. Evidence references a different provider policy file.",
+      "evidence_path": "data/manual/staging_provider_policy.json",
+      "evidence_type": "staging_provider_policy",
+      "expected_checksum_sha256": "23d88241a66c9cc86b59d4278694b4e1522fd48048c268e0744dd217020b21d3",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Stale",
+      "verdict": ""
+    }
+  ],
+  "evidence_file_count": 5,
+  "evidence_manifest": [
+    {
+      "checksum_sha256": "23d88241a66c9cc86b59d4278694b4e1522fd48048c268e0744dd217020b21d3",
+      "path": "data/manual/staging_provider_policy.json"
+    },
+    {
+      "checksum_sha256": "7aa6af6017dcf0b243fa43add16307df4877d77f8b079aa0d9ac9e324331dd98",
+      "path": "data/outputs/provider_acceptance_checklist.json"
+    },
+    {
+      "checksum_sha256": "606c716557072566e10367de0e8bd96acb4c962437fa4b00e4e91a707c85f575",
+      "path": "data/outputs/provider_allowlist_pr_preview.json"
+    },
+    {
+      "checksum_sha256": "b054f130f1042667641fa6252c330ae37d36eecc5d247ba71855e01d98278241",
+      "path": "data/outputs/provider_human_acceptance_receipt_verification.json"
+    },
+    {
+      "checksum_sha256": "bd726c676cc3a63e1ec9fe283881febbedd08b04513abf4d6e2c2aacce0d081f",
+      "path": "data/outputs/provider_shadow_run_comparison.json"
+    }
+  ],
+  "generated_at": "2026-08-17T15:17:29-04:00",
+  "preview_verdict": "Blocked",
+  "provider_key": "odds_api",
+  "provider_name": "the_odds_api",
+  "receipt_id": "",
+  "receipt_verification_verdict": "Missing evidence",
+  "recommended_pr_description": "",
+  "recommended_pr_title": "",
+  "safety": {
+    "bets_placed": false,
+    "cron_enabled": false,
+    "picks_generated": false,
+    "protected_files_edited": false,
+    "provider_allowlisted": false,
+    "provider_policy_edited": false,
+    "provider_run": false,
+    "read_only_evidence_bundle": true,
+    "receipt_created": false,
+    "receipt_verified_by_side_effect": false,
+    "staging_promoted": false
+  },
+  "schema_version": 1,
+  "status_counts": {
+    "Missing": 2,
+    "Not applicable": 1,
+    "Stale": 5
+  },
+  "verdict": "Missing required evidence"
+}

@@ -182,6 +182,15 @@ def main() -> int:
                 f"  {row['region']}: {row['events_with_required_line']}/"
                 f"{row['events']} with the line"
             )
+        for row in probe["per_region"]:
+            covering = row["books_covering_every_fixture"]
+            if covering:
+                print(f"    {row['region']} books covering every fixture: {covering}")
+        if probe["books_covering_every_fixture"]:
+            print(
+                "Books carrying the line for every fixture: "
+                f"{probe['books_covering_every_fixture']}"
+            )
         for fixture in probe["missing_in_every_region"]:
             print(f"  MISSING EVERYWHERE: {fixture}")
         for error in probe["errors"]:

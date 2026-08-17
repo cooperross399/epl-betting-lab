@@ -534,6 +534,19 @@ def probe_totals_regions(
             for item in summary["events"]
             if item["has_required_totals_line"]
         }
+        # Which books carry the line, and how many fixtures each covers. A
+        # region name is not something an operator can act on; a book name is,
+        # because they either hold an account there or they do not.
+        book_fixture_counts: dict[str, int] = {}
+        for item in summary["events"]:
+            for book in item["books_with_totals_2_5"]:
+                book_fixture_counts[book] = book_fixture_counts.get(book, 0) + 1
+        fixture_total = len(summary["events"])
+        books_covering_all = sorted(
+            book
+            for book, count in book_fixture_counts.items()
+            if fixture_total and count == fixture_total
+        )
         all_events = {
             f"{item['date']}: {item['home_team']} vs {item['away_team']}"
             for item in summary["events"]
@@ -546,11 +559,23 @@ def probe_totals_regions(
                 "events": len(all_events),
                 "events_with_required_line": len(with_line),
                 "missing": sorted(all_events - with_line),
+                "books_with_line_by_fixture_count": dict(
+                    sorted(book_fixture_counts.items(), key=lambda kv: (-kv[1], kv[0]))
+                ),
+                "books_covering_every_fixture": books_covering_all,
             }
         )
 
     missing_everywhere = sorted(fixtures_seen - union_with_line)
+    books_covering_every_fixture = sorted(
+        {
+            book
+            for row in per_region
+            for book in row["books_covering_every_fixture"]
+        }
+    )
     return {
+        "books_covering_every_fixture": books_covering_every_fixture,
         "regions_probed": [item["region"] for item in per_region],
         "required_point": REQUIRED_TOTALS_POINT,
         "fixtures_seen": len(fixtures_seen),
@@ -561,7 +586,9 @@ def probe_totals_regions(
         "errors": errors,
         "note": (
             "Evidence only. A complete result does not add totals to the card: "
-            "that is a reviewed scope change, not an automatic consequence."
+            "that is a reviewed scope change, not an automatic consequence. A "
+            "line is only useful at a book the operator can actually bet with, "
+            "which is why books are named rather than only regions."
         ),
     }
 

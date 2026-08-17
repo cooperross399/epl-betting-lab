@@ -100,10 +100,20 @@ def main() -> int:
     )
 
     raw_path = args.raw_response_path or _latest_raw_response()
-    if raw_path is None:
+    if raw_path is None and not args.probe_totals_regions:
         print("BLOCKED: no archived provider response found under data/staging/raw/.")
         return 2
-    print(f"Raw response: {raw_path.name}")
+    if raw_path is not None:
+        print(f"Raw response: {raw_path.name}")
+    else:
+        # The region probe fetches live, so it does not need an archived
+        # response. Requiring one made the probe unrunnable in CI, where
+        # data/staging/raw/ is not committed - which is precisely where the
+        # probe has a working credential.
+        print(
+            "No archived provider response found. Running the live probe only; "
+            "the bulk analysis and report need an archived response."
+        )
 
     event_summary = None
     if args.check_event_markets:
@@ -181,6 +191,10 @@ def main() -> int:
             f"{'Yes' if probe['complete_in_any_region'] else 'No'}"
         )
         print(f"NOTE: {probe['note']}")
+
+    if raw_path is None:
+        print("Skipping the bulk report: no archived response to analyse.")
+        return 0
 
     result = save_provider_market_discovery(
         raw_response_path=raw_path,

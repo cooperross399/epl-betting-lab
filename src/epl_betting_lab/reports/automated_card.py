@@ -131,10 +131,38 @@ def _unit_suggestions(best_bets: Sequence[Mapping[str, Any]]) -> list[dict[str, 
     return suggestions
 
 
+def _provider_allowlisted_now(policy_path: Path | None, provider_name: str) -> bool:
+    """Check the live policy file, not a report that may predate a change.
+
+    The shadow verification report records the policy state at the time it ran.
+    Trusting it alone would let a card generate against a provider whose
+    allowlist entry has since been removed, so the current file is authoritative.
+    """
+    path = (
+        MANUAL_DIR / "staging_provider_policy.json"
+        if policy_path is None
+        else Path(policy_path)
+    )
+    if not path.is_file():
+        return False
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError):
+        return False
+    if not isinstance(payload, Mapping):
+        return False
+    names = payload.get("allowed_provider_names")
+    if not isinstance(names, list):
+        return False
+    return provider_name in {str(item).strip() for item in names}
+
+
 def build_automated_card(
     *,
     output_dir: Path | None = None,
     card_input_path: Path | None = None,
+    policy_path: Path | None = None,
+    provider_name: str = "the_odds_api",
     matches_path: Path | None = None,
     fixtures_path: Path | None = None,
     now: datetime | None = None,
@@ -172,6 +200,14 @@ def build_automated_card(
     if not bool(policy.get("provider_allowed", False)):
         blockers.append(
             "Provider is not allowlisted by the reviewed staging provider policy."
+        )
+    elif not _provider_allowlisted_now(policy_path, provider_name):
+        # The report says allowed but the live policy disagrees: the policy has
+        # changed since that run, and the live file wins.
+        blockers.append(
+            f"`{provider_name}` is not in `allowed_provider_names` in the "
+            "current staging provider policy, even though an earlier report "
+            "recorded it as allowed. Re-run provider verification."
         )
     if not bool(staging_validation.get("handoff_eligible", False)):
         blockers.append("Staging validation is not handoff eligible.")
@@ -383,6 +419,8 @@ def save_automated_card(
     *,
     output_dir: Path | None = None,
     card_input_path: Path | None = None,
+    policy_path: Path | None = None,
+    provider_name: str = "the_odds_api",
     matches_path: Path | None = None,
     fixtures_path: Path | None = None,
     now: datetime | None = None,
@@ -391,6 +429,8 @@ def save_automated_card(
     summary = build_automated_card(
         output_dir=outputs,
         card_input_path=card_input_path,
+        policy_path=policy_path,
+        provider_name=provider_name,
         matches_path=matches_path,
         fixtures_path=fixtures_path,
         now=now,

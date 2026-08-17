@@ -389,6 +389,19 @@ def build_fixture_slate_check(
                 }
             )
     matchweeks = pd.DataFrame(matchweek_rows, columns=MATCHWEEK_COLUMNS)
+    if len(matchweek_rows) > 1:
+        issues.append(
+            _issue(
+                "info",
+                "Multiple matchweek groups",
+                f"The slate spans {len(matchweek_rows)} matchweek groups; the odds "
+                "completeness gate requires real prices for every fixture in the "
+                "slate before a card can generate.",
+                "If sportsbooks have not posted the later matchweek's prices yet, "
+                "preview deferring it with `python scripts/trim_upcoming_fixtures.py` "
+                "so Week 1 is not blocked waiting on unposted odds.",
+            )
+        )
 
     # Team-name spelling cross-check against historical data.
     historical_teams, history_note = _load_historical_teams(matches_path)

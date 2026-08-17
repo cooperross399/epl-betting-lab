@@ -23,6 +23,7 @@ from epl_betting_lab.providers.odds_api_staging_provider import (
 )
 from epl_betting_lab.reports.provider_market_discovery import (
     EVENT_ONLY_MARKETS,
+    probe_totals_regions,
     discover_event_markets,
     estimate_quota_cost,
     save_provider_market_discovery,
@@ -70,6 +71,15 @@ def parse_args() -> argparse.Namespace:
         "--markets",
         default=",".join(EVENT_ONLY_MARKETS),
         help=f"Markets to discover per event. Defaults to {','.join(EVENT_ONLY_MARKETS)}.",
+    )
+    parser.add_argument(
+        "--probe-totals-regions",
+        default="",
+        help=(
+            "Comma-separated regions to probe for the required totals line. "
+            "Read-only: writes no staging bundle and creates no archived run. "
+            "Costs markets x regions."
+        ),
     )
     parser.add_argument(
         "--max-events",
@@ -135,6 +145,42 @@ def main() -> int:
         )
         for error in event_summary["errors"]:
             print(f"WARNING: {error}")
+
+    if args.probe_totals_regions:
+        load_provider_env()
+        api_key = os.environ.get(API_KEY_ENV, "").strip()
+        if not api_key:
+            print(f"BLOCKED: `{API_KEY_ENV}` is not configured.")
+            return 2
+        regions = [r for r in args.probe_totals_regions.split(",") if r.strip()]
+        print(
+            f"Totals region probe: {len(regions)} region(s), estimated cost "
+            f"{len(regions)} credit(s) (1 market x 1 region each)."
+        )
+        probe = probe_totals_regions(
+            api_key=api_key,
+            regions=regions,
+            base_url=os.environ.get("EPL_ODDS_API_BASE_URL", DEFAULT_API_BASE_URL),
+        )
+        print(
+            f"Fixtures seen: {probe['fixtures_seen']}; with a "
+            f"{probe['required_point']} line in at least one region: "
+            f"{probe['fixtures_with_line_in_any_region']}"
+        )
+        for row in probe["per_region"]:
+            print(
+                f"  {row['region']}: {row['events_with_required_line']}/"
+                f"{row['events']} with the line"
+            )
+        for fixture in probe["missing_in_every_region"]:
+            print(f"  MISSING EVERYWHERE: {fixture}")
+        for error in probe["errors"]:
+            print(f"WARNING: {error}")
+        print(
+            "Complete in some region: "
+            f"{'Yes' if probe['complete_in_any_region'] else 'No'}"
+        )
+        print(f"NOTE: {probe['note']}")
 
     result = save_provider_market_discovery(
         raw_response_path=raw_path,

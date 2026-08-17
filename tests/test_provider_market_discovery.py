@@ -435,3 +435,109 @@ def test_provider_records_a_warning_when_an_event_market_call_fails() -> None:
         for market in book["markets"]
     }
     assert "btts" not in markets
+
+
+# --- totals region probe ---------------------------------------------------
+
+
+class _Response:
+    """Minimal bulk-odds response for the region probe."""
+
+    def __init__(self, payload, status: int = 200) -> None:
+        self.status_code = status
+        self._payload = payload
+
+    def json(self):
+        return self._payload
+
+
+def test_totals_probe_requires_a_credential() -> None:
+    from epl_betting_lab.reports.provider_market_discovery import probe_totals_regions
+
+    with pytest.raises(DiscoveryError):
+        probe_totals_regions(api_key="", regions=["us"])
+
+
+def test_totals_probe_reports_a_region_that_completes_the_line() -> None:
+    from epl_betting_lab.reports.provider_market_discovery import probe_totals_regions
+
+    def requester(url: str, **kwargs):
+        region = kwargs["params"]["regions"]
+        points = (2.5,) if region == "uk" else (3.5,)
+        return _Response(
+            [
+                _event("e1", "2026-08-23", "Manchester City", "Bournemouth",
+                       totals_points=points)
+            ]
+        )
+
+    result = probe_totals_regions(
+        api_key=SECRET, regions=["us", "uk"], requester=requester
+    )
+
+    assert result["fixtures_with_line_in_any_region"] == 1
+    assert result["missing_in_every_region"] == []
+    assert result["complete_in_any_region"] is True
+
+
+def test_totals_probe_reports_a_fixture_missing_everywhere() -> None:
+    from epl_betting_lab.reports.provider_market_discovery import probe_totals_regions
+
+    def requester(url: str, **kwargs):
+        return _Response(
+            [
+                _event("e1", "2026-08-23", "Manchester City", "Bournemouth",
+                       totals_points=(3.5,))
+            ]
+        )
+
+    result = probe_totals_regions(
+        api_key=SECRET, regions=["us", "uk", "eu"], requester=requester
+    )
+
+    assert result["complete_in_any_region"] is False
+    assert len(result["missing_in_every_region"]) == 1
+
+
+def test_totals_probe_survives_a_rejected_credential() -> None:
+    """A rotated key returns 401. That is reported, not raised, and no
+    fixture is silently counted as covered."""
+    from epl_betting_lab.reports.provider_market_discovery import probe_totals_regions
+
+    class Rejected:
+        status_code = 401
+
+        def json(self):
+            return []
+
+    result = probe_totals_regions(
+        api_key=SECRET, regions=["us"], requester=lambda url, **kw: Rejected()
+    )
+
+    assert result["errors"]
+    assert result["complete_in_any_region"] is False
+    assert SECRET not in " ".join(result["errors"])
+
+
+def test_totals_probe_states_that_evidence_is_not_a_scope_change() -> None:
+    from epl_betting_lab.reports.provider_market_discovery import probe_totals_regions
+
+    result = probe_totals_regions(
+        api_key=SECRET, regions=[], requester=lambda url, **kw: _Response([])
+    )
+
+    assert "reviewed scope change" in result["note"]
+
+
+def test_discovery_workflow_is_dispatch_only_and_uploads_a_report() -> None:
+    from pathlib import Path
+
+    from epl_betting_lab.config import PROJECT_ROOT
+
+    text = (
+        PROJECT_ROOT / ".github" / "workflows" / "provider-market-discovery.yml"
+    ).read_text(encoding="utf-8")
+
+    assert "workflow_dispatch" in text
+    assert "schedule:" not in text
+    assert "upload-artifact" in text

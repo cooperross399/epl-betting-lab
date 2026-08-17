@@ -209,3 +209,37 @@ def test_the_credential_workflow_stays_dispatch_only() -> None:
 
     assert "workflow_dispatch" in text
     assert "schedule:" not in text
+
+
+# --- newly built tooling must be discoverable ------------------------------
+
+
+def test_the_status_page_is_documented() -> None:
+    """Tooling a future session cannot find may as well not exist."""
+    assert "status.html" in _read("docs/no_terminal_operations.md")
+    assert "status.html" in _read("docs/claude_autonomy_operating_model.md")
+
+
+def test_the_one_command_refresh_is_documented() -> None:
+    text = _read("docs/claude_autonomy_operating_model.md")
+
+    assert "refresh_all_reports.py" in text
+    assert "dependency-ordered" in text.lower() or "dependency order" in text.lower()
+
+
+def test_refreshing_and_refetching_are_documented_as_separate() -> None:
+    """Conflating them is how someone spends quota expecting a redraw."""
+    text = _flat("docs/claude_autonomy_operating_model.md")
+
+    assert "separate, deliberate action" in text
+    assert "spends no quota" in text
+
+
+def test_the_card_comparison_report_is_documented() -> None:
+    assert "automated_card_comparison" in _read(
+        "docs/claude_autonomy_operating_model.md"
+    )
+
+
+def test_the_per_book_clv_report_is_documented() -> None:
+    assert "clv_by_book" in _read("docs/claude_autonomy_operating_model.md")

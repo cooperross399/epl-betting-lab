@@ -218,6 +218,29 @@ or a PR comment — with:
 | What did the provider return? | `data/outputs/provider_shadow_verification.md` |
 | Why is a market excluded? | `data/outputs/provider_market_discovery.md` |
 | Why did a bundle mismatch? | `data/outputs/provider_bundle_diagnostic.md` |
+| Everything at a glance, in a browser | `data/outputs/status.html` |
+| What changed since the last card? | `data/outputs/automated_card_comparison.md` |
+| Which book gives the best closing line? | `data/outputs/clv_by_book.csv` |
+| Did the last refresh succeed? | `data/outputs/refresh_all_reports.json` |
+
+## Refreshing everything
+
+```bash
+PYTHONPATH=src .venv/bin/python scripts/refresh_all_reports.py
+```
+
+One command, dependency-ordered: card input, card, archive, comparison, the
+three routine bridges, then the status page last. It is offline - it re-derives
+from evidence already on disk, contacts no provider, and spends no quota.
+
+Refetching provider data is a separate, deliberate action:
+
+```bash
+PYTHONPATH=src .venv/bin/python scripts/run_provider_shadow_verification.py \
+    --provider odds_api --live --overwrite-staging --include-event-markets
+```
+
+Archive `data/staging/` before any run that overwrites it.
 
 ---
 

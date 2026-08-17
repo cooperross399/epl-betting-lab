@@ -83,6 +83,25 @@ jobs:
           python scripts/archive_provider_policy_pr_gate_verification.py \
             --provider odds_api
 
+      - name: Diagnose evidence bundle mismatch
+        # Runs only when the gate failed. Explains a computed-vs-stored bundle
+        # mismatch instead of leaving it to guesswork against a safety gate.
+        # Diagnostic only: paths, checksums, counts. No file contents and no
+        # credential material are ever emitted.
+        if: failure()
+        run: |
+          python scripts/diagnose_evidence_bundle.py
+
+      - name: Upload evidence bundle diagnostic
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: provider-bundle-diagnostic
+          path: |
+            data/outputs/provider_bundle_diagnostic.json
+            data/outputs/provider_bundle_diagnostic.md
+          if-no-files-found: ignore
+
       - name: Add gate receipt report to job summary
         if: always()
         shell: bash

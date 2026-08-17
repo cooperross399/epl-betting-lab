@@ -260,3 +260,54 @@ def test_save_writes_both_outputs(tmp_path: Path) -> None:
     assert Path(result["json"]).name == "automated_card.json"
     assert Path(result["markdown"]).name == "automated_card.md"
     assert Path(result["json"]).is_file()
+
+
+# --- live policy authority -------------------------------------------------
+
+
+def _policy_file(tmp_path: Path, names) -> Path:
+    path = tmp_path / "policy.json"
+    path.write_text(json.dumps({"allowed_provider_names": list(names)}), encoding="utf-8")
+    return path
+
+
+def test_stale_report_cannot_outvote_the_live_policy(tmp_path: Path) -> None:
+    """A report recorded provider_allowed=True, but the policy no longer lists it."""
+    _ready_evidence(tmp_path)
+    policy = _policy_file(tmp_path, ["manual_reviewed"])
+
+    summary = build_automated_card(output_dir=tmp_path, policy_path=policy)
+
+    assert summary["card_generated"] is False
+    assert any("current staging provider policy" in item for item in summary["blockers"])
+
+
+def test_missing_policy_file_blocks_the_card(tmp_path: Path) -> None:
+    _ready_evidence(tmp_path)
+
+    summary = build_automated_card(
+        output_dir=tmp_path, policy_path=tmp_path / "absent.json"
+    )
+
+    assert summary["card_generated"] is False
+
+
+def test_unreadable_policy_blocks_the_card(tmp_path: Path) -> None:
+    _ready_evidence(tmp_path)
+    policy = tmp_path / "broken.json"
+    policy.write_text("{not json", encoding="utf-8")
+
+    summary = build_automated_card(output_dir=tmp_path, policy_path=policy)
+
+    assert summary["card_generated"] is False
+
+
+def test_live_policy_listing_the_provider_clears_that_blocker(tmp_path: Path) -> None:
+    _ready_evidence(tmp_path)
+    policy = _policy_file(tmp_path, ["manual_reviewed", "the_odds_api"])
+
+    summary = build_automated_card(output_dir=tmp_path, policy_path=policy)
+
+    assert not any(
+        "current staging provider policy" in item for item in summary["blockers"]
+    )

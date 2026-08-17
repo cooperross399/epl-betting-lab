@@ -20,6 +20,14 @@ from typing import Any
 
 from epl_betting_lab.config import MANUAL_DIR, OUTPUTS_DIR
 from epl_betting_lab.market_eligibility import DEFAULT_DISABLED_MARKETS
+from epl_betting_lab.reports.provider_acceptance_checklist import (
+    ACCEPTANCE_VERDICTS,
+)
+
+
+#: The single acceptance verdict that clears the technical bar. Compared by
+#: value against the checklist's own vocabulary so the two cannot drift apart.
+CLEAN_ACCEPTANCE_VERDICT = ACCEPTANCE_VERDICTS[0]
 
 
 PACKET_JSON_FILENAME = "provider_trust_packet.json"
@@ -93,7 +101,7 @@ def build_provider_trust_packet(
     # reviews a window of past runs and fails closed on any that failed, were
     # blocked, or predate a fix, so a raw run count reaching the minimum is not
     # by itself sufficient.
-    checklist_ok = checklist_verdict in {"Trusted", "Ready for acceptance"}
+    checklist_ok = checklist_verdict == CLEAN_ACCEPTANCE_VERDICT
 
     outstanding: list[str] = []
     if completed_runs < required_runs:

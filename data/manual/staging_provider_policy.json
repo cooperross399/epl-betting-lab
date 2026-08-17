@@ -1,6 +1,11 @@
 {
   "allowed_provider_names": [
-    "manual_reviewed"
+    "manual_reviewed",
+    "the_odds_api"
+  ],
+  "allowed_markets": [
+    "1x2",
+    "btts"
   ],
   "allowed_provider_types": [
     "manual_upload",

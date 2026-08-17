@@ -14,7 +14,10 @@ the project.
 | Task | Where | How |
 |:-----|:------|:----|
 | Approve a provider allowlist PR | GitHub UI | Paste the approval block into a PR review or comment |
+| See everything at a glance | Browser | Open `data/outputs/status.html` |
 | See card status | GitHub / report | `data/outputs/epl_card_task.md` or the routine output |
+| See what changed since last run | Report | `data/outputs/automated_card_comparison.md` |
+| Ask what markets a provider offers | GitHub Actions | Run **Provider Market Discovery** &rarr; *Run workflow* |
 | See model readiness | GitHub / report | `data/outputs/epl_model_task.md` |
 | Check the API credential | GitHub Actions | Run **Provider Credential Check** → *Run workflow* |
 | See what changed | GitHub | PR list and Actions runs |
@@ -43,6 +46,19 @@ verifies the approval and transcribes it into the receipt.
 
 The automation **cannot** author an approval — the reviewer identity comes from
 GitHub's API. That is the point: the attestation stays genuinely Cooper's.
+
+---
+
+## The status page
+
+`data/outputs/status.html` is one self-contained file: model readiness, card
+status, included and excluded markets, the picks with book and price, blockers,
+and the settlement preview. It opens with a double click, works offline, and
+follows the system light or dark theme.
+
+A blocked card renders as "No card was produced" and says explicitly that this
+is a blocked card rather than a card with no value. The two are different, and
+the page is written so they cannot be confused.
 
 ---
 

@@ -36,6 +36,7 @@ REPORT_FILES = {
     "card": "epl_card_task.json",
     "settle": "epl_settle_preview_task.json",
     "automated_card": "automated_card.json",
+    "comparison": "automated_card_comparison.json",
 }
 
 
@@ -244,6 +245,48 @@ def build_status_html(
         f'<p>{_text(card.get("next_action") or model.get("next_action") or "")}</p>',
     ]
 
+    comparison = reports["comparison"]
+    if comparison.get("comparable"):
+        counts = {
+            "Added": len(comparison.get("added") or []),
+            "Removed": len(comparison.get("removed") or []),
+            "Moved section": len(comparison.get("moved_section") or []),
+            "Price moved": len(comparison.get("price_changed") or []),
+            "Unchanged": comparison.get("unchanged_count", 0),
+        }
+        change_rows = "".join(
+            f'<div class="card"><div class="label">{_text(label)}</div>'
+            f'<div class="value">{_text(value)}</div></div>'
+            for label, value in counts.items()
+        )
+        detail: list[str] = []
+        for row in (comparison.get("price_changed") or [])[:8]:
+            detail.append(
+                f"<li>{_text(row.get('label'))}: "
+                f"{_text(row.get('from_price'))} &rarr; {_text(row.get('to_price'))}</li>"
+            )
+        for row in (comparison.get("added") or [])[:8]:
+            detail.append(f"<li>added &mdash; {_text(row.get('label'))}</li>")
+        for row in (comparison.get("removed") or [])[:8]:
+            detail.append(f"<li>removed &mdash; {_text(row.get('label'))}</li>")
+        change_section = [
+            "<h2>Since the previous card</h2>",
+            f'<div class="grid">{change_rows}</div>',
+            (
+                "<ul>" + "".join(detail) + "</ul>"
+                if detail
+                else '<p class="muted">No selection or price changed.</p>'
+            ),
+            '<div class="note">A price that moved is not a pick that was '
+            "dropped. The two are counted separately so they cannot be "
+            "confused.</div>",
+        ]
+    else:
+        change_section = [
+            "<h2>Since the previous card</h2>",
+            '<p class="muted">Not enough archived runs to compare yet.</p>',
+        ]
+
     settle_section = [
         "<h2>Settlement preview</h2>",
         '<div class="grid">',
@@ -267,7 +310,13 @@ def build_status_html(
     ]
 
     body = "\n".join(
-        head + markets + card_section + blockers_section + settle_section + footer
+        head
+        + markets
+        + card_section
+        + change_section
+        + blockers_section
+        + settle_section
+        + footer
     )
     return (
         "<!doctype html>\n"

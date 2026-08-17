@@ -247,3 +247,81 @@ def test_output_is_deterministic_for_a_fixed_timestamp(tmp_path: Path) -> None:
     second = build_status_html(output_dir=tmp_path, now=NOW)
 
     assert first == second
+
+
+# --- change since the previous card ----------------------------------------
+
+
+def _comparison(outputs: Path, **overrides) -> None:
+    payload = {
+        "comparable": True,
+        "added": [],
+        "removed": [],
+        "moved_section": [],
+        "price_changed": [],
+        "unchanged_count": 28,
+    }
+    payload.update(overrides)
+    _write(outputs, "automated_card_comparison.json", payload)
+
+
+def test_change_section_counts_each_kind_of_change(tmp_path: Path) -> None:
+    _ready(tmp_path)
+    _comparison(
+        tmp_path,
+        added=[{"label": "Arsenal v Coventry 1x2 home"}],
+        price_changed=[
+            {"label": "Hull v Man United btts yes", "from_price": 150, "to_price": 120}
+        ],
+        unchanged_count=26,
+    )
+
+    html = build_status_html(output_dir=tmp_path, now=NOW)
+
+    assert "Since the previous card" in html
+    assert "Price moved" in html
+    assert "Arsenal v Coventry" in html
+    assert "150" in html and "120" in html
+
+
+def test_a_moved_price_is_not_presented_as_a_dropped_pick(tmp_path: Path) -> None:
+    """Counted separately so the reader cannot conflate them."""
+    _ready(tmp_path)
+    _comparison(
+        tmp_path,
+        price_changed=[
+            {"label": "Hull v Man United btts yes", "from_price": 150, "to_price": 120}
+        ],
+    )
+
+    html = build_status_html(output_dir=tmp_path, now=NOW)
+
+    assert "not a pick that was" in html
+
+
+def test_identical_cards_say_nothing_changed(tmp_path: Path) -> None:
+    _ready(tmp_path)
+    _comparison(tmp_path)
+
+    html = build_status_html(output_dir=tmp_path, now=NOW)
+
+    assert "No selection or price changed." in html
+
+
+def test_a_single_run_reports_not_enough_history(tmp_path: Path) -> None:
+    _ready(tmp_path)
+    _write(tmp_path, "automated_card_comparison.json", {"comparable": False})
+
+    html = build_status_html(output_dir=tmp_path, now=NOW)
+
+    assert "Not enough archived runs" in html
+
+
+def test_change_labels_are_escaped(tmp_path: Path) -> None:
+    _ready(tmp_path)
+    _comparison(tmp_path, added=[{"label": "<img src=x onerror=1>"}])
+
+    html = build_status_html(output_dir=tmp_path, now=NOW)
+
+    assert "<img src=x" not in html
+    assert "&lt;img" in html

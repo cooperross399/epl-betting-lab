@@ -4,6 +4,8 @@ from pathlib import Path
 
 import pandas as pd
 
+from epl_betting_lab.market_eligibility import MARKET_SELECTIONS
+
 from epl_betting_lab.models.value import american_to_implied
 from epl_betting_lab.reports.backtest_bias import edge_bucket, odds_range
 
@@ -23,6 +25,43 @@ CLV_COLUMNS = [
 ]
 
 
+#: Markets closing-line value is measured for. Derived from the supported market
+#: set so a newly allowlisted market cannot be silently excluded from CLV.
+CLV_MEASURED_MARKETS = tuple(MARKET_SELECTIONS)
+
+
+def _book_label(value: object) -> str:
+    """Book name for grouping. A missing book is named, never dropped."""
+    text = "" if value is None else str(value).strip()
+    return text or "unknown book"
+
+
+def build_clv_book_breakdown(clv_bets: pd.DataFrame) -> pd.DataFrame:
+    """Closing-line value per sportsbook.
+
+    Which book gives the best closing line is directly actionable: it says
+    where to take a price, not merely whether a market is sound. This became
+    possible only once the strategy evaluators carried the book through.
+    """
+    columns = ["book"] + CLV_COLUMNS
+    if clv_bets.empty:
+        return pd.DataFrame(columns=columns)
+    df = clv_bets.copy()
+    df["book"] = df["book"].apply(_book_label) if "book" in df.columns else "unknown book"
+    return summarize_clv(df, ["book"])
+
+
+def build_clv_book_market_breakdown(clv_bets: pd.DataFrame) -> pd.DataFrame:
+    """Per book and market, so a book strong at one market is not credited
+    for another."""
+    columns = ["book", "market"] + CLV_COLUMNS
+    if clv_bets.empty:
+        return pd.DataFrame(columns=columns)
+    df = clv_bets.copy()
+    df["book"] = df["book"].apply(_book_label) if "book" in df.columns else "unknown book"
+    return summarize_clv(df, ["book", "market"])
+
+
 def _closing_odds_column(df: pd.DataFrame) -> str | None:
     for column in ["closing_american_odds", "close_american_odds", "closing_odds"]:
         if column in df.columns:
@@ -39,7 +78,11 @@ def enrich_clv_bets(bets: pd.DataFrame) -> pd.DataFrame:
     final_would_bet_col = "goal_environment_adjusted_would_bet" if "goal_environment_adjusted_would_bet" in df.columns else "calibrated_would_bet"
     if final_would_bet_col in df.columns:
         df = df[df[final_would_bet_col]].copy()
-    df = df[df["market"].isin(["1x2", "total_2_5"])].copy()
+    # Measured markets follow the supported set rather than a hardcoded pair.
+    # BTTS was omitted here, so once it became an allowlisted card market every
+    # BTTS bet was silently dropped from CLV - the card could recommend a market
+    # that closing-line value never measured.
+    df = df[df["market"].isin(CLV_MEASURED_MARKETS)].copy()
     if df.empty:
         return df
 
@@ -132,6 +175,8 @@ def render_clv_report(
     team: pd.DataFrame,
     odds_range_report: pd.DataFrame,
     edge: pd.DataFrame,
+    book: pd.DataFrame | None = None,
+    book_market: pd.DataFrame | None = None,
 ) -> str:
     total_bets = int(market["bets"].sum()) if not market.empty else 0
     with_close = int(market["with_closing_odds"].sum()) if not market.empty else 0
@@ -156,6 +201,25 @@ def render_clv_report(
         f"- Closing-odds availability: {availability}",
         "- If closing odds are blank, CLV stays blank instead of being guessed.",
         "- `avg_clv_american_odds_movement` is positive when the price moved shorter in your favor.",
+        "",
+        "## By book",
+        "",
+        (
+            "Which sportsbook gave the best closing line value. This is the "
+            "most directly actionable breakdown: it says where to take a price, "
+            "not only whether a market is sound. A bet with no recorded book is "
+            "attributed to `unknown book` rather than dropped."
+        ),
+        "",
+        book.to_markdown(index=False)
+        if book is not None and not book.empty
+        else "No CLV rows available.",
+        "",
+        "## By book and market",
+        "",
+        book_market.to_markdown(index=False)
+        if book_market is not None and not book_market.empty
+        else "No CLV rows available.",
         "",
         "## By market",
         "",
@@ -190,6 +254,8 @@ def save_clv_reports(bets: pd.DataFrame, output_dir: Path) -> dict[str, Path]:
         "team": build_clv_team_breakdown(clv_bets),
         "odds_range": summarize_clv(clv_bets, ["market", "odds_range"]),
         "edge": summarize_clv(clv_bets, ["market", "edge_bucket"]),
+        "book": build_clv_book_breakdown(clv_bets),
+        "book_market": build_clv_book_market_breakdown(clv_bets),
     }
 
     paths = {
@@ -198,6 +264,8 @@ def save_clv_reports(bets: pd.DataFrame, output_dir: Path) -> dict[str, Path]:
         "team": output_dir / "clv_by_team.csv",
         "odds_range": output_dir / "clv_by_odds_range.csv",
         "edge": output_dir / "clv_by_edge_bucket.csv",
+        "book": output_dir / "clv_by_book.csv",
+        "book_market": output_dir / "clv_by_book_and_market.csv",
     }
     for name, report in reports.items():
         report.to_csv(paths[name], index=False)
@@ -210,6 +278,8 @@ def save_clv_reports(bets: pd.DataFrame, output_dir: Path) -> dict[str, Path]:
             reports["team"],
             reports["odds_range"],
             reports["edge"],
+            reports["book"],
+            reports["book_market"],
         ),
         encoding="utf-8",
     )

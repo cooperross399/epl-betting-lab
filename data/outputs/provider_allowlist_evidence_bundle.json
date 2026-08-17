@@ -1,8 +1,8 @@
 {
-  "bundle_checksum_sha256": "8162f21dbed5ebca21ddf962f4359606b0b5f2186a4cdbd799581ee89c60b089",
-  "bundle_id": "odds_api-allowlist-evidence-8162f21dbed5ebca",
+  "bundle_checksum_sha256": "a44f92ae0a9e433c76879e56db68582f1797e756ff22b5e43443714fdbd66a56",
+  "bundle_id": "odds_api-allowlist-evidence-a44f92ae0a9e433c",
   "bundle_storage": {
-    "archive_directory": "data/outputs/archive/provider_allowlist_evidence_bundles/2026-08-17/160523_odds_api_8162f21dbed5",
+    "archive_directory": "data/outputs/archive/provider_allowlist_evidence_bundles/2026-08-17/161405_odds_api_a44f92ae0a9e",
     "latest_csv_path": "data/outputs/provider_allowlist_evidence_bundle.csv",
     "latest_json_path": "data/outputs/provider_allowlist_evidence_bundle.json",
     "latest_markdown_path": "data/outputs/provider_allowlist_evidence_bundle.md"
@@ -616,12 +616,12 @@
       "verdict": "Stable enough for review"
     },
     {
-      "current_checksum_sha256": "646647836148fbbf332f264e81600a15e7575eccaa0098e1ee05c3a79e383d25",
+      "current_checksum_sha256": "0a3fa5cee514b29d16c9ea08aa3c26c6baa0a05a6420e31020120f610ab31d5d",
       "details": "Current checksum matches every available binding.",
       "evidence_path": "data/outputs/provider_allowlist_pr_conformance.json",
       "evidence_type": "provider_allowlist_pr_conformance",
       "expected_checksum_sha256": "",
-      "generated_at": "2026-08-17T16:05:22-04:00",
+      "generated_at": "2026-08-17T16:14:05-04:00",
       "required": "No",
       "status": "Included",
       "verdict": "Conforms to preview"
@@ -849,7 +849,7 @@
       "path": "data/outputs/provider_acceptance_checklist.json"
     },
     {
-      "checksum_sha256": "646647836148fbbf332f264e81600a15e7575eccaa0098e1ee05c3a79e383d25",
+      "checksum_sha256": "0a3fa5cee514b29d16c9ea08aa3c26c6baa0a05a6420e31020120f610ab31d5d",
       "path": "data/outputs/provider_allowlist_pr_conformance.json"
     },
     {
@@ -869,7 +869,7 @@
       "path": "data/outputs/provider_shadow_run_comparison.json"
     }
   ],
-  "generated_at": "2026-08-17T16:05:23-04:00",
+  "generated_at": "2026-08-17T16:14:05-04:00",
   "preview_verdict": "Ready for separate allowlist PR",
   "provider_key": "odds_api",
   "provider_name": "the_odds_api",

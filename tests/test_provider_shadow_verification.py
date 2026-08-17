@@ -270,16 +270,55 @@ def test_complete_live_shadow_is_ready_for_manual_review(tmp_path: Path) -> None
     assert "staging_input_validation.json" in archive_files
 
 
-def test_missing_btts_is_reported_without_fabrication(tmp_path: Path) -> None:
+def test_missing_btts_is_excluded_not_fabricated_and_does_not_block(
+    tmp_path: Path,
+) -> None:
+    """Market-aware validation: an unavailable market is excluded from the
+    eligible set rather than blocking a bundle whose other markets are complete.
+    It is never fabricated and never reported as a pass or no-value call."""
     result = _run(tmp_path, include_btts=False)
     summary = result["summary"]
 
-    assert summary["verdict"] == "Needs market coverage review"
     assert summary["market_coverage"]["market_counts"]["btts"] == 0
     assert summary["market_coverage"]["missing_markets"] == ["btts"]
+
+    eligibility = summary["market_eligibility"]
+    assert "btts" not in eligibility["eligible_markets"]
+    assert "btts" in eligibility["excluded_markets"]
+    assert "btts" in eligibility["unavailable_markets"]
+    assert set(eligibility["eligible_markets"]) == {"1x2", "total_2_5"}
+
+    # BTTS absence no longer blocks the whole bundle.
+    assert summary["verdict"] != "Needs market coverage review"
+
     odds = pd.read_csv(tmp_path / "data" / "staging" / "current_odds_staging.csv")
     assert "btts" not in set(odds["market"])
     assert any("No odds were fabricated" in item for item in summary["warnings"])
+    btts_entry = next(
+        item for item in eligibility["markets"] if item["market"] == "btts"
+    )
+    assert btts_entry["fabricated"] is False
+    assert btts_entry["usable_for_picks"] is False
+
+
+def test_no_eligible_market_still_blocks(tmp_path: Path) -> None:
+    """Market-aware does not mean permissive: if nothing is eligible, block."""
+    from epl_betting_lab.reports.provider_shadow_verification import _choose_verdict
+
+    verdict, reason = _choose_verdict(
+        dry_run=False,
+        provider_status="Completed",
+        validation_error="",
+        validation={},
+        raw_evidence={"status": "Created", "checksum_status": "Verified"},
+        team_mapping={"status": "Verified"},
+        fixture_matching={"status": "Verified"},
+        market_coverage={"status": "Incomplete"},
+        bookmaker_coverage={"status": "Available"},
+        eligibility={"eligible_markets": [], "excluded_markets": ["1x2", "btts"]},
+    )
+
+    assert verdict in {"Needs market coverage review", "Blocked"}
 
 
 def test_unknown_provider_team_name_needs_mapping_fixes(tmp_path: Path) -> None:

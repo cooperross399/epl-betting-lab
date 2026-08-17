@@ -4,6 +4,7 @@ import hashlib
 import json
 import os
 import re
+from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -775,6 +776,7 @@ def build_github_runner_input_handoff(
     github_repository: str | None = None,
     github_ref: str | None = None,
     github_sha: str | None = None,
+    eligible_markets: Sequence[str] | None = None,
     github_run_id: str | None = None,
 ) -> dict[str, object]:
     """Inspect committed runner inputs without changing either input file."""
@@ -942,6 +944,7 @@ def build_github_runner_input_handoff(
                 build_current_odds_completeness(
                     odds.path,
                     fixtures=fixture_rows,
+                    eligible_markets=eligible_markets,
                 )
             )
         except (
@@ -982,8 +985,13 @@ def build_github_runner_input_handoff(
             )
             completeness_status = "Complete" if complete else "Blocked"
             if not complete:
+                scope = (
+                    f" for eligible market(s) {sorted(eligible_markets)}"
+                    if eligible_markets is not None
+                    else ""
+                )
                 blockers.append(
-                    "Odds entry is incomplete: "
+                    f"Odds entry is incomplete{scope}: "
                     f"{completion_percentage:.1%} complete, "
                     f"{incomplete_matches} incomplete match(es), and "
                     f"{completeness_error_count} serious completeness issue(s)."

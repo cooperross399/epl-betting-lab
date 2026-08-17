@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
+
 import hashlib
 import json
 from dataclasses import dataclass
@@ -476,8 +478,16 @@ def build_staging_input_validation(
     provenance_path: Path | None = None,
     provider_policy_path: Path | None = None,
     run_at: datetime | None = None,
+    eligible_markets: Sequence[str] | None = None,
 ) -> tuple[pd.DataFrame, dict[str, object]]:
-    """Validate staging inputs without copying or changing any input file."""
+    """Validate staging inputs without copying or changing any input file.
+
+    `eligible_markets` makes the completeness gate market-aware: an excluded
+    market (today `total_2_5`, which books price at 3.0/3.5 for two fixtures)
+    must not block a bundle whose eligible markets are complete. Excluded
+    markets are reported as excluded - never as passes, avoids, or no-value
+    calls. `None` keeps the historical all-markets behaviour.
+    """
     root = (repository_root or PROJECT_ROOT).resolve()
     staging = (staging_dir or root / "data" / "staging").resolve()
     run_at = run_at or datetime.now().astimezone()
@@ -718,6 +728,7 @@ def build_staging_input_validation(
             completeness, _ = build_current_odds_completeness(
                 odds.path,
                 fixtures=fixtures.frame,
+                eligible_markets=eligible_markets,
             )
             _append_existing_report(
                 rows,
@@ -737,6 +748,7 @@ def build_staging_input_validation(
                 matches_path=Path(selected_matches),
                 run_at=run_at,
                 repository_root=root,
+                eligible_markets=eligible_markets,
             )
         except (
             OSError,
@@ -1086,6 +1098,7 @@ def save_staging_input_validation(
     provenance_path: Path | None = None,
     provider_policy_path: Path | None = None,
     run_at: datetime | None = None,
+    eligible_markets: Sequence[str] | None = None,
 ) -> dict[str, object]:
     outputs = output_dir or OUTPUTS_DIR
     checks, summary = build_staging_input_validation(
@@ -1097,6 +1110,7 @@ def save_staging_input_validation(
         provenance_path=provenance_path,
         provider_policy_path=provider_policy_path,
         run_at=run_at,
+        eligible_markets=eligible_markets,
     )
     outputs.mkdir(parents=True, exist_ok=True)
     csv_path = outputs / VALIDATION_CSV_FILENAME

@@ -541,3 +541,64 @@ def test_discovery_workflow_is_dispatch_only_and_uploads_a_report() -> None:
     assert "workflow_dispatch" in text
     assert "schedule:" not in text
     assert "upload-artifact" in text
+
+
+def test_totals_probe_names_the_books_carrying_the_line() -> None:
+    """A region name is not actionable; a book name is.
+
+    The operator either holds an account at a book or does not, so the decision
+    needs book names rather than "uk".
+    """
+    from epl_betting_lab.reports.provider_market_discovery import probe_totals_regions
+
+    def requester(url: str, **kwargs):
+        return _Response(
+            [
+                _event("e1", "2026-08-21", "Arsenal", "Coventry City",
+                       totals_points=(2.5,), books=("Bet365", "Pinnacle")),
+                _event("e2", "2026-08-22", "Hull City", "Manchester United",
+                       totals_points=(2.5,), books=("Bet365",)),
+            ]
+        )
+
+    result = probe_totals_regions(
+        api_key=SECRET, regions=["uk"], requester=requester
+    )
+
+    region = result["per_region"][0]
+    # Bet365 covers both fixtures; Pinnacle only one.
+    assert region["books_covering_every_fixture"] == ["Bet365"]
+    assert region["books_with_line_by_fixture_count"]["Bet365"] == 2
+    assert region["books_with_line_by_fixture_count"]["Pinnacle"] == 1
+    assert result["books_covering_every_fixture"] == ["Bet365"]
+
+
+def test_no_book_covers_every_fixture_is_reported_as_empty() -> None:
+    from epl_betting_lab.reports.provider_market_discovery import probe_totals_regions
+
+    def requester(url: str, **kwargs):
+        return _Response(
+            [
+                _event("e1", "2026-08-21", "Arsenal", "Coventry City",
+                       totals_points=(2.5,), books=("Bet365",)),
+                _event("e2", "2026-08-22", "Hull City", "Manchester United",
+                       totals_points=(3.5,), books=("Pinnacle",)),
+            ]
+        )
+
+    result = probe_totals_regions(
+        api_key=SECRET, regions=["uk"], requester=requester
+    )
+
+    assert result["books_covering_every_fixture"] == []
+    assert result["complete_in_any_region"] is False
+
+
+def test_probe_note_explains_why_books_are_named() -> None:
+    from epl_betting_lab.reports.provider_market_discovery import probe_totals_regions
+
+    result = probe_totals_regions(
+        api_key=SECRET, regions=[], requester=lambda url, **kw: _Response([])
+    )
+
+    assert "actually bet with" in result["note"]

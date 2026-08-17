@@ -1,0 +1,84 @@
+name: Provider Market Discovery
+
+# Manual only. Answers evidence questions about what the provider offers -
+# which markets, at which lines, in which regions - without writing a staging
+# bundle or creating an archived shadow run, so probing a question cannot
+# disturb the acceptance evidence window.
+#
+# It costs provider quota, which is why it is dispatched deliberately rather
+# than run on a timer.
+on:
+  workflow_dispatch:
+    inputs:
+      probe_totals_regions:
+        description: "Regions to probe for the 2.5 totals line (comma-separated, blank to skip)"
+        required: false
+        default: ""
+      check_event_markets:
+        description: "Query the per-event endpoint for BTTS availability"
+        type: boolean
+        required: false
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    name: Provider Market Discovery
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install project
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install -e .
+
+      - name: Run market discovery
+        # The credential arrives as an environment variable and is never
+        # echoed. The discovery report contains market names, line values, and
+        # counts - no credential material.
+        env:
+          EPL_ODDS_API_KEY: ${{ secrets.EPL_ODDS_API_KEY }}
+          PYTHONPATH: src
+        run: |
+          ARGS=""
+          if [ -n "${{ inputs.probe_totals_regions }}" ]; then
+            ARGS="$ARGS --probe-totals-regions ${{ inputs.probe_totals_regions }}"
+          fi
+          if [ "${{ inputs.check_event_markets }}" = "true" ]; then
+            ARGS="$ARGS --check-event-markets"
+          fi
+          python scripts/run_provider_market_discovery.py $ARGS
+
+      - name: Upload discovery report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: provider-market-discovery
+          path: |
+            data/outputs/provider_market_discovery.json
+            data/outputs/provider_market_discovery.md
+          if-no-files-found: ignore
+
+      - name: Scope reminder
+        if: always()
+        run: |
+          echo "Evidence only. A market being available does not add it to the"
+          echo "card: that is a reviewed scope change, not an automatic"
+          echo "consequence. No staging bundle was written, no archived shadow"
+          echo "run was created, no picks were generated, and no bet was placed."

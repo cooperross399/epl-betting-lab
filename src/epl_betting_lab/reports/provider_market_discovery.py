@@ -34,6 +34,7 @@ from typing import Any
 from urllib.parse import urlparse
 
 import pandas as pd
+import requests
 
 from epl_betting_lab.config import OUTPUTS_DIR
 from epl_betting_lab.providers.odds_api_staging_provider import (
@@ -466,6 +467,102 @@ def discover_event_markets(
         "events_with_btts": sum(1 for item in per_event if item["has_btts"]),
         "bookmakers_offering_btts": sorted(books_with_btts),
         "errors": errors,
+    }
+
+
+def probe_totals_regions(
+    *,
+    api_key: str,
+    regions: Sequence[str],
+    base_url: str = DEFAULT_API_BASE_URL,
+    sport_key: str = "soccer_epl",
+    requester: Any = None,
+    timeout_seconds: float = 20.0,
+) -> dict[str, Any]:
+    """Ask whether any region offers the required totals line for every fixture.
+
+    Read-only and deliberately separate from the shadow verifier: it writes no
+    staging bundle and creates no archived run, so probing a question cannot
+    disturb the acceptance evidence window.
+
+    One request per region. Cost is markets x regions, so keep the region list
+    short.
+    """
+    if not api_key:
+        raise DiscoveryError(
+            f"A totals region probe requires `{API_KEY_ENV}` in the environment."
+        )
+    request = requester or _default_requester
+    root = _validate_base_url(base_url)
+
+    per_region: list[dict[str, Any]] = []
+    errors: list[str] = []
+    union_with_line: set[str] = set()
+    fixtures_seen: set[str] = set()
+
+    for region in regions:
+        region = region.strip()
+        if not region:
+            continue
+        try:
+            response = request(
+                f"{root}/v4/sports/{sport_key}/odds",
+                params={
+                    "apiKey": api_key,
+                    "regions": region,
+                    "markets": "totals",
+                    "oddsFormat": "american",
+                    "dateFormat": "iso",
+                },
+                timeout=timeout_seconds,
+            )
+            status = int(getattr(response, "status_code", 0) or 0)
+            payload = response.json() if status == 200 else []
+            if status != 200:
+                errors.append(f"Region {region}: HTTP {status}.")
+        except (requests.RequestException, OSError, TimeoutError, ValueError) as exc:
+            # Deliberately narrow. Catching bare Exception here would report a
+            # programming error as a provider failure, which is how a bug gets
+            # disguised as a network problem.
+            errors.append(f"Region {region}: {type(exc).__name__}.")
+            payload = []
+
+        events = payload if isinstance(payload, list) else []
+        summary = summarize_bulk_response(events)
+        with_line = {
+            f"{item['date']}: {item['home_team']} vs {item['away_team']}"
+            for item in summary["events"]
+            if item["has_required_totals_line"]
+        }
+        all_events = {
+            f"{item['date']}: {item['home_team']} vs {item['away_team']}"
+            for item in summary["events"]
+        }
+        fixtures_seen |= all_events
+        union_with_line |= with_line
+        per_region.append(
+            {
+                "region": region,
+                "events": len(all_events),
+                "events_with_required_line": len(with_line),
+                "missing": sorted(all_events - with_line),
+            }
+        )
+
+    missing_everywhere = sorted(fixtures_seen - union_with_line)
+    return {
+        "regions_probed": [item["region"] for item in per_region],
+        "required_point": REQUIRED_TOTALS_POINT,
+        "fixtures_seen": len(fixtures_seen),
+        "fixtures_with_line_in_any_region": len(union_with_line),
+        "missing_in_every_region": missing_everywhere,
+        "per_region": per_region,
+        "complete_in_any_region": bool(fixtures_seen) and not missing_everywhere,
+        "errors": errors,
+        "note": (
+            "Evidence only. A complete result does not add totals to the card: "
+            "that is a reviewed scope change, not an automatic consequence."
+        ),
     }
 
 

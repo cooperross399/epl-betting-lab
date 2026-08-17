@@ -219,6 +219,18 @@ def _technical_staging_success(summary: Mapping[str, object]) -> bool:
     checksum_ok = isinstance(checksums, Mapping) and all(
         _clean(checksums.get(field)) == "Verified" for field in CHECKSUM_FIELDS
     )
+    # Market coverage is judged market-aware, matching staging validation: a
+    # market the card excludes (today `total_2_5`, priced at 3.0/3.5 for two
+    # fixtures) must not fail an otherwise-clean run. At least one market must
+    # still be eligible, and completeness for the eligible scope must be full.
+    # Records written before market eligibility existed fall back to the
+    # original all-markets requirement.
+    eligibility = _nested(summary, "market_eligibility", default=None)
+    if isinstance(eligibility, Mapping):
+        coverage_ok = bool(eligibility.get("any_market_eligible", False))
+    else:
+        coverage_ok = _clean(_nested(summary, "market_coverage", "status")) == "Complete"
+
     return bool(
         checksum_ok
         and _clean(_nested(summary, "raw_evidence", "checksum_status"))
@@ -226,7 +238,7 @@ def _technical_staging_success(summary: Mapping[str, object]) -> bool:
         and _clean(_nested(summary, "provider_age", "status")) == "Fresh"
         and _clean(_nested(summary, "team_mapping", "status")) == "Verified"
         and _clean(_nested(summary, "fixture_matching", "status")) == "Verified"
-        and _clean(_nested(summary, "market_coverage", "status")) == "Complete"
+        and coverage_ok
         and (_as_float(_nested(summary, "odds_completeness", "completion_percentage")) or 0.0)
         >= 0.999
     )

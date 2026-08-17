@@ -258,3 +258,22 @@ def test_the_readme_separates_the_current_workflow_from_the_legacy_one() -> None
     assert "refresh_all_reports.py" in text
     # Flattened: the phrase wraps across lines in the rendered document.
     assert "no longer the active source" in _flat("README.md")
+
+
+def test_the_readme_never_tells_anyone_to_cd_into_the_dead_path() -> None:
+    """The banner says Downloads is dead; a `cd` into it nine lines later is a
+    trap, and the newer instruction is the one people scroll past."""
+    text = _read("README.md")
+
+    assert "cd ~/Downloads/epl-betting-lab" not in text
+    assert "cd ~/Projects/epl-betting-lab" in text
+
+
+def test_the_pr_workflow_compiles_every_module() -> None:
+    """A module can be invalid on the CI Python and still pass the suite if no
+    test imports it, which is how weekly_card.py stayed broken for a month."""
+    text = (
+        PROJECT_ROOT / ".github" / "workflows" / "tests.yml"
+    ).read_text(encoding="utf-8")
+
+    assert "compileall" in text

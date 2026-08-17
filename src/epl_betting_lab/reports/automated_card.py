@@ -198,29 +198,60 @@ def build_automated_card(
     staging_validation = _section(shadow, "staging_validation")
     policy = _section(shadow, "provider_policy")
 
+    # Blockers cascade: with no evidence at all, four checks fail and three of
+    # them are consequences of the first. Reporting all four sends the reader
+    # chasing four problems when there is one, so downstream checks are skipped
+    # once a prerequisite has already failed and the reason is stated.
     blockers: list[str] = []
+    skipped_checks: list[str] = []
+
+    def _skip(reason: str) -> None:
+        skipped_checks.append(reason)
+
     if not input_report:
         blockers.append(
-            "No automated card input report found. Run the API-first workflow."
+            "No automated card input report found. Run: "
+            "PYTHONPATH=src .venv/bin/python "
+            "scripts/run_api_first_card_workflow.py"
         )
-    if not eligible_markets:
-        blockers.append("No market is eligible for automated picks.")
-    if not card_input.is_file():
-        blockers.append(f"Provider-derived card input missing: `{card_input.name}`.")
-    if not bool(policy.get("provider_allowed", False)):
-        blockers.append(
-            "Provider is not allowlisted by the reviewed staging provider policy."
+        _skip(
+            "Market eligibility, provider policy, and staging validation were "
+            "not checked: they are read from reports the API-first workflow "
+            "produces."
         )
-    elif not _provider_allowlisted_now(policy_path, provider_name):
-        # The report says allowed but the live policy disagrees: the policy has
-        # changed since that run, and the live file wins.
-        blockers.append(
-            f"`{provider_name}` is not in `allowed_provider_names` in the "
-            "current staging provider policy, even though an earlier report "
-            "recorded it as allowed. Re-run provider verification."
-        )
-    if not bool(staging_validation.get("handoff_eligible", False)):
-        blockers.append("Staging validation is not handoff eligible.")
+    else:
+        if not eligible_markets:
+            blockers.append(
+                "No market is eligible for automated picks. See "
+                "data/outputs/automated_card_input.md for the reason each "
+                "market was excluded."
+            )
+        if not card_input.is_file():
+            blockers.append(
+                f"Provider-derived card input missing: `{card_input.name}`. "
+                "Re-run: PYTHONPATH=src .venv/bin/python "
+                "scripts/run_api_first_card_workflow.py"
+            )
+        if not bool(policy.get("provider_allowed", False)):
+            blockers.append(
+                "Provider is not allowlisted by the reviewed staging provider "
+                "policy. Allowlisting is a reviewed human decision; see "
+                "docs/provider_allowlist_approval_github_ui.md"
+            )
+        elif not _provider_allowlisted_now(policy_path, provider_name):
+            # The report says allowed but the live policy disagrees: the policy
+            # has changed since that run, and the live file wins.
+            blockers.append(
+                f"`{provider_name}` is not in `allowed_provider_names` in the "
+                "current staging provider policy, even though an earlier report "
+                "recorded it as allowed. Re-run provider verification."
+            )
+        if not bool(staging_validation.get("handoff_eligible", False)):
+            blockers.append(
+                "Staging validation is not handoff eligible. See "
+                "data/outputs/staging_input_validation.md for the failing "
+                "checks."
+            )
 
     summary: dict[str, Any] = {
         "report": "Automated EPL Card",
@@ -238,6 +269,8 @@ def build_automated_card(
         "unit_suggestions": [],
         "validation_warnings": [],
         "blockers": blockers,
+        "root_blocker": blockers[0] if blockers else "",
+        "skipped_checks": skipped_checks,
         "exclusion_note": (
             "Excluded markets are unavailable, incomplete, or outside the "
             "reviewed policy allowlist. They are never presented as passes, "
@@ -253,9 +286,16 @@ def build_automated_card(
     }
 
     if blockers:
+        # Lead with the first blocker: later ones are often downstream of it,
+        # and "resolve the listed blockers" is not an instruction.
         summary["next_action"] = (
-            "Resolve the listed blockers before an automated card can be "
-            "generated. No selection was produced."
+            f"Start here: {blockers[0]}"
+            + (
+                f" ({len(blockers) - 1} further blocker(s) may clear once this "
+                "is resolved.)"
+                if len(blockers) > 1
+                else ""
+            )
         )
         return summary
 

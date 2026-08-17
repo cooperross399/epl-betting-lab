@@ -78,7 +78,7 @@ The included `data/manual/upcoming_fixtures.csv` is a starter fixture sheet for 
 From Terminal:
 
 ```bash
-cd ~/Downloads/epl-betting-lab
+cd ~/Projects/epl-betting-lab
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt

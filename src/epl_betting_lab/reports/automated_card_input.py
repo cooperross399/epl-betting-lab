@@ -328,7 +328,15 @@ def save_automated_card_input(
 
     for label, path in (("odds", staging_odds), ("fixtures", staging_fixtures)):
         if not path.is_file():
-            blockers.append(f"Staging {label} not found: `{path.name}`.")
+            # Naming the file without saying how to produce it leaves the
+            # reader to work out that staging comes from a provider run.
+            blockers.append(
+                f"Staging {label} not found: `{path.name}`. Staging is produced "
+                "by a provider run: PYTHONPATH=src .venv/bin/python "
+                "scripts/run_provider_shadow_verification.py --provider odds_api "
+                "--live --overwrite-staging --include-event-markets "
+                "(archive data/staging/ first)."
+            )
     if not blockers:
         try:
             odds = pd.read_csv(staging_odds, dtype=str).fillna("")
@@ -389,6 +397,7 @@ def save_automated_card_input(
         blockers.append(
             "No market is eligible for automated picks. "
             + " ".join(eligibility.warnings)
+            + " Each market's status and reason is listed in this report."
         )
 
     if not blockers and not frame.empty:

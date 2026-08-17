@@ -38,6 +38,13 @@ jobs:
           python -m pip install -r requirements.txt
           python -m pip install -e .
 
+      - name: Compile every module
+        # A module can be syntactically invalid on the CI Python and still pass
+        # the suite if no test imports it. weekly_card.py sat broken on 3.11 for
+        # over a month that way, failing only the scheduled job nobody reads.
+        run: |
+          python -m compileall -q src scripts app.py
+
       - name: Run the full test suite
         # No credential is provided on purpose: every test must pass without
         # one. A test that needs a live key would make the suite unrunnable on

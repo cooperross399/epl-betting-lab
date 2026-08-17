@@ -13,6 +13,38 @@
 > provider-derived automated input, so **manual odds entry is not required**;
 > EPL SETTLE is preview-only; no bets are ever placed.
 
+## Current workflow
+
+These are the commands in use today. Everything is provider-derived; no manual
+odds entry is involved.
+
+```bash
+# Refresh every report in dependency order, then open the status page
+PYTHONPATH=src .venv/bin/python scripts/refresh_all_reports.py
+open data/outputs/status.html
+
+# Refetch provider data (separate, deliberate, spends quota)
+PYTHONPATH=src .venv/bin/python scripts/run_provider_shadow_verification.py \
+    --provider odds_api --live --overwrite-staging --include-event-markets
+
+# The three scheduled-routine bridges
+PYTHONPATH=src .venv/bin/python scripts/run_epl_model_task.py
+PYTHONPATH=src .venv/bin/python scripts/run_epl_card_task.py
+PYTHONPATH=src .venv/bin/python scripts/run_epl_settle_preview_task.py
+```
+
+## Legacy sections below
+
+Much of this README documents the **manual-odds era**, when prices were typed
+into `data/manual/current_odds.csv` by hand. That file is no longer the active
+source and should not become active again.
+
+Anything below that fills, imports, validates, or repairs `current_odds.csv`,
+and the `run_epl_weekly_pipeline.py` flow built on it, is retained for
+reference and for the manual fallback path. It is **not** the current workflow.
+Read `docs/claude_autonomy_operating_model.md` for what is.
+
+
 A starter Python project for building, testing, and using English Premier League betting strategies for the 2026/27 season.
 
 This is built for a practical betting workflow:

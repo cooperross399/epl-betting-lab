@@ -37,6 +37,13 @@ PLACEHOLDERS = {
 #: A 32-hex-character run is the shape of an Odds API key.
 HEX_KEY = re.compile(r"\b[0-9a-f]{32}\b")
 
+#: `apiKey=` FOLLOWED BY A VALUE is a leak. The bare token is not: it appears
+#: legitimately in the redaction regex that strips credentials and in tests
+#: asserting the token is absent. Flagging the bare token would force those
+#: defences to be written obscurely, or exempted - both worse than matching
+#: precisely. Eight characters is well below any real key length.
+API_KEY_PARAM = re.compile(r"apiKey=[A-Za-z0-9]{8,}")
+
 #: `NAME=value` where NAME is a credential variable and value is not a
 #: placeholder — i.e. a real assignment, not documentation.
 ASSIGNMENT = re.compile(
@@ -135,14 +142,25 @@ def test_no_tracked_file_contains_an_odds_api_key_shape() -> None:
 
 
 def test_generated_reports_never_include_the_api_key_parameter() -> None:
-    """`apiKey=` is how the credential travels; it must not be written down."""
+    """`apiKey=<value>` is how the credential travels; it must not be written."""
     offenders: list[str] = []
     for path in _text_files():
-        text = _read(path)
-        if "apiKey=" in text:
-            offenders.append(str(path.relative_to(PROJECT_ROOT)))
+        for match in API_KEY_PARAM.finditer(_read(path)):
+            offenders.append(
+                f"{path.relative_to(PROJECT_ROOT)}: {match.group(0)[:10]}..."
+            )
 
-    assert offenders == [], f"apiKey= present in tracked files: {offenders}"
+    assert offenders == [], f"apiKey= with a value in tracked files: {offenders}"
+
+
+def test_the_api_key_parameter_check_still_catches_a_real_leak() -> None:
+    """A precise matcher is only useful if it still fires on the real thing."""
+    assert API_KEY_PARAM.search("https://x/v4/odds?apiKey=0123456789abcdef&r=us")
+    assert API_KEY_PARAM.search("apiKey=abcdef0123456789abcdef0123456789")
+    # ...and stays quiet on the defences that mention the token.
+    assert not API_KEY_PARAM.search('re.compile(r"(apiKey=)[^&s]+")')
+    assert not API_KEY_PARAM.search('assert "apiKey=" not in text')
+    assert not API_KEY_PARAM.search("apiKey=[redacted]")
 
 
 @pytest.mark.parametrize("name", PROVIDER_ENV_ALLOWLIST)
@@ -159,7 +177,7 @@ def test_data_outputs_reports_are_not_tracked_with_secrets() -> None:
         if not relative.startswith("data/outputs/"):
             continue
         text = _read(path)
-        if HEX_KEY.search(text) or "apiKey=" in text:
+        if HEX_KEY.search(text) or API_KEY_PARAM.search(text):
             offenders.append(relative)
 
     assert offenders == [], f"tracked report contains a credential: {offenders}"

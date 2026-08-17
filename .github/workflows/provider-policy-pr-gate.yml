@@ -45,24 +45,24 @@ jobs:
       - name: Create receipt from GitHub approval
         # The human act is a GitHub review or comment by an allowed reviewer.
         # This only verifies and transcribes it; it cannot author an approval.
+        #
+        # It deliberately does NOT regenerate the checklist, evidence bundle,
+        # preview, or conformance. Those are committed to the PR and bound by
+        # checksum: rebuilding them here changes their bundle id and checksum,
+        # which invalidates the very verification the gate is about to check.
+        #
         # Allowed to fail so a missing approval surfaces as the gate's own
         # "receipt missing" result rather than an opaque step crash.
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          python scripts/generate_provider_acceptance_checklist.py --provider odds_api || true
-          python scripts/build_provider_allowlist_evidence_bundle.py --provider odds_api || true
           python scripts/create_receipt_from_github_approval.py \
             --pr "${{ github.event.pull_request.number }}" \
             --repository "${{ github.repository }}" \
             --provider odds_api \
             --markets "1x2,btts" \
             --write-receipt
-          python scripts/verify_provider_human_acceptance_receipt.py --provider odds_api || true
-          python scripts/preview_provider_allowlist_pr.py --provider odds_api || true
-          python scripts/check_provider_allowlist_pr_conformance.py --provider odds_api || true
-          python scripts/verify_provider_allowlist_evidence_bundle.py --provider odds_api || true
 
       - name: Check provider policy PR gate
         run: |

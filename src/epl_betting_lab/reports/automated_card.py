@@ -61,6 +61,7 @@ PICK_FIELDS = (
     "raw_edge",
     "fair_american",
     "american_odds",
+    "suggested_units",
     "book",
     "notes",
 )
@@ -104,18 +105,23 @@ def _rows(frame: pd.DataFrame, section: str) -> list[dict[str, Any]]:
 
 
 def _unit_suggestions(best_bets: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
-    """Stake units carried from the existing confidence tiers.
+    """Stake units taken from the report's own `suggested_units` column.
 
-    This reads the tier the model already assigned; it does not introduce a new
-    staking model. Tiers the report does not recognise get no suggestion rather
-    than a guessed one.
+    The best-bets pipeline already computes staking. Re-deriving it from the
+    confidence tier here would be a second, divergent staking model, so this
+    reads the existing value and adds nothing of its own. A pick without a
+    usable stake gets no suggestion rather than a guessed one.
     """
-    tier_units = {"A": 1.0, "B": 0.75, "C": 0.5}
     suggestions: list[dict[str, Any]] = []
     for pick in best_bets:
-        tier = _clean(pick.get("confidence_tier")).upper()[:1]
-        units = tier_units.get(tier)
-        if units is None:
+        units = pick.get("suggested_units")
+        if units is None or (isinstance(units, float) and pd.isna(units)):
+            continue
+        try:
+            units_value = float(units)
+        except (TypeError, ValueError):
+            continue
+        if units_value <= 0:
             continue
         suggestions.append(
             {
@@ -124,8 +130,12 @@ def _unit_suggestions(best_bets: Sequence[Mapping[str, Any]]) -> list[dict[str, 
                 "market": pick.get("market"),
                 "selection": pick.get("selection"),
                 "confidence_tier": pick.get("confidence_tier"),
-                "suggested_units": units,
-                "basis": "Existing confidence tier; no new staking model.",
+                "suggested_units": units_value,
+                "book": pick.get("book"),
+                "basis": (
+                    "Existing pipeline `suggested_units`; no second staking "
+                    "model was introduced."
+                ),
             }
         )
     return suggestions

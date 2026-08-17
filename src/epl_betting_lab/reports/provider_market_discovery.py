@@ -265,6 +265,43 @@ def classify_btts(
     """Decide whether BTTS is genuinely unavailable or merely unqueried."""
     bulk_returned = bool(bulk_summary.get("btts_returned_by_bulk", False))
 
+    if event_summary is None and bulk_returned:
+        # The archived payload already contains BTTS. That happens when the run
+        # used --include-event-markets, which merges per-event markets into the
+        # bulk payload before archiving. Treat it as ingested evidence rather
+        # than pretending the market was never checked.
+        events = list(bulk_summary.get("events", []) or [])
+        with_btts = sum(1 for item in events if item.get("btts_in_bulk_response"))
+        total = len(events)
+        status = (
+            "available"
+            if total and with_btts == total
+            else "incomplete"
+            if with_btts
+            else "unavailable"
+        )
+        return {
+            "market": "btts",
+            "status": status,
+            "endpoint_limited": True,
+            "checked_event_endpoint": True,
+            "events_with_btts": with_btts,
+            "events_total": total,
+            "root_cause": (
+                f"The archived payload contains BTTS for {with_btts} of {total} "
+                "events. It was ingested from the per-event endpoint and merged "
+                "into the bulk payload before archiving."
+            ),
+            "recommended_action": (
+                "BTTS is ingested and can be judged on coverage like any other "
+                "market."
+                if status == "available"
+                else "Keep BTTS excluded while incomplete. Do not fabricate the rest."
+            ),
+            "bulk_returned_btts": bulk_returned,
+            "ingested_via_event_endpoint": True,
+        }
+
     if event_summary is None:
         return {
             "market": "btts",

@@ -42,10 +42,14 @@ MARKET_SELECTIONS: dict[str, tuple[str, ...]] = {
     "btts": ("yes", "no"),
 }
 
-#: Markets intentionally excluded from automated picks for now.
-#: BTTS is disabled because The Odds API's featured endpoint does not return it;
-#: requiring it would reintroduce a manual odds-entry job.
-DEFAULT_DISABLED_MARKETS: tuple[str, ...] = ("btts",)
+#: Markets intentionally excluded from automated picks regardless of coverage.
+#:
+#: BTTS was previously disabled here because the featured endpoint returns no
+#: BTTS rows. Market discovery showed that was an endpoint limitation, not a
+#: provider one: the per-event endpoint supplies BTTS for every Week 1 fixture,
+#: and `--include-event-markets` now ingests it. BTTS is therefore no longer
+#: disabled — it is judged on coverage like any other market.
+DEFAULT_DISABLED_MARKETS: tuple[str, ...] = ()
 
 ELIGIBLE = "eligible"
 INCOMPLETE = "incomplete"

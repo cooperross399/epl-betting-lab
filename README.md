@@ -823,6 +823,33 @@ against the previous archived card, then creates the Thursday decision queue.
 If there are not at least two archived cards yet, it stops with a friendly
 message and does not try to build the queue.
 
+### Confirm the fixture slate
+
+Before entering odds, check the fixture slate itself:
+
+```bash
+python scripts/check_upcoming_fixture_slate.py
+```
+
+The read-only check groups fixtures into matchweeks and flags duplicate
+fixtures, teams double-booked in the same matchweek, a team listed as both
+home and away, unknown team spellings compared with the historical data
+(newly promoted teams are expected to be missing), malformed or past dates,
+repeated pairings on different dates, partial matchweeks, and drift between
+the slate and an existing `current_odds.csv`. It writes:
+
+```text
+data/outputs/fixture_slate_check.json
+data/outputs/fixture_slate_check.md
+data/outputs/fixture_slate_check.csv
+```
+
+The verdict is `Slate ready for manual confirmation`, `Slate ready with
+warnings`, `Needs slate fixes`, or `Missing fixtures`. The markdown report
+ends with a manual confirmation checklist. Even a ready verdict requires a
+human to compare the slate against the official EPL schedule; the check
+never edits fixtures or odds and never fabricates prices.
+
 ### Week 1 launch setup
 
 Before the first weekly pipeline run, use one safe setup command:

@@ -38,7 +38,7 @@ def card_to_markdown(card: pd.DataFrame) -> str:
         matchup = f"{r.home_team} vs {r.away_team}"
         lines.append(f"## {matchup}")
         lines.append(f"**Play:** {r.market} — {r.selection} ({int(r.american_odds):+d})")
-        lines.append(f"**Confidence:** {r.confidence} | **Suggested:** {r.suggested_units}u / ${r["suggested_wager_$"]}")
+        lines.append(f"**Confidence:** {r.confidence} | **Suggested:** {r.suggested_units}u / ${r['suggested_wager_$']}")
         raw_prob = getattr(r, "raw_model_prob", r.model_prob)
         calibrated_prob = getattr(r, "calibrated_model_prob", r.model_prob)
         raw_edge = getattr(r, "raw_edge", r.edge)

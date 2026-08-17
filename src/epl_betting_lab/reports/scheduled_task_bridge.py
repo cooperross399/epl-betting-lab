@@ -36,6 +36,36 @@ CARD_TASK_MARKDOWN = "epl_card_task.md"
 SETTLE_TASK_JSON = "epl_settle_preview_task.json"
 SETTLE_TASK_MARKDOWN = "epl_settle_preview_task.md"
 
+#: What to do about each named blocker. The vocabulary is deliberately terse so
+#: it reads well in a status line, which leaves the label alone saying nothing
+#: about the remedy. These fill that gap.
+BLOCKER_REMEDIES: dict[str, str] = {
+    "Needs odds": (
+        "Rebuild the provider-derived card input: "
+        "scripts/run_api_first_card_workflow.py"
+    ),
+    "Needs mapping": (
+        "A provider team name has no reviewed project mapping. Add it to "
+        "src/epl_betting_lab/providers/team_names.py, deliberately."
+    ),
+    "Needs BTTS": (
+        "BTTS is unavailable from the last provider run. Re-run the provider "
+        "with --include-event-markets, or leave BTTS excluded."
+    ),
+    "Needs validation": (
+        "See data/outputs/staging_input_validation.md for the failing checks."
+    ),
+    "Provider not trusted": (
+        "The provider is not allowlisted. That is a reviewed human decision: "
+        "docs/provider_allowlist_approval_github_ui.md"
+    ),
+    "Needs fixtures": (
+        "Upcoming fixtures are stale or unreadable. Refresh "
+        "data/manual/upcoming_fixtures.csv."
+    ),
+}
+
+
 #: Canonical blocker vocabulary shared by the routines.
 BLOCKER_NEEDS_ODDS = "Needs odds"
 BLOCKER_NEEDS_MAPPING = "Needs mapping"
@@ -333,8 +363,8 @@ def build_epl_model_task(
 
     if blockers:
         next_action = (
-            "Clear the listed blockers before running EPL CARD. Highest priority: "
-            f"{blockers[0]}."
+            "Clear the listed blockers before running EPL CARD. Start with "
+            f"`{blockers[0]}`: {BLOCKER_REMEDIES.get(blockers[0], 'see the reports for detail.')}"
         )
     else:
         next_action = (
@@ -582,9 +612,14 @@ def build_epl_card_task(
         )
     else:
         next_action = (
-            "Do not publish picks. Resolve blockers in order: "
-            + ", ".join(blockers)
-            + "."
+            "Do not publish picks. Start with "
+            f"`{blockers[0]}`: "
+            + BLOCKER_REMEDIES.get(blockers[0], "see the reports for detail.")
+            + (
+                f" Then: {', '.join(blockers[1:])}."
+                if len(blockers) > 1
+                else ""
+            )
         )
 
     return {

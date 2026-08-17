@@ -141,8 +141,21 @@ def build_bundle_diagnostic(
     tracked = _tracked_paths(repository_root)
     # The failure mode that keeps recurring: evidence bound by path but never
     # committed, so a clean checkout recomputes the bundle without it.
+    #
+    # Git tracks files, not directories. A bundle also binds archive
+    # *directories*, and reporting those as untracked buries the real finding
+    # under noise - which happened, and cost a round of investigation. A
+    # directory counts as present when git tracks anything beneath it.
+    def _is_missing(path: str) -> bool:
+        if not tracked:
+            return False
+        if path in tracked:
+            return False
+        prefix = path.rstrip("/") + "/"
+        return not any(item.startswith(prefix) for item in tracked)
+
     untracked_evidence = sorted(
-        path for path in computed_paths if tracked and path not in tracked
+        path for path in computed_paths if _is_missing(path)
     )
     untracked_stored_bundle = bool(
         stored_bundle_path and tracked and stored_bundle_path not in tracked

@@ -1,0 +1,64 @@
+{
+  "bets_placed": false,
+  "blockers": [],
+  "bookmakers": "",
+  "credential_environment_variable": "EPL_ODDS_API_KEY",
+  "credential_status": "Configured",
+  "cron_enabled": false,
+  "featured_markets_requested": [
+    "h2h",
+    "totals"
+  ],
+  "files_written": [
+    "data/staging/source_current_odds.csv",
+    "data/staging/source_upcoming_fixtures.csv",
+    "data/staging/current_odds_staging.csv",
+    "data/staging/upcoming_fixtures_staging.csv",
+    "data/staging/staging_provenance.json",
+    "data/staging/raw/20260817T191717Z_28a413502c74_odds_api_response.json"
+  ],
+  "fixture_count": 10,
+  "generated_at": "2026-08-17T15:17:17-04:00",
+  "generated_by": "scripts/run_provider_shadow_verification.py",
+  "manual_files_edited": false,
+  "market_counts": {
+    "1x2": 270,
+    "btts": 98,
+    "total_2_5": 80
+  },
+  "mode": "Live provider fetch",
+  "network_request_made": true,
+  "next_step": "Run `python scripts/validate_staging_inputs.py`. Trust the bundle only if that separate report says `Ready for handoff`.",
+  "notes": "Controlled provider shadow verification run.",
+  "odds_row_count": 448,
+  "overwrite_staging": true,
+  "provider_key": "odds_api",
+  "provider_name": "the_odds_api",
+  "provider_response_headers": {
+    "x-requests-last": "2",
+    "x-requests-remaining": "352",
+    "x-requests-used": "148"
+  },
+  "provider_type": "odds_api",
+  "raw_source_checksum_sha256": "28a413502c74d03b7383a7d3efefdea56505734b78fa9e54866cb43db3dc6c10",
+  "raw_source_path": "data/staging/raw/20260817T191717Z_28a413502c74_odds_api_response.json",
+  "regions": "us",
+  "secrets_written_or_printed": false,
+  "source_files": {
+    "current_odds": "data/staging/source_current_odds.csv",
+    "upcoming_fixtures": "data/staging/source_upcoming_fixtures.csv"
+  },
+  "source_url": "https://api.the-odds-api.com/v4/sports/soccer_epl/odds",
+  "sport_key": "soccer_epl",
+  "staging_files": {
+    "current_odds": "data/staging/current_odds_staging.csv",
+    "provenance": "data/staging/staging_provenance.json",
+    "upcoming_fixtures": "data/staging/upcoming_fixtures_staging.csv"
+  },
+  "staging_promoted": false,
+  "staging_validation_run": false,
+  "status": "Completed",
+  "warnings": [
+    "Staging validation was not run automatically. The checked-in provider policy must explicitly allow `the_odds_api` before this bundle can become Ready for handoff."
+  ]
+}

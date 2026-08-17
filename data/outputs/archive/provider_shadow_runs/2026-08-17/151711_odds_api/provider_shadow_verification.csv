@@ -1,0 +1,26 @@
+category,check,status,value,details
+Shadow run,shadow_verdict,Needs provider policy review,Live shadow run,"The data checks passed, but the reviewed policy does not allow this provider."
+Provider,provider_run_status,Completed,True,Network request made is reported without exposing credentials.
+Evidence,raw_evidence,Created,"[""data/staging/raw/20260817T191711Z_2783d634502d_odds_api_response.json""]",Raw evidence checksum: Verified.
+Evidence,source_odds_checksum_status,Verified,Verified,Status comes from the existing staging provenance verifier.
+Evidence,source_fixtures_checksum_status,Verified,Verified,Status comes from the existing staging provenance verifier.
+Evidence,staging_odds_checksum_status,Verified,Verified,Status comes from the existing staging provenance verifier.
+Evidence,staging_fixtures_checksum_status,Verified,Verified,Status comes from the existing staging provenance verifier.
+Evidence,odds_checksum_pair_status,Verified,Verified,Status comes from the existing staging provenance verifier.
+Evidence,fixtures_checksum_pair_status,Verified,Verified,Status comes from the existing staging provenance verifier.
+Provider,provider_age,Fresh,0.013,Provider run is 0.0 minute(s) old; policy allows up to 12 hour(s).
+Coverage,team_name_mapping,Verified,1.0,Unmapped teams: none.
+Coverage,fixture_matching,Verified,1.0,Unmatched odds: none; fixtures without odds: none.
+Coverage,slate_provider_returned,Complete,1.0,Denominator: fixtures the provider actually returned in this run; covered 10/10; missing: none.
+Coverage,slate_selected_week1_window,Complete,1.0,Denominator: fixtures inside the selected Week 1 window (2026-08-21 through 2026-08-24); covered 10/10; missing: none.
+Coverage,slate_full_upcoming_fixtures,Incomplete,0.5,"Denominator: every fixture in data/manual/upcoming_fixtures.csv; covered 10/20; missing: ['2026-08-28: crystal palace vs man city', '2026-08-29: aston villa vs arsenal', '2026-08-29: bournemouth vs everton', '2026-08-29: coventry vs hull', ""2026-08-29: liverpool vs nott'm forest"", '2026-08-29: tottenham vs newcastle', '2026-08-30: chelsea vs brighton', '2026-08-30: leeds vs brentford', '2026-08-30: man united vs ipswich', '2026-08-30: sunderland vs fulham']."
+Coverage,btts_availability,Available,98,Trusted: False; fabricated: False. BTTS rows were returned.
+Coverage,core_market_coverage,Incomplete,350,1X2 and totals coverage only. BTTS availability is reported separately and is never inferred from these markets.
+Coverage,market_1x2,Returned,270,No missing price is inferred or fabricated.
+Coverage,market_total_2_5,Returned,80,No missing price is inferred or fabricated.
+Coverage,market_btts,Returned,98,No missing price is inferred or fabricated.
+Coverage,bookmaker_coverage,Available,"[""BetMGM"", ""BetOnline.ag"", ""BetRivers"", ""BetUS"", ""Bovada"", ""DraftKings"", ""FanDuel"", ""LowVig.ag"", ""MyBookie.ag""]","Rows by bookmaker: {'BetMGM': 66, 'BetOnline.ag': 38, 'BetRivers': 66, 'BetUS': 38, 'Bovada': 38, 'DraftKings': 50, 'FanDuel': 50, 'LowVig.ag': 38, 'MyBookie.ag': 64}."
+Validation,odds_completeness,Complete,1.0,Incomplete matches: 0.
+Validation,staging_validation_verdict,Needs fixes,False,The existing staging and GitHub handoff gates remain authoritative.
+Policy,provider_allowed,Not allowed,Provider not allowed,The shadow verifier never changes the provider policy.
+Provider,api_quota,Available,"{""requests_last"": ""2"", ""requests_remaining"": ""364"", ""requests_used"": ""136"", ""status"": ""Available""}",Only the provider's safe request-usage headers are included.

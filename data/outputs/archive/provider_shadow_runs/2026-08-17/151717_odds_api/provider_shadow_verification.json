@@ -1,0 +1,315 @@
+{
+  "api_quota": {
+    "requests_last": "2",
+    "requests_remaining": "352",
+    "requests_used": "148",
+    "status": "Available"
+  },
+  "blockers": [],
+  "bookmaker_coverage": {
+    "bookmaker_count": 9,
+    "bookmakers": [
+      "BetMGM",
+      "BetOnline.ag",
+      "BetRivers",
+      "BetUS",
+      "Bovada",
+      "DraftKings",
+      "FanDuel",
+      "LowVig.ag",
+      "MyBookie.ag"
+    ],
+    "fixtures_by_bookmaker": {
+      "BetMGM": 10,
+      "BetOnline.ag": 10,
+      "BetRivers": 10,
+      "BetUS": 10,
+      "Bovada": 10,
+      "DraftKings": 10,
+      "FanDuel": 10,
+      "LowVig.ag": 10,
+      "MyBookie.ag": 10
+    },
+    "rows_by_bookmaker": {
+      "BetMGM": 66,
+      "BetOnline.ag": 38,
+      "BetRivers": 66,
+      "BetUS": 38,
+      "Bovada": 38,
+      "DraftKings": 50,
+      "FanDuel": 50,
+      "LowVig.ag": 38,
+      "MyBookie.ag": 64
+    },
+    "status": "Available"
+  },
+  "btts_availability": {
+    "bookmakers_with_btts": [
+      "BetMGM",
+      "BetRivers",
+      "DraftKings",
+      "FanDuel",
+      "MyBookie.ag"
+    ],
+    "btts_row_count": 98,
+    "core_market_row_count": 350,
+    "fabricated": false,
+    "recommended_action": "",
+    "status": "Available",
+    "trusted": false
+  },
+  "checksums": {
+    "fixtures_checksum_pair_status": "Verified",
+    "odds_checksum_pair_status": "Verified",
+    "provenance_status": "Verified",
+    "source_fixtures_checksum_status": "Verified",
+    "source_odds_checksum_status": "Verified",
+    "staging_fixtures_checksum_status": "Verified",
+    "staging_odds_checksum_status": "Verified"
+  },
+  "core_market_coverage": {
+    "markets": [
+      "1x2",
+      "total_2_5"
+    ],
+    "missing_fixture_selections": [
+      "2026-08-23: man city vs bournemouth | total_2_5 over",
+      "2026-08-23: man city vs bournemouth | total_2_5 under",
+      "2026-08-23: newcastle vs liverpool | total_2_5 over",
+      "2026-08-23: newcastle vs liverpool | total_2_5 under"
+    ],
+    "note": "1X2 and totals coverage only. BTTS availability is reported separately and is never inferred from these markets.",
+    "row_count": 350,
+    "status": "Incomplete"
+  },
+  "fixture_matching": {
+    "coverage_percentage": 1.0,
+    "fixtures_without_odds": [],
+    "matched_fixture_count": 10,
+    "odds_fixture_count": 10,
+    "staging_fixture_count": 10,
+    "status": "Verified",
+    "unmatched_odds_fixtures": []
+  },
+  "generated_at": "2026-08-17T15:17:17-04:00",
+  "market_coverage": {
+    "coverage_percentage": 0.9428571428571428,
+    "covered_fixture_selection_count": 66,
+    "expected_fixture_selection_count": 70,
+    "market_counts": {
+      "1x2": 270,
+      "btts": 98,
+      "total_2_5": 80
+    },
+    "missing_fixture_selections": [
+      "2026-08-23: man city vs bournemouth | total_2_5 over",
+      "2026-08-23: man city vs bournemouth | total_2_5 under",
+      "2026-08-23: newcastle vs liverpool | total_2_5 over",
+      "2026-08-23: newcastle vs liverpool | total_2_5 under"
+    ],
+    "missing_markets": [
+      "total_2_5"
+    ],
+    "selection_counts": {
+      "1x2:away": 90,
+      "1x2:draw": 90,
+      "1x2:home": 90,
+      "btts:no": 49,
+      "btts:yes": 49,
+      "total_2_5:over": 40,
+      "total_2_5:under": 40
+    },
+    "status": "Incomplete"
+  },
+  "market_eligibility": {
+    "any_market_eligible": true,
+    "disabled_markets": [],
+    "eligible_markets": [
+      "1x2",
+      "btts"
+    ],
+    "excluded_markets": [
+      "total_2_5"
+    ],
+    "fixtures_in_window": 10,
+    "gate_failures": [],
+    "incomplete_markets": [
+      "total_2_5"
+    ],
+    "markets": [
+      {
+        "bookmaker_count": 9,
+        "fabricated": false,
+        "fixtures_covered": 10,
+        "fixtures_expected": 10,
+        "market": "1x2",
+        "missing_fixtures": [],
+        "reason": "`1x2` covers all 10 fixtures in the selected window with passing mapping, validation, and freshness.",
+        "row_count": 270,
+        "status": "eligible",
+        "usable_for_picks": true
+      },
+      {
+        "bookmaker_count": 7,
+        "fabricated": false,
+        "fixtures_covered": 8,
+        "fixtures_expected": 10,
+        "market": "total_2_5",
+        "missing_fixtures": [
+          "2026-08-23: Man City vs Bournemouth",
+          "2026-08-23: Newcastle vs Liverpool"
+        ],
+        "reason": "`total_2_5` covers 8 of 10 fixtures in the selected window. The market is excluded rather than partially used.",
+        "row_count": 80,
+        "status": "incomplete",
+        "usable_for_picks": false
+      },
+      {
+        "bookmaker_count": 5,
+        "fabricated": false,
+        "fixtures_covered": 10,
+        "fixtures_expected": 10,
+        "market": "btts",
+        "missing_fixtures": [],
+        "reason": "`btts` covers all 10 fixtures in the selected window with passing mapping, validation, and freshness.",
+        "row_count": 98,
+        "status": "eligible",
+        "usable_for_picks": true
+      }
+    ],
+    "note": "Excluded markets are unavailable, incomplete, or deliberately disabled. They are never reported as passes or no-value calls, and no missing price was invented.",
+    "unavailable_markets": [],
+    "warnings": [
+      "Incomplete market(s): total_2_5. Excluded from automated picks rather than used for a subset of fixtures."
+    ],
+    "window_label": "2026-08-21 through 2026-08-24"
+  },
+  "mode": "Live shadow run",
+  "next_step": "Review repeated shadow evidence manually before deciding whether to edit the provider allowlist. This report does not edit policy.",
+  "odds_completeness": {
+    "completion_percentage": 1.0,
+    "matches_incomplete": 0,
+    "status": "Complete"
+  },
+  "provider_age": {
+    "age_minutes": 0.007,
+    "note": "Provider run is 0.0 minute(s) old; policy allows up to 12 hour(s).",
+    "status": "Fresh"
+  },
+  "provider_key": "odds_api",
+  "provider_name": "the_odds_api",
+  "provider_policy": {
+    "all_policy_gates_allowed": false,
+    "policy_path": "data/manual/staging_provider_policy.json",
+    "provider_allowed": false,
+    "provider_policy_status": "Provider not allowed"
+  },
+  "provider_run": {
+    "fixture_count": 10,
+    "network_request_made": true,
+    "odds_row_count": 448,
+    "provider_report_json": "/Users/cooperross/Downloads/epl-betting-lab/data/outputs/odds_api_staging_provider_report.json",
+    "provider_report_markdown": "/Users/cooperross/Downloads/epl-betting-lab/data/outputs/odds_api_staging_provider_report.md",
+    "status": "Completed"
+  },
+  "provider_type": "odds_api",
+  "raw_evidence": {
+    "checksum_status": "Verified",
+    "current_checksums_sha256": {
+      "data/staging/raw/20260817T191717Z_28a413502c74_odds_api_response.json": "28a413502c74d03b7383a7d3efefdea56505734b78fa9e54866cb43db3dc6c10"
+    },
+    "declared_files": [
+      "data/staging/raw/20260817T191717Z_28a413502c74_odds_api_response.json"
+    ],
+    "found_files": [
+      "data/staging/raw/20260817T191717Z_28a413502c74_odds_api_response.json"
+    ],
+    "raw_source_checksum_sha256": "28a413502c74d03b7383a7d3efefdea56505734b78fa9e54866cb43db3dc6c10",
+    "status": "Created"
+  },
+  "safety": {
+    "bets_placed": false,
+    "cron_enabled": false,
+    "manual_or_production_files_edited": false,
+    "provider_policy_edited": false,
+    "secrets_written_or_printed": false,
+    "staging_promoted": false,
+    "trusted_picks_generated": false
+  },
+  "slate_coverage": {
+    "full_upcoming_fixtures": {
+      "coverage_percentage": 0.5,
+      "covered_fixture_count": 10,
+      "denominator": "every fixture in data/manual/upcoming_fixtures.csv",
+      "expected_fixture_count": 20,
+      "missing_fixtures": [
+        "2026-08-28: crystal palace vs man city",
+        "2026-08-29: aston villa vs arsenal",
+        "2026-08-29: bournemouth vs everton",
+        "2026-08-29: coventry vs hull",
+        "2026-08-29: liverpool vs nott'm forest",
+        "2026-08-29: tottenham vs newcastle",
+        "2026-08-30: chelsea vs brighton",
+        "2026-08-30: leeds vs brentford",
+        "2026-08-30: man united vs ipswich",
+        "2026-08-30: sunderland vs fulham"
+      ],
+      "scope": "full_upcoming_fixtures",
+      "status": "Incomplete"
+    },
+    "provider_returned": {
+      "coverage_percentage": 1.0,
+      "covered_fixture_count": 10,
+      "denominator": "fixtures the provider actually returned in this run",
+      "expected_fixture_count": 10,
+      "missing_fixtures": [],
+      "scope": "provider_returned",
+      "status": "Complete"
+    },
+    "selected_week1_window": {
+      "coverage_percentage": 1.0,
+      "covered_fixture_count": 10,
+      "denominator": "fixtures inside the selected Week 1 window (2026-08-21 through 2026-08-24)",
+      "expected_fixture_count": 10,
+      "missing_fixtures": [],
+      "scope": "selected_week1_window",
+      "status": "Complete"
+    },
+    "selected_window": "2026-08-21 through 2026-08-24",
+    "warnings": [
+      "`upcoming_fixtures.csv` holds 20 fixtures but the selected Week 1 window holds only 10. Coverage percentages differ by scope."
+    ]
+  },
+  "staging_validation": {
+    "error": "",
+    "handoff_eligible": false,
+    "outputs": {
+      "csv": "/Users/cooperross/Downloads/epl-betting-lab/data/outputs/staging_input_validation.csv",
+      "json": "/Users/cooperross/Downloads/epl-betting-lab/data/outputs/staging_input_validation.json",
+      "markdown": "/Users/cooperross/Downloads/epl-betting-lab/data/outputs/staging_input_validation.md"
+    },
+    "verdict": "Needs fixes"
+  },
+  "team_mapping": {
+    "coverage_percentage": 1.0,
+    "mapped_team_count": 20,
+    "names_without_reviewed_alias": [],
+    "provider_team_count": 20,
+    "reference_sources": [
+      "data/processed/epl_historical_matches.csv",
+      "data/manual/upcoming_fixtures.csv"
+    ],
+    "status": "Verified",
+    "unmapped_team_count": 0,
+    "unmapped_teams": [],
+    "warnings": []
+  },
+  "verdict": "Needs provider policy review",
+  "verdict_reason": "The data checks passed, but the reviewed policy does not allow this provider.",
+  "warnings": [
+    "Staging validation was not run automatically. The checked-in provider policy must explicitly allow `the_odds_api` before this bundle can become Ready for handoff.",
+    "Current odds validation found 108 warning(s). Review them before trusting the card.",
+    "`upcoming_fixtures.csv` holds 20 fixtures but the selected Week 1 window holds only 10. Coverage percentages differ by scope.",
+    "Missing market coverage: total_2_5. No odds were fabricated."
+  ]
+}

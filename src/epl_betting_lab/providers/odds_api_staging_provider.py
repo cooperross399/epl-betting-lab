@@ -36,6 +36,9 @@ from epl_betting_lab.providers.base import (
 )
 
 
+from epl_betting_lab.providers.team_names import normalize_team_name
+
+
 API_KEY_ENV = "EPL_ODDS_API_KEY"
 API_BASE_URL_ENV = "EPL_ODDS_API_BASE_URL"
 DEFAULT_API_BASE_URL = "https://api.the-odds-api.com"
@@ -151,11 +154,21 @@ def _normalize_provider_events(
             raise MalformedProviderResponseError(
                 f"Provider event `{event_id}` has an invalid commence_time."
             )
-        home_team = _required_text(event.get("home_team"), label="home_team")
-        away_team = _required_text(event.get("away_team"), label="away_team")
-        if home_team.casefold() == away_team.casefold():
+        provider_home_team = _required_text(event.get("home_team"), label="home_team")
+        provider_away_team = _required_text(event.get("away_team"), label="away_team")
+        if provider_home_team.casefold() == provider_away_team.casefold():
             raise MalformedProviderResponseError(
                 f"Provider event `{event_id}` uses the same home and away team."
+            )
+        # Staging rows carry canonical project names so they line up with
+        # upcoming_fixtures.csv. The raw provider names are kept for matching
+        # h2h outcome labels, which the provider emits in its own vocabulary.
+        home_team = normalize_team_name(provider_home_team)
+        away_team = normalize_team_name(provider_away_team)
+        if home_team.casefold() == away_team.casefold():
+            raise MalformedProviderResponseError(
+                f"Provider event `{event_id}` maps home and away onto the same "
+                "project team name."
             )
         match_date = parsed_time.strftime("%Y-%m-%d")
         fixture_key = (
@@ -222,9 +235,21 @@ def _normalize_provider_events(
                     normalized_market = ""
                     selection = ""
                     if market_key == "h2h":
-                        if outcome_name.casefold() == home_team.casefold():
+                        # Compare on both the raw provider label and the mapped
+                        # project name so a reviewed alias resolves the outcome.
+                        outcome_keys = {
+                            outcome_name.casefold(),
+                            normalize_team_name(outcome_name).casefold(),
+                        }
+                        if outcome_keys & {
+                            provider_home_team.casefold(),
+                            home_team.casefold(),
+                        }:
                             selection = "home"
-                        elif outcome_name.casefold() == away_team.casefold():
+                        elif outcome_keys & {
+                            provider_away_team.casefold(),
+                            away_team.casefold(),
+                        }:
                             selection = "away"
                         elif outcome_name.casefold() in {"draw", "tie"}:
                             selection = "draw"

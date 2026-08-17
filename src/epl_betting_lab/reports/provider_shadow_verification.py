@@ -15,7 +15,15 @@ from epl_betting_lab.providers.base import (
     file_sha256,
 )
 from epl_betting_lab.providers.provider_registry import create_provider
+from epl_betting_lab.providers.team_names import (
+    normalize_team_name,
+    unmapped_team_names,
+)
 from epl_betting_lab.reports.current_odds_template import SUPPORTED_MARKETS
+from epl_betting_lab.selected_slate import (
+    SELECTED_WEEK1_LABEL,
+    filter_to_selected_window,
+)
 from epl_betting_lab.reports.provider_shadow_history import (
     archive_provider_shadow_run,
 )
@@ -136,9 +144,15 @@ def _team_mapping_metrics(
                 if name:
                     provider_names.setdefault(name.casefold(), name)
     references, sources, warnings = _reference_teams(repository_root, matches_path)
+    # A name counts as mapped when it already matches a project reference or
+    # when a reviewed alias resolves it onto one. Unknown names stay unmapped.
     unmapped = sorted(
-        name for key, name in provider_names.items() if key not in references
+        name
+        for key, name in provider_names.items()
+        if key not in references
+        and normalize_team_name(name).casefold() not in references
     )
+    unreviewed = unmapped_team_names(provider_names.values())
     total = len(provider_names)
     mapped = total - len(unmapped) if references else 0
     if not provider_names or not references:
@@ -157,6 +171,7 @@ def _team_mapping_metrics(
         "unmapped_team_count": len(unmapped),
         "coverage_percentage": percentage,
         "unmapped_teams": unmapped,
+        "names_without_reviewed_alias": unreviewed,
         "reference_sources": sources,
         "warnings": warnings,
     }
@@ -184,6 +199,183 @@ def _fixture_matching_metrics(
         "fixtures_without_odds": [
             _format_fixture(item) for item in fixtures_without_odds
         ],
+    }
+
+
+def _slate_coverage_metrics(
+    odds: pd.DataFrame,
+    fixtures: pd.DataFrame,
+    *,
+    repository_root: Path,
+) -> dict[str, object]:
+    """Report fixture coverage against three explicitly different denominators.
+
+    A single "fixture matching" percentage is misleading: 10 of 10
+    provider-returned events is 100% against the provider's own list while
+    covering only half of `upcoming_fixtures.csv`. Each scope below names its
+    denominator so the number cannot be read as broader than it is.
+    """
+    odds_keys = _fixture_keys(odds)
+    staging_keys = _fixture_keys(fixtures)
+
+    upcoming_path = repository_root / "data" / "manual" / "upcoming_fixtures.csv"
+    upcoming = pd.DataFrame()
+    upcoming_error = ""
+    if upcoming_path.is_file():
+        try:
+            upcoming = _read_csv(upcoming_path)
+        except (OSError, UnicodeError, pd.errors.EmptyDataError, pd.errors.ParserError):
+            upcoming_error = f"Upcoming fixtures could not be read: `{upcoming_path}`."
+
+    upcoming_keys = _fixture_keys(upcoming) if not upcoming.empty else set()
+    selected = (
+        filter_to_selected_window(upcoming) if not upcoming.empty else pd.DataFrame()
+    )
+    selected_keys = _fixture_keys(selected) if not selected.empty else set()
+
+    def _scope(
+        label: str,
+        description: str,
+        expected: set[tuple[str, str, str]],
+    ) -> dict[str, object]:
+        covered = expected & odds_keys
+        missing = sorted(expected - odds_keys)
+        percentage = len(covered) / len(expected) if expected else None
+        if not expected:
+            status = "Not checked"
+        elif missing:
+            status = "Incomplete"
+        else:
+            status = "Complete"
+        return {
+            "scope": label,
+            "denominator": description,
+            "status": status,
+            "expected_fixture_count": len(expected),
+            "covered_fixture_count": len(covered),
+            "coverage_percentage": percentage,
+            "missing_fixtures": [_format_fixture(item) for item in missing],
+        }
+
+    provider_scope = _scope(
+        "provider_returned",
+        "fixtures the provider actually returned in this run",
+        staging_keys,
+    )
+    selected_scope = _scope(
+        "selected_week1_window",
+        f"fixtures inside the selected Week 1 window ({SELECTED_WEEK1_LABEL})",
+        selected_keys,
+    )
+    full_scope = _scope(
+        "full_upcoming_fixtures",
+        "every fixture in data/manual/upcoming_fixtures.csv",
+        upcoming_keys,
+    )
+
+    warnings: list[str] = []
+    if upcoming_error:
+        warnings.append(upcoming_error)
+    if provider_scope["status"] == "Complete" and selected_scope["status"] not in {
+        "Complete",
+        "Not checked",
+    }:
+        warnings.append(
+            "Provider-returned coverage is complete, but the selected Week 1 "
+            "window is not fully covered. Do not read provider coverage as slate "
+            "coverage."
+        )
+    if (
+        full_scope["expected_fixture_count"]
+        and selected_scope["expected_fixture_count"]
+        and full_scope["expected_fixture_count"]
+        > selected_scope["expected_fixture_count"]
+    ):
+        warnings.append(
+            f"`upcoming_fixtures.csv` holds "
+            f"{full_scope['expected_fixture_count']} fixtures but the selected "
+            f"Week 1 window holds only "
+            f"{selected_scope['expected_fixture_count']}. Coverage percentages "
+            "differ by scope."
+        )
+
+    return {
+        "selected_window": SELECTED_WEEK1_LABEL,
+        "provider_returned": provider_scope,
+        "selected_week1_window": selected_scope,
+        "full_upcoming_fixtures": full_scope,
+        "warnings": warnings,
+    }
+
+
+def _btts_availability_metrics(
+    odds: pd.DataFrame,
+    market_coverage: Mapping[str, object],
+) -> dict[str, object]:
+    """Report BTTS separately from 1X2/totals.
+
+    A provider that returns no BTTS rows is not a provider with bad BTTS prices;
+    it is a provider with no BTTS feed. That distinction has to survive into the
+    report so nobody fabricates the missing side.
+    """
+    counts = market_coverage.get("market_counts", {})
+    counts = counts if isinstance(counts, Mapping) else {}
+    btts_rows = int(counts.get("btts", 0) or 0)
+    core_rows = int(counts.get("1x2", 0) or 0) + int(counts.get("total_2_5", 0) or 0)
+
+    books: set[str] = set()
+    if btts_rows and "book" in odds.columns and "market" in odds.columns:
+        for _, row in odds.iterrows():
+            if _key(row.get("market", "")) == "btts" and _clean(row.get("book", "")):
+                books.add(_clean(row.get("book", "")))
+
+    if btts_rows:
+        status = "Available"
+        recommendation = ""
+    elif core_rows:
+        status = "Unavailable"
+        recommendation = (
+            "The provider returned 1X2 and/or totals but no BTTS rows. Either "
+            "enter real BTTS prices manually, request a provider/market "
+            "configuration that includes BTTS, or run the card on markets that "
+            "do not require BTTS. Never fabricate a BTTS price."
+        )
+    else:
+        status = "Not checked"
+        recommendation = ""
+
+    return {
+        "status": status,
+        "btts_row_count": btts_rows,
+        "core_market_row_count": core_rows,
+        "bookmakers_with_btts": sorted(books),
+        "trusted": False,
+        "fabricated": False,
+        "recommended_action": recommendation,
+    }
+
+
+def _core_market_coverage_metrics(
+    market_coverage: Mapping[str, object],
+) -> dict[str, object]:
+    """1X2 + totals coverage reported independently of BTTS availability."""
+    missing = market_coverage.get("missing_fixture_selections", [])
+    missing = missing if isinstance(missing, list) else []
+    core_missing = [
+        str(item) for item in missing if "| btts " not in str(item)
+    ]
+    counts = market_coverage.get("market_counts", {})
+    counts = counts if isinstance(counts, Mapping) else {}
+    return {
+        "status": "Complete" if not core_missing else "Incomplete",
+        "markets": ["1x2", "total_2_5"],
+        "row_count": int(counts.get("1x2", 0) or 0)
+        + int(counts.get("total_2_5", 0) or 0),
+        "missing_fixture_selections": core_missing,
+        "note": (
+            "1X2 and totals coverage only. BTTS availability is reported "
+            "separately and is never inferred from these markets."
+        ),
     }
 
 
@@ -542,6 +734,46 @@ def build_shadow_checks(summary: Mapping[str, object]) -> pd.DataFrame:
             f"fixtures without odds: {fixtures['fixtures_without_odds'] or 'none'}."
         ),
     )
+    slate = summary["slate_coverage"]
+    for scope_key in (
+        "provider_returned",
+        "selected_week1_window",
+        "full_upcoming_fixtures",
+    ):
+        scope = slate[scope_key]
+        _add_check(
+            rows,
+            "Coverage",
+            f"slate_{scope_key}",
+            scope["status"],
+            scope["coverage_percentage"],
+            (
+                f"Denominator: {scope['denominator']}; covered "
+                f"{scope['covered_fixture_count']}/{scope['expected_fixture_count']}; "
+                f"missing: {scope['missing_fixtures'] or 'none'}."
+            ),
+        )
+    btts = summary["btts_availability"]
+    _add_check(
+        rows,
+        "Coverage",
+        "btts_availability",
+        btts["status"],
+        btts["btts_row_count"],
+        (
+            f"Trusted: {btts['trusted']}; fabricated: {btts['fabricated']}. "
+            f"{btts['recommended_action'] or 'BTTS rows were returned.'}"
+        ),
+    )
+    core = summary["core_market_coverage"]
+    _add_check(
+        rows,
+        "Coverage",
+        "core_market_coverage",
+        core["status"],
+        core["row_count"],
+        core["note"],
+    )
     markets = summary["market_coverage"]
     for market in ("1x2", "total_2_5", "btts"):
         count = markets["market_counts"][market]
@@ -608,6 +840,9 @@ def render_provider_shadow_verification(
     markets = summary["market_coverage"]
     mapping = summary["team_mapping"]
     fixtures = summary["fixture_matching"]
+    slate = summary["slate_coverage"]
+    btts = summary["btts_availability"]
+    core = summary["core_market_coverage"]
     policy = summary["provider_policy"]
     quota = summary["api_quota"]
     raw = summary["raw_evidence"]
@@ -662,11 +897,69 @@ def render_provider_shadow_verification(
         ),
         f"- Missing market coverage: {markets['missing_markets'] or 'none'}",
         (
+            f"- Core markets (1X2 + totals): **{core['status']}** | "
+            f"{core['row_count']} rows"
+        ),
+        (
+            f"- BTTS availability: **{btts['status']}** | "
+            f"{btts['btts_row_count']} rows | trusted: "
+            f"{'Yes' if btts['trusted'] else 'No'}"
+        ),
+        (
             f"- Odds completeness: {summary['odds_completeness']['completion_percentage']:.1%}"
         ),
         (
             f"- Bookmakers ({summary['bookmaker_coverage']['bookmaker_count']}): "
             f"{summary['bookmaker_coverage']['bookmakers'] or 'none'}"
+        ),
+        "",
+        "## Fixture coverage by scope",
+        "",
+        (
+            "Each row uses a different denominator. A high percentage against "
+            "provider-returned fixtures does **not** mean the slate is covered."
+        ),
+        "",
+        "| Scope | Denominator | Status | Covered | Coverage |",
+        "|:------|:------------|:-------|:--------|:---------|",
+        *[
+            (
+                f"| `{scope['scope']}` | {scope['denominator']} | "
+                f"**{scope['status']}** | "
+                f"{scope['covered_fixture_count']}/{scope['expected_fixture_count']} | "
+                + (
+                    f"{scope['coverage_percentage']:.1%}"
+                    if scope["coverage_percentage"] is not None
+                    else "n/a"
+                )
+                + " |"
+            )
+            for scope in (
+                slate["provider_returned"],
+                slate["selected_week1_window"],
+                slate["full_upcoming_fixtures"],
+            )
+        ],
+        "",
+        f"- Selected Week 1 window: **{slate['selected_window']}**",
+        (
+            "- Fixtures in the selected window without provider odds: "
+            f"{slate['selected_week1_window']['missing_fixtures'] or 'none'}"
+        ),
+        "",
+        "## BTTS availability",
+        "",
+        f"- Status: **{btts['status']}** ({btts['btts_row_count']} rows)",
+        f"- Treated as trusted: **{'Yes' if btts['trusted'] else 'No'}**",
+        f"- Any price fabricated: **{'Yes' if btts['fabricated'] else 'No'}**",
+        (
+            f"- Recommended action: {btts['recommended_action']}"
+            if btts["recommended_action"]
+            else "- Recommended action: none; BTTS rows were returned."
+        ),
+        (
+            f"- Core 1X2/totals coverage is reported separately: "
+            f"**{core['status']}** ({core['row_count']} rows)"
         ),
         "",
         "## Existing gates",
@@ -799,6 +1092,9 @@ def save_provider_shadow_verification(
     )
     fixture_matching = _fixture_matching_metrics(odds, fixtures)
     market_coverage = _market_coverage_metrics(odds, fixtures)
+    slate_coverage = _slate_coverage_metrics(odds, fixtures, repository_root=root)
+    btts_availability = _btts_availability_metrics(odds, market_coverage)
+    core_market_coverage = _core_market_coverage_metrics(market_coverage)
     bookmaker_coverage = _bookmaker_coverage_metrics(odds)
     raw_evidence = _raw_evidence_files(provider_summary, root)
     api_quota = _quota_metrics(provider_summary)
@@ -830,11 +1126,19 @@ def save_provider_shadow_verification(
     warnings = [str(item) for item in provider_warnings if str(item).strip()]
     warnings.extend(str(item) for item in team_mapping["warnings"])
     warnings.extend(str(item) for item in handoff_warnings if str(item).strip())
+    warnings.extend(str(item) for item in slate_coverage["warnings"])
     if market_coverage["missing_markets"]:
         warnings.append(
             "Missing market coverage: "
             + ", ".join(str(item) for item in market_coverage["missing_markets"])
             + ". No odds were fabricated."
+        )
+    if btts_availability["status"] == "Unavailable":
+        warnings.append(
+            "BTTS is unavailable from this provider run (0 rows). It is reported "
+            "as unavailable, never as trusted, and no BTTS price was invented. "
+            "1X2/totals coverage is reported separately under "
+            "`core_market_coverage`."
         )
     blockers = [str(item) for item in provider_blockers if str(item).strip()]
     blockers.extend(str(item) for item in handoff_blockers if str(item).strip())
@@ -879,8 +1183,11 @@ def save_provider_shadow_verification(
         },
         "team_mapping": team_mapping,
         "fixture_matching": fixture_matching,
+        "slate_coverage": slate_coverage,
         "bookmaker_coverage": bookmaker_coverage,
         "market_coverage": market_coverage,
+        "core_market_coverage": core_market_coverage,
+        "btts_availability": btts_availability,
         "odds_completeness": {
             "status": _clean(completeness.get("status", "Not checked"))
             or "Not checked",

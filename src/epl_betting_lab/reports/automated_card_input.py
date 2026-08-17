@@ -32,6 +32,7 @@ import pandas as pd
 from epl_betting_lab.config import MANUAL_DIR, OUTPUTS_DIR, PROJECT_ROOT, STAGING_DIR
 from epl_betting_lab.market_eligibility import (
     DEFAULT_DISABLED_MARKETS,
+    MARKET_SELECTIONS,
     EligibilityReport,
     evaluate_market_eligibility,
 )
@@ -116,6 +117,39 @@ def _best_quote(rows: pd.DataFrame) -> pd.Series | None:
             best_probability = probability
             best_row = row
     return best_row
+
+
+def _policy_disabled_markets(policy_path: Path | None) -> list[str]:
+    """Markets excluded by the reviewed provider policy allowlist.
+
+    Returns the supported markets NOT present in `allowed_markets`. An absent
+    or unreadable `allowed_markets` means no market restriction, which keeps
+    every pre-existing policy file working unchanged.
+    """
+    path = (
+        MANUAL_DIR / "staging_provider_policy.json"
+        if policy_path is None
+        else Path(policy_path)
+    )
+    if not path.is_file():
+        return []
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError):
+        return []
+    if not isinstance(payload, Mapping):
+        return []
+    allowed = payload.get("allowed_markets")
+    if allowed is None:
+        return []
+    if not isinstance(allowed, list):
+        return []
+    allowed_keys = {
+        str(item).strip().lower() for item in allowed if str(item).strip()
+    }
+    return [
+        market for market in MARKET_SELECTIONS if market not in allowed_keys
+    ]
 
 
 def build_automated_card_input(
@@ -262,6 +296,7 @@ def save_automated_card_input(
     output_dir: Path | None = None,
     card_input_path: Path | None = None,
     disabled_markets: Sequence[str] = DEFAULT_DISABLED_MARKETS,
+    policy_path: Path | None = None,
     mapping_verified: bool | None = None,
     validation_passed: bool | None = None,
     freshness_passed: bool | None = None,
@@ -330,13 +365,21 @@ def save_automated_card_input(
             # gate as passing when the run produced usable staging evidence.
             validation_passed = not blockers
 
+    # A market outside the reviewed policy allowlist is disabled, so a market
+    # that later becomes complete cannot join the card without a deliberate
+    # policy change. An absent `allowed_markets` means no market restriction.
+    policy_disabled = _policy_disabled_markets(policy_path)
+    effective_disabled = tuple(
+        dict.fromkeys(list(disabled_markets) + policy_disabled)
+    )
+
     eligibility = evaluate_market_eligibility(
         odds,
         fixtures,
         mapping_verified=bool(mapping_verified),
         validation_passed=bool(validation_passed),
         freshness_passed=bool(freshness_passed),
-        disabled_markets=disabled_markets,
+        disabled_markets=effective_disabled,
         window_label=SELECTED_WEEK1_LABEL,
     )
 
@@ -375,6 +418,7 @@ def save_automated_card_input(
         "eligibility": eligibility.as_dict(),
         "included_markets": list(eligibility.eligible_markets),
         "excluded_markets": list(eligibility.excluded_markets),
+        "policy_disabled_markets": policy_disabled,
         "blockers": blockers,
         "notes": notes,
         "safety": {

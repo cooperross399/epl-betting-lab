@@ -21,7 +21,8 @@ prior conversation and no ChatGPT is needed to operate this repo.
 4. `docs/no_terminal_operations.md` — doing things from a browser.
 5. `README.md` — full command reference.
 6. Latest `data/outputs/` reports, then GitHub PRs, Actions runs, and the
-   **“EPL Betting Lab — Claude Operating Home”** issue.
+   **“EPL Betting Lab — Claude Operating Home”** issue:
+   <https://github.com/cooperross399/epl-betting-lab/issues/135>
 
 **Never route Cooper to ChatGPT** for memory, next steps, status, or debugging.
 Use the repo, the reports, and GitHub.

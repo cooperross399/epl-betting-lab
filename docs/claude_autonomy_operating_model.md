@@ -224,7 +224,7 @@ or a PR comment — with:
 ## Operating home
 
 The GitHub issue **“EPL Betting Lab — Claude Operating Home”** is the control
-centre: current status, allowed and excluded markets, credential status, test
+centre — <https://github.com/cooperross399/epl-betting-lab/issues/135>: current status, allowed and excluded markets, credential status, test
 count, hard-stop rules, next safe tasks, and links to the workflows, reports,
 and PRs that matter. Keep it current. It replaces chat history as project
 memory.

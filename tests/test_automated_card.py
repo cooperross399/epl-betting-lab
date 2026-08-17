@@ -160,25 +160,33 @@ def test_manual_odds_entry_is_never_required(tmp_path: Path) -> None:
 # --- unit suggestions ------------------------------------------------------
 
 
-def test_unit_suggestions_follow_existing_confidence_tiers() -> None:
+def test_unit_suggestions_reuse_the_pipeline_stake() -> None:
+    """Staking comes from the existing pipeline, not a second model here."""
     picks = [
-        {"home_team": "A", "away_team": "B", "market": "1x2", "selection": "home", "confidence_tier": "A"},
-        {"home_team": "C", "away_team": "D", "market": "btts", "selection": "yes", "confidence_tier": "B"},
-        {"home_team": "E", "away_team": "F", "market": "1x2", "selection": "away", "confidence_tier": "C"},
+        {"home_team": "A", "away_team": "B", "market": "1x2", "selection": "home",
+         "confidence_tier": "A", "suggested_units": 1.0, "book": "BookA"},
+        {"home_team": "C", "away_team": "D", "market": "btts", "selection": "yes",
+         "confidence_tier": "B", "suggested_units": 0.75, "book": "BookB"},
     ]
 
     suggestions = _unit_suggestions(picks)
 
-    assert [item["suggested_units"] for item in suggestions] == [1.0, 0.75, 0.5]
-    assert all("no new staking model" in item["basis"] for item in suggestions)
+    assert [item["suggested_units"] for item in suggestions] == [1.0, 0.75]
+    assert [item["book"] for item in suggestions] == ["BookA", "BookB"]
+    assert all("no second staking model" in item["basis"] for item in suggestions)
 
 
-def test_unknown_tier_gets_no_guessed_stake() -> None:
-    suggestions = _unit_suggestions(
-        [{"home_team": "A", "away_team": "B", "confidence_tier": "Z"}]
+def test_missing_stake_gets_no_guessed_value() -> None:
+    assert _unit_suggestions([{"home_team": "A", "away_team": "B"}]) == []
+    assert (
+        _unit_suggestions([{"home_team": "A", "suggested_units": None}]) == []
     )
 
-    assert suggestions == []
+
+def test_non_numeric_or_zero_stake_is_skipped() -> None:
+    assert _unit_suggestions([{"suggested_units": "not-a-number"}]) == []
+    assert _unit_suggestions([{"suggested_units": 0}]) == []
+    assert _unit_suggestions([{"suggested_units": -1}]) == []
 
 
 # --- bridge integration ----------------------------------------------------
@@ -311,3 +319,33 @@ def test_live_policy_listing_the_provider_clears_that_blocker(tmp_path: Path) ->
     assert not any(
         "current staging provider policy" in item for item in summary["blockers"]
     )
+
+
+# --- book attribution ------------------------------------------------------
+
+
+def test_strategy_evaluators_carry_the_sportsbook() -> None:
+    """CLV needs to know which book priced the pick."""
+    import pandas as pd
+
+    from epl_betting_lab.strategies.ml_value import _book_of
+
+    line = pd.DataFrame([{"american_odds": -110, "book": " DraftKings "}])
+    assert _book_of(line) == "DraftKings"
+
+
+def test_missing_book_becomes_blank_not_nan() -> None:
+    import pandas as pd
+
+    from epl_betting_lab.strategies.ml_value import _book_of
+
+    assert _book_of(pd.DataFrame([{"american_odds": -110}])) == ""
+    assert _book_of(pd.DataFrame([{"american_odds": -110, "book": None}])) == ""
+    assert _book_of(pd.DataFrame(columns=["american_odds"])) == ""
+
+
+def test_all_three_evaluators_expose_book_extraction() -> None:
+    from epl_betting_lab.strategies import btts, ml_value, totals
+
+    for module in (ml_value, totals, btts):
+        assert hasattr(module, "_book_of"), module.__name__

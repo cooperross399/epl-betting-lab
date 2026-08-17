@@ -2,6 +2,16 @@ from __future__ import annotations
 
 import pandas as pd
 
+
+def _book_of(line: pd.DataFrame) -> str:
+    """Sportsbook name for a priced line, blank when the source omitted it."""
+    if line.empty:
+        return ""
+    value = line.iloc[0].get("book", "")
+    if value is None or (isinstance(value, float) and pd.isna(value)):
+        return ""
+    return str(value).strip()
+
 from epl_betting_lab.models.calibration import ShrinkageConfig, calibrate_probability, min_calibrated_edge
 from epl_betting_lab.models.goal_environment import adjust_total_probability
 from epl_betting_lab.models.value import grade_edge
@@ -64,6 +74,10 @@ def evaluate_total_25(
                 "market": "total_2_5",
                 "selection": selection,
                 "american_odds": american,
+                # Carry the sportsbook through so CLV and weekly review can
+                # attribute the price. Identifier only - no edge or probability
+                # calculation depends on it.
+                "book": _book_of(line),
                 "opening_american_odds": american,
                 "opening_implied_probability": raw_grade["book_implied"],
                 "closing_american_odds": closing_american,

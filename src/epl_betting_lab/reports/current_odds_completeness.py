@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
 from pathlib import Path
 
 import pandas as pd
@@ -127,7 +128,10 @@ def load_current_odds_for_completeness(path: Path | None = None) -> pd.DataFrame
     return pd.read_csv(path, dtype=str).fillna("")
 
 
-def _expected_rows(fixtures: pd.DataFrame | None) -> pd.DataFrame:
+def _expected_rows(
+    fixtures: pd.DataFrame | None,
+    eligible_markets: Sequence[str] | None = None,
+) -> pd.DataFrame:
     if fixtures is None:
         try:
             fixtures = load_upcoming_fixtures()
@@ -143,7 +147,15 @@ def _expected_rows(fixtures: pd.DataFrame | None) -> pd.DataFrame:
             "american_odds",
             "book",
         ])
-    return build_current_odds_template(fixtures).fillna("")
+    expected = build_current_odds_template(fixtures).fillna("")
+    if eligible_markets is not None:
+        # Market-aware mode: a market the card will not use must not be demanded
+        # here. An excluded market is excluded, not an outstanding gap.
+        allowed = {str(market).strip().lower() for market in eligible_markets}
+        expected = expected[
+            expected["market"].astype(str).str.strip().str.lower().isin(allowed)
+        ].reset_index(drop=True)
+    return expected
 
 
 def _summary(odds: pd.DataFrame, expected: pd.DataFrame, issues: pd.DataFrame) -> dict[str, object]:
@@ -198,8 +210,15 @@ def _match_completion_counts(odds: pd.DataFrame, expected: pd.DataFrame) -> tupl
 def build_current_odds_completeness(
     odds_path: Path | None = None,
     fixtures: pd.DataFrame | None = None,
+    eligible_markets: Sequence[str] | None = None,
 ) -> tuple[pd.DataFrame, dict[str, object]]:
-    """Return read-only odds entry completeness issues and summary totals."""
+    """Return read-only odds entry completeness issues and summary totals.
+
+    `eligible_markets` restricts the check to the markets the card will actually
+    use. Rows for other markets are neither demanded nor judged: an excluded
+    market must not block a bundle whose eligible markets are complete. Passing
+    `None` keeps the historical all-markets behaviour.
+    """
     path = odds_path or MANUAL_DIR / "current_odds.csv"
     if not path.exists():
         issues = pd.DataFrame([{
@@ -219,7 +238,12 @@ def build_current_odds_completeness(
 
     odds = load_current_odds_for_completeness(path)
     odds = _ensure_columns(odds, DUPLICATE_KEY_COLUMNS + ["american_odds"])
-    expected = _expected_rows(fixtures)
+    expected = _expected_rows(fixtures, eligible_markets)
+    if eligible_markets is not None:
+        allowed = {str(market).strip().lower() for market in eligible_markets}
+        odds = odds[
+            odds["market"].astype(str).str.strip().str.lower().isin(allowed)
+        ].reset_index(drop=True)
     rows: list[dict[str, object]] = []
 
     duplicate_mask = odds.duplicated(subset=DUPLICATE_KEY_COLUMNS, keep=False)

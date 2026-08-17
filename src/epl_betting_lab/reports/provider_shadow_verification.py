@@ -19,6 +19,7 @@ from epl_betting_lab.providers.team_names import (
     normalize_team_name,
     unmapped_team_names,
 )
+from epl_betting_lab.market_eligibility import evaluate_market_eligibility
 from epl_betting_lab.reports.current_odds_template import SUPPORTED_MARKETS
 from epl_betting_lab.selected_slate import (
     SELECTED_WEEK1_LABEL,
@@ -543,6 +544,7 @@ def _choose_verdict(
     fixture_matching: Mapping[str, object],
     market_coverage: Mapping[str, object],
     bookmaker_coverage: Mapping[str, object],
+    eligibility: Mapping[str, object] | None = None,
 ) -> tuple[str, str]:
     if provider_status == "Failed":
         return "Failed", "The provider adapter encountered a file/runtime failure."
@@ -588,10 +590,32 @@ def _choose_verdict(
         if isinstance(completeness, dict)
         else 0.0
     )
-    if market_coverage.get("status") != "Complete" or completion_percentage < 1.0:
+    # Market-aware coverage: judge the markets the card will actually use.
+    # An excluded market is excluded, not an outstanding gap.
+    eligible = list((eligibility or {}).get("eligible_markets", []) or [])
+    excluded = list((eligibility or {}).get("excluded_markets", []) or [])
+    if eligibility is None:
+        coverage_ok = market_coverage.get("status") == "Complete"
+        coverage_reason = (
+            "At least one required 1X2, totals, or BTTS selection is missing."
+        )
+    elif not eligible:
+        coverage_ok = False
+        coverage_reason = (
+            "No market is complete enough to be eligible for an automated card."
+        )
+    else:
+        coverage_ok = True
+        coverage_reason = ""
+    if not coverage_ok or completion_percentage < 1.0:
         return (
             "Needs market coverage review",
-            "At least one required 1X2, totals, or BTTS selection is missing.",
+            coverage_reason
+            or (
+                "Eligible markets "
+                f"{eligible} are complete, but odds completeness for them is "
+                f"{completion_percentage:.1%}."
+            ),
         )
     if bookmaker_coverage.get("status") != "Available":
         return (
@@ -1010,6 +1034,35 @@ def render_provider_shadow_verification(
     return "\n".join(lines)
 
 
+def _eligible_markets_for_validation(
+    odds: pd.DataFrame,
+    fixtures: pd.DataFrame,
+) -> list[str] | None:
+    """Markets complete enough across the selected window to be validated.
+
+    Validation should judge the bundle on the markets the card will actually
+    use. A market the provider prices at a different line for some fixtures
+    (today `total_2_5`) is excluded rather than treated as an outstanding gap.
+    """
+    # Scope is judged across the whole staged bundle, not the Week 1 window:
+    # validation must describe the bundle it was handed. Windowing here would
+    # silently empty the scope for any bundle outside those dates.
+    report = evaluate_market_eligibility(
+        odds,
+        fixtures,
+        mapping_verified=True,
+        validation_passed=True,
+        freshness_passed=True,
+        window_label=SELECTED_WEEK1_LABEL,
+        restrict_to_window=False,
+    )
+    eligible = list(report.eligible_markets)
+    # No eligible market means there is nothing narrower to validate. Fall back
+    # to the historical all-markets gate rather than validating an empty scope,
+    # which would vacuously "pass".
+    return eligible or None
+
+
 def save_provider_shadow_verification(
     provider_name: str,
     *,
@@ -1053,6 +1106,11 @@ def save_provider_shadow_verification(
     fixtures = pd.DataFrame()
     if not dry_run and provider_status == "Completed":
         try:
+            staged_odds = _read_csv(Path(provider_result["staging_odds"]))
+            staged_fixtures = _read_csv(Path(provider_result["staging_fixtures"]))
+            eligible_markets = _eligible_markets_for_validation(
+                staged_odds, staged_fixtures
+            )
             validation_result = save_staging_input_validation(
                 Path(provider_result["staging_odds"]),
                 Path(provider_result["staging_fixtures"]),
@@ -1063,6 +1121,7 @@ def save_provider_shadow_verification(
                 provenance_path=Path(provider_result["provenance"]),
                 provider_policy_path=selected_policy,
                 run_at=generated_at,
+                eligible_markets=eligible_markets,
             )
             validation = json.loads(
                 Path(validation_result["json"]).read_text(encoding="utf-8")
@@ -1093,6 +1152,19 @@ def save_provider_shadow_verification(
     fixture_matching = _fixture_matching_metrics(odds, fixtures)
     market_coverage = _market_coverage_metrics(odds, fixtures)
     slate_coverage = _slate_coverage_metrics(odds, fixtures, repository_root=root)
+    _eligibility_report = evaluate_market_eligibility(
+        odds,
+        fixtures,
+        mapping_verified=team_mapping.get("status") == "Verified",
+        validation_passed=not validation_error,
+        freshness_passed=True,
+        window_label=SELECTED_WEEK1_LABEL,
+        # Bundle-scoped, not window-scoped: this verdict describes the staged
+        # bundle it was handed. Week 1 windowing lives in slate_coverage and in
+        # the card-input builder.
+        restrict_to_window=False,
+    )
+    market_eligibility = _eligibility_report.as_dict()
     btts_availability = _btts_availability_metrics(odds, market_coverage)
     core_market_coverage = _core_market_coverage_metrics(market_coverage)
     bookmaker_coverage = _bookmaker_coverage_metrics(odds)
@@ -1114,6 +1186,7 @@ def save_provider_shadow_verification(
         fixture_matching=fixture_matching,
         market_coverage=market_coverage,
         bookmaker_coverage=bookmaker_coverage,
+        eligibility=market_eligibility,
     )
     if verdict not in SHADOW_VERDICTS:
         raise ValueError(f"Unexpected shadow verification verdict: {verdict}")
@@ -1184,6 +1257,7 @@ def save_provider_shadow_verification(
         "team_mapping": team_mapping,
         "fixture_matching": fixture_matching,
         "slate_coverage": slate_coverage,
+        "market_eligibility": market_eligibility,
         "bookmaker_coverage": bookmaker_coverage,
         "market_coverage": market_coverage,
         "core_market_coverage": core_market_coverage,

@@ -94,6 +94,14 @@ def parse_args() -> argparse.Namespace:
         default="",
         help="Optional comma-separated bookmaker keys. Never include credentials.",
     )
+    odds_api.add_argument(
+        "--include-event-markets",
+        action="store_true",
+        help=(
+            "Also fetch event-only markets (BTTS) from the per-event endpoint. "
+            "Costs extra quota: markets x regions per event."
+        ),
+    )
     return parser.parse_args()
 
 
@@ -112,6 +120,7 @@ def _provider_from_args(args: argparse.Namespace):
             sport_key=args.sport_key,
             regions=args.regions,
             bookmakers=args.bookmakers,
+            include_event_markets=bool(getattr(args, "include_event_markets", False)),
         )
     return create_provider(key)
 

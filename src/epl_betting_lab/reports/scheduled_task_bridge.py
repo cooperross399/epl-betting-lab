@@ -111,7 +111,12 @@ def _gather_evidence(output_dir: Path) -> dict[str, Any]:
     card_input, card_input_error = _read_json(
         output_dir / "automated_card_input.json"
     )
+    discovery, discovery_error = _read_json(
+        output_dir / "provider_market_discovery.json"
+    )
     return {
+        "market_discovery": discovery,
+        "market_discovery_error": discovery_error,
         "week1_readiness": readiness,
         "week1_readiness_error": readiness_error,
         "provider_shadow": shadow,
@@ -120,6 +125,45 @@ def _gather_evidence(output_dir: Path) -> dict[str, Any]:
         "staging_validation_error": validation_error,
         "automated_card_input": card_input,
         "automated_card_input_error": card_input_error,
+    }
+
+
+def _market_investigation(discovery: Mapping[str, Any]) -> dict[str, Any]:
+    """Why each excluded market is excluded, in reviewable terms.
+
+    A market must never read as "excluded because it lost" — exclusion here is
+    always about data availability. Profitability is only ever assessed for
+    eligible markets with trusted odds.
+    """
+    totals = _section(discovery, "totals_classification")
+    btts = _section(discovery, "btts_classification")
+    return {
+        "available": bool(discovery),
+        "totals": {
+            "status": _clean(totals.get("status")) or "not_checked",
+            "events_with_required_line": int(
+                totals.get("events_with_required_line", 0) or 0
+            ),
+            "events_total": int(totals.get("events_total", 0) or 0),
+            "root_cause": _clean(totals.get("root_cause")),
+            "endpoint_limited": bool(totals.get("endpoint_limited", False)),
+            "parser_defect": bool(totals.get("parser_defect", False)),
+            "recommended_action": _clean(totals.get("recommended_action")),
+        },
+        "btts": {
+            "status": _clean(btts.get("status")) or "not_checked",
+            "events_with_btts": int(btts.get("events_with_btts", 0) or 0),
+            "events_total": int(btts.get("events_total", 0) or 0),
+            "checked_event_endpoint": bool(btts.get("checked_event_endpoint", False)),
+            "endpoint_limited": bool(btts.get("endpoint_limited", False)),
+            "root_cause": _clean(btts.get("root_cause")),
+            "recommended_action": _clean(btts.get("recommended_action")),
+        },
+        "profitability_note": (
+            "Markets are excluded for data availability only. Profitability is "
+            "evaluated solely for eligible markets backed by trusted odds, never "
+            "as a reason to exclude a market here."
+        ),
     }
 
 
@@ -278,6 +322,7 @@ def build_epl_model_task(
     odds = _odds_status(readiness)
     provider = _provider_status(shadow)
     eligibility = _market_eligibility(evidence["automated_card_input"])
+    investigation = _market_investigation(evidence["market_discovery"])
     blockers = _collect_blockers(odds, provider, evidence, eligibility)
 
     card_ready = not blockers
@@ -320,6 +365,7 @@ def build_epl_model_task(
             "btts_trusted": False,
         },
         "market_eligibility": eligibility,
+        "market_investigation": investigation,
         "included_markets": eligibility["included_markets"],
         "excluded_markets": eligibility["excluded_markets"],
         "manual_odds_entry_required": eligibility["manual_entry_required"],
@@ -354,6 +400,7 @@ def render_epl_model_task(summary: Mapping[str, Any]) -> str:
     mapping = summary["mapping_coverage"]
     markets = summary["market_coverage"]
     eligible = summary["market_eligibility"]
+    investigation = summary["market_investigation"]
     blockers = [f"- {item}" for item in summary["blockers"]] or ["- None."]
     lines = [
         "# EPL Model Task",
@@ -431,6 +478,24 @@ def render_epl_model_task(summary: Mapping[str, Any]) -> str:
         "",
         eligible["note"],
         "",
+        "## Market investigation",
+        "",
+        (
+            f"- Totals: **{investigation['totals']['status']}** "
+            f"({investigation['totals']['events_with_required_line']}/"
+            f"{investigation['totals']['events_total']} events with the required line)"
+        ),
+        f"  - {investigation['totals']['root_cause'] or 'Not investigated yet.'}",
+        (
+            f"- BTTS: **{investigation['btts']['status']}** "
+            f"({investigation['btts']['events_with_btts']}/"
+            f"{investigation['btts']['events_total']} events; event endpoint checked: "
+            f"{'Yes' if investigation['btts']['checked_event_endpoint'] else 'No'})"
+        ),
+        f"  - {investigation['btts']['root_cause'] or 'Not investigated yet.'}",
+        "",
+        investigation["profitability_note"],
+        "",
         "## Blockers",
         "",
         *blockers,
@@ -483,6 +548,7 @@ def build_epl_card_task(
     odds = _odds_status(readiness)
     provider = _provider_status(shadow)
     eligibility = _market_eligibility(evidence["automated_card_input"])
+    investigation = _market_investigation(evidence["market_discovery"])
     blockers = _collect_blockers(odds, provider, evidence, eligibility)
 
     card_ready = not blockers
@@ -521,6 +587,10 @@ def build_epl_card_task(
         "passes_or_avoids": passes,
         "unit_suggestions": unit_suggestions,
         "market_eligibility": eligibility,
+        "market_investigation": investigation,
+        "card_scope": (
+            "+".join(eligibility["included_markets"]) or "none"
+        ),
         "included_markets": eligibility["included_markets"],
         "excluded_markets": eligibility["excluded_markets"],
         "unavailable_markets": eligibility["unavailable_markets"],

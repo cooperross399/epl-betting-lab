@@ -238,6 +238,49 @@ number.
 
 ---
 
+## Market discovery: why a market is excluded
+
+A market is only excluded once it is **shown** to be unavailable or incomplete —
+never because the first integration missed it, and never for profitability.
+
+```bash
+# Free: analyses the archived raw response, no network request
+PYTHONPATH=src .venv/bin/python scripts/run_provider_market_discovery.py
+
+# Paid: queries the per-event endpoint (cost reported before spending)
+PYTHONPATH=src .venv/bin/python scripts/run_provider_market_discovery.py \
+    --check-event-markets --regions us --markets btts
+```
+
+Outputs `data/outputs/provider_market_discovery.{md,json}`.
+
+### Two endpoints, deliberately kept separate
+
+| Endpoint | Serves | Notes |
+|:---|:---|:---|
+| `/v4/sports/{sport}/odds` (bulk/featured) | `h2h`, `spreads`, `totals` | Additional markets are **never** returned here, whatever regions or bookmakers you request |
+| `/v4/sports/{sport}/events/{id}/odds` | additional markets incl. `btts` | Costs `markets × regions` **per event** |
+
+Conflating these is what produced the earlier wrong conclusion. BTTS missing
+from the bulk response is **expected** and is *not* evidence the provider lacks
+BTTS — the report now says so explicitly and reports `not_checked` rather than
+`unavailable` until the event endpoint has actually been queried.
+
+### Quota
+
+`/events` listing is free. Odds requests cost `markets × regions`; the event
+endpoint charges that per event. The script prints the estimate **before**
+making any paid call, and paid calls are opt-in via `--check-event-markets`.
+
+### Fetching event markets into staging
+
+`--include-event-markets` on the provider entry points merges per-event BTTS
+into the bulk payload before normalisation. The merged payload is re-serialised
+as the archived raw evidence so the checksum pair still matches. A per-event
+failure records a warning and leaves the market **missing** — never fabricated.
+
+---
+
 ## Provider trust / allowlist path
 
 ```bash

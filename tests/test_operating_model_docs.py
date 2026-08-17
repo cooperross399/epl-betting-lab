@@ -243,3 +243,18 @@ def test_the_card_comparison_report_is_documented() -> None:
 
 def test_the_per_book_clv_report_is_documented() -> None:
     assert "clv_by_book" in _read("docs/claude_autonomy_operating_model.md")
+
+
+def test_the_readme_separates_the_current_workflow_from_the_legacy_one() -> None:
+    """Most of the README documents the manual-odds era.
+
+    A session reading top-to-bottom would otherwise take a superseded flow for
+    the current one and reintroduce manual odds entry.
+    """
+    text = _read("README.md")
+
+    assert "## Current workflow" in text
+    assert "## Legacy sections below" in text
+    assert "refresh_all_reports.py" in text
+    # Flattened: the phrase wraps across lines in the rendered document.
+    assert "no longer the active source" in _flat("README.md")

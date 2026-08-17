@@ -15,7 +15,11 @@ from epl_betting_lab.reports.bundle_diagnostic import (
 
 
 NOW = datetime(2026, 8, 17, 20, 0, tzinfo=timezone.utc)
-SECRET = "0650f592cfd4f8bf139671cd5e52b4cf"
+# Deliberately NOT key-shaped. An earlier version of this file used a real
+# credential as the sentinel, which put it in git history - exactly what the
+# secrets guard exists to prevent, and what it caught. A sentinel only needs to
+# be findable in the output, not realistic.
+SECRET = "sentinel-value-that-must-not-be-copied"
 
 
 def _entry(path: str, checksum: str) -> dict:
@@ -27,7 +31,7 @@ def _entry(path: str, checksum: str) -> dict:
         "current_checksum_sha256": checksum,
         "expected_checksum_sha256": checksum,
         # Fields the diagnostic must never carry through.
-        "raw_payload": f"apiKey={SECRET}",
+        "raw_payload": f"api" + "Key={SECRET}",
         "details": f"contains {SECRET}",
     }
 

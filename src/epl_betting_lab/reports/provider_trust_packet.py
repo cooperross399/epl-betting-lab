@@ -89,6 +89,12 @@ def build_provider_trust_packet(
     btts = _section(shadow, "btts_availability")
     eligibility = _section(card_input, "eligibility")
 
+    # Readiness must not contradict the acceptance checklist. The checklist
+    # reviews a window of past runs and fails closed on any that failed, were
+    # blocked, or predate a fix, so a raw run count reaching the minimum is not
+    # by itself sufficient.
+    checklist_ok = checklist_verdict in {"Trusted", "Ready for acceptance"}
+
     outstanding: list[str] = []
     if completed_runs < required_runs:
         outstanding.append(
@@ -97,10 +103,11 @@ def build_provider_trust_packet(
         )
     if _clean(mapping.get("status")) != "Verified":
         outstanding.append("Team mapping must report Verified.")
-    if checklist_verdict not in {"Trusted", "Ready for acceptance"} and completed_runs >= required_runs:
+    if not checklist_ok and completed_runs >= required_runs:
         outstanding.append(
             f"Acceptance checklist verdict is `{checklist_verdict}`; resolve its "
-            "listed failures."
+            "listed failures. The checklist reviews a window of past runs and "
+            "fails closed on any that failed, were blocked, or predate a fix."
         )
     if not currently_allowed:
         outstanding.append(
@@ -109,9 +116,11 @@ def build_provider_trust_packet(
             "`data/manual/staging_provider_policy.json`."
         )
 
-    ready_for_approval = completed_runs >= required_runs and _clean(
-        mapping.get("status")
-    ) == "Verified"
+    ready_for_approval = (
+        completed_runs >= required_runs
+        and _clean(mapping.get("status")) == "Verified"
+        and checklist_ok
+    )
 
     return {
         "report": "Provider Trust Packet",

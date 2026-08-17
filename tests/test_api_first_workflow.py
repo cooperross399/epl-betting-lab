@@ -113,13 +113,27 @@ def test_market_with_no_rows_is_unavailable_not_zero_priced() -> None:
     assert "no price was invented" in btts.reason
 
 
-def test_btts_is_disabled_by_default() -> None:
+def test_btts_is_no_longer_disabled_by_default() -> None:
+    """Market discovery proved BTTS is available via the per-event endpoint, so
+    it is judged on coverage like any other market rather than blanket-disabled."""
     report = _evaluate(
         _odds(WINDOW_FIXTURES, markets=("1x2", "btts")), _fixtures(WINDOW_FIXTURES)
     )
 
     btts = next(m for m in report.markets if m.market == "btts")
-    assert "btts" in DEFAULT_DISABLED_MARKETS
+    assert "btts" not in DEFAULT_DISABLED_MARKETS
+    assert btts.status == ELIGIBLE
+    assert btts.usable is True
+
+
+def test_a_market_can_still_be_disabled_explicitly() -> None:
+    report = _evaluate(
+        _odds(WINDOW_FIXTURES, markets=("1x2", "btts")),
+        _fixtures(WINDOW_FIXTURES),
+        disabled_markets=("btts",),
+    )
+
+    btts = next(m for m in report.markets if m.market == "btts")
     assert btts.status == DISABLED
     assert btts.usable is False
 
@@ -178,13 +192,29 @@ def test_card_input_uses_eligible_markets_only() -> None:
 
 
 def test_card_input_never_contains_btts_while_unavailable() -> None:
+    # Provider returned no BTTS rows: the market must not appear in the card.
     odds = _odds(WINDOW_FIXTURES, markets=("1x2",))
+    fixtures = _fixtures(WINDOW_FIXTURES)
+    report = _evaluate(odds, fixtures)
+
+    btts = next(m for m in report.markets if m.market == "btts")
+    assert btts.status == UNAVAILABLE
+
+    frame, _ = build_automated_card_input(odds, fixtures, eligibility=report)
+
+    assert "btts" not in set(frame["market"])
+
+
+def test_card_input_includes_btts_once_every_fixture_is_covered() -> None:
+    odds = _odds(WINDOW_FIXTURES, markets=("1x2", "btts"))
     fixtures = _fixtures(WINDOW_FIXTURES)
     report = _evaluate(odds, fixtures)
 
     frame, _ = build_automated_card_input(odds, fixtures, eligibility=report)
 
-    assert "btts" not in set(frame["market"])
+    assert set(frame["market"]) == {"1x2", "btts"}
+    # 3 fixtures x (3 x 1x2 + 2 x btts)
+    assert len(frame) == 15
 
 
 def test_card_input_picks_best_real_quote_and_never_synthesises() -> None:
@@ -203,7 +233,8 @@ def test_card_input_picks_best_real_quote_and_never_synthesises() -> None:
 def test_card_input_is_empty_when_no_market_is_eligible() -> None:
     fixtures = _fixtures(WINDOW_FIXTURES)
     odds = _odds(WINDOW_FIXTURES, markets=("btts",))
-    report = _evaluate(odds, fixtures)
+    # Disable the only covered market so nothing is eligible.
+    report = _evaluate(odds, fixtures, disabled_markets=("btts",))
 
     frame, notes = build_automated_card_input(odds, fixtures, eligibility=report)
 

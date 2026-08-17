@@ -338,7 +338,7 @@
     "thursday_cutoff_time": "10:00",
     "timezone": "America/New_York"
   },
-  "generated_at": "2026-08-17T16:14:05-04:00",
+  "generated_at": "2026-08-17T16:36:45-04:00",
   "policy": {
     "checksum_sha256": "5b591c6f034bedae31d9a3e6517dc0beb818b53ea6332321abc482d51c4d7eb9",
     "path": "data/manual/staging_provider_policy.json"

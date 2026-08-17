@@ -5,6 +5,7 @@ import argparse
 from pathlib import Path
 
 from epl_betting_lab.config import STAGING_DIR
+from epl_betting_lab.providers.env_file import load_provider_env
 from epl_betting_lab.providers.base import (
     ProviderRunRequest,
     SOURCE_FIXTURES_FILENAME,
@@ -117,6 +118,10 @@ def _provider_from_args(args: argparse.Namespace):
 
 def main() -> int:
     args = parse_args()
+    env_load = load_provider_env()
+    print(env_load.summary_line())
+    for warning in env_load.warnings:
+        print(f"WARNING: {warning}")
     try:
         provider = _provider_from_args(args)
     except UnknownProviderError as exc:

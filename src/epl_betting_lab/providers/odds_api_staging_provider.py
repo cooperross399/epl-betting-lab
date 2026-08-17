@@ -401,8 +401,9 @@ class OddsApiStagingProvider(BaseStagingProvider):
     def _fetch_events(self) -> tuple[list[object], bytes, dict[str, str]]:
         if not self.api_key:
             raise MissingProviderCredentialsError(
-                f"Live mode requires `{API_KEY_ENV}` from the environment or a "
-                "GitHub Secret. Do not put the key in a file or command argument."
+                f"Live mode requires `{API_KEY_ENV}` from the environment, a "
+                "gitignored local `.env`, or a GitHub Secret. Never pass the key "
+                "as a command argument or commit it."
             )
         params = {
             "apiKey": self.api_key,
@@ -722,9 +723,9 @@ class OddsApiStagingProvider(BaseStagingProvider):
         try:
             if not self.api_key:
                 raise MissingProviderCredentialsError(
-                    f"Live mode requires `{API_KEY_ENV}` from the environment or "
-                    "a GitHub Secret. Do not put the key in a file or command "
-                    "argument."
+                    f"Live mode requires `{API_KEY_ENV}` from the environment, a "
+                    "gitignored local `.env`, or a GitHub Secret. Never pass the "
+                    "key as a command argument or commit it."
                 )
             summary["network_request_made"] = True
             events, raw_content, response_headers = self._fetch_events()

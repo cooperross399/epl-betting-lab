@@ -122,13 +122,26 @@ python scripts/run_provider_staging.py --provider odds_api --dry-run
 ```
 
 The `odds_api` option is the first real-provider skeleton. It is offline by
-default. Live mode is an intentional Terminal step and reads its key only from
-the environment:
+default. Live mode is an intentional Terminal step and reads its key from the
+environment:
 
 ```bash
 export EPL_ODDS_API_KEY='your-secret-key'
 python scripts/run_provider_staging.py --provider odds_api --live
 ```
+
+`export` leaves the key in your shell history. The safer local option is a
+gitignored `.env` file at the repository root, which provider commands load for
+you:
+
+```bash
+printf 'EPL_ODDS_API_KEY=your-secret-key\n' > .env
+chmod 600 .env
+```
+
+The startup line names the variable it loaded and never shows the value. If the
+key ever lands in shell history, a screenshot, or a chat window, rotate it at
+your provider dashboard.
 
 Never paste the key into a CSV, JSON file, notes field, command argument, or
 Git commit. The provider report shows only whether a key was configured. A live
@@ -152,7 +165,7 @@ Seeing `Blocked` in the dry-run report is expected. The command checked its safe
 setup, but it deliberately did not fetch evidence that could prove readiness.
 
 When you intentionally want to test real provider output and have set
-`EPL_ODDS_API_KEY` in your environment, run:
+`EPL_ODDS_API_KEY` in your environment or gitignored `.env`, run:
 
 ```bash
 python scripts/run_provider_shadow_verification.py --provider odds_api --live

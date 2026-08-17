@@ -152,14 +152,49 @@ python scripts/run_provider_staging.py --provider manual --dry-run
 python scripts/run_provider_staging.py --provider odds_api --dry-run
 ```
 
-Live odds API mode is Terminal-only and explicit. Put the key in the
-`EPL_ODDS_API_KEY` environment variable (or a future GitHub Secret), never in a
-CSV, JSON file, command argument, or commit:
+Live odds API mode is Terminal-only and explicit. The key belongs in the
+`EPL_ODDS_API_KEY` environment variable, a gitignored local `.env`, or a GitHub
+Secret — never in a CSV, JSON file, command argument, or commit:
 
 ```bash
 export EPL_ODDS_API_KEY='your-secret-key'
 python scripts/run_provider_staging.py --provider odds_api --live
 ```
+
+### Safe local key setup with `.env`
+
+Exporting the key puts it in your shell history. To avoid that, store it in a
+gitignored `.env` at the repository root instead:
+
+```bash
+printf 'EPL_ODDS_API_KEY=your-secret-key\n' > .env
+chmod 600 .env
+```
+
+`.env` is already listed in `.gitignore`, so it is never committed. The two
+provider entry points — `scripts/run_provider_staging.py` and
+`scripts/run_provider_shadow_verification.py` — load it automatically at start
+up. No other script reads it.
+
+The loader is deliberately narrow:
+
+- Only `EPL_ODDS_API_KEY` and `EPL_ODDS_API_BASE_URL` are read from `.env`. Any
+  other entry is ignored and reported by name, so a stale or careless file
+  cannot change unrelated process configuration.
+- An exported environment variable always wins. `.env` only fills a gap, so
+  shell exports and GitHub Secrets keep their precedence.
+- Values are never printed, logged, or written to a report. The startup line
+  names the variables it loaded and nothing more:
+
+```text
+Local `.env`: loaded EPL_ODDS_API_KEY (values hidden).
+```
+
+- If `.env` is readable beyond its owner, the run warns and tells you to
+  `chmod 600 .env`.
+
+Rotate the key at your provider dashboard if it ever reaches a shell history,
+a chat window, a screenshot, or a pull request.
 
 The provider copies only returned prices. It writes normalized source/staging
 CSVs, `staging_provenance.json`, raw JSON evidence under `data/staging/raw/`,
@@ -181,8 +216,8 @@ default mode makes no network request:
 python scripts/run_provider_shadow_verification.py --provider odds_api --dry-run
 ```
 
-After setting `EPL_ODDS_API_KEY` in your environment, an intentional live shadow
-run writes staging evidence, runs the existing staging validation gates, and
+After setting `EPL_ODDS_API_KEY` in your environment or gitignored `.env`, an
+intentional live shadow run writes staging evidence, runs the existing staging validation gates, and
 creates `data/outputs/provider_shadow_verification.{json,md,csv}`:
 
 ```bash

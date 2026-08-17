@@ -4,10 +4,55 @@ This repository is the source of truth for the EPL Betting Lab / EPL Model.
 Claude operates this repo directly; the older `AGENTS.md` and `codex/` files are
 legacy ChatGPT/Codex material. When they conflict with this file, this file wins.
 
+**Active repo path: `/Users/cooperross/Projects/epl-betting-lab`.** The old
+`~/Downloads/epl-betting-lab` path is dead: macOS privacy controls (TCC) block
+reads there and produce confusing `Operation not permitted` errors. Do not use
+it.
+
+## Read these first
+
+Every session, in this order. They replace chat history as project memory, so no
+prior conversation and no ChatGPT is needed to operate this repo.
+
+1. `CLAUDE.md` (this file) — hard rules, which override everything.
+2. `docs/claude_autonomy_operating_model.md` — how Claude works autonomously,
+   what a hard stop means, and how to problem-solve instead of giving up.
+3. `docs/epl_scheduled_tasks_bridge.md` — the three scheduled routines.
+4. `docs/no_terminal_operations.md` — doing things from a browser.
+5. `README.md` — full command reference.
+6. Latest `data/outputs/` reports, then GitHub PRs, Actions runs, and the
+   **“EPL Betting Lab — Claude Operating Home”** issue.
+
+**Never route Cooper to ChatGPT** for memory, next steps, status, or debugging.
+Use the repo, the reports, and GitHub.
+
+## Current operating state
+
+- Provider **The Odds API is allowlisted**, scoped to `1x2` and `btts` only.
+- `total_2_5` is **excluded** because it covers 8 of 10 fixtures. Data
+  availability, not profitability. It stays excluded until a separate reviewed
+  approval adds it.
+- The active odds source is the **provider-derived automated card input**.
+  Manual odds entry is not required.
+- `data/manual/current_odds.csv` is **legacy** and must not become active again.
+- **EPL CARD is live**, generated from eligible trusted markets only.
+- **EPL SETTLE (IGNORE) is preview-only, permanently.**
+- Production credential is the GitHub secret `EPL_ODDS_API_KEY`. `.env` is
+  local-only and optional.
+
 ## Main commands
 
 ```bash
-# Main weekly command (the primary operating flow)
+# API-first card flow (current)
+PYTHONPATH=src .venv/bin/python scripts/run_api_first_card_workflow.py
+PYTHONPATH=src .venv/bin/python scripts/run_automated_card.py
+
+# Scheduled-routine bridges
+PYTHONPATH=src .venv/bin/python scripts/run_epl_model_task.py
+PYTHONPATH=src .venv/bin/python scripts/run_epl_card_task.py
+PYTHONPATH=src .venv/bin/python scripts/run_epl_settle_preview_task.py
+
+# Legacy weekly command (manual-odds era; kept for reference)
 python scripts/run_epl_weekly_pipeline.py
 
 # Week 1 setup command
@@ -29,8 +74,9 @@ python -m compileall -q src scripts app.py
 
 ## Hard rules (never break these)
 
-- **Never fabricate odds.** If prices are missing, report it and ask the user
-  for real sportsbook prices or the manual odds CSV workflow.
+- **Never fabricate odds.** A missing price stays missing. An incomplete market
+  is excluded, and an excluded market is never described as a pass, an avoid, or
+  a no-value call.
 - **Never place bets** or automate betting in any form.
 - **Never bypass validation.** The gates exist so a bad card is not generated.
 - **Never use force mode** (`--force` or equivalent) unless the user explicitly
@@ -38,6 +84,13 @@ python -m compileall -q src scripts app.py
 - **Never enable cron** or any automatic scheduling unless explicitly requested.
 - **Never run live providers** (`--live` provider modes, odds APIs) unless
   explicitly requested.
+- **Never add `total_2_5` or alternate totals** as official markets without a
+  separate reviewed approval.
+- **Never print, write, compare, or commit an API key.** The secrets guard in
+  `tests/test_no_secrets_committed.py` enforces this; do not weaken it.
+- **Never weaken the Provider Policy PR Gate** or sign a human acceptance
+  receipt on Cooper's behalf.
+- **Never merge with failing CI**, and never force-merge or force-push.
 - **Never edit protected manual files** unless the requested workflow
   explicitly allows it (for example, a Terminal-only `--apply` step the user
   asked for). Protected files:

@@ -258,3 +258,72 @@ def test_markdown_states_it_makes_no_gate_decision(tmp_path: Path) -> None:
 
     assert "never decides whether a gate passes" in text
     assert "Gate decision made: **No**" in text
+
+
+# --- directories are not files ---------------------------------------------
+
+
+def test_a_directory_with_tracked_contents_is_not_reported_untracked(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """Git tracks files, not directories.
+
+    A bundle binds archive directories as well as files. Reporting those as
+    untracked buried the real finding under noise and cost a round of
+    investigation, so a directory counts as present when anything beneath it is
+    tracked.
+    """
+    from epl_betting_lab.reports import bundle_diagnostic
+
+    monkeypatch.setattr(
+        bundle_diagnostic,
+        "_tracked_paths",
+        lambda root=None: {"data/outputs/archive/run1/report.json"},
+    )
+    _write(
+        tmp_path,
+        [
+            _entry("data/outputs/archive/run1", "aaa"),
+            _entry("data/outputs/archive/run1/report.json", "bbb"),
+        ],
+        [],
+    )
+
+    summary = build_bundle_diagnostic(output_dir=tmp_path, repository_root=tmp_path)
+
+    assert summary["untracked_evidence_paths"] == []
+
+
+def test_a_genuinely_missing_file_is_still_reported(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """The precision fix must not hide the failure it exists to catch."""
+    from epl_betting_lab.reports import bundle_diagnostic
+
+    monkeypatch.setattr(
+        bundle_diagnostic,
+        "_tracked_paths",
+        lambda root=None: {"data/outputs/archive/run1/report.json"},
+    )
+    _write(tmp_path, [_entry("data/outputs/archive/run2/missing.json", "ccc")], [])
+
+    summary = build_bundle_diagnostic(output_dir=tmp_path, repository_root=tmp_path)
+
+    assert summary["untracked_evidence_paths"] == [
+        "data/outputs/archive/run2/missing.json"
+    ]
+
+
+def test_a_directory_with_nothing_tracked_beneath_it_is_reported(
+    tmp_path: Path, monkeypatch
+) -> None:
+    from epl_betting_lab.reports import bundle_diagnostic
+
+    monkeypatch.setattr(
+        bundle_diagnostic, "_tracked_paths", lambda root=None: {"other/file.json"}
+    )
+    _write(tmp_path, [_entry("data/outputs/archive/empty_run", "ddd")], [])
+
+    summary = build_bundle_diagnostic(output_dir=tmp_path, repository_root=tmp_path)
+
+    assert summary["untracked_evidence_paths"] == ["data/outputs/archive/empty_run"]

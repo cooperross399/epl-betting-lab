@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Mapping, Sequence
 from datetime import datetime, timezone
 import json
 import math
@@ -359,6 +359,8 @@ class OddsApiStagingProvider(BaseStagingProvider):
         regions: str = DEFAULT_REGIONS,
         bookmakers: str = "",
         timeout_seconds: float = 20.0,
+        include_event_markets: bool = False,
+        event_markets: Sequence[str] = ("btts",),
     ) -> None:
         self.environment = dict(os.environ if environment is None else environment)
         self.requester = requester or _default_requester
@@ -366,6 +368,12 @@ class OddsApiStagingProvider(BaseStagingProvider):
         self.regions = regions.strip() or DEFAULT_REGIONS
         self.bookmakers = bookmakers.strip()
         self.timeout_seconds = timeout_seconds
+        # Event-only markets (BTTS) are opt-in because they cost quota per event.
+        self.include_event_markets = bool(include_event_markets)
+        self.event_markets = tuple(
+            market.strip().lower() for market in event_markets if market.strip()
+        )
+        self.event_market_warnings: list[str] = []
 
     @property
     def credential_environment_variables(self) -> tuple[str, ...]:
@@ -474,6 +482,15 @@ class OddsApiStagingProvider(BaseStagingProvider):
             raise MalformedProviderResponseError(
                 "The odds provider JSON root is not an event list."
             )
+        if self.include_event_markets and self.event_markets:
+            merged = self._merge_event_markets(payload)
+            if merged:
+                # Re-serialise so the archived raw evidence matches exactly what
+                # was normalised. Otherwise the checksum pair would disagree.
+                payload = merged
+                raw_content = (
+                    json.dumps(payload, indent=2, sort_keys=True) + "\n"
+                ).encode("utf-8")
         if not raw_content:
             raw_content = (
                 json.dumps(payload, indent=2, sort_keys=True) + "\n"
@@ -485,6 +502,90 @@ class OddsApiStagingProvider(BaseStagingProvider):
             if headers.get(name) is not None
         }
         return payload, bytes(raw_content), safe_headers
+
+    def _merge_event_markets(self, events: list[object]) -> list[object] | None:
+        """Fetch event-only markets (BTTS) and merge them into the bulk payload.
+
+        The featured endpoint serves h2h/spreads/totals only, so BTTS has to be
+        requested per event. Merged rows carry the same shape as bulk markets,
+        which lets the existing normaliser handle them unchanged.
+
+        A failure for one event is recorded and skipped: a partial BTTS result
+        must surface as an incomplete market, never as a fabricated one.
+        """
+        merged: list[object] = []
+        markets_param = ",".join(self.event_markets)
+        for event in events:
+            if not isinstance(event, dict):
+                merged.append(event)
+                continue
+            event_id = str(event.get("id", "")).strip()
+            if not event_id:
+                merged.append(event)
+                continue
+            url = f"{self.base_url}/v4/sports/{self.sport_key}/events/{event_id}/odds"
+            params = {
+                "apiKey": self.api_key,
+                "regions": self.regions,
+                "markets": markets_param,
+                "oddsFormat": "american",
+                "dateFormat": "iso",
+            }
+            if self.bookmakers:
+                params["bookmakers"] = self.bookmakers
+            try:
+                response = self.requester(url, params=params, timeout=self.timeout_seconds)
+                status_code = getattr(response, "status_code", None)
+                if status_code != 200:
+                    self.event_market_warnings.append(
+                        f"Event {event_id}: HTTP {status_code or 'unknown'} for "
+                        f"`{markets_param}`; market left missing."
+                    )
+                    merged.append(event)
+                    continue
+                payload = response.json()
+            except (requests.RequestException, OSError, TimeoutError, ValueError) as exc:
+                self.event_market_warnings.append(
+                    f"Event {event_id}: {type(exc).__name__} for `{markets_param}`; "
+                    "market left missing."
+                )
+                merged.append(event)
+                continue
+
+            if not isinstance(payload, dict):
+                merged.append(event)
+                continue
+
+            combined = dict(event)
+            existing = list(combined.get("bookmakers", []) or [])
+            by_key = {
+                str(book.get("key", "")): book
+                for book in existing
+                if isinstance(book, dict)
+            }
+            for book in payload.get("bookmakers", []) or []:
+                if not isinstance(book, dict):
+                    continue
+                extra = [
+                    market
+                    for market in book.get("markets", []) or []
+                    if isinstance(market, dict)
+                    and str(market.get("key", "")).strip().lower() in self.event_markets
+                ]
+                if not extra:
+                    continue
+                key = str(book.get("key", ""))
+                if key in by_key:
+                    target = by_key[key]
+                    target["markets"] = list(target.get("markets", []) or []) + extra
+                else:
+                    added = dict(book)
+                    added["markets"] = extra
+                    existing.append(added)
+                    by_key[key] = added
+            combined["bookmakers"] = existing
+            merged.append(combined)
+        return merged
 
     def _directories(self, request: ProviderRunRequest) -> tuple[Path, Path, Path]:
         root = (request.repository_root or PROJECT_ROOT).resolve()
@@ -898,6 +999,7 @@ class OddsApiStagingProvider(BaseStagingProvider):
                     display_repository_path(path, root) for path in payloads
                 ],
                 "warnings": warnings
+                + list(self.event_market_warnings)
                 + [
                     "Staging validation was not run automatically. The checked-in "
                     "provider policy must explicitly allow `the_odds_api` before "

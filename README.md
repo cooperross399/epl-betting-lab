@@ -1,5 +1,18 @@
 # EPL Betting Lab
 
+> **Operating this repo?** Read `CLAUDE.md` first, then
+> `docs/claude_autonomy_operating_model.md`. Together they are the permanent
+> operating model: no chat history and no ChatGPT are needed to run this
+> project. `docs/no_terminal_operations.md` covers doing things from a browser.
+>
+> Active path: `/Users/cooperross/Projects/epl-betting-lab`. The old
+> `~/Downloads` path is dead — macOS privacy controls block it.
+>
+> Current state: The Odds API allowlisted for `1x2` and `btts` only;
+> `total_2_5` excluded for data availability; odds come from the
+> provider-derived automated input, so **manual odds entry is not required**;
+> EPL SETTLE is preview-only; no bets are ever placed.
+
 A starter Python project for building, testing, and using English Premier League betting strategies for the 2026/27 season.
 
 This is built for a practical betting workflow:

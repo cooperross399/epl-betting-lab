@@ -1,0 +1,56 @@
+name: Tests
+
+# Runs the full suite on every pull request and on main. This is what makes
+# "CI is green" mean the suite passed, rather than only that the policy gate
+# passed. It uses no secrets and fetches no odds, so it is safe to run on any
+# branch.
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pytest:
+    name: Full test suite
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install project
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install -e .
+
+      - name: Run the full test suite
+        # No credential is provided on purpose: every test must pass without
+        # one. A test that needs a live key would make the suite unrunnable on
+        # a fork and would risk exposing the key in a log.
+        env:
+          PYTHONPATH: src
+        run: |
+          python -m pytest -q
+
+      - name: Confirm no odds were fetched
+        if: always()
+        run: |
+          echo "This job installs the project and runs unit tests only."
+          echo "It uses no repository secret, makes no provider request,"
+          echo "places no bets, applies no settlement, and runs on demand"
+          echo "or on pull requests rather than on a timer."

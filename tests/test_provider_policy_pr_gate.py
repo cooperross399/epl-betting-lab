@@ -164,7 +164,15 @@ def _mock_current_checks(monkeypatch) -> None:
     )
 
 
-def _build(root: Path, fixture: dict[str, object]):
+def _build(root: Path, fixture: dict[str, object], environment: dict | None = None):
+    """Build the gate with an explicitly empty environment by default.
+
+    The gate selects `ci_pr` mode when GITHUB_ACTIONS and GITHUB_EVENT_NAME are
+    present, which is correct behaviour but makes these local-git assertions
+    depend on where the suite happens to run: green locally, red inside GitHub
+    Actions. Passing the environment in keeps the mode deterministic, and a
+    dedicated test below covers CI mode on purpose.
+    """
     return build_provider_policy_pr_gate(
         "odds_api",
         fixture["outputs"],
@@ -172,6 +180,7 @@ def _build(root: Path, fixture: dict[str, object]):
         base_ref=str(fixture["base_sha"]),
         head_ref=str(fixture["head_sha"]),
         run_at=RUN_AT,
+        environment={} if environment is None else environment,
     )
 
 
@@ -671,3 +680,39 @@ def test_dashboard_displays_latest_gate_receipt_fields() -> None:
     assert '"Head SHA"' in app_source
     assert '"Changed files"' in app_source
     assert "Gate receipt ID:" in app_source
+
+
+def test_gate_mode_is_ci_pr_when_github_actions_env_is_present(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """The behaviour that broke the suite in CI, now asserted deliberately.
+
+    These tests used to inherit the ambient environment, so the gate reported
+    `local_git` on a laptop and `ci_pr` inside GitHub Actions. Same code, two
+    answers, depending on where it ran. Mode selection is now covered
+    explicitly instead of accidentally.
+    """
+    fixture = _prepare_reports(tmp_path)
+    _mock_current_checks(monkeypatch)
+
+    _, summary = _build(
+        tmp_path,
+        fixture,
+        environment={
+            "GITHUB_ACTIONS": "true",
+            "GITHUB_EVENT_NAME": "pull_request",
+        },
+    )
+
+    assert summary["gate_mode"] == "ci_pr"
+
+
+def test_gate_mode_is_local_git_without_github_env(
+    tmp_path: Path, monkeypatch
+) -> None:
+    fixture = _prepare_reports(tmp_path)
+    _mock_current_checks(monkeypatch)
+
+    _, summary = _build(tmp_path, fixture, environment={})
+
+    assert summary["gate_mode"] == "local_git"

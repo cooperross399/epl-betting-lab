@@ -118,250 +118,84 @@ those parameter names do not exist. The ledger is opened read-only.
 ## Exact routine prompts
 
 Claude Code does not edit your scheduled tasks. Paste these into the routine
-definitions yourself.
+definitions yourself. They are written to need **no chat history, no ChatGPT,
+and no Terminal from Cooper**.
 
 ### EPL Model
 
 ```text
-Run the EPL Model readiness bridge in ~/Downloads/epl-betting-lab.
+Read the EPL Betting Lab operating docs first:
+CLAUDE.md, docs/claude_autonomy_operating_model.md,
+docs/epl_scheduled_tasks_bridge.md.
 
-Command:
+Repo: /Users/cooperross/Projects/epl-betting-lab
+
+Run:
 PYTHONPATH=src .venv/bin/python scripts/run_epl_model_task.py
 
-Rules:
-- Do not generate official picks.
-- Do not run live providers.
-- Do not allowlist the provider.
-- Do not edit protected manual files.
-- Do not apply settlement or place bets.
-- Do not enable cron.
+Then report, in plain English:
+- model readiness and whether EPL CARD may run
+- fixture freshness and the selected slate window
+- odds status and the active odds source
+- provider/shadow status and mapping coverage
+- included markets and excluded markets, with the reason for each exclusion
+- blockers, and the exact next action
 
-Report: model readiness, fixture freshness, selected slate/window, odds status,
-provider/shadow status, mapping coverage, market coverage (core vs BTTS),
-blockers, exact next action, and whether EPL CARD is ready.
+Rules:
+- Provider is allowlisted for 1x2 and btts only.
+- total_2_5 is excluded for data availability, never call it unprofitable.
+- Do not generate picks, place bets, apply settlement, or enable scheduling.
+- Do not send Cooper to ChatGPT or to a Terminal. If blocked, say exactly what
+  is blocked and what the smallest browser-based action would be.
 ```
 
 ### EPL CARD
 
 ```text
-Run the EPL CARD bridge in ~/Downloads/epl-betting-lab.
+Read CLAUDE.md and docs/claude_autonomy_operating_model.md first.
 
-Command:
+Repo: /Users/cooperross/Projects/epl-betting-lab
+
+Run:
+PYTHONPATH=src .venv/bin/python scripts/run_automated_card.py
 PYTHONPATH=src .venv/bin/python scripts/run_epl_card_task.py
 
-Rules:
-- If card_ready is false, do NOT invent or publish any pick, lean, or stake.
-- Report blockers instead: Needs odds / Needs mapping / Needs BTTS /
-  Needs validation / Provider not trusted.
-- Do not run live providers.
-- Do not allowlist the provider.
-- Do not edit protected manual files.
-- Do not place bets.
+Then report:
+- card status and whether picks were produced
+- best bets, leans, passes/avoids, and unit suggestions, with book and price
+- included markets and excluded markets
+- odds completeness and the active odds source
+- validation warnings, blockers, and the exact next action
 
-Report: card status, best bets / leans / passes only if the card is actually
-ready, unit suggestions only if ready, validation warnings, odds completeness,
-provider/source used, blockers, and the exact next action.
+Rules:
+- If card_ready is false, publish NO pick, lean, or stake. Report the named
+  blockers instead: Needs odds / Needs mapping / Needs BTTS / Needs validation
+  / Provider not trusted.
+- Markets are 1x2 and btts only. Never include total_2_5.
+- An excluded market is unavailable or incomplete, never a pass or no-value.
+- The card is a recommendation. Never place a bet or automate execution.
+- Do not send Cooper to ChatGPT or to a Terminal.
 ```
 
 ### EPL SETTLE (IGNORE)
 
 ```text
-Run the EPL settle PREVIEW bridge in ~/Downloads/epl-betting-lab.
+Read CLAUDE.md first.
 
-Command:
+Repo: /Users/cooperross/Projects/epl-betting-lab
+
+Run:
 PYTHONPATH=src .venv/bin/python scripts/run_epl_settle_preview_task.py
+
+Then report ledger rows, open bets, settled bets, would-settle count (always 0),
+blockers, and the exact next action.
 
 Rules:
-- Preview only.
-- Never apply settlement.
-- Never edit bet_ledger.csv.
-- Never use force mode.
-- Never place bets.
-
-Report: ledger rows, open bets, settled bets, would-settle count (always 0),
-blockers, and the exact next action.
+- Preview only, permanently.
+- Never apply settlement, never edit bet_ledger.csv, never use force mode,
+  never place a bet.
+- Do not send Cooper to ChatGPT or to a Terminal.
 ```
-
----
-
-## API-first odds workflow
-
-The manual odds-entry job is gone. Odds are derived from provider staging
-evidence and written **outside** `data/manual/`.
-
-```text
-live provider shadow/staging fetch
-  -> staging validation + team normalization
-  -> per-market eligibility (data/outputs/automated_card_input.json)
-  -> provider-derived card input (data/staging/automated_card_current_odds.csv)
-  -> EPL Model / EPL CARD bridges
-```
-
-Build the card input:
-
-```bash
-PYTHONPATH=src .venv/bin/python scripts/run_api_first_card_workflow.py
-```
-
-The writer **refuses** any path under `data/manual/` and raises
-`ProtectedPathError` rather than touching a protected file.
-
-### Market eligibility
-
-Eligibility is decided **per market**, so one absent market no longer blocks the
-whole card:
-
-| State | Meaning | Used for picks? |
-|:------|:--------|:----------------|
-| `eligible` | Provider covers every fixture in the window; mapping, validation and freshness pass | ✅ Yes |
-| `incomplete` | Provider covers only some fixtures | ❌ Excluded (not partially used) |
-| `unavailable` | Provider returned no rows at all (BTTS today) | ❌ Excluded |
-| `disabled` | Deliberately excluded from automated picks | ❌ Excluded |
-
-**BTTS is disabled by default** (`DEFAULT_DISABLED_MARKETS`) because the featured
-endpoint does not return it. Requiring it would reintroduce a manual entry job.
-
-> An excluded market is **never** a pass, a lean, an avoid, or a "no value"
-> call. It is reported as unavailable/incomplete/disabled, and no price is ever
-> invented to fill the gap.
-
-Current Week 1 state: **1X2 eligible** (10/10 fixtures), **totals incomplete**
-(8/10), **BTTS disabled** — so the automated card is 1X2-only, which is exactly
-the intended behaviour when only some markets are complete.
-
-### Price selection
-
-Where several bookmakers priced the same selection, the **best real quote** is
-taken (lowest implied probability) and the source book is preserved. That is a
-choice among real prices — never an average, a synthetic line, or a fabricated
-number.
-
----
-
-## Market discovery: why a market is excluded
-
-A market is only excluded once it is **shown** to be unavailable or incomplete —
-never because the first integration missed it, and never for profitability.
-
-```bash
-# Free: analyses the archived raw response, no network request
-PYTHONPATH=src .venv/bin/python scripts/run_provider_market_discovery.py
-
-# Paid: queries the per-event endpoint (cost reported before spending)
-PYTHONPATH=src .venv/bin/python scripts/run_provider_market_discovery.py \
-    --check-event-markets --regions us --markets btts
-```
-
-Outputs `data/outputs/provider_market_discovery.{md,json}`.
-
-### Two endpoints, deliberately kept separate
-
-| Endpoint | Serves | Notes |
-|:---|:---|:---|
-| `/v4/sports/{sport}/odds` (bulk/featured) | `h2h`, `spreads`, `totals` | Additional markets are **never** returned here, whatever regions or bookmakers you request |
-| `/v4/sports/{sport}/events/{id}/odds` | additional markets incl. `btts` | Costs `markets × regions` **per event** |
-
-Conflating these is what produced the earlier wrong conclusion. BTTS missing
-from the bulk response is **expected** and is *not* evidence the provider lacks
-BTTS — the report now says so explicitly and reports `not_checked` rather than
-`unavailable` until the event endpoint has actually been queried.
-
-### Quota
-
-`/events` listing is free. Odds requests cost `markets × regions`; the event
-endpoint charges that per event. The script prints the estimate **before**
-making any paid call, and paid calls are opt-in via `--check-event-markets`.
-
-### Fetching event markets into staging
-
-`--include-event-markets` on the provider entry points merges per-event BTTS
-into the bulk payload before normalisation. The merged payload is re-serialised
-as the archived raw evidence so the checksum pair still matches. A per-event
-failure records a warning and leaves the market **missing** — never fabricated.
-
----
-
-## Generating the automated card
-
-```bash
-# 1. refresh provider evidence (live; archives staging first is your call)
-PYTHONPATH=src .venv/bin/python scripts/run_provider_shadow_verification.py \
-    --provider odds_api --live --overwrite-staging --include-event-markets
-
-# 2. derive the card input from eligible markets
-PYTHONPATH=src .venv/bin/python scripts/run_api_first_card_workflow.py
-
-# 3. generate the card
-PYTHONPATH=src .venv/bin/python scripts/run_automated_card.py
-
-# 4. refresh the routine bridges
-PYTHONPATH=src .venv/bin/python scripts/run_epl_model_task.py
-PYTHONPATH=src .venv/bin/python scripts/run_epl_card_task.py
-PYTHONPATH=src .venv/bin/python scripts/run_epl_settle_preview_task.py
-```
-
-Outputs `data/outputs/automated_card.{md,json}` with best bets, leans,
-passes/avoids, unit suggestions, model edges, the active odds source, and the
-market eligibility breakdown.
-
-The card **refuses to generate** unless the provider is allowlisted, staging
-validation is handoff-eligible, at least one market is eligible, and the derived
-input exists. A blocked card returns empty lists, never placeholders.
-
-Market rows are filtered twice — before and after report assembly — so an
-excluded market cannot reach published picks. Unit suggestions read the
-confidence tier the model already assigned (A→1.0, B→0.75, C→0.5); an
-unrecognised tier gets no suggestion rather than a guessed one.
-
-> Passes and avoids are model judgements about markets that were priced and
-> modelled. A market the provider could not supply is **excluded**, which is a
-> different thing, and the report keeps them apart.
-
----
-
-## Provider trust / allowlist path
-
-```bash
-PYTHONPATH=src .venv/bin/python scripts/build_provider_trust_packet.py
-```
-
-Produces `data/outputs/provider_trust_packet.{md,json}` consolidating the
-acceptance checklist, coverage by scope, market eligibility, quota, and safety
-flags, plus the exact approval still needed.
-
-The existing acceptance process is used, not bypassed: it requires **3 completed
-live shadow runs** and a clean review window. Allowlisting is an edit to
-`data/manual/staging_provider_policy.json`.
-
-### Per-market allowlisting
-
-The policy accepts an optional `allowed_markets` list. Absent means no market
-restriction; present means markets outside it are disabled for automated picks.
-This exists so a market that later becomes complete cannot silently join the
-card — completeness is not consent.
-
-```json
-"allowed_provider_names": ["manual_reviewed", "the_odds_api"],
-"allowed_markets": ["1x2", "btts"]
-```
-
-### The PR gate needs a human receipt
-
-Changing the policy triggers the **Provider Policy PR Gate** workflow, which
-requires a bound evidence chain including a human acceptance receipt naming a
-reviewer:
-
-```bash
-PYTHONPATH=src .venv/bin/python scripts/create_provider_human_acceptance_receipt.py \
-    --provider odds_api \
-    --reviewer-name "Your Name" \
-    --decision approved_for_allowlist_pr \
-    --notes "Reviewed shadow evidence for 1X2 and BTTS." \
-    --write-receipt
-```
-
-This receipt records that **a named person** reviewed the evidence. It is
-deliberately not something the automation issues on your behalf.
 
 ---
 

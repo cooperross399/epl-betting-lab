@@ -108,6 +108,9 @@ def _gather_evidence(output_dir: Path) -> dict[str, Any]:
     validation, validation_error = _read_json(
         output_dir / "staging_input_validation.json"
     )
+    card_input, card_input_error = _read_json(
+        output_dir / "automated_card_input.json"
+    )
     return {
         "week1_readiness": readiness,
         "week1_readiness_error": readiness_error,
@@ -115,6 +118,33 @@ def _gather_evidence(output_dir: Path) -> dict[str, Any]:
         "provider_shadow_error": shadow_error,
         "staging_validation": validation,
         "staging_validation_error": validation_error,
+        "automated_card_input": card_input,
+        "automated_card_input_error": card_input_error,
+    }
+
+
+def _market_eligibility(card_input: Mapping[str, Any]) -> dict[str, Any]:
+    """Summarise per-market eligibility from the automated card input report."""
+    eligibility = _section(card_input, "eligibility")
+    markets = eligibility.get("markets", [])
+    markets = markets if isinstance(markets, list) else []
+    return {
+        "available": bool(card_input),
+        "included_markets": list(eligibility.get("eligible_markets", []) or []),
+        "excluded_markets": list(eligibility.get("excluded_markets", []) or []),
+        "unavailable_markets": list(eligibility.get("unavailable_markets", []) or []),
+        "incomplete_markets": list(eligibility.get("incomplete_markets", []) or []),
+        "disabled_markets": list(eligibility.get("disabled_markets", []) or []),
+        "any_market_eligible": bool(eligibility.get("any_market_eligible", False)),
+        "markets": markets,
+        "card_input_written": bool(card_input.get("card_input_written", False)),
+        "card_input_path": _clean(card_input.get("card_input_path")),
+        "card_input_row_count": int(card_input.get("row_count", 0) or 0),
+        "manual_entry_required": bool(card_input.get("manual_entry_required", False)),
+        "note": (
+            "Excluded markets are unavailable, incomplete, or disabled. They are "
+            "never reported as passes or no-value calls."
+        ),
     }
 
 
@@ -178,12 +208,20 @@ def _collect_blockers(
     odds: Mapping[str, Any],
     provider: Mapping[str, Any],
     evidence: Mapping[str, Any],
+    eligibility: Mapping[str, Any] | None = None,
 ) -> list[str]:
-    """Named blockers, in the vocabulary the routines report back."""
-    blockers: list[str] = []
+    """Named blockers, in the vocabulary the routines report back.
 
-    if evidence.get("week1_readiness_error"):
-        blockers.append(BLOCKER_NEEDS_VALIDATION)
+    In API-first mode the odds source is the provider, not the manual template.
+    An empty `current_odds.csv` is therefore not a blocker, and a market the
+    provider does not offer (BTTS) is excluded rather than demanded.
+    """
+    blockers: list[str] = []
+    eligibility = eligibility or {}
+    api_first = bool(eligibility.get("available")) and bool(
+        eligibility.get("any_market_eligible")
+    )
+
     # The readiness report renders fixture status as e.g. "Fresh (20 upcoming
     # match(es))", so match on the leading state rather than the whole string.
     fixture_status = _clean(odds.get("fixture_status"))
@@ -191,21 +229,36 @@ def _collect_blockers(
         fixture_status.startswith("Fresh") or fixture_status == "Not checked"
     ):
         blockers.append(BLOCKER_NEEDS_FIXTURES)
-    if (
-        float(odds.get("completeness_percentage", 0.0)) < 1.0
-        or int(odds.get("missing_odds_count", 0)) > 0
-    ):
-        blockers.append(BLOCKER_NEEDS_ODDS)
+
+    if api_first:
+        # Odds come from provider staging. Manual completeness is irrelevant.
+        if not eligibility.get("card_input_written"):
+            blockers.append(BLOCKER_NEEDS_ODDS)
+    else:
+        if evidence.get("week1_readiness_error"):
+            blockers.append(BLOCKER_NEEDS_VALIDATION)
+        if (
+            float(odds.get("completeness_percentage", 0.0)) < 1.0
+            or int(odds.get("missing_odds_count", 0)) > 0
+        ):
+            blockers.append(BLOCKER_NEEDS_ODDS)
+        # Only the legacy manual path treats an absent market as a blocker.
+        # API-first excludes it instead; see market_eligibility.
+        if provider.get("btts_status") == "Unavailable":
+            blockers.append(BLOCKER_NEEDS_BTTS)
+        if (
+            provider.get("staging_validation_verdict")
+            not in {"Ready for handoff", "Not checked"}
+            or int(odds.get("invalid_odds_issue_count", 0)) > 0
+        ):
+            blockers.append(BLOCKER_NEEDS_VALIDATION)
+
     if provider.get("team_mapping_status") not in {"Verified", "Not checked"}:
         blockers.append(BLOCKER_NEEDS_MAPPING)
-    if provider.get("btts_status") == "Unavailable":
-        blockers.append(BLOCKER_NEEDS_BTTS)
-    if (
-        provider.get("staging_validation_verdict") not in {"Ready for handoff", "Not checked"}
-        or int(odds.get("invalid_odds_issue_count", 0)) > 0
-    ):
-        blockers.append(BLOCKER_NEEDS_VALIDATION)
-    if not provider.get("handoff_eligible") or not provider.get("provider_allowed"):
+
+    # The provider allowlist remains a hard gate in both modes. Market
+    # eligibility narrows *which markets* may be used; it never grants trust.
+    if not provider.get("provider_allowed"):
         blockers.append(BLOCKER_PROVIDER_NOT_TRUSTED)
 
     return list(dict.fromkeys(blockers))
@@ -224,7 +277,8 @@ def build_epl_model_task(
 
     odds = _odds_status(readiness)
     provider = _provider_status(shadow)
-    blockers = _collect_blockers(odds, provider, evidence)
+    eligibility = _market_eligibility(evidence["automated_card_input"])
+    blockers = _collect_blockers(odds, provider, evidence, eligibility)
 
     card_ready = not blockers
     model_readiness = "Ready" if card_ready else "Blocked"
@@ -265,6 +319,10 @@ def build_epl_model_task(
             "btts_row_count": provider["btts_row_count"],
             "btts_trusted": False,
         },
+        "market_eligibility": eligibility,
+        "included_markets": eligibility["included_markets"],
+        "excluded_markets": eligibility["excluded_markets"],
+        "manual_odds_entry_required": eligibility["manual_entry_required"],
         "blockers": blockers,
         "next_action": next_action,
         "epl_card_ready": card_ready,
@@ -295,6 +353,7 @@ def render_epl_model_task(summary: Mapping[str, Any]) -> str:
     provider = summary["provider_status"]
     mapping = summary["mapping_coverage"]
     markets = summary["market_coverage"]
+    eligible = summary["market_eligibility"]
     blockers = [f"- {item}" for item in summary["blockers"]] or ["- None."]
     lines = [
         "# EPL Model Task",
@@ -354,6 +413,24 @@ def render_epl_model_task(summary: Mapping[str, Any]) -> str:
         f"- BTTS: **{markets['btts_status']}** ({markets['btts_row_count']} rows)",
         f"- BTTS trusted: **{'Yes' if markets['btts_trusted'] else 'No'}**",
         "",
+        "## Market eligibility",
+        "",
+        f"- Included (usable for picks): **{eligible['included_markets'] or 'none'}**",
+        f"- Excluded: **{eligible['excluded_markets'] or 'none'}**",
+        f"- Unavailable: {eligible['unavailable_markets'] or 'none'}",
+        f"- Incomplete: {eligible['incomplete_markets'] or 'none'}",
+        f"- Disabled: {eligible['disabled_markets'] or 'none'}",
+        (
+            "- Manual odds entry required: "
+            f"**{'Yes' if eligible['manual_entry_required'] else 'No'}**"
+        ),
+        (
+            f"- Provider-derived card input: `{eligible['card_input_path'] or 'not built'}` "
+            f"({eligible['card_input_row_count']} rows)"
+        ),
+        "",
+        eligible["note"],
+        "",
         "## Blockers",
         "",
         *blockers,
@@ -405,7 +482,8 @@ def build_epl_card_task(
 
     odds = _odds_status(readiness)
     provider = _provider_status(shadow)
-    blockers = _collect_blockers(odds, provider, evidence)
+    eligibility = _market_eligibility(evidence["automated_card_input"])
+    blockers = _collect_blockers(odds, provider, evidence, eligibility)
 
     card_ready = not blockers
     card_status = "Ready" if card_ready else "Blocked"
@@ -435,24 +513,63 @@ def build_epl_card_task(
         "generated_at": _now(now),
         "card_status": card_status,
         "card_ready": card_ready,
+        "automated_generation_ready": card_ready
+        and bool(eligibility.get("card_input_written")),
         "picks_suppressed": not card_ready,
         "best_bets": best_bets,
         "leans": leans,
         "passes_or_avoids": passes,
         "unit_suggestions": unit_suggestions,
+        "market_eligibility": eligibility,
+        "included_markets": eligibility["included_markets"],
+        "excluded_markets": eligibility["excluded_markets"],
+        "unavailable_markets": eligibility["unavailable_markets"],
+        "manual_odds_entry_required": eligibility["manual_entry_required"],
+        "excluded_markets_note": (
+            "Excluded markets are unavailable, incomplete, or disabled. They are "
+            "never presented as passes, avoids, or no-value calls, and no BTTS "
+            "pick is produced while BTTS is unavailable."
+        ),
         "validation_warnings": odds["slate_warnings"],
         "validation_warning_count": odds["validation_warning_count"],
+        "odds_source": (
+            "provider-derived automated card input"
+            if eligibility.get("card_input_written")
+            else "manual current_odds.csv (legacy)"
+        ),
         "odds_completeness": {
-            "completion_percentage": odds["completeness_percentage"],
-            "missing_odds_count": odds["missing_odds_count"],
-            "status": odds["odds_file_status"],
+            # Completeness of the ACTIVE source. In API-first mode that is the
+            # provider-derived input, not the manual template.
+            "completion_percentage": (
+                1.0
+                if eligibility.get("card_input_written")
+                else odds["completeness_percentage"]
+            ),
+            "missing_odds_count": (
+                0
+                if eligibility.get("card_input_written")
+                else odds["missing_odds_count"]
+            ),
+            "status": (
+                "Provider-derived input complete for eligible markets"
+                if eligibility.get("card_input_written")
+                else odds["odds_file_status"]
+            ),
+            "legacy_manual_template_completion": odds["completeness_percentage"],
+            "legacy_manual_template_missing": odds["missing_odds_count"],
+            "legacy_template_is_active_source": not bool(
+                eligibility.get("card_input_written")
+            ),
         },
         "provider_source": {
             "provider_verdict": provider["verdict"],
             "handoff_eligible": provider["handoff_eligible"],
             "provider_allowed": provider["provider_allowed"],
-            "source_used": "none (provider output is shadow-only and untrusted)",
-            "trusted": False,
+            "source_used": (
+                eligibility.get("card_input_path")
+                or "none (provider output is shadow-only and untrusted)"
+            ),
+            "trusted": bool(provider.get("provider_allowed")),
         },
         "blockers": blockers,
         "next_action": next_action,
@@ -522,6 +639,22 @@ def render_epl_card_task(summary: Mapping[str, Any]) -> str:
         )
     lines.extend(
         [
+            "## Markets",
+            "",
+            f"- Included in the card: **{summary['included_markets'] or 'none'}**",
+            f"- Excluded: **{summary['excluded_markets'] or 'none'}**",
+            f"- Unavailable: {summary['unavailable_markets'] or 'none'}",
+            (
+                "- Manual odds entry required: "
+                f"**{'Yes' if summary['manual_odds_entry_required'] else 'No'}**"
+            ),
+            (
+                "- Automated generation ready: "
+                f"**{'Yes' if summary['automated_generation_ready'] else 'No'}**"
+            ),
+            "",
+            summary["excluded_markets_note"],
+            "",
             "## Odds completeness",
             "",
             f"- Completeness: **{completeness['completion_percentage']:.1%}**",

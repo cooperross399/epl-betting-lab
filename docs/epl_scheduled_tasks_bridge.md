@@ -1,5 +1,10 @@
 # EPL Scheduled Tasks Bridge
 
+> **API-first mode.** Odds come from The Odds API, not from a hand-filled
+> template. `data/manual/current_odds.csv` is no longer the active source and
+> **no manual odds entry is required**. See
+> [API-first odds workflow](#api-first-odds-workflow) below.
+
 This document connects the three Claude scheduled tasks/routines to concrete
 repository outputs:
 
@@ -176,6 +181,77 @@ Rules:
 Report: ledger rows, open bets, settled bets, would-settle count (always 0),
 blockers, and the exact next action.
 ```
+
+---
+
+## API-first odds workflow
+
+The manual odds-entry job is gone. Odds are derived from provider staging
+evidence and written **outside** `data/manual/`.
+
+```text
+live provider shadow/staging fetch
+  -> staging validation + team normalization
+  -> per-market eligibility (data/outputs/automated_card_input.json)
+  -> provider-derived card input (data/staging/automated_card_current_odds.csv)
+  -> EPL Model / EPL CARD bridges
+```
+
+Build the card input:
+
+```bash
+PYTHONPATH=src .venv/bin/python scripts/run_api_first_card_workflow.py
+```
+
+The writer **refuses** any path under `data/manual/` and raises
+`ProtectedPathError` rather than touching a protected file.
+
+### Market eligibility
+
+Eligibility is decided **per market**, so one absent market no longer blocks the
+whole card:
+
+| State | Meaning | Used for picks? |
+|:------|:--------|:----------------|
+| `eligible` | Provider covers every fixture in the window; mapping, validation and freshness pass | ✅ Yes |
+| `incomplete` | Provider covers only some fixtures | ❌ Excluded (not partially used) |
+| `unavailable` | Provider returned no rows at all (BTTS today) | ❌ Excluded |
+| `disabled` | Deliberately excluded from automated picks | ❌ Excluded |
+
+**BTTS is disabled by default** (`DEFAULT_DISABLED_MARKETS`) because the featured
+endpoint does not return it. Requiring it would reintroduce a manual entry job.
+
+> An excluded market is **never** a pass, a lean, an avoid, or a "no value"
+> call. It is reported as unavailable/incomplete/disabled, and no price is ever
+> invented to fill the gap.
+
+Current Week 1 state: **1X2 eligible** (10/10 fixtures), **totals incomplete**
+(8/10), **BTTS disabled** — so the automated card is 1X2-only, which is exactly
+the intended behaviour when only some markets are complete.
+
+### Price selection
+
+Where several bookmakers priced the same selection, the **best real quote** is
+taken (lowest implied probability) and the source book is preserved. That is a
+choice among real prices — never an average, a synthetic line, or a fabricated
+number.
+
+---
+
+## Provider trust / allowlist path
+
+```bash
+PYTHONPATH=src .venv/bin/python scripts/build_provider_trust_packet.py
+```
+
+Produces `data/outputs/provider_trust_packet.{md,json}` consolidating the
+acceptance checklist, coverage by scope, market eligibility, quota, and safety
+flags, plus the exact approval still needed.
+
+The existing acceptance process is used, not bypassed: it requires **3 completed
+live shadow runs**. Allowlisting is a human edit to
+`data/manual/staging_provider_policy.json`; no script in this repository makes
+that change.
 
 ---
 

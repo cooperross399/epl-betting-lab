@@ -42,10 +42,17 @@ def main() -> int:
         f"{summary['selected_slate']['fixtures_in_window']} / "
         f"{summary['selected_slate']['fixtures_outside_window']}"
     )
+    print(f"Included markets: {summary['included_markets'] or 'none'}")
+    print(f"Excluded markets: {summary['excluded_markets'] or 'none'}")
     print(
-        "Odds completeness: "
+        "Manual odds entry required: "
+        f"{'Yes' if summary['manual_odds_entry_required'] else 'No'}"
+    )
+    print(
+        "Legacy manual template completeness: "
         f"{summary['odds_status']['completeness_percentage']:.1%} "
-        f"({summary['odds_status']['missing_odds_count']} missing)"
+        f"({summary['odds_status']['missing_odds_count']} missing) "
+        "- not the active source in API-first mode"
     )
     print(f"Provider shadow verdict: {summary['provider_status']['verdict']}")
     print(

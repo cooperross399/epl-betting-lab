@@ -45,8 +45,15 @@ def main() -> int:
         print("Leans: withheld (card not ready)")
         print("Passes/avoids: withheld (card not ready)")
         print("Unit suggestions: withheld (card not ready)")
+    print(f"Included markets: {summary['included_markets'] or 'none'}")
+    print(f"Excluded markets: {summary['excluded_markets'] or 'none'}")
     print(
-        "Odds completeness: "
+        "Manual odds entry required: "
+        f"{'Yes' if summary['manual_odds_entry_required'] else 'No'}"
+    )
+    print(f"Odds source: {summary['odds_source']}")
+    print(
+        "Odds completeness (active source): "
         f"{summary['odds_completeness']['completion_percentage']:.1%} "
         f"({summary['odds_completeness']['missing_odds_count']} missing)"
     )

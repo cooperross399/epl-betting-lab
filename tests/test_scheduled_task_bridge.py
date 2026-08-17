@@ -217,11 +217,24 @@ def test_card_reports_named_blockers(tmp_path: Path) -> None:
     assert BLOCKER_PROVIDER_NOT_TRUSTED in blockers
 
 
-def test_card_never_claims_a_trusted_provider_source(tmp_path: Path) -> None:
-    _all_green(tmp_path)
+def test_card_source_is_untrusted_until_the_provider_is_allowlisted(
+    tmp_path: Path,
+) -> None:
+    _write_readiness(tmp_path)
+    _write_shadow(tmp_path, provider_policy={"provider_allowed": False})
+
     summary = build_epl_card_task(output_dir=tmp_path, now=NOW)
 
     assert summary["provider_source"]["trusted"] is False
+    assert BLOCKER_PROVIDER_NOT_TRUSTED in summary["blockers"]
+
+
+def test_card_source_becomes_trusted_only_via_the_allowlist(tmp_path: Path) -> None:
+    _all_green(tmp_path)
+    summary = build_epl_card_task(output_dir=tmp_path, now=NOW)
+
+    # Trust follows the reviewed allowlist, never market eligibility alone.
+    assert summary["provider_source"]["trusted"] is True
 
 
 def test_card_markdown_says_withheld_not_none_found(tmp_path: Path) -> None:

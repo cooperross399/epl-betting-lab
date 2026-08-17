@@ -850,6 +850,35 @@ ends with a manual confirmation checklist. Even a ready verdict requires a
 human to compare the slate against the official EPL schedule; the check
 never edits fixtures or odds and never fabricates prices.
 
+### Trim the slate to the imminent matchweek
+
+The odds completeness gate requires real prices for every fixture in
+`upcoming_fixtures.csv`. If the slate spans more than one matchweek and the
+later prices are not posted yet, preview deferring the later matchweek:
+
+```bash
+python scripts/trim_upcoming_fixtures.py
+```
+
+The preview groups fixtures into matchweek groups, marks each row `Keep`,
+`Defer`, or `Keep (needs manual attention)` for past/invalid dates, and
+prints a confirmation ID. It edits nothing. To apply the exact previewed
+trim from Terminal:
+
+```bash
+python scripts/trim_upcoming_fixtures.py --apply --confirm-id CONFIRM_ID_FROM_PREVIEW
+```
+
+Apply is blocked if the fixture file changed after the preview. It first
+backs up the full slate under `data/manual/backups/`, then moves the
+deferred rows to `data/manual/archive/deferred_fixtures/` (verified after
+writing, never deleted), keeps the imminent matchweek plus any
+needs-attention rows in place, and appends
+`data/outputs/fixture_slate_trim_audit.csv`. After applying, rerun
+`python scripts/run_week1_launch_readiness.py` and review its odds-template
+guidance so the odds file matches the trimmed slate. The tool never edits
+odds, fabricates prices, or places bets.
+
 ### Week 1 launch setup
 
 Before the first weekly pipeline run, use one safe setup command:

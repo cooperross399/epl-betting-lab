@@ -49,6 +49,10 @@ without rediscovering it. Read `CLAUDE.md` first for the hard safety rules.
   slate confirmation check: duplicate fixtures, double-booked teams, unknown
   team spellings, date problems, partial matchweeks, and slate/odds drift,
   plus a manual confirmation checklist against the official schedule.
+- `python scripts/trim_upcoming_fixtures.py` previews (and, with a
+  confirmation ID, applies) deferring later matchweek groups out of the slate
+  when their odds are not posted yet, with backups and a deferred-fixtures
+  archive. Nothing is deleted.
 - `python scripts/run_week1_launch_readiness.py` checks the Week 1 fixture
   slate and the odds file. If `current_odds.csv` does not exist and fixtures
   are usable, it creates a blank seven-market template per fixture — with all

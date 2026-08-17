@@ -109,3 +109,90 @@ def test_a_non_policy_shadow_verdict_is_not_a_technical_success() -> None:
     """Only a policy-only block may count as technically successful."""
     assert _technical_staging_success(_summary(verdict="Blocked")) is False
     assert _technical_staging_success(_summary(verdict="Needs mapping fixes")) is False
+
+
+# --- shadow run comparison -------------------------------------------------
+
+
+def _records(latest: dict, previous: dict | None = None) -> list[dict]:
+    """Two readable, integrity-verified archives, newest first."""
+    def _wrap(summary: dict) -> dict:
+        return {
+            "summary": summary,
+            "readable": True,
+            "archive_integrity_status": "Verified",
+        }
+
+    return [_wrap(latest), _wrap(previous or _comparison_summary())]
+
+
+def _comparison_summary(**overrides) -> dict:
+    base = {
+        "verdict": "Needs provider policy review",
+        "team_mapping": {"status": "Verified"},
+        "fixture_matching": {"status": "Verified"},
+        "market_coverage": {"status": "Incomplete"},
+        "odds_completeness": {"completion_percentage": 1.0},
+        "market_eligibility": {
+            "any_market_eligible": True,
+            "eligible_markets": ["1x2", "btts"],
+            "excluded_markets": ["total_2_5"],
+        },
+        "provider_policy": {"provider_policy_status": "Provider not allowed"},
+    }
+    base.update(overrides)
+    return base
+
+
+def test_comparison_excluded_market_does_not_flag_coverage() -> None:
+    from epl_betting_lab.reports.provider_shadow_history import _comparison_verdict
+
+    import pandas as pd
+
+    rows = pd.DataFrame(
+        [{"metric": "provider_policy_status", "change_status": "Unchanged"}]
+    )
+    verdict, _ = _comparison_verdict(_records(_comparison_summary()), rows)
+
+    assert verdict != "Market coverage issue"
+
+
+def test_comparison_no_eligible_market_still_flags_coverage() -> None:
+    from epl_betting_lab.reports.provider_shadow_history import _comparison_verdict
+
+    verdict, _ = _comparison_verdict(
+        _records(
+            _comparison_summary(
+                market_eligibility={
+                    "any_market_eligible": False,
+                    "eligible_markets": [],
+                    "excluded_markets": ["1x2", "btts", "total_2_5"],
+                }
+            )
+        ),
+        None,
+    )
+
+    assert verdict == "Market coverage issue"
+
+
+def test_comparison_records_without_eligibility_keep_all_markets_rule() -> None:
+    from epl_betting_lab.reports.provider_shadow_history import _comparison_verdict
+
+    summary = _comparison_summary()
+    summary.pop("market_eligibility")
+
+    verdict, _ = _comparison_verdict(_records(summary), None)
+
+    assert verdict == "Market coverage issue"
+
+
+def test_comparison_incomplete_eligible_scope_still_flags_coverage() -> None:
+    from epl_betting_lab.reports.provider_shadow_history import _comparison_verdict
+
+    verdict, _ = _comparison_verdict(
+        _records(_comparison_summary(odds_completeness={"completion_percentage": 0.9})),
+        None,
+    )
+
+    assert verdict == "Market coverage issue"

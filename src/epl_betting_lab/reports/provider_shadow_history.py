@@ -636,11 +636,27 @@ def _comparison_verdict(
         summary, "fixture_matching", "status"
     ) != "Verified":
         return "Mapping issue", "The latest run has unresolved team or fixture mapping coverage."
-    if _nested(summary, "market_coverage", "status") != "Complete" or (
+    # Coverage is judged market-aware, matching staging validation and the
+    # acceptance checklist. A market the card excludes - today `total_2_5`,
+    # priced at 3.0/3.5 for two fixtures - must not fail an otherwise-clean
+    # run. Records written before market eligibility existed keep the original
+    # all-markets requirement.
+    eligibility = _nested(summary, "market_eligibility", default=None)
+    if isinstance(eligibility, Mapping):
+        coverage_ok = bool(eligibility.get("any_market_eligible", False))
+        coverage_detail = (
+            "No market is complete enough to be eligible for an automated card."
+        )
+    else:
+        coverage_ok = _nested(summary, "market_coverage", "status") == "Complete"
+        coverage_detail = (
+            "The latest run is missing required market rows or prices."
+        )
+    if not coverage_ok or (
         _as_float(_nested(summary, "odds_completeness", "completion_percentage"))
         or 0.0
     ) < 1.0:
-        return "Market coverage issue", "The latest run is missing required market rows or prices."
+        return "Market coverage issue", coverage_detail
 
     previous_summary = previous.get("summary", {})
     if not isinstance(previous_summary, Mapping):

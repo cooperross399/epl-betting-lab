@@ -47,12 +47,31 @@ FORBIDDEN_MARKETS: frozenset[str] = frozenset({"total_2_5"})
 #: How long an approval stays usable.
 DEFAULT_MAX_APPROVAL_AGE_HOURS = 72.0
 
-#: Artifacts whose content the approval is bound to.
+#: Artifacts whose content the approval is bound to. All are checksummed into
+#: the receipt for the audit record.
 EVIDENCE_ARTIFACTS = (
     "provider_acceptance_checklist.json",
     "provider_allowlist_evidence_bundle.json",
     "provider_shadow_verification.json",
     "automated_card_input.json",
+)
+
+#: Artifacts the gate itself regenerates deterministically on every run. Their
+#: `generated_at` moves each time without the underlying evidence changing, so
+#: comparing an approval against them would make every approval instantly
+#: "stale" - the gate would invalidate the approval it was verifying.
+DERIVED_ARTIFACTS = frozenset(
+    {
+        "provider_acceptance_checklist.json",
+        "provider_allowlist_evidence_bundle.json",
+    }
+)
+
+#: Artifacts that only change when real provider work happens: a shadow run, or
+#: a rebuild of the card input. These are what staleness is measured against, so
+#: fetching new provider data after an approval still invalidates it.
+SUBSTANTIVE_ARTIFACTS = tuple(
+    name for name in EVIDENCE_ARTIFACTS if name not in DERIVED_ARTIFACTS
 )
 
 
@@ -196,10 +215,14 @@ def evidence_checksums(output_dir: Path | None = None) -> dict[str, str]:
 
 
 def _latest_evidence_time(output_dir: Path | None = None) -> datetime | None:
-    """Newest `generated_at` across the evidence artifacts."""
+    """Newest `generated_at` across the substantive evidence artifacts.
+
+    Deliberately ignores artifacts the gate regenerates itself; see
+    :data:`DERIVED_ARTIFACTS`.
+    """
     outputs = OUTPUTS_DIR if output_dir is None else Path(output_dir)
     newest: datetime | None = None
-    for name in EVIDENCE_ARTIFACTS:
+    for name in SUBSTANTIVE_ARTIFACTS:
         path = outputs / name
         if not path.is_file():
             continue
@@ -337,7 +360,7 @@ def verify_github_approval(
     evidence_time = _latest_evidence_time(output_dir)
     if evidence_time and evidence_time > submitted:
         raise GitHubApprovalError(
-            "Evidence changed after the approval was given "
+            "Provider evidence changed after the approval was given "
             f"(evidence {evidence_time.isoformat()} > approval "
             f"{submitted.isoformat()}). Re-approve on the current evidence."
         )

@@ -248,12 +248,48 @@ def test_future_dated_approval_is_refused(tmp_path: Path) -> None:
         _verify(_activity(submitted=NOW + timedelta(hours=5)), tmp_path)
 
 
-def test_evidence_newer_than_the_approval_is_refused(tmp_path: Path) -> None:
-    """Approving, then regenerating evidence, must invalidate the approval."""
+def test_new_provider_evidence_after_the_approval_is_refused(tmp_path: Path) -> None:
+    """Approving, then fetching new provider data, must invalidate the approval."""
     _evidence(tmp_path, generated_at=NOW - timedelta(minutes=5))
 
-    with pytest.raises(GitHubApprovalError, match="Evidence changed"):
+    with pytest.raises(GitHubApprovalError, match="Provider evidence changed"):
         _verify(_activity(), tmp_path)
+
+
+def test_regenerating_derived_reports_does_not_invalidate_the_approval(
+    tmp_path: Path,
+) -> None:
+    """The gate regenerates the checklist and bundle on every run.
+
+    Measuring staleness against those would make the gate invalidate the very
+    approval it is verifying, seconds after it was given.
+    """
+    _evidence(tmp_path)
+    for name in ("provider_acceptance_checklist.json",
+                 "provider_allowlist_evidence_bundle.json"):
+        (tmp_path / name).write_text(
+            json.dumps({"generated_at": NOW.isoformat(), "regenerated": True}),
+            encoding="utf-8",
+        )
+
+    approval = _verify(_activity(), tmp_path)
+
+    assert approval["approved_markets"] == ["1x2", "btts"]
+    # The regenerated artifacts are still checksummed into the receipt.
+    assert "provider_acceptance_checklist.json" in approval["evidence_checksums_sha256"]
+
+
+def test_substantive_and_derived_artifacts_are_disjoint() -> None:
+    from epl_betting_lab.reports.github_approval import (
+        DERIVED_ARTIFACTS,
+        EVIDENCE_ARTIFACTS,
+        SUBSTANTIVE_ARTIFACTS,
+    )
+
+    assert set(SUBSTANTIVE_ARTIFACTS).isdisjoint(DERIVED_ARTIFACTS)
+    assert set(SUBSTANTIVE_ARTIFACTS) | DERIVED_ARTIFACTS == set(EVIDENCE_ARTIFACTS)
+    # A shadow run must remain a staleness trigger.
+    assert "provider_shadow_verification.json" in SUBSTANTIVE_ARTIFACTS
 
 
 def test_review_of_a_superseded_commit_is_refused(tmp_path: Path) -> None:

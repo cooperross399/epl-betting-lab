@@ -1,0 +1,378 @@
+{
+  "actual_policy": {
+    "allow_missing_provenance": false,
+    "allow_unknown_providers": false,
+    "allowed_provider_names": [
+      "manual_reviewed",
+      "the_odds_api"
+    ],
+    "allowed_provider_types": [
+      "manual_upload",
+      "sportsbook_export",
+      "odds_api",
+      "fixture_provider"
+    ],
+    "max_provider_run_age_hours": 12,
+    "max_receipt_age_hours": 12,
+    "provider_allowlist_entries": {
+      "the_odds_api": {
+        "allowlist_status": "allowed",
+        "approved_at": "2026-08-17T16:03:07-04:00",
+        "cutoff_policy": {
+          "day": "Thursday",
+          "time": "10:00",
+          "timezone": "America/New_York"
+        },
+        "evidence_receipt_id": "odds_api-20260817T160307-0400-20fb55e75c14",
+        "known_limitations": [
+          "`total_2_5` is not allowlisted: the reviewed evidence did not find it eligible. Its prices remain unavailable or incomplete and must never be fabricated.",
+          "Allowlisting does not bypass staging validation, freshness, completeness, checksum, receipt, or Thursday cutoff gates."
+        ],
+        "max_provider_run_age_hours": 12.0,
+        "provider_key": "odds_api",
+        "provider_name": "the_odds_api",
+        "provider_type": "odds_api",
+        "required_markets": [
+          "1x2",
+          "btts"
+        ],
+        "reviewed_at": "2026-08-17T16:03:08-04:00",
+        "reviewer_name": "cooperross399",
+        "verification_report_checksum_sha256": "22fa32fb6d0316128d6b89c53736ad943d787c6be2828b25c87d0c9982da653a",
+        "verification_report_path": "data/outputs/provider_human_acceptance_receipt_verification.json"
+      }
+    },
+    "thursday_cutoff_time": "10:00",
+    "timezone": "America/New_York"
+  },
+  "baseline_actual_diff": "--- preview baseline staging_provider_policy.json\n+++ current staging_provider_policy.json\n@@ -2,7 +2,8 @@\n   \"allow_missing_provenance\": false,\n   \"allow_unknown_providers\": false,\n   \"allowed_provider_names\": [\n-    \"manual_reviewed\"\n+    \"manual_reviewed\",\n+    \"the_odds_api\"\n   ],\n   \"allowed_provider_types\": [\n     \"manual_upload\",\n@@ -12,6 +13,34 @@\n   ],\n   \"max_provider_run_age_hours\": 12,\n   \"max_receipt_age_hours\": 12,\n+  \"provider_allowlist_entries\": {\n+    \"the_odds_api\": {\n+      \"allowlist_status\": \"allowed\",\n+      \"approved_at\": \"2026-08-17T16:03:07-04:00\",\n+      \"cutoff_policy\": {\n+        \"day\": \"Thursday\",\n+        \"time\": \"10:00\",\n+        \"timezone\": \"America/New_York\"\n+      },\n+      \"evidence_receipt_id\": \"odds_api-20260817T160307-0400-20fb55e75c14\",\n+      \"known_limitations\": [\n+        \"`total_2_5` is not allowlisted: the reviewed evidence did not find it eligible. Its prices remain unavailable or incomplete and must never be fabricated.\",\n+        \"Allowlisting does not bypass staging validation, freshness, completeness, checksum, receipt, or Thursday cutoff gates.\"\n+      ],\n+      \"max_provider_run_age_hours\": 12.0,\n+      \"provider_key\": \"odds_api\",\n+      \"provider_name\": \"the_odds_api\",\n+      \"provider_type\": \"odds_api\",\n+      \"required_markets\": [\n+        \"1x2\",\n+        \"btts\"\n+      ],\n+      \"reviewed_at\": \"2026-08-17T16:03:08-04:00\",\n+      \"reviewer_name\": \"cooperross399\",\n+      \"verification_report_checksum_sha256\": \"22fa32fb6d0316128d6b89c53736ad943d787c6be2828b25c87d0c9982da653a\",\n+      \"verification_report_path\": \"data/outputs/provider_human_acceptance_receipt_verification.json\"\n+    }\n+  },\n   \"thursday_cutoff_time\": \"10:00\",\n   \"timezone\": \"America/New_York\"\n }",
+  "baseline_policy": {
+    "allow_missing_provenance": false,
+    "allow_unknown_providers": false,
+    "allowed_provider_names": [
+      "manual_reviewed"
+    ],
+    "allowed_provider_types": [
+      "manual_upload",
+      "sportsbook_export",
+      "odds_api",
+      "fixture_provider"
+    ],
+    "max_provider_run_age_hours": 12,
+    "max_receipt_age_hours": 12,
+    "thursday_cutoff_time": "10:00",
+    "timezone": "America/New_York"
+  },
+  "blockers": [],
+  "checks": [
+    {
+      "actual": "data/outputs/provider_allowlist_pr_preview.json",
+      "baseline": "",
+      "category": "Preview evidence",
+      "details": "The checker reads the existing preview and does not regenerate it.",
+      "expected": "Readable preview JSON",
+      "field": "preview_file",
+      "status": "Match"
+    },
+    {
+      "actual": "Ready for separate allowlist PR; Allowed",
+      "baseline": "",
+      "category": "Preview evidence",
+      "details": "Only a Ready, verified preview can define the expected policy change.",
+      "expected": "Ready for separate allowlist PR; proposed allowlist status Allowed",
+      "field": "preview_status",
+      "status": "Match"
+    },
+    {
+      "actual": "odds_api",
+      "baseline": "",
+      "category": "Provider identity",
+      "details": "The requested provider must match the preview exactly.",
+      "expected": "odds_api",
+      "field": "provider_key",
+      "status": "Match"
+    },
+    {
+      "actual": "the_odds_api",
+      "baseline": "",
+      "category": "Provider identity",
+      "details": "The requested provider must match the preview exactly.",
+      "expected": "the_odds_api",
+      "field": "provider_name",
+      "status": "Match"
+    },
+    {
+      "actual": "odds_api",
+      "baseline": "",
+      "category": "Provider identity",
+      "details": "The requested provider must match the preview exactly.",
+      "expected": "odds_api",
+      "field": "provider_type",
+      "status": "Match"
+    },
+    {
+      "actual": "22fa32fb6d0316128d6b89c53736ad943d787c6be2828b25c87d0c9982da653a",
+      "baseline": "",
+      "category": "Preview evidence",
+      "details": "The checker re-hashes the verification report bound by the preview.",
+      "expected": "22fa32fb6d0316128d6b89c53736ad943d787c6be2828b25c87d0c9982da653a",
+      "field": "verification_report_checksum_sha256",
+      "status": "Match"
+    },
+    {
+      "actual": "data/manual/staging_provider_policy.json",
+      "baseline": "",
+      "category": "Policy",
+      "details": "The policy is read and hashed; it is never edited by this checker.",
+      "expected": "data/manual/staging_provider_policy.json",
+      "field": "policy_file",
+      "status": "Match"
+    },
+    {
+      "actual": "allowed",
+      "baseline": "Missing",
+      "category": "Proposed provider fields",
+      "details": "Required provider fields must match the preview exactly.",
+      "expected": "allowed",
+      "field": "provider_allowlist_entries.the_odds_api.allowlist_status",
+      "status": "Match"
+    },
+    {
+      "actual": "2026-08-17T16:03:07-04:00",
+      "baseline": "Missing",
+      "category": "Proposed provider fields",
+      "details": "Required provider fields must match the preview exactly.",
+      "expected": "2026-08-17T16:03:07-04:00",
+      "field": "provider_allowlist_entries.the_odds_api.approved_at",
+      "status": "Match"
+    },
+    {
+      "actual": "Thursday",
+      "baseline": "Missing",
+      "category": "Proposed provider fields",
+      "details": "Required provider fields must match the preview exactly.",
+      "expected": "Thursday",
+      "field": "provider_allowlist_entries.the_odds_api.cutoff_policy.day",
+      "status": "Match"
+    },
+    {
+      "actual": "10:00",
+      "baseline": "Missing",
+      "category": "Proposed provider fields",
+      "details": "Required provider fields must match the preview exactly.",
+      "expected": "10:00",
+      "field": "provider_allowlist_entries.the_odds_api.cutoff_policy.time",
+      "status": "Match"
+    },
+    {
+      "actual": "America/New_York",
+      "baseline": "Missing",
+      "category": "Proposed provider fields",
+      "details": "Required provider fields must match the preview exactly.",
+      "expected": "America/New_York",
+      "field": "provider_allowlist_entries.the_odds_api.cutoff_policy.timezone",
+      "status": "Match"
+    },
+    {
+      "actual": "odds_api-20260817T160307-0400-20fb55e75c14",
+      "baseline": "Missing",
+      "category": "Proposed provider fields",
+      "details": "Required provider fields must match the preview exactly.",
+      "expected": "odds_api-20260817T160307-0400-20fb55e75c14",
+      "field": "provider_allowlist_entries.the_odds_api.evidence_receipt_id",
+      "status": "Match"
+    },
+    {
+      "actual": "[\"`total_2_5` is not allowlisted: the reviewed evidence did not find it eligible. Its prices remain unavailable or incomplete and must never be fabricated.\", \"Allowlisting does not bypass staging validation, freshness, completeness, checksum, receipt, or Thursday cutoff gates.\"]",
+      "baseline": "Missing",
+      "category": "Proposed provider fields",
+      "details": "Required provider fields must match the preview exactly.",
+      "expected": "[\"`total_2_5` is not allowlisted: the reviewed evidence did not find it eligible. Its prices remain unavailable or incomplete and must never be fabricated.\", \"Allowlisting does not bypass staging validation, freshness, completeness, checksum, receipt, or Thursday cutoff gates.\"]",
+      "field": "provider_allowlist_entries.the_odds_api.known_limitations",
+      "status": "Match"
+    },
+    {
+      "actual": "12.0",
+      "baseline": "Missing",
+      "category": "Proposed provider fields",
+      "details": "Required provider fields must match the preview exactly.",
+      "expected": "12.0",
+      "field": "provider_allowlist_entries.the_odds_api.max_provider_run_age_hours",
+      "status": "Match"
+    },
+    {
+      "actual": "odds_api",
+      "baseline": "Missing",
+      "category": "Proposed provider fields",
+      "details": "Required provider fields must match the preview exactly.",
+      "expected": "odds_api",
+      "field": "provider_allowlist_entries.the_odds_api.provider_key",
+      "status": "Match"
+    },
+    {
+      "actual": "the_odds_api",
+      "baseline": "Missing",
+      "category": "Proposed provider fields",
+      "details": "Required provider fields must match the preview exactly.",
+      "expected": "the_odds_api",
+      "field": "provider_allowlist_entries.the_odds_api.provider_name",
+      "status": "Match"
+    },
+    {
+      "actual": "odds_api",
+      "baseline": "Missing",
+      "category": "Proposed provider fields",
+      "details": "Required provider fields must match the preview exactly.",
+      "expected": "odds_api",
+      "field": "provider_allowlist_entries.the_odds_api.provider_type",
+      "status": "Match"
+    },
+    {
+      "actual": "[\"1x2\", \"btts\"]",
+      "baseline": "Missing",
+      "category": "Proposed provider fields",
+      "details": "Required provider fields must match the preview exactly.",
+      "expected": "[\"1x2\", \"btts\"]",
+      "field": "provider_allowlist_entries.the_odds_api.required_markets",
+      "status": "Match"
+    },
+    {
+      "actual": "2026-08-17T16:03:08-04:00",
+      "baseline": "Missing",
+      "category": "Proposed provider fields",
+      "details": "Required provider fields must match the preview exactly.",
+      "expected": "2026-08-17T16:03:08-04:00",
+      "field": "provider_allowlist_entries.the_odds_api.reviewed_at",
+      "status": "Match"
+    },
+    {
+      "actual": "cooperross399",
+      "baseline": "Missing",
+      "category": "Proposed provider fields",
+      "details": "Required provider fields must match the preview exactly.",
+      "expected": "cooperross399",
+      "field": "provider_allowlist_entries.the_odds_api.reviewer_name",
+      "status": "Match"
+    },
+    {
+      "actual": "22fa32fb6d0316128d6b89c53736ad943d787c6be2828b25c87d0c9982da653a",
+      "baseline": "Missing",
+      "category": "Proposed provider fields",
+      "details": "Required provider fields must match the preview exactly.",
+      "expected": "22fa32fb6d0316128d6b89c53736ad943d787c6be2828b25c87d0c9982da653a",
+      "field": "provider_allowlist_entries.the_odds_api.verification_report_checksum_sha256",
+      "status": "Match"
+    },
+    {
+      "actual": "data/outputs/provider_human_acceptance_receipt_verification.json",
+      "baseline": "Missing",
+      "category": "Proposed provider fields",
+      "details": "Required provider fields must match the preview exactly.",
+      "expected": "data/outputs/provider_human_acceptance_receipt_verification.json",
+      "field": "provider_allowlist_entries.the_odds_api.verification_report_path",
+      "status": "Match"
+    },
+    {
+      "actual": "[\"manual_reviewed\", \"the_odds_api\"]",
+      "baseline": "[\"manual_reviewed\"]",
+      "category": "Expected policy changes",
+      "details": "This is an intended policy change recorded by the preview.",
+      "expected": "[\"manual_reviewed\", \"the_odds_api\"]",
+      "field": "allowed_provider_names",
+      "status": "Match"
+    },
+    {
+      "actual": "No newly enabled setting detected",
+      "baseline": "No newly enabled setting",
+      "category": "Safety",
+      "details": "Allowlisting and cron remain separate decisions.",
+      "expected": "No newly enabled setting",
+      "field": "cron_or_automation_enablement",
+      "status": "Match"
+    }
+  ],
+  "expected_actual_diff": "",
+  "expected_policy": {
+    "allow_missing_provenance": false,
+    "allow_unknown_providers": false,
+    "allowed_provider_names": [
+      "manual_reviewed",
+      "the_odds_api"
+    ],
+    "allowed_provider_types": [
+      "manual_upload",
+      "sportsbook_export",
+      "odds_api",
+      "fixture_provider"
+    ],
+    "max_provider_run_age_hours": 12,
+    "max_receipt_age_hours": 12,
+    "provider_allowlist_entries": {
+      "the_odds_api": {
+        "allowlist_status": "allowed",
+        "approved_at": "2026-08-17T16:03:07-04:00",
+        "cutoff_policy": {
+          "day": "Thursday",
+          "time": "10:00",
+          "timezone": "America/New_York"
+        },
+        "evidence_receipt_id": "odds_api-20260817T160307-0400-20fb55e75c14",
+        "known_limitations": [
+          "`total_2_5` is not allowlisted: the reviewed evidence did not find it eligible. Its prices remain unavailable or incomplete and must never be fabricated.",
+          "Allowlisting does not bypass staging validation, freshness, completeness, checksum, receipt, or Thursday cutoff gates."
+        ],
+        "max_provider_run_age_hours": 12.0,
+        "provider_key": "odds_api",
+        "provider_name": "the_odds_api",
+        "provider_type": "odds_api",
+        "required_markets": [
+          "1x2",
+          "btts"
+        ],
+        "reviewed_at": "2026-08-17T16:03:08-04:00",
+        "reviewer_name": "cooperross399",
+        "verification_report_checksum_sha256": "22fa32fb6d0316128d6b89c53736ad943d787c6be2828b25c87d0c9982da653a",
+        "verification_report_path": "data/outputs/provider_human_acceptance_receipt_verification.json"
+      }
+    },
+    "thursday_cutoff_time": "10:00",
+    "timezone": "America/New_York"
+  },
+  "generated_at": "2026-08-17T16:05:22-04:00",
+  "policy": {
+    "checksum_sha256": "5b591c6f034bedae31d9a3e6517dc0beb818b53ea6332321abc482d51c4d7eb9",
+    "path": "data/manual/staging_provider_policy.json"
+  },
+  "preview": {
+    "checksum_sha256": "caebfa6c6939ef903d36dfabd5d4de8bcd447aba39bbdeca888d9e723bf5b4db",
+    "current_verification_checksum_sha256": "22fa32fb6d0316128d6b89c53736ad943d787c6be2828b25c87d0c9982da653a",
+    "expected_verification_checksum_sha256": "22fa32fb6d0316128d6b89c53736ad943d787c6be2828b25c87d0c9982da653a",
+    "path": "data/outputs/provider_allowlist_pr_preview.json",
+    "proposed_allowlist_status": "Allowed",
+    "status": "Ready for separate allowlist PR",
+    "verification_checksum_status": "Match",
+    "verification_report_path": "data/outputs/provider_human_acceptance_receipt_verification.json"
+  },
+  "provider_key": "odds_api",
+  "provider_name": "the_odds_api",
+  "provider_type": "odds_api",
+  "safety": {
+    "bets_placed": false,
+    "cron_enabled": false,
+    "picks_generated": false,
+    "preview_created": false,
+    "protected_files_edited": false,
+    "provider_allowlisted": false,
+    "provider_policy_edited": false,
+    "provider_run": false,
+    "read_only": true,
+    "receipt_verified_by_side_effect": false,
+    "staging_promoted": false
+  },
+  "schema_version": 1,
+  "status_counts": {
+    "Match": 25
+  },
+  "verdict": "Conforms to preview",
+  "warnings": []
+}

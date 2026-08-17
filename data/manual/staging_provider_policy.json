@@ -1,6 +1,9 @@
 {
+  "allow_missing_provenance": false,
+  "allow_unknown_providers": false,
   "allowed_provider_names": [
-    "manual_reviewed"
+    "manual_reviewed",
+    "the_odds_api"
   ],
   "allowed_provider_types": [
     "manual_upload",
@@ -8,10 +11,36 @@
     "odds_api",
     "fixture_provider"
   ],
-  "allow_unknown_providers": false,
-  "allow_missing_provenance": false,
-  "max_receipt_age_hours": 12,
   "max_provider_run_age_hours": 12,
-  "timezone": "America/New_York",
-  "thursday_cutoff_time": "10:00"
+  "max_receipt_age_hours": 12,
+  "provider_allowlist_entries": {
+    "the_odds_api": {
+      "allowlist_status": "allowed",
+      "approved_at": "2026-08-17T16:03:07-04:00",
+      "cutoff_policy": {
+        "day": "Thursday",
+        "time": "10:00",
+        "timezone": "America/New_York"
+      },
+      "evidence_receipt_id": "odds_api-20260817T160307-0400-20fb55e75c14",
+      "known_limitations": [
+        "`total_2_5` is not allowlisted: the reviewed evidence did not find it eligible. Its prices remain unavailable or incomplete and must never be fabricated.",
+        "Allowlisting does not bypass staging validation, freshness, completeness, checksum, receipt, or Thursday cutoff gates."
+      ],
+      "max_provider_run_age_hours": 12.0,
+      "provider_key": "odds_api",
+      "provider_name": "the_odds_api",
+      "provider_type": "odds_api",
+      "required_markets": [
+        "1x2",
+        "btts"
+      ],
+      "reviewed_at": "2026-08-17T16:03:08-04:00",
+      "reviewer_name": "cooperross399",
+      "verification_report_checksum_sha256": "22fa32fb6d0316128d6b89c53736ad943d787c6be2828b25c87d0c9982da653a",
+      "verification_report_path": "data/outputs/provider_human_acceptance_receipt_verification.json"
+    }
+  },
+  "thursday_cutoff_time": "10:00",
+  "timezone": "America/New_York"
 }

@@ -1,17 +1,17 @@
 {
   "blockers": [],
-  "bundle_checksum_sha256": "8b1c0a7c1b3038290f60717c28eafd85bf704b8fea7cd34c1f085fbf7a257957",
-  "bundle_id": "odds_api-allowlist-evidence-8b1c0a7c1b303829",
-  "bundle_path": "data/outputs/archive/provider_allowlist_evidence_bundles/2026-08-17/160339_odds_api_8b1c0a7c1b30/provider_allowlist_evidence_bundle.json",
+  "bundle_checksum_sha256": "8162f21dbed5ebca21ddf962f4359606b0b5f2186a4cdbd799581ee89c60b089",
+  "bundle_id": "odds_api-allowlist-evidence-8162f21dbed5ebca",
+  "bundle_path": "data/outputs/archive/provider_allowlist_evidence_bundles/2026-08-17/160523_odds_api_8162f21dbed5/provider_allowlist_evidence_bundle.json",
   "bundle_source": "Latest archived provider bundle",
-  "calculated_recorded_bundle_checksum_sha256": "8b1c0a7c1b3038290f60717c28eafd85bf704b8fea7cd34c1f085fbf7a257957",
-  "calculated_recorded_bundle_id": "odds_api-allowlist-evidence-8b1c0a7c1b303829",
+  "calculated_recorded_bundle_checksum_sha256": "8162f21dbed5ebca21ddf962f4359606b0b5f2186a4cdbd799581ee89c60b089",
+  "calculated_recorded_bundle_id": "odds_api-allowlist-evidence-8162f21dbed5ebca",
   "checks": [
     {
       "category": "Bundle",
       "check": "Bundle file",
       "details": "Bundle JSON is readable.",
-      "evidence_path": "data/outputs/archive/provider_allowlist_evidence_bundles/2026-08-17/160339_odds_api_8b1c0a7c1b30/provider_allowlist_evidence_bundle.json",
+      "evidence_path": "data/outputs/archive/provider_allowlist_evidence_bundles/2026-08-17/160523_odds_api_8162f21dbed5/provider_allowlist_evidence_bundle.json",
       "evidence_type": "provider_allowlist_evidence_bundle",
       "expected": "Readable bundle JSON",
       "observed": "Verified",
@@ -22,7 +22,7 @@
       "category": "Bundle",
       "check": "Archived bundle selection",
       "details": "The latest archived bundle or explicit reviewed path was selected.",
-      "evidence_path": "data/outputs/archive/provider_allowlist_evidence_bundles/2026-08-17/160339_odds_api_8b1c0a7c1b30/provider_allowlist_evidence_bundle.json",
+      "evidence_path": "data/outputs/archive/provider_allowlist_evidence_bundles/2026-08-17/160523_odds_api_8162f21dbed5/provider_allowlist_evidence_bundle.json",
       "evidence_type": "provider_allowlist_evidence_bundle",
       "expected": "Latest archived bundle or explicit reviewed path",
       "observed": "Latest archived provider bundle",
@@ -76,13 +76,13 @@
     {
       "category": "Review state",
       "check": "Conformance verdict",
-      "details": "This evidence stage was not applicable when the bundle was built.",
+      "details": "Recorded review verdict remains acceptable.",
       "evidence_path": "",
       "evidence_type": "",
       "expected": "Conforms to preview or Not applicable",
-      "observed": "Not applicable",
+      "observed": "Conforms to preview",
       "required": "No",
-      "status": "Not applicable"
+      "status": "Verified"
     },
     {
       "category": "Evidence",
@@ -90,8 +90,8 @@
       "details": "Current evidence checksum matches the bundle.",
       "evidence_path": "data/manual/staging_provider_policy.json",
       "evidence_type": "staging_provider_policy",
-      "expected": "23d88241a66c9cc86b59d4278694b4e1522fd48048c268e0744dd217020b21d3",
-      "observed": "23d88241a66c9cc86b59d4278694b4e1522fd48048c268e0744dd217020b21d3",
+      "expected": "5b591c6f034bedae31d9a3e6517dc0beb818b53ea6332321abc482d51c4d7eb9",
+      "observed": "5b591c6f034bedae31d9a3e6517dc0beb818b53ea6332321abc482d51c4d7eb9",
       "required": "Yes",
       "status": "Verified"
     },
@@ -660,6 +660,17 @@
       "category": "Evidence",
       "check": "Evidence checksum",
       "details": "Current evidence checksum matches the bundle.",
+      "evidence_path": "data/outputs/provider_allowlist_pr_conformance.json",
+      "evidence_type": "provider_allowlist_pr_conformance",
+      "expected": "646647836148fbbf332f264e81600a15e7575eccaa0098e1ee05c3a79e383d25",
+      "observed": "646647836148fbbf332f264e81600a15e7575eccaa0098e1ee05c3a79e383d25",
+      "required": "No",
+      "status": "Verified"
+    },
+    {
+      "category": "Evidence",
+      "check": "Evidence checksum",
+      "details": "Current evidence checksum matches the bundle.",
       "evidence_path": "data/outputs/provider_allowlist_pr_preview.json",
       "evidence_type": "provider_allowlist_pr_preview",
       "expected": "caebfa6c6939ef903d36dfabd5d4de8bcd447aba39bbdeca888d9e723bf5b4db",
@@ -706,8 +717,8 @@
       "details": "Stored checksum and ID match the canonical recorded manifest.",
       "evidence_path": "",
       "evidence_type": "",
-      "expected": "8b1c0a7c1b3038290f60717c28eafd85bf704b8fea7cd34c1f085fbf7a257957 | odds_api-allowlist-evidence-8b1c0a7c1b303829",
-      "observed": "8b1c0a7c1b3038290f60717c28eafd85bf704b8fea7cd34c1f085fbf7a257957 | odds_api-allowlist-evidence-8b1c0a7c1b303829",
+      "expected": "8162f21dbed5ebca21ddf962f4359606b0b5f2186a4cdbd799581ee89c60b089 | odds_api-allowlist-evidence-8162f21dbed5ebca",
+      "observed": "8162f21dbed5ebca21ddf962f4359606b0b5f2186a4cdbd799581ee89c60b089 | odds_api-allowlist-evidence-8162f21dbed5ebca",
       "required": "No",
       "status": "Verified"
     },
@@ -717,8 +728,8 @@
       "details": "Current evidence recreates the stored bundle identity.",
       "evidence_path": "",
       "evidence_type": "",
-      "expected": "8b1c0a7c1b3038290f60717c28eafd85bf704b8fea7cd34c1f085fbf7a257957 | odds_api-allowlist-evidence-8b1c0a7c1b303829",
-      "observed": "8b1c0a7c1b3038290f60717c28eafd85bf704b8fea7cd34c1f085fbf7a257957 | odds_api-allowlist-evidence-8b1c0a7c1b303829",
+      "expected": "8162f21dbed5ebca21ddf962f4359606b0b5f2186a4cdbd799581ee89c60b089 | odds_api-allowlist-evidence-8162f21dbed5ebca",
+      "observed": "8162f21dbed5ebca21ddf962f4359606b0b5f2186a4cdbd799581ee89c60b089 | odds_api-allowlist-evidence-8162f21dbed5ebca",
       "required": "No",
       "status": "Verified"
     },
@@ -728,16 +739,16 @@
       "details": "Manifest count matches the recorded evidence file count.",
       "evidence_path": "",
       "evidence_type": "",
-      "expected": "56",
-      "observed": "56",
+      "expected": "57",
+      "observed": "57",
       "required": "No",
       "status": "Verified"
     }
   ],
-  "conformance_verdict": "Not applicable",
-  "current_evidence_bundle_checksum_sha256": "8b1c0a7c1b3038290f60717c28eafd85bf704b8fea7cd34c1f085fbf7a257957",
-  "current_evidence_bundle_id": "odds_api-allowlist-evidence-8b1c0a7c1b303829",
-  "generated_at": "2026-08-17T16:03:40-04:00",
+  "conformance_verdict": "Conforms to preview",
+  "current_evidence_bundle_checksum_sha256": "8162f21dbed5ebca21ddf962f4359606b0b5f2186a4cdbd799581ee89c60b089",
+  "current_evidence_bundle_id": "odds_api-allowlist-evidence-8162f21dbed5ebca",
+  "generated_at": "2026-08-17T16:05:23-04:00",
   "original_bundle_verdict": "Evidence bundle ready for PR review",
   "preview_verdict": "Ready for separate allowlist PR",
   "provider_key": "odds_api",
@@ -757,8 +768,7 @@
   },
   "schema_version": 1,
   "status_counts": {
-    "Not applicable": 1,
-    "Verified": 65
+    "Verified": 67
   },
   "verdict": "Evidence bundle verified for PR approval review"
 }

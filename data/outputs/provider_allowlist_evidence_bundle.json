@@ -1,14 +1,14 @@
 {
-  "bundle_checksum_sha256": "8b1c0a7c1b3038290f60717c28eafd85bf704b8fea7cd34c1f085fbf7a257957",
-  "bundle_id": "odds_api-allowlist-evidence-8b1c0a7c1b303829",
+  "bundle_checksum_sha256": "8162f21dbed5ebca21ddf962f4359606b0b5f2186a4cdbd799581ee89c60b089",
+  "bundle_id": "odds_api-allowlist-evidence-8162f21dbed5ebca",
   "bundle_storage": {
-    "archive_directory": "data/outputs/archive/provider_allowlist_evidence_bundles/2026-08-17/160339_odds_api_8b1c0a7c1b30",
+    "archive_directory": "data/outputs/archive/provider_allowlist_evidence_bundles/2026-08-17/160523_odds_api_8162f21dbed5",
     "latest_csv_path": "data/outputs/provider_allowlist_evidence_bundle.csv",
     "latest_json_path": "data/outputs/provider_allowlist_evidence_bundle.json",
     "latest_markdown_path": "data/outputs/provider_allowlist_evidence_bundle.md"
   },
   "checklist_verdict": "Ready for human allowlist review",
-  "conformance_verdict": "Not applicable",
+  "conformance_verdict": "Conforms to preview",
   "evidence": [
     {
       "current_checksum_sha256": "caebfa6c6939ef903d36dfabd5d4de8bcd447aba39bbdeca888d9e723bf5b4db",
@@ -616,32 +616,32 @@
       "verdict": "Stable enough for review"
     },
     {
-      "current_checksum_sha256": "",
-      "details": "No policy change has been checked yet; conformance is optional before PR review.",
+      "current_checksum_sha256": "646647836148fbbf332f264e81600a15e7575eccaa0098e1ee05c3a79e383d25",
+      "details": "Current checksum matches every available binding.",
       "evidence_path": "data/outputs/provider_allowlist_pr_conformance.json",
       "evidence_type": "provider_allowlist_pr_conformance",
       "expected_checksum_sha256": "",
-      "generated_at": "",
+      "generated_at": "2026-08-17T16:05:22-04:00",
       "required": "No",
-      "status": "Not applicable",
-      "verdict": ""
+      "status": "Included",
+      "verdict": "Conforms to preview"
     },
     {
-      "current_checksum_sha256": "23d88241a66c9cc86b59d4278694b4e1522fd48048c268e0744dd217020b21d3",
+      "current_checksum_sha256": "5b591c6f034bedae31d9a3e6517dc0beb818b53ea6332321abc482d51c4d7eb9",
       "details": "Current checksum matches every available binding.",
       "evidence_path": "data/manual/staging_provider_policy.json",
       "evidence_type": "staging_provider_policy",
-      "expected_checksum_sha256": "23d88241a66c9cc86b59d4278694b4e1522fd48048c268e0744dd217020b21d3",
+      "expected_checksum_sha256": "5b591c6f034bedae31d9a3e6517dc0beb818b53ea6332321abc482d51c4d7eb9",
       "generated_at": "",
       "required": "Yes",
       "status": "Included",
       "verdict": ""
     }
   ],
-  "evidence_file_count": 56,
+  "evidence_file_count": 57,
   "evidence_manifest": [
     {
-      "checksum_sha256": "23d88241a66c9cc86b59d4278694b4e1522fd48048c268e0744dd217020b21d3",
+      "checksum_sha256": "5b591c6f034bedae31d9a3e6517dc0beb818b53ea6332321abc482d51c4d7eb9",
       "path": "data/manual/staging_provider_policy.json"
     },
     {
@@ -849,6 +849,10 @@
       "path": "data/outputs/provider_acceptance_checklist.json"
     },
     {
+      "checksum_sha256": "646647836148fbbf332f264e81600a15e7575eccaa0098e1ee05c3a79e383d25",
+      "path": "data/outputs/provider_allowlist_pr_conformance.json"
+    },
+    {
       "checksum_sha256": "caebfa6c6939ef903d36dfabd5d4de8bcd447aba39bbdeca888d9e723bf5b4db",
       "path": "data/outputs/provider_allowlist_pr_preview.json"
     },
@@ -865,7 +869,7 @@
       "path": "data/outputs/provider_shadow_run_comparison.json"
     }
   ],
-  "generated_at": "2026-08-17T16:03:39-04:00",
+  "generated_at": "2026-08-17T16:05:23-04:00",
   "preview_verdict": "Ready for separate allowlist PR",
   "provider_key": "odds_api",
   "provider_name": "the_odds_api",
@@ -888,8 +892,7 @@
   },
   "schema_version": 1,
   "status_counts": {
-    "Included": 56,
-    "Not applicable": 1
+    "Included": 57
   },
   "verdict": "Evidence bundle ready for PR review"
 }

@@ -1,0 +1,243 @@
+{
+  "base_sha": "a2648d68a853edf657c7bff48ee522c0b8d45c3c",
+  "blockers": [],
+  "change_detection": {
+    "base_ref": "origin/main",
+    "base_sha": "a2648d68a853edf657c7bff48ee522c0b8d45c3c",
+    "changed_files": [
+      "data/manual/staging_provider_policy.json",
+      "data/outputs/provider_allowlist_evidence_bundle.json",
+      "data/outputs/provider_allowlist_evidence_bundle.md",
+      "data/outputs/provider_allowlist_evidence_bundle_verification.json",
+      "data/outputs/provider_allowlist_evidence_bundle_verification.md"
+    ],
+    "error": "",
+    "gate_mode": "local_worktree",
+    "head_ref": "HEAD",
+    "head_sha": "a2648d68a853edf657c7bff48ee522c0b8d45c3c",
+    "merge_base_sha": "a2648d68a853edf657c7bff48ee522c0b8d45c3c",
+    "source": "Local Git diff against default branch"
+  },
+  "changed_file_digests": [
+    {
+      "checksum_sha256": "5b591c6f034bedae31d9a3e6517dc0beb818b53ea6332321abc482d51c4d7eb9",
+      "content_source": "working tree",
+      "path": "data/manual/staging_provider_policy.json",
+      "status": "Hashed"
+    },
+    {
+      "checksum_sha256": "3de3890eb0e73db23920751ee1ae8ac3ef2fb641002f4254742c29929680501c",
+      "content_source": "working tree",
+      "path": "data/outputs/provider_allowlist_evidence_bundle.json",
+      "status": "Hashed"
+    },
+    {
+      "checksum_sha256": "45a25f99d05e07b3b1089beed716a78bfda3512826965545d6871cd945e4a196",
+      "content_source": "working tree",
+      "path": "data/outputs/provider_allowlist_evidence_bundle.md",
+      "status": "Hashed"
+    },
+    {
+      "checksum_sha256": "10ff27d53438245d06a6f2a473b35a1412daf0108151168cd55b7a6126c0c2ba",
+      "content_source": "working tree",
+      "path": "data/outputs/provider_allowlist_evidence_bundle_verification.json",
+      "status": "Hashed"
+    },
+    {
+      "checksum_sha256": "9576c7a5c046f822ff5621573588f7e0993773538a6310c17013656b47ad735f",
+      "content_source": "working tree",
+      "path": "data/outputs/provider_allowlist_evidence_bundle_verification.md",
+      "status": "Hashed"
+    }
+  ],
+  "changed_files": [
+    "data/manual/staging_provider_policy.json",
+    "data/outputs/provider_allowlist_evidence_bundle.json",
+    "data/outputs/provider_allowlist_evidence_bundle.md",
+    "data/outputs/provider_allowlist_evidence_bundle_verification.json",
+    "data/outputs/provider_allowlist_evidence_bundle_verification.md"
+  ],
+  "changed_files_digest": "8bd72883253dfbe756681e35e7284d24379016c30d27adaceab86b403e304967",
+  "checks": [
+    {
+      "base_sha": "a2648d68a853edf657c7bff48ee522c0b8d45c3c",
+      "category": "Change detection",
+      "changed_files_digest": "8bd72883253dfbe756681e35e7284d24379016c30d27adaceab86b403e304967",
+      "check": "Provider policy changed",
+      "details": "Verified provider evidence is required before this PR can pass.",
+      "evidence_digest": "1c3fa0a773ff419c704f35933d26055a9d14a3ae319ab7b074d6fce17b59d93f",
+      "evidence_path": "data/manual/staging_provider_policy.json",
+      "expected": "Policy path present in changed files",
+      "gate_receipt_id": "odds_api-provider-policy-gate-19445f63256d300a2af5fb7eb33738b8f0b824fbe0cc74b014dc8bac186377a0",
+      "head_sha": "a2648d68a853edf657c7bff48ee522c0b8d45c3c",
+      "observed": "Policy path changed",
+      "policy_change_digest": "2ad20e03ae455270ada512a21bcab74a9bc68784c83ef0147c6d9355100469bf",
+      "receipt_binding_status": "Bound",
+      "status": "Passed"
+    },
+    {
+      "base_sha": "a2648d68a853edf657c7bff48ee522c0b8d45c3c",
+      "category": "Evidence bundle",
+      "changed_files_digest": "8bd72883253dfbe756681e35e7284d24379016c30d27adaceab86b403e304967",
+      "check": "Verified allowlist evidence bundle",
+      "details": "Stored and current bundle verification are approval-ready and match.",
+      "evidence_digest": "1c3fa0a773ff419c704f35933d26055a9d14a3ae319ab7b074d6fce17b59d93f",
+      "evidence_path": "data/outputs/provider_allowlist_evidence_bundle_verification.json",
+      "expected": "Evidence bundle verified for PR approval review",
+      "gate_receipt_id": "odds_api-provider-policy-gate-19445f63256d300a2af5fb7eb33738b8f0b824fbe0cc74b014dc8bac186377a0",
+      "head_sha": "a2648d68a853edf657c7bff48ee522c0b8d45c3c",
+      "observed": "Evidence bundle verified for PR approval review",
+      "policy_change_digest": "2ad20e03ae455270ada512a21bcab74a9bc68784c83ef0147c6d9355100469bf",
+      "receipt_binding_status": "Bound",
+      "status": "Passed"
+    },
+    {
+      "base_sha": "a2648d68a853edf657c7bff48ee522c0b8d45c3c",
+      "category": "Preview",
+      "changed_files_digest": "8bd72883253dfbe756681e35e7284d24379016c30d27adaceab86b403e304967",
+      "check": "Ready provider allowlist preview",
+      "details": "The preview is ready and proposes the reviewed allowlist entry.",
+      "evidence_digest": "1c3fa0a773ff419c704f35933d26055a9d14a3ae319ab7b074d6fce17b59d93f",
+      "evidence_path": "data/outputs/provider_allowlist_pr_preview.json",
+      "expected": "Ready for separate allowlist PR",
+      "gate_receipt_id": "odds_api-provider-policy-gate-19445f63256d300a2af5fb7eb33738b8f0b824fbe0cc74b014dc8bac186377a0",
+      "head_sha": "a2648d68a853edf657c7bff48ee522c0b8d45c3c",
+      "observed": "Ready for separate allowlist PR",
+      "policy_change_digest": "2ad20e03ae455270ada512a21bcab74a9bc68784c83ef0147c6d9355100469bf",
+      "receipt_binding_status": "Bound",
+      "status": "Passed"
+    },
+    {
+      "base_sha": "a2648d68a853edf657c7bff48ee522c0b8d45c3c",
+      "category": "Human review",
+      "changed_files_digest": "8bd72883253dfbe756681e35e7284d24379016c30d27adaceab86b403e304967",
+      "check": "Verified human acceptance receipt",
+      "details": "Human acceptance evidence remains verified for allowlist PR review.",
+      "evidence_digest": "1c3fa0a773ff419c704f35933d26055a9d14a3ae319ab7b074d6fce17b59d93f",
+      "evidence_path": "data/outputs/provider_human_acceptance_receipt_verification.json",
+      "expected": "Verified for allowlist PR review",
+      "gate_receipt_id": "odds_api-provider-policy-gate-19445f63256d300a2af5fb7eb33738b8f0b824fbe0cc74b014dc8bac186377a0",
+      "head_sha": "a2648d68a853edf657c7bff48ee522c0b8d45c3c",
+      "observed": "Verified for allowlist PR review",
+      "policy_change_digest": "2ad20e03ae455270ada512a21bcab74a9bc68784c83ef0147c6d9355100469bf",
+      "receipt_binding_status": "Bound",
+      "status": "Passed"
+    },
+    {
+      "base_sha": "a2648d68a853edf657c7bff48ee522c0b8d45c3c",
+      "category": "Policy conformance",
+      "changed_files_digest": "8bd72883253dfbe756681e35e7284d24379016c30d27adaceab86b403e304967",
+      "check": "Current policy conforms to reviewed preview",
+      "details": "Stored and rerun conformance checks match the reviewed preview.",
+      "evidence_digest": "1c3fa0a773ff419c704f35933d26055a9d14a3ae319ab7b074d6fce17b59d93f",
+      "evidence_path": "data/outputs/provider_allowlist_pr_conformance.json",
+      "expected": "Conforms to preview",
+      "gate_receipt_id": "odds_api-provider-policy-gate-19445f63256d300a2af5fb7eb33738b8f0b824fbe0cc74b014dc8bac186377a0",
+      "head_sha": "a2648d68a853edf657c7bff48ee522c0b8d45c3c",
+      "observed": "Conforms to preview",
+      "policy_change_digest": "2ad20e03ae455270ada512a21bcab74a9bc68784c83ef0147c6d9355100469bf",
+      "receipt_binding_status": "Bound",
+      "status": "Passed"
+    },
+    {
+      "base_sha": "a2648d68a853edf657c7bff48ee522c0b8d45c3c",
+      "category": "Safety",
+      "changed_files_digest": "8bd72883253dfbe756681e35e7284d24379016c30d27adaceab86b403e304967",
+      "check": "No cron or automation enablement",
+      "details": "The conformance check found no newly enabled automation setting.",
+      "evidence_digest": "1c3fa0a773ff419c704f35933d26055a9d14a3ae319ab7b074d6fce17b59d93f",
+      "evidence_path": "data/manual/staging_provider_policy.json",
+      "expected": "No newly enabled cron, schedule, or automation setting",
+      "gate_receipt_id": "odds_api-provider-policy-gate-19445f63256d300a2af5fb7eb33738b8f0b824fbe0cc74b014dc8bac186377a0",
+      "head_sha": "a2648d68a853edf657c7bff48ee522c0b8d45c3c",
+      "observed": "No unsafe automation change detected",
+      "policy_change_digest": "2ad20e03ae455270ada512a21bcab74a9bc68784c83ef0147c6d9355100469bf",
+      "receipt_binding_status": "Bound",
+      "status": "Passed"
+    },
+    {
+      "base_sha": "a2648d68a853edf657c7bff48ee522c0b8d45c3c",
+      "category": "Receipt binding",
+      "changed_files_digest": "8bd72883253dfbe756681e35e7284d24379016c30d27adaceab86b403e304967",
+      "check": "Deterministic PR comparison receipt",
+      "details": "The exact Git comparison, changed-file contents, current policy, and required evidence reports are checksum-bound.",
+      "evidence_digest": "1c3fa0a773ff419c704f35933d26055a9d14a3ae319ab7b074d6fce17b59d93f",
+      "evidence_path": "data/manual/staging_provider_policy.json",
+      "expected": "Bound",
+      "gate_receipt_id": "odds_api-provider-policy-gate-19445f63256d300a2af5fb7eb33738b8f0b824fbe0cc74b014dc8bac186377a0",
+      "head_sha": "a2648d68a853edf657c7bff48ee522c0b8d45c3c",
+      "observed": "Bound",
+      "policy_change_digest": "2ad20e03ae455270ada512a21bcab74a9bc68784c83ef0147c6d9355100469bf",
+      "receipt_binding_status": "Bound",
+      "status": "Bound"
+    }
+  ],
+  "comparison_context_status": "Bound",
+  "conformance_report_checksum_sha256": "646647836148fbbf332f264e81600a15e7575eccaa0098e1ee05c3a79e383d25",
+  "evidence_bundle_verification_checksum_sha256": "10ff27d53438245d06a6f2a473b35a1412daf0108151168cd55b7a6126c0c2ba",
+  "evidence_digest": "1c3fa0a773ff419c704f35933d26055a9d14a3ae319ab7b074d6fce17b59d93f",
+  "evidence_reports": [
+    {
+      "checksum_sha256": "646647836148fbbf332f264e81600a15e7575eccaa0098e1ee05c3a79e383d25",
+      "field": "conformance_report_checksum_sha256",
+      "path": "data/outputs/provider_allowlist_pr_conformance.json",
+      "status": "Included"
+    },
+    {
+      "checksum_sha256": "10ff27d53438245d06a6f2a473b35a1412daf0108151168cd55b7a6126c0c2ba",
+      "field": "evidence_bundle_verification_checksum_sha256",
+      "path": "data/outputs/provider_allowlist_evidence_bundle_verification.json",
+      "status": "Included"
+    },
+    {
+      "checksum_sha256": "caebfa6c6939ef903d36dfabd5d4de8bcd447aba39bbdeca888d9e723bf5b4db",
+      "field": "preview_report_checksum_sha256",
+      "path": "data/outputs/provider_allowlist_pr_preview.json",
+      "status": "Included"
+    },
+    {
+      "checksum_sha256": "22fa32fb6d0316128d6b89c53736ad943d787c6be2828b25c87d0c9982da653a",
+      "field": "receipt_verification_report_checksum_sha256",
+      "path": "data/outputs/provider_human_acceptance_receipt_verification.json",
+      "status": "Included"
+    }
+  ],
+  "gate_generated_at": "2026-08-17T16:05:24-04:00",
+  "gate_mode": "local_worktree",
+  "gate_receipt_checksum_sha256": "19445f63256d300a2af5fb7eb33738b8f0b824fbe0cc74b014dc8bac186377a0",
+  "gate_receipt_id": "odds_api-provider-policy-gate-19445f63256d300a2af5fb7eb33738b8f0b824fbe0cc74b014dc8bac186377a0",
+  "generated_at": "2026-08-17T16:05:24-04:00",
+  "head_sha": "a2648d68a853edf657c7bff48ee522c0b8d45c3c",
+  "merge_base_sha": "a2648d68a853edf657c7bff48ee522c0b8d45c3c",
+  "policy_change_digest": "2ad20e03ae455270ada512a21bcab74a9bc68784c83ef0147c6d9355100469bf",
+  "policy_changed": true,
+  "policy_checksum_after_sha256": "5b591c6f034bedae31d9a3e6517dc0beb818b53ea6332321abc482d51c4d7eb9",
+  "policy_checksum_before_sha256": "23d88241a66c9cc86b59d4278694b4e1522fd48048c268e0744dd217020b21d3",
+  "policy_path": "data/manual/staging_provider_policy.json",
+  "preview_report_checksum_sha256": "caebfa6c6939ef903d36dfabd5d4de8bcd447aba39bbdeca888d9e723bf5b4db",
+  "provider_key": "odds_api",
+  "provider_name": "the_odds_api",
+  "receipt_binding_note": "The exact Git comparison, changed-file contents, current policy, and required evidence reports are checksum-bound.",
+  "receipt_binding_status": "Bound",
+  "receipt_verification_report_checksum_sha256": "22fa32fb6d0316128d6b89c53736ad943d787c6be2828b25c87d0c9982da653a",
+  "safety": {
+    "bets_placed": false,
+    "cron_enabled": false,
+    "picks_generated": false,
+    "preview_created": false,
+    "protected_files_edited": false,
+    "provider_allowlisted": false,
+    "provider_policy_edited": false,
+    "provider_run": false,
+    "read_only_gate": true,
+    "receipt_created": false,
+    "secrets_required": false,
+    "staging_promoted": false
+  },
+  "schema_version": 2,
+  "status_counts": {
+    "Bound": 1,
+    "Passed": 6
+  },
+  "verdict": "Provider policy PR gate passed"
+}

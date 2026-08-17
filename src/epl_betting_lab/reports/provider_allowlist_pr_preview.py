@@ -136,9 +136,54 @@ def _find_verification_check(
     return None
 
 
+def _eligible_markets_from_evidence(output_dir: Path | None = None) -> list[str]:
+    """Markets the reviewed evidence found eligible, if any.
+
+    The adapter's `featured_markets_requested` describes what the *bulk*
+    endpoint asks for, which is not the same as what the card may use: BTTS now
+    arrives from the per-event endpoint, and totals is excluded while it covers
+    only 8 of 10 fixtures. Allowlisting the adapter's request list would grant
+    totals and omit BTTS - the opposite of what was reviewed.
+    """
+    outputs = OUTPUTS_DIR if output_dir is None else Path(output_dir)
+    path = outputs / "automated_card_input.json"
+    if not path.is_file():
+        return []
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError):
+        return []
+    if not isinstance(payload, Mapping):
+        return []
+    eligibility = payload.get("eligibility")
+    if not isinstance(eligibility, Mapping):
+        return []
+    markets = eligibility.get("eligible_markets")
+    if not isinstance(markets, list):
+        return []
+    return [str(item).strip().lower() for item in markets if str(item).strip()]
+
+
 def _provider_markets_and_limitations(
     provider: object,
+    output_dir: Path | None = None,
 ) -> tuple[list[str], list[str]]:
+    eligible = _eligible_markets_from_evidence(output_dir)
+    if eligible:
+        limitations: list[str] = []
+        for market in ("1x2", "total_2_5", "btts"):
+            if market not in eligible:
+                limitations.append(
+                    f"`{market}` is not allowlisted: the reviewed evidence did "
+                    "not find it eligible. Its prices remain unavailable or "
+                    "incomplete and must never be fabricated."
+                )
+        limitations.append(
+            "Allowlisting does not bypass staging validation, freshness, "
+            "completeness, checksum, receipt, or Thursday cutoff gates."
+        )
+        return list(dict.fromkeys(eligible)), limitations
+
     configuration = provider.public_configuration()
     featured = configuration.get("featured_markets_requested", [])
     if isinstance(featured, list):
@@ -246,7 +291,9 @@ def build_provider_allowlist_pr_preview(
     provider_key = provider.provider_key
     canonical_name = provider.provider_name
     provider_type = provider.provider_type
-    required_markets, limitations = _provider_markets_and_limitations(provider)
+    required_markets, limitations = _provider_markets_and_limitations(
+        provider, output_dir
+    )
     blockers: list[str] = []
     warnings: list[str] = []
     rows: list[dict[str, object]] = []

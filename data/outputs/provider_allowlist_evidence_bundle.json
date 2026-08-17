@@ -1,8 +1,8 @@
 {
-  "bundle_checksum_sha256": "8b66627b1081c1044e0ae0efffc450f8bd7be4332f58e93a692a3f97a69866bf",
-  "bundle_id": "odds_api-allowlist-evidence-8b66627b1081c104",
+  "bundle_checksum_sha256": "8b1c0a7c1b3038290f60717c28eafd85bf704b8fea7cd34c1f085fbf7a257957",
+  "bundle_id": "odds_api-allowlist-evidence-8b1c0a7c1b303829",
   "bundle_storage": {
-    "archive_directory": "data/outputs/archive/provider_allowlist_evidence_bundles/2026-08-17/155218_odds_api_8b66627b1081",
+    "archive_directory": "data/outputs/archive/provider_allowlist_evidence_bundles/2026-08-17/160339_odds_api_8b1c0a7c1b30",
     "latest_csv_path": "data/outputs/provider_allowlist_evidence_bundle.csv",
     "latest_json_path": "data/outputs/provider_allowlist_evidence_bundle.json",
     "latest_markdown_path": "data/outputs/provider_allowlist_evidence_bundle.md"
@@ -11,45 +11,45 @@
   "conformance_verdict": "Not applicable",
   "evidence": [
     {
-      "current_checksum_sha256": "281ecfb181959f98dfc9a7dd0b2bce3b769348ec3a1f033cab6c87306fa3197d",
+      "current_checksum_sha256": "caebfa6c6939ef903d36dfabd5d4de8bcd447aba39bbdeca888d9e723bf5b4db",
       "details": "Current checksum matches every available binding.",
       "evidence_path": "data/outputs/provider_allowlist_pr_preview.json",
       "evidence_type": "provider_allowlist_pr_preview",
       "expected_checksum_sha256": "",
-      "generated_at": "2026-08-17T15:52:18-04:00",
+      "generated_at": "2026-08-17T16:03:08-04:00",
       "required": "Yes",
       "status": "Included",
       "verdict": "Ready for separate allowlist PR"
     },
     {
-      "current_checksum_sha256": "837ec2d2bb6b0796a66f1714f3168c9f971256b5221d78602bbe1690498a77ee",
+      "current_checksum_sha256": "22fa32fb6d0316128d6b89c53736ad943d787c6be2828b25c87d0c9982da653a",
       "details": "Current checksum matches every available binding.",
       "evidence_path": "data/outputs/provider_human_acceptance_receipt_verification.json",
       "evidence_type": "provider_human_acceptance_receipt_verification",
-      "expected_checksum_sha256": "837ec2d2bb6b0796a66f1714f3168c9f971256b5221d78602bbe1690498a77ee",
-      "generated_at": "2026-08-17T15:52:18-04:00",
+      "expected_checksum_sha256": "22fa32fb6d0316128d6b89c53736ad943d787c6be2828b25c87d0c9982da653a",
+      "generated_at": "2026-08-17T16:03:08-04:00",
       "required": "Yes",
       "status": "Included",
       "verdict": "Verified for allowlist PR review"
     },
     {
-      "current_checksum_sha256": "635160dd9f1c6496288695e87ad876ac5362d8d27faf874a78de8bd4d111a17e",
+      "current_checksum_sha256": "59e8324e81895782f9ca135b422638e4a3edb0cddda45367bcce1f0772e6f5bf",
       "details": "Current checksum matches every available binding.",
       "evidence_path": "data/outputs/provider_human_acceptance_receipt.json",
       "evidence_type": "provider_human_acceptance_receipt",
-      "expected_checksum_sha256": "635160dd9f1c6496288695e87ad876ac5362d8d27faf874a78de8bd4d111a17e",
+      "expected_checksum_sha256": "59e8324e81895782f9ca135b422638e4a3edb0cddda45367bcce1f0772e6f5bf",
       "generated_at": "",
       "required": "Yes",
       "status": "Included",
       "verdict": "approved_for_allowlist_pr"
     },
     {
-      "current_checksum_sha256": "7aa6af6017dcf0b243fa43add16307df4877d77f8b079aa0d9ac9e324331dd98",
+      "current_checksum_sha256": "c525fa657a3a51c237f870d9fbfb3cce1a0765e96bafd3ed031478174744fd8d",
       "details": "Current checksum matches every available binding.",
       "evidence_path": "data/outputs/provider_acceptance_checklist.json",
       "evidence_type": "provider_acceptance_checklist",
-      "expected_checksum_sha256": "7aa6af6017dcf0b243fa43add16307df4877d77f8b079aa0d9ac9e324331dd98",
-      "generated_at": "2026-08-17T15:17:20-04:00",
+      "expected_checksum_sha256": "c525fa657a3a51c237f870d9fbfb3cce1a0765e96bafd3ed031478174744fd8d",
+      "generated_at": "2026-08-17T15:59:00-04:00",
       "required": "Yes",
       "status": "Included",
       "verdict": "Ready for human allowlist review"
@@ -605,12 +605,12 @@
       "verdict": ""
     },
     {
-      "current_checksum_sha256": "17bd99391c54fcb732f1be6e4350b1cd2f30ec15b7dc32677e01299ca665211d",
+      "current_checksum_sha256": "8c1ab882133936657fa4961aab0909acbfb0f4676783e0e27ad8be0959677650",
       "details": "Current checksum matches every available binding.",
       "evidence_path": "data/outputs/provider_shadow_run_comparison.json",
       "evidence_type": "provider_shadow_run_comparison",
-      "expected_checksum_sha256": "17bd99391c54fcb732f1be6e4350b1cd2f30ec15b7dc32677e01299ca665211d",
-      "generated_at": "2026-08-17T15:51:40-04:00",
+      "expected_checksum_sha256": "8c1ab882133936657fa4961aab0909acbfb0f4676783e0e27ad8be0959677650",
+      "generated_at": "2026-08-17T15:59:00-04:00",
       "required": "Yes",
       "status": "Included",
       "verdict": "Stable enough for review"
@@ -845,33 +845,33 @@
       "path": "data/outputs/archive/provider_shadow_runs/2026-08-17/151717_odds_api/staging_input_validation.md"
     },
     {
-      "checksum_sha256": "7aa6af6017dcf0b243fa43add16307df4877d77f8b079aa0d9ac9e324331dd98",
+      "checksum_sha256": "c525fa657a3a51c237f870d9fbfb3cce1a0765e96bafd3ed031478174744fd8d",
       "path": "data/outputs/provider_acceptance_checklist.json"
     },
     {
-      "checksum_sha256": "281ecfb181959f98dfc9a7dd0b2bce3b769348ec3a1f033cab6c87306fa3197d",
+      "checksum_sha256": "caebfa6c6939ef903d36dfabd5d4de8bcd447aba39bbdeca888d9e723bf5b4db",
       "path": "data/outputs/provider_allowlist_pr_preview.json"
     },
     {
-      "checksum_sha256": "635160dd9f1c6496288695e87ad876ac5362d8d27faf874a78de8bd4d111a17e",
+      "checksum_sha256": "59e8324e81895782f9ca135b422638e4a3edb0cddda45367bcce1f0772e6f5bf",
       "path": "data/outputs/provider_human_acceptance_receipt.json"
     },
     {
-      "checksum_sha256": "837ec2d2bb6b0796a66f1714f3168c9f971256b5221d78602bbe1690498a77ee",
+      "checksum_sha256": "22fa32fb6d0316128d6b89c53736ad943d787c6be2828b25c87d0c9982da653a",
       "path": "data/outputs/provider_human_acceptance_receipt_verification.json"
     },
     {
-      "checksum_sha256": "17bd99391c54fcb732f1be6e4350b1cd2f30ec15b7dc32677e01299ca665211d",
+      "checksum_sha256": "8c1ab882133936657fa4961aab0909acbfb0f4676783e0e27ad8be0959677650",
       "path": "data/outputs/provider_shadow_run_comparison.json"
     }
   ],
-  "generated_at": "2026-08-17T15:52:18-04:00",
+  "generated_at": "2026-08-17T16:03:39-04:00",
   "preview_verdict": "Ready for separate allowlist PR",
   "provider_key": "odds_api",
   "provider_name": "the_odds_api",
-  "receipt_id": "odds_api-20260817T155217-0400-8204291a2b19",
+  "receipt_id": "odds_api-20260817T160307-0400-20fb55e75c14",
   "receipt_verification_verdict": "Verified for allowlist PR review",
-  "recommended_pr_description": "Adds `the_odds_api` (`odds_api`) to the reviewed staging provider allowlist for 1x2, total_2_5. Binds the policy entry to human acceptance receipt `odds_api-20260817T155217-0400-8204291a2b19` and its verified evidence. Known limitations: BTTS is not requested by the current provider adapter. Missing BTTS prices remain unavailable and must never be fabricated. Allowlisting does not bypass staging validation, freshness, completeness, checksum, receipt, or Thursday cutoff gates. This policy-only proposal does not promote staging, run a provider, generate picks, place bets, or enable cron.",
+  "recommended_pr_description": "Adds `the_odds_api` (`odds_api`) to the reviewed staging provider allowlist for 1x2, btts. Binds the policy entry to human acceptance receipt `odds_api-20260817T160307-0400-20fb55e75c14` and its verified evidence. Known limitations: `total_2_5` is not allowlisted: the reviewed evidence did not find it eligible. Its prices remain unavailable or incomplete and must never be fabricated. Allowlisting does not bypass staging validation, freshness, completeness, checksum, receipt, or Thursday cutoff gates. This policy-only proposal does not promote staging, run a provider, generate picks, place bets, or enable cron.",
   "recommended_pr_title": "Allowlist the_odds_api staging provider",
   "safety": {
     "bets_placed": false,

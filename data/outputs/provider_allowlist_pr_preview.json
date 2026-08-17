@@ -17,15 +17,15 @@
     "provider_allowlist_entries": {
       "the_odds_api": {
         "allowlist_status": "allowed",
-        "approved_at": "2026-08-17T15:52:17-04:00",
+        "approved_at": "2026-08-17T16:03:07-04:00",
         "cutoff_policy": {
           "day": "Thursday",
           "time": "10:00",
           "timezone": "America/New_York"
         },
-        "evidence_receipt_id": "odds_api-20260817T155217-0400-8204291a2b19",
+        "evidence_receipt_id": "odds_api-20260817T160307-0400-20fb55e75c14",
         "known_limitations": [
-          "BTTS is not requested by the current provider adapter. Missing BTTS prices remain unavailable and must never be fabricated.",
+          "`total_2_5` is not allowlisted: the reviewed evidence did not find it eligible. Its prices remain unavailable or incomplete and must never be fabricated.",
           "Allowlisting does not bypass staging validation, freshness, completeness, checksum, receipt, or Thursday cutoff gates."
         ],
         "max_provider_run_age_hours": 12.0,
@@ -34,11 +34,11 @@
         "provider_type": "odds_api",
         "required_markets": [
           "1x2",
-          "total_2_5"
+          "btts"
         ],
-        "reviewed_at": "2026-08-17T15:52:18-04:00",
+        "reviewed_at": "2026-08-17T16:03:08-04:00",
         "reviewer_name": "cooperross399",
-        "verification_report_checksum_sha256": "837ec2d2bb6b0796a66f1714f3168c9f971256b5221d78602bbe1690498a77ee",
+        "verification_report_checksum_sha256": "22fa32fb6d0316128d6b89c53736ad943d787c6be2828b25c87d0c9982da653a",
         "verification_report_path": "data/outputs/provider_human_acceptance_receipt_verification.json"
       }
     },
@@ -64,7 +64,7 @@
   },
   "blockers": [],
   "current_allowlist_status": "Not allowed",
-  "generated_at": "2026-08-17T15:52:18-04:00",
+  "generated_at": "2026-08-17T16:03:08-04:00",
   "policy": {
     "checksum_sha256": "23d88241a66c9cc86b59d4278694b4e1522fd48048c268e0744dd217020b21d3",
     "cutoff_policy": {
@@ -75,19 +75,19 @@
     "max_provider_run_age_hours": 12.0,
     "path": "data/manual/staging_provider_policy.json"
   },
-  "policy_diff": "--- data/manual/staging_provider_policy.json (current)\n+++ data/manual/staging_provider_policy.json (proposed)\n@@ -2,7 +2,8 @@\n   \"allow_missing_provenance\": false,\n   \"allow_unknown_providers\": false,\n   \"allowed_provider_names\": [\n-    \"manual_reviewed\"\n+    \"manual_reviewed\",\n+    \"the_odds_api\"\n   ],\n   \"allowed_provider_types\": [\n     \"manual_upload\",\n@@ -12,6 +13,34 @@\n   ],\n   \"max_provider_run_age_hours\": 12,\n   \"max_receipt_age_hours\": 12,\n+  \"provider_allowlist_entries\": {\n+    \"the_odds_api\": {\n+      \"allowlist_status\": \"allowed\",\n+      \"approved_at\": \"2026-08-17T15:52:17-04:00\",\n+      \"cutoff_policy\": {\n+        \"day\": \"Thursday\",\n+        \"time\": \"10:00\",\n+        \"timezone\": \"America/New_York\"\n+      },\n+      \"evidence_receipt_id\": \"odds_api-20260817T155217-0400-8204291a2b19\",\n+      \"known_limitations\": [\n+        \"BTTS is not requested by the current provider adapter. Missing BTTS prices remain unavailable and must never be fabricated.\",\n+        \"Allowlisting does not bypass staging validation, freshness, completeness, checksum, receipt, or Thursday cutoff gates.\"\n+      ],\n+      \"max_provider_run_age_hours\": 12.0,\n+      \"provider_key\": \"odds_api\",\n+      \"provider_name\": \"the_odds_api\",\n+      \"provider_type\": \"odds_api\",\n+      \"required_markets\": [\n+        \"1x2\",\n+        \"total_2_5\"\n+      ],\n+      \"reviewed_at\": \"2026-08-17T15:52:18-04:00\",\n+      \"reviewer_name\": \"cooperross399\",\n+      \"verification_report_checksum_sha256\": \"837ec2d2bb6b0796a66f1714f3168c9f971256b5221d78602bbe1690498a77ee\",\n+      \"verification_report_path\": \"data/outputs/provider_human_acceptance_receipt_verification.json\"\n+    }\n+  },\n   \"thursday_cutoff_time\": \"10:00\",\n   \"timezone\": \"America/New_York\"\n }",
+  "policy_diff": "--- data/manual/staging_provider_policy.json (current)\n+++ data/manual/staging_provider_policy.json (proposed)\n@@ -2,7 +2,8 @@\n   \"allow_missing_provenance\": false,\n   \"allow_unknown_providers\": false,\n   \"allowed_provider_names\": [\n-    \"manual_reviewed\"\n+    \"manual_reviewed\",\n+    \"the_odds_api\"\n   ],\n   \"allowed_provider_types\": [\n     \"manual_upload\",\n@@ -12,6 +13,34 @@\n   ],\n   \"max_provider_run_age_hours\": 12,\n   \"max_receipt_age_hours\": 12,\n+  \"provider_allowlist_entries\": {\n+    \"the_odds_api\": {\n+      \"allowlist_status\": \"allowed\",\n+      \"approved_at\": \"2026-08-17T16:03:07-04:00\",\n+      \"cutoff_policy\": {\n+        \"day\": \"Thursday\",\n+        \"time\": \"10:00\",\n+        \"timezone\": \"America/New_York\"\n+      },\n+      \"evidence_receipt_id\": \"odds_api-20260817T160307-0400-20fb55e75c14\",\n+      \"known_limitations\": [\n+        \"`total_2_5` is not allowlisted: the reviewed evidence did not find it eligible. Its prices remain unavailable or incomplete and must never be fabricated.\",\n+        \"Allowlisting does not bypass staging validation, freshness, completeness, checksum, receipt, or Thursday cutoff gates.\"\n+      ],\n+      \"max_provider_run_age_hours\": 12.0,\n+      \"provider_key\": \"odds_api\",\n+      \"provider_name\": \"the_odds_api\",\n+      \"provider_type\": \"odds_api\",\n+      \"required_markets\": [\n+        \"1x2\",\n+        \"btts\"\n+      ],\n+      \"reviewed_at\": \"2026-08-17T16:03:08-04:00\",\n+      \"reviewer_name\": \"cooperross399\",\n+      \"verification_report_checksum_sha256\": \"22fa32fb6d0316128d6b89c53736ad943d787c6be2828b25c87d0c9982da653a\",\n+      \"verification_report_path\": \"data/outputs/provider_human_acceptance_receipt_verification.json\"\n+    }\n+  },\n   \"thursday_cutoff_time\": \"10:00\",\n   \"timezone\": \"America/New_York\"\n }",
   "proposed_allowlist_status": "Allowed",
   "proposed_provider_entry": {
     "allowlist_status": "allowed",
-    "approved_at": "2026-08-17T15:52:17-04:00",
+    "approved_at": "2026-08-17T16:03:07-04:00",
     "cutoff_policy": {
       "day": "Thursday",
       "time": "10:00",
       "timezone": "America/New_York"
     },
-    "evidence_receipt_id": "odds_api-20260817T155217-0400-8204291a2b19",
+    "evidence_receipt_id": "odds_api-20260817T160307-0400-20fb55e75c14",
     "known_limitations": [
-      "BTTS is not requested by the current provider adapter. Missing BTTS prices remain unavailable and must never be fabricated.",
+      "`total_2_5` is not allowlisted: the reviewed evidence did not find it eligible. Its prices remain unavailable or incomplete and must never be fabricated.",
       "Allowlisting does not bypass staging validation, freshness, completeness, checksum, receipt, or Thursday cutoff gates."
     ],
     "max_provider_run_age_hours": 12.0,
@@ -96,17 +96,17 @@
     "provider_type": "odds_api",
     "required_markets": [
       "1x2",
-      "total_2_5"
+      "btts"
     ],
-    "reviewed_at": "2026-08-17T15:52:18-04:00",
+    "reviewed_at": "2026-08-17T16:03:08-04:00",
     "reviewer_name": "cooperross399",
-    "verification_report_checksum_sha256": "837ec2d2bb6b0796a66f1714f3168c9f971256b5221d78602bbe1690498a77ee",
+    "verification_report_checksum_sha256": "22fa32fb6d0316128d6b89c53736ad943d787c6be2828b25c87d0c9982da653a",
     "verification_report_path": "data/outputs/provider_human_acceptance_receipt_verification.json"
   },
   "provider_key": "odds_api",
   "provider_name": "the_odds_api",
   "provider_type": "odds_api",
-  "recommended_pr_description": "Adds `the_odds_api` (`odds_api`) to the reviewed staging provider allowlist for 1x2, total_2_5. Binds the policy entry to human acceptance receipt `odds_api-20260817T155217-0400-8204291a2b19` and its verified evidence. Known limitations: BTTS is not requested by the current provider adapter. Missing BTTS prices remain unavailable and must never be fabricated. Allowlisting does not bypass staging validation, freshness, completeness, checksum, receipt, or Thursday cutoff gates. This policy-only proposal does not promote staging, run a provider, generate picks, place bets, or enable cron.",
+  "recommended_pr_description": "Adds `the_odds_api` (`odds_api`) to the reviewed staging provider allowlist for 1x2, btts. Binds the policy entry to human acceptance receipt `odds_api-20260817T160307-0400-20fb55e75c14` and its verified evidence. Known limitations: `total_2_5` is not allowlisted: the reviewed evidence did not find it eligible. Its prices remain unavailable or incomplete and must never be fabricated. Allowlisting does not bypass staging validation, freshness, completeness, checksum, receipt, or Thursday cutoff gates. This policy-only proposal does not promote staging, run a provider, generate picks, place bets, or enable cron.",
   "recommended_pr_title": "Allowlist the_odds_api staging provider",
   "rows": [
     {
@@ -119,8 +119,8 @@
       "status": "Verified"
     },
     {
-      "after": "837ec2d2bb6b0796a66f1714f3168c9f971256b5221d78602bbe1690498a77ee",
-      "before": "837ec2d2bb6b0796a66f1714f3168c9f971256b5221d78602bbe1690498a77ee",
+      "after": "22fa32fb6d0316128d6b89c53736ad943d787c6be2828b25c87d0c9982da653a",
+      "before": "22fa32fb6d0316128d6b89c53736ad943d787c6be2828b25c87d0c9982da653a",
       "category": "Evidence",
       "change": "Bound evidence",
       "details": "The proposed policy entry binds the exact verification report bytes.",
@@ -200,7 +200,7 @@
       "status": "Ready for separate allowlist PR"
     },
     {
-      "after": "[\"1x2\", \"total_2_5\"]",
+      "after": "[\"1x2\", \"btts\"]",
       "before": "Not present",
       "category": "Provider controls",
       "change": "Add reviewed provider control",
@@ -209,7 +209,7 @@
       "status": "Ready for separate allowlist PR"
     },
     {
-      "after": "[\"BTTS is not requested by the current provider adapter. Missing BTTS prices remain unavailable and must never be fabricated.\", \"Allowlisting does not bypass staging validation, freshness, completeness, checksum, receipt, or Thursday cutoff gates.\"]",
+      "after": "[\"`total_2_5` is not allowlisted: the reviewed evidence did not find it eligible. Its prices remain unavailable or incomplete and must never be fabricated.\", \"Allowlisting does not bypass staging validation, freshness, completeness, checksum, receipt, or Thursday cutoff gates.\"]",
       "before": "Not present",
       "category": "Provider controls",
       "change": "Add reviewed provider control",
@@ -218,7 +218,7 @@
       "status": "Ready for separate allowlist PR"
     },
     {
-      "after": "odds_api-20260817T155217-0400-8204291a2b19",
+      "after": "odds_api-20260817T160307-0400-20fb55e75c14",
       "before": "Not present",
       "category": "Provider controls",
       "change": "Add reviewed provider control",
@@ -236,7 +236,7 @@
       "status": "Ready for separate allowlist PR"
     },
     {
-      "after": "837ec2d2bb6b0796a66f1714f3168c9f971256b5221d78602bbe1690498a77ee",
+      "after": "22fa32fb6d0316128d6b89c53736ad943d787c6be2828b25c87d0c9982da653a",
       "before": "Not present",
       "category": "Provider controls",
       "change": "Add reviewed provider control",
@@ -254,7 +254,7 @@
       "status": "Ready for separate allowlist PR"
     },
     {
-      "after": "2026-08-17T15:52:18-04:00",
+      "after": "2026-08-17T16:03:08-04:00",
       "before": "Not present",
       "category": "Provider controls",
       "change": "Add reviewed provider control",
@@ -263,7 +263,7 @@
       "status": "Ready for separate allowlist PR"
     },
     {
-      "after": "2026-08-17T15:52:17-04:00",
+      "after": "2026-08-17T16:03:07-04:00",
       "before": "Not present",
       "category": "Provider controls",
       "change": "Add reviewed provider control",
@@ -288,13 +288,13 @@
   "schema_version": 1,
   "status": "Ready for separate allowlist PR",
   "verification": {
-    "approved_at": "2026-08-17T15:52:17-04:00",
-    "checksum_sha256": "837ec2d2bb6b0796a66f1714f3168c9f971256b5221d78602bbe1690498a77ee",
+    "approved_at": "2026-08-17T16:03:07-04:00",
+    "checksum_sha256": "22fa32fb6d0316128d6b89c53736ad943d787c6be2828b25c87d0c9982da653a",
     "path": "data/outputs/provider_human_acceptance_receipt_verification.json",
-    "receipt_checksum_sha256": "635160dd9f1c6496288695e87ad876ac5362d8d27faf874a78de8bd4d111a17e",
-    "receipt_id": "odds_api-20260817T155217-0400-8204291a2b19",
+    "receipt_checksum_sha256": "59e8324e81895782f9ca135b422638e4a3edb0cddda45367bcce1f0772e6f5bf",
+    "receipt_id": "odds_api-20260817T160307-0400-20fb55e75c14",
     "receipt_path": "data/outputs/provider_human_acceptance_receipt.json",
-    "reviewed_at": "2026-08-17T15:52:18-04:00",
+    "reviewed_at": "2026-08-17T16:03:08-04:00",
     "reviewer_name": "cooperross399",
     "verdict": "Verified for allowlist PR review"
   },

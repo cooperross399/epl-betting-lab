@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 
 from epl_betting_lab.providers.base import UnknownProviderError
+from epl_betting_lab.providers.env_file import load_provider_env
 from epl_betting_lab.providers.provider_registry import (
     available_provider_names,
     create_provider,
@@ -67,6 +68,10 @@ def _provider_from_args(args: argparse.Namespace):
 
 def main() -> int:
     args = parse_args()
+    env_load = load_provider_env()
+    print(env_load.summary_line())
+    for warning in env_load.warnings:
+        print(f"WARNING: {warning}")
     try:
         provider = _provider_from_args(args)
     except UnknownProviderError as exc:

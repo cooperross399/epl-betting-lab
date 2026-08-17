@@ -71,12 +71,25 @@ src/epl_betting_lab/providers/odds_api_staging_provider.py
 ```
 
 The first real-provider skeleton follows The Odds API v4 EPL event/odds shape.
-Live mode requires an environment-only key:
+Live mode requires the key in the process environment:
 
 ```bash
 export EPL_ODDS_API_KEY='your-secret-key'
 python scripts/run_provider_staging.py --provider odds_api --live
 ```
+
+To keep the key out of shell history, store it in a gitignored `.env` at the
+repository root instead. Provider entry points load it automatically:
+
+```bash
+printf 'EPL_ODDS_API_KEY=your-secret-key\n' > .env
+chmod 600 .env
+python scripts/run_provider_staging.py --provider odds_api --live
+```
+
+Only `EPL_ODDS_API_KEY` and `EPL_ODDS_API_BASE_URL` are read from `.env`; an
+exported variable always takes precedence; values are never printed or written.
+See "Safe local key setup with `.env`" in `README.md`.
 
 Do not put the key in a command argument, `.csv`, provenance JSON, notes, or a
 commit. A future GitHub run must receive it through GitHub Secrets. The adapter
@@ -126,7 +139,8 @@ The dry-run command itself exits successfully when the preview works, but its
 report verdict remains `Blocked`: no live evidence was fetched, so provider
 usability cannot honestly be proven yet.
 
-For an intentional live shadow run, set the key only in your local environment:
+For an intentional live shadow run, set the key in your local environment or a
+gitignored `.env` (see `README.md`):
 
 ```bash
 export EPL_ODDS_API_KEY='your-secret-key'

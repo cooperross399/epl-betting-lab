@@ -55,10 +55,18 @@ def _tracked_files() -> list[Path]:
     return [PROJECT_ROOT / name for name in names]
 
 
+#: This file necessarily contains every pattern it hunts for, so it must not
+#: scan itself. A scanner that flags its own needles reports a false positive
+#: forever and teaches everyone to ignore it.
+SELF = Path(__file__).resolve()
+
+
 def _text_files() -> list[Path]:
     keep: list[Path] = []
     for path in _tracked_files():
         if not path.is_file():
+            continue
+        if path.resolve() == SELF:
             continue
         if path.suffix in {".png", ".jpg", ".jpeg", ".gif", ".ico", ".pdf", ".zip"}:
             continue
@@ -155,3 +163,18 @@ def test_data_outputs_reports_are_not_tracked_with_secrets() -> None:
             offenders.append(relative)
 
     assert offenders == [], f"tracked report contains a credential: {offenders}"
+
+
+def test_the_guard_excludes_itself_from_its_own_scan() -> None:
+    """Otherwise it flags its own needles and everyone learns to ignore it."""
+    scanned = {path.resolve() for path in _text_files()}
+
+    assert SELF not in scanned
+
+
+def test_the_guard_still_scans_other_test_files() -> None:
+    """Self-exclusion must be exactly one file, not all of tests/."""
+    scanned = {path.name for path in _text_files()}
+
+    assert "test_automated_card.py" in scanned
+    assert "test_provider_env_file.py" in scanned

@@ -114,7 +114,10 @@ def _gather_evidence(output_dir: Path) -> dict[str, Any]:
     discovery, discovery_error = _read_json(
         output_dir / "provider_market_discovery.json"
     )
+    card, card_error = _read_json(output_dir / "automated_card.json")
     return {
+        "automated_card": card,
+        "automated_card_error": card_error,
         "market_discovery": discovery,
         "market_discovery_error": discovery_error,
         "week1_readiness": readiness,
@@ -557,10 +560,20 @@ def build_epl_card_task(
     # The card only carries selections when every gate passes. While blocked it
     # returns empty lists, never placeholders, so a routine cannot mistake an
     # empty card for a produced one.
+    generated = evidence["automated_card"]
+    card_generated = bool(generated.get("card_generated", False))
     best_bets: list[dict[str, Any]] = []
     leans: list[dict[str, Any]] = []
     passes: list[dict[str, Any]] = []
     unit_suggestions: list[dict[str, Any]] = []
+
+    # Selections are carried only when the gates pass AND a card was actually
+    # generated. A blocked card yields empty lists, never placeholders.
+    if card_ready and card_generated:
+        best_bets = list(generated.get("best_bets", []) or [])
+        leans = list(generated.get("leans", []) or [])
+        passes = list(generated.get("passes_or_avoids", []) or [])
+        unit_suggestions = list(generated.get("unit_suggestions", []) or [])
 
     if card_ready:
         next_action = (
@@ -581,6 +594,7 @@ def build_epl_card_task(
         "card_ready": card_ready,
         "automated_generation_ready": card_ready
         and bool(eligibility.get("card_input_written")),
+        "automated_card_generated": card_generated,
         "picks_suppressed": not card_ready,
         "best_bets": best_bets,
         "leans": leans,

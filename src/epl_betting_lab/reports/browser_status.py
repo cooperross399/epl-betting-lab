@@ -27,6 +27,12 @@ from pathlib import Path
 from typing import Any
 
 from epl_betting_lab.config import OUTPUTS_DIR
+from epl_betting_lab.reports.pick_display import (
+    NOT_STAKEABLE_LABEL,
+    NOT_STAKEABLE_PLAIN_NOTE,
+    format_american_odds,
+    split_stakeable,
+)
 
 
 STATUS_HTML_FILENAME = "status.html"
@@ -71,9 +77,7 @@ def _market_pills(markets: Sequence[str], tone: str) -> str:
     return "".join(_pill(market, tone) for market in markets)
 
 
-def _picks_table(rows: Sequence[Mapping[str, Any]], empty_note: str) -> str:
-    if not rows:
-        return f'<p class="muted">{_text(empty_note)}</p>'
+def _rows_table(rows: Sequence[Mapping[str, Any]]) -> str:
     cells = []
     for row in rows:
         prob = row.get("calibrated_model_prob")
@@ -87,7 +91,7 @@ def _picks_table(rows: Sequence[Mapping[str, Any]], empty_note: str) -> str:
             f"<td>{_text(row.get('confidence_tier')) or '&mdash;'}</td>"
             f"<td class=\"num\">{f'{float(prob):.1%}' if isinstance(prob, (int, float)) else '&mdash;'}</td>"
             f"<td class=\"num\">{f'{float(edge):+.1%}' if isinstance(edge, (int, float)) else '&mdash;'}</td>"
-            f"<td class=\"num\">{_text(row.get('american_odds')) or '&mdash;'}</td>"
+            f"<td class=\"num\">{_text(format_american_odds(row.get('american_odds')))}</td>"
             f"<td>{_text(row.get('book')) or '&mdash;'}</td>"
             f"<td class=\"num\">{_text(units) if units not in (None, '') else '&mdash;'}</td>"
             "</tr>"
@@ -98,6 +102,25 @@ def _picks_table(rows: Sequence[Mapping[str, Any]], empty_note: str) -> str:
         "<th>Model</th><th>Edge</th><th>Price</th><th>Book</th><th>Units</th>"
         "</tr></thead><tbody>" + "".join(cells) + "</tbody></table></div>"
     )
+
+
+def _picks_table(rows: Sequence[Mapping[str, Any]], empty_note: str) -> str:
+    """Render picks, keeping zero-unit rows visibly apart from real plays."""
+    if not rows:
+        return f'<p class="muted">{_text(empty_note)}</p>'
+    stakeable, not_stakeable = split_stakeable(rows)
+    html = (
+        _rows_table(stakeable)
+        if stakeable
+        else f'<p class="muted">{_text(empty_note)}</p>'
+    )
+    if not_stakeable:
+        html += (
+            f"<h4>{_text(NOT_STAKEABLE_LABEL)}</h4>"
+            f'<p class="muted">{_text(NOT_STAKEABLE_PLAIN_NOTE)}</p>'
+            + _rows_table(not_stakeable)
+        )
+    return html
 
 
 def _list_block(items: Sequence[str], empty: str, tone: str = "") -> str:

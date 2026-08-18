@@ -1,0 +1,115 @@
+name: Matchday Refresh
+
+# Hands-off weekly refresh. Runs on GitHub's infrastructure so no laptop needs
+# to be open and no command needs to be typed.
+#
+# SCOPE: this refetches prices and rebuilds reports. It does NOT place a bet,
+# apply settlement, edit any protected manual file, allowlist a provider, or
+# widen market scope. Those remain human decisions and no schedule can take
+# them. A card is a recommendation.
+#
+# Cadence follows the existing Thursday cutoff rhythm plus the Friday opener,
+# because the provider policy treats a run older than 12 hours as stale: a
+# Thursday card cannot be trusted on Saturday, so a single weekly run would
+# produce a report that is already blocked when read.
+on:
+  schedule:
+    # Thursday 13:00 UTC (09:00 America/New_York) — the weekly card.
+    - cron: "0 13 * * 4"
+    # Friday 13:00 UTC — fresh prices for the Friday opener.
+    - cron: "0 13 * * 5"
+  workflow_dispatch:
+    inputs:
+      skip_provider_fetch:
+        description: "Rebuild reports from existing evidence without refetching prices"
+        type: boolean
+        required: false
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  # Never let two refreshes write staging at once.
+  group: matchday-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    name: Matchday Refresh
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install project
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install -e .
+
+      - name: Check the provider credential
+        # Fails fast and legibly if the key was rotated without updating the
+        # secret, rather than surfacing as a confusing provider error later.
+        # Costs no quota and prints nothing about the key beyond its length.
+        env:
+          EPL_ODDS_API_KEY: ${{ secrets.EPL_ODDS_API_KEY }}
+          PYTHONPATH: src
+        run: |
+          python scripts/check_provider_credential.py --no-env-file
+
+      - name: Refetch provider prices
+        if: ${{ inputs.skip_provider_fetch != true }}
+        env:
+          EPL_ODDS_API_KEY: ${{ secrets.EPL_ODDS_API_KEY }}
+          PYTHONPATH: src
+        run: |
+          python scripts/run_provider_shadow_verification.py \
+            --provider odds_api --live --overwrite-staging --include-event-markets
+
+      - name: Rebuild every report
+        env:
+          PYTHONPATH: src
+        run: |
+          python scripts/refresh_all_reports.py
+
+      - name: Write the card to the run summary
+        if: always()
+        env:
+          PYTHONPATH: src
+        run: |
+          python scripts/build_run_summary.py --append-to-step-summary
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: matchday-reports
+          path: |
+            data/outputs/status.html
+            data/outputs/run_summary.md
+            data/outputs/automated_card.md
+            data/outputs/automated_card_comparison.md
+            data/outputs/epl_model_task.md
+            data/outputs/epl_card_task.md
+            data/outputs/epl_settle_preview_task.md
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Scope reminder
+        if: always()
+        run: |
+          echo "This job refetched prices and rebuilt reports."
+          echo "It placed no bet, applied no settlement, edited no protected"
+          echo "manual file, allowlisted no provider, and widened no market scope."

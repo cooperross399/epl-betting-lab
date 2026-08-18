@@ -34,6 +34,12 @@ import pandas as pd
 from epl_betting_lab.config import MANUAL_DIR, OUTPUTS_DIR, STAGING_DIR
 from epl_betting_lab.dashboard_actions import run_thursday_best_bets_report
 from epl_betting_lab.reports.automated_card_input import CARD_INPUT_FILENAME
+from epl_betting_lab.reports.pick_display import (
+    NOT_STAKEABLE_LABEL,
+    NOT_STAKEABLE_NOTE,
+    format_american_odds,
+    split_stakeable,
+)
 from epl_betting_lab.reports.current_odds_validation import (
     CurrentOddsValidationError,
 )
@@ -355,9 +361,7 @@ def build_automated_card(
 
 
 def render_automated_card(summary: Mapping[str, Any]) -> str:
-    def _table(rows: Sequence[Mapping[str, Any]], label: str) -> list[str]:
-        if not rows:
-            return [f"_No {label.lower()}._", ""]
+    def _rows_table(rows: Sequence[Mapping[str, Any]]) -> list[str]:
         lines = [
             "| Match | Market | Selection | Tier | Model prob | Edge | Price | Book |",
             "|:------|:-------|:----------|:-----|:-----------|:-----|:------|:-----|",
@@ -371,10 +375,20 @@ def render_automated_card(summary: Mapping[str, Any]) -> str:
                 f"| {_clean(row.get('confidence_tier')) or '-'} "
                 f"| {f'{float(prob):.1%}' if isinstance(prob, (int, float)) else '-'} "
                 f"| {f'{float(edge):+.1%}' if isinstance(edge, (int, float)) else '-'} "
-                f"| {_clean(row.get('american_odds')) or '-'} "
+                f"| {format_american_odds(row.get('american_odds'), missing='-')} "
                 f"| {_clean(row.get('book')) or '-'} |"
             )
         lines.append("")
+        return lines
+
+    def _table(rows: Sequence[Mapping[str, Any]], label: str) -> list[str]:
+        if not rows:
+            return [f"_No {label.lower()}._", ""]
+        stakeable, not_stakeable = split_stakeable(rows)
+        lines = _rows_table(stakeable) if stakeable else [f"_No {label.lower()}._", ""]
+        if not_stakeable:
+            lines += [f"**{NOT_STAKEABLE_LABEL}**", "", NOT_STAKEABLE_NOTE, ""]
+            lines += _rows_table(not_stakeable)
         return lines
 
     lines = [

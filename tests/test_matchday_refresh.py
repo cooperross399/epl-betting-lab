@@ -189,3 +189,139 @@ def test_routine_prompts_know_the_totals_question_is_settled() -> None:
     )
 
     assert "Do not re-investigate" in text
+
+
+# --- memory across runs ----------------------------------------------------
+#
+# A runner starts empty every time and the card archive is not tracked in git,
+# so without an explicit restore the "since the previous refresh" diff is
+# permanently blank and the Friday card can never say what moved since
+# Thursday. The first CI run proved exactly that.
+
+
+def test_the_previous_card_archive_is_restored() -> None:
+    text = _workflow()
+
+    assert "Restore the previous card archive" in text
+    assert "matchday-card-archive" in text
+
+
+def test_the_restore_reads_the_previous_successful_run() -> None:
+    text = _workflow()
+
+    assert "--status success" in text
+    assert "gh run download" in text
+
+
+def test_a_missing_archive_does_not_fail_the_run() -> None:
+    """First run, pruned artifact, or API hiccup must not lose the card."""
+    text = _workflow()
+    restore = text.split("Restore the previous card archive", 1)[1]
+    restore = restore.split("- name:", 1)[0]
+
+    assert "continue-on-error: true" in restore
+
+
+def test_the_restore_only_writes_under_the_archive_directory() -> None:
+    """It must never overwrite the prices this run just fetched."""
+    text = _workflow()
+    restore = text.split("Restore the previous card archive", 1)[1]
+    restore = restore.split("- name:", 1)[0]
+
+    assert "--dir data/outputs/archive/automated_cards" in restore
+    assert "data/staging" not in restore
+    assert "data/manual" not in restore
+
+
+def test_the_archive_is_carried_forward_for_the_next_run() -> None:
+    text = _workflow()
+
+    assert "Upload the card archive" in text
+    assert "path: data/outputs/archive/automated_cards" in text
+
+
+def test_the_archive_outlives_the_reports() -> None:
+    """It is the only link between one matchweek and the next."""
+    text = _workflow()
+
+    assert "retention-days: 90" in text
+
+
+def test_reading_actions_is_the_only_permission_added() -> None:
+    text = _workflow()
+    header = text.split("jobs:", 1)[0]
+
+    assert "actions: read" in header
+    assert "contents: read" in header
+    # Nothing in this workflow may write to the repository.
+    assert "contents: write" not in header
+    assert "actions: write" not in header
+    assert "pull-requests: write" not in header
+
+
+# --- a blocked run must say what to do -------------------------------------
+
+
+def test_a_blocked_summary_leads_with_the_root_cause(tmp_path: Path) -> None:
+    """The routine feeds carry terse labels that name no fix."""
+    _write(
+        tmp_path,
+        "epl_card_task.json",
+        {"card_ready": False, "blockers": ["Needs odds", "Provider not trusted"]},
+    )
+    _write(
+        tmp_path,
+        "automated_card.json",
+        {
+            "card_generated": False,
+            "root_blocker": "No market is eligible. See data/outputs/x.md.",
+            "blockers": [
+                "No market is eligible. See data/outputs/x.md.",
+                "Provider is not allowlisted.",
+            ],
+            "next_action": "Start here: No market is eligible. See data/outputs/x.md.",
+        },
+    )
+
+    summary = build_run_summary(output_dir=tmp_path, now=NOW)
+
+    assert "**Start here:** No market is eligible. See data/outputs/x.md." in summary
+    # The terse label must not be what the reader is left with.
+    assert "- Needs odds" not in summary
+
+
+def test_a_blocked_summary_counts_the_blockers_that_may_clear(
+    tmp_path: Path,
+) -> None:
+    _write(tmp_path, "epl_card_task.json", {"card_ready": False})
+    _write(
+        tmp_path,
+        "automated_card.json",
+        {
+            "card_generated": False,
+            "root_blocker": "Root cause.",
+            "blockers": ["Root cause.", "Consequence one.", "Consequence two."],
+        },
+    )
+
+    summary = build_run_summary(output_dir=tmp_path, now=NOW)
+
+    assert "2 further blocker(s) may clear once that is resolved" in summary
+    assert "- Consequence one." in summary
+    # The root cause must not be repeated in the consequence list.
+    assert summary.count("Root cause.") == 1
+
+
+def test_terse_blockers_are_still_shown_when_there_is_no_better_source(
+    tmp_path: Path,
+) -> None:
+    """Falling back is better than showing nothing."""
+    _write(
+        tmp_path,
+        "epl_card_task.json",
+        {"card_ready": False, "blockers": ["Needs odds"]},
+    )
+
+    summary = build_run_summary(output_dir=tmp_path, now=NOW)
+
+    assert "- Needs odds" in summary

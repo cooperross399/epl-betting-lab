@@ -20,6 +20,7 @@ from typing import Any
 
 from epl_betting_lab.config import MANUAL_DIR, OUTPUTS_DIR
 from epl_betting_lab.market_eligibility import DEFAULT_DISABLED_MARKETS
+from epl_betting_lab.reports.pick_display import format_market_list
 
 
 PACKET_JSON_FILENAME = "provider_trust_packet.json"
@@ -250,11 +251,11 @@ def render_provider_trust_packet(summary: Mapping[str, Any]) -> str:
         "",
         "## Market eligibility summary",
         "",
-        f"- Included: **{markets['included_markets'] or 'none'}**",
-        f"- Excluded: **{markets['excluded_markets'] or 'none'}**",
-        f"- Unavailable: {markets['unavailable_markets'] or 'none'}",
-        f"- Incomplete: {markets['incomplete_markets'] or 'none'}",
-        f"- Disabled: {markets['disabled_markets'] or 'none'}",
+        f"- Included: **{format_market_list(markets['included_markets'])}**",
+        f"- Excluded: **{format_market_list(markets['excluded_markets'])}**",
+        f"- Unavailable: {format_market_list(markets['unavailable_markets'])}",
+        f"- Incomplete: {format_market_list(markets['incomplete_markets'])}",
+        f"- Disabled: {format_market_list(markets['disabled_markets'])}",
         f"- BTTS: **{markets['btts_status']}**",
         f"- Provider-derived card input rows: **{markets['card_input_rows']}**",
         (

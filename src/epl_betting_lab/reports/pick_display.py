@@ -1,4 +1,4 @@
-"""Shared presentation rules for rendered picks.
+"""Shared presentation rules for rendered reports.
 
 Three surfaces render the same card — the job summary, the card markdown, and
 the browser status page — and each had grown its own inline formatting. The
@@ -59,6 +59,24 @@ def format_american_odds(value: object, *, missing: str = EM_DASH) -> str:
     if number == 0:
         return missing
     return f"{int(round(number)):+d}"
+
+
+def format_market_list(markets: object, *, empty: str = "none") -> str:
+    """Render a list of market names as prose, not as a Python literal.
+
+    Interpolating a list into an f-string produced ``['1x2', 'total_2_5']`` in
+    five places across three reports. That is a repr, not a sentence: it leaks
+    the implementation into a document a person reads, and the quotes and
+    brackets make a short list harder to scan than the words alone.
+    """
+    if markets is None:
+        return empty
+    if isinstance(markets, str):
+        return markets.strip() or empty
+    if isinstance(markets, Sequence):
+        names = [str(item).strip() for item in markets if str(item).strip()]
+        return ", ".join(names) if names else empty
+    return str(markets)
 
 
 def is_stakeable(row: Mapping[str, Any]) -> bool:

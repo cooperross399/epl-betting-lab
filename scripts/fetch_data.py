@@ -14,7 +14,11 @@ def main() -> None:
     args = parser.parse_args()
 
     df = fetch_and_build_dataset(args.seasons, force=args.force)
-    print(f"Built dataset with {len(df):,} matches across seasons: {', '.join(args.seasons)}")
+    # Report the seasons actually in the data, not the ones asked for. The
+    # season being played is skipped until it has results, and naming it here
+    # would misreport what the model is fitted on.
+    included = [str(season) for season in sorted(df["season"].unique())]
+    print(f"Built dataset with {len(df):,} matches across seasons: {', '.join(included)}")
     print("Saved to data/processed/epl_historical_matches.csv")
 
 

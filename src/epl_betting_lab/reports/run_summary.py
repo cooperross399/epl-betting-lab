@@ -19,6 +19,12 @@ from pathlib import Path
 from typing import Any
 
 from epl_betting_lab.config import OUTPUTS_DIR
+from epl_betting_lab.reports.pick_display import (
+    NOT_STAKEABLE_LABEL,
+    NOT_STAKEABLE_NOTE,
+    format_american_odds,
+    split_stakeable,
+)
 
 
 SUMMARY_MARKDOWN_FILENAME = "run_summary.md"
@@ -38,9 +44,7 @@ def _clean(value: object) -> str:
     return "" if value is None else str(value).strip()
 
 
-def _picks_table(rows: Sequence[Mapping[str, Any]], empty: str) -> list[str]:
-    if not rows:
-        return [f"_{empty}_", ""]
+def _table(rows: Sequence[Mapping[str, Any]]) -> list[str]:
     lines = [
         "| Match | Market | Selection | Tier | Model | Edge | Price | Book | Units |",
         "|:------|:-------|:----------|:-----|------:|-----:|------:|:-----|------:|",
@@ -55,11 +59,23 @@ def _picks_table(rows: Sequence[Mapping[str, Any]], empty: str) -> list[str]:
             f"| {_clean(row.get('confidence_tier')) or '—'} "
             f"| {f'{float(prob):.1%}' if isinstance(prob, (int, float)) else '—'} "
             f"| {f'{float(edge):+.1%}' if isinstance(edge, (int, float)) else '—'} "
-            f"| {_clean(row.get('american_odds')) or '—'} "
+            f"| {format_american_odds(row.get('american_odds'))} "
             f"| {_clean(row.get('book')) or '—'} "
             f"| {_clean(units) if units not in (None, '') else '—'} |"
         )
     lines.append("")
+    return lines
+
+
+def _picks_table(rows: Sequence[Mapping[str, Any]], empty: str) -> list[str]:
+    """Render picks, keeping zero-unit rows visibly apart from real plays."""
+    if not rows:
+        return [f"_{empty}_", ""]
+    stakeable, not_stakeable = split_stakeable(rows)
+    lines = _table(stakeable) if stakeable else [f"_{empty}_", ""]
+    if not_stakeable:
+        lines += [f"**{NOT_STAKEABLE_LABEL}**", "", NOT_STAKEABLE_NOTE, ""]
+        lines += _table(not_stakeable)
     return lines
 
 

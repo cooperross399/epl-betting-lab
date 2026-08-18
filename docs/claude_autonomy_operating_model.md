@@ -52,9 +52,23 @@ These are the facts a new session needs. If reality and this list disagree,
 | Credential check workflow | `workflow_dispatch`-only |
 | Test count | 934 passing on `main` as of PR #133 |
 
-`total_2_5` is excluded because two Week 1 fixtures are priced at 3.0/3.5 rather
-than 2.5. That is **data availability, not profitability**. Never describe an
-excluded market as unprofitable, a pass, an avoid, or a no-value call.
+### Why `total_2_5` is excluded — settled, do not re-litigate
+
+The 2.5 line is incomplete in the `us` region (8 of 10 Week 1 fixtures) and
+complete in `uk` and `eu`. The only books carrying it for **every** fixture are
+William Hill, Betsson, and Nordic Bet, and **Cooper holds no account at any of
+them**. A price that cannot be taken is not a price.
+
+So totals stay excluded, permanently for this season. This is **availability,
+not profitability**, and it is not a judgement about the market. Never describe
+an excluded market as unprofitable, a pass, an avoid, or a no-value call.
+
+Revisit only if Cooper gains access to one of those books, or a book already in
+use starts posting the 2.5 line. Adding totals remains a hard stop either way.
+
+The full evidence is in the operating issue; the standing reason also travels
+with the data in `MARKET_EXCLUSION_NOTES`, so a report explains itself without
+anyone finding this file.
 
 ---
 

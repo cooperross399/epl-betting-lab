@@ -51,6 +51,24 @@ MARKET_SELECTIONS: dict[str, tuple[str, ...]] = {
 #: disabled — it is judged on coverage like any other market.
 DEFAULT_DISABLED_MARKETS: tuple[str, ...] = ()
 
+#: Standing notes about why a market is excluded, beyond what this run's
+#: coverage numbers show. Coverage says a market is incomplete; it cannot say
+#: why, and a future session seeing "8 of 10 fixtures" would reasonably wonder
+#: whether another region fixes it. This records that the question was asked
+#: and answered, so the investigation is not repeated to a different conclusion.
+MARKET_EXCLUSION_NOTES: dict[str, str] = {
+    "total_2_5": (
+        "Settled 2026-08-17. The 2.5 line is incomplete in the `us` region "
+        "(8 of 10 fixtures) and complete in `uk` and `eu`. However the only "
+        "books carrying it for every fixture are William Hill, Betsson, and "
+        "Nordic Bet, and the operator holds no account at any of them. A price "
+        "that cannot be taken is not a price, so totals stay excluded. This is "
+        "availability, not profitability, and it is not a judgement about the "
+        "market. Revisit only if the operator gains access to one of those "
+        "books, or a book already in use starts posting the 2.5 line."
+    ),
+}
+
 ELIGIBLE = "eligible"
 INCOMPLETE = "incomplete"
 UNAVAILABLE = "unavailable"
@@ -280,6 +298,10 @@ def evaluate_market_eligibility(
                 f"`{market}` covers all {len(expected_ids)} fixtures in the "
                 "selected window with passing mapping, validation, and freshness."
             )
+
+        standing_note = MARKET_EXCLUSION_NOTES.get(market, "")
+        if standing_note and status != ELIGIBLE:
+            reason = f"{reason} {standing_note}"
 
         results.append(
             MarketEligibility(

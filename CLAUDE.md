@@ -30,9 +30,10 @@ Use the repo, the reports, and GitHub.
 ## Current operating state
 
 - Provider **The Odds API is allowlisted**, scoped to `1x2` and `btts` only.
-- `total_2_5` is **excluded** because it covers 8 of 10 fixtures. Data
-  availability, not profitability. It stays excluded until a separate reviewed
-  approval adds it.
+- `total_2_5` is **excluded**, settled 2026-08-17: the complete 2.5 line exists
+  only at William Hill, Betsson, and Nordic Bet, and Cooper holds no account at
+  any of them. Availability, not profitability. Do not re-investigate; see
+  `docs/claude_autonomy_operating_model.md`.
 - The active odds source is the **provider-derived automated card input**.
   Manual odds entry is not required.
 - `data/manual/current_odds.csv` is **legacy** and must not become active again.

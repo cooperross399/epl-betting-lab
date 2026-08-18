@@ -8,16 +8,36 @@ name: Matchday Refresh
 # widen market scope. Those remain human decisions and no schedule can take
 # them. A card is a recommendation.
 #
-# Cadence follows the existing Thursday cutoff rhythm plus the Friday opener,
-# because the provider policy treats a run older than 12 hours as stale: a
-# Thursday card cannot be trusted on Saturday, so a single weekly run would
-# produce a report that is already blocked when read.
+# CADENCE: one run per day that has matches, plus the Thursday planning card.
+#
+# The provider policy treats a run older than 12 hours as stale, and a stale
+# card is refused. So the schedule has to reach every matchday, not just the
+# start of the week. A Thursday-and-Friday schedule looked sufficient and was
+# not: Friday's run expires at 01:00 UTC Saturday, while a typical matchweek
+# puts six matches on Saturday, three on Sunday and one on Monday. Nine of
+# eleven would have been read from an already-blocked card.
+#
+# Each run is timed to land before that day's earliest kick-off and stay fresh
+# through its latest, allowing for the UK being UTC+1 in summer:
+#
+#   Thursday  13:00 UTC  planning card; no matches
+#   Friday    13:00 UTC  ~6h before a 20:00 UK kick-off
+#   Saturday  09:00 UTC  ~2.5h before a 12:30 UK kick-off, fresh until 21:00
+#   Sunday    09:00 UTC  covers the afternoon slate
+#   Monday    13:00 UTC  ~6h before a 20:00 UK kick-off
+#
+# Five runs a week is roughly 260 requests a month against a 500 request
+# allowance. The remaining headroom is deliberate: it leaves room for manual
+# dispatches without putting the schedule itself at risk. Every run prints the
+# quota remaining, so the number falls in public rather than being discovered
+# at zero.
 on:
   schedule:
-    # Thursday 13:00 UTC (09:00 America/New_York) — the weekly card.
     - cron: "0 13 * * 4"
-    # Friday 13:00 UTC — fresh prices for the Friday opener.
     - cron: "0 13 * * 5"
+    - cron: "0 9 * * 6"
+    - cron: "0 9 * * 0"
+    - cron: "0 13 * * 1"
   workflow_dispatch:
     inputs:
       skip_provider_fetch:
@@ -28,6 +48,9 @@ on:
 
 permissions:
   contents: read
+  # Read-only, and only so the run can fetch the previous run's card archive.
+  # Nothing here can write to the repository.
+  actions: read
 
 concurrency:
   # Never let two refreshes write staging at once.
@@ -78,6 +101,43 @@ jobs:
           python scripts/run_provider_shadow_verification.py \
             --provider odds_api --live --overwrite-staging --include-event-markets
 
+      - name: Restore the previous card archive
+        # A runner is empty every time and the card archive is not tracked in
+        # git, so without this each run has no memory of the last one and the
+        # "since the previous refresh" diff is permanently blank — the Friday
+        # card could never say what moved since Thursday.
+        #
+        # The archive is restored from the previous successful run's artifact.
+        # This is additive: it only writes under the archive directory, so it
+        # cannot overwrite the prices this run just fetched. A first run, a
+        # pruned artifact, or any failure here is not fatal — the run continues
+        # and simply reports no comparison.
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -u
+          previous=$(gh run list \
+            --workflow matchday-refresh.yml \
+            --status success \
+            --limit 1 \
+            --json databaseId \
+            --jq '.[0].databaseId // empty')
+          if [ -z "$previous" ]; then
+            echo "No previous successful run. This run establishes the baseline."
+            exit 0
+          fi
+          echo "Restoring the card archive from run $previous."
+          mkdir -p data/outputs/archive/automated_cards
+          gh run download "$previous" \
+            --name matchday-card-archive \
+            --dir data/outputs/archive/automated_cards || {
+              echo "No card archive on run $previous; continuing without a comparison."
+              exit 0
+            }
+          find data/outputs/archive/automated_cards -name '*.json' | wc -l \
+            | xargs echo "Archived card runs restored:"
+
       - name: Rebuild every report
         env:
           PYTHONPATH: src
@@ -106,6 +166,18 @@ jobs:
             data/outputs/epl_settle_preview_task.md
           if-no-files-found: warn
           retention-days: 30
+
+      - name: Upload the card archive
+        # Carries this run's card history forward so the next run can diff
+        # against it. Retained longer than the reports because it is the only
+        # link between one matchweek and the next.
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: matchday-card-archive
+          path: data/outputs/archive/automated_cards
+          if-no-files-found: warn
+          retention-days: 90
 
       - name: Scope reminder
         if: always()

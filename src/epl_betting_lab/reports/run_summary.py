@@ -128,9 +128,37 @@ def build_run_summary(
             "generated, so nothing is being withheld as a judgement.",
             "",
         ]
-        for blocker in card.get("blockers") or model.get("blockers") or []:
-            lines.append(f"- {blocker}")
-        lines.append("")
+        # Prefer the generated card's blockers. The routine feeds carry terse
+        # status labels ("Needs odds", "Provider not trusted") which name the
+        # symptom without naming the fix, and they cascade: four blockers where
+        # three are consequences of the first. The generated card already
+        # resolved that — it leads with the root cause and carries the command
+        # that clears it — so a blocked run summary should say what a person
+        # can actually do next.
+        root = _clean(generated.get("root_blocker"))
+        blockers = (
+            generated.get("blockers")
+            or card.get("blockers")
+            or model.get("blockers")
+            or []
+        )
+        if root:
+            lines += [f"**Start here:** {root}", ""]
+            remaining = [b for b in blockers if _clean(b) != root]
+            if remaining:
+                lines.append(
+                    f"{len(remaining)} further blocker(s) may clear once that is "
+                    "resolved:"
+                )
+                lines.append("")
+                lines += [f"- {blocker}" for blocker in remaining]
+                lines.append("")
+        else:
+            lines += [f"- {blocker}" for blocker in blockers]
+            lines.append("")
+        next_action = _clean(generated.get("next_action"))
+        if next_action and next_action != root:
+            lines += [f"Next action: {next_action}", ""]
 
     if comparison.get("comparable"):
         lines += [

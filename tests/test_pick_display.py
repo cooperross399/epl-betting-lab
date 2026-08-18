@@ -15,6 +15,7 @@ from epl_betting_lab.reports.automated_card import render_automated_card
 from epl_betting_lab.reports.browser_status import build_status_html
 from epl_betting_lab.reports.pick_display import (
     format_american_odds,
+    format_market_list,
     is_stakeable,
     split_stakeable,
 )
@@ -218,3 +219,108 @@ class TestStatusPageRendering:
         # placeholder must not arrive pre-escaped.
         assert "**0 units**" not in html
         assert "&amp;mdash;" not in html
+
+
+class TestFormatMarketList:
+    """A report is read by a person; a list repr is read by a debugger."""
+
+    def test_markets_are_joined_as_prose(self) -> None:
+        assert format_market_list(["1x2", "total_2_5", "btts"]) == "1x2, total_2_5, btts"
+
+    def test_no_brackets_or_quotes_survive(self) -> None:
+        rendered = format_market_list(["1x2", "btts"])
+        for character in "[]'\"":
+            assert character not in rendered
+
+    def test_an_empty_list_reads_as_none(self) -> None:
+        assert format_market_list([]) == "none"
+        assert format_market_list(None) == "none"
+
+    def test_the_empty_word_is_configurable(self) -> None:
+        assert format_market_list([], empty="all markets") == "all markets"
+
+    def test_blank_entries_are_dropped(self) -> None:
+        assert format_market_list(["1x2", "", "  ", "btts"]) == "1x2, btts"
+
+    def test_a_list_of_only_blanks_reads_as_none(self) -> None:
+        assert format_market_list(["", "  "]) == "none"
+
+    def test_a_plain_string_is_passed_through(self) -> None:
+        assert format_market_list("1x2") == "1x2"
+
+    def test_a_tuple_works_like_a_list(self) -> None:
+        assert format_market_list(("1x2", "btts")) == "1x2, btts"
+
+
+class TestNoReprLeaksIntoReports:
+    """A guard, because five of these shipped before anyone noticed."""
+
+    def _rendered_reports(self, tmp_path: Path) -> dict[str, str]:
+        from epl_betting_lab.reports.automated_card import render_automated_card
+
+        markets = ["1x2", "total_2_5", "btts"]
+        card = render_automated_card(
+            {
+                "card_generated": False,
+                "window_label": "Matchweek 1",
+                "best_bets": [],
+                "leans": [],
+                "passes_or_avoids": [],
+                "blockers": ["Nothing eligible."],
+                "included_markets": [],
+                "excluded_markets": markets,
+                "odds_source": "data/outputs/automated_card_input.json",
+                "manual_odds_entry_required": False,
+                "unit_suggestions": [],
+                "exclusion_note": "",
+            }
+        )
+        _write_card(tmp_path, [])
+        return {
+            "automated_card.md": card,
+            "run_summary.md": build_run_summary(output_dir=tmp_path),
+            "status.html": build_status_html(output_dir=tmp_path),
+        }
+
+    def test_no_report_contains_a_python_list_repr(self, tmp_path: Path) -> None:
+        for name, text in self._rendered_reports(tmp_path).items():
+            assert "['" not in text, f"{name} leaks a list repr"
+            assert "']" not in text, f"{name} leaks a list repr"
+
+    def test_the_excluded_markets_still_appear(self, tmp_path: Path) -> None:
+        """Removing the repr must not remove the information."""
+        card = self._rendered_reports(tmp_path)["automated_card.md"]
+
+        assert "1x2, total_2_5, btts" in card
+
+
+class TestNoSourceInterpolatesAMarketList:
+    """A static guard, because rendering every report in a test is not feasible.
+
+    Fifteen sites across six modules interpolated a market list straight into an
+    f-string. Only five were visible in the reports a person happens to open, so
+    a rendering test would have missed the rest.
+    """
+
+    def test_no_module_interpolates_a_bare_market_list(self) -> None:
+        import re
+
+        from epl_betting_lab.config import PROJECT_ROOT
+
+        # `{something['..._markets']}` with no formatting call around it.
+        bare = re.compile(r"\{[A-Za-z_]+\[['\"][a-z_]*markets['\"]\][^}]*\}")
+        offenders: list[str] = []
+        for path in sorted((PROJECT_ROOT / "src").rglob("*.py")):
+            for number, line in enumerate(
+                path.read_text(encoding="utf-8").splitlines(), start=1
+            ):
+                for match in bare.finditer(line):
+                    if "format_market_list" in match.group(0):
+                        continue
+                    if "len(" in match.group(0) or "join" in match.group(0):
+                        continue
+                    offenders.append(f"{path.name}:{number}: {match.group(0)}")
+
+        assert not offenders, "interpolate through format_market_list:\n" + "\n".join(
+            offenders
+        )

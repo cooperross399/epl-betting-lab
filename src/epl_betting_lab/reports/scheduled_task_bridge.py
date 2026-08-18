@@ -26,6 +26,7 @@ from typing import Any
 import pandas as pd
 
 from epl_betting_lab.config import MANUAL_DIR, OUTPUTS_DIR, PROJECT_ROOT
+from epl_betting_lab.reports.pick_display import format_market_list
 from epl_betting_lab.selected_slate import SELECTED_WEEK1_LABEL
 
 
@@ -495,11 +496,11 @@ def render_epl_model_task(summary: Mapping[str, Any]) -> str:
         "",
         "## Market eligibility",
         "",
-        f"- Included (usable for picks): **{eligible['included_markets'] or 'none'}**",
-        f"- Excluded: **{eligible['excluded_markets'] or 'none'}**",
-        f"- Unavailable: {eligible['unavailable_markets'] or 'none'}",
-        f"- Incomplete: {eligible['incomplete_markets'] or 'none'}",
-        f"- Disabled: {eligible['disabled_markets'] or 'none'}",
+        f"- Included (usable for picks): **{format_market_list(eligible['included_markets'])}**",
+        f"- Excluded: **{format_market_list(eligible['excluded_markets'])}**",
+        f"- Unavailable: {format_market_list(eligible['unavailable_markets'])}",
+        f"- Incomplete: {format_market_list(eligible['incomplete_markets'])}",
+        f"- Disabled: {format_market_list(eligible['disabled_markets'])}",
         (
             "- Manual odds entry required: "
             f"**{'Yes' if eligible['manual_entry_required'] else 'No'}**"
@@ -760,9 +761,9 @@ def render_epl_card_task(summary: Mapping[str, Any]) -> str:
         [
             "## Markets",
             "",
-            f"- Included in the card: **{summary['included_markets'] or 'none'}**",
-            f"- Excluded: **{summary['excluded_markets'] or 'none'}**",
-            f"- Unavailable: {summary['unavailable_markets'] or 'none'}",
+            f"- Included in the card: **{format_market_list(summary['included_markets'])}**",
+            f"- Excluded: **{format_market_list(summary['excluded_markets'])}**",
+            f"- Unavailable: {format_market_list(summary['unavailable_markets'])}",
             (
                 "- Manual odds entry required: "
                 f"**{'Yes' if summary['manual_odds_entry_required'] else 'No'}**"

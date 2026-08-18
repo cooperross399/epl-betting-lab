@@ -28,6 +28,7 @@ from epl_betting_lab.selected_slate import (
 from epl_betting_lab.reports.provider_shadow_history import (
     archive_provider_shadow_run,
 )
+from epl_betting_lab.reports.pick_display import format_market_list
 from epl_betting_lab.reports.staging_input_validation import (
     save_staging_input_validation,
 )
@@ -919,7 +920,7 @@ def render_provider_shadow_verification(
             f"totals {markets['market_counts']['total_2_5']} rows; "
             f"BTTS {markets['market_counts']['btts']} rows"
         ),
-        f"- Missing market coverage: {markets['missing_markets'] or 'none'}",
+        f"- Missing market coverage: {format_market_list(markets['missing_markets'])}",
         (
             f"- Core markets (1X2 + totals): **{core['status']}** | "
             f"{core['row_count']} rows"

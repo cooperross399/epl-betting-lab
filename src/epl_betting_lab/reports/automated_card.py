@@ -38,6 +38,7 @@ from epl_betting_lab.reports.pick_display import (
     NOT_STAKEABLE_LABEL,
     NOT_STAKEABLE_NOTE,
     format_american_odds,
+    format_market_list,
     split_stakeable,
 )
 from epl_betting_lab.reports.current_odds_validation import (
@@ -401,8 +402,8 @@ def render_automated_card(summary: Mapping[str, Any]) -> str:
         "",
         f"- Card generated: **{'Yes' if summary['card_generated'] else 'No'}**",
         f"- Selected window: **{summary['window_label']}**",
-        f"- Included markets: **{summary['included_markets'] or 'none'}**",
-        f"- Excluded markets: **{summary['excluded_markets'] or 'none'}**",
+        f"- Included markets: **{format_market_list(summary['included_markets'])}**",
+        f"- Excluded markets: **{format_market_list(summary['excluded_markets'])}**",
         f"- Odds source: `{summary['odds_source']}`",
         (
             "- Manual odds entry required: "

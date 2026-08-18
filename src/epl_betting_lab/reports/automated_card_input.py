@@ -36,6 +36,7 @@ from epl_betting_lab.market_eligibility import (
     EligibilityReport,
     evaluate_market_eligibility,
 )
+from epl_betting_lab.reports.pick_display import format_market_list
 from epl_betting_lab.selected_slate import (
     SELECTED_WEEK1_LABEL,
     filter_to_selected_window,
@@ -211,8 +212,8 @@ def build_automated_card_input(
 
     frame = pd.DataFrame(records, columns=CARD_INPUT_COLUMNS)
     notes.append(
-        f"Included markets: {sorted(eligible)}. Excluded: "
-        f"{list(eligibility.excluded_markets) or 'none'}."
+        f"Included markets: {format_market_list(sorted(eligible))}. Excluded: "
+        f"{format_market_list(eligibility.excluded_markets)}."
     )
     notes.append(
         f"{len(frame)} row(s) derived from real provider quotes. No price was "
@@ -256,11 +257,11 @@ def _render_markdown(summary: Mapping[str, object]) -> str:
     lines.extend(
         [
             "",
-            f"- Included markets: **{eligibility['eligible_markets'] or 'none'}**",
-            f"- Excluded markets: **{eligibility['excluded_markets'] or 'none'}**",
-            f"- Unavailable: {eligibility['unavailable_markets'] or 'none'}",
-            f"- Incomplete: {eligibility['incomplete_markets'] or 'none'}",
-            f"- Disabled: {eligibility['disabled_markets'] or 'none'}",
+            f"- Included markets: **{format_market_list(eligibility['eligible_markets'])}**",
+            f"- Excluded markets: **{format_market_list(eligibility['excluded_markets'])}**",
+            f"- Unavailable: {format_market_list(eligibility['unavailable_markets'])}",
+            f"- Incomplete: {format_market_list(eligibility['incomplete_markets'])}",
+            f"- Disabled: {format_market_list(eligibility['disabled_markets'])}",
             "",
             eligibility["note"],
             "",

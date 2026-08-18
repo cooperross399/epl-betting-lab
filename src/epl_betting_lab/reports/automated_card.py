@@ -322,6 +322,19 @@ def build_automated_card(
             "produced and no price was invented."
         )
         return summary
+    except FileNotFoundError as exc:
+        # Missing evidence is a blocked card, not a crash. The rest of this
+        # module is careful about that distinction and this path was not: a
+        # missing historical dataset raised through the report runner and took
+        # the whole refresh down with a traceback, which reads as "the tool is
+        # broken" rather than "one input is absent".
+        summary["blockers"] = [f"Card generation blocked by missing data: {exc}"]
+        summary["next_action"] = (
+            f"Start here: {exc} No selection was produced and no price was "
+            "invented."
+        )
+        summary["root_blocker"] = summary["blockers"][0]
+        return summary
 
     try:
         report = pd.read_csv(paths["csv"])

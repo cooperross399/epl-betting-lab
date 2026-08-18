@@ -355,3 +355,30 @@ def test_terse_blockers_are_still_shown_when_there_is_no_better_source(
     summary = build_run_summary(output_dir=tmp_path, now=NOW)
 
     assert "- Needs odds" in summary
+
+
+# --- the model needs data the runner does not have -------------------------
+
+
+def test_historical_results_are_fetched_before_the_card_is_built() -> None:
+    """The first live CI run failed here: no dataset, so no card, ever."""
+    text = _workflow()
+
+    assert "scripts/fetch_data.py" in text
+    assert text.index("fetch_data.py") < text.index("refresh_all_reports.py")
+
+
+def test_results_are_fetched_before_any_quota_is_spent() -> None:
+    """If the free source is down, stop before paying the odds provider."""
+    text = _workflow()
+
+    assert text.index("fetch_data.py") < text.index(
+        "run_provider_shadow_verification.py"
+    )
+
+
+def test_fetching_results_needs_no_secret() -> None:
+    text = _workflow()
+    step = text.split("Fetch historical results", 1)[1].split("- name:", 1)[0]
+
+    assert "secrets." not in step

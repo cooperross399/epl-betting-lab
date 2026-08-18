@@ -324,3 +324,85 @@ class TestNoSourceInterpolatesAMarketList:
         assert not offenders, "interpolate through format_market_list:\n" + "\n".join(
             offenders
         )
+
+
+class TestMissingDataIsABlockedCardNotACrash:
+    """A missing input must read as "one thing is absent", not "it is broken"."""
+
+    def test_a_missing_dataset_becomes_a_named_blocker(
+        self, tmp_path: Path, monkeypatch
+    ) -> None:
+        from epl_betting_lab.reports import automated_card
+
+        # Every gate ahead of the report runner has to pass, otherwise the card
+        # short-circuits earlier and this path is never reached.
+        (tmp_path / "automated_card_input.json").write_text(
+            json.dumps({"eligibility": {"eligible_markets": ["1x2"]}}),
+            encoding="utf-8",
+        )
+        (tmp_path / "provider_shadow_verification.json").write_text(
+            json.dumps(
+                {
+                    "staging_validation": {"handoff_eligible": True},
+                    "provider_policy": {"provider_allowed": True},
+                }
+            ),
+            encoding="utf-8",
+        )
+        card_input = tmp_path / "card_input.csv"
+        card_input.write_text("market,selection\n", encoding="utf-8")
+
+        def _raise(**_kwargs: object) -> dict[str, str]:
+            raise FileNotFoundError(
+                "Missing data/processed/epl_historical_matches.csv. "
+                "Run scripts/fetch_data.py first."
+            )
+
+        monkeypatch.setattr(automated_card, "run_thursday_best_bets_report", _raise)
+        monkeypatch.setattr(
+            automated_card, "_provider_allowlisted_now", lambda *a, **k: True
+        )
+
+        summary = automated_card.build_automated_card(
+            output_dir=tmp_path, card_input_path=card_input
+        )
+
+        assert summary["card_generated"] is False
+        assert any("fetch_data.py" in b for b in summary["blockers"])
+        assert "fetch_data.py" in summary["next_action"]
+
+    def test_the_missing_input_is_named_as_the_root_blocker(
+        self, tmp_path: Path, monkeypatch
+    ) -> None:
+        from epl_betting_lab.reports import automated_card
+
+        (tmp_path / "automated_card_input.json").write_text(
+            json.dumps({"eligibility": {"eligible_markets": ["1x2"]}}),
+            encoding="utf-8",
+        )
+        (tmp_path / "provider_shadow_verification.json").write_text(
+            json.dumps(
+                {
+                    "staging_validation": {"handoff_eligible": True},
+                    "provider_policy": {"provider_allowed": True},
+                }
+            ),
+            encoding="utf-8",
+        )
+        card_input = tmp_path / "card_input.csv"
+        card_input.write_text("market,selection\n", encoding="utf-8")
+
+        monkeypatch.setattr(
+            automated_card,
+            "run_thursday_best_bets_report",
+            lambda **_k: (_ for _ in ()).throw(FileNotFoundError("Missing thing.")),
+        )
+        monkeypatch.setattr(
+            automated_card, "_provider_allowlisted_now", lambda *a, **k: True
+        )
+
+        summary = automated_card.build_automated_card(
+            output_dir=tmp_path, card_input_path=card_input
+        )
+
+        assert summary["root_blocker"] == summary["blockers"][0]

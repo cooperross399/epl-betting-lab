@@ -81,7 +81,7 @@ def test_totals_are_documented_as_excluded_for_availability() -> None:
     text = _flat("docs/claude_autonomy_operating_model.md")
 
     assert "excluded" in text
-    assert "data availability, not profitability" in text
+    assert "availability, not profitability" in text
     assert "never describe an excluded market as unprofitable" in text
 
 
@@ -277,3 +277,82 @@ def test_the_pr_workflow_compiles_every_module() -> None:
     ).read_text(encoding="utf-8")
 
     assert "compileall" in text
+
+
+def test_the_totals_decision_is_recorded_as_settled() -> None:
+    """Coverage numbers alone would invite a future session to re-investigate
+    and reach a different answer. The reason it is settled has to be written
+    down, not inferred from "8 of 10"."""
+    text = _flat("docs/claude_autonomy_operating_model.md")
+
+    assert "settled" in text
+    assert "no account at any of them" in text
+    assert "availability, not profitability" in text
+
+
+def test_the_standing_exclusion_note_travels_with_the_data() -> None:
+    """A report should explain itself without anyone finding the docs."""
+    from epl_betting_lab.market_eligibility import MARKET_EXCLUSION_NOTES
+
+    note = MARKET_EXCLUSION_NOTES["total_2_5"]
+
+    assert "William Hill" in note
+    assert "cannot be taken is not a price" in note
+    assert "not profitability" in note
+
+
+def test_an_excluded_market_reason_carries_the_standing_note() -> None:
+    import pandas as pd
+
+    from epl_betting_lab.market_eligibility import evaluate_market_eligibility
+
+    fixtures = pd.DataFrame(
+        [{"date": "2026-08-21", "home_team": "Arsenal", "away_team": "Coventry"}]
+    )
+    report = evaluate_market_eligibility(
+        pd.DataFrame(columns=["date", "home_team", "away_team", "market", "selection"]),
+        fixtures,
+        mapping_verified=True,
+        validation_passed=True,
+        freshness_passed=True,
+    )
+
+    totals = next(m for m in report.markets if m.market == "total_2_5")
+    assert "William Hill" in totals.reason
+
+
+def test_an_eligible_market_does_not_carry_an_exclusion_note() -> None:
+    """The note explains an exclusion; attaching it to an included market would
+    contradict the report."""
+    import pandas as pd
+
+    from epl_betting_lab.market_eligibility import evaluate_market_eligibility
+
+    fixtures = pd.DataFrame(
+        [{"date": "2026-08-21", "home_team": "Arsenal", "away_team": "Coventry"}]
+    )
+    odds = pd.DataFrame(
+        [
+            {
+                "date": "2026-08-21",
+                "home_team": "Arsenal",
+                "away_team": "Coventry",
+                "market": "total_2_5",
+                "selection": side,
+                "american_odds": "-110",
+                "book": "BookA",
+            }
+            for side in ("over", "under")
+        ]
+    )
+    report = evaluate_market_eligibility(
+        odds,
+        fixtures,
+        mapping_verified=True,
+        validation_passed=True,
+        freshness_passed=True,
+    )
+
+    totals = next(m for m in report.markets if m.market == "total_2_5")
+    assert totals.status == "eligible"
+    assert "William Hill" not in totals.reason

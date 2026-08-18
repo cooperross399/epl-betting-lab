@@ -124,29 +124,36 @@ and no Terminal from Cooper**.
 ### EPL Model
 
 ```text
-Read the EPL Betting Lab operating docs first:
-CLAUDE.md, docs/claude_autonomy_operating_model.md,
-docs/epl_scheduled_tasks_bridge.md.
+Read CLAUDE.md and docs/claude_autonomy_operating_model.md first.
 
 Repo: /Users/cooperross/Projects/epl-betting-lab
 
-Run:
-PYTHONPATH=src .venv/bin/python scripts/run_epl_model_task.py
+Do the whole sequence yourself. Do not ask Cooper to run anything.
+
+1. Check whether the last provider run is still fresh. The policy treats a run
+   older than 12 hours as stale, so a card built on an older run is blocked.
+2. If it is stale and a matchweek is within a few days, refetch:
+   archive data/staging/ first, then
+   PYTHONPATH=src .venv/bin/python scripts/run_provider_shadow_verification.py \
+       --provider odds_api --live --overwrite-staging --include-event-markets
+3. Rebuild every report:
+   PYTHONPATH=src .venv/bin/python scripts/refresh_all_reports.py
 
 Then report, in plain English:
 - model readiness and whether EPL CARD may run
 - fixture freshness and the selected slate window
-- odds status and the active odds source
+- the active odds source
 - provider/shadow status and mapping coverage
-- included markets and excluded markets, with the reason for each exclusion
+- included and excluded markets, with the reason for each exclusion
 - blockers, and the exact next action
 
 Rules:
 - Provider is allowlisted for 1x2 and btts only.
-- total_2_5 is excluded for data availability, never call it unprofitable.
-- Do not generate picks, place bets, apply settlement, or enable scheduling.
-- Do not send Cooper to ChatGPT or to a Terminal. If blocked, say exactly what
-  is blocked and what the smallest browser-based action would be.
+- total_2_5 is excluded and settled: the complete 2.5 line exists only at books
+  Cooper has no account with. Do not re-investigate.
+- Generate no picks here, place no bets, apply no settlement.
+- Never send Cooper to ChatGPT or a Terminal. If something blocks, say exactly
+  what and what the smallest browser-based fix would be.
 ```
 
 ### EPL CARD
@@ -156,14 +163,21 @@ Read CLAUDE.md and docs/claude_autonomy_operating_model.md first.
 
 Repo: /Users/cooperross/Projects/epl-betting-lab
 
-Run:
-PYTHONPATH=src .venv/bin/python scripts/run_automated_card.py
-PYTHONPATH=src .venv/bin/python scripts/run_epl_card_task.py
+Do the whole sequence yourself. Do not ask Cooper to run anything.
+
+1. If the last provider run is older than 12 hours and a matchweek is close,
+   archive data/staging/ and refetch:
+   PYTHONPATH=src .venv/bin/python scripts/run_provider_shadow_verification.py \
+       --provider odds_api --live --overwrite-staging --include-event-markets
+2. Rebuild everything:
+   PYTHONPATH=src .venv/bin/python scripts/refresh_all_reports.py
 
 Then report:
 - card status and whether picks were produced
-- best bets, leans, passes/avoids, and unit suggestions, with book and price
-- included markets and excluded markets
+- best bets, leans, passes/avoids and unit suggestions, with book and price
+- what changed since the previous card: added, removed, moved section, and
+  price moved, counted separately
+- included and excluded markets
 - odds completeness and the active odds source
 - validation warnings, blockers, and the exact next action
 
@@ -174,7 +188,7 @@ Rules:
 - Markets are 1x2 and btts only. Never include total_2_5.
 - An excluded market is unavailable or incomplete, never a pass or no-value.
 - The card is a recommendation. Never place a bet or automate execution.
-- Do not send Cooper to ChatGPT or to a Terminal.
+- Never send Cooper to ChatGPT or a Terminal.
 ```
 
 ### EPL SETTLE (IGNORE)

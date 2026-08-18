@@ -35,12 +35,42 @@ def test_the_refresh_is_scheduled() -> None:
     assert "cron:" in text
 
 
-def test_it_runs_twice_a_week_because_a_run_goes_stale_in_12_hours() -> None:
-    """A single weekly run would produce a card already blocked when read."""
-    text = _workflow()
+def test_every_matchday_has_a_run_because_a_run_goes_stale_in_12_hours() -> None:
+    """The schedule must reach every matchday, not just the start of the week.
 
-    assert text.count("- cron:") == 2
+    A Thursday-and-Friday schedule looked sufficient and was not: Friday's run
+    expires at 01:00 UTC Saturday, while a typical matchweek puts six matches
+    on Saturday, three on Sunday and one on Monday. Nine of eleven would have
+    been read from an already-blocked card.
+    """
+    text = _workflow()
+    days = {line.split("* *", 1)[1].strip().strip('"') for line in text.splitlines() if "- cron:" in line}
+
+    # Thursday planning card, then one run per day that can hold a match.
+    assert days == {"4", "5", "6", "0", "1"}
     assert "12 hours as stale" in text
+
+
+def test_the_weekend_runs_land_before_the_earliest_kick_off() -> None:
+    """A 12:30 UK kick-off is 11:30 UTC in summer; 13:00 UTC would be too late."""
+    text = _workflow()
+    weekend = [
+        line for line in text.splitlines()
+        if "- cron:" in line and line.rstrip().endswith(('* * 6"', '* * 0"'))
+    ]
+
+    assert len(weekend) == 2
+    for line in weekend:
+        hour = int(line.split('"')[1].split()[1])
+        assert hour <= 9, f"weekend run at {hour}:00 UTC is too late for a 12:30 UK kick-off"
+
+
+def test_the_cadence_stays_inside_the_request_allowance() -> None:
+    """Five runs a week is ~260 requests a month against a 500 allowance."""
+    text = _workflow()
+    runs_per_week = text.count("- cron:")
+
+    assert runs_per_week * 4.35 * 12 < 500
 
 
 def test_the_schedule_never_places_a_bet_or_settles() -> None:

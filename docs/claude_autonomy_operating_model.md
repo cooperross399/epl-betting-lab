@@ -258,6 +258,33 @@ Archive `data/staging/` before any run that overwrites it.
 
 ---
 
+## How the automation can stop without telling anyone
+
+The refresh runs itself (`.github/workflows/matchday-refresh.yml`, five runs a
+week — Thursday plus every day that can hold a match). Three things can stop it,
+and none of them announces itself as a failure. A run that never starts produces
+no red X.
+
+**GitHub disables a scheduled workflow after 60 days of repository inactivity.**
+Workflow runs do not count as activity — commits do. A quiet stretch mid-season
+therefore switches the automation off silently. GitHub emails the repository
+owner first, so that mail is not noise. Re-enable from the Actions tab; any
+commit resets the clock.
+
+**The request allowance runs out.** Five runs a week is roughly 260 requests a
+month against a 500 allowance. Every run prints the quota remaining in its job
+summary, so the number falls in public. If it is not going to last the season,
+that is visible weeks ahead, not on the morning it hits zero.
+
+**The API key stops working.** A rotated or expired key fails at the credential
+check, before any quota is spent, and the run goes red. That one is loud — it is
+listed here so the quiet two are recognisable by contrast.
+
+If a card looks stale, check when the workflow last ran before assuming the
+report is wrong.
+
+---
+
 ## Operating home
 
 The GitHub issue **“EPL Betting Lab — Claude Operating Home”** is the control

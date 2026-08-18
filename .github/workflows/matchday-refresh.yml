@@ -8,16 +8,36 @@ name: Matchday Refresh
 # widen market scope. Those remain human decisions and no schedule can take
 # them. A card is a recommendation.
 #
-# Cadence follows the existing Thursday cutoff rhythm plus the Friday opener,
-# because the provider policy treats a run older than 12 hours as stale: a
-# Thursday card cannot be trusted on Saturday, so a single weekly run would
-# produce a report that is already blocked when read.
+# CADENCE: one run per day that has matches, plus the Thursday planning card.
+#
+# The provider policy treats a run older than 12 hours as stale, and a stale
+# card is refused. So the schedule has to reach every matchday, not just the
+# start of the week. A Thursday-and-Friday schedule looked sufficient and was
+# not: Friday's run expires at 01:00 UTC Saturday, while a typical matchweek
+# puts six matches on Saturday, three on Sunday and one on Monday. Nine of
+# eleven would have been read from an already-blocked card.
+#
+# Each run is timed to land before that day's earliest kick-off and stay fresh
+# through its latest, allowing for the UK being UTC+1 in summer:
+#
+#   Thursday  13:00 UTC  planning card; no matches
+#   Friday    13:00 UTC  ~6h before a 20:00 UK kick-off
+#   Saturday  09:00 UTC  ~2.5h before a 12:30 UK kick-off, fresh until 21:00
+#   Sunday    09:00 UTC  covers the afternoon slate
+#   Monday    13:00 UTC  ~6h before a 20:00 UK kick-off
+#
+# Five runs a week is roughly 260 requests a month against a 500 request
+# allowance. The remaining headroom is deliberate: it leaves room for manual
+# dispatches without putting the schedule itself at risk. Every run prints the
+# quota remaining, so the number falls in public rather than being discovered
+# at zero.
 on:
   schedule:
-    # Thursday 13:00 UTC (09:00 America/New_York) — the weekly card.
     - cron: "0 13 * * 4"
-    # Friday 13:00 UTC — fresh prices for the Friday opener.
     - cron: "0 13 * * 5"
+    - cron: "0 9 * * 6"
+    - cron: "0 9 * * 0"
+    - cron: "0 13 * * 1"
   workflow_dispatch:
     inputs:
       skip_provider_fetch:

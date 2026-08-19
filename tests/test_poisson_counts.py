@@ -296,3 +296,96 @@ class TestShapeProbing:
 
         assert "corners_1x2" in summary["markets_absent"]
         assert "double_chance" in summary["markets_returned"]
+
+
+class TestProbingWithoutAnArchive:
+    """A probe must run on a clean checkout.
+
+    Event discovery previously derived its event list from an archived bulk
+    response, which is not committed — so the probe was unrunnable in CI, the
+    one place with a working credential. The events endpoint carries no odds
+    and costs nothing, so it can supply the ids directly.
+    """
+
+    def _events_response(self, payload):
+        class _Response:
+            status_code = 200
+
+            def json(self):
+                return payload
+
+        return _Response()
+
+    def test_it_reads_the_free_events_endpoint(self) -> None:
+        from epl_betting_lab.reports.provider_market_discovery import fetch_events_live
+
+        captured = {}
+
+        def _request(url, params=None, timeout=None):
+            captured["url"] = url
+            captured["params"] = params
+            return self._events_response(
+                [
+                    {
+                        "id": "evt1",
+                        "home_team": "Arsenal",
+                        "away_team": "Chelsea",
+                        "commence_time": "2026-08-21T19:00:00Z",
+                    }
+                ]
+            )
+
+        events = fetch_events_live(api_key="k", requester=_request)
+
+        assert captured["url"].endswith("/events")
+        assert events[0]["provider_event_id"] == "evt1"
+        assert events[0]["home_team"] == "Arsenal"
+
+    def test_it_asks_for_no_odds_so_it_costs_nothing(self) -> None:
+        from epl_betting_lab.reports.provider_market_discovery import fetch_events_live
+
+        captured = {}
+
+        def _request(url, params=None, timeout=None):
+            captured["params"] = params or {}
+            return self._events_response([])
+
+        fetch_events_live(api_key="k", requester=_request)
+
+        assert "markets" not in captured["params"]
+        assert "regions" not in captured["params"]
+
+    def test_a_missing_credential_is_refused_clearly(self) -> None:
+        from epl_betting_lab.reports.provider_market_discovery import (
+            DiscoveryError,
+            fetch_events_live,
+        )
+
+        with pytest.raises(DiscoveryError, match="EPL_ODDS_API_KEY"):
+            fetch_events_live(api_key="")
+
+    def test_an_error_response_is_refused_not_treated_as_empty(self) -> None:
+        from epl_betting_lab.reports.provider_market_discovery import (
+            DiscoveryError,
+            fetch_events_live,
+        )
+
+        class _Response:
+            status_code = 401
+
+            def json(self):
+                return {}
+
+        with pytest.raises(DiscoveryError, match="401"):
+            fetch_events_live(api_key="k", requester=lambda *a, **k: _Response())
+
+    def test_an_unexpected_body_yields_no_events(self) -> None:
+        from epl_betting_lab.reports.provider_market_discovery import fetch_events_live
+
+        assert (
+            fetch_events_live(
+                api_key="k",
+                requester=lambda *a, **k: self._events_response({"error": "nope"}),
+            )
+            == []
+        )

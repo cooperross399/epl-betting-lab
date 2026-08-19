@@ -27,6 +27,7 @@ from epl_betting_lab.reports.provider_market_discovery import (
     discover_event_markets,
     estimate_quota_cost,
     save_provider_market_discovery,
+    fetch_events_live,
     summarize_bulk_response,
 )
 
@@ -110,7 +111,7 @@ def main() -> int:
     )
 
     raw_path = args.raw_response_path or _latest_raw_response()
-    if raw_path is None and not args.probe_totals_regions:
+    if raw_path is None and not (args.probe_totals_regions or args.check_event_markets):
         print("BLOCKED: no archived provider response found under data/staging/raw/.")
         return 2
     if raw_path is not None:
@@ -133,9 +134,18 @@ def main() -> int:
             print(f"BLOCKED: `{API_KEY_ENV}` is not configured.")
             return 2
 
-        payload = json.loads(raw_path.read_text(encoding="utf-8"))
-        bulk = summarize_bulk_response(payload if isinstance(payload, list) else [])
-        events = bulk["events"]
+        if raw_path is not None:
+            payload = json.loads(raw_path.read_text(encoding="utf-8"))
+            bulk = summarize_bulk_response(payload if isinstance(payload, list) else [])
+            events = bulk["events"]
+        else:
+            # The events list is a free endpoint, and event discovery only needs
+            # the ids. Requiring an archived bulk response made this unrunnable
+            # in CI, where data/staging/raw/ is not committed - which is exactly
+            # where the working credential lives.
+            print("No archived response; fetching the free events list instead.")
+            events = fetch_events_live(api_key=api_key)
+            print(f"Events in the provider window: {len(events)}")
         if args.max_events > 0:
             events = events[: args.max_events]
 

@@ -359,3 +359,52 @@ class TestProviderSpellingsResolve:
 
         assert "provider_home_team," in source
         assert "provider_away_team," in source
+
+
+class TestDuplicateRowsAreTreatedByMarket:
+    """A repeat means different things in different markets.
+
+    In 1X2, totals or BTTS it means the response is not what it claims to be,
+    and those prices decide real bets — so the run stops. In an alternate-lines
+    market a book sometimes lists the same corner line twice while assembling a
+    ladder; refusing the whole run over that threw away every market including
+    the ones that were fine.
+    """
+
+    def _source(self) -> str:
+        from epl_betting_lab.config import PROJECT_ROOT
+
+        return (
+            PROJECT_ROOT
+            / "src/epl_betting_lab/providers/odds_api_staging_provider.py"
+        ).read_text(encoding="utf-8")
+
+    def test_the_core_markets_still_stop_the_run(self) -> None:
+        from epl_betting_lab.providers.odds_api_staging_provider import CORE_MARKETS
+
+        assert CORE_MARKETS == frozenset({"1x2", "total_2_5", "btts"})
+        assert "if normalized_market in CORE_MARKETS:" in self._source()
+        assert "raise MalformedProviderResponseError(" in self._source()
+
+    def test_the_derived_markets_keep_the_first_price(self) -> None:
+        source = self._source()
+
+        assert "duplicate_counts[normalized_market] = (" in source
+        assert "continue" in source
+
+    def test_repeats_are_reported_not_swallowed(self) -> None:
+        """Tolerating something quietly is how it stops being noticed."""
+        source = self._source()
+
+        assert "The first price was kept and the repeats ignored" in source
+        assert "no price was guessed" in source
+
+    def test_no_core_market_is_in_the_derived_set(self) -> None:
+        """Otherwise a core repeat would take the tolerant path."""
+        from epl_betting_lab.providers.odds_api_staging_provider import (
+            CORE_MARKETS,
+            DERIVED_PROVIDER_MARKETS,
+        )
+
+        derived = {t for targets in DERIVED_PROVIDER_MARKETS.values() for t in targets}
+        assert not (derived & CORE_MARKETS)

@@ -406,3 +406,29 @@ class TestMissingDataIsABlockedCardNotACrash:
         )
 
         assert summary["root_blocker"] == summary["blockers"][0]
+
+
+class TestQuotaIsAnArgumentNotATableCell:
+    """Quota running dry stops the schedule without producing a red X."""
+
+    def _summary(self, tmp_path: Path, remaining: str) -> str:
+        _write_card(tmp_path, [])
+        (tmp_path / "provider_shadow_verification.json").write_text(
+            json.dumps({"api_quota": {"requests_remaining": remaining}}),
+            encoding="utf-8",
+        )
+        return build_run_summary(output_dir=tmp_path)
+
+    def test_a_healthy_quota_says_how_many_runs_it_buys(self, tmp_path: Path) -> None:
+        assert "about 20 more runs" in self._summary(tmp_path, "311")
+
+    def test_a_low_quota_says_the_schedule_stops(self, tmp_path: Path) -> None:
+        summary = self._summary(tmp_path, "100")
+
+        assert "Top this up or the schedule stops" in summary
+
+    def test_the_warning_is_absent_when_there_is_plenty(self, tmp_path: Path) -> None:
+        assert "Top this up" not in self._summary(tmp_path, "311")
+
+    def test_an_unreadable_quota_is_shown_not_hidden(self, tmp_path: Path) -> None:
+        assert "unknown" in self._summary(tmp_path, "")

@@ -67,6 +67,35 @@ def _table(rows: Sequence[Mapping[str, Any]]) -> list[str]:
     return lines
 
 
+#: A run costs about 15 requests, measured from the counter across two live
+#: runs rather than derived from the request pattern.
+REQUESTS_PER_RUN = 15
+
+#: Below this many runs' worth, the summary says so. Quota running dry is one
+#: of the ways this automation stops without producing a red X, so the number
+#: has to become an argument rather than sit in a table being technically
+#: present.
+LOW_QUOTA_RUNS = 14
+
+
+def _quota_line(quota: Mapping[str, Any]) -> str:
+    """The remaining quota, and how many runs that actually buys."""
+    raw = _clean(quota.get("requests_remaining"))
+    if not raw:
+        return "unknown"
+    try:
+        remaining = int(float(raw))
+    except ValueError:
+        return raw
+    runs = remaining // REQUESTS_PER_RUN
+    if runs <= LOW_QUOTA_RUNS:
+        return (
+            f"**{remaining}** — about {runs} more run(s). "
+            "**Top this up or the schedule stops.**"
+        )
+    return f"{remaining} (about {runs} more runs)"
+
+
 def _picks_table(rows: Sequence[Mapping[str, Any]], empty: str) -> list[str]:
     """Render picks, keeping zero-unit rows visibly apart from real plays."""
     if not rows:
@@ -111,7 +140,7 @@ def build_run_summary(
         f"| Markets excluded | {', '.join(card.get('excluded_markets') or []) or 'none'} |",
         f"| Manual odds entry | {'Required' if card.get('manual_odds_entry_required') else 'Not required'} |",
         f"| Provider run | {_clean(shadow.get('verdict')) or 'unknown'} |",
-        f"| Quota remaining | {_clean(quota.get('requests_remaining')) or 'unknown'} |",
+        f"| Quota remaining | {_quota_line(quota)} |",
         "",
     ]
 

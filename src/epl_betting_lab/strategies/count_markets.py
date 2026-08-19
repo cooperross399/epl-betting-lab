@@ -32,9 +32,18 @@ COUNT_MARKETS: dict[str, tuple[str, float | None, str]] = {
     "corners_1x2": ("corners", None, "1x2"),
     "corners_total_9_5": ("corners", 9.5, "total"),
     "corners_total_10_5": ("corners", 10.5, "total"),
+    # Cards are modelled but not registered as a market: no book offers them in
+    # the `us` region. Kept here so the market can be enabled the day one does,
+    # without rebuilding the model.
     "cards_total_3_5": ("cards", 3.5, "total"),
     "cards_total_4_5": ("cards", 4.5, "total"),
 }
+
+#: Markets this module can price but which no reachable book offers, so they
+#: are deliberately absent from MARKET_SELECTIONS.
+UNAVAILABLE_MARKETS: frozenset[str] = frozenset(
+    {"cards_total_3_5", "cards_total_4_5"}
+)
 
 #: Extra edge demanded before a card market is believed. See the module note.
 CARDS_MIN_EDGE = 0.06

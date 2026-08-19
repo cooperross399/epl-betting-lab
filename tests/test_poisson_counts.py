@@ -192,18 +192,37 @@ class TestCardsAreTrustedLess:
 
 
 class TestRegistration:
-    def test_every_count_market_is_known_to_the_project(self) -> None:
+    def test_every_available_count_market_is_registered(self) -> None:
         from epl_betting_lab.market_eligibility import MARKET_SELECTIONS
+        from epl_betting_lab.strategies.count_markets import UNAVAILABLE_MARKETS
 
         for market in COUNT_MARKETS:
+            if market in UNAVAILABLE_MARKETS:
+                continue
             assert market in MARKET_SELECTIONS, market
+
+    def test_unavailable_markets_are_modelled_but_not_registered(self) -> None:
+        """No book offers cards in the `us` region, which is where the accounts
+        are. The model stays so the market can be enabled the day one appears;
+        registering it would put a market on the card that has no price."""
+        from epl_betting_lab.market_eligibility import MARKET_SELECTIONS
+        from epl_betting_lab.strategies.count_markets import UNAVAILABLE_MARKETS
+
+        assert UNAVAILABLE_MARKETS
+        for market in UNAVAILABLE_MARKETS:
+            assert market in COUNT_MARKETS, market
+            assert market not in MARKET_SELECTIONS, market
 
     @needs_dataset
     def test_the_strategy_and_registry_agree_on_selections(self) -> None:
         from epl_betting_lab.market_eligibility import MARKET_SELECTIONS
 
+        from epl_betting_lab.strategies.count_markets import UNAVAILABLE_MARKETS
+
         models = fit_count_models(load_matches())
         for market, (event, _, _) in COUNT_MARKETS.items():
+            if market in UNAVAILABLE_MARKETS:
+                continue
             priced = set(probabilities_for(market, models[event], "Arsenal", "Chelsea"))
             assert priced == set(MARKET_SELECTIONS[market]), market
 

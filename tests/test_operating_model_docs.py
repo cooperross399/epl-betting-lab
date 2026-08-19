@@ -165,16 +165,50 @@ def test_routine_prompts_forbid_chatgpt_and_terminal() -> None:
     assert text.count("ChatGPT") >= 3  # one per routine prompt
 
 
-def test_routine_prompts_use_the_active_repo_path() -> None:
-    text = _read("docs/epl_scheduled_tasks_bridge.md")
+def test_routine_prompts_do_not_depend_on_a_local_checkout() -> None:
+    """They read email instead.
 
-    assert ACTIVE_PATH in text
+    The prompts used to run commands against a local path, which meant they
+    silently could not run whenever the machine was off — the exact situation
+    a scheduled routine exists for. The card is delivered by email now, so a
+    routine works from anywhere with the laptop shut.
+    """
+    text = _read("docs/epl_scheduled_tasks_bridge.md")
+    prompts = text.split("## Exact routine prompts", 1)[1]
+    prompts = prompts.split("## Safe vs unsafe actions", 1)[0]
+
+    assert ACTIVE_PATH not in prompts
+    assert "PYTHONPATH=src" not in prompts
+    assert "Search Gmail" in prompts
 
 
 def test_card_routine_forbids_publishing_picks_when_blocked() -> None:
+    """A blocked card means nothing was generated, never "no value found"."""
     text = _read("docs/epl_scheduled_tasks_bridge.md")
 
-    assert "publish NO pick" in text
+    assert 'It never means "no value found"' in text
+    assert "is not a reason to suggest a bet" in text
+
+
+def test_card_routine_forbids_inventing_anything() -> None:
+    text = _read("docs/epl_scheduled_tasks_bridge.md")
+
+    assert "Do not compute, adjust, or invent" in text
+
+
+def test_card_routine_keeps_the_zero_unit_rule() -> None:
+    """The rule survived the move from filesystem to email."""
+    text = _read("docs/epl_scheduled_tasks_bridge.md")
+
+    assert "zero-unit row is not a small bet" in text
+
+
+def test_routines_explain_that_no_email_is_not_a_fault() -> None:
+    """Silence is information here, and only safe if that is stated."""
+    text = _read("docs/epl_scheduled_tasks_bridge.md")
+
+    assert "selections have not changed" in text
+    assert "failure email" in text or "failure notification" in text
 
 
 # --- CI ---------------------------------------------------------------------

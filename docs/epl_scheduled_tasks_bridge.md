@@ -149,97 +149,94 @@ independent, and only one of them is load-bearing.
 ## Exact routine prompts
 
 Claude Code does not edit your scheduled tasks. Paste these into the routine
-definitions yourself. They are written to need **no chat history, no ChatGPT,
-and no Terminal from Cooper**.
+definitions yourself.
 
-### EPL Model
+**These prompts read email, not the filesystem.** The card is built by GitHub
+Actions and delivered as a comment on the *EPL Card — this week's picks* issue,
+which GitHub emails to Cooper. A routine that reads that mail works from
+anywhere, with the laptop shut, and needs only the Gmail connector. The earlier
+versions ran commands against a local checkout, which meant they silently could
+not run whenever the machine was off — the exact situation these are for.
 
-```text
-Read CLAUDE.md and docs/claude_autonomy_operating_model.md first.
-
-Repo: /Users/cooperross/Projects/epl-betting-lab
-
-Do the whole sequence yourself. Do not ask Cooper to run anything.
-
-1. Check whether the last provider run is still fresh. The policy treats a run
-   older than 12 hours as stale, so a card built on an older run is blocked.
-2. If it is stale and a matchweek is within a few days, refetch:
-   archive data/staging/ first, then
-   PYTHONPATH=src .venv/bin/python scripts/run_provider_shadow_verification.py \
-       --provider odds_api --live --overwrite-staging --include-event-markets
-3. Rebuild every report:
-   PYTHONPATH=src .venv/bin/python scripts/refresh_all_reports.py
-
-Then report, in plain English:
-- model readiness and whether EPL CARD may run
-- fixture freshness and the selected slate window
-- the active odds source
-- provider/shadow status and mapping coverage
-- included and excluded markets, with the reason for each exclusion
-- blockers, and the exact next action
-
-Rules:
-- Provider is allowlisted for 1x2 and btts only.
-- total_2_5 is excluded and settled: the complete 2.5 line exists only at books
-  Cooper has no account with. Do not re-investigate.
-- Generate no picks here, place no bets, apply no settlement.
-- Never send Cooper to ChatGPT or a Terminal. If something blocks, say exactly
-  what and what the smallest browser-based fix would be.
-```
+If a GitHub connector is ever added to Claude, a routine can read the run
+directly instead; the mail is simply the path that works today.
 
 ### EPL CARD
 
 ```text
-Read CLAUDE.md and docs/claude_autonomy_operating_model.md first.
+Search Gmail for the most recent notification from GitHub for the issue
+"EPL Card — this week's picks" in cooperross399/epl-betting-lab.
 
-Repo: /Users/cooperross/Projects/epl-betting-lab
+That email is the card. Read it and tell me, in plain English:
 
-Do the whole sequence yourself. Do not ask Cooper to run anything.
-
-1. If the last provider run is older than 12 hours and a matchweek is close,
-   archive data/staging/ and refetch:
-   PYTHONPATH=src .venv/bin/python scripts/run_provider_shadow_verification.py \
-       --provider odds_api --live --overwrite-staging --include-event-markets
-2. Rebuild everything:
-   PYTHONPATH=src .venv/bin/python scripts/refresh_all_reports.py
-
-Then report:
-- card status and whether picks were produced
-- best bets, leans, passes/avoids and unit suggestions, with book and price
-- what changed since the previous card: added, removed, moved section, and
-  price moved, counted separately
-- included and excluded markets
-- odds completeness and the active odds source
-- validation warnings, blockers, and the exact next action
+- whether a card was produced, or whether it was blocked and why
+- the best bets and the leans, each with market, selection, tier, edge, price
+  and book, and the suggested unit size
+- what changed since the previous card: added, dropped, or moved section
+- which markets were included and excluded
 
 Rules:
-- If card_ready is false, publish NO pick, lean, or stake. Report the named
-  blockers instead: Needs odds / Needs mapping / Needs BTTS / Needs validation
-  / Provider not trusted.
-- Markets are 1x2 and btts only. Never include total_2_5.
-- An excluded market is unavailable or incomplete, never a pass or no-value.
-- The card is a recommendation. Never place a bet or automate execution.
-- Never send Cooper to ChatGPT or a Terminal.
+- Report only what the email says. Do not compute, adjust, or invent a
+  selection, a price, or an edge. If something is missing, say it is missing.
+- A blocked card means nothing was generated. It never means "no value found",
+  and it is not a reason to suggest a bet.
+- A zero-unit row is not a small bet, it is no bet. Do not present one as a pick.
+- Place no bets. Apply no settlement. Suggest no stake beyond the units in the
+  email.
+- Never tell me to open a Terminal or to ask ChatGPT. If something looks wrong,
+  say what and point me at the GitHub Actions run linked in the email.
+
+If there is no such email in the last 8 days, say so plainly. It means either
+the selections have not changed — which is normal and not a fault — or the
+schedule has stopped. A failed run emails separately, so check for a GitHub
+Actions failure notification before assuming anything is broken.
+```
+
+### EPL Model
+
+```text
+Search Gmail for the most recent notification from GitHub for the issue
+"EPL Card — this week's picks" in cooperross399/epl-betting-lab, and for any
+GitHub Actions failure notifications for the "Matchday Refresh" workflow in the
+last 8 days.
+
+Tell me, in plain English:
+
+- when the card last changed, and whether the schedule appears to be running
+- whether the latest card was ready or blocked, and the blocker if it was
+- which markets are included and excluded
+- how much provider quota remains, if the email states it, and roughly how many
+  runs that buys
+
+Rules:
+- Provider is allowlisted for 1x2 and btts only.
+- total_2_5 is excluded and that question is settled: the complete 2.5 line
+  exists only at books Cooper has no account with. Do not re-investigate it and
+  do not propose adding it.
+- Generate no picks here. Place no bets. Apply no settlement.
+- Never tell me to open a Terminal or to ask ChatGPT.
+
+No card email does not mean the system is broken. It means the selections did
+not change. A broken run sends its own failure email — that is the one to worry
+about.
 ```
 
 ### EPL SETTLE (IGNORE)
 
 ```text
-Read CLAUDE.md first.
+Do nothing that writes.
 
-Repo: /Users/cooperross/Projects/epl-betting-lab
+Search Gmail for GitHub Actions failure notifications for the "Matchday
+Refresh" workflow in cooperross399/epl-betting-lab in the last 8 days.
 
-Run:
-PYTHONPATH=src .venv/bin/python scripts/run_epl_settle_preview_task.py
-
-Then report ledger rows, open bets, settled bets, would-settle count (always 0),
-blockers, and the exact next action.
+If there are none, say the schedule is running and stop.
+If there are, tell me which run failed, when, and what the error line says.
 
 Rules:
-- Preview only, permanently.
-- Never apply settlement, never edit bet_ledger.csv, never use force mode,
-  never place a bet.
-- Do not send Cooper to ChatGPT or to a Terminal.
+- Settlement is preview-only in this project and has no write path. Never apply
+  settlement, never edit the bet ledger, and never record a result.
+- Place no bets and suggest none.
+- Never tell me to open a Terminal or to ask ChatGPT.
 ```
 
 ---

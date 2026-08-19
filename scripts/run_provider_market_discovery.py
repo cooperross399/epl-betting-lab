@@ -82,6 +82,16 @@ def parse_args() -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--dump-outcome-shapes",
+        action="store_true",
+        help=(
+            "Print how each returned market shapes its outcomes, so a parser "
+            "can be written against the real field names rather than guessed. "
+            "Reports structure only: names, descriptions and points, never a "
+            "price and never the credential."
+        ),
+    )
+    parser.add_argument(
         "--max-events",
         type=int,
         default=0,
@@ -147,12 +157,26 @@ def main() -> int:
             base_url=os.environ.get("EPL_ODDS_API_BASE_URL", DEFAULT_API_BASE_URL),
             regions=args.regions,
             markets=args.markets,
+            dump_outcome_shapes=args.dump_outcome_shapes,
         )
         print(
             "Event endpoint results: "
             f"{event_summary['events_with_btts']}/{event_summary['event_count']} "
             "event(s) returned BTTS"
         )
+        returned = event_summary.get("markets_returned") or []
+        absent = event_summary.get("markets_absent") or []
+        print(f"Markets returned: {', '.join(returned) or 'none'}")
+        if absent:
+            print(f"Markets requested but never returned: {', '.join(absent)}")
+        for market, shape in (event_summary.get("outcome_shapes") or {}).items():
+            print(f"\n=== {market}  (example book: {shape['example_bookmaker']})")
+            print(f"    outcome fields: {', '.join(shape['outcome_fields'])}")
+            for outcome in shape["outcomes"]:
+                print(
+                    "    name={name!r} description={description!r} "
+                    "point={point!r} priced={has_price}".format(**outcome)
+                )
         for error in event_summary["errors"]:
             print(f"WARNING: {error}")
 

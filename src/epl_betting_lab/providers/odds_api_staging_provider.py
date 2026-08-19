@@ -36,6 +36,11 @@ from epl_betting_lab.providers.base import (
 )
 
 
+from epl_betting_lab.providers.derived_market_parsing import (
+    UnrecognizedOutcomeError,
+    matches_line,
+    selection_for,
+)
 from epl_betting_lab.providers.team_names import normalize_team_name
 
 
@@ -100,6 +105,50 @@ def _required_text(value: object, *, label: str) -> str:
             f"Provider response is missing required `{label}` data."
         )
     return text
+
+
+#: Provider market key -> the project market(s) it can produce. One provider
+#: market can feed several: a corners totals response carries the whole ladder
+#: from 4.5 to 15.5, and each project market reads only its own line.
+DERIVED_PROVIDER_MARKETS: dict[str, tuple[str, ...]] = {
+    "double_chance": ("double_chance",),
+    "draw_no_bet": ("draw_no_bet",),
+    "corners_1x2": ("corners_1x2",),
+    "alternate_totals_corners": ("corners_total_9_5", "corners_total_10_5"),
+}
+
+#: Everything the normalizer will look at. Anything else in a response is
+#: ignored rather than guessed at.
+ACCEPTED_PROVIDER_MARKETS: frozenset[str] = frozenset(
+    {"h2h", "totals", "btts"} | set(DERIVED_PROVIDER_MARKETS)
+)
+
+#: The per-event markets a live run requests by default.
+DEFAULT_EVENT_MARKETS: tuple[str, ...] = ("btts",) + tuple(DERIVED_PROVIDER_MARKETS)
+
+
+def _line_of(market: str) -> float:
+    """The line named in a market key, e.g. corners_total_9_5 -> 9.5."""
+    parts = market.rsplit("_", 2)
+    return float(f"{parts[-2]}.{parts[-1]}")
+
+
+def _derived_project_market(
+    provider_market: str, outcome: Mapping[str, Any]
+) -> str | None:
+    """Which project market this outcome belongs to, if any.
+
+    A market carrying a line ladder produces one project market per line, so
+    the outcome's own point decides. An outcome on a line nobody models is not
+    an error — it is simply not one of ours.
+    """
+    candidates = DERIVED_PROVIDER_MARKETS.get(provider_market, ())
+    if len(candidates) == 1:
+        return candidates[0]
+    for candidate in candidates:
+        if matches_line(outcome, _line_of(candidate)):
+            return candidate
+    return None
 
 
 def _american_price(value: object) -> int | float:
@@ -217,7 +266,7 @@ def _normalize_provider_events(
                         f"Provider bookmaker `{book_name}` has a malformed market."
                     )
                 market_key = str(market.get("key", "")).strip().lower()
-                if market_key not in {"h2h", "totals", "btts"}:
+                if market_key not in ACCEPTED_PROVIDER_MARKETS:
                     continue
                 outcomes = market.get("outcomes", [])
                 if not isinstance(outcomes, list):
@@ -273,6 +322,28 @@ def _normalize_provider_events(
                             )
                         normalized_market = "total_2_5"
                         selection = lowered
+                    elif market_key in DERIVED_PROVIDER_MARKETS:
+                        # Named after the teams rather than after positions, so
+                        # resolving one needs this fixture's names. The parser
+                        # raises on a name it cannot place: silently dropping a
+                        # selection leaves a card that looks complete and is
+                        # missing a bet.
+                        target = _derived_project_market(market_key, outcome)
+                        if target is None:
+                            # An outcome from elsewhere on the line ladder.
+                            continue
+                        try:
+                            parsed = selection_for(
+                                target, outcome, home_team, away_team
+                            )
+                        except UnrecognizedOutcomeError as exc:
+                            raise MalformedProviderResponseError(
+                                f"{exc} (provider event `{event_id}`)"
+                            ) from exc
+                        if parsed is None:
+                            continue
+                        normalized_market = target
+                        selection = parsed
                     else:
                         lowered = outcome_name.casefold()
                         if lowered not in {"yes", "no"}:
@@ -360,7 +431,7 @@ class OddsApiStagingProvider(BaseStagingProvider):
         bookmakers: str = "",
         timeout_seconds: float = 20.0,
         include_event_markets: bool = False,
-        event_markets: Sequence[str] = ("btts",),
+        event_markets: Sequence[str] = DEFAULT_EVENT_MARKETS,
     ) -> None:
         self.environment = dict(os.environ if environment is None else environment)
         self.requester = requester or _default_requester

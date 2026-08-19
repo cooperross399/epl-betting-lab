@@ -478,3 +478,44 @@ class TestABlockedRunDoesNotReportRemovedPicks:
         summary = self._summary(tmp_path, card_ready=True)
 
         assert "- Removed: 27" in summary
+
+
+class TestMovedPricesAreFormattedToo:
+    """The one place the price formatter had not reached."""
+
+    def _summary(self, tmp_path: Path) -> str:
+        _write_card(tmp_path, [_pick()])
+        (tmp_path / "automated_card_comparison.json").write_text(
+            json.dumps(
+                {
+                    "comparable": True,
+                    "added": [],
+                    "removed": [],
+                    "moved_section": [],
+                    "price_changed": [
+                        {
+                            "label": "Arsenal v Coventry btts yes",
+                            "from_price": 155.0,
+                            "to_price": 164.0,
+                        },
+                        {
+                            "label": "Man City v Bournemouth 1x2 home",
+                            "from_price": -200.0,
+                            "to_price": -205.0,
+                        },
+                    ],
+                    "unchanged_count": 25,
+                }
+            ),
+            encoding="utf-8",
+        )
+        return build_run_summary(output_dir=tmp_path)
+
+    def test_a_moved_price_is_signed(self, tmp_path: Path) -> None:
+        summary = self._summary(tmp_path)
+
+        assert "+155 → +164" in summary
+        assert "155.0" not in summary
+
+    def test_a_negative_moved_price_keeps_its_sign(self, tmp_path: Path) -> None:
+        assert "-200 → -205" in self._summary(tmp_path)

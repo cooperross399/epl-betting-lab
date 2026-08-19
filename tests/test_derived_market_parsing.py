@@ -244,3 +244,44 @@ class TestTheProviderNormalisesThem:
         sourced |= {"1x2", "total_2_5", "btts"}
 
         assert set(MARKET_SELECTIONS) == sourced
+
+
+class TestCountersSurviveANewMarket:
+    """A hardcoded counter took the whole refresh down the first time five
+    markets were added. The fetch worked, the normaliser worked, and the run
+    died on `market_counts[normalized_market] += 1` because the dict had been
+    initialised with exactly three keys."""
+
+    def test_the_counter_is_built_from_the_market_registry(self) -> None:
+        """Not from a literal, so adding a market cannot raise a KeyError."""
+        from epl_betting_lab.config import PROJECT_ROOT
+
+        source = (
+            PROJECT_ROOT
+            / "src/epl_betting_lab/providers/odds_api_staging_provider.py"
+        ).read_text(encoding="utf-8")
+
+        assert '{"1x2": 0, "total_2_5": 0, "btts": 0}' not in source
+        assert source.count("{market: 0 for market in MARKET_SELECTIONS}") >= 2
+
+    def test_counting_cannot_raise_on_an_unexpected_market(self) -> None:
+        from epl_betting_lab.config import PROJECT_ROOT
+
+        source = (
+            PROJECT_ROOT
+            / "src/epl_betting_lab/providers/odds_api_staging_provider.py"
+        ).read_text(encoding="utf-8")
+
+        assert "market_counts[normalized_market] += 1" not in source
+        assert "market_counts.get(normalized_market, 0) + 1" in source
+
+    def test_the_report_lists_whatever_markets_were_counted(self) -> None:
+        """It named three markets explicitly, so new ones would be invisible."""
+        from epl_betting_lab.config import PROJECT_ROOT
+
+        source = (
+            PROJECT_ROOT
+            / "src/epl_betting_lab/providers/odds_api_staging_provider.py"
+        ).read_text(encoding="utf-8")
+
+        assert "summary['market_counts']['1x2']" not in source

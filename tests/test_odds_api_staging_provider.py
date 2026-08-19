@@ -13,6 +13,7 @@ from epl_betting_lab.providers.odds_api_staging_provider import (
     API_KEY_ENV,
     OddsApiStagingProvider,
 )
+from epl_betting_lab.market_eligibility import MARKET_SELECTIONS
 from epl_betting_lab.reports.staging_input_validation import (
     build_staging_input_validation,
 )
@@ -201,7 +202,13 @@ def test_live_mocked_response_writes_only_staging_evidence_and_reports(
     assert summary["status"] == "Completed"
     assert summary["fixture_count"] == 1
     assert summary["odds_row_count"] == 7
-    assert summary["market_counts"] == {"1x2": 3, "total_2_5": 2, "btts": 2}
+    # Counts for the markets this fixture prices, without pinning the full set:
+    # a hardcoded dict here is what let a new market raise a KeyError in the
+    # provider itself and take the whole refresh down.
+    assert summary["market_counts"]["1x2"] == 3
+    assert summary["market_counts"]["total_2_5"] == 2
+    assert summary["market_counts"]["btts"] == 2
+    assert set(summary["market_counts"]) == set(MARKET_SELECTIONS)
     assert summary["network_request_made"] is True
     assert len(calls) == 1
     assert calls[0][1]["params"]["apiKey"] == SECRET

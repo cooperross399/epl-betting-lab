@@ -56,6 +56,10 @@ permissions:
   # Read-only, and only so the run can fetch the previous run's card archive.
   # Nothing here can write to the repository.
   actions: read
+  # Lets the run comment the card on an issue, which is what delivers it by
+  # email. This writes issue comments and nothing else — no code, no branches,
+  # no releases.
+  issues: write
 
 concurrency:
   # Never let two refreshes write staging at once.
@@ -175,6 +179,48 @@ jobs:
           PYTHONPATH: src
         run: |
           python scripts/build_run_summary.py --append-to-step-summary
+
+      - name: Email the card when the picks change
+        # Delivery. GitHub emails everyone watching the issue, so commenting is
+        # the whole mechanism — no SMTP server, no credentials, no third party.
+        #
+        # Only when the selections change. Five emails a week would train the
+        # reader to ignore them, and an alert nobody opens is worse than none
+        # because it still looks like coverage. Silence is safe to read because
+        # a failed run emails separately: no message means the run happened and
+        # the picks did not move.
+        if: always()
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PYTHONPATH: src
+        run: |
+          set -u
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          DECISION=$(python scripts/post_card_to_issue.py \
+            --out card_comment.md --title-out card_title.txt \
+            --run-url "$RUN_URL" | tail -1)
+          if [ "$DECISION" != "post" ]; then
+            echo "Not emailing: the selections did not change."
+            exit 0
+          fi
+          # The title comes from the module so the two cannot drift apart and
+          # start posting to different issues.
+          TITLE=$(cat card_title.txt)
+          # Matched exactly against the open issues rather than through the
+          # search API: the title contains an apostrophe, and a search that
+          # quietly returns nothing would create a duplicate issue every run.
+          NUMBER=$(gh issue list --state open --limit 200 --json number,title \
+            | jq -r --arg t "$TITLE" \
+              '[.[] | select(.title == $t)] | .[0].number // empty')
+          if [ -z "$NUMBER" ]; then
+            echo "Creating the delivery issue."
+            NUMBER=$(gh issue create --title "$TITLE" \
+              --body "Each matchday card is posted here when the selections change. Watch this issue to get them by email. Recommendations only; no bet is ever placed." \
+              | grep -o '[0-9]*$')
+          fi
+          gh issue comment "$NUMBER" --body-file card_comment.md
+          echo "Card posted to issue #$NUMBER."
 
       - name: Upload reports
         if: always()

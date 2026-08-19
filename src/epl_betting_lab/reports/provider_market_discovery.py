@@ -379,6 +379,7 @@ def discover_event_markets(
     markets: str = "btts",
     requester: Requester | None = None,
     timeout_seconds: float = 20.0,
+    dump_outcome_shapes: bool = False,
 ) -> dict[str, Any]:
     """Query the per-event odds endpoint for additional markets.
 
@@ -397,6 +398,10 @@ def discover_event_markets(
     per_event: list[dict[str, Any]] = []
     books_with_btts: set[str] = set()
     errors: list[str] = []
+    # market key -> one example of how its outcomes are shaped. A parser has to
+    # be written against the real field names, and guessing them is how a
+    # market silently returns nothing.
+    outcome_shapes: dict[str, dict[str, Any]] = {}
 
     for event in events:
         event_id = _clean(event.get("provider_event_id") or event.get("id"))
@@ -440,6 +445,33 @@ def discover_event_markets(
                         continue
                     key = _clean(market.get("key")).lower()
                     found.add(key)
+                    if dump_outcome_shapes and key not in outcome_shapes:
+                        samples = []
+                        for outcome in (market.get("outcomes") or [])[:6]:
+                            if not isinstance(outcome, Mapping):
+                                continue
+                            samples.append(
+                                {
+                                    "name": _clean(outcome.get("name")),
+                                    "description": _clean(outcome.get("description")),
+                                    "point": outcome.get("point"),
+                                    # Whether a price is present, never the price
+                                    # itself: this report is about structure.
+                                    "has_price": outcome.get("price") is not None,
+                                }
+                            )
+                        outcome_shapes[key] = {
+                            "example_bookmaker": book,
+                            "outcome_fields": sorted(
+                                {
+                                    field
+                                    for outcome in (market.get("outcomes") or [])
+                                    if isinstance(outcome, Mapping)
+                                    for field in outcome
+                                }
+                            ),
+                            "outcomes": samples,
+                        }
                     if key == "btts":
                         event_books.add(book)
                         books_with_btts.add(book)
@@ -466,6 +498,12 @@ def discover_event_markets(
         "events": per_event,
         "events_with_btts": sum(1 for item in per_event if item["has_btts"]),
         "bookmakers_offering_btts": sorted(books_with_btts),
+        "outcome_shapes": outcome_shapes,
+        "markets_returned": sorted({m for item in per_event for m in item["markets_returned"]}),
+        "markets_absent": sorted(
+            set(market_list)
+            - {m for item in per_event for m in item["markets_returned"]}
+        ),
         "errors": errors,
     }
 

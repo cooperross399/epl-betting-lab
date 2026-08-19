@@ -19,6 +19,19 @@ on:
         type: boolean
         required: false
         default: false
+      markets:
+        description: "Per-event market keys to discover (comma-separated, blank for the default)"
+        required: false
+        default: ""
+      max_events:
+        description: "Limit how many events are queried (0 = all). Use 1 to probe cheaply."
+        required: false
+        default: "0"
+      dump_shapes:
+        description: "Print the raw outcome shape of each market returned, so a parser can be written against reality"
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: read
@@ -62,6 +75,15 @@ jobs:
           fi
           if [ "${{ inputs.check_event_markets }}" = "true" ]; then
             ARGS="$ARGS --check-event-markets"
+          fi
+          if [ -n "${{ inputs.markets }}" ]; then
+            ARGS="$ARGS --markets ${{ inputs.markets }}"
+          fi
+          if [ "${{ inputs.max_events }}" != "0" ]; then
+            ARGS="$ARGS --max-events ${{ inputs.max_events }}"
+          fi
+          if [ "${{ inputs.dump_shapes }}" = "true" ]; then
+            ARGS="$ARGS --dump-outcome-shapes"
           fi
           python scripts/run_provider_market_discovery.py $ARGS
 

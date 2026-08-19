@@ -210,3 +210,89 @@ class TestRegistration:
     def test_every_named_event_maps_to_a_column_pair(self) -> None:
         for event, columns in COUNT_EVENTS.items():
             assert len(columns) == 2, event
+
+
+class TestShapeProbing:
+    """Discovery must be able to report a market's real outcome shape.
+
+    A parser written against guessed field names is how a market silently
+    returns nothing: the request succeeds, the outcomes are unrecognised, and
+    the market simply never appears on a card.
+    """
+
+    def _summary(self, payload: dict, **kwargs) -> dict:
+        from epl_betting_lab.reports.provider_market_discovery import (
+            discover_event_markets,
+        )
+
+        class _Response:
+            status_code = 200
+
+            def json(self) -> dict:
+                return payload
+
+        return discover_event_markets(
+            [{"id": "evt1", "home_team": "Arsenal", "away_team": "Chelsea"}],
+            api_key="k",
+            requester=lambda *a, **k: _Response(),
+            **kwargs,
+        )
+
+    def _payload(self) -> dict:
+        return {
+            "bookmakers": [
+                {
+                    "title": "FanDuel",
+                    "markets": [
+                        {
+                            "key": "double_chance",
+                            "outcomes": [
+                                {"name": "Arsenal/Draw", "price": -300},
+                                {"name": "Arsenal/Chelsea", "price": -150},
+                            ],
+                        },
+                        {
+                            "key": "alternate_totals_corners",
+                            "outcomes": [
+                                {"name": "Over", "point": 9.5, "price": -110},
+                                {"name": "Under", "point": 9.5, "price": -110},
+                            ],
+                        },
+                    ],
+                }
+            ]
+        }
+
+    def test_shapes_are_absent_unless_asked_for(self) -> None:
+        summary = self._summary(self._payload())
+        assert summary["outcome_shapes"] == {}
+
+    def test_it_reports_the_real_field_names(self) -> None:
+        summary = self._summary(self._payload(), dump_outcome_shapes=True)
+        corners = summary["outcome_shapes"]["alternate_totals_corners"]
+
+        assert "point" in corners["outcome_fields"]
+        assert corners["outcomes"][0]["point"] == 9.5
+
+    def test_it_reports_outcome_names_verbatim(self) -> None:
+        """"Arsenal/Draw" is not a name any parser would have guessed."""
+        summary = self._summary(self._payload(), dump_outcome_shapes=True)
+        names = [o["name"] for o in summary["outcome_shapes"]["double_chance"]["outcomes"]]
+
+        assert "Arsenal/Draw" in names
+
+    def test_it_records_that_a_price_exists_without_reporting_it(self) -> None:
+        """This report is about structure, not prices."""
+        summary = self._summary(self._payload(), dump_outcome_shapes=True)
+        outcome = summary["outcome_shapes"]["double_chance"]["outcomes"][0]
+
+        assert outcome["has_price"] is True
+        assert "price" not in outcome
+
+    def test_a_requested_market_that_never_returns_is_named(self) -> None:
+        summary = self._summary(
+            self._payload(), markets="double_chance,corners_1x2"
+        )
+
+        assert "corners_1x2" in summary["markets_absent"]
+        assert "double_chance" in summary["markets_returned"]

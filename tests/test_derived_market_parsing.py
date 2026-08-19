@@ -394,7 +394,9 @@ class TestDuplicateRowsAreTreatedByMarket:
 
     def test_repeats_are_reported_not_swallowed(self) -> None:
         """Tolerating something quietly is how it stops being noticed."""
-        source = self._source()
+        # Collapse whitespace first, then drop the quote pairs the wrapping
+        # introduces: the message spans three source lines.
+        source = " ".join(self._source().split()).replace('" "', "")
 
         assert "The first price was kept and the repeats ignored" in source
         assert "no price was guessed" in source

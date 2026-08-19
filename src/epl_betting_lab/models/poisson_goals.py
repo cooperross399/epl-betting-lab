@@ -96,6 +96,21 @@ class PoissonGoalsModel:
         btts_yes = mat.loc[(mat.home_goals > 0) & (mat.away_goals > 0), "prob"].sum()
         btts_no = 1 - btts_yes
 
+        # Double chance and draw-no-bet are functions of the same three
+        # outcomes, so they cost nothing to add and cannot disagree with the
+        # 1X2 numbers above — they are the same numbers, combined.
+        #
+        # Draw-no-bet is conditional, not a sum: the draw voids the bet and the
+        # stake comes back, so the fair price is P(home | not a draw). Treating
+        # it as P(home) would systematically overprice both sides, which is the
+        # one mistake this market invites.
+        not_draw = 1.0 - draw
+        if not_draw > 1e-9:
+            dnb_home = home_win / not_draw
+            dnb_away = away_win / not_draw
+        else:
+            dnb_home = dnb_away = 0.0
+
         home_xg, away_xg = self.expected_goals(home_team, away_team)
         top_scores = mat.sort_values("prob", ascending=False).head(5).copy()
         top_scores["score"] = top_scores["home_goals"].astype(str) + "-" + top_scores["away_goals"].astype(str)
@@ -112,6 +127,11 @@ class PoissonGoalsModel:
             "under_2_5": round(float(under_25), 4),
             "btts_yes": round(float(btts_yes), 4),
             "btts_no": round(float(btts_no), 4),
+            "double_chance_home_or_draw": round(float(home_win + draw), 4),
+            "double_chance_draw_or_away": round(float(draw + away_win), 4),
+            "double_chance_home_or_away": round(float(home_win + away_win), 4),
+            "draw_no_bet_home": round(float(dnb_home), 4),
+            "draw_no_bet_away": round(float(dnb_away), 4),
             "top_scores": top_scores[["score", "prob"]].assign(prob=lambda d: d["prob"].round(4)).to_dict("records"),
         }
 

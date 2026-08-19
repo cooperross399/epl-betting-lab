@@ -160,3 +160,87 @@ class TestSelectionFor:
         for market, outcome in cases:
             selection = selection_for(market, outcome, HOME, AWAY)
             assert selection in MARKET_SELECTIONS[market], (market, selection)
+
+
+class TestTheProviderNormalisesThem:
+    """The provider has to turn a real response into project rows.
+
+    Shapes copied from a live probe. The risk being covered is a market that
+    parses to nothing: the request succeeds, the outcomes are ignored, and the
+    market never reaches a card without anything reporting a problem.
+    """
+
+    def _maps(self):
+        from epl_betting_lab.providers.odds_api_staging_provider import (
+            ACCEPTED_PROVIDER_MARKETS,
+            DEFAULT_EVENT_MARKETS,
+            DERIVED_PROVIDER_MARKETS,
+            _derived_project_market,
+        )
+
+        return (
+            ACCEPTED_PROVIDER_MARKETS,
+            DEFAULT_EVENT_MARKETS,
+            DERIVED_PROVIDER_MARKETS,
+            _derived_project_market,
+        )
+
+    def test_the_original_three_markets_are_still_accepted(self) -> None:
+        accepted, _, _, _ = self._maps()
+        assert {"h2h", "totals", "btts"} <= accepted
+
+    def test_the_new_provider_keys_are_accepted(self) -> None:
+        accepted, _, derived, _ = self._maps()
+        assert set(derived) <= accepted
+        assert "double_chance" in accepted
+
+    def test_a_live_run_requests_them(self) -> None:
+        _, default_markets, derived, _ = self._maps()
+        assert "btts" in default_markets
+        assert set(derived) <= set(default_markets)
+
+    def test_one_provider_market_can_feed_two_project_markets(self) -> None:
+        """A corners response carries the ladder from 4.5 to 15.5."""
+        _, _, derived, _ = self._maps()
+        assert derived["alternate_totals_corners"] == (
+            "corners_total_9_5",
+            "corners_total_10_5",
+        )
+
+    def test_the_line_decides_which_market_an_outcome_belongs_to(self) -> None:
+        _, _, _, route = self._maps()
+        assert (
+            route("alternate_totals_corners", {"name": "Over", "point": 9.5})
+            == "corners_total_9_5"
+        )
+        assert (
+            route("alternate_totals_corners", {"name": "Over", "point": 10.5})
+            == "corners_total_10_5"
+        )
+
+    def test_a_line_nobody_models_is_not_an_error(self) -> None:
+        """Most of the ladder is simply not ours."""
+        _, _, _, route = self._maps()
+        assert route("alternate_totals_corners", {"name": "Over", "point": 15.5}) is None
+
+    def test_a_single_market_needs_no_line(self) -> None:
+        _, _, _, route = self._maps()
+        assert route("double_chance", {"name": "Arsenal or Draw"}) == "double_chance"
+
+    def test_every_routed_market_is_one_the_project_knows(self) -> None:
+        from epl_betting_lab.market_eligibility import MARKET_SELECTIONS
+
+        _, _, derived, _ = self._maps()
+        for targets in derived.values():
+            for target in targets:
+                assert target in MARKET_SELECTIONS, target
+
+    def test_every_registered_derived_market_has_a_provider_source(self) -> None:
+        """A market on the card with no way to fetch a price is a dead entry."""
+        from epl_betting_lab.market_eligibility import MARKET_SELECTIONS
+
+        _, _, derived, _ = self._maps()
+        sourced = {target for targets in derived.values() for target in targets}
+        sourced |= {"1x2", "total_2_5", "btts"}
+
+        assert set(MARKET_SELECTIONS) == sourced

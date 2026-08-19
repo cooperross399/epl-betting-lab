@@ -16,25 +16,39 @@ name: Matchday Refresh
 # arrives too. Silence therefore always means "it ran and nothing moved", which
 # is the only thing that makes silence safe to read.
 #
-# CADENCE: Thursday only, by choice.
+# CADENCE: one run per day that can hold a match, plus the Thursday planning
+# card.
 #
-# This is a strategy decision, not just a schedule. A Thursday card is priced on
-# Thursday, and by Sunday those prices will have moved — so the card is a set of
-# early positions rather than a live view of the market. That is a coherent way
-# to bet and the one this project already measures: closing-line value only
-# means anything if the bet went on before the close.
+# This was briefly Thursday-only, when 500 credits a month meant a second run
+# cost more than an extra market was worth. On the 20,000 plan that trade is
+# gone: every market the project can price, at every matchday, costs roughly
+# 2,300 a month — about a ninth of the allowance.
 #
-# What it gives up: the weekend runs that kept the card inside the 12-hour
-# freshness window for Saturday and Sunday kick-offs. Nothing will refresh a
-# price after Thursday, so a card read on Sunday is four days old and should be
-# treated that way.
+# The reason to run more than once a week is the freshness policy. A run older
+# than 12 hours is treated as stale and its card is refused, so Friday's run
+# expires at 01:00 UTC Saturday. A typical matchweek puts six matches on
+# Saturday, three on Sunday and one on Monday, all after that: a Thursday card
+# read on Sunday is four days old.
 #
-# What it buys: a run costs about 15 credits plus 10 for each extra per-event
-# market, so once a week leaves roughly 435 of the 500 monthly credits free —
-# enough for around nine additional markets instead of none.
+# Each run lands before that day's earliest kick-off and stays fresh through its
+# latest, allowing for the UK being UTC+1 in summer:
+#
+#   Thursday  13:00 UTC  planning card; no matches
+#   Friday    13:00 UTC  ~6h before a 20:00 UK kick-off
+#   Saturday  09:00 UTC  ~2.5h before a 12:30 UK kick-off, fresh until 21:00
+#   Sunday    09:00 UTC  covers the afternoon slate
+#   Monday    13:00 UTC  ~6h before a 20:00 UK kick-off
+#
+# COST: measured, not estimated. A run is about 15 credits plus 10 for each
+# extra per-event market. Every run prints the quota remaining and how many
+# runs it buys.
 on:
   schedule:
     - cron: "0 13 * * 4"
+    - cron: "0 13 * * 5"
+    - cron: "0 9 * * 6"
+    - cron: "0 9 * * 0"
+    - cron: "0 13 * * 1"
   workflow_dispatch:
     inputs:
       skip_provider_fetch:

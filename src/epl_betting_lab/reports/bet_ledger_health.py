@@ -6,6 +6,8 @@ import pandas as pd
 
 from epl_betting_lab.reports.bet_ledger import LEDGER_COLUMNS
 
+from epl_betting_lab.market_eligibility import MARKET_SELECTIONS
+
 
 HEALTH_COLUMNS = [
     "severity",
@@ -20,10 +22,13 @@ HEALTH_COLUMNS = [
 ]
 
 VALID_RESULTS = {"win", "loss", "push", "pending"}
-VALID_SELECTIONS = {
-    "1x2": {"home", "draw", "away"},
-    "total_2_5": {"over", "under"},
-    "btts": {"yes", "no"},
+#: Derived from the one market registry rather than restated here. A second
+#: copy of the market list is how a market can be fetched, priced and written
+#: to staging, and then rejected by a validator that was never told it exists —
+#: which is exactly what happened: 416 rows failed as `invalid_market` while
+#: every other layer had already accepted them.
+VALID_SELECTIONS: dict[str, set[str]] = {
+    market: set(selections) for market, selections in MARKET_SELECTIONS.items()
 }
 SERIOUS_SEVERITIES = {"error", "warning"}
 
@@ -118,7 +123,7 @@ def build_bet_ledger_health_check(ledger: pd.DataFrame) -> pd.DataFrame:
                 "Optional missing CLV: add the closing line later if you want CLV tracking.",
             )
         if market not in VALID_SELECTIONS:
-            _add_issue(issues, "error", "invalid_market", row, row_number, "Supported markets are 1x2, total_2_5, and btts.")
+            _add_issue(issues, "error", "invalid_market", row, row_number, f"Supported markets are {', '.join(sorted(VALID_SELECTIONS))}.")
         elif selection not in VALID_SELECTIONS[market]:
             allowed = ", ".join(sorted(VALID_SELECTIONS[market]))
             _add_issue(issues, "error", "invalid_selection", row, row_number, f"Supported selections for {market}: {allowed}.")

@@ -410,3 +410,42 @@ class TestDuplicateRowsAreTreatedByMarket:
 
         derived = {t for targets in DERIVED_PROVIDER_MARKETS.values() for t in targets}
         assert not (derived & CORE_MARKETS)
+
+
+class TestOneMarketRegistry:
+    """Every layer must agree on what a market is.
+
+    A market was fetched, normalised, priced and written to staging, and then
+    rejected by the odds validator as `invalid_market` — 416 rows of it. The
+    validator held its own copy of the market list and had never been told the
+    new ones existed. A second copy of a list is how that happens.
+    """
+
+    def test_the_validator_derives_its_markets_from_the_registry(self) -> None:
+        from epl_betting_lab.market_eligibility import MARKET_SELECTIONS
+        from epl_betting_lab.reports.bet_ledger_health import VALID_SELECTIONS
+
+        assert set(VALID_SELECTIONS) == set(MARKET_SELECTIONS)
+
+    def test_the_selections_match_too(self) -> None:
+        from epl_betting_lab.market_eligibility import MARKET_SELECTIONS
+        from epl_betting_lab.reports.bet_ledger_health import VALID_SELECTIONS
+
+        for market, selections in MARKET_SELECTIONS.items():
+            assert VALID_SELECTIONS[market] == set(selections), market
+
+    def test_no_layer_restates_the_market_list(self) -> None:
+        """The literal that caused this must not come back anywhere."""
+        from epl_betting_lab.config import PROJECT_ROOT
+
+        for path in (PROJECT_ROOT / "src").rglob("*.py"):
+            text = path.read_text(encoding="utf-8")
+            assert "Supported markets are 1x2, total_2_5, and btts" not in text, path
+            assert '{"1x2": 0, "total_2_5": 0, "btts": 0}' not in text, path
+
+    def test_a_new_market_would_be_accepted_by_the_validator(self) -> None:
+        from epl_betting_lab.reports.bet_ledger_health import VALID_SELECTIONS
+
+        assert "double_chance" in VALID_SELECTIONS
+        assert "home_or_draw" in VALID_SELECTIONS["double_chance"]
+        assert "corners_total_9_5" in VALID_SELECTIONS

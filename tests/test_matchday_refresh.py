@@ -35,13 +35,13 @@ def test_the_refresh_is_scheduled() -> None:
     assert "cron:" in text
 
 
-def test_the_card_is_built_once_a_week_on_thursday() -> None:
-    """Thursday only, by choice, and the trade-off is deliberate.
+def test_every_matchday_has_a_run() -> None:
+    """A run older than 12 hours is refused as stale.
 
-    Weekend runs previously kept the card inside the 12-hour freshness window
-    for Saturday and Sunday kick-offs. Giving them up means a card read on
-    Sunday is priced four days earlier — early positions rather than a live
-    view. What it buys is roughly nine extra markets instead of none.
+    Friday's run expires at 01:00 UTC Saturday, and a typical matchweek puts
+    six matches on Saturday, three on Sunday and one on Monday — all after
+    that. Covering only Thursday would mean nine of eleven matches read from an
+    already-stale card.
     """
     text = _workflow()
     days = {
@@ -50,15 +50,22 @@ def test_the_card_is_built_once_a_week_on_thursday() -> None:
         if "- cron:" in line
     }
 
-    assert days == {"4"}
+    assert days == {"4", "5", "6", "0", "1"}
 
 
-def test_the_cadence_says_what_it_gives_up() -> None:
-    """A schedule that silently drops freshness would be a trap."""
+def test_the_weekend_runs_land_before_the_earliest_kick_off() -> None:
+    """A 12:30 UK kick-off is 11:30 UTC in summer; 13:00 would be too late."""
     text = _workflow()
+    weekend = [
+        line
+        for line in text.splitlines()
+        if "- cron:" in line and line.rstrip().endswith(('* * 6"', '* * 0"'))
+    ]
 
-    assert "12-hour" in text or "12 hours as stale" in text
-    assert "four days old" in text
+    assert len(weekend) == 2
+    for line in weekend:
+        hour = int(line.split('"')[1].split()[1])
+        assert hour <= 9, f"{hour}:00 UTC is too late for a 12:30 UK kick-off"
 
 
 #: Measured, not estimated: two live runs moved the counter from 340 to 311.
@@ -67,7 +74,9 @@ MEASURED_REQUESTS_PER_RUN = 15
 #: Each extra per-event market costs one request per fixture.
 REQUESTS_PER_EXTRA_MARKET_PER_RUN = 10
 
-MONTHLY_REQUEST_ALLOWANCE = 500
+#: The plan in use. Raised from 500 once the schedule needed to cover every
+#: matchday and price every market; at 500 those two were mutually exclusive.
+MONTHLY_REQUEST_ALLOWANCE = 20_000
 WEEKS_PER_MONTH = 4.35
 
 

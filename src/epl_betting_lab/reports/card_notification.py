@@ -32,6 +32,16 @@ from epl_betting_lab.reports.pick_display import (
 
 ISSUE_TITLE = "EPL Card — this week's picks"
 
+#: Who to mention so the comment actually reaches a person.
+#:
+#: Posting a comment is not the same as delivering it. On a repository you own,
+#: GitHub's default notification setting is "participating and @mentions", so a
+#: comment written by Actions on an issue nobody has touched can notify nobody
+#: at all — the delivery would look like it worked on every run and quietly
+#: reach no one. An explicit mention always notifies, whatever the watch
+#: settings are, and needs nothing configured by hand.
+NOTIFY_HANDLE = "@cooperross399"
+
 
 def _read(path: Path) -> dict[str, Any]:
     if not path.is_file():
@@ -135,7 +145,7 @@ def build_notification(
     lines = [
         f"## {stamp.strftime('%A %d %B, %H:%M UTC')}",
         "",
-        f"_{reason}_",
+        f"{NOTIFY_HANDLE} — {reason}",
         "",
     ]
 

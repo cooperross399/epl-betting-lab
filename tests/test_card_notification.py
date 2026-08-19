@@ -304,3 +304,41 @@ class TestSendingOnDemand:
         dispatch = text.split("workflow_dispatch:", 1)[1].split("permissions:", 1)[0]
 
         assert "force_email" in dispatch
+
+
+class TestTheCommentReachesAPerson:
+    """Posting is not delivering.
+
+    On a repository you own, GitHub's default notification setting is
+    "participating and @mentions". A comment written by Actions on an issue
+    nobody has touched can notify nobody — the delivery step would report
+    success on every run and quietly reach no one, which is the failure mode
+    this whole design is meant to avoid.
+    """
+
+    def _body(self, tmp_path: Path) -> str:
+        _write(tmp_path, ready=True, comparison=_comparison(added=[{"label": "x"}]))
+        return build_notification(output_dir=tmp_path, now=NOW)["body"]
+
+    def test_the_comment_mentions_someone(self, tmp_path: Path) -> None:
+        from epl_betting_lab.reports.card_notification import NOTIFY_HANDLE
+
+        assert NOTIFY_HANDLE.startswith("@")
+        assert NOTIFY_HANDLE in self._body(tmp_path)
+
+    def test_the_mention_is_near_the_top_where_it_notifies(
+        self, tmp_path: Path
+    ) -> None:
+        from epl_betting_lab.reports.card_notification import NOTIFY_HANDLE
+
+        body = self._body(tmp_path)
+        assert body.index(NOTIFY_HANDLE) < 120
+
+    def test_a_blocked_card_still_reaches_someone(self, tmp_path: Path) -> None:
+        """Losing the card is exactly when the message must not go unseen."""
+        from epl_betting_lab.reports.card_notification import NOTIFY_HANDLE
+
+        _write(tmp_path, ready=False, comparison=_comparison(removed=[{"label": "x"}]))
+        body = build_notification(output_dir=tmp_path, now=NOW)["body"]
+
+        assert NOTIFY_HANDLE in body

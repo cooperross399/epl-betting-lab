@@ -12,6 +12,7 @@ from __future__ import annotations
 import pandas as pd
 import pytest
 
+from epl_betting_lab.config import PROCESSED_DIR
 from epl_betting_lab.data.loaders import load_matches
 from epl_betting_lab.models.poisson_counts import (
     COUNT_EVENTS,
@@ -124,6 +125,19 @@ class TestProbabilities:
         assert model.total_over_probability("Arsenal", "Chelsea", 0.5) == 0.0
 
 
+#: The match dataset is derived, not tracked, so a clean checkout does not have
+#: it. Tests that need it are skipped rather than failed: they are a check on
+#: the fit against real league averages, which is worth having locally and is
+#: not worth making the suite depend on a file that only exists after a fetch.
+#: Everything above this line runs on synthetic data and always executes.
+_DATASET = PROCESSED_DIR / "epl_historical_matches.csv"
+needs_dataset = pytest.mark.skipif(
+    not _DATASET.is_file(),
+    reason="needs data/processed/epl_historical_matches.csv (run scripts/fetch_data.py)",
+)
+
+
+@needs_dataset
 class TestAgainstRealData:
     """The fit has to land near known league averages to be worth anything."""
 
@@ -184,6 +198,7 @@ class TestRegistration:
         for market in COUNT_MARKETS:
             assert market in MARKET_SELECTIONS, market
 
+    @needs_dataset
     def test_the_strategy_and_registry_agree_on_selections(self) -> None:
         from epl_betting_lab.market_eligibility import MARKET_SELECTIONS
 

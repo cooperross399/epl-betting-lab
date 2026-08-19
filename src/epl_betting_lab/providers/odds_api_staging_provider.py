@@ -338,7 +338,12 @@ def _normalize_provider_events(
                             continue
                         try:
                             parsed = selection_for(
-                                target, outcome, home_team, away_team
+                                target,
+                                outcome,
+                                home_team,
+                                away_team,
+                                provider_home_team,
+                                provider_away_team,
                             )
                         except UnrecognizedOutcomeError as exc:
                             raise MalformedProviderResponseError(

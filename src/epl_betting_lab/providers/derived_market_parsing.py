@@ -39,20 +39,46 @@ def _norm(value: object) -> str:
     return " ".join(str(value or "").split()).casefold()
 
 
+def _names(*values: object) -> set[str]:
+    """Every spelling that should count as this team.
+
+    The provider writes "Coventry City" where the project writes "Coventry", so
+    matching on the project name alone rejects a real outcome. The h2h path
+    already compared both the provider label and the reviewed alias; these
+    markets have to do the same or they drop a side of every fixture whose
+    names differ.
+    """
+    from epl_betting_lab.providers.team_names import normalize_team_name
+
+    spellings: set[str] = set()
+    for value in values:
+        text = _norm(value)
+        if not text:
+            continue
+        spellings.add(text)
+        spellings.add(_norm(normalize_team_name(str(value))))
+    return spellings
+
+
 def double_chance_selection(
-    outcome_name: str, home_team: str, away_team: str
+    outcome_name: str,
+    home_team: str,
+    away_team: str,
+    provider_home_team: str = "",
+    provider_away_team: str = "",
 ) -> str:
     """"Arsenal or Draw" -> "home_or_draw"."""
     name = _norm(outcome_name)
-    home, away = _norm(home_team), _norm(away_team)
-    parts = [part.strip() for part in name.split(" or ")]
+    home = _names(home_team, provider_home_team)
+    away = _names(away_team, provider_away_team)
+    parts = {part.strip() for part in name.split(" or ")}
     if len(parts) != 2:
         raise UnrecognizedOutcomeError(
             f"Double chance outcome {outcome_name!r} is not two outcomes joined "
             "by ' or '."
         )
-    has_home = home in parts
-    has_away = away in parts
+    has_home = bool(home & parts)
+    has_away = bool(away & parts)
     has_draw = "draw" in parts
     if has_home and has_draw:
         return "home_or_draw"
@@ -67,14 +93,20 @@ def double_chance_selection(
     )
 
 
-def team_selection(outcome_name: str, home_team: str, away_team: str) -> str:
+def team_selection(
+    outcome_name: str,
+    home_team: str,
+    away_team: str,
+    provider_home_team: str = "",
+    provider_away_team: str = "",
+) -> str:
     """A team name, or "Draw", to "home" / "away" / "draw"."""
     name = _norm(outcome_name)
-    if name == "draw":
+    if name in {"draw", "tie"}:
         return "draw"
-    if name == _norm(home_team):
+    if name in _names(home_team, provider_home_team):
         return "home"
-    if name == _norm(away_team):
+    if name in _names(away_team, provider_away_team):
         return "away"
     raise UnrecognizedOutcomeError(
         f"Outcome {outcome_name!r} is neither a draw nor one of "
@@ -110,7 +142,12 @@ def matches_line(outcome: Mapping[str, Any], line: float) -> bool:
 
 #: market -> how to read one of its outcomes.
 def selection_for(
-    market: str, outcome: Mapping[str, Any], home_team: str, away_team: str
+    market: str,
+    outcome: Mapping[str, Any],
+    home_team: str,
+    away_team: str,
+    provider_home_team: str = "",
+    provider_away_team: str = "",
 ) -> str | None:
     """The project selection for one provider outcome, or None if it is off-line.
 
@@ -119,9 +156,13 @@ def selection_for(
     """
     name = str(outcome.get("name", ""))
     if market == "double_chance":
-        return double_chance_selection(name, home_team, away_team)
+        return double_chance_selection(
+            name, home_team, away_team, provider_home_team, provider_away_team
+        )
     if market in {"draw_no_bet", "corners_1x2"}:
-        return team_selection(name, home_team, away_team)
+        return team_selection(
+            name, home_team, away_team, provider_home_team, provider_away_team
+        )
     if market.startswith("corners_total_"):
         line = float(market.rsplit("_", 2)[-2] + "." + market.rsplit("_", 1)[-1])
         if not matches_line(outcome, line):

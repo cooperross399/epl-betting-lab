@@ -120,6 +120,31 @@ def _best_quote(rows: pd.DataFrame) -> pd.Series | None:
     return best_row
 
 
+def _provider_entry_disabled_markets(payload: Mapping[str, object]) -> list[str]:
+    """Markets outside the reviewed per-provider allowlist.
+
+    `required_markets` under a provider entry is a reviewed human decision, so
+    it can stand in for a missing top-level allowlist. If no entry names any
+    market, every market is treated as unapproved rather than as approved —
+    a gate that cannot find its rules must close, not open.
+    """
+    entries = payload.get("provider_allowlist_entries")
+    if not isinstance(entries, Mapping):
+        return list(MARKET_SELECTIONS)
+    approved: set[str] = set()
+    for entry in entries.values():
+        if not isinstance(entry, Mapping):
+            continue
+        markets = entry.get("required_markets")
+        if isinstance(markets, list):
+            approved |= {
+                str(item).strip().lower() for item in markets if str(item).strip()
+            }
+    if not approved:
+        return list(MARKET_SELECTIONS)
+    return [market for market in MARKET_SELECTIONS if market not in approved]
+
+
 def _policy_disabled_markets(policy_path: Path | None) -> list[str]:
     """Markets excluded by the reviewed provider policy allowlist.
 
@@ -141,10 +166,17 @@ def _policy_disabled_markets(policy_path: Path | None) -> list[str]:
     if not isinstance(payload, Mapping):
         return []
     allowed = payload.get("allowed_markets")
-    if allowed is None:
-        return []
-    if not isinstance(allowed, list):
-        return []
+    if allowed is None or not isinstance(allowed, list):
+        # No top-level allowlist. That meant "no restriction" back when the
+        # project priced exactly the three markets the policy had approved, so
+        # the default was safe by coincidence. It stopped being safe the moment
+        # the project could price markets nobody had reviewed: a market added
+        # in code would have become eligible on its own.
+        #
+        # Fall back to the reviewed per-provider allowlist, which is a human
+        # decision already recorded in this same file. Absent that too, nothing
+        # is claimed to be approved.
+        return _provider_entry_disabled_markets(payload)
     allowed_keys = {
         str(item).strip().lower() for item in allowed if str(item).strip()
     }

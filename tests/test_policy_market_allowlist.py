@@ -120,8 +120,20 @@ def test_markets_outside_the_allowlist_are_disabled(tmp_path: Path) -> None:
     assert disabled, "an allowlist that disables nothing is not a gate"
 
 
-def test_no_allowlist_disables_nothing(tmp_path: Path) -> None:
-    assert _policy_disabled_markets(_policy(tmp_path)) == []
+def test_no_allowlist_now_approves_nothing(tmp_path: Path) -> None:
+    """This deliberately reverses. It used to disable nothing.
+
+    "No allowlist means no restriction" was safe by coincidence: the project
+    priced exactly the three markets the policy had approved, so there was
+    nothing an open default could let through. Once the project could price
+    markets nobody had reviewed, that same default would have made each one
+    eligible the moment it was added — approval by omission.
+    """
+    from epl_betting_lab.market_eligibility import MARKET_SELECTIONS
+
+    disabled = set(_policy_disabled_markets(_policy(tmp_path)))
+
+    assert disabled == set(MARKET_SELECTIONS)
 
 
 def test_missing_policy_file_disables_nothing(tmp_path: Path) -> None:
@@ -212,3 +224,99 @@ def test_an_unlisted_market_cannot_join_by_becoming_complete(
     assert summary["included_markets"] == ["1x2"]
     assert {"total_2_5", "btts"} <= set(summary["excluded_markets"])
     assert "1x2" not in summary["excluded_markets"]
+
+
+# --- the gate must close when it cannot find its rules ----------------------
+#
+# An absent top-level `allowed_markets` meant "no restriction". That was safe by
+# coincidence: the project priced exactly the three markets the policy had
+# approved. It stopped being safe the moment the project could price markets
+# nobody had reviewed — a market added in code would have become eligible on
+# its own, which is precisely what adding markets must never do.
+
+
+def _payload(tmp_path: Path, payload: dict) -> Path:
+    path = tmp_path / "policy.json"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    return path
+
+
+def test_a_missing_allowlist_falls_back_to_the_reviewed_provider_entry(
+    tmp_path: Path,
+) -> None:
+    from epl_betting_lab.market_eligibility import MARKET_SELECTIONS
+
+    path = _payload(
+        tmp_path,
+        {
+            "provider_allowlist_entries": {
+                "the_odds_api": {"required_markets": ["1x2", "btts"]}
+            }
+        },
+    )
+
+    disabled = set(_policy_disabled_markets(path))
+
+    assert disabled == set(MARKET_SELECTIONS) - {"1x2", "btts"}
+
+
+def test_a_policy_naming_no_markets_at_all_approves_nothing(
+    tmp_path: Path,
+) -> None:
+    """A gate that cannot find its rules must close, not open."""
+    from epl_betting_lab.market_eligibility import MARKET_SELECTIONS
+
+    path = _payload(tmp_path, {"provider_allowlist_entries": {}})
+
+    assert set(_policy_disabled_markets(path)) == set(MARKET_SELECTIONS)
+
+
+def test_a_policy_with_no_entries_key_approves_nothing(tmp_path: Path) -> None:
+    from epl_betting_lab.market_eligibility import MARKET_SELECTIONS
+
+    path = _payload(tmp_path, {"max_provider_run_age_hours": 12})
+
+    assert set(_policy_disabled_markets(path)) == set(MARKET_SELECTIONS)
+
+
+def test_the_top_level_allowlist_still_wins_when_present(tmp_path: Path) -> None:
+    path = _payload(
+        tmp_path,
+        {
+            "allowed_markets": ["1x2"],
+            "provider_allowlist_entries": {
+                "the_odds_api": {"required_markets": ["1x2", "btts"]}
+            },
+        },
+    )
+
+    assert "btts" in _policy_disabled_markets(path)
+
+
+def test_several_providers_contribute_their_reviewed_markets(
+    tmp_path: Path,
+) -> None:
+    path = _payload(
+        tmp_path,
+        {
+            "provider_allowlist_entries": {
+                "the_odds_api": {"required_markets": ["1x2"]},
+                "manual_reviewed": {"required_markets": ["btts"]},
+            }
+        },
+    )
+
+    disabled = set(_policy_disabled_markets(path))
+
+    assert "1x2" not in disabled
+    assert "btts" not in disabled
+
+
+def test_the_shipped_policy_approves_only_the_reviewed_markets() -> None:
+    """The real file, not a fixture: this is what a live run will use."""
+    disabled = set(_policy_disabled_markets(None))
+
+    assert "1x2" not in disabled
+    assert "btts" not in disabled
+    for market in ("double_chance", "draw_no_bet", "corners_1x2", "total_2_5"):
+        assert market in disabled, market

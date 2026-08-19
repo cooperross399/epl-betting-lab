@@ -52,9 +52,16 @@ class TestDoubleChance:
             double_chance_selection("Arsenal", HOME, AWAY)
 
     def test_a_team_that_is_not_in_this_fixture_is_refused(self) -> None:
-        """A spelling mismatch silently drops one side of the market."""
+        """A team from another match must not resolve to a side of this one."""
         with pytest.raises(UnrecognizedOutcomeError, match="drops one side"):
+            double_chance_selection("Chelsea or Draw", HOME, AWAY)
+
+    def test_a_reviewed_alias_of_this_fixture_resolves(self) -> None:
+        """"Coventry" and "Coventry City" are the same club, not a mismatch."""
+        assert (
             double_chance_selection("Coventry or Draw", HOME, AWAY)
+            == "draw_or_away"
+        )
 
 
 class TestTeamOutcomes:
@@ -285,3 +292,70 @@ class TestCountersSurviveANewMarket:
         ).read_text(encoding="utf-8")
 
         assert "summary['market_counts']['1x2']" not in source
+
+
+class TestProviderSpellingsResolve:
+    """The provider and the project do not spell every team the same way.
+
+    The provider writes "Coventry City" where the project writes "Coventry".
+    Matching on the project name alone rejected a real outcome, and because an
+    unplaceable name raises, that did not drop one selection — it blocked the
+    entire live run. The h2h path had always compared both spellings; these
+    markets now do the same.
+    """
+
+    PROJECT_HOME, PROJECT_AWAY = "Arsenal", "Coventry"
+    PROVIDER_HOME, PROVIDER_AWAY = "Arsenal", "Coventry City"
+
+    def _resolve(self, market: str, outcome: dict) -> str | None:
+        return selection_for(
+            market,
+            outcome,
+            self.PROJECT_HOME,
+            self.PROJECT_AWAY,
+            self.PROVIDER_HOME,
+            self.PROVIDER_AWAY,
+        )
+
+    def test_double_chance_accepts_the_provider_spelling(self) -> None:
+        assert self._resolve("double_chance", {"name": "Coventry City or Draw"}) == (
+            "draw_or_away"
+        )
+
+    def test_draw_no_bet_accepts_the_provider_spelling(self) -> None:
+        assert self._resolve("draw_no_bet", {"name": "Coventry City"}) == "away"
+
+    def test_corners_accepts_the_provider_spelling(self) -> None:
+        assert self._resolve("corners_1x2", {"name": "Coventry City"}) == "away"
+
+    def test_the_project_spelling_still_works(self) -> None:
+        assert self._resolve("draw_no_bet", {"name": "Coventry"}) == "away"
+
+    def test_the_home_side_is_unaffected(self) -> None:
+        assert self._resolve("draw_no_bet", {"name": "Arsenal"}) == "home"
+
+    def test_a_genuinely_unknown_team_is_still_refused(self) -> None:
+        """Looser matching must not become no matching."""
+        with pytest.raises(UnrecognizedOutcomeError):
+            self._resolve("draw_no_bet", {"name": "Chelsea"})
+
+    def test_a_tie_reads_as_a_draw(self) -> None:
+        assert self._resolve("corners_1x2", {"name": "Tie"}) == "draw"
+
+    def test_the_provider_names_are_optional(self) -> None:
+        """Callers that already normalised should not have to pass them twice."""
+        assert (
+            selection_for("draw_no_bet", {"name": "Arsenal"}, "Arsenal", "Coventry")
+            == "home"
+        )
+
+    def test_the_provider_passes_both_spellings_through(self) -> None:
+        from epl_betting_lab.config import PROJECT_ROOT
+
+        source = (
+            PROJECT_ROOT
+            / "src/epl_betting_lab/providers/odds_api_staging_provider.py"
+        ).read_text(encoding="utf-8")
+
+        assert "provider_home_team," in source
+        assert "provider_away_team," in source

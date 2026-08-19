@@ -216,8 +216,9 @@ def build_run_summary(
         ]
         for row in (comparison.get("price_changed") or [])[:10]:
             lines.append(
-                f"  - {_clean(row.get('label'))}: {_clean(row.get('from_price'))} "
-                f"→ {_clean(row.get('to_price'))}"
+                f"  - {_clean(row.get('label'))}: "
+                f"{format_american_odds(row.get('from_price'))} "
+                f"→ {format_american_odds(row.get('to_price'))}"
             )
         if comparison.get("price_changed"):
             lines.append("")

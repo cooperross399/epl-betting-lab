@@ -31,13 +31,16 @@ jobs:
         run: python -m pytest
 
       - name: Build historical dataset
-        run: python scripts/fetch_data.py --seasons 2122 2223 2324 2425 2526
+        # No --seasons: the list is derived from the date, so this picks up a
+        # new season each August without anyone editing this file.
+        run: python scripts/fetch_data.py
 
       - name: Run backtest
         run: python scripts/run_backtest.py
 
       - name: Build agent weekly brief
-        run: python scripts/agent_weekly_brief.py --current-season 2526 --recent-matches 6
+        # No --current-season, for the same reason.
+        run: python scripts/agent_weekly_brief.py --recent-matches 6
 
       - name: Upload outputs
         uses: actions/upload-artifact@v4

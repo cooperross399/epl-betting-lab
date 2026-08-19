@@ -171,3 +171,63 @@ class TestTheSeasonRollsOverWithoutHelp:
     def test_the_window_is_oldest_first(self) -> None:
         codes = recent_season_codes(6, date(2026, 8, 19))
         assert codes == sorted(codes)
+
+
+class TestNoWorkflowPinsASeason:
+    """A pinned season does not fail when it goes stale.
+
+    The config derives the season from the date so it rolls over each August by
+    itself. A workflow that passes --seasons or --current-season on the command
+    line silently opts out of that and keeps describing last season forever.
+    """
+
+    def _workflows(self) -> dict[str, str]:
+        """Workflow bodies with comments stripped.
+
+        A comment explaining why a flag is absent is not a pin, and must not
+        trip the very check it is explaining.
+        """
+        from epl_betting_lab.config import PROJECT_ROOT
+
+        workflows = {}
+        for path in sorted((PROJECT_ROOT / ".github" / "workflows").glob("*.yml")):
+            workflows[path.name] = "\n".join(
+                line
+                for line in path.read_text(encoding="utf-8").splitlines()
+                if not line.strip().startswith("#")
+            )
+        return workflows
+
+    def test_no_workflow_passes_an_explicit_season_list(self) -> None:
+        for name, text in self._workflows().items():
+            assert "--seasons" not in text, name
+
+    def test_no_workflow_pins_the_current_season(self) -> None:
+        for name, text in self._workflows().items():
+            assert "--current-season" not in text, name
+
+    def test_no_workflow_contains_a_bare_season_code(self) -> None:
+        """Catches a pin written some other way."""
+        import re
+
+        for name, text in self._workflows().items():
+            assert not re.search(r"\b2[0-9]{3}\s+2[0-9]{3}\b", text), name
+
+
+class TestTheWeeklyBriefDerivesItsSeason:
+    def test_the_default_is_the_season_being_played(self) -> None:
+        import subprocess
+        import sys
+
+        from epl_betting_lab.config import PROJECT_ROOT, current_season_code
+
+        out = subprocess.run(
+            [sys.executable, "scripts/agent_weekly_brief.py", "--help"],
+            cwd=PROJECT_ROOT,
+            capture_output=True,
+            text=True,
+            env={"PYTHONPATH": "src", "PATH": "/usr/bin:/bin"},
+        )
+        assert "current-season" in out.stdout
+        # The literal previous season must not be baked in as the default.
+        assert current_season_code() != "2526"

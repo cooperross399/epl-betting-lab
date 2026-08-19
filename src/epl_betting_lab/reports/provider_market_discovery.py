@@ -369,6 +369,52 @@ def classify_btts(
     }
 
 
+def fetch_events_live(
+    *,
+    api_key: str,
+    base_url: str = DEFAULT_API_BASE_URL,
+    sport_key: str = "soccer_epl",
+    requester: Requester | None = None,
+    timeout_seconds: float = 20.0,
+) -> list[dict[str, Any]]:
+    """The upcoming events, from the free events endpoint.
+
+    Costs no quota: `/events` carries no odds, so the provider does not charge
+    for it. This exists so a market probe can run against a clean checkout,
+    where no archived bulk response has been committed.
+    """
+    if not api_key:
+        raise DiscoveryError(
+            f"Fetching events requires `{API_KEY_ENV}` in the environment."
+        )
+    request = requester or _default_requester
+    root = _validate_base_url(base_url)
+    response = request(
+        f"{root}/v4/sports/{sport_key}/events",
+        params={"apiKey": api_key, "dateFormat": "iso"},
+        timeout=timeout_seconds,
+    )
+    status_code = int(getattr(response, "status_code", 0) or 0)
+    if status_code and status_code >= 400:
+        raise DiscoveryError(f"Events endpoint returned HTTP {status_code}.")
+    payload = response.json()
+    if not isinstance(payload, list):
+        return []
+    events: list[dict[str, Any]] = []
+    for item in payload:
+        if not isinstance(item, Mapping):
+            continue
+        events.append(
+            {
+                "provider_event_id": _clean(item.get("id")),
+                "home_team": _clean(item.get("home_team")),
+                "away_team": _clean(item.get("away_team")),
+                "date": _clean(item.get("commence_time")),
+            }
+        )
+    return events
+
+
 def discover_event_markets(
     events: Sequence[Mapping[str, Any]],
     *,

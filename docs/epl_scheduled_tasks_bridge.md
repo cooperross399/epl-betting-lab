@@ -115,6 +115,37 @@ those parameter names do not exist. The ledger is opened read-only.
 
 ---
 
+## These routines are no longer how the card gets made
+
+Read this before pasting anything below.
+
+The card is produced by **GitHub Actions**
+(`.github/workflows/matchday-refresh.yml`), five runs a week, on GitHub's
+infrastructure. It fetches results, fetches prices, rebuilds every report, and
+renders the card on the run page. It needs no laptop, no terminal, and nothing
+from these routines. That is the self-sustaining path and it is proven end to
+end.
+
+The routines below are a **reading layer**, and they have a hard limitation
+worth stating plainly rather than discovering on a Thursday: their prompts run
+commands against a local checkout at `/Users/cooperross/Projects/epl-betting-lab`.
+That requires a Claude session with filesystem access to that machine, and the
+machine being awake. **With the laptop closed they cannot run**, and a routine
+that cannot run is not a quiet no-op — it is a scheduled item that appears to
+be covering something and is not.
+
+So:
+
+* **To get the card:** open Actions → Matchday Refresh → the latest run. Nothing
+  else is required, ever.
+* **These routines:** optional. They add a plain-English reading of what is
+  already on disk, and only when the machine they point at is on.
+
+Do not treat a routine failing to run as the card failing. The two are
+independent, and only one of them is load-bearing.
+
+---
+
 ## Exact routine prompts
 
 Claude Code does not edit your scheduled tasks. Paste these into the routine

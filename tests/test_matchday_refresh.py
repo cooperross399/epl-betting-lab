@@ -35,47 +35,48 @@ def test_the_refresh_is_scheduled() -> None:
     assert "cron:" in text
 
 
-def test_every_matchday_has_a_run_because_a_run_goes_stale_in_12_hours() -> None:
-    """The schedule must reach every matchday, not just the start of the week.
+def test_the_card_is_built_once_a_week_on_thursday() -> None:
+    """Thursday only, by choice, and the trade-off is deliberate.
 
-    A Thursday-and-Friday schedule looked sufficient and was not: Friday's run
-    expires at 01:00 UTC Saturday, while a typical matchweek puts six matches
-    on Saturday, three on Sunday and one on Monday. Nine of eleven would have
-    been read from an already-blocked card.
+    Weekend runs previously kept the card inside the 12-hour freshness window
+    for Saturday and Sunday kick-offs. Giving them up means a card read on
+    Sunday is priced four days earlier — early positions rather than a live
+    view. What it buys is roughly nine extra markets instead of none.
     """
     text = _workflow()
-    days = {line.split("* *", 1)[1].strip().strip('"') for line in text.splitlines() if "- cron:" in line}
+    days = {
+        line.split("* *", 1)[1].strip().strip('"')
+        for line in text.splitlines()
+        if "- cron:" in line
+    }
 
-    # Thursday planning card, then one run per day that can hold a match.
-    assert days == {"4", "5", "6", "0", "1"}
-    assert "12 hours as stale" in text
+    assert days == {"4"}
 
 
-def test_the_weekend_runs_land_before_the_earliest_kick_off() -> None:
-    """A 12:30 UK kick-off is 11:30 UTC in summer; 13:00 UTC would be too late."""
+def test_the_cadence_says_what_it_gives_up() -> None:
+    """A schedule that silently drops freshness would be a trap."""
     text = _workflow()
-    weekend = [
-        line for line in text.splitlines()
-        if "- cron:" in line and line.rstrip().endswith(('* * 6"', '* * 0"'))
-    ]
 
-    assert len(weekend) == 2
-    for line in weekend:
-        hour = int(line.split('"')[1].split()[1])
-        assert hour <= 9, f"weekend run at {hour}:00 UTC is too late for a 12:30 UK kick-off"
+    assert "12-hour" in text or "12 hours as stale" in text
+    assert "four days old" in text
 
 
 #: Measured, not estimated: two live runs moved the counter from 340 to 311.
 MEASURED_REQUESTS_PER_RUN = 15
+
+#: Each extra per-event market costs one request per fixture.
+REQUESTS_PER_EXTRA_MARKET_PER_RUN = 10
+
 MONTHLY_REQUEST_ALLOWANCE = 500
+WEEKS_PER_MONTH = 4.35
 
 
 def test_the_cadence_stays_inside_the_request_allowance() -> None:
-    """Five runs a week is ~325 requests a month against a 500 allowance."""
+    """One run a week is ~65 requests a month against a 500 allowance."""
     text = _workflow()
     runs_per_week = text.count("- cron:")
 
-    monthly = runs_per_week * 4.35 * MEASURED_REQUESTS_PER_RUN
+    monthly = runs_per_week * WEEKS_PER_MONTH * MEASURED_REQUESTS_PER_RUN
     assert monthly < MONTHLY_REQUEST_ALLOWANCE
 
 
@@ -84,9 +85,33 @@ def test_the_cadence_leaves_room_for_manual_dispatches() -> None:
     text = _workflow()
     runs_per_week = text.count("- cron:")
 
-    monthly = runs_per_week * 4.35 * MEASURED_REQUESTS_PER_RUN
+    monthly = runs_per_week * WEEKS_PER_MONTH * MEASURED_REQUESTS_PER_RUN
     spare_runs = (MONTHLY_REQUEST_ALLOWANCE - monthly) / MEASURED_REQUESTS_PER_RUN
     assert spare_runs >= 5
+
+
+def test_the_allowance_covers_every_market_the_project_knows() -> None:
+    """The point of running weekly: modelling, not credits, is the limit.
+
+    If this ever fails, a market was added that the schedule cannot afford to
+    price — which would show up as a market quietly missing from the card
+    rather than as an error.
+    """
+    from epl_betting_lab.market_eligibility import MARKET_SELECTIONS
+
+    text = _workflow()
+    runs_per_month = text.count("- cron:") * WEEKS_PER_MONTH
+    # 1x2 and totals arrive together in one bulk call; the rest are per-event.
+    extra_markets = len(MARKET_SELECTIONS) - 2
+    monthly = runs_per_month * (
+        MEASURED_REQUESTS_PER_RUN
+        + extra_markets * REQUESTS_PER_EXTRA_MARKET_PER_RUN
+    )
+
+    assert monthly < MONTHLY_REQUEST_ALLOWANCE, (
+        f"{len(MARKET_SELECTIONS)} markets would cost ~{monthly:.0f} credits a "
+        f"month against {MONTHLY_REQUEST_ALLOWANCE}"
+    )
 
 
 def test_the_schedule_never_places_a_bet_or_settles() -> None:

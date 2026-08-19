@@ -46,6 +46,21 @@ MARKET_SELECTIONS: dict[str, tuple[str, ...]] = {
     # these behave as underdog markets under the configured juice limit.
     "double_chance": ("home_or_draw", "draw_or_away", "home_or_away"),
     "draw_no_bet": ("home", "away"),
+    # Team totals come off the goals model's marginals.
+    "team_total_1_5": (
+        "home_over",
+        "home_under",
+        "away_over",
+        "away_under",
+    ),
+    # Counted events, fitted on columns Football-Data already ships in the same
+    # file as the scorelines. See models/poisson_counts.py, and note the stated
+    # limits on cards in particular.
+    "corners_1x2": ("home", "draw", "away"),
+    "corners_total_9_5": ("over", "under"),
+    "corners_total_10_5": ("over", "under"),
+    "cards_total_3_5": ("over", "under"),
+    "cards_total_4_5": ("over", "under"),
 }
 
 #: Markets intentionally excluded from automated picks regardless of coverage.

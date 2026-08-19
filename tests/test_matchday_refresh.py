@@ -517,3 +517,16 @@ def test_the_card_is_built_and_sent_even_after_a_failure() -> None:
                  "Email the card", "Upload reports"):
         block = text.split(f"- name: {step}", 1)[1].split("- name:", 1)[0]
         assert "if: always()" in block, step
+
+
+def test_the_provider_report_is_uploaded_when_a_fetch_fails() -> None:
+    """It is the only thing that says why a fetch was blocked.
+
+    A run that could not fetch prices left no way to see the reason without
+    editing the workflow and running it again — on a schedule that runs five
+    times a week, that is a whole matchday lost to a round trip.
+    """
+    text = _workflow()
+
+    assert "data/outputs/provider_shadow_verification.md" in text
+    assert "data/outputs/staging_input_validation.md" in text

@@ -269,6 +269,12 @@ jobs:
           path: |
             data/outputs/status.html
             data/outputs/run_summary.md
+            # When a fetch fails, this is the report that says why. Leaving it
+            # out meant a blocked run could only be diagnosed by adding it and
+            # running again.
+            data/outputs/provider_shadow_verification.md
+            data/outputs/staging_input_validation.md
+            data/outputs/automated_card_input.md
             data/outputs/automated_card.md
             data/outputs/automated_card_comparison.md
             data/outputs/epl_model_task.md

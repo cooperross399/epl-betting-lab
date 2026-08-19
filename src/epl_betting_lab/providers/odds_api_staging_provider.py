@@ -42,6 +42,7 @@ from epl_betting_lab.providers.derived_market_parsing import (
     selection_for,
 )
 from epl_betting_lab.providers.team_names import normalize_team_name
+from epl_betting_lab.market_eligibility import MARKET_SELECTIONS
 
 
 API_KEY_ENV = "EPL_ODDS_API_KEY"
@@ -187,7 +188,10 @@ def _normalize_provider_events(
     odds_rows: list[dict[str, object]] = []
     fixture_keys: set[tuple[str, str, str]] = set()
     odds_keys: set[tuple[str, str, str, str, str, str]] = set()
-    market_counts = {"1x2": 0, "total_2_5": 0, "btts": 0}
+    # Every market the project knows, so adding one cannot raise a KeyError
+    # here. A hardcoded three did exactly that the first time five more were
+    # fetched: the whole refresh died on a counter.
+    market_counts = {market: 0 for market in MARKET_SELECTIONS}
 
     for event_index, event in enumerate(events, start=1):
         if not isinstance(event, dict):
@@ -385,7 +389,9 @@ def _normalize_provider_events(
                             ),
                         }
                     )
-                    market_counts[normalized_market] += 1
+                    market_counts[normalized_market] = (
+                        market_counts.get(normalized_market, 0) + 1
+                    )
 
     if not odds_rows:
         raise EmptyProviderResponseError(
@@ -406,7 +412,7 @@ def _normalize_provider_events(
         ("total_2_5", "2.5 totals"),
         ("btts", "BTTS"),
     ):
-        if market_counts[market] == 0:
+        if market_counts.get(market, 0) == 0:
             warnings.append(
                 f"The provider returned no {label} rows. Staging completeness "
                 "validation may block this bundle; no prices were guessed."
@@ -726,9 +732,10 @@ class OddsApiStagingProvider(BaseStagingProvider):
             "",
             f"- Fixtures: {summary['fixture_count']}",
             f"- Odds rows: {summary['odds_row_count']}",
-            f"- 1X2 rows: {summary['market_counts']['1x2']}",
-            f"- Total 2.5 rows: {summary['market_counts']['total_2_5']}",
-            f"- BTTS rows: {summary['market_counts']['btts']}",
+            *(
+                f"- {market} rows: {count}"
+                for market, count in sorted(summary["market_counts"].items())
+            ),
             "",
             "## Raw evidence",
             "",
@@ -815,7 +822,7 @@ class OddsApiStagingProvider(BaseStagingProvider):
             "overwrite_staging": request.overwrite_staging,
             "fixture_count": 0,
             "odds_row_count": 0,
-            "market_counts": {"1x2": 0, "total_2_5": 0, "btts": 0},
+            "market_counts": {market: 0 for market in MARKET_SELECTIONS},
             "raw_source_path": "",
             "raw_source_checksum_sha256": "",
             "source_files": {},

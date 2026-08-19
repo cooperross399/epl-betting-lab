@@ -40,6 +40,12 @@ MARKET_SELECTIONS: dict[str, tuple[str, ...]] = {
     "1x2": ("home", "draw", "away"),
     "total_2_5": ("over", "under"),
     "btts": ("yes", "no"),
+    # Both read off the same 1X2 distribution, so they need no new model and
+    # cannot disagree with the 1X2 rows on the same card. See
+    # strategies/derived_result.py for why draw-no-bet is conditional and why
+    # these behave as underdog markets under the configured juice limit.
+    "double_chance": ("home_or_draw", "draw_or_away", "home_or_away"),
+    "draw_no_bet": ("home", "away"),
 }
 
 #: Markets intentionally excluded from automated picks regardless of coverage.

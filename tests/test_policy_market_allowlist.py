@@ -104,9 +104,20 @@ def test_malformed_allowed_markets_is_a_policy_blocker(tmp_path: Path) -> None:
 
 
 def test_markets_outside_the_allowlist_are_disabled(tmp_path: Path) -> None:
-    path = _policy(tmp_path, allowed_markets=["1x2", "btts"])
+    """Every known market that is not listed, not one particular one.
 
-    assert _policy_disabled_markets(path) == ["total_2_5"]
+    This asserted the literal ["total_2_5"], so adding a market to the project
+    broke it — which read as a regression when it was the gate working. What
+    matters is that anything unlisted is disabled, however many there are.
+    """
+    from epl_betting_lab.market_eligibility import MARKET_SELECTIONS
+
+    allowed = ["1x2", "btts"]
+    path = _policy(tmp_path, allowed_markets=allowed)
+
+    disabled = set(_policy_disabled_markets(path))
+    assert disabled == set(MARKET_SELECTIONS) - set(allowed)
+    assert disabled, "an allowlist that disables nothing is not a gate"
 
 
 def test_no_allowlist_disables_nothing(tmp_path: Path) -> None:
@@ -149,7 +160,11 @@ def test_card_input_excludes_a_market_the_policy_does_not_allow(
 
     assert set(summary["included_markets"]) == {"1x2", "btts"}
     assert "total_2_5" in summary["excluded_markets"]
-    assert summary["policy_disabled_markets"] == ["total_2_5"]
+    # Every unlisted market, not one particular one - see the note on
+    # test_markets_outside_the_allowlist_are_disabled.
+    assert "total_2_5" in summary["policy_disabled_markets"]
+    assert "1x2" not in summary["policy_disabled_markets"]
+    assert "btts" not in summary["policy_disabled_markets"]
 
     written = pd.read_csv(result["card_input"])
     assert "total_2_5" not in set(written["market"])
@@ -195,4 +210,5 @@ def test_an_unlisted_market_cannot_join_by_becoming_complete(
     summary = result["summary"]
 
     assert summary["included_markets"] == ["1x2"]
-    assert set(summary["excluded_markets"]) == {"total_2_5", "btts"}
+    assert {"total_2_5", "btts"} <= set(summary["excluded_markets"])
+    assert "1x2" not in summary["excluded_markets"]

@@ -17,7 +17,14 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from epl_betting_lab.config import CURRENT_SEASON, DEFAULT_SEASONS
+from datetime import date
+
+from epl_betting_lab.config import (
+    CURRENT_SEASON,
+    DEFAULT_SEASONS,
+    current_season_code,
+    recent_season_codes,
+)
 from epl_betting_lab.data import fetch_football_data as fetcher
 
 
@@ -50,8 +57,8 @@ class TestSeasonSchedule:
         assert DEFAULT_SEASONS[-1] == CURRENT_SEASON
 
     def test_the_schedule_reaches_the_season_being_played(self) -> None:
-        """Left un-rolled this does not fail loudly, it just stops learning."""
-        assert CURRENT_SEASON == "2627"
+        """No longer a fixed value: it is derived, so it cannot go stale."""
+        assert CURRENT_SEASON == current_season_code()
 
     def test_seasons_are_oldest_first(self) -> None:
         assert DEFAULT_SEASONS == sorted(DEFAULT_SEASONS)
@@ -115,3 +122,52 @@ class TestBuildingTheDataset:
 
         assert set(frame["season"]) == {"2526", "2627"}
         assert isinstance(frame, pd.DataFrame)
+
+
+class TestTheSeasonRollsOverWithoutHelp:
+    """A hardcoded season list does not fail when it goes stale.
+
+    It silently keeps fitting the model on seasons that ended before the
+    matches being predicted, and nothing in the output says so. That is the
+    worst shape a defect can take in a system meant to run unattended, so the
+    season is derived from the date instead of written down.
+    """
+
+    def test_today_is_unchanged_by_deriving_it(self) -> None:
+        """The derivation must reproduce the list it replaced."""
+        assert recent_season_codes(6, date(2026, 8, 19)) == [
+            "2122",
+            "2223",
+            "2324",
+            "2425",
+            "2526",
+            "2627",
+        ]
+
+    def test_a_new_season_is_picked_up_in_august(self) -> None:
+        assert current_season_code(date(2027, 8, 1)) == "2728"
+
+    def test_midseason_january_still_reports_the_season_that_started(self) -> None:
+        assert current_season_code(date(2027, 1, 15)) == "2627"
+
+    def test_june_still_reports_the_season_that_just_ended(self) -> None:
+        """Seasons run August to May, so June belongs to the season gone by."""
+        assert current_season_code(date(2026, 6, 30)) == "2526"
+
+    def test_july_is_the_rollover_boundary(self) -> None:
+        assert current_season_code(date(2026, 7, 1)) == "2627"
+
+    def test_it_keeps_working_years_from_now(self) -> None:
+        assert current_season_code(date(2030, 9, 10)) == "3031"
+
+    def test_the_window_stays_the_requested_length(self) -> None:
+        for count in (3, 5, 6, 10):
+            assert len(recent_season_codes(count, date(2026, 8, 19))) == count
+
+    def test_the_window_ends_with_the_current_season(self) -> None:
+        moment = date(2028, 11, 2)
+        assert recent_season_codes(6, moment)[-1] == current_season_code(moment)
+
+    def test_the_window_is_oldest_first(self) -> None:
+        codes = recent_season_codes(6, date(2026, 8, 19))
+        assert codes == sorted(codes)

@@ -261,31 +261,41 @@ Archive `data/staging/` before any run that overwrites it.
 ## How the automation can stop without telling anyone
 
 The refresh runs itself (`.github/workflows/matchday-refresh.yml`, five runs a
-week — Thursday plus every day that can hold a match). Three things can stop it,
-and none of them announces itself as a failure. A run that never starts produces
-no red X.
+week - Thursday plus every day that can hold a match). It needs no laptop, no
+terminal, and no command. What follows is the list of things that could still
+stop it, checked rather than assumed.
 
-**GitHub disables a scheduled workflow after 60 days of repository inactivity.**
-Workflow runs do not count as activity — commits do. A quiet stretch mid-season
-therefore switches the automation off silently. GitHub emails the repository
-owner first, so that mail is not noise. Re-enable from the Actions tab; any
-commit resets the clock.
+**The 60-day inactivity rule does not apply here.** GitHub disables a scheduled
+workflow after 60 days without repository activity *in a public repository*.
+This repository is private, so the rule does not reach it and no keep-alive
+commit is needed. Worth knowing precisely, because it would otherwise look like
+the season needs periodic manual commits to stay alive. If the repository is
+ever made public, this becomes real.
 
-**The request allowance runs out.** A run costs about 15 requests - measured
-from the counter across two live runs, not derived from the request pattern; an
-earlier estimate of 12 was 25% low. Five runs a week is therefore roughly 325 a
-month against a 500 allowance. The run summary prints what is left and how many
-runs that buys, and says plainly when the schedule is about to stop. If the 500
-turns out to be a lifetime allowance rather than a monthly one, the balance is a
-few weeks rather than a season - which is why the number is printed rather than
-assumed.
+**The request allowance is monthly, and the cadence fits inside it.** The Odds
+API free tier is 500 credits per month, and it resets monthly. A run costs about
+15 credits - measured from the counter across two live runs, not derived from
+the request pattern. Five runs a week is roughly 325 a month. The run summary
+prints what is left and how many runs that buys, and says plainly when the
+schedule is about to stop.
+
+**GitHub Actions minutes are not a constraint.** A run takes about 50 seconds,
+so roughly 22 minutes a month against the 2,000 included with a private
+repository.
+
+**The season rolls over on its own.** `DEFAULT_SEASONS` is derived from the date
+rather than written down, so each August the new season enters the training data
+without anyone remembering. Football-Data publishes a season only once it has
+results, so the season being played is skipped until its first match and picked
+up automatically after it. A completed season failing to load is refused, since
+that would quietly shrink the training set.
 
 **The API key stops working.** A rotated or expired key fails at the credential
-check, before any quota is spent, and the run goes red. That one is loud — it is
-listed here so the quiet two are recognisable by contrast.
+check, before any quota is spent, and the run goes red. That one is loud.
 
-If a card looks stale, check when the workflow last ran before assuming the
-report is wrong.
+So the honest failure list is short: a dead key, an outage at one of the two
+sources, or the repository being made public. If a card looks stale, check when
+the workflow last ran before assuming the report is wrong.
 
 ---
 

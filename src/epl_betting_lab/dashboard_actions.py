@@ -125,6 +125,16 @@ from epl_betting_lab.reports.week1_launch_readiness import (
     run_week1_launch_readiness as save_week1_launch_readiness,
 )
 from epl_betting_lab.strategies.btts import evaluate_btts
+from epl_betting_lab.strategies.count_markets import (
+    COUNT_MARKETS,
+    UNAVAILABLE_MARKETS,
+    evaluate_count_market,
+    fit_count_models,
+)
+from epl_betting_lab.strategies.derived_result import (
+    evaluate_double_chance,
+    evaluate_draw_no_bet,
+)
 from epl_betting_lab.strategies.ml_value import evaluate_1x2_value
 from epl_betting_lab.strategies.totals import evaluate_total_25
 
@@ -752,11 +762,43 @@ def run_thursday_best_bets_report(
 
     model = PoissonGoalsModel().fit(matches, last_n_matches_per_team=38)
     projections = model.project_fixtures(fixtures)
-    candidates = pd.concat([
+    # Every market the project can price is evaluated here. Which of them may
+    # reach a card is decided by the reviewed policy allowlist upstream, not by
+    # what happens to be wired in — so a market being absent from the card is a
+    # policy decision that can be read, rather than a gap nobody noticed.
+    #
+    # A market with no odds in this bundle simply produces no rows: the
+    # strategies skip fixtures they have no price for, and never invent one.
+    frames = [
         evaluate_1x2_value(projections, odds, min_edge=MIN_EDGE, max_juice=MAX_DEFAULT_JUICE),
         evaluate_total_25(projections, odds, min_edge=MIN_EDGE, max_juice=MAX_DEFAULT_JUICE, matches=matches),
         evaluate_btts(projections, odds, min_edge=MIN_EDGE, max_juice=MAX_DEFAULT_JUICE),
-    ], ignore_index=True)
+        evaluate_double_chance(projections, odds, min_edge=MIN_EDGE, max_juice=MAX_DEFAULT_JUICE),
+        evaluate_draw_no_bet(projections, odds, min_edge=MIN_EDGE, max_juice=MAX_DEFAULT_JUICE),
+    ]
+
+    # Corner markets need their own fit, on columns that ship in the same file
+    # as the scorelines. A dataset without them yields no models and therefore
+    # no rows, rather than a failure.
+    count_models = fit_count_models(matches)
+    if count_models:
+        for market in COUNT_MARKETS:
+            if market in UNAVAILABLE_MARKETS:
+                continue
+            frames.append(
+                evaluate_count_market(
+                    market,
+                    count_models,
+                    projections,
+                    odds,
+                    min_edge=MIN_EDGE,
+                    max_juice=MAX_DEFAULT_JUICE,
+                )
+            )
+
+    candidates = pd.concat(
+        [frame for frame in frames if not frame.empty], ignore_index=True
+    ) if any(not frame.empty for frame in frames) else pd.DataFrame()
 
     report = build_thursday_best_bets(candidates)
     return save_thursday_best_bets(

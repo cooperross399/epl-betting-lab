@@ -220,12 +220,24 @@ def test_summary_survives_missing_reports(tmp_path: Path) -> None:
 
 
 def test_routine_prompts_do_the_work_rather_than_asking_cooper_to() -> None:
+    """They no longer ask him to run anything because they no longer run anything.
+
+    The work moved to the schedule and the card arrives by email, so the
+    routines read rather than execute. The property being protected is the same
+    one: a routine must never hand a task back to Cooper.
+    """
     text = (PROJECT_ROOT / "docs" / "epl_scheduled_tasks_bridge.md").read_text(
         encoding="utf-8"
     )
+    prompts = text.split("## Exact routine prompts", 1)[1]
+    prompts = prompts.split("## Safe vs unsafe actions", 1)[0]
 
-    assert text.count("Do the whole sequence yourself") >= 2
-    assert "Do not ask Cooper to run anything" in text
+    assert prompts.count("Search Gmail") >= 3  # one per routine
+    for handoff in ("open a Terminal", "ask ChatGPT"):
+        assert handoff in prompts
+    # Nothing in a prompt may tell him to run a command.
+    assert "PYTHONPATH=src" not in prompts
+    assert "scripts/" not in prompts
 
 
 def test_routine_prompts_know_the_totals_question_is_settled() -> None:

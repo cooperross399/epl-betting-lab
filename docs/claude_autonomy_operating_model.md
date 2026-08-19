@@ -271,10 +271,14 @@ therefore switches the automation off silently. GitHub emails the repository
 owner first, so that mail is not noise. Re-enable from the Actions tab; any
 commit resets the clock.
 
-**The request allowance runs out.** Five runs a week is roughly 260 requests a
-month against a 500 allowance. Every run prints the quota remaining in its job
-summary, so the number falls in public. If it is not going to last the season,
-that is visible weeks ahead, not on the morning it hits zero.
+**The request allowance runs out.** A run costs about 15 requests - measured
+from the counter across two live runs, not derived from the request pattern; an
+earlier estimate of 12 was 25% low. Five runs a week is therefore roughly 325 a
+month against a 500 allowance. The run summary prints what is left and how many
+runs that buys, and says plainly when the schedule is about to stop. If the 500
+turns out to be a lifetime allowance rather than a monthly one, the balance is a
+few weeks rather than a season - which is why the number is printed rather than
+assumed.
 
 **The API key stops working.** A rotated or expired key fails at the credential
 check, before any quota is spent, and the run goes red. That one is loud — it is

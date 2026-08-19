@@ -26,11 +26,16 @@ name: Matchday Refresh
 #   Sunday    09:00 UTC  covers the afternoon slate
 #   Monday    13:00 UTC  ~6h before a 20:00 UK kick-off
 #
-# Five runs a week is roughly 260 requests a month against a 500 request
-# allowance. The remaining headroom is deliberate: it leaves room for manual
-# dispatches without putting the schedule itself at risk. Every run prints the
-# quota remaining, so the number falls in public rather than being discovered
-# at zero.
+# COST: measured, not estimated. Two live runs moved the counter from 340 to
+# 311, so a run costs about 15 requests. Five runs a week is therefore roughly
+# 325 a month against a 500 allowance. An earlier estimate of 12 was 25% low,
+# which is worth stating: the number that matters here is measured from the
+# counter, not derived from the request pattern.
+#
+# That 500 is understood to be a monthly allowance. If it turns out to be a
+# lifetime one, the remaining balance is a few weeks, not a season — so every
+# run prints the quota remaining and the run summary carries it, letting the
+# number fall in public rather than being discovered at zero.
 on:
   schedule:
     - cron: "0 13 * * 4"

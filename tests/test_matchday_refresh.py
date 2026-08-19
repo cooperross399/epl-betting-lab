@@ -65,12 +65,28 @@ def test_the_weekend_runs_land_before_the_earliest_kick_off() -> None:
         assert hour <= 9, f"weekend run at {hour}:00 UTC is too late for a 12:30 UK kick-off"
 
 
+#: Measured, not estimated: two live runs moved the counter from 340 to 311.
+MEASURED_REQUESTS_PER_RUN = 15
+MONTHLY_REQUEST_ALLOWANCE = 500
+
+
 def test_the_cadence_stays_inside_the_request_allowance() -> None:
-    """Five runs a week is ~260 requests a month against a 500 allowance."""
+    """Five runs a week is ~325 requests a month against a 500 allowance."""
     text = _workflow()
     runs_per_week = text.count("- cron:")
 
-    assert runs_per_week * 4.35 * 12 < 500
+    monthly = runs_per_week * 4.35 * MEASURED_REQUESTS_PER_RUN
+    assert monthly < MONTHLY_REQUEST_ALLOWANCE
+
+
+def test_the_cadence_leaves_room_for_manual_dispatches() -> None:
+    """A schedule that exactly fills the allowance cannot be run by hand."""
+    text = _workflow()
+    runs_per_week = text.count("- cron:")
+
+    monthly = runs_per_week * 4.35 * MEASURED_REQUESTS_PER_RUN
+    spare_runs = (MONTHLY_REQUEST_ALLOWANCE - monthly) / MEASURED_REQUESTS_PER_RUN
+    assert spare_runs >= 5
 
 
 def test_the_schedule_never_places_a_bet_or_settles() -> None:

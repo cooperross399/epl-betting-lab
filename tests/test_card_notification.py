@@ -248,7 +248,7 @@ class TestTheWorkflowAgrees:
         ).read_text(encoding="utf-8")
 
     def test_the_delivery_step_exists(self) -> None:
-        assert "Email the card when the picks change" in self._workflow()
+        assert "Email the card" in self._workflow()
 
     def test_it_may_write_issues_and_nothing_else(self) -> None:
         header = self._workflow().split("jobs:", 1)[0]
@@ -259,7 +259,7 @@ class TestTheWorkflowAgrees:
     def test_delivery_failure_does_not_fail_the_run(self) -> None:
         """A card that was built must not be lost because email broke."""
         text = self._workflow()
-        step = text.split("Email the card when the picks change", 1)[1]
+        step = text.split("- name: Email the card", 1)[1]
         step = step.split("- name:", 1)[0]
 
         assert "continue-on-error: true" in step
@@ -342,3 +342,91 @@ class TestTheCommentReachesAPerson:
         body = build_notification(output_dir=tmp_path, now=NOW)["body"]
 
         assert NOTIFY_HANDLE in body
+
+
+class TestADegradedRunAlwaysSends:
+    """Silence means "nothing moved" only if failure breaks the silence."""
+
+    def test_a_degraded_run_sends_even_with_no_changes(self) -> None:
+        post, reason = decide(
+            card={"card_ready": True},
+            generated={"card_generated": True},
+            comparison=_comparison(),
+            degraded=["Prices could not be refreshed."],
+        )
+        assert post is True
+        assert "went wrong" in reason
+
+    def test_a_degraded_blocked_run_still_sends(self) -> None:
+        """Staying blocked is normally quiet; a failure must override that."""
+        post, _ = decide(
+            card={"card_ready": False},
+            generated={"card_generated": False},
+            comparison=_comparison(),
+            degraded=["No match dataset."],
+        )
+        assert post is True
+
+    def test_a_clean_unchanged_run_still_stays_quiet(self) -> None:
+        post, _ = decide(
+            card={"card_ready": True},
+            generated={"card_generated": True},
+            comparison=_comparison(),
+            degraded=[],
+        )
+        assert post is False
+
+    def test_the_message_says_what_went_wrong(self, tmp_path: Path) -> None:
+        _write(tmp_path, ready=True, comparison=_comparison())
+        body = build_notification(
+            output_dir=tmp_path,
+            now=NOW,
+            degraded=["Provider prices could not be refreshed."],
+        )["body"]
+
+        assert "### What went wrong" in body
+        assert "Provider prices could not be refreshed." in body
+
+    def test_the_message_warns_the_card_may_be_built_on_less(
+        self, tmp_path: Path
+    ) -> None:
+        _write(tmp_path, ready=True, comparison=_comparison())
+        body = build_notification(
+            output_dir=tmp_path, now=NOW, degraded=["Something broke."]
+        )["body"]
+
+        assert "whatever evidence was available" in body
+
+    def test_the_footer_promises_failures_break_the_silence(
+        self, tmp_path: Path
+    ) -> None:
+        _write(tmp_path, ready=True, comparison=_comparison(added=[{"label": "x"}]))
+        body = build_notification(output_dir=tmp_path, now=NOW)["body"]
+
+        assert "nothing broke" in body
+
+
+class TestReadingTheDegradedRecord:
+    def test_missing_file_is_not_degraded(self, tmp_path: Path) -> None:
+        from epl_betting_lab.reports.card_notification import read_degraded
+
+        assert read_degraded(tmp_path / "nope.txt") == []
+
+    def test_empty_file_is_not_degraded(self, tmp_path: Path) -> None:
+        from epl_betting_lab.reports.card_notification import read_degraded
+
+        path = tmp_path / "d.txt"
+        path.write_text("\n  \n", encoding="utf-8")
+        assert read_degraded(path) == []
+
+    def test_each_line_is_a_reason(self, tmp_path: Path) -> None:
+        from epl_betting_lab.reports.card_notification import read_degraded
+
+        path = tmp_path / "d.txt"
+        path.write_text("one\ntwo\n", encoding="utf-8")
+        assert read_degraded(path) == ["one", "two"]
+
+    def test_no_path_is_not_degraded(self) -> None:
+        from epl_betting_lab.reports.card_notification import read_degraded
+
+        assert read_degraded(None) == []

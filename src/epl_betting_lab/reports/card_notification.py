@@ -82,12 +82,19 @@ def decide(
     card: Mapping[str, Any],
     generated: Mapping[str, Any],
     comparison: Mapping[str, Any],
+    degraded: Sequence[str] = (),
 ) -> tuple[bool, str]:
     """Should this run be emailed, and why?
 
     Returns (should_post, reason). The reason is reported either way, so a run
     that stays quiet can still explain itself in its own job log.
+
+    A degraded run always sends. The reader is being asked to treat silence as
+    "nothing moved", and that is only safe if anything going wrong breaks the
+    silence — otherwise a week of failures looks exactly like a quiet week.
     """
+    if degraded:
+        return True, "Something went wrong in this run."
     card_ready = bool(card.get("card_ready", False)) and bool(
         generated.get("card_generated", False)
     )
@@ -123,11 +130,26 @@ def decide(
     )
 
 
+def read_degraded(path: Path | str | None) -> list[str]:
+    """The reasons this run was degraded, one per line, or none."""
+    if not path:
+        return []
+    target = Path(path)
+    if not target.is_file():
+        return []
+    try:
+        text = target.read_text(encoding="utf-8")
+    except (OSError, UnicodeError):
+        return []
+    return [line.strip() for line in text.splitlines() if line.strip()]
+
+
 def build_notification(
     *,
     output_dir: Path | None = None,
     now: datetime | None = None,
     run_url: str = "",
+    degraded: Sequence[str] = (),
 ) -> dict[str, Any]:
     outputs = OUTPUTS_DIR if output_dir is None else Path(output_dir)
     card = _read(outputs / "epl_card_task.json")
@@ -135,7 +157,7 @@ def build_notification(
     comparison = _read(outputs / "automated_card_comparison.json")
 
     should_post, reason = decide(
-        card=card, generated=generated, comparison=comparison
+        card=card, generated=generated, comparison=comparison, degraded=degraded
     )
     stamp = (now or datetime.now(timezone.utc)).astimezone(timezone.utc)
     card_ready = bool(card.get("card_ready", False)) and bool(
@@ -148,6 +170,16 @@ def build_notification(
         f"{NOTIFY_HANDLE} — {reason}",
         "",
     ]
+
+    if degraded:
+        lines += ["### What went wrong", ""]
+        lines += [f"- {item}" for item in degraded]
+        lines += [
+            "",
+            "The card below was still built, from whatever evidence was "
+            "available. Treat it with that in mind.",
+            "",
+        ]
 
     if card_ready:
         best, _ = split_stakeable(card.get("best_bets") or [])
@@ -192,9 +224,9 @@ def build_notification(
         "",
         "Recommendations only. No bet was placed and no settlement was applied.",
         "",
-        "You are emailed only when the selections change — a price drifting is "
-        "not news. A failed run emails you separately, so **no message means "
-        "the run happened and the picks did not move.**",
+        "You are emailed when the selections change, and whenever a run goes "
+        "wrong. A price drifting is not news. So **no message means the run "
+        "happened, nothing broke, and the picks did not move.**",
         "",
     ]
     if run_url:

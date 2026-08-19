@@ -432,3 +432,49 @@ class TestQuotaIsAnArgumentNotATableCell:
 
     def test_an_unreadable_quota_is_shown_not_hidden(self, tmp_path: Path) -> None:
         assert "unknown" in self._summary(tmp_path, "")
+
+
+class TestABlockedRunDoesNotReportRemovedPicks:
+    """`Removed: 27` on a blocked run reads as a judgement. It is not one."""
+
+    def _summary(self, tmp_path: Path, *, card_ready: bool) -> str:
+        (tmp_path / "epl_card_task.json").write_text(
+            json.dumps({"card_ready": card_ready, "best_bets": [], "leans": []}),
+            encoding="utf-8",
+        )
+        (tmp_path / "automated_card.json").write_text(
+            json.dumps({"card_generated": card_ready}), encoding="utf-8"
+        )
+        (tmp_path / "automated_card_comparison.json").write_text(
+            json.dumps(
+                {
+                    "comparable": True,
+                    "added": [],
+                    "removed": [{"label": f"pick {n}"} for n in range(27)],
+                    "moved_section": [],
+                    "price_changed": [],
+                    "unchanged_count": 0,
+                }
+            ),
+            encoding="utf-8",
+        )
+        return build_run_summary(output_dir=tmp_path)
+
+    def test_a_blocked_run_reports_no_comparison(self, tmp_path: Path) -> None:
+        summary = self._summary(tmp_path, card_ready=False)
+
+        assert "- Removed: 27" not in summary
+        assert "produced no card, so there is nothing to compare" in _flat(summary)
+
+    def test_it_says_the_previous_picks_were_not_withdrawn(
+        self, tmp_path: Path
+    ) -> None:
+        summary = _flat(self._summary(tmp_path, card_ready=False))
+
+        assert "were not withdrawn or reassessed" in summary
+
+    def test_a_generated_card_still_reports_the_diff(self, tmp_path: Path) -> None:
+        """The fix must not silence a comparison that is genuinely meaningful."""
+        summary = self._summary(tmp_path, card_ready=True)
+
+        assert "- Removed: 27" in summary

@@ -142,7 +142,7 @@ def build_current_odds_validation(
                 _add_issue(issues, "error", "fixture_not_found", row, row_number, "This home/away pairing does not match an upcoming fixture.")
 
         if market not in VALID_SELECTIONS:
-            _add_issue(issues, "error", "invalid_market", row, row_number, "Supported markets are 1x2, total_2_5, and btts.")
+            _add_issue(issues, "error", "invalid_market", row, row_number, f"Supported markets are {', '.join(sorted(VALID_SELECTIONS))}.")
         elif selection not in VALID_SELECTIONS[market]:
             allowed = ", ".join(sorted(VALID_SELECTIONS[market]))
             _add_issue(issues, "error", "invalid_selection", row, row_number, f"Supported selections for {market}: {allowed}.")

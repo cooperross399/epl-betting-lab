@@ -29,6 +29,7 @@ from epl_betting_lab.reports.provider_shadow_history import (
     archive_provider_shadow_run,
 )
 from epl_betting_lab.reports.pick_display import format_market_list
+from epl_betting_lab.market_eligibility import MARKET_SELECTIONS
 from epl_betting_lab.reports.staging_input_validation import (
     save_staging_input_validation,
 )
@@ -392,7 +393,7 @@ def _market_coverage_metrics(
         for market, selection in SUPPORTED_MARKETS
     }
     present: set[tuple[str, str, str, str, str]] = set()
-    market_counts = {"1x2": 0, "total_2_5": 0, "btts": 0}
+    market_counts = {market: 0 for market in MARKET_SELECTIONS}
     selection_counts: dict[str, int] = {}
     for _, row in odds.iterrows():
         fixture = _fixture_key(row)

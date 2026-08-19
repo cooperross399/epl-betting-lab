@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 import pandas as pd
+from epl_betting_lab.market_eligibility import MARKET_SELECTIONS
 
 from epl_betting_lab.providers.odds_api_staging_provider import (
     API_KEY_ENV,
@@ -252,11 +253,13 @@ def test_complete_live_shadow_is_ready_for_manual_review(tmp_path: Path) -> None
     assert summary["provider_age"]["status"] == "Fresh"
     assert summary["team_mapping"]["coverage_percentage"] == 1.0
     assert summary["fixture_matching"]["coverage_percentage"] == 1.0
-    assert summary["market_coverage"]["market_counts"] == {
-        "1x2": 3,
-        "total_2_5": 2,
-        "btts": 2,
-    }
+    # The markets this fixture prices, without pinning the whole registry: a
+    # literal here is the same defect that rejected 416 valid rows elsewhere.
+    counts = summary["market_coverage"]["market_counts"]
+    assert counts["1x2"] == 3
+    assert counts["total_2_5"] == 2
+    assert counts["btts"] == 2
+    assert set(counts) == set(MARKET_SELECTIONS)
     assert summary["odds_completeness"]["completion_percentage"] == 1.0
     assert summary["staging_validation"]["verdict"] == "Ready for handoff"
     assert summary["provider_policy"]["provider_allowed"] is True

@@ -46,21 +46,21 @@ MARKET_SELECTIONS: dict[str, tuple[str, ...]] = {
     # these behave as underdog markets under the configured juice limit.
     "double_chance": ("home_or_draw", "draw_or_away", "home_or_away"),
     "draw_no_bet": ("home", "away"),
-    # Team totals come off the goals model's marginals.
-    "team_total_1_5": (
-        "home_over",
-        "home_under",
-        "away_over",
-        "away_under",
-    ),
-    # Counted events, fitted on columns Football-Data already ships in the same
-    # file as the scorelines. See models/poisson_counts.py, and note the stated
-    # limits on cards in particular.
+    # Corner markets, fitted on columns Football-Data already ships in the same
+    # file as the scorelines. See models/poisson_counts.py.
+    #
+    # Card markets are modelled too and deliberately not listed here: a live
+    # probe found no book offering cards in the `us` region, which is where
+    # every account is. A price that cannot be taken is not a price. The model
+    # stays so the market can be added the day one appears.
+    #
+    # Team totals are likewise absent, for a different reason: the book sets a
+    # different line per team on the same fixture — Arsenal at 2.5 and Coventry
+    # at 0.5 in the same market — so a fixed line in the market name can never
+    # match. Supporting them needs line-aware selections, not another entry.
     "corners_1x2": ("home", "draw", "away"),
     "corners_total_9_5": ("over", "under"),
     "corners_total_10_5": ("over", "under"),
-    "cards_total_3_5": ("over", "under"),
-    "cards_total_4_5": ("over", "under"),
 }
 
 #: Markets intentionally excluded from automated picks regardless of coverage.

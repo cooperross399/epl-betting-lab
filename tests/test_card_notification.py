@@ -270,3 +270,37 @@ class TestTheWorkflowAgrees:
 
         assert "--title-out" in text
         assert ISSUE_TITLE not in text
+
+
+class TestSendingOnDemand:
+    """A delivery path that only fires on change cannot be checked on demand.
+
+    Without this the first proof that email works would be the first week the
+    picks moved — which is the worst possible time to discover it does not.
+    """
+
+    def _workflow(self) -> str:
+        from epl_betting_lab.config import PROJECT_ROOT
+
+        return (
+            PROJECT_ROOT / ".github" / "workflows" / "matchday-refresh.yml"
+        ).read_text(encoding="utf-8")
+
+    def test_the_card_can_be_sent_on_demand(self) -> None:
+        text = self._workflow()
+
+        assert "force_email" in text
+        assert "Send the card even if the selections did not change" in text
+
+    def test_forcing_is_off_by_default(self) -> None:
+        """The schedule must stay quiet unless the picks move."""
+        text = self._workflow()
+        block = text.split("force_email:", 1)[1].split("permissions:", 1)[0]
+
+        assert "default: false" in block
+
+    def test_forcing_is_a_manual_input_not_a_schedule_setting(self) -> None:
+        text = self._workflow()
+        dispatch = text.split("workflow_dispatch:", 1)[1].split("permissions:", 1)[0]
+
+        assert "force_email" in dispatch

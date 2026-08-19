@@ -50,6 +50,11 @@ on:
         type: boolean
         required: false
         default: false
+      force_email:
+        description: "Send the card even if the selections did not change"
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: read
@@ -200,6 +205,10 @@ jobs:
           DECISION=$(python scripts/post_card_to_issue.py \
             --out card_comment.md --title-out card_title.txt \
             --run-url "$RUN_URL" | tail -1)
+          if [ "${{ inputs.force_email }}" = "true" ]; then
+            echo "Forced: sending the current card regardless of changes."
+            DECISION=post
+          fi
           if [ "$DECISION" != "post" ]; then
             echo "Not emailing: the selections did not change."
             exit 0

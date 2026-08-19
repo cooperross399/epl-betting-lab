@@ -257,11 +257,11 @@ def test_routine_prompts_know_the_totals_question_is_settled() -> None:
 # Thursday. The first CI run proved exactly that.
 
 
-def test_the_previous_card_archive_is_restored() -> None:
+def test_the_previous_state_is_restored() -> None:
     text = _workflow()
 
-    assert "Restore the previous card archive" in text
-    assert "matchday-card-archive" in text
+    assert "Restore the previous state" in text
+    assert "matchday-state" in text
 
 
 def test_the_restore_reads_the_previous_successful_run() -> None:
@@ -271,31 +271,33 @@ def test_the_restore_reads_the_previous_successful_run() -> None:
     assert "gh run download" in text
 
 
-def test_a_missing_archive_does_not_fail_the_run() -> None:
+def test_a_missing_state_does_not_fail_the_run() -> None:
     """First run, pruned artifact, or API hiccup must not lose the card."""
     text = _workflow()
-    restore = text.split("Restore the previous card archive", 1)[1]
+    restore = text.split("Restore the previous state", 1)[1]
     restore = restore.split("- name:", 1)[0]
 
     assert "continue-on-error: true" in restore
 
 
-def test_the_restore_only_writes_under_the_archive_directory() -> None:
-    """It must never overwrite the prices this run just fetched."""
+def test_the_restore_never_touches_prices_or_protected_files() -> None:
+    """It runs before the fetch, so it must not be able to clobber it."""
     text = _workflow()
-    restore = text.split("Restore the previous card archive", 1)[1]
+    restore = text.split("Restore the previous state", 1)[1]
     restore = restore.split("- name:", 1)[0]
 
-    assert "--dir data/outputs/archive/automated_cards" in restore
+    assert "--dir data" in restore
     assert "data/staging" not in restore
     assert "data/manual" not in restore
 
 
-def test_the_archive_is_carried_forward_for_the_next_run() -> None:
+def test_the_state_is_carried_forward_for_the_next_run() -> None:
+    """Both halves: the card archive for the diff, the dataset as a fallback."""
     text = _workflow()
 
-    assert "Upload the card archive" in text
-    assert "path: data/outputs/archive/automated_cards" in text
+    assert "Upload the state for the next run" in text
+    assert "data/outputs/archive/automated_cards" in text
+    assert "data/processed/epl_historical_matches.csv" in text
 
 
 def test_the_archive_outlives_the_reports() -> None:
@@ -410,3 +412,74 @@ def test_fetching_results_needs_no_secret() -> None:
     step = text.split("Fetch historical results", 1)[1].split("- name:", 1)[0]
 
     assert "secrets." not in step
+
+
+# --- a bad run must never be a quiet run -----------------------------------
+#
+# The reader is asked to treat no-email as "nothing moved". That is only safe
+# if everything that can go wrong breaks the silence. These pin the chain that
+# makes it true.
+
+
+def test_the_external_fetches_cannot_abort_the_run() -> None:
+    """Both sources are outside this repo and will have bad days."""
+    text = _workflow()
+    for step in ("Fetch historical results", "Refetch provider prices"):
+        block = text.split(f"- name: {step}", 1)[1].split("- name:", 1)[0]
+        assert "continue-on-error: true" in block, step
+
+
+def test_the_credential_check_stays_hard() -> None:
+    """Without a key there is no refresh to degrade to."""
+    text = _workflow()
+    block = text.split("- name: Check the provider credential", 1)[1]
+    block = block.split("- name:", 1)[0]
+
+    assert "continue-on-error" not in block
+
+
+def test_a_degraded_run_is_recorded_in_one_place() -> None:
+    """The summary, the email, and the exit status must not disagree."""
+    text = _workflow()
+
+    assert "Record what went wrong" in text
+    assert "run_degraded.txt" in text
+
+
+def test_the_summary_and_the_email_both_read_that_record() -> None:
+    text = _workflow()
+
+    assert text.count("--degraded-file run_degraded.txt") >= 2
+
+
+def test_a_missing_dataset_is_named_as_the_reason_no_card_exists() -> None:
+    text = _workflow()
+
+    assert "No match dataset" in text
+
+
+def test_the_run_still_finishes_red_when_degraded() -> None:
+    """Degrading must not quietly turn a failure into a green tick."""
+    text = _workflow()
+    block = text.split("- name: Report the outcome", 1)[1]
+
+    assert "exit 1" in block
+    assert "::error::" in block
+
+
+def test_only_the_final_step_can_fail_the_job() -> None:
+    """Anything failing earlier would skip the card, summary, and email."""
+    text = _workflow()
+    before_final = text.split("- name: Report the outcome", 1)[0]
+    rebuild = before_final.split("- name: Rebuild every report", 1)[1]
+    rebuild = rebuild.split("- name:", 1)[0]
+
+    assert "continue-on-error: true" in rebuild
+
+
+def test_the_card_is_built_and_sent_even_after_a_failure() -> None:
+    text = _workflow()
+    for step in ("Rebuild every report", "Write the card to the run summary",
+                 "Email the card", "Upload reports"):
+        block = text.split(f"- name: {step}", 1)[1].split("- name:", 1)[0]
+        assert "if: always()" in block, step

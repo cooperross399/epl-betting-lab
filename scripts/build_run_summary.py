@@ -12,6 +12,7 @@ import argparse
 import os
 from pathlib import Path
 
+from epl_betting_lab.reports.card_notification import read_degraded
 from epl_betting_lab.reports.run_summary import save_run_summary
 
 
@@ -23,12 +24,18 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Also append to $GITHUB_STEP_SUMMARY when running in Actions.",
     )
+    parser.add_argument(
+        "--degraded-file",
+        help="File listing what went wrong, one reason per line",
+    )
     return parser.parse_args()
 
 
 def main() -> int:
     args = parse_args()
-    result = save_run_summary(output_dir=args.output_dir)
+    result = save_run_summary(
+        output_dir=args.output_dir, degraded=read_degraded(args.degraded_file)
+    )
     print(result["text"])
 
     if args.append_to_step_summary:

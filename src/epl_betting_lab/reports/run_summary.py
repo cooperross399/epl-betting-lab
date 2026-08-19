@@ -18,6 +18,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+from collections.abc import Sequence as _Sequence
+
 from epl_betting_lab.config import OUTPUTS_DIR
 from epl_betting_lab.reports.pick_display import (
     NOT_STAKEABLE_LABEL,
@@ -112,6 +114,7 @@ def build_run_summary(
     *,
     output_dir: Path | None = None,
     now: datetime | None = None,
+    degraded: _Sequence[str] = (),
 ) -> str:
     outputs = OUTPUTS_DIR if output_dir is None else Path(output_dir)
     model = _read(outputs / "epl_model_task.json")
@@ -132,6 +135,19 @@ def build_run_summary(
         f"Generated {stamp.strftime('%Y-%m-%d %H:%M UTC')}. "
         "Recommendations only; no bet is ever placed and settlement is never applied.",
         "",
+    ]
+    if degraded:
+        # Top of the page, before the status table. A reader who stops after the
+        # first screen must not come away thinking this was a normal run.
+        lines += [
+            "> [!WARNING]",
+            "> **This run was degraded.** The card below was built from "
+            "whatever evidence was available.",
+            ">",
+        ]
+        lines += [f"> - {item}" for item in degraded]
+        lines += [""]
+    lines += [
         "| | |",
         "|:--|:--|",
         f"| Model | {'Ready' if model.get('epl_card_ready') else 'Blocked'} |",
@@ -245,9 +261,10 @@ def save_run_summary(
     *,
     output_dir: Path | None = None,
     now: datetime | None = None,
+    degraded: _Sequence[str] = (),
 ) -> dict[str, Any]:
     outputs = OUTPUTS_DIR if output_dir is None else Path(output_dir)
-    text = build_run_summary(output_dir=outputs, now=now)
+    text = build_run_summary(output_dir=outputs, now=now, degraded=degraded)
     outputs.mkdir(parents=True, exist_ok=True)
     path = outputs / SUMMARY_MARKDOWN_FILENAME
     path.write_text(text, encoding="utf-8")

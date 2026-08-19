@@ -1,12 +1,20 @@
 name: Matchday Refresh
 
-# Hands-off weekly refresh. Runs on GitHub's infrastructure so no laptop needs
-# to be open and no command needs to be typed.
+# Hands-off matchday refresh. Runs on GitHub's infrastructure, so no laptop
+# needs to be open and no command needs to be typed.
 #
 # SCOPE: this refetches prices and rebuilds reports. It does NOT place a bet,
 # apply settlement, edit any protected manual file, allowlist a provider, or
 # widen market scope. Those remain human decisions and no schedule can take
 # them. A card is a recommendation.
+#
+# DESIGN RULE: a run never ends with nothing to show. Both external sources are
+# outside this repository and will have bad days, so a failure downgrades the
+# run rather than aborting it: the card is rebuilt from the last good state,
+# the summary says exactly what went wrong, and the result is emailed even if
+# the picks did not change. The run still finishes red, so the failure notice
+# arrives too. Silence therefore always means "it ran and nothing moved", which
+# is the only thing that makes silence safe to read.
 #
 # CADENCE: one run per day that has matches, plus the Thursday planning card.
 #
@@ -14,11 +22,10 @@ name: Matchday Refresh
 # card is refused. So the schedule has to reach every matchday, not just the
 # start of the week. A Thursday-and-Friday schedule looked sufficient and was
 # not: Friday's run expires at 01:00 UTC Saturday, while a typical matchweek
-# puts six matches on Saturday, three on Sunday and one on Monday. Nine of
-# eleven would have been read from an already-blocked card.
+# puts six matches on Saturday, three on Sunday and one on Monday.
 #
-# Each run is timed to land before that day's earliest kick-off and stay fresh
-# through its latest, allowing for the UK being UTC+1 in summer:
+# Each run lands before that day's earliest kick-off and stays fresh through
+# its latest, allowing for the UK being UTC+1 in summer:
 #
 #   Thursday  13:00 UTC  planning card; no matches
 #   Friday    13:00 UTC  ~6h before a 20:00 UK kick-off
@@ -27,15 +34,9 @@ name: Matchday Refresh
 #   Monday    13:00 UTC  ~6h before a 20:00 UK kick-off
 #
 # COST: measured, not estimated. Two live runs moved the counter from 340 to
-# 311, so a run costs about 15 requests. Five runs a week is therefore roughly
-# 325 a month against a 500 allowance. An earlier estimate of 12 was 25% low,
-# which is worth stating: the number that matters here is measured from the
-# counter, not derived from the request pattern.
-#
-# That 500 is understood to be a monthly allowance. If it turns out to be a
-# lifetime one, the remaining balance is a few weeks, not a season — so every
-# run prints the quota remaining and the run summary carries it, letting the
-# number fall in public rather than being discovered at zero.
+# 311, so a run costs about 15 requests. Five runs a week is roughly 325 a
+# month against the free tier's 500 per month, which resets monthly. Every run
+# prints the quota remaining and how many runs it buys.
 on:
   schedule:
     - cron: "0 13 * * 4"
@@ -58,12 +59,10 @@ on:
 
 permissions:
   contents: read
-  # Read-only, and only so the run can fetch the previous run's card archive.
-  # Nothing here can write to the repository.
+  # Read-only, and only so the run can fetch the previous run's state.
   actions: read
   # Lets the run comment the card on an issue, which is what delivers it by
-  # email. This writes issue comments and nothing else — no code, no branches,
-  # no releases.
+  # email. This writes issue comments and nothing else.
   issues: write
 
 concurrency:
@@ -96,10 +95,43 @@ jobs:
           python -m pip install -r requirements.txt
           python -m pip install -e .
 
+      - name: Restore the previous state
+        # A runner starts empty, and neither the card archive nor the match
+        # dataset is tracked in git. Without this every run begins with no
+        # memory of the last one: the "since the previous refresh" diff stays
+        # permanently blank, and a bad day at Football-Data means no card at
+        # all rather than a card built on last week's results.
+        #
+        # Additive and scoped to data/, so it cannot overwrite the prices this
+        # run is about to fetch. A first run, a pruned artifact, or an API
+        # hiccup is not fatal.
+        id: restore
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -u
+          previous=$(gh run list --workflow matchday-refresh.yml --status success \
+            --limit 1 --json databaseId --jq '.[0].databaseId // empty')
+          if [ -z "$previous" ]; then
+            echo "No previous successful run. This run establishes the baseline."
+            exit 0
+          fi
+          mkdir -p data
+          gh run download "$previous" --name matchday-state --dir data || {
+            echo "No state on run $previous; continuing without it."
+            exit 0
+          }
+          echo "Restored state from run $previous."
+          find data/outputs/archive/automated_cards -name '*.json' 2>/dev/null \
+            | wc -l | xargs echo "Archived card runs restored:"
+
       - name: Check the provider credential
         # Fails fast and legibly if the key was rotated without updating the
         # secret, rather than surfacing as a confusing provider error later.
         # Costs no quota and prints nothing about the key beyond its length.
+        # This one is deliberately hard: without a key there is no refresh to
+        # degrade to, and a dead credential must be loud.
         env:
           EPL_ODDS_API_KEY: ${{ secrets.EPL_ODDS_API_KEY }}
           PYTHONPATH: src
@@ -107,27 +139,27 @@ jobs:
           python scripts/check_provider_credential.py --no-env-file
 
       - name: Fetch historical results
-        # The model is fitted on completed matches, and that dataset is derived
-        # rather than tracked, so a runner has none of it. Without this step the
-        # card cannot be generated at all — which is how the first live CI run
-        # failed.
+        # The model is fitted on completed matches. Football-Data is public CSV
+        # over HTTP: no key, no quota, no secret. Fetched before any quota is
+        # spent, so an outage there costs nothing.
         #
-        # Refetching weekly is not merely a workaround for the empty runner. The
-        # season adds results every week and the model should be fitted on them;
-        # a copy pinned at the start of the season would quietly get worse as
-        # the season it is meant to predict went on.
-        #
-        # Football-Data.co.uk is public CSV over HTTP: no key, no quota, no
-        # secret. It is the one external dependency here that is not the odds
-        # provider, so it is fetched before any quota is spent — if it is down,
-        # the run stops before it costs anything.
+        # Soft: if the fetch fails and the restored dataset is present, the run
+        # continues on last week's results and says so. Fitting on results that
+        # are a few days old is a far better outcome than no card.
+        id: results
+        continue-on-error: true
         env:
           PYTHONPATH: src
         run: |
           python scripts/fetch_data.py
 
       - name: Refetch provider prices
+        # Soft for the same reason: without fresh prices the card is refused by
+        # the freshness policy, and a blocked card that explains itself beats a
+        # red X with a traceback.
+        id: prices
         if: ${{ inputs.skip_provider_fetch != true }}
+        continue-on-error: true
         env:
           EPL_ODDS_API_KEY: ${{ secrets.EPL_ODDS_API_KEY }}
           PYTHONPATH: src
@@ -135,44 +167,37 @@ jobs:
           python scripts/run_provider_shadow_verification.py \
             --provider odds_api --live --overwrite-staging --include-event-markets
 
-      - name: Restore the previous card archive
-        # A runner is empty every time and the card archive is not tracked in
-        # git, so without this each run has no memory of the last one and the
-        # "since the previous refresh" diff is permanently blank — the Friday
-        # card could never say what moved since Thursday.
-        #
-        # The archive is restored from the previous successful run's artifact.
-        # This is additive: it only writes under the archive directory, so it
-        # cannot overwrite the prices this run just fetched. A first run, a
-        # pruned artifact, or any failure here is not fatal — the run continues
-        # and simply reports no comparison.
-        continue-on-error: true
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Record what went wrong
+        # One place that knows whether the run was degraded, so the summary,
+        # the email, and the exit status cannot disagree about it.
+        id: health
+        if: always()
         run: |
           set -u
-          previous=$(gh run list \
-            --workflow matchday-refresh.yml \
-            --status success \
-            --limit 1 \
-            --json databaseId \
-            --jq '.[0].databaseId // empty')
-          if [ -z "$previous" ]; then
-            echo "No previous successful run. This run establishes the baseline."
-            exit 0
+          : > run_degraded.txt
+          if [ ! -f data/processed/epl_historical_matches.csv ]; then
+            echo "No match dataset: the model cannot be fitted, so no card can be built. Football-Data could not be reached and no previous copy was restored." >> run_degraded.txt
+          elif [ "${{ steps.results.outcome }}" = "failure" ]; then
+            echo "Historical results could not be refreshed; the model was fitted on the previously stored dataset." >> run_degraded.txt
           fi
-          echo "Restoring the card archive from run $previous."
-          mkdir -p data/outputs/archive/automated_cards
-          gh run download "$previous" \
-            --name matchday-card-archive \
-            --dir data/outputs/archive/automated_cards || {
-              echo "No card archive on run $previous; continuing without a comparison."
-              exit 0
-            }
-          find data/outputs/archive/automated_cards -name '*.json' | wc -l \
-            | xargs echo "Archived card runs restored:"
+          if [ "${{ steps.prices.outcome }}" = "failure" ]; then
+            echo "Provider prices could not be refreshed, so the card is built on the last prices fetched and may be refused as stale." >> run_degraded.txt
+          fi
+          if [ -s run_degraded.txt ]; then
+            echo "degraded=true" >> "$GITHUB_OUTPUT"
+            cat run_degraded.txt
+          else
+            echo "degraded=false" >> "$GITHUB_OUTPUT"
+            echo "Nothing went wrong."
+          fi
 
       - name: Rebuild every report
+        # Soft: refresh_all_reports already continues past a failed step and
+        # exits non-zero at the end, so letting it stop the job here would
+        # discard the reports it did produce.
+        id: rebuild
+        if: always()
+        continue-on-error: true
         env:
           PYTHONPATH: src
         run: |
@@ -183,17 +208,17 @@ jobs:
         env:
           PYTHONPATH: src
         run: |
-          python scripts/build_run_summary.py --append-to-step-summary
+          python scripts/build_run_summary.py --append-to-step-summary \
+            --degraded-file run_degraded.txt
 
-      - name: Email the card when the picks change
+      - name: Email the card
         # Delivery. GitHub emails everyone watching the issue, so commenting is
-        # the whole mechanism — no SMTP server, no credentials, no third party.
+        # the whole mechanism: no SMTP server, no credentials, no third party.
         #
-        # Only when the selections change. Five emails a week would train the
-        # reader to ignore them, and an alert nobody opens is worse than none
-        # because it still looks like coverage. Silence is safe to read because
-        # a failed run emails separately: no message means the run happened and
-        # the picks did not move.
+        # Normally only when the selections change — five emails a week would
+        # train the reader to ignore them. But a degraded run always sends,
+        # because silence is only safe to read as "nothing moved" if anything
+        # going wrong breaks the silence.
         if: always()
         continue-on-error: true
         env:
@@ -204,28 +229,28 @@ jobs:
           RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           DECISION=$(python scripts/post_card_to_issue.py \
             --out card_comment.md --title-out card_title.txt \
-            --run-url "$RUN_URL" | tail -1)
+            --degraded-file run_degraded.txt --run-url "$RUN_URL" | tail -1)
           if [ "${{ inputs.force_email }}" = "true" ]; then
             echo "Forced: sending the current card regardless of changes."
             DECISION=post
           fi
           if [ "$DECISION" != "post" ]; then
-            echo "Not emailing: the selections did not change."
+            echo "Not emailing: the run was clean and the selections did not change."
             exit 0
           fi
           # The title comes from the module so the two cannot drift apart and
           # start posting to different issues.
           TITLE=$(cat card_title.txt)
           # Matched exactly against the open issues rather than through the
-          # search API: the title contains an apostrophe, and a search that
-          # quietly returns nothing would create a duplicate issue every run.
+          # search API: the title contains an apostrophe, and a search quietly
+          # returning nothing would create a duplicate issue every run.
           NUMBER=$(gh issue list --state open --limit 200 --json number,title \
             | jq -r --arg t "$TITLE" \
               '[.[] | select(.title == $t)] | .[0].number // empty')
           if [ -z "$NUMBER" ]; then
             echo "Creating the delivery issue."
             NUMBER=$(gh issue create --title "$TITLE" \
-              --body "Each matchday card is posted here when the selections change. Watch this issue to get them by email. Recommendations only; no bet is ever placed." \
+              --body "Each matchday card is posted here when the selections change, and whenever a run is degraded. Recommendations only; no bet is ever placed." \
               | grep -o '[0-9]*$')
           fi
           gh issue comment "$NUMBER" --body-file card_comment.md
@@ -247,21 +272,35 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
 
-      - name: Upload the card archive
-        # Carries this run's card history forward so the next run can diff
-        # against it. Retained longer than the reports because it is the only
-        # link between one matchweek and the next.
+      - name: Upload the state for the next run
+        # The card archive and the match dataset together are the only link
+        # between one matchweek and the next, which is why they outlive the
+        # reports.
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: matchday-card-archive
-          path: data/outputs/archive/automated_cards
+          name: matchday-state
+          path: |
+            data/outputs/archive/automated_cards
+            data/processed/epl_historical_matches.csv
           if-no-files-found: warn
           retention-days: 90
 
-      - name: Scope reminder
+      - name: Report the outcome
+        # Last, and the only step that can fail the job. Everything above is
+        # allowed to degrade so that the card still gets built, summarised, and
+        # delivered; the run then finishes red so the failure notice arrives.
         if: always()
         run: |
           echo "This job refetched prices and rebuilt reports."
           echo "It placed no bet, applied no settlement, edited no protected"
           echo "manual file, allowlisted no provider, and widened no market scope."
+          if [ "${{ steps.rebuild.outcome }}" = "failure" ]; then
+            echo "Some reports failed to rebuild."
+          fi
+          if [ "${{ steps.health.outputs.degraded }}" = "true" ] \
+             || [ "${{ steps.rebuild.outcome }}" = "failure" ]; then
+            echo "::error::This run was degraded. The card was still built and emailed; see the job summary."
+            exit 1
+          fi
+          echo "Clean run."

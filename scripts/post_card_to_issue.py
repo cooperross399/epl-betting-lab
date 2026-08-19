@@ -10,7 +10,11 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from epl_betting_lab.reports.card_notification import ISSUE_TITLE, build_notification
+from epl_betting_lab.reports.card_notification import (
+    ISSUE_TITLE,
+    build_notification,
+    read_degraded,
+)
 
 
 def main() -> None:
@@ -18,13 +22,20 @@ def main() -> None:
     parser.add_argument("--out", required=True, help="Where to write the comment body")
     parser.add_argument("--run-url", default="", help="Link back to the run")
     parser.add_argument(
+        "--degraded-file",
+        help="File listing what went wrong, one reason per line. A degraded "
+        "run always sends, so that silence stays trustworthy.",
+    )
+    parser.add_argument(
         "--title-out",
         help="Write the delivery issue title here, so the workflow and this "
         "module cannot disagree about which issue to post to",
     )
     args = parser.parse_args()
 
-    result = build_notification(run_url=args.run_url)
+    result = build_notification(
+        run_url=args.run_url, degraded=read_degraded(args.degraded_file)
+    )
     Path(args.out).write_text(result["body"], encoding="utf-8")
     if args.title_out:
         Path(args.title_out).write_text(ISSUE_TITLE, encoding="utf-8")

@@ -92,6 +92,26 @@ jobs:
         run: |
           python scripts/check_provider_credential.py --no-env-file
 
+      - name: Fetch historical results
+        # The model is fitted on completed matches, and that dataset is derived
+        # rather than tracked, so a runner has none of it. Without this step the
+        # card cannot be generated at all — which is how the first live CI run
+        # failed.
+        #
+        # Refetching weekly is not merely a workaround for the empty runner. The
+        # season adds results every week and the model should be fitted on them;
+        # a copy pinned at the start of the season would quietly get worse as
+        # the season it is meant to predict went on.
+        #
+        # Football-Data.co.uk is public CSV over HTTP: no key, no quota, no
+        # secret. It is the one external dependency here that is not the odds
+        # provider, so it is fetched before any quota is spent — if it is down,
+        # the run stops before it costs anything.
+        env:
+          PYTHONPATH: src
+        run: |
+          python scripts/fetch_data.py
+
       - name: Refetch provider prices
         if: ${{ inputs.skip_provider_fetch != true }}
         env:

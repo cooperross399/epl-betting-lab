@@ -27,6 +27,24 @@ def football_data_url(season: str, league: str = LEAGUE_CODE) -> str:
     return BASE_URL.format(season=season, league=league)
 
 
+class SeasonNotPublished(RuntimeError):
+    """The season is in the schedule but Football-Data has no results for it."""
+
+
+def _looks_like_a_results_csv(content: bytes) -> bool:
+    """Is this the CSV we asked for, or a page saying it is not there?
+
+    Football-Data answers a season it has not published with a redirect page
+    rather than a 404 — an HTTP 300 carrying a few hundred bytes of HTML.
+    `raise_for_status` is silent on 3xx, so without this check that page is
+    written to disk as `E0.csv` and then parsed as if it were results.
+    """
+    head = content[:2048].lstrip().lower()
+    if head.startswith(b"<"):
+        return False
+    return b"hometeam" in head and b"awayteam" in head
+
+
 def fetch_season(season: str, league: str = LEAGUE_CODE, raw_dir: Path = RAW_DIR) -> Path:
     """Download one season CSV and return local path."""
     raw_dir.mkdir(parents=True, exist_ok=True)
@@ -35,6 +53,11 @@ def fetch_season(season: str, league: str = LEAGUE_CODE, raw_dir: Path = RAW_DIR
 
     response = requests.get(url, timeout=30)
     response.raise_for_status()
+    if not _looks_like_a_results_csv(response.content):
+        raise SeasonNotPublished(
+            f"{url} returned HTTP {response.status_code} with "
+            f"{len(response.content)} bytes that are not a results CSV."
+        )
     dest.write_bytes(response.content)
     return dest
 
@@ -76,12 +99,37 @@ def fetch_and_build_dataset(seasons: Iterable[str], force: bool = False) -> pd.D
     RAW_DIR.mkdir(parents=True, exist_ok=True)
     PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
 
+    ordered = list(seasons)
     frames: list[pd.DataFrame] = []
-    for season in seasons:
+    skipped: list[str] = []
+    for season in ordered:
         raw_path = RAW_DIR / f"football_data_{LEAGUE_CODE}_{season}.csv"
-        if force or not raw_path.exists():
-            fetch_season(season)
-        frames.append(load_season(raw_path, season))
+        try:
+            if force or not raw_path.exists():
+                fetch_season(season)
+            frames.append(load_season(raw_path, season))
+        except SeasonNotPublished as exc:
+            # Only the season being played is allowed to be missing, and only
+            # until its first result is published. A completed season going
+            # quiet would shrink the training set without anyone noticing,
+            # which is the failure this asymmetry exists to prevent.
+            if season != ordered[-1]:
+                raise RuntimeError(
+                    f"Completed season {season} could not be fetched: {exc}. "
+                    "Refusing to build a dataset that is missing a season the "
+                    "model was fitted on."
+                ) from exc
+            skipped.append(season)
+            print(
+                f"Season {season} has no published results yet; building "
+                "without it. It will be included once the season starts."
+            )
+
+    if not frames:
+        raise RuntimeError(
+            "No season could be fetched. Football-Data may be unreachable; "
+            "the existing dataset was left untouched."
+        )
 
     combined = pd.concat(frames, ignore_index=True)
     combined = combined.sort_values(["date", "home_team", "away_team"], na_position="last")

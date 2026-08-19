@@ -132,6 +132,20 @@ class PoissonGoalsModel:
             "double_chance_home_or_away": round(float(home_win + away_win), 4),
             "draw_no_bet_home": round(float(dnb_home), 4),
             "draw_no_bet_away": round(float(dnb_away), 4),
+            # Team totals come off each side's own marginal, not the joint
+            # matrix, so they stay correct even where the matrix is truncated.
+            "team_total_home_over_1_5": round(
+                float(1.0 - sum(self._poisson_pmf(k, home_xg) for k in (0, 1))), 4
+            ),
+            "team_total_home_under_1_5": round(
+                float(sum(self._poisson_pmf(k, home_xg) for k in (0, 1))), 4
+            ),
+            "team_total_away_over_1_5": round(
+                float(1.0 - sum(self._poisson_pmf(k, away_xg) for k in (0, 1))), 4
+            ),
+            "team_total_away_under_1_5": round(
+                float(sum(self._poisson_pmf(k, away_xg) for k in (0, 1))), 4
+            ),
             "top_scores": top_scores[["score", "prob"]].assign(prob=lambda d: d["prob"].round(4)).to_dict("records"),
         }
 

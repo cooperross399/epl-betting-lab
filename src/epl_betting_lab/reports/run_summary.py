@@ -189,7 +189,21 @@ def build_run_summary(
         if next_action and next_action != root:
             lines += [f"Next action: {next_action}", ""]
 
-    if comparison.get("comparable"):
+    if comparison.get("comparable") and not (card_ready and card_generated):
+        # A blocked run has no card, so every previous pick counts as "removed".
+        # Printed as a bare number that reads as a judgement — 27 picks dropped —
+        # when nothing was dropped and nothing was assessed. The comparison is
+        # only meaningful between two cards that exist.
+        lines += [
+            "## Since the previous refresh",
+            "",
+            "No comparison: this run produced no card, so there is nothing to "
+            "compare the previous one against. The previous card's selections "
+            "were not withdrawn or reassessed — they were simply not "
+            "regenerated.",
+            "",
+        ]
+    elif comparison.get("comparable"):
         lines += [
             "## Since the previous refresh",
             "",

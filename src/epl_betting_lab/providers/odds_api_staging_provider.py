@@ -108,6 +108,10 @@ def _required_text(value: object, *, label: str) -> str:
     return text
 
 
+#: Markets whose prices decide real bets, where a repeated row means the
+#: response is not what it claims to be and the run must stop.
+CORE_MARKETS: frozenset[str] = frozenset({"1x2", "total_2_5", "btts"})
+
 #: Provider market key -> the project market(s) it can produce. One provider
 #: market can feed several: a corners totals response carries the whole ladder
 #: from 4.5 to 15.5, and each project market reads only its own line.
@@ -192,6 +196,7 @@ def _normalize_provider_events(
     # here. A hardcoded three did exactly that the first time five more were
     # fetched: the whole refresh died on a counter.
     market_counts = {market: 0 for market in MARKET_SELECTIONS}
+    duplicate_counts: dict[str, int] = {}
 
     for event_index, event in enumerate(events, start=1):
         if not isinstance(event, dict):
@@ -372,10 +377,27 @@ def _normalize_provider_events(
                         book_name.casefold(),
                     )
                     if odds_key in odds_keys:
-                        raise MalformedProviderResponseError(
-                            "Provider response repeats an odds row for the same "
-                            "fixture, market, selection, and book."
+                        # A repeat in one of the three core markets means the
+                        # response is not what it claims to be, and prices there
+                        # decide real bets — so that still stops the run.
+                        #
+                        # The alternate-lines markets are different. A book
+                        # publishes a whole ladder of corner lines and sometimes
+                        # lists the same one twice; that is a quirk of how the
+                        # ladder is assembled, not evidence the response is
+                        # corrupt. Refusing the entire run over it threw away
+                        # every market including the ones that were fine. The
+                        # first price is kept, the repeat is counted, and the
+                        # count is reported rather than swallowed.
+                        if normalized_market in CORE_MARKETS:
+                            raise MalformedProviderResponseError(
+                                "Provider response repeats an odds row for the "
+                                "same fixture, market, selection, and book."
+                            )
+                        duplicate_counts[normalized_market] = (
+                            duplicate_counts.get(normalized_market, 0) + 1
                         )
+                        continue
                     odds_keys.add(odds_key)
                     odds_rows.append(
                         {
@@ -422,6 +444,12 @@ def _normalize_provider_events(
                 f"The provider returned no {label} rows. Staging completeness "
                 "validation may block this bundle; no prices were guessed."
             )
+    for market, count in sorted(duplicate_counts.items()):
+        warnings.append(
+            f"The provider repeated {count} `{market}` row(s) for the same "
+            "fixture, selection and book. The first price was kept and the "
+            "repeats ignored; no price was guessed."
+        )
     return odds, fixtures, warnings, market_counts
 
 

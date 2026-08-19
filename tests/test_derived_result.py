@@ -185,3 +185,58 @@ class TestRegistration:
         """Two lists that could drift apart and silently drop a selection."""
         for market, mapping in DERIVED_MARKETS.items():
             assert set(mapping) == set(MARKET_SELECTIONS[market]), market
+
+
+class TestTheCardEvaluatesEveryPriceableMarket:
+    """Which markets reach a card is a policy decision, not a wiring accident.
+
+    Five markets were modelled, registered, fetched and validated, and still
+    produced no picks because nothing evaluated them. That is the failure this
+    covers: a market absent from the card should be a decision someone can
+    read in the policy, never a gap nobody noticed.
+    """
+
+    def _source(self) -> str:
+        from epl_betting_lab.config import PROJECT_ROOT
+
+        return (PROJECT_ROOT / "src/epl_betting_lab/dashboard_actions.py").read_text(
+            encoding="utf-8"
+        )
+
+    def test_the_derived_markets_are_evaluated(self) -> None:
+        source = self._source()
+
+        assert "evaluate_double_chance(" in source
+        assert "evaluate_draw_no_bet(" in source
+
+    def test_the_count_markets_are_evaluated(self) -> None:
+        source = self._source()
+
+        assert "evaluate_count_market(" in source
+        assert "fit_count_models(" in source
+
+    def test_markets_with_no_price_source_are_skipped(self) -> None:
+        """Cards have no book, so evaluating them would only waste work."""
+        source = self._source()
+
+        assert "if market in UNAVAILABLE_MARKETS:" in source
+
+    def test_every_registered_market_has_something_that_evaluates_it(self) -> None:
+        from epl_betting_lab.market_eligibility import MARKET_SELECTIONS
+        from epl_betting_lab.strategies.count_markets import (
+            COUNT_MARKETS,
+            UNAVAILABLE_MARKETS,
+        )
+        from epl_betting_lab.strategies.derived_result import DERIVED_MARKETS
+
+        evaluated = {"1x2", "total_2_5", "btts"}
+        evaluated |= set(DERIVED_MARKETS)
+        evaluated |= set(COUNT_MARKETS) - set(UNAVAILABLE_MARKETS)
+
+        assert set(MARKET_SELECTIONS) <= evaluated
+
+    def test_an_empty_strategy_result_does_not_break_the_concat(self) -> None:
+        """Most markets return nothing on most bundles."""
+        source = self._source()
+
+        assert "if not frame.empty" in source

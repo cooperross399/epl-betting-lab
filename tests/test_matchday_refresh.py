@@ -609,8 +609,8 @@ def test_the_card_routine_prompt_matches_how_leans_are_staked() -> None:
     )
     flat = " ".join(text.split())
 
-    assert "leans separately, and say plainly that they carry no stake" in flat
-    assert "information, not bets" in flat
+    assert "carry no stake" in flat
+    assert "information, not a bet" in flat
 
 
 def test_the_routine_prompt_carries_the_honest_headline() -> None:
@@ -621,3 +621,72 @@ def test_the_routine_prompt_carries_the_honest_headline() -> None:
     flat = " ".join(text.split())
 
     assert "No market in this project has a demonstrated edge" in flat
+
+
+def test_the_prompts_tell_a_card_apart_from_a_failure() -> None:
+    """Both arrive from the same issue and read very differently."""
+    text = (PROJECT_ROOT / "docs" / "epl_scheduled_tasks_bridge.md").read_text(
+        encoding="utf-8"
+    )
+    flat = " ".join(text.split())
+
+    assert "Selections changed" in flat
+    assert "Something went wrong" in flat
+    assert "Read the first line" in flat
+
+
+def test_the_prompts_use_the_same_staleness_window_as_the_watchdog() -> None:
+    """Four days, because the card runs ten times a week.
+
+    An eight-day window would have called a missed weekend normal.
+    """
+    from epl_betting_lab.reports.schedule_health import MAX_EXPECTED_GAP
+
+    text = (PROJECT_ROOT / "docs" / "epl_scheduled_tasks_bridge.md").read_text(
+        encoding="utf-8"
+    )
+
+    assert MAX_EXPECTED_GAP.days == 4
+    assert "four days" in " ".join(text.split())
+
+
+def test_the_prompts_name_the_delivery_issue() -> None:
+    """Searching by number is exact; searching by title is not."""
+    text = (PROJECT_ROOT / "docs" / "epl_scheduled_tasks_bridge.md").read_text(
+        encoding="utf-8"
+    )
+
+    assert "#162" in text
+
+
+def test_the_prompts_carry_the_longshot_cap() -> None:
+    """So a routine can explain a missing big price instead of guessing."""
+    text = (PROJECT_ROOT / "docs" / "epl_scheduled_tasks_bridge.md").read_text(
+        encoding="utf-8"
+    )
+    flat = " ".join(text.split())
+
+    assert "+600" in flat
+    assert "0 for 12" in flat
+
+
+def test_the_model_prompt_refuses_to_propose_enabling_a_market() -> None:
+    """That is a reviewed decision, and the evidence does not support one."""
+    text = (PROJECT_ROOT / "docs" / "epl_scheduled_tasks_bridge.md").read_text(
+        encoding="utf-8"
+    )
+    flat = " ".join(text.split())
+
+    assert "Do not propose enabling a market" in flat
+    assert "enable nothing new" in flat
+
+
+def test_the_settle_routine_checks_the_schedule_is_alive() -> None:
+    """It used to only look for failures, which a dead schedule never produces."""
+    text = (PROJECT_ROOT / "docs" / "epl_scheduled_tasks_bridge.md").read_text(
+        encoding="utf-8"
+    )
+    flat = " ".join(text.split())
+
+    assert "a run was probably missed" in flat
+    assert "may need enabling" in flat

@@ -149,33 +149,44 @@ independent, and only one of them is load-bearing.
 ## Exact routine prompts
 
 Claude Code does not edit your scheduled tasks. Paste these into the routine
-definitions yourself.
+definitions yourself, and re-paste them when this file changes — a routine is
+text living in another system, and it does not update itself.
 
 **These prompts read email, not the filesystem.** The card is built by GitHub
-Actions and delivered as a comment on the *EPL Card — this week's picks* issue,
-which GitHub emails to Cooper. A routine that reads that mail works from
-anywhere, with the laptop shut, and needs only the Gmail connector. The earlier
-versions ran commands against a local checkout, which meant they silently could
-not run whenever the machine was off — the exact situation these are for.
+Actions and posted to issue #162, *EPL Card — this week's picks*, which
+mentions Cooper so GitHub always emails it. A routine reading that mail works
+from anywhere with the laptop shut and needs only the Gmail connector. Earlier
+versions ran commands against a local checkout, so they silently could not run
+whenever the machine was off — the exact situation a scheduled routine is for.
 
-If a GitHub connector is ever added to Claude, a routine can read the run
-directly instead; the mail is simply the path that works today.
+**One email can be either a card or a failure.** Both arrive from the same
+issue. A card leads with *"Selections changed"*; a failure leads with
+*"Something went wrong"* and lists what broke before showing whatever card
+could still be built. Read the first line before reading the tables.
+
+**Silence is meaningful.** Mail arrives only when the selections change or a run
+goes wrong, so no mail means the schedule ran and the picks did not move. The
+card runs ten times a week — Thursday through Monday, twice a day — so a gap of
+more than four days means a run was missed, not that nothing changed.
+
+---
 
 ### EPL CARD
 
 ```text
-Search Gmail for the most recent notification from GitHub for the issue
-"EPL Card — this week's picks" in cooperross399/epl-betting-lab.
+Search Gmail for the most recent GitHub notification for issue #162,
+"EPL Card — this week's picks", in cooperross399/epl-betting-lab.
 
-That email is the card. Read it and tell me, in plain English:
+Read the first line before anything else. "Selections changed" means it is a
+card. "Something went wrong" means the run was degraded: say what broke first,
+then report whatever card was still built and note that it may rest on stale
+prices.
+
+Then tell me, in plain English:
 
 - whether a card was produced, or whether it was blocked and why
-- the best bets, each with market, selection, tier, edge, price, book and the
-  suggested unit size
-- the leans separately, and say plainly that they carry no stake. A lean fires
-  at a 1.5% modelled edge, which is below this model's own error and below a
-  book's margin; measured, leans returned about -9% over 150 bets. They are
-  information, not bets. Never present one as a play.
+- the best bets: market, selection, tier, edge, price, book, suggested units
+- the leans, separately, and say plainly that they carry no stake
 - what changed since the previous card: added, dropped, or moved section
 - which markets were included and excluded
 
@@ -183,65 +194,88 @@ Rules:
 - Report only what the email says. Do not compute, adjust, or invent a
   selection, a price, or an edge. If something is missing, say it is missing.
 - A blocked card means nothing was generated. It never means "no value found",
-  and it is not a reason to suggest a bet.
-- A zero-unit row is not a small bet, it is no bet. Do not present one as a
-  pick. Anything under "Ranked but not stakeable" belongs in that category.
+  and it is never a reason to suggest a bet.
+- A lean is information, not a bet. It fires at a 1.5% modelled edge, which is
+  below this model's own error and below a book's margin; measured, leans
+  returned about -9% over 150 bets. Never present one as a play.
+- A zero-unit row is not a small bet, it is no bet. Anything under "Ranked but
+  not stakeable" is in that category, whatever its edge looks like.
+- Prices longer than +600 are refused by design. The model overstates long
+  prices, and the band above +900 went 0 for 12 in the backtest. If I ask about
+  a big price that is not on the card, that is why.
 - No market in this project has a demonstrated edge. Every measured interval
-  includes zero. If asked whether it works, say that.
-- Place no bets. Apply no settlement. Suggest no stake beyond the units in the
-  email.
+  includes zero. If I ask whether it works, say exactly that.
+- Place no bets. Apply no settlement. Suggest no stake beyond the units shown.
 - Never tell me to open a Terminal or to ask ChatGPT. If something looks wrong,
-  say what and point me at the GitHub Actions run linked in the email.
+  say what, and point me at the Actions run linked in the email.
 
-If there is no such email in the last 8 days, say so plainly. It means either
-the selections have not changed — which is normal and not a fault — or the
-schedule has stopped. A failed run emails separately, so check for a GitHub
-Actions failure notification before assuming anything is broken.
+If there is no such email in the last four days, say so plainly and treat it as
+a possible missed run rather than a quiet week.
 ```
+
+---
 
 ### EPL Model
 
 ```text
-Search Gmail for the most recent notification from GitHub for the issue
-"EPL Card — this week's picks" in cooperross399/epl-betting-lab, and for any
-GitHub Actions failure notifications for the "Matchday Refresh" workflow in the
-last 8 days.
+Search Gmail for the most recent GitHub notification for issue #162 in
+cooperross399/epl-betting-lab, and for any GitHub Actions failure notifications
+for the "Matchday Refresh" workflow in the last seven days.
 
 Tell me, in plain English:
 
 - when the card last changed, and whether the schedule appears to be running
-- whether the latest card was ready or blocked, and the blocker if it was
+- whether the latest card was ready, blocked, or degraded, and why
 - which markets are included and excluded
-- how much provider quota remains, if the email states it, and roughly how many
-  runs that buys
+- how much provider quota remains, if the email states it, and how many runs
+  that buys
+
+What is true about the markets, so you do not have to guess:
+- Only 1x2 and btts are enabled. Six further markets are modelled, priced and
+  wired, and all six are held by the reviewed policy allowlist.
+- Every market has been measured against real historical prices. Not one
+  interval excludes zero. double_chance measured negative; draw_no_bet's
+  positive number rests on thirteen bets; corners_1x2 can never be measured
+  because the provider does not retain it historically.
+- The recommendation is to enable nothing new on that evidence.
+- total_2_5 was excluded on 2026-08-17 and reopened on 2026-08-19: the original
+  finding held only for the bulk `totals` market, and BetRivers and FanDuel
+  both carry the 2.5 line via `alternate_totals`. It is still not enabled, and
+  the backtest places about six bets a season in it, so enabling it would
+  change very little.
 
 Rules:
-- Provider is allowlisted for 1x2 and btts only.
-- total_2_5 was excluded on 2026-08-17 and reopened on 2026-08-19: the old
-  finding held only for the bulk `totals` market, and BetRivers and FanDuel
-  both carry 2.5 via `alternate_totals`. It awaits policy approval.
 - Generate no picks here. Place no bets. Apply no settlement.
+- Do not propose enabling a market. That is a reviewed decision behind the
+  policy gate, and the evidence does not currently support one.
 - Never tell me to open a Terminal or to ask ChatGPT.
 
-No card email does not mean the system is broken. It means the selections did
-not change. A broken run sends its own failure email — that is the one to worry
-about.
+No card email does not mean the system is broken; it means the picks did not
+move. A gap of more than four days does mean a run was missed.
 ```
+
+---
 
 ### EPL SETTLE (IGNORE)
 
 ```text
-Do nothing that writes.
+Do nothing that writes. This routine only checks that the machinery is alive.
 
-Search Gmail for GitHub Actions failure notifications for the "Matchday
-Refresh" workflow in cooperross399/epl-betting-lab in the last 8 days.
+Search Gmail in cooperross399/epl-betting-lab for, in the last seven days:
+1. GitHub Actions failure notifications for "Matchday Refresh"
+2. any notification for issue #162 whose first line says "Something went wrong"
+3. the most recent notification for issue #162 of any kind
 
-If there are none, say the schedule is running and stop.
-If there are, tell me which run failed, when, and what the error line says.
+Then say which of these is true:
+- No failures, and a message within the last four days: the schedule is running.
+- No messages at all for more than four days: a run was probably missed. Tell me
+  to check Actions → Matchday Refresh, and say the workflow may need enabling.
+- Failures present: tell me which run, when, and what the error line says.
 
 Rules:
 - Settlement is preview-only in this project and has no write path. Never apply
-  settlement, never edit the bet ledger, and never record a result.
+  settlement, never edit the bet ledger, never record a result, and never
+  compute a profit or loss.
 - Place no bets and suggest none.
 - Never tell me to open a Terminal or to ask ChatGPT.
 ```

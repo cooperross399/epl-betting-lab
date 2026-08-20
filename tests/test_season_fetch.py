@@ -231,3 +231,70 @@ class TestTheWeeklyBriefDerivesItsSeason:
         assert "current-season" in out.stdout
         # The literal previous season must not be baked in as the default.
         assert current_season_code() != "2526"
+
+
+class TestDatesSurviveTheRoundTrip:
+    """Every match in the dataset was dated January 1970.
+
+    A loop coerced every column that was not on a label list to a number, and
+    the parsed date was not on that list. A datetime became microseconds since
+    the epoch, and reading an integer back gives nanoseconds — so 2021 became
+    1970. The integers stay in order, so sorting and walk-forward never
+    noticed. Only something that read a date could, and nothing did until a
+    join against harvested prices returned zero rows.
+    """
+
+    def _frame(self) -> pd.DataFrame:
+        return pd.DataFrame(
+            {
+                "Div": ["E0", "E0"],
+                "Date": ["13/08/2021", "22/05/2022"],
+                "HomeTeam": ["Brentford", "Arsenal"],
+                "AwayTeam": ["Arsenal", "Everton"],
+                "FTHG": [2, 5],
+                "FTAG": [0, 1],
+                "FTR": ["H", "H"],
+                "HC": [2, 7],
+                "AC": [5, 3],
+            }
+        )
+
+    def test_the_parsed_date_is_not_coerced_to_a_number(self, tmp_path) -> None:
+        from epl_betting_lab.data.fetch_football_data import load_season
+
+        raw = tmp_path / "season.csv"
+        self._frame().to_csv(raw, index=False)
+
+        loaded = load_season(raw, "2122")
+
+        assert pd.api.types.is_datetime64_any_dtype(loaded["date"])
+        assert loaded["date"].min().year == 2021
+
+    def test_a_date_written_as_a_string_reads_back_the_same(self, tmp_path) -> None:
+        from epl_betting_lab.data.loaders import _read_dates
+
+        written = pd.Series(["2021-08-13", "2022-05-22"])
+
+        assert _read_dates(written).min().year == 2021
+
+    def test_a_legacy_integer_file_is_still_read_correctly(self) -> None:
+        """Files written before the fix are already on disk."""
+        from epl_betting_lab.data.loaders import _read_dates
+
+        # Microseconds since the epoch, as the broken writer produced.
+        legacy = pd.Series([1628812800000000])
+
+        assert _read_dates(legacy).iloc[0].year == 2021
+
+    def test_seasons_land_in_the_years_they_name(self) -> None:
+        """The check that would have caught this at any point."""
+        from epl_betting_lab.config import PROCESSED_DIR
+        from epl_betting_lab.data.loaders import load_matches
+
+        if not (PROCESSED_DIR / "epl_historical_matches.csv").is_file():
+            pytest.skip("needs the match dataset")
+
+        matches = load_matches()
+        for season, group in matches.groupby("season"):
+            expected_start = 2000 + int(str(season)[:2])
+            assert group["date"].min().year == expected_start, season

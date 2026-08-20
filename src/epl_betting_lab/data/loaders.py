@@ -12,8 +12,21 @@ def load_matches(path: Path | None = None) -> pd.DataFrame:
         raise FileNotFoundError(f"Missing {path}. Run scripts/fetch_data.py first.")
     df = pd.read_csv(path)
     if "date" in df.columns:
-        df["date"] = pd.to_datetime(df["date"], errors="coerce", format="mixed")
+        df["date"] = _read_dates(df["date"])
     return df
+
+
+def _read_dates(values: pd.Series) -> pd.Series:
+    """Dates as written now, and as they were written before.
+
+    A file produced before the serialisation fix holds microseconds since the
+    epoch as a bare integer. Read as nanoseconds — pandas's default for an
+    integer — every match lands in January 1970. Handling both means an old
+    file already on disk is read correctly rather than silently wrongly.
+    """
+    if pd.api.types.is_numeric_dtype(values):
+        return pd.to_datetime(values, unit="us", errors="coerce")
+    return pd.to_datetime(values, errors="coerce", format="mixed")
 
 
 def load_current_odds(path: Path | None = None) -> pd.DataFrame:

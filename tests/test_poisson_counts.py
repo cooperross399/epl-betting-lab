@@ -529,3 +529,98 @@ class TestParsingLineCoverageArguments:
 
     def test_blank_yields_nothing(self) -> None:
         assert self._parse("") == []
+
+
+class TestShrinkage:
+    """Team strengths are pulled toward the league average by evidence.
+
+    A ratio from a season of matches is a noisy estimate, and multiplying two
+    of them — one side's generating, the other's conceding — compounds it. Left
+    raw, the model predicted 74% where 59% happened and 26% where 48% did: too
+    spread out in both directions. Shrinkage weights each strength by how much
+    evidence stands behind it.
+    """
+
+    def _frame(self, team_matches: int) -> pd.DataFrame:
+        rows = []
+        # A league of ordinary teams, plus one outlier with `team_matches` games.
+        for i in range(200):
+            rows.append(
+                {"home_team": f"T{i % 10}", "away_team": f"T{(i + 1) % 10}",
+                 "HC": 5, "AC": 5, "HY": 2, "AY": 2}
+            )
+        for i in range(team_matches):
+            rows.append(
+                {"home_team": "Outlier", "away_team": f"T{i % 10}",
+                 "HC": 15, "AC": 5, "HY": 2, "AY": 2}
+            )
+        return pd.DataFrame(rows)
+
+    def test_a_team_with_little_evidence_stays_near_average(self) -> None:
+        model = PoissonCountModel("HC", "AC").fit(self._frame(8))
+        strength = model.team_strengths["Outlier"].generates
+
+        assert strength < 1.4, "eight matches should not buy a large claim"
+
+    def test_a_team_with_much_evidence_keeps_more_of_it(self) -> None:
+        few = PoissonCountModel("HC", "AC").fit(self._frame(8))
+        many = PoissonCountModel("HC", "AC").fit(self._frame(150))
+
+        assert (
+            many.team_strengths["Outlier"].generates
+            > few.team_strengths["Outlier"].generates
+        )
+
+    def test_shrinkage_never_crosses_the_average(self) -> None:
+        """It pulls toward 1.0; it must not overshoot past it."""
+        model = PoissonCountModel("HC", "AC").fit(self._frame(30))
+
+        assert model.team_strengths["Outlier"].generates > 1.0
+
+    def test_disabling_shrinkage_restores_the_raw_ratio(self) -> None:
+        raw = PoissonCountModel("HC", "AC", shrinkage_matches=0).fit(self._frame(60))
+        shrunk = PoissonCountModel("HC", "AC").fit(self._frame(60))
+
+        assert (
+            raw.team_strengths["Outlier"].generates
+            > shrunk.team_strengths["Outlier"].generates
+        )
+
+    def test_the_half_weight_point_is_documented_not_arbitrary(self) -> None:
+        assert PoissonCountModel.SHRINKAGE_MATCHES == 60
+
+
+class TestShrinkageImprovedCalibration:
+    """The measured result, so a later change cannot quietly undo it."""
+
+    @needs_dataset
+    def test_the_nine_and_a_half_line_is_well_calibrated(self) -> None:
+        from epl_betting_lab.reports.count_model_calibration import (
+            summarize_calibration,
+            walk_forward_predictions,
+            worst_gap,
+        )
+
+        predictions = walk_forward_predictions(
+            load_matches(), event="corners", line=9.5
+        )
+        gap = worst_gap(summarize_calibration(predictions))
+
+        # Was 15.2% before shrinkage.
+        assert gap < 0.05, f"worst judged gap is {gap:.1%}"
+
+    @needs_dataset
+    def test_the_ten_and_a_half_line_improved_but_is_not_clean(self) -> None:
+        """Recorded honestly: better, and not yet good enough to enable."""
+        from epl_betting_lab.reports.count_model_calibration import (
+            summarize_calibration,
+            walk_forward_predictions,
+            worst_gap,
+        )
+
+        predictions = walk_forward_predictions(
+            load_matches(), event="corners", line=10.5
+        )
+        gap = worst_gap(summarize_calibration(predictions))
+
+        assert gap < 0.15, f"worst judged gap is {gap:.1%}"  # was 21.6%

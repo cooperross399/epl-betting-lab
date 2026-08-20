@@ -69,14 +69,20 @@ def _table(rows: Sequence[Mapping[str, Any]]) -> list[str]:
     return lines
 
 
-#: A run costs about 15 requests, measured from the counter across two live
-#: runs rather than derived from the request pattern.
-REQUESTS_PER_RUN = 15
+#: Measured from consecutive live runs, not derived: the counter moved 14248 ->
+#: 14186 -> 14124, and 19612 -> 19540. Sixty-two a run with every market
+#: fetched.
+#:
+#: It read 15 until this was checked, from a measurement taken before the extra
+#: markets were added, so the "about N more runs" figure overstated the runway
+#: roughly fourfold. A number offered to reassure someone should not be the
+#: optimistic one.
+REQUESTS_PER_RUN = 62
 
 #: Below this many runs' worth, the summary says so. Quota running dry is one
 #: of the ways this automation stops without producing a red X, so the number
 #: has to become an argument rather than sit in a table being technically
-#: present.
+#: present. Fourteen is about a fortnight at ten runs a week.
 LOW_QUOTA_RUNS = 14
 
 

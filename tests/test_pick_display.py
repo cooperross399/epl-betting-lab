@@ -420,7 +420,10 @@ class TestQuotaIsAnArgumentNotATableCell:
         return build_run_summary(output_dir=tmp_path)
 
     def test_a_healthy_quota_says_how_many_runs_it_buys(self, tmp_path: Path) -> None:
-        assert "about 20 more runs" in self._summary(tmp_path, "311")
+        # 5,000 at 62 a run. The per-run cost was corrected after the counter
+        # was read across consecutive runs; 311 used to look healthy and is now
+        # five runs from empty.
+        assert "about 80 more runs" in self._summary(tmp_path, "5000")
 
     def test_a_low_quota_says_the_schedule_stops(self, tmp_path: Path) -> None:
         summary = self._summary(tmp_path, "100")
@@ -428,7 +431,11 @@ class TestQuotaIsAnArgumentNotATableCell:
         assert "Top this up or the schedule stops" in summary
 
     def test_the_warning_is_absent_when_there_is_plenty(self, tmp_path: Path) -> None:
-        assert "Top this up" not in self._summary(tmp_path, "311")
+        assert "Top this up" not in self._summary(tmp_path, "5000")
+
+    def test_what_used_to_look_healthy_now_warns(self, tmp_path: Path) -> None:
+        """311 credits read as twenty runs and is really five."""
+        assert "Top this up" in self._summary(tmp_path, "311")
 
     def test_an_unreadable_quota_is_shown_not_hidden(self, tmp_path: Path) -> None:
         assert "unknown" in self._summary(tmp_path, "")

@@ -451,3 +451,32 @@ def test_it_warns_against_changes_that_improve_the_estimate_a_lot() -> None:
 
     assert "why_better_calibration_lost_money.md" in text
     assert "Prefer changes with a mechanism" in text
+
+
+def test_every_market_measurement_is_recorded_with_its_interval() -> None:
+    """Six markets now have real-price measurements. All include zero."""
+    text = _read("docs/every_market_measured.md")
+    flat = " ".join(text.split())
+
+    for market in ("1x2", "btts", "draw_no_bet", "double_chance",
+                   "corners_total_9_5", "corners_total_10_5"):
+        assert market in flat, market
+    assert "Every interval includes zero" in flat
+
+
+def test_it_records_that_corners_1x2_cannot_be_measured() -> None:
+    """Offered live, not retained historically — so never backtestable."""
+    text = _read("docs/every_market_measured.md")
+    flat = " ".join(text.split())
+
+    assert "no history exists" in flat
+    assert "never backtested" in flat
+
+
+def test_it_withdraws_the_earlier_recommendation() -> None:
+    """Double chance and draw-no-bet were recommended before they were measured."""
+    text = _read("docs/every_market_measured.md")
+    flat = " ".join(text.split())
+
+    assert "enable nothing new on this evidence" in flat
+    assert "sound and incomplete" in flat

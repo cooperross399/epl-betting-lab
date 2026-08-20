@@ -98,6 +98,17 @@ def parse_args() -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--historical-probe",
+        default="",
+        help=(
+            "ISO timestamp, e.g. 2025-08-16T12:00:00Z. Asks whether the plan "
+            "can read historical odds at that moment, and what it costs. "
+            "Historical prices are the only way to backtest a market Football-"
+            "Data does not carry odds for, which is every market except 1X2 "
+            "and the 2.5 goals line."
+        ),
+    )
+    parser.add_argument(
         "--line-coverage",
         default="",
         help=(
@@ -150,6 +161,28 @@ def main() -> int:
             "No archived provider response found. Running the live probe only; "
             "the bulk analysis and report need an archived response."
         )
+
+    if args.historical_probe:
+        load_provider_env()
+        api_key = os.environ.get(API_KEY_ENV, "").strip()
+        if not api_key:
+            print(f"BLOCKED: `{API_KEY_ENV}` is not configured.")
+            return 2
+        outcome = probe_historical_odds(
+            api_key=api_key,
+            when=args.historical_probe,
+            markets=args.markets,
+            regions=args.regions,
+        )
+        print(f"Historical odds at {args.historical_probe}:")
+        print(f"  available   : {outcome['available']}")
+        print(f"  http status : {outcome['status_code']}")
+        print(f"  credits used: {outcome['requests_last'] or 'unknown'}")
+        print(f"  remaining   : {outcome['requests_remaining'] or 'unknown'}")
+        print(f"  events      : {outcome['event_count']}")
+        print(f"  markets seen: {', '.join(outcome['markets_seen']) or 'none'}")
+        if outcome["detail"]:
+            print(f"  detail      : {outcome['detail']}")
 
     event_summary = None
     if args.check_event_markets:

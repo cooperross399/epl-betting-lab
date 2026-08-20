@@ -686,3 +686,37 @@ class TestEveryLiveProbeRunsWithoutAnArchive:
 
         for flag in ("probe_totals_regions", "check_event_markets", "historical_probe"):
             assert flag in guard, flag
+
+
+class TestTheDiscoveryScriptResolvesEveryNameItCalls:
+    """compileall parses; it does not resolve names.
+
+    A helper was added to the module and used in the script without being
+    imported. That is a NameError at the moment of use — invisible to the
+    compile check, invisible to every test that did not run that branch, and
+    it surfaced as a failed dispatch after the credential had been read.
+    """
+
+    def _module(self):
+        import importlib.util
+
+        from epl_betting_lab.config import PROJECT_ROOT
+
+        spec = importlib.util.spec_from_file_location(
+            "_discovery_cli",
+            PROJECT_ROOT / "scripts" / "run_provider_market_discovery.py",
+        )
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
+
+    def test_every_discovery_helper_the_script_calls_is_imported(self) -> None:
+        import re
+
+        module = self._module()
+        source = open(module.__file__, encoding="utf-8").read()
+        called = set(re.findall(r"\b(probe_[a-z_]+|fetch_[a-z_]+|summarize_[a-z_]+|discover_[a-z_]+|save_[a-z_]+)\(", source))
+
+        missing = [name for name in called if not hasattr(module, name)]
+
+        assert not missing, f"called but not imported: {missing}"

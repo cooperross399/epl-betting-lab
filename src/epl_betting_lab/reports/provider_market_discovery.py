@@ -437,6 +437,12 @@ def probe_historical_odds(
         data = payload.get("data") if isinstance(payload, Mapping) else payload
         if isinstance(data, list):
             events = data
+        elif isinstance(data, Mapping):
+            # A single-event snapshot returns one object where the slate
+            # returns a list. Reading only the list shape reported "no events"
+            # for a request that had succeeded and been charged for, which
+            # looks exactly like the market being unavailable.
+            events = [data]
         for event in events:
             if not isinstance(event, Mapping):
                 continue

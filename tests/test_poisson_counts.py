@@ -720,3 +720,97 @@ class TestTheDiscoveryScriptResolvesEveryNameItCalls:
         missing = [name for name in called if not hasattr(module, name)]
 
         assert not missing, f"called but not imported: {missing}"
+
+
+class TestHistoricalProbeResponseShapes:
+    """A slate returns a list; one event returns an object.
+
+    Reading only the list shape reported "no events, no markets" for a request
+    that had succeeded and been charged for — indistinguishable from the market
+    being unavailable, which is the question the probe exists to answer.
+    """
+
+    def _probe(self, payload, **kwargs):
+        from epl_betting_lab.reports.provider_market_discovery import (
+            probe_historical_odds,
+        )
+
+        class _Response:
+            status_code = 200
+            headers = {"x-requests-last": "10", "x-requests-remaining": "100"}
+
+            def json(self):
+                return payload
+
+        return probe_historical_odds(
+            api_key="k",
+            when="2025-08-16T12:00:00Z",
+            requester=lambda *a, **k: _Response(),
+            **kwargs,
+        )
+
+    def _event(self, market="btts"):
+        return {
+            "id": "e1",
+            "home_team": "Aston Villa",
+            "away_team": "Newcastle",
+            "bookmakers": [{"title": "FanDuel", "markets": [{"key": market}]}],
+        }
+
+    def test_a_slate_snapshot_is_read(self) -> None:
+        out = self._probe({"data": [self._event("h2h"), self._event("h2h")]})
+
+        assert out["event_count"] == 2
+        assert out["markets_seen"] == ["h2h"]
+
+    def test_a_single_event_snapshot_is_read(self) -> None:
+        out = self._probe({"data": self._event("btts")}, event_id="e1")
+
+        assert out["event_count"] == 1
+        assert out["markets_seen"] == ["btts"]
+
+    def test_the_per_event_endpoint_is_addressed_by_id(self) -> None:
+        from epl_betting_lab.reports.provider_market_discovery import (
+            probe_historical_odds,
+        )
+
+        seen = {}
+
+        class _Response:
+            status_code = 200
+            headers = {}
+
+            def json(self):
+                return {"data": {}}
+
+        def _request(url, params=None, timeout=None):
+            seen["url"] = url
+            return _Response()
+
+        probe_historical_odds(
+            api_key="k", when="x", requester=_request, event_id="abc123"
+        )
+
+        assert "/events/abc123/odds" in seen["url"]
+
+    def test_without_an_id_the_slate_endpoint_is_used(self) -> None:
+        from epl_betting_lab.reports.provider_market_discovery import (
+            probe_historical_odds,
+        )
+
+        seen = {}
+
+        class _Response:
+            status_code = 200
+            headers = {}
+
+            def json(self):
+                return {"data": []}
+
+        def _request(url, params=None, timeout=None):
+            seen["url"] = url
+            return _Response()
+
+        probe_historical_odds(api_key="k", when="x", requester=_request)
+
+        assert "/events/" not in seen["url"]

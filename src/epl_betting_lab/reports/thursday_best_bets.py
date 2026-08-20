@@ -205,6 +205,12 @@ def _ranking_components(row: pd.Series, market_reliability: dict[str, float]) ->
     return round(max(0.0, min(100.0, score)), 1), reasons
 
 
+#: Leans are shown and not staked. The card already separates zero-unit rows
+#: under "Ranked but not stakeable", so this needs no new presentation — a lean
+#: simply stops arriving with a stake attached to it.
+LEAN_TIER = "Lean (no stake)"
+
+
 def _confidence_tier(row: pd.Series) -> str:
     section = row.get("section")
     status = str(row.get("status", "")).upper()
@@ -216,7 +222,17 @@ def _confidence_tier(row: pd.Series) -> str:
     if section == "Passes / notable avoids" or "PASS" in status or edge <= 0:
         return "Pass/Avoid"
     if status == "LEAN":
-        return "C"
+        # A lean is information, not a bet. It fires at a 1.5% modelled edge,
+        # which is smaller than this model's own demonstrated error — the
+        # calibration work found it off by four to fifteen points depending on
+        # the band — and smaller than a typical book margin of four to six per
+        # cent. A threshold below the noise floor cannot be selecting for skill.
+        #
+        # Measured: 1X2 leans returned -18.6% over 65 bets, positive in one
+        # season of four; BTTS leans -1.0% over 85. Combined, 150 bets at -8.6%.
+        # Not significant on its own, and pointing the same way as the reason
+        # to expect it.
+        return LEAN_TIER
     if score >= 72:
         tier = "A"
     elif score >= 55:
@@ -231,7 +247,13 @@ def _confidence_tier(row: pd.Series) -> str:
 
 
 def _suggested_units(tier: str) -> float:
-    return {"A": 0.5, "B": 0.25, "C": 0.1, "Pass/Avoid": 0.0}.get(tier, 0.0)
+    return {
+        "A": 0.5,
+        "B": 0.25,
+        "C": 0.1,
+        LEAN_TIER: 0.0,
+        "Pass/Avoid": 0.0,
+    }.get(tier, 0.0)
 
 
 def _section(status: object) -> str:

@@ -751,3 +751,38 @@ def test_a_refused_bundle_is_not_reported_as_a_failed_fetch() -> None:
 
     assert "explain_provider_failure.py" in text
     assert ">> run_degraded.txt" in text
+
+
+def test_the_prompts_judge_health_from_labelled_messages_only() -> None:
+    """GitHub's failure mail carries no trigger label and no error text.
+
+    Every failure this project has recorded was a manual dispatch, and two
+    health checks in a row concluded the pipeline was broken by counting them.
+    """
+    text = (PROJECT_ROOT / "docs" / "epl_scheduled_tasks_bridge.md").read_text(
+        encoding="utf-8"
+    )
+    flat = " ".join(text.split())
+
+    assert "Judge schedule health ONLY from issue #162 messages" in flat
+    assert "counting them is not evidence" in flat or "not evidence" in flat
+
+
+def test_the_prompts_say_what_only_manual_failures_mean() -> None:
+    text = (PROJECT_ROOT / "docs" / "epl_scheduled_tasks_bridge.md").read_text(
+        encoding="utf-8"
+    )
+    flat = " ".join(text.split())
+
+    assert "Only manual failures" in flat
+    assert "do not describe the pipeline as broken" in flat
+
+
+def test_the_prompts_prefer_saying_they_cannot_tell() -> None:
+    """Better than assuming a failure was scheduled."""
+    text = (PROJECT_ROOT / "docs" / "epl_scheduled_tasks_bridge.md").read_text(
+        encoding="utf-8"
+    )
+    flat = " ".join(text.split())
+
+    assert "say you cannot tell rather than assuming" in flat

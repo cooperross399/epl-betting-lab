@@ -180,8 +180,16 @@ previous day and reported it as the current state, missing a card issued that
 morning. Ask for newest by date, and say which timestamp you read, so a stale
 answer is visible as one.
 
-**A manual run says so.** Its heading ends "— manual run". Testing this system
-produces failure mail that is otherwise indistinguishable from the real thing.
+**A manual run says so — but only in the issue message.** Its heading ends
+"— manual run". GitHub's own "Run failed" notifications carry no such label and
+no error text either, so they cannot tell you whether the schedule is healthy.
+Judge that from the issue #162 messages, which are labelled, and treat raw
+Actions failure mail as a pointer to look rather than as evidence.
+
+This matters more than it sounds. Every failure this project has recorded was a
+manual dispatch; the only scheduled run so far succeeded. Two health checks in a
+row concluded the pipeline was broken by counting failure notifications that
+were all someone testing.
 
 ---
 
@@ -251,9 +259,17 @@ is not date order and will hand you an old message. Also look for GitHub
 Actions failure notifications for the "Matchday Refresh" workflow in the last
 seven days.
 
-State the timestamp of the newest message you found. Ignore any whose heading
-ends "— manual run" when judging whether the schedule is healthy: those were
-started by hand.
+State the timestamp of the newest message you found.
+
+Judge schedule health ONLY from issue #162 messages, and ignore any whose
+heading ends "— manual run": those were started by hand and say nothing about
+whether the schedule works. GitHub's own "Run failed" notifications carry no
+trigger label and no error text, so a count of them is not evidence — every
+failure this project has recorded was a manual dispatch, and two health checks
+in a row concluded the pipeline was broken by counting them.
+
+If you cannot tell whether a failure came from the schedule, say you cannot
+tell rather than assuming it did.
 
 Tell me, in plain English:
 
@@ -299,11 +315,23 @@ Search Gmail in cooperross399/epl-betting-lab for, in the last seven days:
 2. any notification for issue #162 whose first line says "Something went wrong"
 3. the most recent notification for issue #162 of any kind
 
+Judge schedule health ONLY from issue #162 messages, ignoring any whose heading
+ends "— manual run". GitHub's "Run failed" notifications carry no trigger label
+and no error text, so counting them is not evidence: every failure this project
+has recorded was a manual dispatch, and two health checks in a row concluded the
+pipeline was broken by counting them.
+
 Then say which of these is true:
-- No failures, and a message within the last four days: the schedule is running.
+- A message within the last four days and no non-manual failures: the schedule
+  is running.
 - No messages at all for more than four days: a run was probably missed. Tell me
   to check Actions → Matchday Refresh, and say the workflow may need enabling.
-- Failures present: tell me which run, when, and what the error line says.
+- A non-manual failure: tell me which run, when, and what the error line says.
+- Only manual failures: say the schedule looks healthy and that someone was
+  testing, and do not describe the pipeline as broken.
+
+If you cannot tell whether a failure came from the schedule, say you cannot tell
+rather than assuming it did.
 
 Rules:
 - Settlement is preview-only in this project and has no write path. Never apply

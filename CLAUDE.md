@@ -53,6 +53,16 @@ Use the repo, the reports, and GitHub.
     this *in the market we looked at*". Check coverage per bookmaker with
     `Provider Market Discovery` → `line_coverage` before concluding a market is
     unreachable.
+- **Calibration is a precondition, not a goal.** It can rule a model out; it
+  cannot rule one in. Never ship a model change on calibration evidence alone
+  where a price-based backtest is available — Football-Data ships historical
+  odds for 1X2 and the 2.5 line, so for those it always is. A change that
+  improved calibration on every market cost about 140 units in the backtest:
+  `docs/why_better_calibration_lost_money.md`.
+- BTTS has a known, measured, **unfixed** calibration bias of roughly nine
+  points, and cannot be profit-backtested because no historical BTTS prices
+  exist. It produces most of the picks on a card. Say so rather than patching
+  it.
 - The active odds source is the **provider-derived automated card input**.
   Manual odds entry is not required.
 - `data/manual/current_odds.csv` is **legacy** and must not become active again.

@@ -113,14 +113,64 @@ class TestHarvest:
 
         assert result.rows[0]["btts_yes_american"] == 165
 
-    def test_it_records_when_it_sampled(self) -> None:
-        """A price without a timestamp cannot be compared to anything."""
+    def test_it_samples_before_that_fixture_own_kick_off(self) -> None:
+        """Not at a fixed hour of the day.
+
+        Sampling every matchday at one time bought some fixtures twice, missed
+        the lead on others, and once returned a price stamped after kick-off —
+        an in-play number that would have read as a very good bet.
+        """
         result = harvest_btts_history(
             DAY, api_key="k", budget=HarvestBudget(limit=1000),
             requester=_requester([_event()], _btts_payload()), hours_before=3,
         )
 
-        assert result.rows[0]["sampled_at"] == "2025-08-16T12:00:00Z"
+        # Kick-off 14:00, so three hours before is 11:00.
+        assert result.rows[0]["sampled_at"] == "2025-08-16T11:00:00Z"
+
+    def test_the_sample_is_always_before_kick_off(self) -> None:
+        result = harvest_btts_history(
+            DAY, api_key="k", budget=HarvestBudget(limit=1000),
+            requester=_requester([_event()], _btts_payload()), hours_before=3,
+        )
+        row = result.rows[0]
+
+        assert row["sampled_at"] < row["commence_time"]
+
+    def test_a_fixture_seen_on_two_days_is_bought_once(self) -> None:
+        """Slate snapshots return everything upcoming, so they overlap."""
+        two_days = [
+            datetime(2025, 8, 16, 15, 0, tzinfo=timezone.utc),
+            datetime(2025, 8, 17, 15, 0, tzinfo=timezone.utc),
+        ]
+        result = harvest_btts_history(
+            two_days, api_key="k", budget=HarvestBudget(limit=1000),
+            requester=_requester([_event()], _btts_payload()),
+        )
+
+        assert len(result.rows) == 1
+
+    def test_a_fixture_already_bought_is_not_bought_again(self) -> None:
+        """Credits already spent must not be spent twice."""
+        result = harvest_btts_history(
+            DAY, api_key="k", budget=HarvestBudget(limit=1000),
+            requester=_requester([_event()], _btts_payload()),
+            already_harvested=["2025-08-16|arsenal|chelsea"],
+        )
+
+        assert result.rows == []
+        assert result.already_had == 1
+
+    def test_an_unreadable_kick_off_is_reported_not_guessed(self) -> None:
+        broken = dict(_event())
+        broken["commence_time"] = "not a time"
+        result = harvest_btts_history(
+            DAY, api_key="k", budget=HarvestBudget(limit=1000),
+            requester=_requester([broken], _btts_payload()),
+        )
+
+        assert result.rows == []
+        assert any("kick-off" in e for e in result.errors)
 
     def test_a_day_with_no_fixtures_costs_one_snapshot(self) -> None:
         result = harvest_btts_history(

@@ -71,21 +71,35 @@ def main() -> int:
         print(f"BLOCKED: `{API_KEY_ENV}` is not configured.")
         return 2
 
+    # What has already been bought, so no credit is spent twice.
+    output_path = Path(PROCESSED_DIR) / args.output
+    already: list[str] = []
+    if args.append and output_path.is_file():
+        with output_path.open(encoding="utf-8", newline="") as handle:
+            for row in csv.DictReader(handle):
+                day = str(row.get("commence_time", ""))[:10]
+                home = str(row.get("home_team", "")).strip().casefold()
+                away = str(row.get("away_team", "")).strip().casefold()
+                already.append(f"{day}|{home}|{away}")
+
     days = matchdays_between(_day(args.start), _day(args.end))
     print(f"EPL Betting Lab - Historical BTTS harvest")
     print(f"Range: {args.start} to {args.end} ({len(days)} day(s))")
     print(f"Credit ceiling: {args.credit_limit}")
-    print(f"Sampling {args.hours_before}h before kick-off.")
+    print(f"Sampling {args.hours_before}h before each fixture's own kick-off.")
+    if already:
+        print(f"Already hold {len(already)} fixture(s); they will not be re-bought.")
 
     result = harvest_btts_history(
         days,
         api_key=api_key,
         budget=HarvestBudget(limit=args.credit_limit),
         hours_before=args.hours_before,
+        already_harvested=already,
     )
 
     PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
-    path = Path(PROCESSED_DIR) / args.output
+    path = output_path
     exists = path.is_file()
     mode = "a" if (args.append and exists) else "w"
     with path.open(mode, newline="", encoding="utf-8") as handle:
@@ -96,7 +110,8 @@ def main() -> int:
             writer.writerow(row)
 
     print(f"Snapshots: {result.snapshots}")
-    print(f"Events seen: {result.events_seen}; with BTTS: {result.events_with_btts}")
+    print(f"Fixtures seen: {result.events_seen}; priced: {result.events_with_btts}; "
+          f"already had: {result.already_had}")
     print(f"Rows written: {len(result.rows)} -> {path}")
     print(f"Credits spent: {result.credits_spent}")
     if result.stopped_early:

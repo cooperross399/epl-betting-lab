@@ -13,9 +13,16 @@ prices (10 credits each). About 110 credits a matchday, 4,180 a season.
 Two decisions worth stating, because they bound what the resulting measurement
 can claim:
 
-**Prices are sampled at a fixed hour before kick-off, not at the close.** A
-card is built at a set time and bet at that time, so a fixed lead is the honest
-comparison. It is not the best price available and does not pretend to be.
+**Prices are sampled a fixed number of hours before each fixture's own
+kick-off, not at a fixed hour of the day.** The first version sampled every
+matchday at one time and asked for whatever was upcoming, which bought some
+fixtures twice, missed the lead entirely on others, and once returned a price
+timestamped after kick-off — an in-play number that would have looked like a
+very good bet. Anchoring to each fixture's kick-off fixes all three and costs
+less, because each fixture is bought exactly once.
+
+A card is built at a set time and bet at that time, so a fixed lead is the
+honest comparison. It is not the closing line and does not pretend to be.
 
 **Only the best price across books is kept, per selection.** That matches how
 the card is built — it quotes the best of the books it can reach — so the
@@ -65,6 +72,7 @@ class HarvestResult:
     snapshots: int = 0
     events_seen: int = 0
     events_with_btts: int = 0
+    already_had: int = 0
     stopped_early: bool = False
     errors: list[str] = field(default_factory=list)
 
@@ -169,12 +177,33 @@ def _event_btts(
     return best
 
 
+def _parse_time(value: object) -> datetime | None:
+    text = str(value or "").strip().replace("Z", "+00:00")
+    if not text:
+        return None
+    try:
+        parsed = datetime.fromisoformat(text)
+    except ValueError:
+        return None
+    return parsed if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
+
+
+def _fixture_key(event: Mapping[str, Any]) -> str:
+    """Identity of a fixture, so it is never bought twice."""
+    kickoff = _parse_time(event.get("commence_time"))
+    day = kickoff.strftime("%Y-%m-%d") if kickoff else ""
+    home = str(event.get("home_team", "")).strip().casefold()
+    away = str(event.get("away_team", "")).strip().casefold()
+    return f"{day}|{home}|{away}"
+
+
 def harvest_btts_history(
     matchdays: Sequence[datetime],
     *,
     api_key: str,
     budget: HarvestBudget,
     hours_before: int = 3,
+    already_harvested: Sequence[str] = (),
     requester: Requester | None = None,
     base_url: str = DEFAULT_API_BASE_URL,
     sport_key: str = "soccer_epl",
@@ -185,14 +214,17 @@ def harvest_btts_history(
     root = _validate_base_url(base_url)
     result = HarvestResult()
 
+    # Learn each fixture's kick-off first, then price it at its own lead. One
+    # paid request per fixture, at the right moment, with no duplicates.
+    seen: set[str] = set(already_harvested or ())
+    fixtures: dict[str, Mapping[str, Any]] = {}
     for matchday in matchdays:
-        when = matchday - timedelta(hours=hours_before)
         if not budget.can_afford():
             result.stopped_early = True
             break
         events = _slate_snapshot(
             api_key=api_key,
-            when=when,
+            when=matchday,
             request=request,
             root=root,
             sport_key=sport_key,
@@ -200,40 +232,50 @@ def harvest_btts_history(
         )
         budget.charge()
         result.snapshots += 1
-        result.events_seen += len(events)
-
         for event in events:
             event_id = str(event.get("id", "")).strip()
-            if not event_id:
-                continue
-            if not budget.can_afford():
-                result.stopped_early = True
-                break
-            prices = _event_btts(
-                api_key=api_key,
-                event_id=event_id,
-                when=when,
-                request=request,
-                root=root,
-                sport_key=sport_key,
-                timeout_seconds=timeout_seconds,
-            )
-            budget.charge()
-            if not prices:
-                continue
-            result.events_with_btts += 1
-            result.rows.append(
-                {
-                    "sampled_at": when.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                    "commence_time": str(event.get("commence_time", "")),
-                    "home_team": str(event.get("home_team", "")),
-                    "away_team": str(event.get("away_team", "")),
-                    "btts_yes_american": prices.get("yes"),
-                    "btts_no_american": prices.get("no"),
-                }
-            )
-        if result.stopped_early:
+            if event_id and event_id not in fixtures:
+                fixtures[event_id] = event
+
+    result.events_seen = len(fixtures)
+
+    for event_id, event in fixtures.items():
+        key = _fixture_key(event)
+        if key in seen:
+            result.already_had += 1
+            continue
+        kickoff = _parse_time(event.get("commence_time"))
+        if kickoff is None:
+            result.errors.append(f"Event {event_id}: unreadable kick-off time.")
+            continue
+        when = kickoff - timedelta(hours=hours_before)
+        if not budget.can_afford():
+            result.stopped_early = True
             break
+        prices = _event_btts(
+            api_key=api_key,
+            event_id=event_id,
+            when=when,
+            request=request,
+            root=root,
+            sport_key=sport_key,
+            timeout_seconds=timeout_seconds,
+        )
+        budget.charge()
+        if not prices:
+            continue
+        result.events_with_btts += 1
+        seen.add(key)
+        result.rows.append(
+            {
+                "sampled_at": when.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "commence_time": kickoff.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "home_team": str(event.get("home_team", "")),
+                "away_team": str(event.get("away_team", "")),
+                "btts_yes_american": prices.get("yes"),
+                "btts_no_american": prices.get("no"),
+            }
+        )
 
     result.credits_spent = budget.spent
     return result

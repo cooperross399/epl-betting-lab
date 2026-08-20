@@ -625,3 +625,51 @@ class TestTheEmailCarriesQuota:
         ).read_text(encoding="utf-8")
 
         assert "from epl_betting_lab.reports.run_summary import _quota_line" in source
+
+
+class TestEveryRunSaysHowItStarted:
+    """Labelling only manual runs left the other kind ambiguous.
+
+    A health check reading an older message could not tell whether "no label"
+    meant scheduled or meant the message predated labelling, and correctly said
+    so rather than guessing. Labelling both makes an unlabelled message mean
+    exactly one thing: it is old.
+    """
+
+    def _heading(self, tmp_path: Path, trigger: str) -> str:
+        from epl_betting_lab.reports.card_notification import build_notification
+
+        _write(tmp_path, ready=True, comparison=_comparison(added=[{"label": "x"}]))
+        return build_notification(
+            output_dir=tmp_path, now=NOW, trigger=trigger
+        )["body"].splitlines()[0]
+
+    def test_a_scheduled_run_says_so(self, tmp_path: Path) -> None:
+        assert "scheduled run" in self._heading(tmp_path, "schedule")
+
+    def test_a_manual_run_says_so(self, tmp_path: Path) -> None:
+        assert "manual run" in self._heading(tmp_path, "workflow_dispatch")
+
+    def test_the_two_labels_are_distinguishable(self, tmp_path: Path) -> None:
+        """"scheduled run" contains neither word of "manual run"."""
+        scheduled = self._heading(tmp_path, "schedule")
+
+        assert "manual" not in scheduled
+
+    def test_an_unknown_trigger_carries_no_label(self, tmp_path: Path) -> None:
+        """So an unlabelled message means one thing: it predates labelling."""
+        heading = self._heading(tmp_path, "")
+
+        assert "run" not in heading.split("UTC")[-1]
+
+    def test_only_the_manual_caveat_appears_for_manual_runs(
+        self, tmp_path: Path
+    ) -> None:
+        from epl_betting_lab.reports.card_notification import build_notification
+
+        _write(tmp_path, ready=True, comparison=_comparison(added=[{"label": "x"}]))
+        scheduled = build_notification(
+            output_dir=tmp_path, now=NOW, trigger="schedule"
+        )["body"]
+
+        assert "started by hand" not in scheduled

@@ -180,8 +180,9 @@ previous day and reported it as the current state, missing a card issued that
 morning. Ask for newest by date, and say which timestamp you read, so a stale
 answer is visible as one.
 
-**A manual run says so — but only in the issue message.** Its heading ends
-"— manual run". GitHub's own "Run failed" notifications carry no such label and
+**Every run says how it started — but only in the issue message.** Its heading
+ends "— scheduled run" or "— manual run". A message with neither predates
+labelling and is old, which is itself worth knowing. GitHub's own "Run failed" notifications carry no such label and
 no error text either, so they cannot tell you whether the schedule is healthy.
 Judge that from the issue #162 messages, which are labelled, and treat raw
 Actions failure mail as a pointer to look rather than as evidence.

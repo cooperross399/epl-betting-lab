@@ -188,14 +188,21 @@ def build_notification(
         generated.get("card_generated", False)
     )
 
-    # A manual dispatch and a scheduled run read identically once they are in
-    # an inbox, and a reader working out which is which from timestamps is a
-    # reader who will eventually guess wrong. Testing this system produced a
-    # run of failure mails that looked exactly like real ones.
+    # Every run says how it was started, not only the manual ones.
+    #
+    # Labelling manual runs alone left the other kind unlabelled, which is
+    # ambiguous rather than informative: a health check reading an older
+    # message could not tell whether "no label" meant scheduled or meant the
+    # message predated labelling, and had to say so. Labelling both makes an
+    # unlabelled message mean exactly one thing — that it is old.
     manual = trigger == "workflow_dispatch"
+    label = {
+        "workflow_dispatch": "manual run",
+        "schedule": "scheduled run",
+    }.get(trigger, "")
     heading = f"## {stamp.strftime('%A %d %B, %H:%M UTC')}"
-    if manual:
-        heading += " — manual run"
+    if label:
+        heading += f" — {label}"
     lines = [
         heading,
         "",

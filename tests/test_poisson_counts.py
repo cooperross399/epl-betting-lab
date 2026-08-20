@@ -656,3 +656,33 @@ class TestThreeWayCornersAreCalibrated:
         )
 
         assert all(row.judged for row in summary)
+
+
+class TestEveryLiveProbeRunsWithoutAnArchive:
+    """The archive guard has blocked two probes in turn.
+
+    Each live probe fetches for itself, so none of them needs an archived bulk
+    response. The guard was widened once for event discovery and then blocked
+    the historical probe the same way, which is what a list of special cases
+    does. It now asks whether anything is going to read the archive at all.
+    """
+
+    def _source(self) -> str:
+        from epl_betting_lab.config import PROJECT_ROOT
+
+        return (
+            PROJECT_ROOT / "scripts" / "run_provider_market_discovery.py"
+        ).read_text(encoding="utf-8")
+
+    def test_the_guard_asks_one_question(self) -> None:
+        source = self._source()
+
+        assert "live_probe = bool(" in source
+        assert "if raw_path is None and not live_probe:" in source
+
+    def test_every_probe_flag_is_counted(self) -> None:
+        source = self._source()
+        guard = source.split("live_probe = bool(", 1)[1].split(")", 1)[0]
+
+        for flag in ("probe_totals_regions", "check_event_markets", "historical_probe"):
+            assert flag in guard, flag

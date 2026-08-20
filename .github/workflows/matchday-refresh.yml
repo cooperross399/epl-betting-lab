@@ -131,6 +131,25 @@ jobs:
           find data/outputs/archive/automated_cards -name '*.json' 2>/dev/null \
             | wc -l | xargs echo "Archived card runs restored:"
 
+      - name: Check the schedule has not gone quiet
+        # A schedule that never fires produces no run, no summary, no email and
+        # no red tick — indistinguishable from a week in which nothing changed,
+        # which is the one failure the delivery design cannot otherwise see.
+        # Measuring the gap behind this run catches a missed one; it cannot
+        # catch a total absence, which is what the weekly watchdog is for.
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PYTHONPATH: src
+        run: |
+          set -u
+          : > run_degraded.txt
+          previous=$(gh run list --workflow matchday-refresh.yml \
+            --status success --limit 5 --json createdAt \
+            --jq '.[].createdAt' | tr '\n' ' ')
+          python scripts/check_schedule_health.py $previous \
+            --append-to run_degraded.txt
+
       - name: Check the provider credential
         # Fails fast and legibly if the key was rotated without updating the
         # secret, rather than surfacing as a confusing provider error later.
@@ -179,7 +198,8 @@ jobs:
         if: always()
         run: |
           set -u
-          : > run_degraded.txt
+          # Created by the schedule-health step; appended to, never cleared.
+          touch run_degraded.txt
           if [ ! -f data/processed/epl_historical_matches.csv ]; then
             echo "No match dataset: the model cannot be fitted, so no card can be built. Football-Data could not be reached and no previous copy was restored." >> run_degraded.txt
           elif [ "${{ steps.results.outcome }}" = "failure" ]; then

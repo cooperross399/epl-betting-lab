@@ -401,15 +401,32 @@ class TestDuplicateRowsAreTreatedByMarket:
         assert "The first price was kept and the repeats ignored" in source
         assert "no price was guessed" in source
 
-    def test_no_core_market_is_in_the_derived_set(self) -> None:
-        """Otherwise a core repeat would take the tolerant path."""
+    def test_a_repeat_from_the_same_provider_market_still_raises(self) -> None:
+        """The tolerant path is chosen by source, not by market name.
+
+        A core market can legitimately have two provider sources — the 2.5
+        goals line arrives from the bulk `totals` response and again from
+        `alternate_totals`. That overlap is expected. A repeat from the *same*
+        provider market is not, and remains evidence the response is malformed.
+        """
+        source = self._source()
+
+        assert "if odds_sources.get(odds_key) != market_key:" in source
+        assert "raise MalformedProviderResponseError(" in source
+
+    def test_the_first_source_of_a_row_is_remembered(self) -> None:
+        source = self._source()
+
+        assert "odds_sources[odds_key] = market_key" in source
+
+    def test_a_core_market_may_now_have_two_sources(self) -> None:
         from epl_betting_lab.providers.odds_api_staging_provider import (
             CORE_MARKETS,
             DERIVED_PROVIDER_MARKETS,
         )
 
         derived = {t for targets in DERIVED_PROVIDER_MARKETS.values() for t in targets}
-        assert not (derived & CORE_MARKETS)
+        assert "total_2_5" in derived & CORE_MARKETS
 
 
 class TestOneMarketRegistry:

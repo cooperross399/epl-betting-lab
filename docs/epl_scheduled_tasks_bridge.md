@@ -210,9 +210,9 @@ Tell me, in plain English:
 
 Rules:
 - Provider is allowlisted for 1x2 and btts only.
-- total_2_5 is excluded and that question is settled: the complete 2.5 line
-  exists only at books Cooper has no account with. Do not re-investigate it and
-  do not propose adding it.
+- total_2_5 was excluded on 2026-08-17 and reopened on 2026-08-19: the old
+  finding held only for the bulk `totals` market, and BetRivers and FanDuel
+  both carry 2.5 via `alternate_totals`. It awaits policy approval.
 - Generate no picks here. Place no bets. Apply no settlement.
 - Never tell me to open a Terminal or to ask ChatGPT.
 

@@ -43,10 +43,16 @@ Use the repo, the reports, and GitHub.
 ## Current operating state
 
 - Provider **The Odds API is allowlisted**, scoped to `1x2` and `btts` only.
-- `total_2_5` is **excluded**, settled 2026-08-17: the complete 2.5 line exists
-  only at William Hill, Betsson, and Nordic Bet, and Cooper holds no account at
-  any of them. Availability, not profitability. Do not re-investigate; see
-  `docs/claude_autonomy_operating_model.md`.
+- `total_2_5` was excluded on 2026-08-17 and **reopened on 2026-08-19**. The
+  original finding — that the complete 2.5 line existed only at William Hill,
+  Betsson and Nordic Bet — was true of the bulk `totals` market, the only one
+  examined. It was never true of `alternate_totals`, where BetRivers and
+  FanDuel each carry 2.5 on every fixture. The market is sourced from there now
+  and awaits policy approval like any other.
+  - The lesson worth keeping: "no book offers this" was really "no book offers
+    this *in the market we looked at*". Check coverage per bookmaker with
+    `Provider Market Discovery` → `line_coverage` before concluding a market is
+    unreachable.
 - The active odds source is the **provider-derived automated card input**.
   Manual odds entry is not required.
 - `data/manual/current_odds.csv` is **legacy** and must not become active again.

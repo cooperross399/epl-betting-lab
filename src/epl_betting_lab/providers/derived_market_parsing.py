@@ -163,8 +163,10 @@ def selection_for(
         return team_selection(
             name, home_team, away_team, provider_home_team, provider_away_team
         )
-    if market.startswith("corners_total_"):
-        line = float(market.rsplit("_", 2)[-2] + "." + market.rsplit("_", 1)[-1])
+    if market.startswith("corners_total_") or market == "total_2_5":
+        line = 2.5 if market == "total_2_5" else float(
+            market.rsplit("_", 2)[-2] + "." + market.rsplit("_", 1)[-1]
+        )
         if not matches_line(outcome, line):
             return None
         return total_selection(name)

@@ -1,0 +1,114 @@
+name: Harvest Historical BTTS
+
+# Manual only, and it spends real provider credits: ten per event.
+#
+# BTTS produces most of the picks on a card and has never been backtested for
+# profit, because Football-Data ships no BTTS odds at all. The provider sells
+# them through the per-event historical endpoint, one event at a time. This buys
+# them so the market can be measured rather than assumed.
+#
+# The credit ceiling is required, not defaulted. A harvest that silently spent
+# a season's budget would be a worse outcome than one that stops short.
+on:
+  workflow_dispatch:
+    inputs:
+      start:
+        description: "First day to sample, YYYY-MM-DD"
+        required: true
+      end:
+        description: "Last day to sample, YYYY-MM-DD"
+        required: true
+      credit_limit:
+        description: "Hard ceiling on credits spent. ~110 buys one matchday."
+        required: true
+        default: "500"
+      hours_before:
+        description: "Sample this many hours before kick-off"
+        required: false
+        default: "3"
+      append:
+        description: "Add to the existing file rather than replacing it"
+        type: boolean
+        required: false
+        default: true
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  # Two harvests at once would double-spend and interleave their rows.
+  group: harvest-historical-btts
+  cancel-in-progress: false
+
+jobs:
+  harvest:
+    name: Harvest Historical BTTS
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install project
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install -e .
+
+      - name: Restore what has already been bought
+        # Credits already spent must not be spent again. Each run appends to
+        # the previous run's file, so a season can be bought in pieces.
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -u
+          previous=$(gh run list --workflow harvest-historical-btts.yml \
+            --status success --limit 1 --json databaseId \
+            --jq '.[0].databaseId // empty')
+          if [ -z "$previous" ]; then
+            echo "No previous harvest. Starting a new file."
+            exit 0
+          fi
+          mkdir -p data/processed
+          gh run download "$previous" --name historical-btts --dir data/processed \
+            || echo "No prior file on run $previous."
+          wc -l data/processed/historical_btts_odds.csv 2>/dev/null || true
+
+      - name: Harvest
+        env:
+          EPL_ODDS_API_KEY: ${{ secrets.EPL_ODDS_API_KEY }}
+          PYTHONPATH: src
+        run: |
+          python scripts/harvest_historical_btts.py \
+            --start "${{ inputs.start }}" \
+            --end "${{ inputs.end }}" \
+            --credit-limit "${{ inputs.credit_limit }}" \
+            --hours-before "${{ inputs.hours_before }}" \
+            ${{ inputs.append == true && '--append' || '' }}
+
+      - name: Upload the prices
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: historical-btts
+          path: data/processed/historical_btts_odds.csv
+          if-no-files-found: warn
+          retention-days: 90
+
+      - name: Scope reminder
+        if: always()
+        run: |
+          echo "This job bought historical prices and wrote a CSV."
+          echo "It placed no bet, changed no policy, and produced no card."

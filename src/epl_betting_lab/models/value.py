@@ -1,4 +1,8 @@
 from __future__ import annotations
+from epl_betting_lab.config import MAX_DEFAULT_PRICE
+
+#: Sentinel: "use the configured cap", as distinct from `None` = "no cap".
+_FROM_CONFIG = object()
 
 
 def american_to_decimal(odds: float) -> float:
@@ -38,14 +42,27 @@ def expected_value_per_unit(model_prob: float, american_odds: float) -> float:
     return model_prob * profit_if_win - (1 - model_prob)
 
 
-def grade_edge(model_prob: float, american_odds: float, min_edge: float = 0.035, max_default_juice: int = -160) -> dict:
+def grade_edge(
+    model_prob: float,
+    american_odds: float,
+    min_edge: float = 0.035,
+    max_default_juice: int = -160,
+    max_default_price: int | None = _FROM_CONFIG,
+) -> dict:
     implied = american_to_implied(american_odds)
     edge = model_prob - implied
     ev = expected_value_per_unit(model_prob, american_odds)
     too_juiced = american_odds < max_default_juice
+    # `None` means no cap; omitting the argument means use the configured one.
+    # Those are different requests and a single default cannot express both.
+    cap = MAX_DEFAULT_PRICE if max_default_price is _FROM_CONFIG else max_default_price
+    too_long = cap is not None and american_odds > cap
 
     if too_juiced:
         status = "PASS - too much juice"
+    elif too_long:
+        # The model is not trusted this far out. See MAX_DEFAULT_PRICE.
+        status = "PASS - price too long"
     elif edge >= min_edge and ev > 0:
         status = "BETTABLE"
     elif edge >= 0.015 and ev > 0:

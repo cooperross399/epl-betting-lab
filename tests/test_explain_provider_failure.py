@@ -104,4 +104,82 @@ class TestTheWorkflowUsesIt:
             PROJECT_ROOT / ".github" / "workflows" / "matchday-refresh.yml"
         ).read_text(encoding="utf-8")
 
-        assert "explain_provider_failure.py >> run_degraded.txt" in text
+        assert "explain_provider_failure.py" in text
+        assert ">> run_degraded.txt" in text
+
+
+class TestDecliningIsNotFailing:
+    """The Thursday cutoff refuses receipts made after 10:00 New York.
+
+    Scheduled runs are all before it, so only a run started by hand outside the
+    window meets it — and that is the policy doing its job. Reported as a
+    failure it produced a week of red runs and alarming mail, and a health
+    check reasonably concluded the pipeline was broken.
+    """
+
+    def test_the_cutoff_refusal_is_expected(self) -> None:
+        module = _module()
+
+        assert module.is_expected(
+            "The provider run was refused: The staging receipt was generated "
+            "after the Thursday automation cutoff of 10:00 America/New_York."
+        )
+
+    def test_a_real_fetch_failure_is_not_expected(self) -> None:
+        assert not _module().is_expected(_module().FALLBACK)
+
+    def test_another_refusal_is_not_expected(self) -> None:
+        """A provider that is not allowlisted is a real problem."""
+        assert not _module().is_expected(
+            "The provider run was refused: Provider is not allowlisted."
+        )
+
+    def test_a_validation_refusal_is_not_expected(self) -> None:
+        assert not _module().is_expected(
+            "The provider run was refused: Not handoff eligible."
+        )
+
+    def test_the_exit_code_marks_an_expected_refusal(self, tmp_path: Path) -> None:
+        import subprocess
+        import sys
+
+        _write(tmp_path, "provider_shadow_verification.json", {
+            "blockers": ["The staging receipt was generated after the Thursday "
+                         "automation cutoff of 10:00 America/New_York."]})
+        result = subprocess.run(
+            [sys.executable, str(PROJECT_ROOT / "scripts" / "explain_provider_failure.py"),
+             "--output-dir", str(tmp_path), "--expected-exit", "3"],
+            capture_output=True, text=True,
+        )
+
+        assert result.returncode == 3
+        assert "Thursday automation cutoff" in result.stdout
+
+    def test_a_real_failure_exits_zero(self, tmp_path: Path) -> None:
+        """Zero here means "not an expected refusal", not "everything is fine"."""
+        import subprocess
+        import sys
+
+        result = subprocess.run(
+            [sys.executable, str(PROJECT_ROOT / "scripts" / "explain_provider_failure.py"),
+             "--output-dir", str(tmp_path), "--expected-exit", "3"],
+            capture_output=True, text=True,
+        )
+
+        assert result.returncode == 0
+
+    def test_the_workflow_finishes_green_on_an_expected_refusal(self) -> None:
+        text = (
+            PROJECT_ROOT / ".github" / "workflows" / "matchday-refresh.yml"
+        ).read_text(encoding="utf-8")
+
+        assert "expected_refusal=true" in text
+        assert "as expected outside the Thursday window" in text
+
+    def test_any_other_degradation_still_goes_red(self) -> None:
+        text = (
+            PROJECT_ROOT / ".github" / "workflows" / "matchday-refresh.yml"
+        ).read_text(encoding="utf-8")
+
+        assert "This run was degraded" in text
+        assert "exit 1" in text

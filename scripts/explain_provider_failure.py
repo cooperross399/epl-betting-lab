@@ -22,6 +22,20 @@ FALLBACK = (
     "prices fetched and may be refused as stale."
 )
 
+#: A refusal that means the policy worked rather than the system broke.
+#:
+#: The Thursday cutoff refuses any receipt made after 10:00 New York on a
+#: Thursday. Scheduled runs are all before it, so only a run started by hand
+#: outside the window meets this — and it is the policy doing its job, not a
+#: fault. Reported as a failure it produced a week of red runs and alarming
+#: mail, and a health check reasonably concluded the pipeline was broken.
+EXPECTED_REFUSALS = ("after the Thursday automation cutoff",)
+
+
+def is_expected(explanation: str) -> bool:
+    """Is this a refusal the system is supposed to make?"""
+    return any(phrase in explanation for phrase in EXPECTED_REFUSALS)
+
 
 def _load(path: Path) -> dict:
     try:
@@ -66,9 +80,17 @@ def explain(outputs: Path) -> str:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-dir", type=Path, default=Path("data/outputs"))
+    parser.add_argument(
+        "--expected-exit",
+        type=int,
+        default=0,
+        help="Exit with this code when the refusal was an expected one, so a "
+        "caller can tell a policy declining from a system breaking.",
+    )
     args = parser.parse_args()
-    print(explain(args.output_dir))
-    return 0
+    explanation = explain(args.output_dir)
+    print(explanation)
+    return args.expected_exit if is_expected(explanation) else 0
 
 
 if __name__ == "__main__":

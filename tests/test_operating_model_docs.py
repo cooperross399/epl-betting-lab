@@ -422,3 +422,32 @@ def test_it_says_when_a_price_backtest_is_available() -> None:
 
     assert "Football-Data ships the odds" in flat
     assert "For BTTS and corners it never is" in flat
+
+
+def test_the_evidence_document_states_the_intervals_not_just_the_rois() -> None:
+    """The point estimates are encouraging and the intervals are not.
+
+    A reader who takes away "+5.3% and +15.0%" has taken away the opposite of
+    what the measurement showed, so the interval has to travel with the number.
+    """
+    text = _read("docs/what_we_can_and_cannot_claim.md")
+    flat = " ".join(text.split())
+
+    assert "−3.4% .. +14.1%" in flat or "-3.4% .. +14.1%" in flat
+    assert "Neither interval excludes zero" in flat
+
+
+def test_it_says_how_long_proving_an_edge_would_take() -> None:
+    text = _read("docs/what_we_can_and_cannot_claim.md")
+    flat = " ".join(text.split())
+
+    assert "1,537" in flat
+    assert "twelve seasons" in flat
+
+
+def test_it_warns_against_changes_that_improve_the_estimate_a_lot() -> None:
+    """That is exactly what the shrinkage change looked like."""
+    text = _read("docs/what_we_can_and_cannot_claim.md")
+
+    assert "why_better_calibration_lost_money.md" in text
+    assert "Prefer changes with a mechanism" in text

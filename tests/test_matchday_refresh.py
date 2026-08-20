@@ -595,3 +595,29 @@ def test_thursday_triggers_precede_the_policy_cutoff() -> None:
         minute, hour = line.split('"')[1].split()[:2]
         at = int(hour) + int(minute) / 60
         assert at < 14.0, f"{hour}:{minute} UTC is past the 10:00 New York cutoff"
+
+
+def test_the_card_routine_prompt_matches_how_leans_are_staked() -> None:
+    """The prompt asked for lean unit sizes after leans stopped carrying one.
+
+    A routine reading a stale prompt would ask the reader to act on a stake
+    that is always zero, which is exactly the confusion the change was meant
+    to end.
+    """
+    text = (PROJECT_ROOT / "docs" / "epl_scheduled_tasks_bridge.md").read_text(
+        encoding="utf-8"
+    )
+    flat = " ".join(text.split())
+
+    assert "leans separately, and say plainly that they carry no stake" in flat
+    assert "information, not bets" in flat
+
+
+def test_the_routine_prompt_carries_the_honest_headline() -> None:
+    """Asked whether it works, a routine should not guess."""
+    text = (PROJECT_ROOT / "docs" / "epl_scheduled_tasks_bridge.md").read_text(
+        encoding="utf-8"
+    )
+    flat = " ".join(text.split())
+
+    assert "No market in this project has a demonstrated edge" in flat

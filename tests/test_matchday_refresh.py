@@ -274,21 +274,21 @@ def test_routine_prompts_do_the_work_rather_than_asking_cooper_to() -> None:
     assert "scripts/" not in prompts
 
 
-def test_routine_prompts_know_the_totals_question_is_settled() -> None:
-    """Otherwise a routine re-investigates it every week."""
+def test_routine_prompts_carry_the_totals_history() -> None:
+    """A routine must not re-run an investigation, nor repeat a stale answer.
+
+    Totals were excluded on evidence that was correct about the market it
+    examined and silent about another. Telling a routine only "settled, do not
+    re-investigate" is what let that stand unchallenged; telling it only the
+    new answer would invite the old investigation again. It gets both.
+    """
     text = (PROJECT_ROOT / "docs" / "epl_scheduled_tasks_bridge.md").read_text(
         encoding="utf-8"
     )
 
-    assert "Do not re-investigate" in text
-
-
-# --- memory across runs ----------------------------------------------------
-#
-# A runner starts empty every time and the card archive is not tracked in git,
-# so without an explicit restore the "since the previous refresh" diff is
-# permanently blank and the Friday card can never say what moved since
-# Thursday. The first CI run proved exactly that.
+    assert "reopened" in text.lower()
+    assert "alternate_totals" in text
+    assert "bulk `totals`" in text
 
 
 def test_the_previous_state_is_restored() -> None:

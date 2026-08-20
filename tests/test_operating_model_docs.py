@@ -324,15 +324,22 @@ def test_the_totals_decision_is_recorded_as_settled() -> None:
     assert "availability, not profitability" in text
 
 
-def test_the_standing_exclusion_note_travels_with_the_data() -> None:
-    """A report should explain itself without anyone finding the docs."""
+def test_the_standing_note_travels_with_the_data() -> None:
+    """A report should explain itself without anyone finding the docs.
+
+    The note now records a reversal rather than the original exclusion, so it
+    has to carry both halves: what was concluded, and why that conclusion did
+    not survive. A note saying only the new answer would leave the next reader
+    wondering whether the old reasoning had been considered.
+    """
     from epl_betting_lab.market_eligibility import MARKET_EXCLUSION_NOTES
 
     note = MARKET_EXCLUSION_NOTES["total_2_5"]
 
     assert "William Hill" in note
-    assert "cannot be taken is not a price" in note
-    assert "not profitability" in note
+    assert "bulk `totals`" in note
+    assert "alternate_totals" in note
+    assert "BetRivers" in note or "FanDuel" in note
 
 
 def test_an_excluded_market_reason_carries_the_standing_note() -> None:

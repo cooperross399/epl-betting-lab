@@ -79,14 +79,15 @@ DEFAULT_DISABLED_MARKETS: tuple[str, ...] = ()
 #: and answered, so the investigation is not repeated to a different conclusion.
 MARKET_EXCLUSION_NOTES: dict[str, str] = {
     "total_2_5": (
-        "Settled 2026-08-17. The 2.5 line is incomplete in the `us` region "
-        "(8 of 10 fixtures) and complete in `uk` and `eu`. However the only "
-        "books carrying it for every fixture are William Hill, Betsson, and "
-        "Nordic Bet, and the operator holds no account at any of them. A price "
-        "that cannot be taken is not a price, so totals stay excluded. This is "
-        "availability, not profitability, and it is not a judgement about the "
-        "market. Revisit only if the operator gains access to one of those "
-        "books, or a book already in use starts posting the 2.5 line."
+        "Reopened 2026-08-19. The 2026-08-17 exclusion said the complete 2.5 "
+        "line existed only at William Hill, Betsson and Nordic Bet, where "
+        "there is no account. That was true of the bulk `totals` market, which "
+        "is the only one that had been examined. It was never true of "
+        "`alternate_totals`: BetRivers and FanDuel each carry 2.5 on all ten "
+        "fixtures, and both already price rows on the card. The line was "
+        "reachable the whole time, in a market nobody had looked at. The "
+        "market is now sourced from there and awaits policy approval like any "
+        "other."
     ),
 }
 

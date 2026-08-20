@@ -120,6 +120,15 @@ DERIVED_PROVIDER_MARKETS: dict[str, tuple[str, ...]] = {
     "draw_no_bet": ("draw_no_bet",),
     "corners_1x2": ("corners_1x2",),
     "alternate_totals_corners": ("corners_total_9_5", "corners_total_10_5"),
+    # The 2.5 goals line, from the market that actually carries it here.
+    #
+    # Totals were excluded because the complete 2.5 line existed only at
+    # William Hill, Betsson and Nordic Bet. That was true of the bulk `totals`
+    # market, and it is why the exclusion was recorded as settled. It was never
+    # true of `alternate_totals`, which nobody had looked at: BetRivers and
+    # FanDuel both carry 2.5 on every fixture in the slate, and both are books
+    # already quoted on the card.
+    "alternate_totals": ("total_2_5",),
 }
 
 #: Everything the normalizer will look at. Anything else in a response is
@@ -197,6 +206,8 @@ def _normalize_provider_events(
     # fetched: the whole refresh died on a counter.
     market_counts = {market: 0 for market in MARKET_SELECTIONS}
     duplicate_counts: dict[str, int] = {}
+    # odds key -> the provider market that first supplied it.
+    odds_sources: dict[tuple, str] = {}
 
     for event_index, event in enumerate(events, start=1):
         if not isinstance(event, dict):
@@ -377,6 +388,18 @@ def _normalize_provider_events(
                         book_name.casefold(),
                     )
                     if odds_key in odds_keys:
+                        # Two provider markets can legitimately carry the same
+                        # project market: the 2.5 goals line arrives from the
+                        # bulk `totals` response and again from
+                        # `alternate_totals`. That overlap is expected, so the
+                        # first price is kept and the second ignored — it is
+                        # not evidence the response is malformed, which is what
+                        # a repeat from the *same* provider market would be.
+                        if odds_sources.get(odds_key) != market_key:
+                            duplicate_counts[normalized_market] = (
+                                duplicate_counts.get(normalized_market, 0) + 1
+                            )
+                            continue
                         # A repeat in one of the three core markets means the
                         # response is not what it claims to be, and prices there
                         # decide real bets — so that still stops the run.
@@ -399,6 +422,7 @@ def _normalize_provider_events(
                         )
                         continue
                     odds_keys.add(odds_key)
+                    odds_sources[odds_key] = market_key
                     odds_rows.append(
                         {
                             "date": match_date,

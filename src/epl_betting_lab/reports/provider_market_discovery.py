@@ -458,6 +458,16 @@ def probe_historical_odds(
         "requests_remaining": _clean(headers.get("x-requests-remaining")),
         "event_count": len(events),
         "markets_seen": sorted(m for m in markets_seen if m),
+        # Needed to ask the per-event endpoint anything at all: it takes an id,
+        # and the only place to get a historical one is a bulk snapshot.
+        "sample_events": [
+            {
+                "id": _clean(event.get("id")),
+                "fixture": f"{_clean(event.get('home_team'))} v {_clean(event.get('away_team'))}",
+            }
+            for event in events[:3]
+            if isinstance(event, Mapping)
+        ],
         "detail": detail,
     }
 

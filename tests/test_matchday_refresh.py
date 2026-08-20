@@ -749,4 +749,5 @@ def test_a_refused_bundle_is_not_reported_as_a_failed_fetch() -> None:
     """
     text = _workflow()
 
-    assert "explain_provider_failure.py >> run_degraded.txt" in text
+    assert "explain_provider_failure.py" in text
+    assert ">> run_degraded.txt" in text

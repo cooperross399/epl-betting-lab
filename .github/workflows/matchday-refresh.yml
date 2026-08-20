@@ -236,7 +236,14 @@ jobs:
             # The step exits non-zero both when the fetch fails and when the
             # fetch works and policy refuses the bundle. Ask the reports which
             # it was rather than assuming the first.
-            python scripts/explain_provider_failure.py >> run_degraded.txt
+            # Exit 3 marks a refusal the policy is supposed to make, so the
+            # run can decline without pretending to be broken.
+            if python scripts/explain_provider_failure.py --expected-exit 3 \
+                 >> run_degraded.txt; then
+              :
+            else
+              if [ $? -eq 3 ]; then echo "expected_refusal=true" >> "$GITHUB_OUTPUT"; fi
+            fi
           fi
           if [ -s run_degraded.txt ]; then
             echo "degraded=true" >> "$GITHUB_OUTPUT"
@@ -367,6 +374,13 @@ jobs:
           echo "manual file, allowlisted no provider, and widened no market scope."
           if [ "${{ steps.rebuild.outcome }}" = "failure" ]; then
             echo "Some reports failed to rebuild."
+          fi
+          if [ "${{ steps.health.outputs.expected_refusal }}" = "true" ]; then
+            # The policy declined, which is the policy working. A red run here
+            # produced a week of alarming mail and a health check that
+            # concluded the pipeline was broken.
+            echo "::notice::The provider run was refused by policy, as expected outside the Thursday window. Not a fault."
+            exit 0
           fi
           if [ "${{ steps.health.outputs.degraded }}" = "true" ] \
              || [ "${{ steps.rebuild.outcome }}" = "failure" ]; then

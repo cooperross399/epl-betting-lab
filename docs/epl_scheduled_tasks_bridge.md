@@ -169,18 +169,38 @@ goes wrong, so no mail means the schedule ran and the picks did not move. The
 card runs ten times a week — Thursday through Monday, twice a day — so a gap of
 more than four days means a run was missed, not that nothing changed.
 
+**A search is not a sort.** The first routine run read a message from the
+previous day and reported it as the current state, missing a card issued that
+morning. Ask for newest by date, and say which timestamp you read, so a stale
+answer is visible as one.
+
+**A manual run says so.** Its heading ends "— manual run". Testing this system
+produces failure mail that is otherwise indistinguishable from the real thing.
+
 ---
 
 ### EPL CARD
 
 ```text
-Search Gmail for the most recent GitHub notification for issue #162,
-"EPL Card — this week's picks", in cooperross399/epl-betting-lab.
+Search Gmail for GitHub notifications for issue #162, "EPL Card — this week's
+picks", in cooperross399/epl-betting-lab. Sort by date and take the newest.
+Do not rely on search relevance: the first result is often not the latest.
 
-Read the first line before anything else. "Selections changed" means it is a
-card. "Something went wrong" means the run was degraded: say what broke first,
-then report whatever card was still built and note that it may rest on stale
-prices.
+Start by stating the timestamp of the message you are reading, which is in its
+first line. If it is more than 24 hours old, say so before anything else — a
+newer one probably exists and you have the wrong message.
+
+Report two things separately, because they are often different messages:
+- the newest message of any kind, and what it says
+- the newest actual CARD, meaning one whose first line says "Selections
+  changed". A degraded run can arrive after the last good card, and the card is
+  still the current advice.
+
+Read the first line of each before the tables. "Selections changed" means it is
+a card. "Something went wrong" means the run was degraded: say what broke
+first, then report whatever card was still built and note it may rest on stale
+prices. A heading ending "— manual run" means someone started it by hand rather
+than the schedule; say so, and do not treat it as the routine state of play.
 
 Then tell me, in plain English:
 
@@ -218,9 +238,15 @@ a possible missed run rather than a quiet week.
 ### EPL Model
 
 ```text
-Search Gmail for the most recent GitHub notification for issue #162 in
-cooperross399/epl-betting-lab, and for any GitHub Actions failure notifications
-for the "Matchday Refresh" workflow in the last seven days.
+Search Gmail for GitHub notifications for issue #162 in
+cooperross399/epl-betting-lab, sorted by date, newest first — search relevance
+is not date order and will hand you an old message. Also look for GitHub
+Actions failure notifications for the "Matchday Refresh" workflow in the last
+seven days.
+
+State the timestamp of the newest message you found. Ignore any whose heading
+ends "— manual run" when judging whether the schedule is healthy: those were
+started by hand.
 
 Tell me, in plain English:
 

@@ -150,6 +150,7 @@ def build_notification(
     now: datetime | None = None,
     run_url: str = "",
     degraded: Sequence[str] = (),
+    trigger: str = "",
 ) -> dict[str, Any]:
     outputs = OUTPUTS_DIR if output_dir is None else Path(output_dir)
     card = _read(outputs / "epl_card_task.json")
@@ -164,12 +165,26 @@ def build_notification(
         generated.get("card_generated", False)
     )
 
+    # A manual dispatch and a scheduled run read identically once they are in
+    # an inbox, and a reader working out which is which from timestamps is a
+    # reader who will eventually guess wrong. Testing this system produced a
+    # run of failure mails that looked exactly like real ones.
+    manual = trigger == "workflow_dispatch"
+    heading = f"## {stamp.strftime('%A %d %B, %H:%M UTC')}"
+    if manual:
+        heading += " — manual run"
     lines = [
-        f"## {stamp.strftime('%A %d %B, %H:%M UTC')}",
+        heading,
         "",
         f"{NOTIFY_HANDLE} — {reason}",
         "",
     ]
+    if manual:
+        lines += [
+            "_This run was started by hand, not by the schedule. If you did not "
+            "start it, someone was testing._",
+            "",
+        ]
 
     if degraded:
         lines += ["### What went wrong", ""]
@@ -220,7 +235,9 @@ def build_notification(
             lines += [f"**Start here:** {root}", ""]
 
     try:
-        from epl_betting_lab.config import OUTPUTS_DIR
+        # OUTPUTS_DIR is imported at module scope. Importing it here as well
+        # made it local to this whole function, so the very first line that
+        # used it raised UnboundLocalError — before reaching this block.
         from epl_betting_lab.data.loaders import load_matches
         from epl_betting_lab.reports.card_scoreboard import (
             build_scoreboard,
@@ -228,11 +245,7 @@ def build_notification(
             render_scoreboard,
         )
 
-        archived = load_archived_cards(
-            Path(outputs if output_dir else OUTPUTS_DIR)
-            / "archive"
-            / "automated_cards"
-        )
+        archived = load_archived_cards(outputs / "archive" / "automated_cards")
         if archived:
             lines += render_scoreboard(build_scoreboard(archived, load_matches()))
     except Exception:

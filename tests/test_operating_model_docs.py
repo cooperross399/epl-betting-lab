@@ -397,3 +397,28 @@ def test_an_eligible_market_does_not_carry_an_exclusion_note() -> None:
     totals = next(m for m in report.markets if m.market == "total_2_5")
     assert totals.status == "eligible"
     assert "William Hill" not in totals.reason
+
+
+def test_the_negative_result_is_recorded_where_it_will_be_found() -> None:
+    """A change that was not made, and why.
+
+    Shrinking team strengths improved calibration on every market and cost
+    about 140 units in the backtest. The reasoning was sound and the evidence
+    for it was strong, which is exactly why it needs writing down: the next
+    person to measure calibration will reach the same conclusion.
+    """
+    text = _read("docs/why_better_calibration_lost_money.md")
+
+    assert "+1.3%" in text and "-15.8%" in text
+    assert "Calibration is a precondition, not a goal" in text
+    assert "BTTS bias is real and is still there" in text
+
+
+def test_it_says_when_a_price_backtest_is_available() -> None:
+    """The rule only bites where it can be followed."""
+    text = _read("docs/why_better_calibration_lost_money.md")
+
+    flat = " ".join(text.split())
+
+    assert "Football-Data ships the odds" in flat
+    assert "For BTTS and corners it never is" in flat

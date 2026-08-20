@@ -46,6 +46,7 @@ from epl_betting_lab.providers.odds_api_staging_provider import (
     _default_requester,
 )
 from epl_betting_lab.providers.team_names import normalize_team_name
+from epl_betting_lab.providers.credential_check import redact
 from epl_betting_lab.selected_slate import (
     SELECTED_WEEK1_LABEL,
     in_selected_window,
@@ -366,6 +367,88 @@ def classify_btts(
         "bookmakers_offering_btts": list(
             event_summary.get("bookmakers_offering_btts", []) or []
         ),
+    }
+
+
+def probe_historical_odds(
+    *,
+    api_key: str,
+    when: str,
+    markets: str = "h2h",
+    regions: str = "us",
+    base_url: str = DEFAULT_API_BASE_URL,
+    sport_key: str = "soccer_epl",
+    requester: Requester | None = None,
+    timeout_seconds: float = 20.0,
+) -> dict[str, Any]:
+    """Can this plan read historical odds, and what does one snapshot cost?
+
+    Every market except 1X2 and the 2.5 goals line has no historical price in
+    Football-Data, so none of them can be backtested for profit from it. If the
+    provider will sell historical snapshots, that limit lifts — which is worth
+    one request to find out rather than assuming either way.
+
+    Reports availability, cost and shape. Never the credential, and no prices.
+    """
+    if not api_key:
+        raise DiscoveryError(f"A historical probe requires `{API_KEY_ENV}`.")
+    request = requester or _default_requester
+    root = _validate_base_url(base_url)
+    try:
+        response = request(
+            f"{root}/v4/historical/sports/{sport_key}/odds",
+            params={
+                "apiKey": api_key,
+                "regions": regions,
+                "markets": markets,
+                "oddsFormat": "american",
+                "date": when,
+            },
+            timeout=timeout_seconds,
+        )
+    except Exception as exc:  # network failures must not leak details
+        return {
+            "available": False,
+            "status_code": 0,
+            "requests_last": "",
+            "requests_remaining": "",
+            "event_count": 0,
+            "markets_seen": [],
+            "detail": type(exc).__name__,
+        }
+
+    status_code = int(getattr(response, "status_code", 0) or 0)
+    headers = getattr(response, "headers", {}) or {}
+    detail = ""
+    events: list[Any] = []
+    markets_seen: set[str] = set()
+    if status_code == 200:
+        payload = response.json()
+        data = payload.get("data") if isinstance(payload, Mapping) else payload
+        if isinstance(data, list):
+            events = data
+        for event in events:
+            if not isinstance(event, Mapping):
+                continue
+            for bookmaker in event.get("bookmakers", []) or []:
+                if not isinstance(bookmaker, Mapping):
+                    continue
+                for market in bookmaker.get("markets", []) or []:
+                    if isinstance(market, Mapping):
+                        markets_seen.add(_clean(market.get("key")))
+    else:
+        body = getattr(response, "text", "") or ""
+        # Provider error messages describe the plan, not the key.
+        detail = redact(body[:200])
+
+    return {
+        "available": status_code == 200,
+        "status_code": status_code,
+        "requests_last": _clean(headers.get("x-requests-last")),
+        "requests_remaining": _clean(headers.get("x-requests-remaining")),
+        "event_count": len(events),
+        "markets_seen": sorted(m for m in markets_seen if m),
+        "detail": detail,
     }
 
 

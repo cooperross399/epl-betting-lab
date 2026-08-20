@@ -233,30 +233,10 @@ jobs:
             echo "Historical results could not be refreshed; the model was fitted on the previously stored dataset." >> run_degraded.txt
           fi
           if [ "${{ steps.prices.outcome }}" = "failure" ]; then
-            # Say what actually stopped it. The provider step exits non-zero
-            # both when the fetch fails and when the fetch succeeds and policy
-            # refuses the bundle, and reporting the first for the second sent a
-            # reader looking for a network problem that was not there: a run
-            # refused by the Thursday cutoff reported "prices could not be
-            # refreshed" while 330 rows of prices sat in the bundle.
-            python - <<'PYEOF' >> run_degraded.txt
-          import json, pathlib
-          path = pathlib.Path("data/outputs/provider_shadow_verification.json")
-          blockers = []
-          if path.is_file():
-              try:
-                  payload = json.loads(path.read_text(encoding="utf-8"))
-                  blockers = [str(b) for b in (payload.get("blockers") or [])]
-              except Exception:
-                  blockers = []
-          if blockers:
-              print("The provider run was refused: " + " ".join(blockers))
-          else:
-              print(
-                  "Provider prices could not be refreshed, so the card is built "
-                  "on the last prices fetched and may be refused as stale."
-              )
-          PYEOF
+            # The step exits non-zero both when the fetch fails and when the
+            # fetch works and policy refuses the bundle. Ask the reports which
+            # it was rather than assuming the first.
+            python scripts/explain_provider_failure.py >> run_degraded.txt
           fi
           if [ -s run_degraded.txt ]; then
             echo "degraded=true" >> "$GITHUB_OUTPUT"

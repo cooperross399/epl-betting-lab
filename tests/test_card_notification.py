@@ -581,3 +581,47 @@ class TestOneCardADay:
 
         assert "one card a day" in body
         assert "a run did not happen" in body
+
+
+class TestTheEmailCarriesQuota:
+    """The routine prompts ask for quota and a routine reads email.
+
+    The first EPL Watch run reported "provider quota: missing" every week,
+    correctly: the figure was only ever in the run summary, which a routine
+    never sees.
+    """
+
+    def _body(self, tmp_path: Path, remaining: str) -> str:
+        from epl_betting_lab.reports.card_notification import build_notification
+        import json as _json
+
+        _write(tmp_path, ready=True, comparison=_comparison(added=[{"label": "x"}]))
+        (tmp_path / "provider_shadow_verification.json").write_text(
+            _json.dumps({"api_quota": {"requests_remaining": remaining}}),
+            encoding="utf-8",
+        )
+        return build_notification(output_dir=tmp_path, now=NOW)["body"]
+
+    def test_the_card_states_the_quota(self, tmp_path: Path) -> None:
+        assert "Provider quota:" in self._body(tmp_path, "5000")
+
+    def test_it_says_how_many_runs_that_buys(self, tmp_path: Path) -> None:
+        assert "about 80 more runs" in self._body(tmp_path, "5000")
+
+    def test_a_low_quota_warns_in_the_email_too(self, tmp_path: Path) -> None:
+        assert "Top this up" in self._body(tmp_path, "500")
+
+    def test_an_unknown_quota_is_left_out_rather_than_guessed(
+        self, tmp_path: Path
+    ) -> None:
+        assert "Provider quota:" not in self._body(tmp_path, "")
+
+    def test_the_email_and_the_summary_use_the_same_arithmetic(self) -> None:
+        """Two implementations would eventually disagree."""
+        from epl_betting_lab.config import PROJECT_ROOT
+
+        source = (
+            PROJECT_ROOT / "src/epl_betting_lab/reports/card_notification.py"
+        ).read_text(encoding="utf-8")
+
+        assert "from epl_betting_lab.reports.run_summary import _quota_line" in source

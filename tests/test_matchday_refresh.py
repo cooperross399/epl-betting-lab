@@ -97,7 +97,7 @@ def test_a_duplicate_run_cannot_collide_with_the_first() -> None:
 
 
 #: Measured, not estimated: two live runs moved the counter from 340 to 311.
-MEASURED_REQUESTS_PER_RUN = 105  # with every market fetched
+MEASURED_REQUESTS_PER_RUN = 62  # measured from consecutive live runs
 
 #: Each extra per-event market costs one request per fixture.
 REQUESTS_PER_EXTRA_MARKET_PER_RUN = 10
@@ -572,8 +572,8 @@ def test_the_stated_credit_cost_matches_the_schedule() -> None:
     monthly = runs_per_week * WEEKS_PER_MONTH * MEASURED_REQUESTS_PER_RUN
 
     # The comment should state a figure within a reasonable distance of truth.
-    assert "4,600 credits a month" in text
-    assert 4_000 < monthly < 5_500, f"schedule now costs ~{monthly:.0f}"
+    assert "2,700 credits a month" in text
+    assert 2_200 < monthly < 3_200, f"schedule now costs ~{monthly:.0f}"
     assert monthly < MONTHLY_REQUEST_ALLOWANCE
 
 

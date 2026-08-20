@@ -56,10 +56,11 @@ on:
     # email only fires when the selections change — so a duplicate run is
     # invisible unless it has something new to say.
     #
-    # Ten runs a week is about 4,600 credits a month against 20,000 — roughly a
-    # quarter of the allowance. (An earlier note here said 1,050, computed from
-    # a per-run cost that predated the extra markets. The measured figure is
-    # about 105 credits a run.)
+    # Ten runs a week is about 2,700 credits a month against 20,000 — roughly an
+    # eighth of the allowance. Measured from consecutive runs: the counter moves
+    # about 62 a run with every market fetched. Two earlier notes here were
+    # wrong in both directions, 1,050 and 4,600, each computed rather than
+    # measured.
     # Thursday's backup runs BEFORE the primary, not after. The provider
     # policy refuses a Thursday receipt made after 10:00 America/New_York,
     # which is 14:00 UTC in summer — so a backup ninety minutes late would be

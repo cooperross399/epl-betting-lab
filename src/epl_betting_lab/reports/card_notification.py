@@ -23,6 +23,7 @@ from pathlib import Path
 from typing import Any
 
 from epl_betting_lab.config import OUTPUTS_DIR
+from epl_betting_lab.reports.run_summary import _quota_line
 from epl_betting_lab.reports.pick_display import (
     format_american_odds,
     format_market_list,
@@ -217,6 +218,15 @@ def build_notification(
             "available. Treat it with that in mind.",
             "",
         ]
+
+    # Quota belongs in the mail, not only in the run summary. The routine
+    # prompts ask for it, and a routine reads email — so asking for something
+    # the email does not carry made it report "quota: missing" every week.
+    shadow = _read(outputs / "provider_shadow_verification.json")
+    quota = shadow.get("api_quota") if isinstance(shadow.get("api_quota"), Mapping) else {}
+    quota_line = _quota_line(quota)
+    if quota_line != "unknown":
+        lines += [f"Provider quota: {quota_line}", ""]
 
     if card_ready:
         best, _ = split_stakeable(card.get("best_bets") or [])

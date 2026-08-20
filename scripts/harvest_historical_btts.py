@@ -23,14 +23,15 @@ from epl_betting_lab.providers.historical_btts import (
 )
 
 API_KEY_ENV = "EPL_ODDS_API_KEY"
-DEFAULT_OUTPUT = "historical_btts_odds.csv"
+DEFAULT_OUTPUT = "historical_market_odds.csv"
 FIELDS = [
     "sampled_at",
     "commence_time",
     "home_team",
     "away_team",
-    "btts_yes_american",
-    "btts_no_american",
+    "market",
+    "selection",
+    "american",
 ]
 
 
@@ -55,6 +56,15 @@ def main() -> int:
         default=3,
         help="Sample this many hours before kick-off. A card is built and bet "
         "at a set time, so a fixed lead is the honest comparison.",
+    )
+    parser.add_argument(
+        "--markets",
+        default="btts",
+        help="Comma-separated provider market keys. Several travel in one "
+        "request, which prices them at the same instant — prices sampled "
+        "minutes apart are not strictly comparable, and comparing markets is "
+        "the point. Historical credits are charged per market, so this "
+        "multiplies the cost.",
     )
     parser.add_argument("--output", default=DEFAULT_OUTPUT)
     parser.add_argument(
@@ -87,6 +97,7 @@ def main() -> int:
     print(f"Range: {args.start} to {args.end} ({len(days)} day(s))")
     print(f"Credit ceiling: {args.credit_limit}")
     print(f"Sampling {args.hours_before}h before each fixture's own kick-off.")
+    print(f"Markets: {args.markets}")
     if already:
         print(f"Already hold {len(already)} fixture(s); they will not be re-bought.")
 
@@ -95,6 +106,7 @@ def main() -> int:
         api_key=api_key,
         budget=HarvestBudget(limit=args.credit_limit),
         hours_before=args.hours_before,
+        markets=[m.strip() for m in args.markets.split(",") if m.strip()],
         already_harvested=already,
     )
 

@@ -59,5 +59,23 @@ LEAGUE_CODE = "E0"  # English Premier League on Football-Data.co.uk
 
 # User preference baked in: avoid laying heavy juice unless manually approved.
 MAX_DEFAULT_JUICE = -160
+
+#: Longest price the model is trusted to judge. There was a cap on the short
+#: side and none on the long side, and the backtest shows why there should be:
+#:
+#:   +400..+600   83 bets   +6.4% ROI   19.3% win rate
+#:   +600..+900   34 bets  -22.3% ROI    8.8% win rate
+#:   +900 and up  12 bets  -100.0% ROI   0.0% win rate
+#:
+#: Twelve claimed chances of roughly one in ten, none of which happened. An
+#: independent-Poisson model puts too much mass in the tail of the scoreline
+#: distribution, so it overstates exactly these outcomes, and the market's own
+#: favourite-longshot bias prices them short on top of that.
+#:
+#: 600 rather than the ROI-maximising 300: the band from +400 to +600 is
+#: profitable, so cutting it would be fitting the threshold to the sample
+#: rather than to the failure. Every cap between +300 and +600 is positive in
+#: three of four seasons, so this does not balance on the exact number.
+MAX_DEFAULT_PRICE = 600
 MIN_EDGE = 0.035
 BANKROLL_UNIT_DOLLARS = 25.0

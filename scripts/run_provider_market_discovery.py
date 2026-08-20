@@ -28,6 +28,7 @@ from epl_betting_lab.reports.provider_market_discovery import (
     estimate_quota_cost,
     save_provider_market_discovery,
     fetch_events_live,
+    probe_historical_odds,
     summarize_bulk_response,
 )
 

@@ -278,10 +278,18 @@ jobs:
         run: |
           set -u
           RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          # When a message was last sent, so at most one card a day goes out.
+          TITLE_FOR_LOOKUP="EPL Card"
+          LAST_SENT=$(gh issue list --state open --limit 200 --json number,title \
+            | jq -r --arg t "$TITLE_FOR_LOOKUP" \
+              '[.[] | select(.title | startswith($t))] | .[0].number // empty' \
+            | xargs -r -I{} gh issue view {} --json comments \
+              --jq '[.comments[].createdAt] | max // empty')
           DECISION=$(python scripts/post_card_to_issue.py \
             --out card_comment.md --title-out card_title.txt \
             --degraded-file run_degraded.txt --run-url "$RUN_URL" \
-            --trigger "${{ github.event_name }}" | tail -1)
+            --trigger "${{ github.event_name }}" \
+            --last-sent "$LAST_SENT" | tail -1)
           if [ "${{ inputs.force_email }}" = "true" ]; then
             echo "Forced: sending the current card regardless of changes."
             DECISION=post

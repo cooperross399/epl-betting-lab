@@ -164,10 +164,16 @@ issue. A card leads with *"Selections changed"*; a failure leads with
 *"Something went wrong"* and lists what broke before showing whatever card
 could still be built. Read the first line before reading the tables.
 
-**Silence is meaningful.** Mail arrives only when the selections change or a run
-goes wrong, so no mail means the schedule ran and the picks did not move. The
-card runs ten times a week — Thursday through Monday, twice a day — so a gap of
-more than four days means a run was missed, not that nothing changed.
+**A card arrives once a day, and silence means a missed run.** The schedule
+fires ten times a week — Thursday through Monday, twice a day — and the first
+run of each day that produces a card sends it, whether or not the selections
+moved. Later runs the same day stay quiet unless something changed or broke.
+
+So a matchday with no message at all means a run did not happen, which is a
+sharper signal than the old rule of "mail only when the picks move". That rule
+was right for a person reading an inbox and wrong for a routine reading daily:
+the first routine run read a message from the previous day and reported it as
+the state of play.
 
 **A search is not a sort.** The first routine run read a message from the
 previous day and reported it as the current state, missing a card issued that
@@ -229,8 +235,9 @@ Rules:
 - Never tell me to open a Terminal or to ask ChatGPT. If something looks wrong,
   say what, and point me at the Actions run linked in the email.
 
-If there is no such email in the last four days, say so plainly and treat it as
-a possible missed run rather than a quiet week.
+A card is sent once a day while the schedule runs. If the newest message is
+from before today and today is a matchday (Thursday through Monday), say a run
+was probably missed rather than treating the old message as current.
 ```
 
 ---

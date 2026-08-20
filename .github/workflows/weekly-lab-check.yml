@@ -6,6 +6,12 @@ on:
     # Mondays at 10:00 AM UTC during the season. Adjust as needed.
     - cron: "0 10 * * 1"
 
+permissions:
+  contents: read
+  # Read-only, and only so the watchdog can see whether the matchday schedule
+  # has run. It changes nothing.
+  actions: read
+
 jobs:
   test-and-brief:
     runs-on: ubuntu-latest
@@ -47,3 +53,18 @@ jobs:
         with:
           name: epl-betting-lab-outputs
           path: data/outputs/
+
+      - name: Watch that the matchday schedule is still running
+        # An independent schedule, so this does not share the failure it is
+        # meant to catch. Nothing can detect its own total absence; two
+        # unrelated crons failing in the same week is far less likely than one.
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PYTHONPATH: src
+        run: |
+          set -u
+          previous=$(gh run list --workflow matchday-refresh.yml \
+            --status success --limit 5 --json createdAt \
+            --jq '.[].createdAt' | tr '\n' ' ')
+          python scripts/check_schedule_health.py $previous --fail-when-stale

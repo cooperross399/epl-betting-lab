@@ -272,12 +272,13 @@ commit is needed. Worth knowing precisely, because it would otherwise look like
 the season needs periodic manual commits to stay alive. If the repository is
 ever made public, this becomes real.
 
-**The request allowance is monthly, and the cadence fits inside it.** The Odds
-API free tier is 500 credits per month, and it resets monthly. A run costs about
-15 credits - measured from the counter across two live runs, not derived from
-the request pattern. Five runs a week is roughly 325 a month. The run summary
-prints what is left and how many runs that buys, and says plainly when the
-schedule is about to stop.
+**The request allowance is monthly, and the cadence fits inside it.** The plan
+is 20,000 credits per month and it resets monthly. A run costs 62 credits -
+measured from the counter across live runs, not derived from the request
+pattern. Ten triggers a week is roughly 2,700 a month, comfortably inside the
+allowance. The run summary prints what is left and how many runs that buys, and
+says plainly when the schedule is about to stop - that figure is a health
+signal, not a budget to manage.
 
 **GitHub Actions minutes are not a constraint.** A run takes about 50 seconds,
 so roughly 22 minutes a month against the 2,000 included with a private

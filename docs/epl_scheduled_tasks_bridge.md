@@ -170,8 +170,12 @@ Search Gmail for the most recent notification from GitHub for the issue
 That email is the card. Read it and tell me, in plain English:
 
 - whether a card was produced, or whether it was blocked and why
-- the best bets and the leans, each with market, selection, tier, edge, price
-  and book, and the suggested unit size
+- the best bets, each with market, selection, tier, edge, price, book and the
+  suggested unit size
+- the leans separately, and say plainly that they carry no stake. A lean fires
+  at a 1.5% modelled edge, which is below this model's own error and below a
+  book's margin; measured, leans returned about -9% over 150 bets. They are
+  information, not bets. Never present one as a play.
 - what changed since the previous card: added, dropped, or moved section
 - which markets were included and excluded
 
@@ -180,7 +184,10 @@ Rules:
   selection, a price, or an edge. If something is missing, say it is missing.
 - A blocked card means nothing was generated. It never means "no value found",
   and it is not a reason to suggest a bet.
-- A zero-unit row is not a small bet, it is no bet. Do not present one as a pick.
+- A zero-unit row is not a small bet, it is no bet. Do not present one as a
+  pick. Anything under "Ranked but not stakeable" belongs in that category.
+- No market in this project has a demonstrated edge. Every measured interval
+  includes zero. If asked whether it works, say that.
 - Place no bets. Apply no settlement. Suggest no stake beyond the units in the
   email.
 - Never tell me to open a Terminal or to ask ChatGPT. If something looks wrong,

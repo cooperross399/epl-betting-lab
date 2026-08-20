@@ -408,3 +408,124 @@ class TestProbingWithoutAnArchive:
             )
             == []
         )
+
+
+class TestLineCoverage:
+    """Which books carry a line decides whether a market is takeable.
+
+    Totals were excluded because the complete 2.5 line existed only at books
+    with no account. That is a per-bookmaker question, and nothing reported it
+    per bookmaker — the answer had to be reconstructed by hand from a response.
+    """
+
+    def _summary(self, payload: dict, **kwargs) -> dict:
+        from epl_betting_lab.reports.provider_market_discovery import (
+            discover_event_markets,
+        )
+
+        class _Response:
+            status_code = 200
+
+            def json(self) -> dict:
+                return payload
+
+        return discover_event_markets(
+            [
+                {"id": "e1", "home_team": "A", "away_team": "B"},
+                {"id": "e2", "home_team": "C", "away_team": "D"},
+            ],
+            api_key="k",
+            requester=lambda *a, **k: _Response(),
+            **kwargs,
+        )
+
+    def _payload(self) -> dict:
+        return {
+            "bookmakers": [
+                {
+                    "title": "FanDuel",
+                    "markets": [
+                        {
+                            "key": "alternate_totals",
+                            "outcomes": [
+                                {"name": "Over", "point": 2.5, "price": -110},
+                                {"name": "Over", "point": 3.5, "price": 150},
+                            ],
+                        }
+                    ],
+                },
+                {
+                    "title": "Bovada",
+                    "markets": [
+                        {
+                            "key": "alternate_totals",
+                            "outcomes": [
+                                {"name": "Over", "point": 3.5, "price": 150}
+                            ],
+                        }
+                    ],
+                },
+            ]
+        }
+
+    def test_it_counts_fixtures_per_bookmaker(self) -> None:
+        summary = self._summary(
+            self._payload(), line_coverage=[("alternate_totals", 2.5)]
+        )
+        coverage = summary["line_coverage"]["alternate_totals@2.5"]
+
+        assert coverage["FanDuel"] == 2
+
+    def test_a_book_without_that_line_is_absent(self) -> None:
+        summary = self._summary(
+            self._payload(), line_coverage=[("alternate_totals", 2.5)]
+        )
+
+        assert "Bovada" not in summary["line_coverage"]["alternate_totals@2.5"]
+
+    def test_a_line_nobody_offers_reports_empty(self) -> None:
+        summary = self._summary(
+            self._payload(), line_coverage=[("alternate_totals", 8.5)]
+        )
+
+        assert summary["line_coverage"]["alternate_totals@8.5"] == {}
+
+    def test_coverage_is_absent_unless_asked_for(self) -> None:
+        assert self._summary(self._payload())["line_coverage"] == {}
+
+    def test_several_lines_can_be_asked_about_at_once(self) -> None:
+        summary = self._summary(
+            self._payload(),
+            line_coverage=[("alternate_totals", 2.5), ("alternate_totals", 3.5)],
+        )
+
+        assert set(summary["line_coverage"]) == {
+            "alternate_totals@2.5",
+            "alternate_totals@3.5",
+        }
+        assert summary["line_coverage"]["alternate_totals@3.5"]["Bovada"] == 2
+
+
+class TestParsingLineCoverageArguments:
+    def _parse(self, raw: str):
+        import importlib.util
+        from epl_betting_lab.config import PROJECT_ROOT
+
+        spec = importlib.util.spec_from_file_location(
+            "_disc", PROJECT_ROOT / "scripts" / "run_provider_market_discovery.py"
+        )
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module._parse_line_coverage(raw)
+
+    def test_it_reads_market_at_line_pairs(self) -> None:
+        assert self._parse("alternate_totals@2.5") == [("alternate_totals", 2.5)]
+
+    def test_several_pairs(self) -> None:
+        assert len(self._parse("a@1.5,b@2.5")) == 2
+
+    def test_nonsense_is_skipped_not_raised(self) -> None:
+        assert self._parse("no_at_sign,a@notanumber,b@1.5") == [("b", 1.5)]
+
+    def test_blank_yields_nothing(self) -> None:
+        assert self._parse("") == []

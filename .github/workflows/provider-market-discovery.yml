@@ -27,6 +27,10 @@ on:
         description: "Limit how many events are queried (0 = all). Use 1 to probe cheaply."
         required: false
         default: "0"
+      line_coverage:
+        description: "market@line pairs to check per bookmaker, e.g. alternate_totals@2.5"
+        required: false
+        default: ""
       dump_shapes:
         description: "Print the raw outcome shape of each market returned, so a parser can be written against reality"
         type: boolean
@@ -81,6 +85,9 @@ jobs:
           fi
           if [ "${{ inputs.max_events }}" != "0" ]; then
             ARGS="$ARGS --max-events ${{ inputs.max_events }}"
+          fi
+          if [ -n "${{ inputs.line_coverage }}" ]; then
+            ARGS="$ARGS --line-coverage ${{ inputs.line_coverage }}"
           fi
           if [ "${{ inputs.dump_shapes }}" = "true" ]; then
             ARGS="$ARGS --dump-outcome-shapes"

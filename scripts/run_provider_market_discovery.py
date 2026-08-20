@@ -43,6 +43,21 @@ def _latest_raw_response() -> Path | None:
     return candidates[-1] if candidates else None
 
 
+def _parse_line_coverage(raw: str) -> list[tuple[str, float]]:
+    """"market@line,market@line" -> [(market, line)]."""
+    pairs: list[tuple[str, float]] = []
+    for chunk in raw.split(","):
+        chunk = chunk.strip()
+        if not chunk or "@" not in chunk:
+            continue
+        market, _, line = chunk.partition("@")
+        try:
+            pairs.append((market.strip(), float(line)))
+        except ValueError:
+            continue
+    return pairs
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -80,6 +95,16 @@ def parse_args() -> argparse.Namespace:
             "Comma-separated regions to probe for the required totals line. "
             "Read-only: writes no staging bundle and creates no archived run. "
             "Costs markets x regions."
+        ),
+    )
+    parser.add_argument(
+        "--line-coverage",
+        default="",
+        help=(
+            "Comma-separated market@line pairs, e.g. "
+            "alternate_totals@2.5,alternate_totals_corners@9.5. Reports which "
+            "bookmakers carry that exact line, across how many fixtures. A line "
+            "offered only by a book with no account is not a price."
         ),
     )
     parser.add_argument(
@@ -168,6 +193,7 @@ def main() -> int:
             regions=args.regions,
             markets=args.markets,
             dump_outcome_shapes=args.dump_outcome_shapes,
+            line_coverage=_parse_line_coverage(args.line_coverage),
         )
         print(
             "Event endpoint results: "
@@ -187,6 +213,12 @@ def main() -> int:
                     "    name={name!r} description={description!r} "
                     "point={point!r} priced={has_price}".format(**outcome)
                 )
+        for key, books in (event_summary.get("line_coverage") or {}).items():
+            print(f"\n=== line coverage: {key}")
+            if not books:
+                print("    no bookmaker offered this line on any fixture")
+            for book, count in sorted(books.items(), key=lambda kv: -kv[1]):
+                print(f"    {book:20} {count} fixture(s)")
         for error in event_summary["errors"]:
             print(f"WARNING: {error}")
 

@@ -186,8 +186,10 @@ def test_card_routine_forbids_publishing_picks_when_blocked() -> None:
     """A blocked card means nothing was generated, never "no value found"."""
     text = _read("docs/epl_scheduled_tasks_bridge.md")
 
-    assert 'It never means "no value found"' in text
-    assert "is not a reason to suggest a bet" in text
+    flat = " ".join(text.split())
+
+    assert 'It never means "no value found"' in flat
+    assert "never a reason to suggest a bet" in flat
 
 
 def test_card_routine_forbids_inventing_anything() -> None:
@@ -207,8 +209,10 @@ def test_routines_explain_that_no_email_is_not_a_fault() -> None:
     """Silence is information here, and only safe if that is stated."""
     text = _read("docs/epl_scheduled_tasks_bridge.md")
 
-    assert "selections have not changed" in text
-    assert "failure email" in text or "failure notification" in text
+    flat = " ".join(text.split())
+
+    assert "the picks did not move" in flat
+    assert "failure notification" in flat or "failure email" in flat
 
 
 # --- CI ---------------------------------------------------------------------

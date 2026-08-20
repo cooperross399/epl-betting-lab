@@ -147,7 +147,13 @@ def main() -> int:
     )
 
     raw_path = args.raw_response_path or _latest_raw_response()
-    if raw_path is None and not (args.probe_totals_regions or args.check_event_markets):
+    # Every live probe fetches for itself and needs no archived response. This
+    # guard has now blocked two of them in turn, so it asks the question once:
+    # is anything here going to read the archive?
+    live_probe = bool(
+        args.probe_totals_regions or args.check_event_markets or args.historical_probe
+    )
+    if raw_path is None and not live_probe:
         print("BLOCKED: no archived provider response found under data/staging/raw/.")
         return 2
     if raw_path is not None:

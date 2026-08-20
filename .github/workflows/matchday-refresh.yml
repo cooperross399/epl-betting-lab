@@ -60,8 +60,13 @@ on:
     # quarter of the allowance. (An earlier note here said 1,050, computed from
     # a per-run cost that predated the extra markets. The measured figure is
     # about 105 credits a run.)
+    # Thursday's backup runs BEFORE the primary, not after. The provider
+    # policy refuses a Thursday receipt made after 10:00 America/New_York,
+    # which is 14:00 UTC in summer — so a backup ninety minutes late would be
+    # blocked by policy every single Thursday, and would look like a provider
+    # fault rather than a scheduling one.
+    - cron: "30 11 * * 4"
     - cron: "0 13 * * 4"
-    - cron: "30 14 * * 4"
     - cron: "0 13 * * 5"
     - cron: "30 14 * * 5"
     - cron: "0 9 * * 6"

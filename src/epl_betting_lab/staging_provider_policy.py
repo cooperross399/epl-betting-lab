@@ -884,23 +884,35 @@ def evaluate_staging_provider_policy(
         cutoff_hour, cutoff_minute = (
             int(part) for part in str(policy["thursday_cutoff_time"]).split(":")
         )
-        thursday_date = receipt_local.date() + timedelta(
-            days=3 - receipt_local.weekday()
-        )
-        cutoff_at = datetime.combine(
-            thursday_date,
-            time(cutoff_hour, cutoff_minute),
-            tzinfo=policy_timezone,
-        )
-        result["cutoff_at"] = cutoff_at.isoformat(timespec="minutes")
-        if receipt_local <= cutoff_at:
-            result["cutoff_policy_status"] = "Before cutoff"
+        # The cutoff is a Thursday deadline, so it applies on Thursdays.
+        #
+        # It used to be measured against "this week's Thursday", computed as
+        # today plus (3 - weekday). On Friday, Saturday and Sunday that lands
+        # on the Thursday just gone, so a receipt made on any of those days was
+        # always after it: every weekend run was blocked by a rule about
+        # Thursday. The card is built five days a week and three of them are
+        # the matchdays, so this refused the days that matter most while
+        # reporting a Thursday policy as the reason.
+        THURSDAY = 3
+        if receipt_local.weekday() != THURSDAY:
+            result["cutoff_at"] = ""
+            result["cutoff_policy_status"] = "Not a Thursday"
         else:
-            result["cutoff_policy_status"] = "After cutoff"
-            blockers.append(
-                "The staging receipt was generated after the Thursday automation "
-                f"cutoff of {policy['thursday_cutoff_time']} {timezone_name}."
+            cutoff_at = datetime.combine(
+                receipt_local.date(),
+                time(cutoff_hour, cutoff_minute),
+                tzinfo=policy_timezone,
             )
+            result["cutoff_at"] = cutoff_at.isoformat(timespec="minutes")
+            if receipt_local <= cutoff_at:
+                result["cutoff_policy_status"] = "Before cutoff"
+            else:
+                result["cutoff_policy_status"] = "After cutoff"
+                blockers.append(
+                    "The staging receipt was generated after the Thursday "
+                    f"automation cutoff of {policy['thursday_cutoff_time']} "
+                    f"{timezone_name}."
+                )
 
     result["blockers"] = list(dict.fromkeys(blockers))
     result["warnings"] = list(dict.fromkeys(warnings))

@@ -244,6 +244,27 @@ def build_run_summary(
         )
         lines.append("")
 
+    # How the recommendations have actually done. The only out-of-sample
+    # evidence this project has, and it accumulates by itself.
+    try:
+        from epl_betting_lab.data.loaders import load_matches
+        from epl_betting_lab.reports.card_scoreboard import (
+            build_scoreboard,
+            load_archived_cards,
+            render_scoreboard,
+        )
+
+        archived = load_archived_cards(outputs / "archive" / "automated_cards")
+        if archived:
+            lines += render_scoreboard(build_scoreboard(archived, load_matches()))
+    except Exception:
+        # A scoreboard that cannot be built must not take the card down with
+        # it: it is a report about the past, and the card is about this week.
+        lines += [
+            "_The recommendation scoreboard could not be built this run._",
+            "",
+        ]
+
     lines += [
         "## Settlement",
         "",

@@ -219,6 +219,25 @@ def build_notification(
         if root:
             lines += [f"**Start here:** {root}", ""]
 
+    try:
+        from epl_betting_lab.config import OUTPUTS_DIR
+        from epl_betting_lab.data.loaders import load_matches
+        from epl_betting_lab.reports.card_scoreboard import (
+            build_scoreboard,
+            load_archived_cards,
+            render_scoreboard,
+        )
+
+        archived = load_archived_cards(
+            Path(outputs if output_dir else OUTPUTS_DIR)
+            / "archive"
+            / "automated_cards"
+        )
+        if archived:
+            lines += render_scoreboard(build_scoreboard(archived, load_matches()))
+    except Exception:
+        pass
+
     lines += [
         "---",
         "",

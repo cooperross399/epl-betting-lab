@@ -53,6 +53,12 @@ Use the repo, the reports, and GitHub.
     this *in the market we looked at*". Check coverage per bookmaker with
     `Provider Market Discovery` → `line_coverage` before concluding a market is
     unreachable.
+- **No market in this system has a demonstrated edge.** 1X2 measures +5.3% over
+  500 bets (95% interval −3.4% to +14.1%); BTTS measures +15.0% over 51 bets
+  (−12.4% to +42.5%). Both intervals include zero. Separating a true +5% edge
+  from zero would take about 1,537 bets — roughly twelve seasons at the rate
+  this system bets. Say this plainly when asked whether it works:
+  `docs/what_we_can_and_cannot_claim.md`.
 - **Calibration is a precondition, not a goal.** It can rule a model out; it
   cannot rule one in. Never ship a model change on calibration evidence alone
   where a price-based backtest is available — Football-Data ships historical

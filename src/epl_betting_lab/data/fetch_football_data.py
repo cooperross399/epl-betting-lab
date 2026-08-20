@@ -87,8 +87,17 @@ def load_season(path: Path, season: str) -> pd.DataFrame:
     df["away_goals"] = pd.to_numeric(df.get("FTAG"), errors="coerce")
     df["result"] = df.get("FTR")
 
+    # Everything that is not a label is a number — except the parsed date,
+    # which is neither. Coercing it turned a datetime into microseconds since
+    # the epoch, and reading that back as nanoseconds put every match in
+    # January 1970. The integers stay in order, so sorting and walk-forward
+    # never noticed; only something that read a date could.
+    non_numeric = {
+        "season", "Div", "Date", "Time", "HomeTeam", "AwayTeam",
+        "FTR", "HTR", "home_team", "away_team", "result", "date",
+    }
     for col in df.columns:
-        if col not in {"season", "Div", "Date", "Time", "HomeTeam", "AwayTeam", "FTR", "HTR", "home_team", "away_team", "result"}:
+        if col not in non_numeric:
             df[col] = pd.to_numeric(df[col], errors="coerce")
 
     return df
@@ -134,5 +143,14 @@ def fetch_and_build_dataset(seasons: Iterable[str], force: bool = False) -> pd.D
     combined = pd.concat(frames, ignore_index=True)
     combined = combined.sort_values(["date", "home_team", "away_team"], na_position="last")
     out = PROCESSED_DIR / "epl_historical_matches.csv"
-    combined.to_csv(out, index=False)
+    # Write the date as a readable string. Left to itself, pandas serialised a
+    # microsecond-resolution datetime column as a bare integer, which read back
+    # as nanoseconds and put every match in 1970. Ordering survived — the
+    # integers are monotonic — so sorting and walk-forward were unaffected and
+    # nothing noticed for as long as nobody looked at a date.
+    written = combined.copy()
+    written["date"] = pd.to_datetime(written["date"], errors="coerce").dt.strftime(
+        "%Y-%m-%d"
+    )
+    written.to_csv(out, index=False)
     return combined

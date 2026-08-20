@@ -22,6 +22,15 @@ trust near the line.
 counts and Football-Data does not carry it. So card markets carry a real
 unmodelled variable, which is why their minimum edge should be set higher than
 the default rather than lower.
+
+**Team strengths are shrunk toward the league average.** A ratio computed from
+a season of matches is a noisy estimate of a team's real rate, and multiplying
+two noisy ratios — one side's generating, the other's conceding — compounds the
+noise. Left raw, the model produced predictions that were too spread out in
+both directions: 74% where 59% happened, and 26% where 48% happened. Shrinkage
+pulls each strength toward 1.0 in proportion to how little evidence stands
+behind it, so a team with sixty matches keeps most of its estimate and a team
+with six keeps almost none of it.
 """
 
 from __future__ import annotations
@@ -52,17 +61,27 @@ COUNT_EVENTS: dict[str, tuple[str, str]] = {
 class PoissonCountModel:
     """Poisson model for a counted event, fitted per team."""
 
+    #: Matches of evidence at which a team keeps half of its measured deviation
+    #: from the league average. Below it the estimate is mostly the average;
+    #: above it, mostly the team. Chosen because it is roughly a season and a
+    #: half, which is the point at which a corner rate stops moving much.
+    SHRINKAGE_MATCHES = 60
+
     def __init__(
         self,
         home_column: str,
         away_column: str,
         max_count: int = 25,
         minimum_matches: int = 5,
+        shrinkage_matches: int | None = None,
     ) -> None:
         self.home_column = home_column
         self.away_column = away_column
         self.max_count = max_count
         self.minimum_matches = minimum_matches
+        self.shrinkage_matches = (
+            self.SHRINKAGE_MATCHES if shrinkage_matches is None else shrinkage_matches
+        )
         self.team_strengths: dict[str, TeamCountStrength] = {}
         self.avg_home: float | None = None
         self.avg_away: float | None = None
@@ -107,9 +126,15 @@ class PoissonCountModel:
             generated = at_home[self.home_column].sum() + away[self.away_column].sum()
             conceded = at_home[self.away_column].sum() + away[self.home_column].sum()
             expected = (self.avg_home + self.avg_away) / 2 * played
+            raw_generates = float(generated / expected) if expected else 1.0
+            raw_concedes = float(conceded / expected) if expected else 1.0
+            # How much of the measured deviation this team has earned. A ratio
+            # from a handful of matches is mostly noise, and two of them
+            # multiplied together is worse; weight it by the evidence behind it.
+            weight = played / (played + self.shrinkage_matches)
             self.team_strengths[team] = TeamCountStrength(
-                generates=float(generated / expected) if expected else 1.0,
-                concedes=float(conceded / expected) if expected else 1.0,
+                generates=1.0 + weight * (raw_generates - 1.0),
+                concedes=1.0 + weight * (raw_concedes - 1.0),
             )
         return self
 

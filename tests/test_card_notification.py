@@ -8,7 +8,7 @@ reader is being asked to treat silence as information.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 import json
 from pathlib import Path
 
@@ -79,20 +79,24 @@ class TestWhenToSend:
         )
         assert post is True
 
-    def test_a_price_move_alone_stays_quiet(self) -> None:
+    def test_a_price_move_alone_stays_quiet_once_today_is_covered(self) -> None:
         post, reason = decide(
             card={"card_ready": True},
             generated={"card_generated": True},
             comparison=_comparison(price_changed=[{"label": "x"}, {"label": "y"}]),
+            last_sent=NOW - timedelta(hours=2),
+            now=NOW,
         )
         assert post is False
-        assert "2 price move(s) only" in reason
+        assert "2 price move(s)" in reason
 
-    def test_an_identical_card_stays_quiet(self) -> None:
+    def test_an_identical_card_stays_quiet_once_today_is_covered(self) -> None:
         post, _ = decide(
             card={"card_ready": True},
             generated={"card_generated": True},
             comparison=_comparison(),
+            last_sent=NOW - timedelta(hours=2),
+            now=NOW,
         )
         assert post is False
 
@@ -121,6 +125,8 @@ class TestWhenToSend:
             card={"card_ready": False},
             generated={"card_generated": False},
             comparison=_comparison(),
+            last_sent=NOW - timedelta(hours=2),
+            now=NOW,
         )
         assert post is False
         assert "nothing new" in reason
@@ -130,6 +136,8 @@ class TestWhenToSend:
             card={"card_ready": True},
             generated={"card_generated": False},
             comparison=_comparison(),
+            last_sent=NOW - timedelta(hours=2),
+            now=NOW,
         )
         assert post is False
 
@@ -192,7 +200,9 @@ class TestTheMessage:
         _write(tmp_path, ready=True, comparison=_comparison(added=[{"label": "x"}]))
         body = build_notification(output_dir=tmp_path, now=NOW)["body"]
 
-        assert "no message means" in body.lower()
+        # The promise changed: it used to be "no message means nothing moved".
+        # Now a card arrives daily, so a silent day means a run did not happen.
+        assert "a run did not happen" in body.lower()
 
     def test_a_blocked_card_is_not_reported_as_no_value(self, tmp_path: Path) -> None:
         _write(tmp_path, ready=False, comparison=_comparison(removed=[{"label": "x"}]))
@@ -373,6 +383,8 @@ class TestADegradedRunAlwaysSends:
             generated={"card_generated": True},
             comparison=_comparison(),
             degraded=[],
+            last_sent=NOW - timedelta(hours=2),
+            now=NOW,
         )
         assert post is False
 
@@ -403,7 +415,7 @@ class TestADegradedRunAlwaysSends:
         _write(tmp_path, ready=True, comparison=_comparison(added=[{"label": "x"}]))
         body = build_notification(output_dir=tmp_path, now=NOW)["body"]
 
-        assert "nothing broke" in body
+        assert "whenever a run goes wrong" in body
 
 
 class TestReadingTheDegradedRecord:
@@ -499,3 +511,73 @@ class TestTheEmailSaysHowItWasStarted:
 
         assert "--trigger" in text
         assert "github.event_name" in text
+
+
+class TestOneCardADay:
+    """Sending only on change is wrong for something that reads daily.
+
+    A price drifting is not news to a person. But a routine running every day
+    then reads a message from days ago and reports it as the state of play,
+    which is exactly what the first routine run did.
+    """
+
+    def _decide(self, last_sent, comparison=None):
+        from epl_betting_lab.reports.card_notification import decide
+
+        return decide(
+            card={"card_ready": True},
+            generated={"card_generated": True},
+            comparison=comparison or _comparison(price_changed=[{"label": "x"}]),
+            last_sent=last_sent,
+            now=NOW,
+        )
+
+    def test_the_first_card_of_the_day_sends(self) -> None:
+        post, reason = self._decide(NOW - timedelta(days=1))
+
+        assert post is True
+        assert "First card of the day" in reason
+        assert "unchanged" in reason
+
+    def test_a_second_run_the_same_day_stays_quiet(self) -> None:
+        """Ten runs a week must not become ten messages."""
+        post, _ = self._decide(NOW - timedelta(hours=2))
+
+        assert post is False
+
+    def test_a_second_run_still_sends_when_selections_change(self) -> None:
+        post, reason = self._decide(
+            NOW - timedelta(hours=2), _comparison(added=[{"label": "x"}])
+        )
+
+        assert post is True
+        assert "added" in reason
+
+    def test_nothing_sent_before_means_send(self) -> None:
+        post, _ = self._decide(None)
+
+        assert post is True
+
+    def test_a_degraded_run_sends_whatever_the_day(self) -> None:
+        from epl_betting_lab.reports.card_notification import decide
+
+        post, _ = decide(
+            card={"card_ready": True},
+            generated={"card_generated": True},
+            comparison=_comparison(),
+            degraded=["broke"],
+            last_sent=NOW - timedelta(hours=1),
+            now=NOW,
+        )
+
+        assert post is True
+
+    def test_the_footer_says_a_silent_day_means_a_missed_run(self, tmp_path: Path) -> None:
+        """The promise changed, so the wording had to."""
+        from epl_betting_lab.reports.card_notification import build_notification
+
+        _write(tmp_path, ready=True, comparison=_comparison(added=[{"label": "x"}]))
+        body = build_notification(output_dir=tmp_path, now=NOW)["body"]
+
+        assert "one card a day" in body
+        assert "a run did not happen" in body

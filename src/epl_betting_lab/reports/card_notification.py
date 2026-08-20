@@ -83,6 +83,8 @@ def decide(
     generated: Mapping[str, Any],
     comparison: Mapping[str, Any],
     degraded: Sequence[str] = (),
+    last_sent: datetime | None = None,
+    now: datetime | None = None,
 ) -> tuple[bool, str]:
     """Should this run be emailed, and why?
 
@@ -113,6 +115,7 @@ def decide(
     if not comparison.get("comparable"):
         return True, "First card with nothing to compare against."
 
+
     changes = len(added) + len(removed) + len(moved)
     if changes:
         parts = []
@@ -124,9 +127,22 @@ def decide(
             parts.append(f"{len(moved)} moved section")
         return True, "Selections changed: " + ", ".join(parts) + "."
 
+    # Nothing changed. Send anyway if nothing has gone out today.
+    #
+    # Sending only on change was right when a person read the mail: a price
+    # drifting is not news. It is wrong for something that reads daily, which
+    # then finds a message from days ago and reports it as the state of play —
+    # exactly what the first routine run did. A card a day is at most five
+    # messages a week and means whatever reads them is never looking at a stale
+    # one. A change is still described as a change, because that is the more
+    # useful sentence when there is one.
+    moment = (now or datetime.now(timezone.utc)).astimezone(timezone.utc)
+    if last_sent is None or last_sent.astimezone(timezone.utc).date() < moment.date():
+        return True, "First card of the day; the selections are unchanged."
+
     moved_prices = len(comparison.get("price_changed") or [])
     return False, (
-        f"Same selections as the previous run ({moved_prices} price move(s) only)."
+        f"Already sent today; same selections ({moved_prices} price move(s))."
     )
 
 
@@ -151,6 +167,7 @@ def build_notification(
     run_url: str = "",
     degraded: Sequence[str] = (),
     trigger: str = "",
+    last_sent: datetime | None = None,
 ) -> dict[str, Any]:
     outputs = OUTPUTS_DIR if output_dir is None else Path(output_dir)
     card = _read(outputs / "epl_card_task.json")
@@ -158,7 +175,12 @@ def build_notification(
     comparison = _read(outputs / "automated_card_comparison.json")
 
     should_post, reason = decide(
-        card=card, generated=generated, comparison=comparison, degraded=degraded
+        card=card,
+        generated=generated,
+        comparison=comparison,
+        degraded=degraded,
+        last_sent=last_sent,
+        now=now,
     )
     stamp = (now or datetime.now(timezone.utc)).astimezone(timezone.utc)
     card_ready = bool(card.get("card_ready", False)) and bool(
@@ -256,9 +278,9 @@ def build_notification(
         "",
         "Recommendations only. No bet was placed and no settlement was applied.",
         "",
-        "You are emailed when the selections change, and whenever a run goes "
-        "wrong. A price drifting is not news. So **no message means the run "
-        "happened, nothing broke, and the picks did not move.**",
+        "You get one card a day while the schedule runs, plus a message "
+        "whenever a run goes wrong. So **a day with no message at all means a "
+        "run did not happen.**",
         "",
     ]
     if run_url:

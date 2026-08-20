@@ -15,12 +15,19 @@ from epl_betting_lab.reports.card_notification import (
     build_notification,
     read_degraded,
 )
+from epl_betting_lab.reports.schedule_health import parse_run_time as read_run_time
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", required=True, help="Where to write the comment body")
     parser.add_argument("--run-url", default="", help="Link back to the run")
+    parser.add_argument(
+        "--last-sent",
+        default="",
+        help="ISO timestamp of the last message sent, so at most one card a "
+        "day is sent. Usually the created_at of the newest issue comment.",
+    )
     parser.add_argument(
         "--trigger",
         default="",
@@ -43,7 +50,8 @@ def main() -> None:
     result = build_notification(
         run_url=args.run_url,
         degraded=read_degraded(args.degraded_file),
-        trigger=args.trigger
+        trigger=args.trigger,
+        last_sent=read_run_time(args.last_sent)
     )
     Path(args.out).write_text(result["body"], encoding="utf-8")
     if args.title_out:

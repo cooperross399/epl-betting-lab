@@ -54,8 +54,12 @@ on:
     # Running twice is safe and nearly free. The concurrency group serialises
     # them, the second run simply refetches slightly fresher prices, and the
     # email only fires when the selections change — so a duplicate run is
-    # invisible unless it has something new to say. Ten runs a week is about
-    # 1,050 credits a month against 20,000.
+    # invisible unless it has something new to say.
+    #
+    # Ten runs a week is about 4,600 credits a month against 20,000 — roughly a
+    # quarter of the allowance. (An earlier note here said 1,050, computed from
+    # a per-run cost that predated the extra markets. The measured figure is
+    # about 105 credits a run.)
     - cron: "0 13 * * 4"
     - cron: "30 14 * * 4"
     - cron: "0 13 * * 5"

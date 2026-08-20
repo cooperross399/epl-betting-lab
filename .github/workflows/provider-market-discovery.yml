@@ -31,6 +31,10 @@ on:
         description: "ISO timestamp to test historical-odds access, e.g. 2025-08-16T12:00:00Z"
         required: false
         default: ""
+      historical_event_id:
+        description: "With historical_probe: query one event's historical odds (needed for BTTS)"
+        required: false
+        default: ""
       line_coverage:
         description: "market@line pairs to check per bookmaker, e.g. alternate_totals@2.5"
         required: false
@@ -92,6 +96,9 @@ jobs:
           fi
           if [ -n "${{ inputs.historical_probe }}" ]; then
             ARGS="$ARGS --historical-probe ${{ inputs.historical_probe }}"
+          fi
+          if [ -n "${{ inputs.historical_event_id }}" ]; then
+            ARGS="$ARGS --historical-event-id ${{ inputs.historical_event_id }}"
           fi
           if [ -n "${{ inputs.line_coverage }}" ]; then
             ARGS="$ARGS --line-coverage ${{ inputs.line_coverage }}"

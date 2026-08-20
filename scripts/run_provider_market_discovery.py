@@ -110,6 +110,16 @@ def parse_args() -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--historical-event-id",
+        default="",
+        help=(
+            "With --historical-probe, ask the per-event historical endpoint "
+            "for this event instead of the bulk one. BTTS is refused by the "
+            "bulk endpoint both live and historically, so this is the only "
+            "route by which it could ever be backtested."
+        ),
+    )
+    parser.add_argument(
         "--line-coverage",
         default="",
         help=(
@@ -180,8 +190,14 @@ def main() -> int:
             when=args.historical_probe,
             markets=args.markets,
             regions=args.regions,
+            event_id=args.historical_event_id,
         )
-        print(f"Historical odds at {args.historical_probe}:")
+        where = (
+            f"event {args.historical_event_id}"
+            if args.historical_event_id
+            else "the whole slate"
+        )
+        print(f"Historical odds at {args.historical_probe} for {where}:")
         print(f"  available   : {outcome['available']}")
         print(f"  http status : {outcome['status_code']}")
         print(f"  credits used: {outcome['requests_last'] or 'unknown'}")

@@ -204,6 +204,8 @@ def main() -> int:
         print(f"  remaining   : {outcome['requests_remaining'] or 'unknown'}")
         print(f"  events      : {outcome['event_count']}")
         print(f"  markets seen: {', '.join(outcome['markets_seen']) or 'none'}")
+        for sample in outcome.get("sample_events") or []:
+            print(f"  event       : {sample['id']}  {sample['fixture']}")
         if outcome["detail"]:
             print(f"  detail      : {outcome['detail']}")
 

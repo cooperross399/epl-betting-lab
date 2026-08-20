@@ -624,3 +624,35 @@ class TestShrinkageImprovedCalibration:
         gap = worst_gap(summarize_calibration(predictions))
 
         assert gap < 0.15, f"worst judged gap is {gap:.1%}"  # was 21.6%
+
+
+class TestThreeWayCornersAreCalibrated:
+    """Measured, not assumed: it is a different question from the totals."""
+
+    @needs_dataset
+    def test_the_corner_three_way_is_well_calibrated(self) -> None:
+        from epl_betting_lab.reports.count_model_calibration import (
+            summarize_calibration,
+            walk_forward_three_way,
+            worst_gap,
+        )
+
+        predictions = walk_forward_three_way(load_matches(), event="corners")
+        summary = summarize_calibration(predictions)
+        gap = worst_gap(summary)
+
+        assert gap < 0.05, f"worst judged gap is {gap:.1%}"
+
+    @needs_dataset
+    def test_every_band_carries_enough_matches_to_judge(self) -> None:
+        """A clean gap across thin bands would not mean much."""
+        from epl_betting_lab.reports.count_model_calibration import (
+            summarize_calibration,
+            walk_forward_three_way,
+        )
+
+        summary = summarize_calibration(
+            walk_forward_three_way(load_matches(), event="corners")
+        )
+
+        assert all(row.judged for row in summary)

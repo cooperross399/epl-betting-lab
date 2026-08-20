@@ -426,6 +426,7 @@ def discover_event_markets(
     requester: Requester | None = None,
     timeout_seconds: float = 20.0,
     dump_outcome_shapes: bool = False,
+    line_coverage: Sequence[tuple[str, float]] = (),
 ) -> dict[str, Any]:
     """Query the per-event odds endpoint for additional markets.
 
@@ -448,6 +449,13 @@ def discover_event_markets(
     # be written against the real field names, and guessing them is how a
     # market silently returns nothing.
     outcome_shapes: dict[str, dict[str, Any]] = {}
+    # (market, line) -> book -> number of fixtures offering it. Which books
+    # carry a line, across the whole slate, is the question that decides
+    # whether a market is takeable — a line offered by a book with no account
+    # is not a price.
+    coverage: dict[str, dict[str, set[str]]] = {
+        f"{market}@{line}": {} for market, line in line_coverage
+    }
 
     for event in events:
         event_id = _clean(event.get("provider_event_id") or event.get("id"))
@@ -518,6 +526,22 @@ def discover_event_markets(
                             ),
                             "outcomes": samples,
                         }
+                    for want_market, want_line in line_coverage:
+                        if key != want_market:
+                            continue
+                        for outcome in market.get("outcomes") or []:
+                            if not isinstance(outcome, Mapping):
+                                continue
+                            point = outcome.get("point")
+                            try:
+                                if point is None or abs(
+                                    float(point) - float(want_line)
+                                ) > 1e-9:
+                                    continue
+                            except (TypeError, ValueError):
+                                continue
+                            slot = coverage[f"{want_market}@{want_line}"]
+                            slot.setdefault(book, set()).add(event_id)
                     if key == "btts":
                         event_books.add(book)
                         books_with_btts.add(book)
@@ -545,6 +569,13 @@ def discover_event_markets(
         "events_with_btts": sum(1 for item in per_event if item["has_btts"]),
         "bookmakers_offering_btts": sorted(books_with_btts),
         "outcome_shapes": outcome_shapes,
+        "line_coverage": {
+            key: {
+                book: len(events_seen)
+                for book, events_seen in sorted(books.items())
+            }
+            for key, books in coverage.items()
+        },
         "markets_returned": sorted({m for item in per_event for m in item["markets_returned"]}),
         "markets_absent": sorted(
             set(market_list)

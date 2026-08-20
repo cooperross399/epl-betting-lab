@@ -22,6 +22,13 @@ def main() -> None:
     parser.add_argument("--out", required=True, help="Where to write the comment body")
     parser.add_argument("--run-url", default="", help="Link back to the run")
     parser.add_argument(
+        "--trigger",
+        default="",
+        help="What started the run, e.g. schedule or workflow_dispatch. A "
+        "manual run says so, because in an inbox it is otherwise "
+        "indistinguishable from a real one.",
+    )
+    parser.add_argument(
         "--degraded-file",
         help="File listing what went wrong, one reason per line. A degraded "
         "run always sends, so that silence stays trustworthy.",
@@ -34,7 +41,9 @@ def main() -> None:
     args = parser.parse_args()
 
     result = build_notification(
-        run_url=args.run_url, degraded=read_degraded(args.degraded_file)
+        run_url=args.run_url,
+        degraded=read_degraded(args.degraded_file),
+        trigger=args.trigger
     )
     Path(args.out).write_text(result["body"], encoding="utf-8")
     if args.title_out:

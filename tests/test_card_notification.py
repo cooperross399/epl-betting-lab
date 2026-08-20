@@ -430,3 +430,72 @@ class TestReadingTheDegradedRecord:
         from epl_betting_lab.reports.card_notification import read_degraded
 
         assert read_degraded(None) == []
+
+
+class TestTheProductionPathIsExercised:
+    """Every test passed `output_dir`. Production does not.
+
+    A local import shadowed the module-level OUTPUTS_DIR for the whole
+    function, so the default path raised UnboundLocalError while every test
+    passed — because a conditional expression never evaluates the branch it
+    does not take. The delivery step is continue-on-error, so the only symptom
+    would have been email quietly stopping.
+    """
+
+    def test_it_builds_with_no_output_directory(self) -> None:
+        from epl_betting_lab.reports.card_notification import build_notification
+
+        result = build_notification()
+
+        assert isinstance(result["body"], str)
+        assert result["body"].strip()
+
+    def test_it_builds_with_no_arguments_at_all(self) -> None:
+        from epl_betting_lab.reports.card_notification import build_notification
+
+        assert build_notification()["should_post"] in {True, False}
+
+
+class TestTheEmailSaysHowItWasStarted:
+    """A manual run and a scheduled one read identically in an inbox.
+
+    Testing this system produced a run of failure mails indistinguishable from
+    real ones, and a routine reading them reported a stale manual test as the
+    current state.
+    """
+
+    def _body(self, tmp_path: Path, trigger: str) -> str:
+        _write(tmp_path, ready=True, comparison=_comparison(added=[{"label": "x"}]))
+        from epl_betting_lab.reports.card_notification import build_notification
+
+        return build_notification(
+            output_dir=tmp_path, now=NOW, trigger=trigger,
+            degraded=["something broke"],
+        )["body"]
+
+    def test_a_manual_run_says_so_in_the_heading(self, tmp_path: Path) -> None:
+        assert "manual run" in self._body(tmp_path, "workflow_dispatch")
+
+    def test_a_manual_run_explains_what_that_means(self, tmp_path: Path) -> None:
+        body = self._body(tmp_path, "workflow_dispatch")
+
+        assert "started by hand, not by the schedule" in body
+
+    def test_a_scheduled_run_is_not_labelled(self, tmp_path: Path) -> None:
+        """The normal case should not carry a caveat."""
+        body = self._body(tmp_path, "schedule")
+
+        assert "manual run" not in body
+
+    def test_an_unknown_trigger_is_treated_as_scheduled(self, tmp_path: Path) -> None:
+        assert "manual run" not in self._body(tmp_path, "")
+
+    def test_the_workflow_passes_the_trigger_through(self) -> None:
+        from epl_betting_lab.config import PROJECT_ROOT
+
+        text = (
+            PROJECT_ROOT / ".github" / "workflows" / "matchday-refresh.yml"
+        ).read_text(encoding="utf-8")
+
+        assert "--trigger" in text
+        assert "github.event_name" in text

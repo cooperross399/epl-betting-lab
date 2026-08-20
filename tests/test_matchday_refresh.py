@@ -690,3 +690,50 @@ def test_the_settle_routine_checks_the_schedule_is_alive() -> None:
 
     assert "a run was probably missed" in flat
     assert "may need enabling" in flat
+
+
+def test_the_prompts_demand_date_order_not_search_relevance() -> None:
+    """The first routine run read yesterday's message as today's state.
+
+    It missed a card issued that morning. Search relevance is not date order,
+    and "most recent" is not an instruction a search tool reliably honours.
+    """
+    text = (PROJECT_ROOT / "docs" / "epl_scheduled_tasks_bridge.md").read_text(
+        encoding="utf-8"
+    )
+    flat = " ".join(text.split())
+
+    assert "Sort by date and take the newest" in flat
+    assert "search relevance" in flat.lower()
+
+
+def test_the_prompts_require_stating_the_timestamp_read() -> None:
+    """A stale answer should be visible as one."""
+    text = (PROJECT_ROOT / "docs" / "epl_scheduled_tasks_bridge.md").read_text(
+        encoding="utf-8"
+    )
+    flat = " ".join(text.split())
+
+    assert "stating the timestamp" in flat or "State the timestamp" in flat
+    assert "more than 24 hours old" in flat
+
+
+def test_the_prompts_separate_the_newest_message_from_the_newest_card() -> None:
+    """A degraded run can arrive after the last good card."""
+    text = (PROJECT_ROOT / "docs" / "epl_scheduled_tasks_bridge.md").read_text(
+        encoding="utf-8"
+    )
+    flat = " ".join(text.split())
+
+    assert "the newest actual CARD" in flat
+    assert "still the current advice" in flat
+
+
+def test_the_prompts_know_about_manual_runs() -> None:
+    text = (PROJECT_ROOT / "docs" / "epl_scheduled_tasks_bridge.md").read_text(
+        encoding="utf-8"
+    )
+    flat = " ".join(text.split())
+
+    assert "manual run" in flat
+    assert "started it by hand" in flat

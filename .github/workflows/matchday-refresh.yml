@@ -280,7 +280,8 @@ jobs:
           RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           DECISION=$(python scripts/post_card_to_issue.py \
             --out card_comment.md --title-out card_title.txt \
-            --degraded-file run_degraded.txt --run-url "$RUN_URL" | tail -1)
+            --degraded-file run_degraded.txt --run-url "$RUN_URL" \
+            --trigger "${{ github.event_name }}" | tail -1)
           if [ "${{ inputs.force_email }}" = "true" ]; then
             echo "Forced: sending the current card regardless of changes."
             DECISION=post

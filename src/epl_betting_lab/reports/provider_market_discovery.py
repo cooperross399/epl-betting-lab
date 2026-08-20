@@ -380,8 +380,13 @@ def probe_historical_odds(
     sport_key: str = "soccer_epl",
     requester: Requester | None = None,
     timeout_seconds: float = 20.0,
+    event_id: str = "",
 ) -> dict[str, Any]:
     """Can this plan read historical odds, and what does one snapshot cost?
+
+    With `event_id`, asks the per-event historical endpoint instead. The split
+    matters: the bulk endpoint refuses BTTS live and refuses it historically
+    too, so if BTTS is ever to be backtested it has to come from here.
 
     Every market except 1X2 and the 2.5 goals line has no historical price in
     Football-Data, so none of them can be backtested for profit from it. If the
@@ -394,9 +399,14 @@ def probe_historical_odds(
         raise DiscoveryError(f"A historical probe requires `{API_KEY_ENV}`.")
     request = requester or _default_requester
     root = _validate_base_url(base_url)
+    url = (
+        f"{root}/v4/historical/sports/{sport_key}/events/{event_id}/odds"
+        if event_id
+        else f"{root}/v4/historical/sports/{sport_key}/odds"
+    )
     try:
         response = request(
-            f"{root}/v4/historical/sports/{sport_key}/odds",
+            url,
             params={
                 "apiKey": api_key,
                 "regions": regions,

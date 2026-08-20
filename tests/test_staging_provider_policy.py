@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from epl_betting_lab.staging_provider_policy import (
@@ -246,3 +246,76 @@ def test_provider_run_age_fails_closed_when_policy_is_unavailable(
 
     assert result["provider_age_status"] == "Policy unavailable"
     assert result["fresh"] is False
+
+
+# --- the Thursday cutoff applies on Thursdays -------------------------------
+#
+# It used to be measured against "this week's Thursday", computed as today plus
+# (3 - weekday). On Friday, Saturday and Sunday that lands on the Thursday just
+# gone, so a receipt made on any of those days was always after it. Every
+# weekend run was blocked by a rule about Thursday — and the card is built five
+# days a week, three of them the matchdays. Week 1 is a Friday, a Saturday and
+# a Sunday, so every card that mattered would have been refused, citing a
+# Thursday policy.
+
+
+def _at(day: int, hour: int) -> datetime:
+    """A receipt at a given hour on a given weekday of the same week."""
+    monday = datetime(2026, 8, 17, tzinfo=timezone.utc)  # a Monday
+    return (monday + timedelta(days=day)).replace(hour=hour + 4)  # 04:00 UTC = 00:00 ET
+
+
+def _evaluate(tmp_path: Path, when: datetime) -> dict:
+    return evaluate_staging_provider_policy(
+        _load_policy(tmp_path),
+        _provenance(),
+        receipt_generated_at=when,
+        evaluated_at=when + timedelta(minutes=5),
+    )
+
+
+def test_a_friday_receipt_is_not_blocked_by_the_thursday_cutoff(
+    tmp_path: Path,
+) -> None:
+    result = _evaluate(tmp_path, _at(4, 9))
+
+    assert result["cutoff_policy_status"] == "Not a Thursday"
+    assert not any("cutoff" in str(b).lower() for b in result["blockers"])
+
+
+def test_a_saturday_receipt_is_not_blocked(tmp_path: Path) -> None:
+    result = _evaluate(tmp_path, _at(5, 9))
+
+    assert result["cutoff_policy_status"] == "Not a Thursday"
+
+
+def test_a_sunday_receipt_is_not_blocked(tmp_path: Path) -> None:
+    result = _evaluate(tmp_path, _at(6, 9))
+
+    assert result["cutoff_policy_status"] == "Not a Thursday"
+
+
+def test_a_thursday_receipt_before_the_cutoff_passes(tmp_path: Path) -> None:
+    result = _evaluate(tmp_path, _at(3, 9))
+
+    assert result["cutoff_policy_status"] == "Before cutoff"
+
+
+def test_a_thursday_receipt_after_the_cutoff_is_still_blocked(
+    tmp_path: Path,
+) -> None:
+    """The rule still does the job it was written for."""
+    result = _evaluate(tmp_path, _at(3, 11))
+
+    assert result["cutoff_policy_status"] == "After cutoff"
+    assert any("cutoff" in str(b).lower() for b in result["blockers"])
+
+
+def test_every_day_the_card_runs_can_pass_the_cutoff(tmp_path: Path) -> None:
+    """Thursday, Friday, Saturday, Sunday and Monday all build cards."""
+    for day, hour in ((3, 9), (4, 9), (5, 5), (6, 5), (0, 9)):
+        result = _evaluate(tmp_path, _at(day, hour))
+        assert result["cutoff_policy_status"] in {"Before cutoff", "Not a Thursday"}, (
+            day,
+            result["cutoff_policy_status"],
+        )

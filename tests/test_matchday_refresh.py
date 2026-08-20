@@ -575,3 +575,23 @@ def test_the_stated_credit_cost_matches_the_schedule() -> None:
     assert "4,600 credits a month" in text
     assert 4_000 < monthly < 5_500, f"schedule now costs ~{monthly:.0f}"
     assert monthly < MONTHLY_REQUEST_ALLOWANCE
+
+
+def test_thursday_triggers_precede_the_policy_cutoff() -> None:
+    """The provider policy refuses a Thursday receipt after 10:00 New York.
+
+    That is 14:00 UTC in summer. A Thursday trigger later than that is blocked
+    by policy every week, and reports a provider fault rather than a scheduling
+    one — so Thursday's backup runs before the primary rather than after it.
+    """
+    text = _workflow()
+    thursday = [
+        line for line in text.splitlines()
+        if "- cron:" in line and line.rstrip().endswith('* * 4"')
+    ]
+
+    assert len(thursday) >= 2
+    for line in thursday:
+        minute, hour = line.split('"')[1].split()[:2]
+        at = int(hour) + int(minute) / 60
+        assert at < 14.0, f"{hour}:{minute} UTC is past the 10:00 New York cutoff"

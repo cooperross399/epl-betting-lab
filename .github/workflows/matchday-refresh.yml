@@ -44,11 +44,28 @@ name: Matchday Refresh
 # runs it buys.
 on:
   schedule:
+    # Each matchday is triggered twice, ninety minutes apart. GitHub documents
+    # that scheduled workflows may be delayed or dropped entirely under load,
+    # and one was dropped the day this was written: 13:00 Thursday produced no
+    # run at all, while a Monday cron in the same repository had fired three
+    # days earlier. A trigger that usually works is not a trigger a card can
+    # depend on.
+    #
+    # Running twice is safe and nearly free. The concurrency group serialises
+    # them, the second run simply refetches slightly fresher prices, and the
+    # email only fires when the selections change — so a duplicate run is
+    # invisible unless it has something new to say. Ten runs a week is about
+    # 1,050 credits a month against 20,000.
     - cron: "0 13 * * 4"
+    - cron: "30 14 * * 4"
     - cron: "0 13 * * 5"
+    - cron: "30 14 * * 5"
     - cron: "0 9 * * 6"
+    - cron: "30 10 * * 6"
     - cron: "0 9 * * 0"
+    - cron: "30 10 * * 0"
     - cron: "0 13 * * 1"
+    - cron: "30 14 * * 1"
   workflow_dispatch:
     inputs:
       skip_provider_fetch:

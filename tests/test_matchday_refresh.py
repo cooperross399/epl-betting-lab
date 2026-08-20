@@ -54,7 +54,11 @@ def test_every_matchday_has_a_run() -> None:
 
 
 def test_the_weekend_runs_land_before_the_earliest_kick_off() -> None:
-    """A 12:30 UK kick-off is 11:30 UTC in summer; 13:00 would be too late."""
+    """A 12:30 UK kick-off is 11:30 UTC in summer.
+
+    Every weekend trigger, primary and backup, has to precede it — a backup
+    that fires after kick-off would refresh prices nobody can take.
+    """
     text = _workflow()
     weekend = [
         line
@@ -62,10 +66,34 @@ def test_the_weekend_runs_land_before_the_earliest_kick_off() -> None:
         if "- cron:" in line and line.rstrip().endswith(('* * 6"', '* * 0"'))
     ]
 
-    assert len(weekend) == 2
+    assert len(weekend) >= 2
     for line in weekend:
-        hour = int(line.split('"')[1].split()[1])
-        assert hour <= 9, f"{hour}:00 UTC is too late for a 12:30 UK kick-off"
+        minute, hour = line.split('"')[1].split()[:2]
+        at = int(hour) + int(minute) / 60
+        assert at <= 11.0, f"{hour}:{minute} UTC is too late for a 12:30 UK kick-off"
+
+
+def test_every_matchday_has_a_backup_trigger() -> None:
+    """GitHub drops scheduled events under load, and dropped one the day this
+    was written: 13:00 Thursday produced no run at all. A trigger that usually
+    works is not a trigger a card can depend on."""
+    text = _workflow()
+    days = [
+        line.split("* *", 1)[1].strip().strip('"')
+        for line in text.splitlines()
+        if "- cron:" in line
+    ]
+
+    for day in ("4", "5", "6", "0", "1"):
+        assert days.count(day) >= 2, f"day {day} has no backup trigger"
+
+
+def test_a_duplicate_run_cannot_collide_with_the_first() -> None:
+    """Two triggers ninety minutes apart must serialise, not race."""
+    text = _workflow()
+
+    assert "group: matchday-refresh" in text
+    assert "cancel-in-progress: false" in text
 
 
 #: Measured, not estimated: two live runs moved the counter from 340 to 311.

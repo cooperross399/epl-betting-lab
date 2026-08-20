@@ -53,6 +53,12 @@ Use the repo, the reports, and GitHub.
     this *in the market we looked at*". Check coverage per bookmaker with
     `Provider Market Discovery` → `line_coverage` before concluding a market is
     unreachable.
+- **Every market has now been measured against real prices** — the unpriced ones
+  were bought per event. Not one interval excludes zero, `double_chance` is
+  negative, `draw_no_bet`'s positive number rests on thirteen bets, and
+  `corners_1x2` can never be measured because the provider does not retain it
+  historically. Enable nothing new on this evidence:
+  `docs/every_market_measured.md`.
 - **No market in this system has a demonstrated edge.** 1X2 measures +5.3% over
   500 bets (95% interval −3.4% to +14.1%); BTTS measures +15.0% over 51 bets
   (−12.4% to +42.5%). Both intervals include zero. Separating a true +5% edge

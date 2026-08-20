@@ -124,23 +124,31 @@ def _slate_snapshot(
     return [event for event in (data or []) if isinstance(event, Mapping)]
 
 
-def _event_btts(
+def _event_prices(
     *,
     api_key: str,
     event_id: str,
     when: datetime,
+    markets: Sequence[str],
     request: Requester,
     root: str,
     sport_key: str,
     timeout_seconds: float,
-) -> dict[str, float]:
-    """Best available price per BTTS selection, across books."""
+) -> dict[str, dict[str, float]]:
+    """Best price per selection, per market, across books.
+
+    Several markets travel in one request. Historical credits are charged per
+    market per region, so asking for three markets together costs the same as
+    three separate calls — but it needs one round trip and, more importantly,
+    prices every market at the same instant. Prices sampled minutes apart are
+    not strictly comparable, and comparing markets is the whole point.
+    """
     response = request(
         f"{root}/v4/historical/sports/{sport_key}/events/{event_id}/odds",
         params={
             "apiKey": api_key,
             "regions": "us",
-            "markets": "btts",
+            "markets": ",".join(markets),
             "oddsFormat": "american",
             "date": when.strftime("%Y-%m-%dT%H:%M:%SZ"),
         },
@@ -155,25 +163,32 @@ def _event_btts(
     if not isinstance(data, Mapping):
         return {}
 
-    best: dict[str, float] = {}
+    wanted = {m.strip() for m in markets if m.strip()}
+    best: dict[str, dict[str, float]] = {}
     for bookmaker in data.get("bookmakers", []) or []:
         if not isinstance(bookmaker, Mapping):
             continue
         for market in bookmaker.get("markets", []) or []:
-            if not isinstance(market, Mapping) or market.get("key") != "btts":
+            if not isinstance(market, Mapping):
+                continue
+            key = str(market.get("key", "")).strip()
+            if key not in wanted:
                 continue
             for outcome in market.get("outcomes", []) or []:
                 if not isinstance(outcome, Mapping):
                     continue
-                selection = str(outcome.get("name", "")).strip().casefold()
-                if selection not in {"yes", "no"}:
-                    continue
+                name = str(outcome.get("name", "")).strip()
+                point = outcome.get("point")
+                # Keep the line in the selection name, so a totals ladder does
+                # not collapse every line into one column.
+                selection = name if point is None else f"{name}@{point}"
                 price = _american(outcome.get("price"))
                 if price is None:
                     continue
+                slot = best.setdefault(key, {})
                 # Best price = the one that pays most for the same outcome.
-                if selection not in best or price > best[selection]:
-                    best[selection] = price
+                if selection not in slot or price > slot[selection]:
+                    slot[selection] = price
     return best
 
 
@@ -203,6 +218,7 @@ def harvest_btts_history(
     api_key: str,
     budget: HarvestBudget,
     hours_before: int = 3,
+    markets: Sequence[str] = ("btts",),
     already_harvested: Sequence[str] = (),
     requester: Requester | None = None,
     base_url: str = DEFAULT_API_BASE_URL,
@@ -249,33 +265,43 @@ def harvest_btts_history(
             result.errors.append(f"Event {event_id}: unreadable kick-off time.")
             continue
         when = kickoff - timedelta(hours=hours_before)
-        if not budget.can_afford():
+        if not budget.can_afford(HISTORICAL_CREDITS_PER_REQUEST * len(markets)):
             result.stopped_early = True
             break
-        prices = _event_btts(
+        prices = _event_prices(
             api_key=api_key,
             event_id=event_id,
             when=when,
+            markets=markets,
             request=request,
             root=root,
             sport_key=sport_key,
             timeout_seconds=timeout_seconds,
         )
-        budget.charge()
+        budget.charge(HISTORICAL_CREDITS_PER_REQUEST * len(markets))
         if not prices:
             continue
         result.events_with_btts += 1
         seen.add(key)
-        result.rows.append(
-            {
-                "sampled_at": when.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                "commence_time": kickoff.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                "home_team": str(event.get("home_team", "")),
-                "away_team": str(event.get("away_team", "")),
-                "btts_yes_american": prices.get("yes"),
-                "btts_no_american": prices.get("no"),
-            }
-        )
+        base = {
+            "sampled_at": when.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "commence_time": kickoff.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "home_team": str(event.get("home_team", "")),
+            "away_team": str(event.get("away_team", "")),
+        }
+        # One row per market per selection. A wide table would need a column
+        # per line of every ladder and would change shape whenever a book added
+        # one; long rows survive that.
+        for market_key, selections in sorted(prices.items()):
+            for selection, price in sorted(selections.items()):
+                result.rows.append(
+                    {
+                        **base,
+                        "market": market_key,
+                        "selection": selection,
+                        "american": price,
+                    }
+                )
 
     result.credits_spent = budget.spent
     return result

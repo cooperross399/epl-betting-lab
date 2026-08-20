@@ -22,6 +22,10 @@ on:
         description: "Hard ceiling on credits spent. ~110 buys one matchday."
         required: true
         default: "500"
+      markets:
+        description: "Comma-separated market keys. Each multiplies the credit cost."
+        required: false
+        default: "btts"
       hours_before:
         description: "Sample this many hours before kick-off"
         required: false
@@ -84,7 +88,7 @@ jobs:
           mkdir -p data/processed
           gh run download "$previous" --name historical-btts --dir data/processed \
             || echo "No prior file on run $previous."
-          wc -l data/processed/historical_btts_odds.csv 2>/dev/null || true
+          wc -l data/processed/historical_market_odds.csv 2>/dev/null || true
 
       - name: Harvest
         env:
@@ -96,6 +100,7 @@ jobs:
             --end "${{ inputs.end }}" \
             --credit-limit "${{ inputs.credit_limit }}" \
             --hours-before "${{ inputs.hours_before }}" \
+            --markets "${{ inputs.markets }}" \
             ${{ inputs.append == true && '--append' || '' }}
 
       - name: Upload the prices
@@ -103,7 +108,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: historical-btts
-          path: data/processed/historical_btts_odds.csv
+          path: data/processed/historical_market_odds.csv
           if-no-files-found: warn
           retention-days: 90
 

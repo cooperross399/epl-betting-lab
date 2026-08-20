@@ -71,7 +71,12 @@ DAY = [datetime(2025, 8, 16, 15, 0, tzinfo=timezone.utc)]
 
 
 class TestHarvest:
-    def test_it_returns_a_row_per_fixture(self) -> None:
+    def test_it_returns_a_row_per_selection(self) -> None:
+        """Long rows, not wide.
+
+        A wide table would need a column per line of every ladder and would
+        change shape whenever a book added one.
+        """
         result = harvest_btts_history(
             DAY,
             api_key="k",
@@ -79,8 +84,32 @@ class TestHarvest:
             requester=_requester([_event()], _btts_payload()),
         )
 
-        assert len(result.rows) == 1
-        assert result.rows[0]["home_team"] == "Arsenal"
+        assert len(result.rows) == 2
+        assert {r["selection"] for r in result.rows} == {"Yes", "No"}
+        assert all(r["home_team"] == "Arsenal" for r in result.rows)
+
+    def test_each_row_names_its_market(self) -> None:
+        result = harvest_btts_history(
+            DAY, api_key="k", budget=HarvestBudget(limit=1000),
+            requester=_requester([_event()], _btts_payload()),
+        )
+
+        assert {r["market"] for r in result.rows} == {"btts"}
+
+    def test_a_line_is_kept_in_the_selection(self) -> None:
+        """Otherwise a totals ladder collapses into a single column."""
+        payload = {"data": {"bookmakers": [{"title": "FanDuel", "markets": [
+            {"key": "alternate_totals_corners", "outcomes": [
+                {"name": "Over", "point": 9.5, "price": -110},
+                {"name": "Over", "point": 10.5, "price": 120},
+            ]}]}]}}
+        result = harvest_btts_history(
+            DAY, api_key="k", budget=HarvestBudget(limit=1000),
+            markets=["alternate_totals_corners"],
+            requester=_requester([_event()], payload),
+        )
+
+        assert {r["selection"] for r in result.rows} == {"Over@9.5", "Over@10.5"}
 
     def test_it_keeps_both_selections(self) -> None:
         result = harvest_btts_history(
@@ -89,10 +118,35 @@ class TestHarvest:
             budget=HarvestBudget(limit=1000),
             requester=_requester([_event()], _btts_payload(yes=150, no=-180)),
         )
-        row = result.rows[0]
+        prices = {r["selection"]: r["american"] for r in result.rows}
 
-        assert row["btts_yes_american"] == 150
-        assert row["btts_no_american"] == -180
+        assert prices == {"Yes": 150, "No": -180}
+
+    def test_several_markets_travel_in_one_request(self) -> None:
+        """They must be priced at the same instant to be comparable."""
+        payload = {"data": {"bookmakers": [{"title": "FanDuel", "markets": [
+            {"key": "btts", "outcomes": [{"name": "Yes", "price": 150}]},
+            {"key": "draw_no_bet", "outcomes": [{"name": "Arsenal", "price": -140}]},
+        ]}]}}
+        result = harvest_btts_history(
+            DAY, api_key="k", budget=HarvestBudget(limit=1000),
+            markets=["btts", "draw_no_bet"],
+            requester=_requester([_event()], payload),
+        )
+
+        assert {r["market"] for r in result.rows} == {"btts", "draw_no_bet"}
+        assert len({r["sampled_at"] for r in result.rows}) == 1
+
+    def test_asking_for_more_markets_costs_more(self) -> None:
+        budget = HarvestBudget(limit=1000)
+        harvest_btts_history(
+            DAY, api_key="k", budget=budget,
+            markets=["btts", "draw_no_bet", "corners_1x2"],
+            requester=_requester([_event()], _btts_payload()),
+        )
+
+        # One slate snapshot, plus ten credits per market on one event.
+        assert budget.spent == 10 + 30
 
     def test_it_keeps_the_best_price_across_books(self) -> None:
         """The card quotes the best book it can reach, so this must too."""
@@ -111,7 +165,7 @@ class TestHarvest:
             requester=_requester([_event()], payload),
         )
 
-        assert result.rows[0]["btts_yes_american"] == 165
+        assert result.rows[0]["american"] == 165
 
     def test_it_samples_before_that_fixture_own_kick_off(self) -> None:
         """Not at a fixed hour of the day.
@@ -148,7 +202,8 @@ class TestHarvest:
             requester=_requester([_event()], _btts_payload()),
         )
 
-        assert len(result.rows) == 1
+        # Two selections from one fixture, not four from two.
+        assert len(result.rows) == 2
 
     def test_a_fixture_already_bought_is_not_bought_again(self) -> None:
         """Credits already spent must not be spent twice."""

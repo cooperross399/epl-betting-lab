@@ -50,6 +50,30 @@ independent-Poisson tails is known to overstate long prices, the excluded band
 went 0 for 12, and the result held across every threshold from +300 to +600. The
 ROI improvement is the weakest part of that argument.
 
+## Slicing the same data does not produce new evidence
+
+Investigating this project produced roughly twenty-five segment analyses of the
+same four seasons: by selection, by price band, by edge band, by season, by
+market, by conviction. Exactly one of them cleared 95% significance — bets with
+a calibrated edge between 3.5% and 4.5% returned +21.6% over 166 bets, naive
+interval +6.4% to +36.8%.
+
+That is what chance looks like. With twenty-five looks at one dataset, the
+probability of at least one 95% result is 72%. Correcting for the number of
+looks widens that interval to −0.2% to +43.4%, which includes zero like every
+other.
+
+The pattern around it says the same thing. Leans, at the smallest edges, lose.
+Bets above 4.5% edge lose slightly. Only the narrow band between them wins — a
+sweet spot with losses on both sides, found after the fact, in data that has
+been searched hard. Nothing about the model explains why that band and not its
+neighbours.
+
+So it is recorded and not acted on. A threshold moved to sit on it would be
+fitted to this sample and to nothing else. The rule that survives is the one
+already written down: prefer a change with a mechanism, and treat a result that
+improves the estimate a lot as a reason for suspicion rather than enthusiasm.
+
 ## What cannot be measured at all
 
 Corners, double chance and draw-no-bet have no historical prices anywhere —

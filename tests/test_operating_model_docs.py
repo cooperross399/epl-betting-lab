@@ -484,3 +484,25 @@ def test_it_withdraws_the_earlier_recommendation() -> None:
 
     assert "enable nothing new on this evidence" in flat
     assert "sound and incomplete" in flat
+
+
+def test_the_multiple_comparisons_problem_is_recorded() -> None:
+    """One significant result from twenty-five looks is what chance looks like.
+
+    Recording it matters more than most findings, because the next person to
+    slice this dataset will find something too.
+    """
+    text = _read("docs/what_we_can_and_cannot_claim.md")
+    flat = " ".join(text.split())
+
+    assert "twenty-five" in flat
+    assert "72%" in flat
+    assert "includes zero like every other" in flat
+
+
+def test_it_says_the_finding_was_not_acted_on() -> None:
+    text = _read("docs/what_we_can_and_cannot_claim.md")
+    flat = " ".join(text.split())
+
+    assert "recorded and not acted on" in flat
+    assert "fitted to this sample" in flat

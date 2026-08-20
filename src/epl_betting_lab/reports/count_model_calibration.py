@@ -116,6 +116,52 @@ def walk_forward_predictions(
     return pd.DataFrame(rows)
 
 
+def walk_forward_three_way(
+    matches: pd.DataFrame,
+    *,
+    event: str,
+    minimum_history: int = 200,
+) -> pd.DataFrame:
+    """Predicted P(home wins the count) beside what happened, per match.
+
+    The same walk-forward discipline as the totals check, applied to the
+    three-way. It is a different question from a total — a model can be well
+    calibrated on "how many" and poorly calibrated on "which side" — so it
+    needs measuring rather than assuming.
+    """
+    probe = PoissonCountModel.for_event(event)
+    home_column, away_column = probe.home_column, probe.away_column
+    frame = matches.dropna(subset=[home_column, away_column]).copy()
+    frame = frame.sort_values("date").reset_index(drop=True)
+    frame[home_column] = pd.to_numeric(frame[home_column], errors="coerce")
+    frame[away_column] = pd.to_numeric(frame[away_column], errors="coerce")
+    frame = frame.dropna(subset=[home_column, away_column])
+
+    rows: list[dict[str, object]] = []
+    model: PoissonCountModel | None = None
+    fitted_through = None
+    for index, match in frame.iterrows():
+        if index < minimum_history:
+            continue
+        if model is None or match["season"] != fitted_through:
+            history = frame.iloc[:index]
+            if len(history) < minimum_history:
+                continue
+            model = PoissonCountModel.for_event(event).fit(history)
+            fitted_through = match["season"]
+        outcomes = model.match_probabilities(
+            match["home_team"], match["away_team"]
+        )
+        rows.append(
+            {
+                "date": match["date"],
+                "predicted_over": outcomes["home"],
+                "went_over": bool(match[home_column] > match[away_column]),
+            }
+        )
+    return pd.DataFrame(rows)
+
+
 def summarize_calibration(predictions: pd.DataFrame) -> list[CalibrationRow]:
     """Predicted versus observed rate, by probability band."""
     if predictions.empty:

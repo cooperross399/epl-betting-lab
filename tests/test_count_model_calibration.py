@@ -144,3 +144,61 @@ class TestReport:
 
         assert "*" in text
         assert "reported, not judged" in text
+
+
+class TestThreeWayCalibration:
+    """Being right about "how many" does not make a model right about "which side".
+
+    A total and a three-way are different questions off the same fit, so the
+    three-way needs its own measurement rather than inheriting the totals
+    result.
+    """
+
+    def test_predictions_are_produced(self) -> None:
+        from epl_betting_lab.reports.count_model_calibration import (
+            walk_forward_three_way,
+        )
+
+        predictions = walk_forward_three_way(
+            _matches(), event="corners", minimum_history=100
+        )
+
+        assert not predictions.empty
+        assert {"predicted_over", "went_over"} <= set(predictions.columns)
+
+    def test_the_outcome_is_whether_home_won_the_count(self) -> None:
+        from epl_betting_lab.reports.count_model_calibration import (
+            walk_forward_three_way,
+        )
+
+        frame = _matches()
+        frame["HC"] = 9
+        frame["AC"] = 2
+        predictions = walk_forward_three_way(
+            frame, event="corners", minimum_history=100
+        )
+
+        assert predictions["went_over"].all()
+
+    def test_equal_counts_are_not_a_home_win(self) -> None:
+        """A drawn corner count is its own outcome, not a home win."""
+        from epl_betting_lab.reports.count_model_calibration import (
+            walk_forward_three_way,
+        )
+
+        predictions = walk_forward_three_way(
+            _matches(corners=5), event="corners", minimum_history=100
+        )
+
+        assert not predictions["went_over"].any()
+
+    def test_too_little_history_yields_nothing(self) -> None:
+        from epl_betting_lab.reports.count_model_calibration import (
+            walk_forward_three_way,
+        )
+
+        predictions = walk_forward_three_way(
+            _matches(n=50), event="corners", minimum_history=200
+        )
+
+        assert predictions.empty

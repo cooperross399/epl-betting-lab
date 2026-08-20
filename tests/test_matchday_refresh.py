@@ -737,3 +737,25 @@ def test_the_prompts_know_about_manual_runs() -> None:
 
     assert "manual run" in flat
     assert "started it by hand" in flat
+
+
+def test_a_refused_bundle_is_not_reported_as_a_failed_fetch() -> None:
+    """The provider step exits non-zero for two different reasons.
+
+    A run refused by the Thursday cutoff reported "prices could not be
+    refreshed" while 330 rows of prices sat in the bundle, and a routine
+    reading that went looking for a network problem that did not exist.
+    """
+    text = _workflow()
+    block = text.split("steps.prices.outcome }}\" = \"failure\"", 1)[1]
+    block = block.split("if [ -s run_degraded.txt", 1)[0]
+
+    assert "provider_shadow_verification.json" in block
+    assert "The provider run was refused" in block
+
+
+def test_it_still_reports_a_genuine_fetch_failure() -> None:
+    """When there are no blockers to read, the original message stands."""
+    text = _workflow()
+
+    assert "Provider prices could not be refreshed" in text

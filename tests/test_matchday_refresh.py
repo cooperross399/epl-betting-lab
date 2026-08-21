@@ -670,15 +670,22 @@ def test_the_prompts_carry_the_longshot_cap() -> None:
     assert "0 for 12" in flat
 
 
-def test_the_model_prompt_refuses_to_propose_enabling_a_market() -> None:
-    """That is a reviewed decision, and the evidence does not support one."""
+def test_the_model_prompt_refuses_to_propose_market_scope_changes() -> None:
+    """Scope changes are reviewed decisions behind the policy gate.
+
+    Since 2026-08-21 all eight priced markets are enabled (PR #224), so the
+    rule cuts both ways: a routine proposes neither enabling nor disabling,
+    and it carries both the measurement evidence and the decision made
+    against its recommendation.
+    """
     text = (PROJECT_ROOT / "docs" / "epl_scheduled_tasks_bridge.md").read_text(
         encoding="utf-8"
     )
     flat = " ".join(text.split())
 
-    assert "Do not propose enabling a market" in flat
-    assert "enable nothing new" in flat
+    assert "Do not propose enabling or disabling a market" in flat
+    assert "recommended enabling nothing new" in flat
+    assert "enabled all eight" in flat
 
 
 def test_the_settle_routine_checks_the_schedule_is_alive() -> None:

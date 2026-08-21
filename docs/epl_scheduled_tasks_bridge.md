@@ -216,7 +216,10 @@ Read the first line of each before the tables. "Selections changed" means it is
 a card. "Something went wrong" means the run was degraded: say what broke
 first, then report whatever card was still built and note it may rest on stale
 prices. A heading ending "— manual run" means someone started it by hand rather
-than the schedule; say so, and do not treat it as the routine state of play.
+than the schedule. Say so — it says nothing about whether the *schedule* is
+healthy — but the card itself is real: manual and scheduled runs use the same
+reviewed configuration, so a manual card is still the current advice until a
+newer card replaces it.
 
 Then tell me, in plain English:
 
@@ -282,23 +285,29 @@ Tell me, in plain English:
   that buys
 
 What is true about the markets, so you do not have to guess:
-- Only 1x2 and btts are enabled. Six further markets are modelled, priced and
-  wired, and all six are held by the reviewed policy allowlist.
+- All eight priced markets are enabled since 2026-08-21: 1x2, btts, total_2_5,
+  double_chance, draw_no_bet, corners_1x2, corners_total_9_5,
+  corners_total_10_5. Cooper approved the scope on PR #224, bound to human
+  acceptance receipt odds_api-20260821T114655-0400-20ffa5677988. A card
+  carrying all eight markets is the normal card, not a test.
 - Every market has been measured against real historical prices. Not one
   interval excludes zero. double_chance measured negative; draw_no_bet's
   positive number rests on thirteen bets; corners_1x2 can never be measured
   because the provider does not retain it historically.
-- The recommendation is to enable nothing new on that evidence.
-- total_2_5 was excluded on 2026-08-17 and reopened on 2026-08-19: the original
-  finding held only for the bulk `totals` market, and BetRivers and FanDuel
-  both carry the 2.5 line via `alternate_totals`. It is still not enabled, and
-  the backtest places about six bets a season in it, so enabling it would
-  change very little.
+- The measurement recommended enabling nothing new. Cooper reviewed that
+  evidence and enabled all eight anyway; both the evidence and the decision
+  are on the record, and if I ask whether the picks rest on a demonstrated
+  edge, the honest answer is still no.
+- total_2_5 has its own history: excluded on 2026-08-17 on a finding that was
+  true of the bulk `totals` market and silent about `alternate_totals`, where
+  BetRivers and FanDuel carry the 2.5 line on every fixture; reopened on
+  2026-08-19 when that was noticed; enabled with the rest on 2026-08-21. Do
+  not re-run that investigation, and do not repeat the stale answer.
 
 Rules:
 - Generate no picks here. Place no bets. Apply no settlement.
-- Do not propose enabling a market. That is a reviewed decision behind the
-  policy gate, and the evidence does not currently support one.
+- Do not propose enabling or disabling a market. Scope changes are reviewed
+  decisions behind the policy gate, not something a health check suggests.
 - Never tell me to open a Terminal or to ask ChatGPT.
 
 No card email does not mean the system is broken; it means the picks did not

@@ -260,13 +260,25 @@ def _recommended_pr(
     receipt_id: str,
     required_markets: list[str],
     limitations: list[str],
+    *,
+    already_allowed: bool = False,
 ) -> tuple[str, str]:
-    title = f"Allowlist {provider_name} staging provider"
     market_text = ", ".join(required_markets)
     limitation_text = " ".join(limitations)
+    if already_allowed:
+        title = f"Update the {provider_name} allowlisted market scope"
+        action = (
+            f"Updates the reviewed allowlist entry for `{provider_name}` "
+            f"(`{provider_type}`) to cover {market_text}."
+        )
+    else:
+        title = f"Allowlist {provider_name} staging provider"
+        action = (
+            f"Adds `{provider_name}` (`{provider_type}`) to the reviewed "
+            f"staging provider allowlist for {market_text}."
+        )
     description = (
-        f"Adds `{provider_name}` (`{provider_type}`) to the reviewed staging "
-        f"provider allowlist for {market_text}. Binds the policy entry to human "
+        f"{action} Binds the policy entry to human "
         f"acceptance receipt `{receipt_id}` and its verified evidence. "
         f"Known limitations: {limitation_text} This policy-only proposal does not "
         "promote staging, run a provider, generate picks, place bets, or enable cron."
@@ -518,11 +530,37 @@ def build_provider_allowlist_pr_preview(
     after_policy = deepcopy(before_policy)
     recommended_title = ""
     recommended_description = ""
-    if already_allowed and not blockers:
+    # An allowlisted provider is up to date only when its entry already binds
+    # the current receipt and the reviewed market scope. Otherwise the preview
+    # proposes an updated entry: a scope change to an existing provider is a
+    # policy change like any other and goes through the same PR gate, and
+    # declaring "no change needed" here made that change structurally
+    # unapprovable.
+    entry_scope = (
+        sorted(
+            str(item).strip().casefold()
+            for item in existing_entry.get("required_markets", [])
+            if str(item).strip()
+        )
+        if isinstance(existing_entry, Mapping)
+        else []
+    )
+    entry_receipt_id = (
+        _clean(existing_entry.get("evidence_receipt_id"))
+        if isinstance(existing_entry, Mapping)
+        else ""
+    )
+    entry_up_to_date = (
+        already_allowed
+        and entry_scope == sorted(item.casefold() for item in required_markets)
+        and entry_receipt_id == receipt_id
+    )
+    if entry_up_to_date and not blockers:
         status = NO_CHANGE_STATUS
         warnings.append(
-            f"`{canonical_name}` is already in `allowed_provider_names`; no new "
-            "allowlist PR should be opened from this preview."
+            f"`{canonical_name}` is already allowlisted with this receipt and "
+            "market scope; no new allowlist PR should be opened from this "
+            "preview."
         )
     elif blockers:
         status = BLOCKED_STATUS
@@ -552,7 +590,8 @@ def build_provider_allowlist_pr_preview(
             "approved_at": approved_at,
         }
         proposed_names = list(allowed_names)
-        proposed_names.append(canonical_name)
+        if canonical_name not in proposed_names:
+            proposed_names.append(canonical_name)
         after_policy["allowed_provider_names"] = proposed_names
         allowed_types = [
             _clean(item) for item in policy_status.get("allowed_provider_types", [])
@@ -569,6 +608,7 @@ def build_provider_allowlist_pr_preview(
             receipt_id,
             required_markets,
             limitations,
+            already_allowed=already_allowed,
         )
 
     _add_row(

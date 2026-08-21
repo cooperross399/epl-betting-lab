@@ -57,12 +57,15 @@ def _prepare_verified_evidence(
     verification_provider: str = "odds_api",
     bind_policy: bool = True,
     already_allowed: bool = False,
+    existing_entry: dict[str, object] | None = None,
 ) -> tuple[Path, Path, Path]:
     outputs = root / "data" / "outputs"
     policy_path = root / "data" / "manual" / "staging_provider_policy.json"
     policy = _policy()
     if already_allowed:
         policy["allowed_provider_names"] = ["manual_reviewed", "the_odds_api"]
+    if existing_entry is not None:
+        policy["provider_allowlist_entries"] = {"the_odds_api": existing_entry}
     _write_json(policy_path, policy)
     policy_checksum = file_sha256(policy_path)
 
@@ -290,10 +293,18 @@ def test_provider_mismatch_blocks_preview(tmp_path: Path) -> None:
     assert any("not `odds_api`" in item for item in summary["blockers"])
 
 
-def test_already_allowed_provider_needs_no_policy_change(tmp_path: Path) -> None:
+def test_up_to_date_allowlisted_provider_needs_no_policy_change(
+    tmp_path: Path,
+) -> None:
+    """No change is proposed only when the entry already binds this receipt
+    and this market scope."""
     outputs, policy_path, verification_path = _prepare_verified_evidence(
         tmp_path,
         already_allowed=True,
+        existing_entry={
+            "required_markets": ["1x2", "total_2_5"],
+            "evidence_receipt_id": RECEIPT_ID,
+        },
     )
 
     _, summary = _build(tmp_path, outputs, policy_path, verification_path)
@@ -302,6 +313,51 @@ def test_already_allowed_provider_needs_no_policy_change(tmp_path: Path) -> None
     assert summary["after_policy"] == summary["before_policy"]
     assert summary["proposed_provider_entry"] == {}
     assert any("already" in item for item in summary["warnings"])
+
+
+def test_scope_change_for_allowlisted_provider_is_proposed(
+    tmp_path: Path,
+) -> None:
+    """A scope change to an existing provider is a policy change like any
+    other. The preview used to call it "no change needed", which made scope
+    expansion structurally unapprovable."""
+    outputs, policy_path, verification_path = _prepare_verified_evidence(
+        tmp_path,
+        already_allowed=True,
+        existing_entry={
+            "required_markets": ["1x2"],
+            "evidence_receipt_id": "odds_api-20260101T000000-0000-000000000000",
+        },
+    )
+
+    _, summary = _build(tmp_path, outputs, policy_path, verification_path)
+
+    assert summary["status"] == READY_STATUS
+    entry = summary["proposed_provider_entry"]
+    assert entry["required_markets"] == ["1x2", "total_2_5"]
+    assert entry["evidence_receipt_id"] == RECEIPT_ID
+    # The provider name is already allowed; it must not be listed twice.
+    assert summary["after_policy"]["allowed_provider_names"] == [
+        "manual_reviewed",
+        "the_odds_api",
+    ]
+    assert summary["recommended_pr_title"] == (
+        "Update the the_odds_api allowlisted market scope"
+    )
+
+
+def test_allowed_name_without_a_bound_entry_gets_one_proposed(
+    tmp_path: Path,
+) -> None:
+    outputs, policy_path, verification_path = _prepare_verified_evidence(
+        tmp_path,
+        already_allowed=True,
+    )
+
+    _, summary = _build(tmp_path, outputs, policy_path, verification_path)
+
+    assert summary["status"] == READY_STATUS
+    assert summary["proposed_provider_entry"]["evidence_receipt_id"] == RECEIPT_ID
 
 
 def test_malformed_existing_provider_metadata_blocks_preview(tmp_path: Path) -> None:

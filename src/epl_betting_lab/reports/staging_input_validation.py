@@ -667,7 +667,7 @@ def build_staging_input_validation(
         rows,
         "info"
         if provider_policy_result["cutoff_policy_status"]
-        in ("Before cutoff", "Not a Thursday")
+        in ("Before cutoff", "Not a Thursday", "Manual run")
         else "error",
         "Receipt policy",
         "thursday_cutoff",

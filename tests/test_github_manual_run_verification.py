@@ -259,6 +259,26 @@ def test_verification_accepts_non_thursday_cutoff_status(tmp_path: Path) -> None
     )
 
 
+def test_verification_accepts_manual_run_cutoff_status(tmp_path: Path) -> None:
+    """A manual dispatch after the Thursday cutoff is exempt, not refused."""
+    output_dir = tmp_path / "data" / "outputs"
+    paths = _write_run(output_dir, allowed=True)
+    handoff = json.loads(paths["handoff_json"].read_text(encoding="utf-8"))
+    handoff.update(_ready_staging_policy_proof())
+    handoff["staging_cutoff_policy_status"] = "Manual run"
+    scheduled = json.loads(paths["scheduled_json"].read_text(encoding="utf-8"))
+    scheduled["input_handoff"] = copy.deepcopy(handoff)
+    paths["handoff_json"].write_text(json.dumps(handoff), encoding="utf-8")
+    paths["scheduled_json"].write_text(json.dumps(scheduled), encoding="utf-8")
+
+    _, summary = build_github_manual_run_verification(output_dir)
+
+    assert summary["verdict"] == "Verified ready run"
+    assert not any(
+        "thursday cutoff" in item.lower() for item in summary["trust_failures"]
+    )
+
+
 def test_verification_rejects_after_cutoff_status(tmp_path: Path) -> None:
     output_dir = tmp_path / "data" / "outputs"
     paths = _write_run(output_dir, allowed=True)

@@ -24,7 +24,8 @@
       },
       "evidence_receipt_id": "odds_api-20260817T160307-0400-20fb55e75c14",
       "known_limitations": [
-        "`total_2_5` is not allowlisted: the reviewed evidence did not find it eligible. Its prices remain unavailable or incomplete and must never be fabricated.",
+        "No market in this system has a demonstrated edge: every measured interval includes zero, `double_chance` measured negative, and `draw_no_bet`'s positive number rests on thirteen bets. Enablement is a reviewed human decision made with that evidence in view, not on it.",
+        "`corners_1x2` can never be profit-backtested: the provider does not retain its history. `btts` carries a known, unfixed calibration bias of roughly nine points and cannot be profit-backtested either.",
         "Allowlisting does not bypass staging validation, freshness, completeness, checksum, receipt, or Thursday cutoff gates."
       ],
       "max_provider_run_age_hours": 12.0,
@@ -33,7 +34,13 @@
       "provider_type": "odds_api",
       "required_markets": [
         "1x2",
-        "btts"
+        "btts",
+        "total_2_5",
+        "double_chance",
+        "draw_no_bet",
+        "corners_1x2",
+        "corners_total_9_5",
+        "corners_total_10_5"
       ],
       "reviewed_at": "2026-08-17T16:03:08-04:00",
       "reviewer_name": "cooperross399",

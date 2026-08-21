@@ -28,10 +28,12 @@ Before approving, read these from the PR's **Checks** tab or the repository's
 | `automated_card_input.md` | Included markets are the ones you intend |
 | `provider_shadow_verification.md` | Mapping verified, no failed runs |
 
-Check specifically that the **excluded** markets are the ones you expect.
-Today `total_2_5` is excluded because books price two Week 1 fixtures at
-3.0/3.5 rather than 2.5 — that is a data-availability exclusion, not a
-judgement about the market's value.
+Check specifically that the **included** markets are the ones you intend.
+The reviewed scope is whatever the PR's proposed policy lists in
+`required_markets` — the gate reads it from the PR head, and your approval
+must name exactly that scope. (`total_2_5` was excluded until 2026-08-19,
+when the line was found complete in `alternate_totals`; it is approvable
+like any other market now.)
 
 ### 3. Approve with the approval block
 
@@ -80,8 +82,8 @@ Every one of these fails closed and produces **no receipt**:
 | Someone else quotes your approval text | Refused |
 | `provider:` missing or naming another provider | Refused |
 | `markets:` missing | Refused |
-| `markets:` includes `total_2_5` | Refused |
-| Market scope narrower or wider than reviewed | Refused |
+| `markets:` naming a market the project cannot price | Refused |
+| Market scope narrower or wider than the PR's proposed `required_markets` | Refused |
 | `pr:` naming a different PR | Refused |
 | Approval older than 72 hours | Refused |
 | Approval timestamp in the future | Refused |

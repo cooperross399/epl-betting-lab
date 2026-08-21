@@ -27,6 +27,7 @@ import subprocess
 from typing import Any
 
 from epl_betting_lab.config import MANUAL_DIR, OUTPUTS_DIR
+from epl_betting_lab.market_eligibility import MARKET_SELECTIONS
 
 
 #: The exact token that marks a comment or review as an approval.
@@ -38,11 +39,21 @@ ALLOWED_REVIEWERS: tuple[str, ...] = ("cooperross399",)
 #: The provider this flow may approve.
 EXPECTED_PROVIDER = "the_odds_api"
 
-#: Markets an approval may grant. Anything else is refused outright.
-APPROVABLE_MARKETS: frozenset[str] = frozenset({"1x2", "btts"})
+#: Markets an approval may grant: exactly the markets the project can price.
+#: Derived from the market registry so this flow and the card can never
+#: disagree about what a market is. Approvable is not approved — every scope
+#: still needs the human approval block and evidence this module verifies.
+APPROVABLE_MARKETS: frozenset[str] = frozenset(MARKET_SELECTIONS)
 
 #: Markets that must never appear in an approval while they are excluded.
-FORBIDDEN_MARKETS: frozenset[str] = frozenset({"total_2_5"})
+#:
+#: `total_2_5` sat here from 2026-08-17, when the complete 2.5 line appeared
+#: to exist only at books without an account. That finding was reversed on
+#: 2026-08-19 — `alternate_totals` carries the line at BetRivers and FanDuel
+#: on every fixture — so totals awaits policy approval like any other market
+#: and no market is currently forbidden. The mechanism stays: put a market
+#: here to make it unapprovable while an exclusion decision is in force.
+FORBIDDEN_MARKETS: frozenset[str] = frozenset()
 
 #: How long an approval stays usable.
 DEFAULT_MAX_APPROVAL_AGE_HOURS = 72.0
@@ -386,7 +397,11 @@ def verify_github_approval(
         "commit_id": _clean(entry["commit_id"]),
         "provider_name": provider_name,
         "approved_markets": sorted(declared_markets),
-        "excluded_markets": sorted(FORBIDDEN_MARKETS),
+        # Every priced market this approval does not grant, so the receipt
+        # names what was withheld as well as what was given.
+        "excluded_markets": sorted(
+            (APPROVABLE_MARKETS - declared_markets) | FORBIDDEN_MARKETS
+        ),
         "evidence_checksums_sha256": checksums,
         "evidence_generated_at": evidence_time.isoformat() if evidence_time else "",
         "verified_at": moment.isoformat(),

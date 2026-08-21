@@ -1,8 +1,8 @@
 {
   "api_quota": {
     "requests_last": "2",
-    "requests_remaining": "6518",
-    "requests_used": "13482",
+    "requests_remaining": "6682",
+    "requests_used": "13318",
     "status": "Available"
   },
   "blockers": [],
@@ -96,7 +96,7 @@
     "status": "Verified",
     "unmatched_odds_fixtures": []
   },
-  "generated_at": "2026-08-21T15:43:35+00:00",
+  "generated_at": "2026-08-21T15:40:19+00:00",
   "market_coverage": {
     "coverage_percentage": 1.0,
     "covered_fixture_selection_count": 105,
@@ -289,7 +289,7 @@
     "status": "Complete"
   },
   "provider_age": {
-    "age_minutes": 0.005,
+    "age_minutes": 0.012,
     "note": "Provider run is 0.0 minute(s) old; policy allows up to 12 hour(s).",
     "status": "Fresh"
   },
@@ -313,15 +313,15 @@
   "raw_evidence": {
     "checksum_status": "Verified",
     "current_checksums_sha256": {
-      "data/staging/raw/20260821T154335Z_9ed629a2fed4_odds_api_response.json": "9ed629a2fed476822d32052965e59df72cc150bad2965454be2cf9a6b95b3b52"
+      "data/staging/raw/20260821T154019Z_fdb1b4cc8da6_odds_api_response.json": "fdb1b4cc8da6966b2290a0bfd1a43454abd67c2a54f754192982146096651f46"
     },
     "declared_files": [
-      "data/staging/raw/20260821T154335Z_9ed629a2fed4_odds_api_response.json"
+      "data/staging/raw/20260821T154019Z_fdb1b4cc8da6_odds_api_response.json"
     ],
     "found_files": [
-      "data/staging/raw/20260821T154335Z_9ed629a2fed4_odds_api_response.json"
+      "data/staging/raw/20260821T154019Z_fdb1b4cc8da6_odds_api_response.json"
     ],
-    "raw_source_checksum_sha256": "9ed629a2fed476822d32052965e59df72cc150bad2965454be2cf9a6b95b3b52",
+    "raw_source_checksum_sha256": "fdb1b4cc8da6966b2290a0bfd1a43454abd67c2a54f754192982146096651f46",
     "status": "Created"
   },
   "safety": {

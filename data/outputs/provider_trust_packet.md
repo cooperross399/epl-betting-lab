@@ -4,9 +4,9 @@ Consolidated evidence for the provider allowlist decision. This report cannot ed
 
 ## Decision
 
-- Provider: **the_odds_api**
+- Provider: **odds_api**
 - Currently allowlisted: **No**
-- Ready for human approval: **Yes**
+- Ready for human approval: **No**
 
 ## Acceptance progress
 
@@ -20,26 +20,26 @@ Consolidated evidence for the provider allowlist decision. This report cannot ed
 
 | Scope | Status | Covered | Coverage |
 |:------|:-------|:--------|:---------|
-| `provider_returned` | Complete | 10/10 | 100.0% |
+| `provider_returned` | Complete | 15/15 | 100.0% |
 | `selected_week1_window` | Complete | 10/10 | 100.0% |
-| `full_upcoming_fixtures` | Incomplete | 10/20 | 50.0% |
+| `full_upcoming_fixtures` | Incomplete | 14/20 | 70.0% |
 
 ## Market eligibility summary
 
-- Included: **['1x2', 'btts']**
-- Excluded: **['total_2_5']**
+- Included: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5**
+- Excluded: **none**
 - Unavailable: none
-- Incomplete: ['total_2_5']
+- Incomplete: none
 - Disabled: none
 - BTTS: **Available**
-- Provider-derived card input rows: **50**
+- Provider-derived card input rows: **190**
 - Manual odds entry required: **No**
 
 ## Quota
 
 - Status: **Available**
-- Used: 76
-- Remaining: 424
+- Used: 13482
+- Remaining: 6518
 
 ## Safety flags
 
@@ -53,8 +53,9 @@ Consolidated evidence for the provider allowlist decision. This report cannot ed
 
 ## Outstanding requirements
 
-- Explicit human approval to add `the_odds_api` to `allowed_provider_names` in `data/manual/staging_provider_policy.json`.
+- Acceptance checklist verdict is `Ready for human allowlist review`; resolve its listed failures. The checklist reviews a window of past runs and fails closed on any that failed, were blocked, or predate a fix.
+- Explicit human approval to add `odds_api` to `allowed_provider_names` in `data/manual/staging_provider_policy.json`.
 
 ## Exact approval needed
 
-Add `"the_odds_api"` to `allowed_provider_names` in `data/manual/staging_provider_policy.json`. This packet does not and cannot make that edit; it requires your explicit approval.
+Add `"odds_api"` to `allowed_provider_names` in `data/manual/staging_provider_policy.json`. This packet does not and cannot make that edit; it requires your explicit approval.

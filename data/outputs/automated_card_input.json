@@ -7,81 +7,142 @@
     "disabled_markets": [],
     "eligible_markets": [
       "1x2",
-      "btts"
+      "total_2_5",
+      "btts",
+      "double_chance",
+      "draw_no_bet",
+      "corners_1x2",
+      "corners_total_9_5",
+      "corners_total_10_5"
     ],
-    "excluded_markets": [
-      "total_2_5"
-    ],
+    "excluded_markets": [],
     "fixtures_in_window": 10,
     "gate_failures": [],
-    "incomplete_markets": [
-      "total_2_5"
-    ],
+    "incomplete_markets": [],
     "markets": [
       {
-        "bookmaker_count": 9,
+        "bookmaker_count": 11,
         "fabricated": false,
         "fixtures_covered": 10,
         "fixtures_expected": 10,
         "market": "1x2",
         "missing_fixtures": [],
         "reason": "`1x2` covers all 10 fixtures in the selected window with passing mapping, validation, and freshness.",
-        "row_count": 270,
+        "row_count": 330,
         "status": "eligible",
         "usable_for_picks": true
       },
       {
-        "bookmaker_count": 7,
+        "bookmaker_count": 11,
         "fabricated": false,
-        "fixtures_covered": 8,
+        "fixtures_covered": 10,
         "fixtures_expected": 10,
         "market": "total_2_5",
-        "missing_fixtures": [
-          "2026-08-23: Man City vs Bournemouth",
-          "2026-08-23: Newcastle vs Liverpool"
-        ],
-        "reason": "`total_2_5` covers 8 of 10 fixtures in the selected window. The market is excluded rather than partially used.",
-        "row_count": 80,
-        "status": "incomplete",
-        "usable_for_picks": false
+        "missing_fixtures": [],
+        "reason": "`total_2_5` covers all 10 fixtures in the selected window with passing mapping, validation, and freshness.",
+        "row_count": 170,
+        "status": "eligible",
+        "usable_for_picks": true
       },
       {
-        "bookmaker_count": 5,
+        "bookmaker_count": 9,
         "fabricated": false,
         "fixtures_covered": 10,
         "fixtures_expected": 10,
         "market": "btts",
         "missing_fixtures": [],
         "reason": "`btts` covers all 10 fixtures in the selected window with passing mapping, validation, and freshness.",
-        "row_count": 98,
+        "row_count": 166,
+        "status": "eligible",
+        "usable_for_picks": true
+      },
+      {
+        "bookmaker_count": 7,
+        "fabricated": false,
+        "fixtures_covered": 10,
+        "fixtures_expected": 10,
+        "market": "double_chance",
+        "missing_fixtures": [],
+        "reason": "`double_chance` covers all 10 fixtures in the selected window with passing mapping, validation, and freshness.",
+        "row_count": 183,
+        "status": "eligible",
+        "usable_for_picks": true
+      },
+      {
+        "bookmaker_count": 9,
+        "fabricated": false,
+        "fixtures_covered": 10,
+        "fixtures_expected": 10,
+        "market": "draw_no_bet",
+        "missing_fixtures": [],
+        "reason": "`draw_no_bet` covers all 10 fixtures in the selected window with passing mapping, validation, and freshness.",
+        "row_count": 168,
+        "status": "eligible",
+        "usable_for_picks": true
+      },
+      {
+        "bookmaker_count": 6,
+        "fabricated": false,
+        "fixtures_covered": 10,
+        "fixtures_expected": 10,
+        "market": "corners_1x2",
+        "missing_fixtures": [],
+        "reason": "`corners_1x2` covers all 10 fixtures in the selected window with passing mapping, validation, and freshness.",
+        "row_count": 168,
+        "status": "eligible",
+        "usable_for_picks": true
+      },
+      {
+        "bookmaker_count": 8,
+        "fabricated": false,
+        "fixtures_covered": 10,
+        "fixtures_expected": 10,
+        "market": "corners_total_9_5",
+        "missing_fixtures": [],
+        "reason": "`corners_total_9_5` covers all 10 fixtures in the selected window with passing mapping, validation, and freshness.",
+        "row_count": 124,
+        "status": "eligible",
+        "usable_for_picks": true
+      },
+      {
+        "bookmaker_count": 7,
+        "fabricated": false,
+        "fixtures_covered": 10,
+        "fixtures_expected": 10,
+        "market": "corners_total_10_5",
+        "missing_fixtures": [],
+        "reason": "`corners_total_10_5` covers all 10 fixtures in the selected window with passing mapping, validation, and freshness.",
+        "row_count": 120,
         "status": "eligible",
         "usable_for_picks": true
       }
     ],
     "note": "Excluded markets are unavailable, incomplete, or deliberately disabled. They are never reported as passes or no-value calls, and no missing price was invented.",
     "unavailable_markets": [],
-    "warnings": [
-      "Incomplete market(s): total_2_5. Excluded from automated picks rather than used for a subset of fixtures."
-    ],
+    "warnings": [],
     "window_label": "2026-08-21 through 2026-08-24"
   },
-  "excluded_markets": [
-    "total_2_5"
-  ],
+  "excluded_markets": [],
   "fixtures_in_window": 10,
-  "generated_at": "2026-08-17T19:59:00+00:00",
+  "generated_at": "2026-08-21T15:43:44+00:00",
   "included_markets": [
     "1x2",
-    "btts"
+    "total_2_5",
+    "btts",
+    "double_chance",
+    "draw_no_bet",
+    "corners_1x2",
+    "corners_total_9_5",
+    "corners_total_10_5"
   ],
   "manual_entry_required": false,
   "notes": [
-    "Included markets: ['1x2', 'btts']. Excluded: ['total_2_5'].",
-    "50 row(s) derived from real provider quotes. No price was fabricated and no manual entry is required."
+    "Included markets: 1x2, btts, corners_1x2, corners_total_10_5, corners_total_9_5, double_chance, draw_no_bet, total_2_5. Excluded: none.",
+    "190 row(s) derived from real provider quotes. No price was fabricated and no manual entry is required."
   ],
   "policy_disabled_markets": [],
   "report": "Automated Card Input",
-  "row_count": 50,
+  "row_count": 190,
   "safety": {
     "bets_placed": false,
     "manual_odds_entry_required": false,

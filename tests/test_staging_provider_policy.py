@@ -265,12 +265,15 @@ def _at(day: int, hour: int) -> datetime:
     return (monday + timedelta(days=day)).replace(hour=hour + 4)  # 04:00 UTC = 00:00 ET
 
 
-def _evaluate(tmp_path: Path, when: datetime) -> dict:
+def _evaluate(
+    tmp_path: Path, when: datetime, *, run_trigger: str = "schedule"
+) -> dict:
     return evaluate_staging_provider_policy(
         _load_policy(tmp_path),
         _provenance(),
         receipt_generated_at=when,
         evaluated_at=when + timedelta(minutes=5),
+        run_trigger=run_trigger,
     )
 
 
@@ -319,3 +322,46 @@ def test_every_day_the_card_runs_can_pass_the_cutoff(tmp_path: Path) -> None:
             day,
             result["cutoff_policy_status"],
         )
+
+
+# --- the cutoff is an automation deadline, so a manual dispatch passes it ----
+
+
+def test_a_manual_thursday_run_after_the_cutoff_passes(tmp_path: Path) -> None:
+    """A human dispatching the workflow is not automation racing a deadline."""
+    result = _evaluate(tmp_path, _at(3, 11), run_trigger="workflow_dispatch")
+
+    assert result["cutoff_policy_status"] == "Manual run"
+    assert not any("cutoff" in str(b).lower() for b in result["blockers"])
+
+
+def test_a_scheduled_thursday_run_after_the_cutoff_stays_blocked(
+    tmp_path: Path,
+) -> None:
+    result = _evaluate(tmp_path, _at(3, 11), run_trigger="schedule")
+
+    assert result["cutoff_policy_status"] == "After cutoff"
+    assert any("cutoff" in str(b).lower() for b in result["blockers"])
+
+
+def test_the_trigger_is_read_from_the_actions_environment(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """With no explicit trigger, GITHUB_EVENT_NAME decides — and its absence
+    fails closed: an unknown trigger is treated as automation."""
+    when = _at(3, 11)
+    common = dict(
+        receipt_generated_at=when, evaluated_at=when + timedelta(minutes=5)
+    )
+
+    monkeypatch.setenv("GITHUB_EVENT_NAME", "workflow_dispatch")
+    dispatched = evaluate_staging_provider_policy(
+        _load_policy(tmp_path), _provenance(), **common
+    )
+    assert dispatched["cutoff_policy_status"] == "Manual run"
+
+    monkeypatch.delenv("GITHUB_EVENT_NAME", raising=False)
+    unknown = evaluate_staging_provider_policy(
+        _load_policy(tmp_path), _provenance(), **common
+    )
+    assert unknown["cutoff_policy_status"] == "After cutoff"

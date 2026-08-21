@@ -454,8 +454,9 @@ def test_missing_provider_policy_blocks_validation(tmp_path: Path) -> None:
 
 
 def test_staging_validation_after_thursday_cutoff_needs_fixes(
-    tmp_path: Path,
+    tmp_path: Path, monkeypatch
 ) -> None:
+    monkeypatch.delenv("GITHUB_EVENT_NAME", raising=False)
     paths = _write_ready_inputs(tmp_path)
     after_cutoff = datetime(2026, 8, 6, 14, 1, tzinfo=timezone.utc)
 
@@ -464,6 +465,23 @@ def test_staging_validation_after_thursday_cutoff_needs_fixes(
     assert summary["verdict"] == "Needs fixes"
     assert summary["provider_policy"]["cutoff_policy_status"] == "After cutoff"
     assert summary["handoff_eligible"] is False
+
+
+def test_manual_run_after_thursday_cutoff_is_handoff_eligible(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """The cutoff is an automation deadline; a workflow_dispatch run passes it."""
+    monkeypatch.setenv("GITHUB_EVENT_NAME", "workflow_dispatch")
+    paths = _write_ready_inputs(tmp_path)
+    after_cutoff = datetime(2026, 8, 6, 14, 1, tzinfo=timezone.utc)
+
+    checks, summary = _build(tmp_path, paths, run_at=after_cutoff)
+
+    assert summary["provider_policy"]["cutoff_policy_status"] == "Manual run"
+    cutoff_rows = checks[checks["check"] == "thursday_cutoff"]
+    assert set(cutoff_rows["severity"]) == {"info"}
+    assert summary["verdict"] == "Ready for handoff"
+    assert summary["handoff_eligible"] is True
 
 
 def test_non_thursday_receipt_is_still_handoff_eligible(tmp_path: Path) -> None:

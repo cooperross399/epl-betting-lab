@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
 from datetime import datetime, time, timedelta
 from pathlib import Path
@@ -756,8 +757,18 @@ def evaluate_staging_provider_policy(
     *,
     receipt_generated_at: datetime | str,
     evaluated_at: datetime,
+    run_trigger: str | None = None,
 ) -> dict[str, object]:
-    """Evaluate provider identity, receipt age, and Thursday cutoff fail-closed."""
+    """Evaluate provider identity, receipt age, and Thursday cutoff fail-closed.
+
+    `run_trigger` names how the current run was started, using GitHub's event
+    names ("schedule", "workflow_dispatch"). `None` reads `GITHUB_EVENT_NAME`,
+    which every Actions step carries; outside Actions that is unset and the
+    cutoff applies, so an unknown trigger fails closed.
+    """
+    if run_trigger is None:
+        run_trigger = os.environ.get("GITHUB_EVENT_NAME", "")
+    manual_run = str(run_trigger).strip().casefold() == "workflow_dispatch"
     blockers = [str(item) for item in policy.get("blockers", [])]
     blockers.extend(str(item) for item in provenance.get("blockers", []))
     warnings = [str(item) for item in provenance.get("warnings", [])]
@@ -906,6 +917,13 @@ def evaluate_staging_provider_policy(
             result["cutoff_at"] = cutoff_at.isoformat(timespec="minutes")
             if receipt_local <= cutoff_at:
                 result["cutoff_policy_status"] = "Before cutoff"
+            elif manual_run:
+                # The cutoff is an *automation* deadline: the schedule must
+                # not issue a fresh Thursday card after 10:00 New York. A
+                # human dispatching the workflow after that is not automation
+                # racing a deadline — it is the deliberate act the deadline
+                # exists to protect, so it passes rather than being refused.
+                result["cutoff_policy_status"] = "Manual run"
             else:
                 result["cutoff_policy_status"] = "After cutoff"
                 blockers.append(

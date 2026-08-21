@@ -313,10 +313,14 @@ def test_several_providers_contribute_their_reviewed_markets(
 
 
 def test_the_shipped_policy_approves_only_the_reviewed_markets() -> None:
-    """The real file, not a fixture: this is what a live run will use."""
+    """The real file, not a fixture: this is what a live run will use.
+
+    The reviewed scope covers all eight priced markets since 2026-08-21:
+    approved on PR #224 and bound to human acceptance receipt
+    odds_api-20260821T114655-0400-20ffa5677988. A market missing from the
+    policy's required_markets would silently drop off the card, so an empty
+    disabled set is the assertion, not an absence of one.
+    """
     disabled = set(_policy_disabled_markets(None))
 
-    assert "1x2" not in disabled
-    assert "btts" not in disabled
-    for market in ("double_chance", "draw_no_bet", "corners_1x2", "total_2_5"):
-        assert market in disabled, market
+    assert disabled == set()

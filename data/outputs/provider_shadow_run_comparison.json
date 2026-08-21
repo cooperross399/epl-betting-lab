@@ -1,5 +1,5 @@
 {
-  "archive_count": 15,
+  "archive_count": 10,
   "changed_metric_count": 2,
   "comparison_rows": [
     {
@@ -7,21 +7,21 @@
       "change": "No change",
       "change_status": "Stable",
       "details": "Latest archived value compared with the previous archived value.",
-      "latest_run": "2026-08-17T15:17:17-04:00",
-      "latest_value": "Needs provider policy review",
+      "latest_run": "2026-08-21T15:43:35+00:00",
+      "latest_value": "Shadow ready for review",
       "metric": "verdict",
-      "previous_run": "2026-08-17T15:17:11-04:00",
-      "previous_value": "Needs provider policy review"
+      "previous_run": "2026-08-21T15:42:22+00:00",
+      "previous_value": "Shadow ready for review"
     },
     {
       "category": "Evidence",
       "change": "No change",
       "change_status": "Stable",
       "details": "Latest archived value compared with the previous archived value.",
-      "latest_run": "2026-08-17T15:17:17-04:00",
+      "latest_run": "2026-08-21T15:43:35+00:00",
       "latest_value": "Verified",
       "metric": "archive_integrity",
-      "previous_run": "2026-08-17T15:17:11-04:00",
+      "previous_run": "2026-08-21T15:42:22+00:00",
       "previous_value": "Verified"
     },
     {
@@ -29,10 +29,10 @@
       "change": "No change",
       "change_status": "Stable",
       "details": "Latest archived value compared with the previous archived value.",
-      "latest_run": "2026-08-17T15:17:17-04:00",
+      "latest_run": "2026-08-21T15:43:35+00:00",
       "latest_value": "Verified",
       "metric": "raw_evidence_checksum",
-      "previous_run": "2026-08-17T15:17:11-04:00",
+      "previous_run": "2026-08-21T15:42:22+00:00",
       "previous_value": "Verified"
     },
     {
@@ -40,10 +40,10 @@
       "change": "No change",
       "change_status": "Stable",
       "details": "Latest archived value compared with the previous archived value.",
-      "latest_run": "2026-08-17T15:17:17-04:00",
+      "latest_run": "2026-08-21T15:43:35+00:00",
       "latest_value": "Verified",
       "metric": "team_mapping_status",
-      "previous_run": "2026-08-17T15:17:11-04:00",
+      "previous_run": "2026-08-21T15:42:22+00:00",
       "previous_value": "Verified"
     },
     {
@@ -51,10 +51,10 @@
       "change": 0.0,
       "change_status": "Stable",
       "details": "Latest archived value compared with the previous archived value.",
-      "latest_run": "2026-08-17T15:17:17-04:00",
+      "latest_run": "2026-08-21T15:43:35+00:00",
       "latest_value": "1.0000",
       "metric": "team_mapping_coverage",
-      "previous_run": "2026-08-17T15:17:11-04:00",
+      "previous_run": "2026-08-21T15:42:22+00:00",
       "previous_value": "1.0000"
     },
     {
@@ -62,10 +62,10 @@
       "change": 0.0,
       "change_status": "Stable",
       "details": "Latest archived value compared with the previous archived value.",
-      "latest_run": "2026-08-17T15:17:17-04:00",
+      "latest_run": "2026-08-21T15:43:35+00:00",
       "latest_value": "0",
       "metric": "unmapped_team_count",
-      "previous_run": "2026-08-17T15:17:11-04:00",
+      "previous_run": "2026-08-21T15:42:22+00:00",
       "previous_value": "0"
     },
     {
@@ -73,10 +73,10 @@
       "change": "No change",
       "change_status": "Stable",
       "details": "Latest archived value compared with the previous archived value.",
-      "latest_run": "2026-08-17T15:17:17-04:00",
+      "latest_run": "2026-08-21T15:43:35+00:00",
       "latest_value": "Verified",
       "metric": "fixture_matching_status",
-      "previous_run": "2026-08-17T15:17:11-04:00",
+      "previous_run": "2026-08-21T15:42:22+00:00",
       "previous_value": "Verified"
     },
     {
@@ -84,10 +84,10 @@
       "change": 0.0,
       "change_status": "Stable",
       "details": "Latest archived value compared with the previous archived value.",
-      "latest_run": "2026-08-17T15:17:17-04:00",
+      "latest_run": "2026-08-21T15:43:35+00:00",
       "latest_value": "1.0000",
       "metric": "fixture_matching_coverage",
-      "previous_run": "2026-08-17T15:17:11-04:00",
+      "previous_run": "2026-08-21T15:42:22+00:00",
       "previous_value": "1.0000"
     },
     {
@@ -95,87 +95,87 @@
       "change": 0.0,
       "change_status": "Stable",
       "details": "Latest archived value compared with the previous archived value.",
-      "latest_run": "2026-08-17T15:17:17-04:00",
-      "latest_value": "9",
+      "latest_run": "2026-08-21T15:43:35+00:00",
+      "latest_value": "11",
       "metric": "bookmaker_count",
-      "previous_run": "2026-08-17T15:17:11-04:00",
-      "previous_value": "9"
+      "previous_run": "2026-08-21T15:42:22+00:00",
+      "previous_value": "11"
     },
     {
       "category": "Bookmakers",
       "change": "No change",
       "change_status": "Stable",
       "details": "Latest archived value compared with the previous archived value.",
-      "latest_run": "2026-08-17T15:17:17-04:00",
-      "latest_value": "[\"BetMGM\", \"BetOnline.ag\", \"BetRivers\", \"BetUS\", \"Bovada\", \"DraftKings\", \"FanDuel\", \"LowVig.ag\", \"MyBookie.ag\"]",
+      "latest_run": "2026-08-21T15:43:35+00:00",
+      "latest_value": "[\"BetMGM\", \"BetOnline.ag\", \"BetRivers\", \"BetUS\", \"Bovada\", \"Caesars\", \"DraftKings\", \"FanDuel\", \"Fanatics\", \"LowVig.ag\", \"MyBookie.ag\"]",
       "metric": "bookmakers",
-      "previous_run": "2026-08-17T15:17:11-04:00",
-      "previous_value": "[\"BetMGM\", \"BetOnline.ag\", \"BetRivers\", \"BetUS\", \"Bovada\", \"DraftKings\", \"FanDuel\", \"LowVig.ag\", \"MyBookie.ag\"]"
+      "previous_run": "2026-08-21T15:42:22+00:00",
+      "previous_value": "[\"BetMGM\", \"BetOnline.ag\", \"BetRivers\", \"BetUS\", \"Bovada\", \"Caesars\", \"DraftKings\", \"FanDuel\", \"Fanatics\", \"LowVig.ag\", \"MyBookie.ag\"]"
     },
     {
       "category": "Markets",
       "change": 0.0,
       "change_status": "Stable",
       "details": "Latest archived value compared with the previous archived value.",
-      "latest_run": "2026-08-17T15:17:17-04:00",
-      "latest_value": "270",
+      "latest_run": "2026-08-21T15:43:35+00:00",
+      "latest_value": "345",
       "metric": "market_1x2_rows",
-      "previous_run": "2026-08-17T15:17:11-04:00",
-      "previous_value": "270"
+      "previous_run": "2026-08-21T15:42:22+00:00",
+      "previous_value": "345"
     },
     {
       "category": "Markets",
       "change": 0.0,
       "change_status": "Stable",
       "details": "Latest archived value compared with the previous archived value.",
-      "latest_run": "2026-08-17T15:17:17-04:00",
-      "latest_value": "80",
+      "latest_run": "2026-08-21T15:43:35+00:00",
+      "latest_value": "180",
       "metric": "market_total_2_5_rows",
-      "previous_run": "2026-08-17T15:17:11-04:00",
-      "previous_value": "80"
+      "previous_run": "2026-08-21T15:42:22+00:00",
+      "previous_value": "180"
     },
     {
       "category": "Markets",
       "change": 0.0,
       "change_status": "Stable",
       "details": "Latest archived value compared with the previous archived value.",
-      "latest_run": "2026-08-17T15:17:17-04:00",
-      "latest_value": "98",
+      "latest_run": "2026-08-21T15:43:35+00:00",
+      "latest_value": "176",
       "metric": "market_btts_rows",
-      "previous_run": "2026-08-17T15:17:11-04:00",
-      "previous_value": "98"
+      "previous_run": "2026-08-21T15:42:22+00:00",
+      "previous_value": "176"
     },
     {
       "category": "Markets",
       "change": 0.0,
       "change_status": "Stable",
       "details": "Latest archived value compared with the previous archived value.",
-      "latest_run": "2026-08-17T15:17:17-04:00",
-      "latest_value": "0.9429",
+      "latest_run": "2026-08-21T15:43:35+00:00",
+      "latest_value": "1.0000",
       "metric": "market_coverage_percentage",
-      "previous_run": "2026-08-17T15:17:11-04:00",
-      "previous_value": "0.9429"
+      "previous_run": "2026-08-21T15:42:22+00:00",
+      "previous_value": "1.0000"
     },
     {
       "category": "Markets",
       "change": "No change",
       "change_status": "Stable",
       "details": "Latest archived value compared with the previous archived value.",
-      "latest_run": "2026-08-17T15:17:17-04:00",
-      "latest_value": "[\"total_2_5\"]",
+      "latest_run": "2026-08-21T15:43:35+00:00",
+      "latest_value": "[]",
       "metric": "missing_markets",
-      "previous_run": "2026-08-17T15:17:11-04:00",
-      "previous_value": "[\"total_2_5\"]"
+      "previous_run": "2026-08-21T15:42:22+00:00",
+      "previous_value": "[]"
     },
     {
       "category": "Completeness",
       "change": 0.0,
       "change_status": "Stable",
       "details": "Latest archived value compared with the previous archived value.",
-      "latest_run": "2026-08-17T15:17:17-04:00",
+      "latest_run": "2026-08-21T15:43:35+00:00",
       "latest_value": "1.0000",
       "metric": "odds_completeness",
-      "previous_run": "2026-08-17T15:17:11-04:00",
+      "previous_run": "2026-08-21T15:42:22+00:00",
       "previous_value": "1.0000"
     },
     {
@@ -183,98 +183,98 @@
       "change": "No change",
       "change_status": "Stable",
       "details": "Latest archived value compared with the previous archived value.",
-      "latest_run": "2026-08-17T15:17:17-04:00",
-      "latest_value": "Provider not allowed",
+      "latest_run": "2026-08-21T15:43:35+00:00",
+      "latest_value": "Provider allowed",
       "metric": "provider_policy_status",
-      "previous_run": "2026-08-17T15:17:11-04:00",
-      "previous_value": "Provider not allowed"
+      "previous_run": "2026-08-21T15:42:22+00:00",
+      "previous_value": "Provider allowed"
     },
     {
       "category": "Policy",
       "change": "No change",
       "change_status": "Stable",
       "details": "Latest archived value compared with the previous archived value.",
-      "latest_run": "2026-08-17T15:17:17-04:00",
-      "latest_value": "No",
+      "latest_run": "2026-08-21T15:43:35+00:00",
+      "latest_value": "Yes",
       "metric": "provider_allowed",
-      "previous_run": "2026-08-17T15:17:11-04:00",
-      "previous_value": "No"
+      "previous_run": "2026-08-21T15:42:22+00:00",
+      "previous_value": "Yes"
     },
     {
       "category": "Policy",
       "change": "No change",
       "change_status": "Stable",
       "details": "Latest archived value compared with the previous archived value.",
-      "latest_run": "2026-08-17T15:17:17-04:00",
-      "latest_value": "No",
+      "latest_run": "2026-08-21T15:43:35+00:00",
+      "latest_value": "Yes",
       "metric": "all_policy_gates_allowed",
-      "previous_run": "2026-08-17T15:17:11-04:00",
-      "previous_value": "No"
+      "previous_run": "2026-08-21T15:42:22+00:00",
+      "previous_value": "Yes"
     },
     {
       "category": "Validation",
       "change": "No change",
       "change_status": "Stable",
       "details": "Latest archived value compared with the previous archived value.",
-      "latest_run": "2026-08-17T15:17:17-04:00",
-      "latest_value": "Needs fixes",
+      "latest_run": "2026-08-21T15:43:35+00:00",
+      "latest_value": "Ready for handoff",
       "metric": "staging_validation_verdict",
-      "previous_run": "2026-08-17T15:17:11-04:00",
-      "previous_value": "Needs fixes"
+      "previous_run": "2026-08-21T15:42:22+00:00",
+      "previous_value": "Ready for handoff"
     },
     {
       "category": "Validation",
       "change": "No change",
       "change_status": "Stable",
       "details": "Latest archived value compared with the previous archived value.",
-      "latest_run": "2026-08-17T15:17:17-04:00",
-      "latest_value": "No",
+      "latest_run": "2026-08-21T15:43:35+00:00",
+      "latest_value": "Yes",
       "metric": "handoff_eligible",
-      "previous_run": "2026-08-17T15:17:11-04:00",
-      "previous_value": "No"
+      "previous_run": "2026-08-21T15:42:22+00:00",
+      "previous_value": "Yes"
     },
     {
       "category": "Provider",
       "change": "No change",
       "change_status": "Stable",
       "details": "Latest archived value compared with the previous archived value.",
-      "latest_run": "2026-08-17T15:17:17-04:00",
+      "latest_run": "2026-08-21T15:43:35+00:00",
       "latest_value": "Fresh",
       "metric": "provider_age_status",
-      "previous_run": "2026-08-17T15:17:11-04:00",
+      "previous_run": "2026-08-21T15:42:22+00:00",
       "previous_value": "Fresh"
     },
     {
       "category": "Quota",
-      "change": -12.0,
+      "change": -82.0,
       "change_status": "Changed",
       "details": "Latest archived value compared with the previous archived value.",
-      "latest_run": "2026-08-17T15:17:17-04:00",
-      "latest_value": "352",
+      "latest_run": "2026-08-21T15:43:35+00:00",
+      "latest_value": "6518",
       "metric": "requests_remaining",
-      "previous_run": "2026-08-17T15:17:11-04:00",
-      "previous_value": "364"
+      "previous_run": "2026-08-21T15:42:22+00:00",
+      "previous_value": "6600"
     },
     {
       "category": "Quota",
-      "change": 12.0,
+      "change": 82.0,
       "change_status": "Changed",
       "details": "Latest archived value compared with the previous archived value.",
-      "latest_run": "2026-08-17T15:17:17-04:00",
-      "latest_value": "148",
+      "latest_run": "2026-08-21T15:43:35+00:00",
+      "latest_value": "13482",
       "metric": "requests_used",
-      "previous_run": "2026-08-17T15:17:11-04:00",
-      "previous_value": "136"
+      "previous_run": "2026-08-21T15:42:22+00:00",
+      "previous_value": "13400"
     },
     {
       "category": "Quota",
       "change": 0.0,
       "change_status": "Stable",
       "details": "Latest archived value compared with the previous archived value.",
-      "latest_run": "2026-08-17T15:17:17-04:00",
+      "latest_run": "2026-08-21T15:43:35+00:00",
       "latest_value": "2",
       "metric": "requests_last",
-      "previous_run": "2026-08-17T15:17:11-04:00",
+      "previous_run": "2026-08-21T15:42:22+00:00",
       "previous_value": "2"
     },
     {
@@ -282,10 +282,10 @@
       "change": "No change",
       "change_status": "Stable",
       "details": "Existing source/staging provenance checksum proof status.",
-      "latest_run": "2026-08-17T15:17:17-04:00",
+      "latest_run": "2026-08-21T15:43:35+00:00",
       "latest_value": "Verified",
       "metric": "provenance_status",
-      "previous_run": "2026-08-17T15:17:11-04:00",
+      "previous_run": "2026-08-21T15:42:22+00:00",
       "previous_value": "Verified"
     },
     {
@@ -293,10 +293,10 @@
       "change": "No change",
       "change_status": "Stable",
       "details": "Existing source/staging provenance checksum proof status.",
-      "latest_run": "2026-08-17T15:17:17-04:00",
+      "latest_run": "2026-08-21T15:43:35+00:00",
       "latest_value": "Verified",
       "metric": "source_odds_checksum_status",
-      "previous_run": "2026-08-17T15:17:11-04:00",
+      "previous_run": "2026-08-21T15:42:22+00:00",
       "previous_value": "Verified"
     },
     {
@@ -304,10 +304,10 @@
       "change": "No change",
       "change_status": "Stable",
       "details": "Existing source/staging provenance checksum proof status.",
-      "latest_run": "2026-08-17T15:17:17-04:00",
+      "latest_run": "2026-08-21T15:43:35+00:00",
       "latest_value": "Verified",
       "metric": "source_fixtures_checksum_status",
-      "previous_run": "2026-08-17T15:17:11-04:00",
+      "previous_run": "2026-08-21T15:42:22+00:00",
       "previous_value": "Verified"
     },
     {
@@ -315,10 +315,10 @@
       "change": "No change",
       "change_status": "Stable",
       "details": "Existing source/staging provenance checksum proof status.",
-      "latest_run": "2026-08-17T15:17:17-04:00",
+      "latest_run": "2026-08-21T15:43:35+00:00",
       "latest_value": "Verified",
       "metric": "staging_odds_checksum_status",
-      "previous_run": "2026-08-17T15:17:11-04:00",
+      "previous_run": "2026-08-21T15:42:22+00:00",
       "previous_value": "Verified"
     },
     {
@@ -326,10 +326,10 @@
       "change": "No change",
       "change_status": "Stable",
       "details": "Existing source/staging provenance checksum proof status.",
-      "latest_run": "2026-08-17T15:17:17-04:00",
+      "latest_run": "2026-08-21T15:43:35+00:00",
       "latest_value": "Verified",
       "metric": "staging_fixtures_checksum_status",
-      "previous_run": "2026-08-17T15:17:11-04:00",
+      "previous_run": "2026-08-21T15:42:22+00:00",
       "previous_value": "Verified"
     },
     {
@@ -337,10 +337,10 @@
       "change": "No change",
       "change_status": "Stable",
       "details": "Existing source/staging provenance checksum proof status.",
-      "latest_run": "2026-08-17T15:17:17-04:00",
+      "latest_run": "2026-08-21T15:43:35+00:00",
       "latest_value": "Verified",
       "metric": "odds_checksum_pair_status",
-      "previous_run": "2026-08-17T15:17:11-04:00",
+      "previous_run": "2026-08-21T15:42:22+00:00",
       "previous_value": "Verified"
     },
     {
@@ -348,10 +348,10 @@
       "change": "No change",
       "change_status": "Stable",
       "details": "Existing source/staging provenance checksum proof status.",
-      "latest_run": "2026-08-17T15:17:17-04:00",
+      "latest_run": "2026-08-21T15:43:35+00:00",
       "latest_value": "Verified",
       "metric": "fixtures_checksum_pair_status",
-      "previous_run": "2026-08-17T15:17:11-04:00",
+      "previous_run": "2026-08-21T15:42:22+00:00",
       "previous_value": "Verified"
     },
     {
@@ -359,10 +359,10 @@
       "change": "No change",
       "change_status": "Stable",
       "details": "New warnings in the latest run.",
-      "latest_run": "2026-08-17T15:17:17-04:00",
+      "latest_run": "2026-08-21T15:43:35+00:00",
       "latest_value": "[]",
       "metric": "warnings_added",
-      "previous_run": "2026-08-17T15:17:11-04:00",
+      "previous_run": "2026-08-21T15:42:22+00:00",
       "previous_value": "[]"
     },
     {
@@ -370,10 +370,10 @@
       "change": "No change",
       "change_status": "Stable",
       "details": "Prior warnings no longer present.",
-      "latest_run": "2026-08-17T15:17:17-04:00",
+      "latest_run": "2026-08-21T15:43:35+00:00",
       "latest_value": "[]",
       "metric": "warnings_removed",
-      "previous_run": "2026-08-17T15:17:11-04:00",
+      "previous_run": "2026-08-21T15:42:22+00:00",
       "previous_value": "[]"
     },
     {
@@ -381,10 +381,10 @@
       "change": "No change",
       "change_status": "Stable",
       "details": "New blockers in the latest run.",
-      "latest_run": "2026-08-17T15:17:17-04:00",
+      "latest_run": "2026-08-21T15:43:35+00:00",
       "latest_value": "[]",
       "metric": "blockers_added",
-      "previous_run": "2026-08-17T15:17:11-04:00",
+      "previous_run": "2026-08-21T15:42:22+00:00",
       "previous_value": "[]"
     },
     {
@@ -392,29 +392,29 @@
       "change": "No change",
       "change_status": "Stable",
       "details": "Prior blockers no longer present.",
-      "latest_run": "2026-08-17T15:17:17-04:00",
+      "latest_run": "2026-08-21T15:43:35+00:00",
       "latest_value": "[]",
       "metric": "blockers_removed",
-      "previous_run": "2026-08-17T15:17:11-04:00",
+      "previous_run": "2026-08-21T15:42:22+00:00",
       "previous_value": "[]"
     }
   ],
-  "generated_at": "2026-08-17T15:59:00-04:00",
+  "generated_at": "2026-08-21T11:44:26-04:00",
   "latest_completeness_percentage": 1.0,
-  "latest_provider_allowed": false,
+  "latest_provider_allowed": true,
   "latest_run": {
     "archive_integrity_status": "Verified",
-    "archive_path": "archive/provider_shadow_runs/2026-08-17/151717_odds_api",
-    "generated_at": "2026-08-17T15:17:17-04:00",
-    "verdict": "Needs provider policy review"
+    "archive_path": "archive/provider_shadow_runs/2026-08-21/154335_odds_api",
+    "generated_at": "2026-08-21T15:43:35+00:00",
+    "verdict": "Shadow ready for review"
   },
-  "latest_staging_verdict": "Needs fixes",
+  "latest_staging_verdict": "Ready for handoff",
   "next_step": "Review raw evidence, quota behavior, and provider ownership manually. This is not automatic allowlist approval.",
   "previous_run": {
     "archive_integrity_status": "Verified",
-    "archive_path": "archive/provider_shadow_runs/2026-08-17/151711_odds_api",
-    "generated_at": "2026-08-17T15:17:11-04:00",
-    "verdict": "Needs provider policy review"
+    "archive_path": "archive/provider_shadow_runs/2026-08-21/154222_odds_api",
+    "generated_at": "2026-08-21T15:42:22+00:00",
+    "verdict": "Shadow ready for review"
   },
   "provider_key": "odds_api",
   "provider_name": "the_odds_api",

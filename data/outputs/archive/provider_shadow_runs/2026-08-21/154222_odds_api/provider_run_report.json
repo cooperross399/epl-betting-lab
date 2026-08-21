@@ -1,0 +1,72 @@
+{
+  "bets_placed": false,
+  "blockers": [],
+  "bookmakers": "",
+  "credential_environment_variable": "EPL_ODDS_API_KEY",
+  "credential_status": "Configured",
+  "cron_enabled": false,
+  "featured_markets_requested": [
+    "h2h",
+    "totals"
+  ],
+  "files_written": [
+    "data/staging/source_current_odds.csv",
+    "data/staging/source_upcoming_fixtures.csv",
+    "data/staging/current_odds_staging.csv",
+    "data/staging/upcoming_fixtures_staging.csv",
+    "data/staging/staging_provenance.json",
+    "data/staging/raw/20260821T154222Z_49eb3e5f58a6_odds_api_response.json"
+  ],
+  "fixture_count": 15,
+  "generated_at": "2026-08-21T15:42:22+00:00",
+  "generated_by": "scripts/run_provider_shadow_verification.py",
+  "manual_files_edited": false,
+  "market_counts": {
+    "1x2": 345,
+    "btts": 176,
+    "corners_1x2": 168,
+    "corners_total_10_5": 120,
+    "corners_total_9_5": 124,
+    "double_chance": 198,
+    "draw_no_bet": 178,
+    "total_2_5": 180
+  },
+  "mode": "Live provider fetch",
+  "network_request_made": true,
+  "next_step": "Run `python scripts/validate_staging_inputs.py`. Trust the bundle only if that separate report says `Ready for handoff`.",
+  "notes": "Controlled provider shadow verification run.",
+  "odds_row_count": 1489,
+  "overwrite_staging": true,
+  "provider_key": "odds_api",
+  "provider_name": "the_odds_api",
+  "provider_response_headers": {
+    "x-requests-last": "2",
+    "x-requests-remaining": "6600",
+    "x-requests-used": "13400"
+  },
+  "provider_type": "odds_api",
+  "raw_source_checksum_sha256": "49eb3e5f58a6aa77b53162c1f762649cf38861b3b9ea73f49c91aaa6fd6598e2",
+  "raw_source_path": "data/staging/raw/20260821T154222Z_49eb3e5f58a6_odds_api_response.json",
+  "regions": "us",
+  "secrets_written_or_printed": false,
+  "source_files": {
+    "current_odds": "data/staging/source_current_odds.csv",
+    "upcoming_fixtures": "data/staging/source_upcoming_fixtures.csv"
+  },
+  "source_url": "https://api.the-odds-api.com/v4/sports/soccer_epl/odds",
+  "sport_key": "soccer_epl",
+  "staging_files": {
+    "current_odds": "data/staging/current_odds_staging.csv",
+    "provenance": "data/staging/staging_provenance.json",
+    "upcoming_fixtures": "data/staging/upcoming_fixtures_staging.csv"
+  },
+  "staging_promoted": false,
+  "staging_validation_run": false,
+  "status": "Completed",
+  "warnings": [
+    "The provider repeated 20 `corners_total_10_5` row(s) for the same fixture, selection and book. The first price was kept and the repeats ignored; no price was guessed.",
+    "The provider repeated 22 `corners_total_9_5` row(s) for the same fixture, selection and book. The first price was kept and the repeats ignored; no price was guessed.",
+    "The provider repeated 32 `total_2_5` row(s) for the same fixture, selection and book. The first price was kept and the repeats ignored; no price was guessed.",
+    "Staging validation was not run automatically. The checked-in provider policy must explicitly allow `the_odds_api` before this bundle can become Ready for handoff."
+  ]
+}

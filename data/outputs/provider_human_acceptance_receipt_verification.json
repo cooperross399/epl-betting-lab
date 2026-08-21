@@ -7,7 +7,7 @@
       "details": "Receipt JSON is readable.",
       "evidence_path": "data/outputs/provider_human_acceptance_receipt.json",
       "expected": "Readable receipt JSON object",
-      "observed": "59e8324e81895782f9ca135b422638e4a3edb0cddda45367bcce1f0772e6f5bf",
+      "observed": "5ffec591e5ade9f3d74130b81e7ca7ebafdba5539b17fef758ad630291c81836",
       "status": "Verified"
     },
     {
@@ -34,7 +34,7 @@
       "details": "",
       "evidence_path": "",
       "expected": "Timezone-aware ISO timestamp",
-      "observed": "2026-08-17T16:03:07-04:00",
+      "observed": "2026-08-21T11:46:55-04:00",
       "status": "Verified"
     },
     {
@@ -51,8 +51,8 @@
       "check": "Provider acceptance checklist checksum",
       "details": "Current file checksum matches the human receipt.",
       "evidence_path": "data/outputs/provider_acceptance_checklist.json",
-      "expected": "c525fa657a3a51c237f870d9fbfb3cce1a0765e96bafd3ed031478174744fd8d",
-      "observed": "c525fa657a3a51c237f870d9fbfb3cce1a0765e96bafd3ed031478174744fd8d",
+      "expected": "865d4e6ec1c4d1535a96966bba04df89ce3a0643e288cde36a3c5b643aac4b69",
+      "observed": "865d4e6ec1c4d1535a96966bba04df89ce3a0643e288cde36a3c5b643aac4b69",
       "status": "Verified"
     },
     {
@@ -77,25 +77,25 @@
       "category": "Evidence",
       "check": "Reviewed shadow archive 1 bundle checksum",
       "details": "Current archive contains 9 file(s).",
-      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-17/151717_odds_api",
-      "expected": "350e8968939101ed4f96b65b40abea897318695fc14494007cbcaa7d5065af96",
-      "observed": "350e8968939101ed4f96b65b40abea897318695fc14494007cbcaa7d5065af96",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154335_odds_api",
+      "expected": "6b2842cbc84eddbecbd3ca435a652bc900f47c2b00999985ce398c47059aa866",
+      "observed": "6b2842cbc84eddbecbd3ca435a652bc900f47c2b00999985ce398c47059aa866",
       "status": "Verified"
     },
     {
       "category": "Evidence",
       "check": "Reviewed shadow archive 1 metadata checksum",
       "details": "",
-      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-17/151717_odds_api/archive_metadata.json",
-      "expected": "3fcfd33f2651d126856db4512df948fe6f15efe4599bf22bfb95cb2a428dcf4c",
-      "observed": "3fcfd33f2651d126856db4512df948fe6f15efe4599bf22bfb95cb2a428dcf4c",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154335_odds_api/archive_metadata.json",
+      "expected": "00a8ed2f5e471c240b7333af072afdb4d96ff2bbb3737c3dc661977a52d6f9cc",
+      "observed": "00a8ed2f5e471c240b7333af072afdb4d96ff2bbb3737c3dc661977a52d6f9cc",
       "status": "Verified"
     },
     {
       "category": "Evidence",
       "check": "Reviewed shadow archive 1 archive integrity",
       "details": "Verified 8 archived report checksum(s).",
-      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-17/151717_odds_api",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154335_odds_api",
       "expected": "Verified",
       "observed": "Verified",
       "status": "Verified"
@@ -104,25 +104,25 @@
       "category": "Evidence",
       "check": "Reviewed shadow archive 2 bundle checksum",
       "details": "Current archive contains 9 file(s).",
-      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-17/151711_odds_api",
-      "expected": "9548e60f62463182766da19fabfb5228a473fe395bc167abea691aad335fd735",
-      "observed": "9548e60f62463182766da19fabfb5228a473fe395bc167abea691aad335fd735",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154222_odds_api",
+      "expected": "539a2672fc06e78616e8235fecd39d85a9c67d697350547a6a20f80d0c197c28",
+      "observed": "539a2672fc06e78616e8235fecd39d85a9c67d697350547a6a20f80d0c197c28",
       "status": "Verified"
     },
     {
       "category": "Evidence",
       "check": "Reviewed shadow archive 2 metadata checksum",
       "details": "",
-      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-17/151711_odds_api/archive_metadata.json",
-      "expected": "410652f1d2d5ec77a9088fd4e18710b58441b9de34bdaaca78c364ec2cf3d8a4",
-      "observed": "410652f1d2d5ec77a9088fd4e18710b58441b9de34bdaaca78c364ec2cf3d8a4",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154222_odds_api/archive_metadata.json",
+      "expected": "e4a87d50ebc2f7cb5747c10b364363135f30c0c387b203f29ce389d215c5c117",
+      "observed": "e4a87d50ebc2f7cb5747c10b364363135f30c0c387b203f29ce389d215c5c117",
       "status": "Verified"
     },
     {
       "category": "Evidence",
       "check": "Reviewed shadow archive 2 archive integrity",
       "details": "Verified 8 archived report checksum(s).",
-      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-17/151711_odds_api",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154222_odds_api",
       "expected": "Verified",
       "observed": "Verified",
       "status": "Verified"
@@ -131,25 +131,25 @@
       "category": "Evidence",
       "check": "Reviewed shadow archive 3 bundle checksum",
       "details": "Current archive contains 9 file(s).",
-      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-17/151706_odds_api",
-      "expected": "03e810ba7a46d193774e99f05e8f67cf21dfae96caa64b767577a951377c50df",
-      "observed": "03e810ba7a46d193774e99f05e8f67cf21dfae96caa64b767577a951377c50df",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154019_odds_api",
+      "expected": "9525c7de23a88ac19b34b9e812e68b6caa156d5d3483f9360b12edfc3c262935",
+      "observed": "9525c7de23a88ac19b34b9e812e68b6caa156d5d3483f9360b12edfc3c262935",
       "status": "Verified"
     },
     {
       "category": "Evidence",
       "check": "Reviewed shadow archive 3 metadata checksum",
       "details": "",
-      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-17/151706_odds_api/archive_metadata.json",
-      "expected": "f80f7e619ceee625685a2834b57e2270476abfc022b97562d833432ec5ee8ca5",
-      "observed": "f80f7e619ceee625685a2834b57e2270476abfc022b97562d833432ec5ee8ca5",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154019_odds_api/archive_metadata.json",
+      "expected": "74ab893d1efbde34329b9df97b82803e14967b7e326c519d4f7526b9be2c7038",
+      "observed": "74ab893d1efbde34329b9df97b82803e14967b7e326c519d4f7526b9be2c7038",
       "status": "Verified"
     },
     {
       "category": "Evidence",
       "check": "Reviewed shadow archive 3 archive integrity",
       "details": "Verified 8 archived report checksum(s).",
-      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-17/151706_odds_api",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154019_odds_api",
       "expected": "Verified",
       "observed": "Verified",
       "status": "Verified"
@@ -158,25 +158,25 @@
       "category": "Evidence",
       "check": "Reviewed shadow archive 4 bundle checksum",
       "details": "Current archive contains 9 file(s).",
-      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-17/151700_odds_api",
-      "expected": "1fd4711908ca3ccc01d0144ef30064250bddb1ba9de18877ea9222e1aa14e760",
-      "observed": "1fd4711908ca3ccc01d0144ef30064250bddb1ba9de18877ea9222e1aa14e760",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153908_odds_api",
+      "expected": "0e0aae3c2da51bf78bd25991ad100e5421195356ff9f3fa8bc2c8c1bae411398",
+      "observed": "0e0aae3c2da51bf78bd25991ad100e5421195356ff9f3fa8bc2c8c1bae411398",
       "status": "Verified"
     },
     {
       "category": "Evidence",
       "check": "Reviewed shadow archive 4 metadata checksum",
       "details": "",
-      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-17/151700_odds_api/archive_metadata.json",
-      "expected": "55781d1f8de48409c7d2471280e9d6f9fe54de087f1ca26d18c4ff7a4f61fd20",
-      "observed": "55781d1f8de48409c7d2471280e9d6f9fe54de087f1ca26d18c4ff7a4f61fd20",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153908_odds_api/archive_metadata.json",
+      "expected": "a960c6e46dde87b7de95ef8a7aecefd7f1216d9bd02fcc8e1ee4285f4a14d659",
+      "observed": "a960c6e46dde87b7de95ef8a7aecefd7f1216d9bd02fcc8e1ee4285f4a14d659",
       "status": "Verified"
     },
     {
       "category": "Evidence",
       "check": "Reviewed shadow archive 4 archive integrity",
       "details": "Verified 8 archived report checksum(s).",
-      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-17/151700_odds_api",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153908_odds_api",
       "expected": "Verified",
       "observed": "Verified",
       "status": "Verified"
@@ -185,25 +185,25 @@
       "category": "Evidence",
       "check": "Reviewed shadow archive 5 bundle checksum",
       "details": "Current archive contains 9 file(s).",
-      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-17/151655_odds_api",
-      "expected": "68478b7192e7004b4e7426223e39e06d7074b3704681c5072409669ec9432471",
-      "observed": "68478b7192e7004b4e7426223e39e06d7074b3704681c5072409669ec9432471",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153816_odds_api",
+      "expected": "30f6c1ad63ccda5181ff5fd39a9f9f474e6f0630041d22b3c84b37cd4b564491",
+      "observed": "30f6c1ad63ccda5181ff5fd39a9f9f474e6f0630041d22b3c84b37cd4b564491",
       "status": "Verified"
     },
     {
       "category": "Evidence",
       "check": "Reviewed shadow archive 5 metadata checksum",
       "details": "",
-      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-17/151655_odds_api/archive_metadata.json",
-      "expected": "684562bde7e3fc35d21fb7f5c1c1da47af288c3afe8ba1a7caab1842cdc6e21c",
-      "observed": "684562bde7e3fc35d21fb7f5c1c1da47af288c3afe8ba1a7caab1842cdc6e21c",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153816_odds_api/archive_metadata.json",
+      "expected": "de53269f32536f3ddd216d10630266cdfdb4be7846d7fc8763fb4aeb2578ab2b",
+      "observed": "de53269f32536f3ddd216d10630266cdfdb4be7846d7fc8763fb4aeb2578ab2b",
       "status": "Verified"
     },
     {
       "category": "Evidence",
       "check": "Reviewed shadow archive 5 archive integrity",
       "details": "Verified 8 archived report checksum(s).",
-      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-17/151655_odds_api",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153816_odds_api",
       "expected": "Verified",
       "observed": "Verified",
       "status": "Verified"
@@ -213,8 +213,8 @@
       "check": "Latest live archive set",
       "details": "The same latest live archives remain current and bound.",
       "evidence_path": "data/outputs/archive/provider_shadow_runs",
-      "expected": "[\"archive/provider_shadow_runs/2026-08-17/151655_odds_api\", \"archive/provider_shadow_runs/2026-08-17/151700_odds_api\", \"archive/provider_shadow_runs/2026-08-17/151706_odds_api\", \"archive/provider_shadow_runs/2026-08-17/151711_odds_api\", \"archive/provider_shadow_runs/2026-08-17/151717_odds_api\"]",
-      "observed": "[\"archive/provider_shadow_runs/2026-08-17/151655_odds_api\", \"archive/provider_shadow_runs/2026-08-17/151700_odds_api\", \"archive/provider_shadow_runs/2026-08-17/151706_odds_api\", \"archive/provider_shadow_runs/2026-08-17/151711_odds_api\", \"archive/provider_shadow_runs/2026-08-17/151717_odds_api\"]",
+      "expected": "[\"archive/provider_shadow_runs/2026-08-21/153816_odds_api\", \"archive/provider_shadow_runs/2026-08-21/153908_odds_api\", \"archive/provider_shadow_runs/2026-08-21/154019_odds_api\", \"archive/provider_shadow_runs/2026-08-21/154222_odds_api\", \"archive/provider_shadow_runs/2026-08-21/154335_odds_api\"]",
+      "observed": "[\"archive/provider_shadow_runs/2026-08-21/153816_odds_api\", \"archive/provider_shadow_runs/2026-08-21/153908_odds_api\", \"archive/provider_shadow_runs/2026-08-21/154019_odds_api\", \"archive/provider_shadow_runs/2026-08-21/154222_odds_api\", \"archive/provider_shadow_runs/2026-08-21/154335_odds_api\"]",
       "status": "Verified"
     },
     {
@@ -222,8 +222,8 @@
       "check": "Matching shadow comparison checksum",
       "details": "Current file checksum matches the human receipt.",
       "evidence_path": "data/outputs/provider_shadow_run_comparison.json",
-      "expected": "8c1ab882133936657fa4961aab0909acbfb0f4676783e0e27ad8be0959677650",
-      "observed": "8c1ab882133936657fa4961aab0909acbfb0f4676783e0e27ad8be0959677650",
+      "expected": "81a23e87f4e585b8b1e7b3d25d80a5ad6ff7427f806563d98e22dff2785474e5",
+      "observed": "81a23e87f4e585b8b1e7b3d25d80a5ad6ff7427f806563d98e22dff2785474e5",
       "status": "Verified"
     },
     {
@@ -240,8 +240,8 @@
       "check": "Provider policy checksum",
       "details": "Current file checksum matches the human receipt.",
       "evidence_path": "data/manual/staging_provider_policy.json",
-      "expected": "23d88241a66c9cc86b59d4278694b4e1522fd48048c268e0744dd217020b21d3",
-      "observed": "23d88241a66c9cc86b59d4278694b4e1522fd48048c268e0744dd217020b21d3",
+      "expected": "1a16ba8a70d96ec81ddc6aabd4e7f0e61b0e50982b7893dcc19f178139466dbb",
+      "observed": "1a16ba8a70d96ec81ddc6aabd4e7f0e61b0e50982b7893dcc19f178139466dbb",
       "status": "Verified"
     },
     {
@@ -258,19 +258,19 @@
       "check": "Receipt ID",
       "details": "Receipt ID binds human fields and recorded evidence checksums.",
       "evidence_path": "",
-      "expected": "odds_api-20260817T160307-0400-20fb55e75c14",
-      "observed": "odds_api-20260817T160307-0400-20fb55e75c14",
+      "expected": "odds_api-20260821T114655-0400-20ffa5677988",
+      "observed": "odds_api-20260821T114655-0400-20ffa5677988",
       "status": "Verified"
     }
   ],
   "decision": "approved_for_allowlist_pr",
-  "generated_at": "2026-08-17T16:03:08-04:00",
+  "generated_at": "2026-08-21T11:47:03-04:00",
   "next_step": "A separate human-reviewed provider allowlist PR may now be considered. This verifier does not edit policy or enable cron.",
   "provider_key": "odds_api",
   "provider_name": "the_odds_api",
-  "receipt_checksum_sha256": "59e8324e81895782f9ca135b422638e4a3edb0cddda45367bcce1f0772e6f5bf",
-  "receipt_created_at": "2026-08-17T16:03:07-04:00",
-  "receipt_id": "odds_api-20260817T160307-0400-20fb55e75c14",
+  "receipt_checksum_sha256": "5ffec591e5ade9f3d74130b81e7ca7ebafdba5539b17fef758ad630291c81836",
+  "receipt_created_at": "2026-08-21T11:46:55-04:00",
+  "receipt_id": "odds_api-20260821T114655-0400-20ffa5677988",
   "receipt_path": "data/outputs/provider_human_acceptance_receipt.json",
   "reviewer_name": "cooperross399",
   "safety": {

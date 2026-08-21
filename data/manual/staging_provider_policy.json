@@ -16,15 +16,14 @@
   "provider_allowlist_entries": {
     "the_odds_api": {
       "allowlist_status": "allowed",
-      "approved_at": "2026-08-17T16:03:07-04:00",
+      "approved_at": "2026-08-21T11:46:55-04:00",
       "cutoff_policy": {
         "day": "Thursday",
         "time": "10:00",
         "timezone": "America/New_York"
       },
-      "evidence_receipt_id": "odds_api-20260817T160307-0400-20fb55e75c14",
+      "evidence_receipt_id": "odds_api-20260821T114655-0400-20ffa5677988",
       "known_limitations": [
-        "`total_2_5` is not allowlisted: the reviewed evidence did not find it eligible. Its prices remain unavailable or incomplete and must never be fabricated.",
         "Allowlisting does not bypass staging validation, freshness, completeness, checksum, receipt, or Thursday cutoff gates."
       ],
       "max_provider_run_age_hours": 12.0,
@@ -33,11 +32,17 @@
       "provider_type": "odds_api",
       "required_markets": [
         "1x2",
-        "btts"
+        "total_2_5",
+        "btts",
+        "double_chance",
+        "draw_no_bet",
+        "corners_1x2",
+        "corners_total_9_5",
+        "corners_total_10_5"
       ],
-      "reviewed_at": "2026-08-17T16:03:08-04:00",
+      "reviewed_at": "2026-08-21T11:47:03-04:00",
       "reviewer_name": "cooperross399",
-      "verification_report_checksum_sha256": "22fa32fb6d0316128d6b89c53736ad943d787c6be2828b25c87d0c9982da653a",
+      "verification_report_checksum_sha256": "a5b59887648b80bd03f4ee8e04d7e6f68281497a7e18d3beac80bb77fc3a51fd",
       "verification_report_path": "data/outputs/provider_human_acceptance_receipt_verification.json"
     }
   },

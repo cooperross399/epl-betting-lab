@@ -1,0 +1,77 @@
+{
+  "archive_id": "archive/provider_shadow_runs/2026-08-21/153908_odds_api",
+  "archive_warnings": [],
+  "archived_at": "2026-08-21T15:39:08+00:00",
+  "files": {
+    "provider_report_json": {
+      "archive_path": "archive/provider_shadow_runs/2026-08-21/153908_odds_api/provider_run_report.json",
+      "checksum_sha256": "cb8882d430bb3bea56f75705d4cf2c59443e656350d23d833c920ce4a645908a",
+      "size_bytes": 3025,
+      "source_path": "odds_api_staging_provider_report.json",
+      "status": "Archived"
+    },
+    "provider_report_markdown": {
+      "archive_path": "archive/provider_shadow_runs/2026-08-21/153908_odds_api/provider_run_report.md",
+      "checksum_sha256": "58dd62e80369e1b6c8f836c488fb3bff15561724523b62cf77a0c3c4100b8a95",
+      "size_bytes": 2323,
+      "source_path": "odds_api_staging_provider_report.md",
+      "status": "Archived"
+    },
+    "shadow_csv": {
+      "archive_path": "archive/provider_shadow_runs/2026-08-21/153908_odds_api/provider_shadow_verification.csv",
+      "checksum_sha256": "3474512ebc0b8ed461ebfbfbc74791e4bed3f4d0db41df17ad8a54ded1923422",
+      "size_bytes": 3478,
+      "source_path": "provider_shadow_verification.csv",
+      "status": "Archived"
+    },
+    "shadow_json": {
+      "archive_path": "archive/provider_shadow_runs/2026-08-21/153908_odds_api/provider_shadow_verification.json",
+      "checksum_sha256": "86d1d3c4aa165a282e60bb1f7c569c188d385f9ea9ab8de83564e81d3a3e9b5c",
+      "size_bytes": 13967,
+      "source_path": "provider_shadow_verification.json",
+      "status": "Archived"
+    },
+    "shadow_markdown": {
+      "archive_path": "archive/provider_shadow_runs/2026-08-21/153908_odds_api/provider_shadow_verification.md",
+      "checksum_sha256": "9d3ba1d0f3d1272d37b5ebc4ed918fd2e03e4752a065b8968e22ca3b192e28ab",
+      "size_bytes": 18631,
+      "source_path": "provider_shadow_verification.md",
+      "status": "Archived"
+    },
+    "staging_validation_csv": {
+      "archive_path": "archive/provider_shadow_runs/2026-08-21/153908_odds_api/staging_input_validation.csv",
+      "checksum_sha256": "7df1af4bd9314f2d585e4e1512236957cca48076610127b2f9fb47379a046bb0",
+      "size_bytes": 121330,
+      "source_path": "staging_input_validation.csv",
+      "status": "Archived"
+    },
+    "staging_validation_json": {
+      "archive_path": "archive/provider_shadow_runs/2026-08-21/153908_odds_api/staging_input_validation.json",
+      "checksum_sha256": "362d12f239d270df4011572a035fcfb6a50825c33559629691de3d9339ea077b",
+      "size_bytes": 7038,
+      "source_path": "staging_input_validation.json",
+      "status": "Archived"
+    },
+    "staging_validation_markdown": {
+      "archive_path": "archive/provider_shadow_runs/2026-08-21/153908_odds_api/staging_input_validation.md",
+      "checksum_sha256": "0ec7265f967d329b1d02a8c59e483a159a3f3cf0e4b5ced2ee533b13360673aa",
+      "size_bytes": 159792,
+      "source_path": "staging_input_validation.md",
+      "status": "Archived"
+    }
+  },
+  "generated_at": "2026-08-21T15:39:08+00:00",
+  "mode": "Live shadow run",
+  "provider_key": "odds_api",
+  "provider_name": "the_odds_api",
+  "provider_type": "odds_api",
+  "safety": {
+    "bets_placed": false,
+    "cron_enabled": false,
+    "manual_or_production_files_edited": false,
+    "provider_policy_edited": false,
+    "staging_promoted": false
+  },
+  "schema_version": 1,
+  "verdict": "Shadow ready for review"
+}

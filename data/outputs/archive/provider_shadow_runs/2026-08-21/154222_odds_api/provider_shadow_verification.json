@@ -1,0 +1,410 @@
+{
+  "api_quota": {
+    "requests_last": "2",
+    "requests_remaining": "6600",
+    "requests_used": "13400",
+    "status": "Available"
+  },
+  "blockers": [],
+  "bookmaker_coverage": {
+    "bookmaker_count": 11,
+    "bookmakers": [
+      "BetMGM",
+      "BetOnline.ag",
+      "BetRivers",
+      "BetUS",
+      "Bovada",
+      "Caesars",
+      "DraftKings",
+      "FanDuel",
+      "Fanatics",
+      "LowVig.ag",
+      "MyBookie.ag"
+    ],
+    "fixtures_by_bookmaker": {
+      "BetMGM": 10,
+      "BetOnline.ag": 10,
+      "BetRivers": 10,
+      "BetUS": 10,
+      "Bovada": 10,
+      "Caesars": 10,
+      "DraftKings": 10,
+      "FanDuel": 15,
+      "Fanatics": 10,
+      "LowVig.ag": 10,
+      "MyBookie.ag": 10
+    },
+    "rows_by_bookmaker": {
+      "BetMGM": 160,
+      "BetOnline.ag": 91,
+      "BetRivers": 190,
+      "BetUS": 36,
+      "Bovada": 187,
+      "Caesars": 110,
+      "DraftKings": 190,
+      "FanDuel": 250,
+      "Fanatics": 148,
+      "LowVig.ag": 36,
+      "MyBookie.ag": 91
+    },
+    "status": "Available"
+  },
+  "btts_availability": {
+    "bookmakers_with_btts": [
+      "BetMGM",
+      "BetOnline.ag",
+      "BetRivers",
+      "Bovada",
+      "Caesars",
+      "DraftKings",
+      "FanDuel",
+      "Fanatics",
+      "MyBookie.ag"
+    ],
+    "btts_row_count": 176,
+    "core_market_row_count": 525,
+    "fabricated": false,
+    "recommended_action": "",
+    "status": "Available",
+    "trusted": false
+  },
+  "checksums": {
+    "fixtures_checksum_pair_status": "Verified",
+    "odds_checksum_pair_status": "Verified",
+    "provenance_status": "Verified",
+    "source_fixtures_checksum_status": "Verified",
+    "source_odds_checksum_status": "Verified",
+    "staging_fixtures_checksum_status": "Verified",
+    "staging_odds_checksum_status": "Verified"
+  },
+  "core_market_coverage": {
+    "markets": [
+      "1x2",
+      "total_2_5"
+    ],
+    "missing_fixture_selections": [],
+    "note": "1X2 and totals coverage only. BTTS availability is reported separately and is never inferred from these markets.",
+    "row_count": 525,
+    "status": "Complete"
+  },
+  "fixture_matching": {
+    "coverage_percentage": 1.0,
+    "fixtures_without_odds": [],
+    "matched_fixture_count": 15,
+    "odds_fixture_count": 15,
+    "staging_fixture_count": 15,
+    "status": "Verified",
+    "unmatched_odds_fixtures": []
+  },
+  "generated_at": "2026-08-21T15:42:22+00:00",
+  "market_coverage": {
+    "coverage_percentage": 1.0,
+    "covered_fixture_selection_count": 105,
+    "expected_fixture_selection_count": 105,
+    "market_counts": {
+      "1x2": 345,
+      "btts": 176,
+      "corners_1x2": 168,
+      "corners_total_10_5": 120,
+      "corners_total_9_5": 124,
+      "double_chance": 198,
+      "draw_no_bet": 178,
+      "total_2_5": 180
+    },
+    "missing_fixture_selections": [],
+    "missing_markets": [],
+    "selection_counts": {
+      "1x2:away": 115,
+      "1x2:draw": 115,
+      "1x2:home": 115,
+      "btts:no": 88,
+      "btts:yes": 88,
+      "corners_1x2:away": 56,
+      "corners_1x2:draw": 56,
+      "corners_1x2:home": 56,
+      "corners_total_10_5:over": 60,
+      "corners_total_10_5:under": 60,
+      "corners_total_9_5:over": 62,
+      "corners_total_9_5:under": 62,
+      "double_chance:draw_or_away": 66,
+      "double_chance:home_or_away": 66,
+      "double_chance:home_or_draw": 66,
+      "draw_no_bet:away": 89,
+      "draw_no_bet:home": 89,
+      "total_2_5:over": 90,
+      "total_2_5:under": 90
+    },
+    "status": "Complete"
+  },
+  "market_eligibility": {
+    "any_market_eligible": true,
+    "disabled_markets": [],
+    "eligible_markets": [
+      "1x2",
+      "total_2_5",
+      "btts",
+      "double_chance",
+      "draw_no_bet"
+    ],
+    "excluded_markets": [
+      "corners_1x2",
+      "corners_total_9_5",
+      "corners_total_10_5"
+    ],
+    "fixtures_in_window": 15,
+    "gate_failures": [],
+    "incomplete_markets": [
+      "corners_1x2",
+      "corners_total_9_5",
+      "corners_total_10_5"
+    ],
+    "markets": [
+      {
+        "bookmaker_count": 11,
+        "fabricated": false,
+        "fixtures_covered": 15,
+        "fixtures_expected": 15,
+        "market": "1x2",
+        "missing_fixtures": [],
+        "reason": "`1x2` covers all 15 fixtures in the selected window with passing mapping, validation, and freshness.",
+        "row_count": 345,
+        "status": "eligible",
+        "usable_for_picks": true
+      },
+      {
+        "bookmaker_count": 11,
+        "fabricated": false,
+        "fixtures_covered": 15,
+        "fixtures_expected": 15,
+        "market": "total_2_5",
+        "missing_fixtures": [],
+        "reason": "`total_2_5` covers all 15 fixtures in the selected window with passing mapping, validation, and freshness.",
+        "row_count": 180,
+        "status": "eligible",
+        "usable_for_picks": true
+      },
+      {
+        "bookmaker_count": 9,
+        "fabricated": false,
+        "fixtures_covered": 15,
+        "fixtures_expected": 15,
+        "market": "btts",
+        "missing_fixtures": [],
+        "reason": "`btts` covers all 15 fixtures in the selected window with passing mapping, validation, and freshness.",
+        "row_count": 176,
+        "status": "eligible",
+        "usable_for_picks": true
+      },
+      {
+        "bookmaker_count": 7,
+        "fabricated": false,
+        "fixtures_covered": 15,
+        "fixtures_expected": 15,
+        "market": "double_chance",
+        "missing_fixtures": [],
+        "reason": "`double_chance` covers all 15 fixtures in the selected window with passing mapping, validation, and freshness.",
+        "row_count": 198,
+        "status": "eligible",
+        "usable_for_picks": true
+      },
+      {
+        "bookmaker_count": 9,
+        "fabricated": false,
+        "fixtures_covered": 15,
+        "fixtures_expected": 15,
+        "market": "draw_no_bet",
+        "missing_fixtures": [],
+        "reason": "`draw_no_bet` covers all 15 fixtures in the selected window with passing mapping, validation, and freshness.",
+        "row_count": 178,
+        "status": "eligible",
+        "usable_for_picks": true
+      },
+      {
+        "bookmaker_count": 6,
+        "fabricated": false,
+        "fixtures_covered": 10,
+        "fixtures_expected": 15,
+        "market": "corners_1x2",
+        "missing_fixtures": [
+          "2026-08-29: Bournemouth vs Everton",
+          "2026-08-29: Tottenham vs Newcastle",
+          "2026-08-30: Chelsea vs Brighton",
+          "2026-08-30: Leeds vs Brentford",
+          "2026-08-31: Aston Villa vs Arsenal"
+        ],
+        "reason": "`corners_1x2` covers 10 of 15 fixtures in the selected window. The market is excluded rather than partially used.",
+        "row_count": 168,
+        "status": "incomplete",
+        "usable_for_picks": false
+      },
+      {
+        "bookmaker_count": 8,
+        "fabricated": false,
+        "fixtures_covered": 10,
+        "fixtures_expected": 15,
+        "market": "corners_total_9_5",
+        "missing_fixtures": [
+          "2026-08-29: Bournemouth vs Everton",
+          "2026-08-29: Tottenham vs Newcastle",
+          "2026-08-30: Chelsea vs Brighton",
+          "2026-08-30: Leeds vs Brentford",
+          "2026-08-31: Aston Villa vs Arsenal"
+        ],
+        "reason": "`corners_total_9_5` covers 10 of 15 fixtures in the selected window. The market is excluded rather than partially used.",
+        "row_count": 124,
+        "status": "incomplete",
+        "usable_for_picks": false
+      },
+      {
+        "bookmaker_count": 7,
+        "fabricated": false,
+        "fixtures_covered": 10,
+        "fixtures_expected": 15,
+        "market": "corners_total_10_5",
+        "missing_fixtures": [
+          "2026-08-29: Bournemouth vs Everton",
+          "2026-08-29: Tottenham vs Newcastle",
+          "2026-08-30: Chelsea vs Brighton",
+          "2026-08-30: Leeds vs Brentford",
+          "2026-08-31: Aston Villa vs Arsenal"
+        ],
+        "reason": "`corners_total_10_5` covers 10 of 15 fixtures in the selected window. The market is excluded rather than partially used.",
+        "row_count": 120,
+        "status": "incomplete",
+        "usable_for_picks": false
+      }
+    ],
+    "note": "Excluded markets are unavailable, incomplete, or deliberately disabled. They are never reported as passes or no-value calls, and no missing price was invented.",
+    "unavailable_markets": [],
+    "warnings": [
+      "Incomplete market(s): corners_1x2, corners_total_9_5, corners_total_10_5. Excluded from automated picks rather than used for a subset of fixtures."
+    ],
+    "window_label": "2026-08-21 through 2026-08-24"
+  },
+  "mode": "Live shadow run",
+  "next_step": "Review raw evidence and repeat several manual shadow runs before any provider allowlist or scheduling decision.",
+  "odds_completeness": {
+    "completion_percentage": 1.0,
+    "matches_incomplete": 0,
+    "status": "Complete"
+  },
+  "provider_age": {
+    "age_minutes": 0.001,
+    "note": "Provider run is 0.0 minute(s) old; policy allows up to 12 hour(s).",
+    "status": "Fresh"
+  },
+  "provider_key": "odds_api",
+  "provider_name": "the_odds_api",
+  "provider_policy": {
+    "all_policy_gates_allowed": true,
+    "policy_path": "data/manual/staging_provider_policy.json",
+    "provider_allowed": true,
+    "provider_policy_status": "Provider allowed"
+  },
+  "provider_run": {
+    "fixture_count": 15,
+    "network_request_made": true,
+    "odds_row_count": 1489,
+    "provider_report_json": "/home/runner/work/epl-betting-lab/epl-betting-lab/data/outputs/odds_api_staging_provider_report.json",
+    "provider_report_markdown": "/home/runner/work/epl-betting-lab/epl-betting-lab/data/outputs/odds_api_staging_provider_report.md",
+    "status": "Completed"
+  },
+  "provider_type": "odds_api",
+  "raw_evidence": {
+    "checksum_status": "Verified",
+    "current_checksums_sha256": {
+      "data/staging/raw/20260821T154222Z_49eb3e5f58a6_odds_api_response.json": "49eb3e5f58a6aa77b53162c1f762649cf38861b3b9ea73f49c91aaa6fd6598e2"
+    },
+    "declared_files": [
+      "data/staging/raw/20260821T154222Z_49eb3e5f58a6_odds_api_response.json"
+    ],
+    "found_files": [
+      "data/staging/raw/20260821T154222Z_49eb3e5f58a6_odds_api_response.json"
+    ],
+    "raw_source_checksum_sha256": "49eb3e5f58a6aa77b53162c1f762649cf38861b3b9ea73f49c91aaa6fd6598e2",
+    "status": "Created"
+  },
+  "safety": {
+    "bets_placed": false,
+    "cron_enabled": false,
+    "manual_or_production_files_edited": false,
+    "provider_policy_edited": false,
+    "secrets_written_or_printed": false,
+    "staging_promoted": false,
+    "trusted_picks_generated": false
+  },
+  "slate_coverage": {
+    "full_upcoming_fixtures": {
+      "coverage_percentage": 0.7,
+      "covered_fixture_count": 14,
+      "denominator": "every fixture in data/manual/upcoming_fixtures.csv",
+      "expected_fixture_count": 20,
+      "missing_fixtures": [
+        "2026-08-28: crystal palace vs man city",
+        "2026-08-29: aston villa vs arsenal",
+        "2026-08-29: coventry vs hull",
+        "2026-08-29: liverpool vs nott'm forest",
+        "2026-08-30: man united vs ipswich",
+        "2026-08-30: sunderland vs fulham"
+      ],
+      "scope": "full_upcoming_fixtures",
+      "status": "Incomplete"
+    },
+    "provider_returned": {
+      "coverage_percentage": 1.0,
+      "covered_fixture_count": 15,
+      "denominator": "fixtures the provider actually returned in this run",
+      "expected_fixture_count": 15,
+      "missing_fixtures": [],
+      "scope": "provider_returned",
+      "status": "Complete"
+    },
+    "selected_week1_window": {
+      "coverage_percentage": 1.0,
+      "covered_fixture_count": 10,
+      "denominator": "fixtures inside the selected Week 1 window (2026-08-21 through 2026-08-24)",
+      "expected_fixture_count": 10,
+      "missing_fixtures": [],
+      "scope": "selected_week1_window",
+      "status": "Complete"
+    },
+    "selected_window": "2026-08-21 through 2026-08-24",
+    "warnings": [
+      "`upcoming_fixtures.csv` holds 20 fixtures but the selected Week 1 window holds only 10. Coverage percentages differ by scope."
+    ]
+  },
+  "staging_validation": {
+    "error": "",
+    "handoff_eligible": true,
+    "outputs": {
+      "csv": "/home/runner/work/epl-betting-lab/epl-betting-lab/data/outputs/staging_input_validation.csv",
+      "json": "/home/runner/work/epl-betting-lab/epl-betting-lab/data/outputs/staging_input_validation.json",
+      "markdown": "/home/runner/work/epl-betting-lab/epl-betting-lab/data/outputs/staging_input_validation.md"
+    },
+    "verdict": "Ready for handoff"
+  },
+  "team_mapping": {
+    "coverage_percentage": 1.0,
+    "mapped_team_count": 20,
+    "names_without_reviewed_alias": [],
+    "provider_team_count": 20,
+    "reference_sources": [
+      "data/processed/epl_historical_matches.csv",
+      "data/manual/upcoming_fixtures.csv"
+    ],
+    "status": "Verified",
+    "unmapped_team_count": 0,
+    "unmapped_teams": [],
+    "warnings": []
+  },
+  "verdict": "Shadow ready for review",
+  "verdict_reason": "The live bundle passed current technical gates; manual review is still required.",
+  "warnings": [
+    "The provider repeated 20 `corners_total_10_5` row(s) for the same fixture, selection and book. The first price was kept and the repeats ignored; no price was guessed.",
+    "The provider repeated 22 `corners_total_9_5` row(s) for the same fixture, selection and book. The first price was kept and the repeats ignored; no price was guessed.",
+    "The provider repeated 32 `total_2_5` row(s) for the same fixture, selection and book. The first price was kept and the repeats ignored; no price was guessed.",
+    "Staging validation was not run automatically. The checked-in provider policy must explicitly allow `the_odds_api` before this bundle can become Ready for handoff.",
+    "Current odds validation found 489 warning(s). Review them before trusting the card.",
+    "`upcoming_fixtures.csv` holds 20 fixtures but the selected Week 1 window holds only 10. Coverage percentages differ by scope."
+  ]
+}

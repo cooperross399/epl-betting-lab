@@ -1,5 +1,5 @@
 {
-  "archived_run_count": 15,
+  "archived_run_count": 10,
   "checklist": [
     {
       "details": "Dry runs do not count toward provider acceptance evidence.",
@@ -31,21 +31,21 @@
     },
     {
       "details": "Bookmaker disappearance or churn requires manual review.",
-      "observed": "BetMGM, BetOnline.ag, BetRivers, BetUS, Bovada, DraftKings, FanDuel, LowVig.ag, MyBookie.ag",
+      "observed": "BetMGM, BetOnline.ag, BetRivers, BetUS, Bovada, Caesars, DraftKings, FanDuel, Fanatics, LowVig.ag, MyBookie.ag",
       "required": "At least one consistent bookmaker set",
       "requirement": "Stable bookmaker coverage",
       "status": "Pass"
     },
     {
       "details": "Counts may exceed the minimum when multiple books are returned.",
-      "observed": "270/30, 270/30, 270/30, 270/30, 270/30",
+      "observed": "345/45, 345/45, 345/45, 345/45, 345/45",
       "required": "Home, draw, and away for each returned fixture",
       "requirement": "Acceptable 1X2 coverage",
       "status": "Pass"
     },
     {
       "details": "Missing totals are never filled with guessed prices.",
-      "observed": "80/20, 80/20, 80/20, 80/20, 80/20",
+      "observed": "180/30, 180/30, 180/30, 180/30, 180/30",
       "required": "Over and under 2.5 for each returned fixture",
       "requirement": "Acceptable totals coverage",
       "status": "Pass"
@@ -87,10 +87,10 @@
     },
     {
       "details": "Provider not allowed is expected before human review and is never changed here.",
-      "observed": "Provider not allowed, Provider not allowed, Provider not allowed, Provider not allowed, Provider not allowed",
+      "observed": "Provider allowed, Provider allowed, Provider allowed, Provider allowed, Provider allowed",
       "required": "Stable, readable policy evidence",
       "requirement": "Provider policy state",
-      "status": "Pending human review"
+      "status": "Pass"
     },
     {
       "details": "Policy-only pending blockers are separated from technical blockers.",
@@ -101,15 +101,15 @@
     }
   ],
   "completed_live_run_count": 5,
-  "generated_at": "2026-08-17T15:59:00-04:00",
+  "generated_at": "2026-08-21T11:44:26-04:00",
   "latest_pair_changed_metrics": [
     "requests_remaining",
     "requests_used"
   ],
-  "live_run_count": 15,
+  "live_run_count": 10,
   "minimum_live_runs": 3,
   "next_step": "A person may now review the evidence and policy change separately. This report does not approve or edit the allowlist.",
-  "provider_currently_allowed": false,
+  "provider_currently_allowed": true,
   "provider_key": "odds_api",
   "provider_name": "the_odds_api",
   "quota_header_run_count": 5,
@@ -118,43 +118,43 @@
   "reviewed_runs": [
     {
       "archive_integrity_status": "Verified",
-      "archive_path": "archive/provider_shadow_runs/2026-08-17/151717_odds_api",
-      "generated_at": "2026-08-17T15:17:17-04:00",
+      "archive_path": "archive/provider_shadow_runs/2026-08-21/154335_odds_api",
+      "generated_at": "2026-08-21T15:43:35+00:00",
       "provider_run_status": "Completed",
-      "shadow_verdict": "Needs provider policy review",
-      "staging_verdict": "Needs fixes"
+      "shadow_verdict": "Shadow ready for review",
+      "staging_verdict": "Ready for handoff"
     },
     {
       "archive_integrity_status": "Verified",
-      "archive_path": "archive/provider_shadow_runs/2026-08-17/151711_odds_api",
-      "generated_at": "2026-08-17T15:17:11-04:00",
+      "archive_path": "archive/provider_shadow_runs/2026-08-21/154222_odds_api",
+      "generated_at": "2026-08-21T15:42:22+00:00",
       "provider_run_status": "Completed",
-      "shadow_verdict": "Needs provider policy review",
-      "staging_verdict": "Needs fixes"
+      "shadow_verdict": "Shadow ready for review",
+      "staging_verdict": "Ready for handoff"
     },
     {
       "archive_integrity_status": "Verified",
-      "archive_path": "archive/provider_shadow_runs/2026-08-17/151706_odds_api",
-      "generated_at": "2026-08-17T15:17:06-04:00",
+      "archive_path": "archive/provider_shadow_runs/2026-08-21/154019_odds_api",
+      "generated_at": "2026-08-21T15:40:19+00:00",
       "provider_run_status": "Completed",
-      "shadow_verdict": "Needs provider policy review",
-      "staging_verdict": "Needs fixes"
+      "shadow_verdict": "Shadow ready for review",
+      "staging_verdict": "Ready for handoff"
     },
     {
       "archive_integrity_status": "Verified",
-      "archive_path": "archive/provider_shadow_runs/2026-08-17/151700_odds_api",
-      "generated_at": "2026-08-17T15:17:00-04:00",
+      "archive_path": "archive/provider_shadow_runs/2026-08-21/153908_odds_api",
+      "generated_at": "2026-08-21T15:39:08+00:00",
       "provider_run_status": "Completed",
-      "shadow_verdict": "Needs provider policy review",
-      "staging_verdict": "Needs fixes"
+      "shadow_verdict": "Shadow ready for review",
+      "staging_verdict": "Ready for handoff"
     },
     {
       "archive_integrity_status": "Verified",
-      "archive_path": "archive/provider_shadow_runs/2026-08-17/151655_odds_api",
-      "generated_at": "2026-08-17T15:16:55-04:00",
+      "archive_path": "archive/provider_shadow_runs/2026-08-21/153816_odds_api",
+      "generated_at": "2026-08-21T15:38:16+00:00",
       "provider_run_status": "Completed",
-      "shadow_verdict": "Needs provider policy review",
-      "staging_verdict": "Needs fixes"
+      "shadow_verdict": "Shadow ready for review",
+      "staging_verdict": "Ready for handoff"
     }
   ],
   "safety": {

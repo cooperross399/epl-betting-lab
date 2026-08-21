@@ -1,0 +1,167 @@
+{
+  "generated_at": "2026-08-21T15:40:19+00:00",
+  "validated_at": "2026-08-21T15:40:19+00:00",
+  "provider_name": "the_odds_api",
+  "provider_type": "odds_api",
+  "provider_generated_at": "2026-08-21T15:40:19+00:00",
+  "provider_run_age_minutes": 0.012,
+  "provider_age_status": "Fresh",
+  "provider_age_note": "Provider run is 0.0 minute(s) old; policy allows up to 12 hour(s).",
+  "source_file_path": "data/staging/source_current_odds.csv",
+  "source_checksum_sha256": "ff42eb05a2c32d1b6ff12b40e3f09a8f9957dbf613a2187222936ec0111f68b2",
+  "provenance_status": "Verified",
+  "provenance_note": "All four files match provenance, and both source-to-staging checksum pairs are verified.",
+  "source_odds_checksum_status": "Verified",
+  "source_fixtures_checksum_status": "Verified",
+  "staging_odds_checksum_status": "Verified",
+  "staging_fixtures_checksum_status": "Verified",
+  "odds_checksum_pair_status": "Verified",
+  "fixtures_checksum_pair_status": "Verified",
+  "generated_by": "scripts/run_provider_shadow_verification.py",
+  "notes": "Controlled provider shadow verification run.",
+  "provenance": {
+    "provenance_file_path": "data/staging/staging_provenance.json",
+    "provenance_file_checksum_sha256": "8ccd05a66b9f79cd37ddb39f129afc34d40a0913679666f11d74b9cedf1eee73",
+    "provenance_status": "Verified",
+    "provider_name": "the_odds_api",
+    "provider_type": "odds_api",
+    "source_file_path": "data/staging/source_current_odds.csv",
+    "source_checksum_sha256": "ff42eb05a2c32d1b6ff12b40e3f09a8f9957dbf613a2187222936ec0111f68b2",
+    "source_checksum_status": "Verified",
+    "source_odds_checksum_status": "Verified",
+    "source_fixtures_checksum_status": "Verified",
+    "staging_odds_checksum_status": "Verified",
+    "staging_fixtures_checksum_status": "Verified",
+    "odds_checksum_pair_status": "Verified",
+    "fixtures_checksum_pair_status": "Verified",
+    "checksum_verification": {
+      "source_odds": {
+        "field_name": "source_odds",
+        "label": "source odds",
+        "path": "data/staging/source_current_odds.csv",
+        "declared_path": "data/staging/source_current_odds.csv",
+        "recorded_checksum_sha256": "ff42eb05a2c32d1b6ff12b40e3f09a8f9957dbf613a2187222936ec0111f68b2",
+        "current_checksum_sha256": "ff42eb05a2c32d1b6ff12b40e3f09a8f9957dbf613a2187222936ec0111f68b2",
+        "status": "Verified",
+        "note": "Current source odds matches its recorded SHA-256 checksum.",
+        "blocker": ""
+      },
+      "source_fixtures": {
+        "field_name": "source_fixtures",
+        "label": "source fixtures",
+        "path": "data/staging/source_upcoming_fixtures.csv",
+        "declared_path": "data/staging/source_upcoming_fixtures.csv",
+        "recorded_checksum_sha256": "f81273f3f919c258ae464991c1645b75f503e899a08064e0896308fda6f415f1",
+        "current_checksum_sha256": "f81273f3f919c258ae464991c1645b75f503e899a08064e0896308fda6f415f1",
+        "status": "Verified",
+        "note": "Current source fixtures matches its recorded SHA-256 checksum.",
+        "blocker": ""
+      },
+      "staging_odds": {
+        "field_name": "staging_odds",
+        "label": "staging odds",
+        "path": "data/staging/current_odds_staging.csv",
+        "declared_path": "data/staging/current_odds_staging.csv",
+        "recorded_checksum_sha256": "ff42eb05a2c32d1b6ff12b40e3f09a8f9957dbf613a2187222936ec0111f68b2",
+        "current_checksum_sha256": "ff42eb05a2c32d1b6ff12b40e3f09a8f9957dbf613a2187222936ec0111f68b2",
+        "status": "Verified",
+        "note": "Current staging odds matches its recorded SHA-256 checksum.",
+        "blocker": ""
+      },
+      "staging_fixtures": {
+        "field_name": "staging_fixtures",
+        "label": "staging fixtures",
+        "path": "data/staging/upcoming_fixtures_staging.csv",
+        "declared_path": "data/staging/upcoming_fixtures_staging.csv",
+        "recorded_checksum_sha256": "f81273f3f919c258ae464991c1645b75f503e899a08064e0896308fda6f415f1",
+        "current_checksum_sha256": "f81273f3f919c258ae464991c1645b75f503e899a08064e0896308fda6f415f1",
+        "status": "Verified",
+        "note": "Current staging fixtures matches its recorded SHA-256 checksum.",
+        "blocker": ""
+      }
+    },
+    "provenance_note": "All four files match provenance, and both source-to-staging checksum pairs are verified.",
+    "generated_by": "scripts/run_provider_shadow_verification.py",
+    "provider_generated_at": "2026-08-21T15:40:19+00:00",
+    "generated_at": "2026-08-21T15:40:19+00:00",
+    "notes": "Controlled provider shadow verification run."
+  },
+  "provider_policy": {
+    "path": "data/manual/staging_provider_policy.json",
+    "checksum_sha256": "1a16ba8a70d96ec81ddc6aabd4e7f0e61b0e50982b7893dcc19f178139466dbb",
+    "load_status": "Policy loaded",
+    "provider_policy_status": "Provider allowed",
+    "provider_allowed": true,
+    "allow_missing_provenance": false,
+    "max_receipt_age_hours": 12.0,
+    "max_provider_run_age_hours": 12.0,
+    "receipt_age_hours": 0.0,
+    "receipt_age_status": "Within age limit",
+    "timezone": "America/New_York",
+    "thursday_cutoff_time": "10:00",
+    "cutoff_at": "",
+    "cutoff_policy_status": "Not a Thursday",
+    "allowed": true,
+    "blockers": [],
+    "warnings": []
+  },
+  "verdict": "Ready for handoff",
+  "handoff_eligible": true,
+  "next_step": "Review warnings and checksums. These files are eligible for handoff, but this report did not copy or promote them.",
+  "current_odds_staging": {
+    "path": "data/staging/current_odds_staging.csv",
+    "path_safe": true,
+    "exists": true,
+    "readable": true,
+    "row_count": 1489,
+    "checksum_sha256": "ff42eb05a2c32d1b6ff12b40e3f09a8f9957dbf613a2187222936ec0111f68b2",
+    "missing_columns": [],
+    "fatal_codes": []
+  },
+  "upcoming_fixtures_staging": {
+    "path": "data/staging/upcoming_fixtures_staging.csv",
+    "path_safe": true,
+    "exists": true,
+    "readable": true,
+    "row_count": 15,
+    "checksum_sha256": "f81273f3f919c258ae464991c1645b75f503e899a08064e0896308fda6f415f1",
+    "missing_columns": [],
+    "fatal_codes": []
+  },
+  "current_odds_date_freshness": {
+    "earliest_date": "2026-08-21",
+    "latest_date": "2026-08-31",
+    "past_rows": 0,
+    "today_or_future_rows": 1489,
+    "invalid_date_rows": 0
+  },
+  "fixture_date_freshness": {
+    "earliest_date": "2026-08-21",
+    "latest_date": "2026-08-31",
+    "past_rows": 0,
+    "today_or_future_rows": 15,
+    "invalid_date_rows": 0
+  },
+  "current_odds_validation": {
+    "status": "Ready",
+    "serious_issue_count": 0,
+    "warning_count": 489
+  },
+  "odds_completeness": {
+    "status": "Complete",
+    "completion_percentage": 1.0,
+    "matches_incomplete": 0
+  },
+  "handoff_gate": {
+    "status": "Warnings only",
+    "card_generation_allowed": true,
+    "blockers": [],
+    "warnings": [
+      "Current odds validation found 489 warning(s). Review them before trusting the card."
+    ]
+  },
+  "serious_issue_count": 0,
+  "warning_count": 490,
+  "cron_enabled": false,
+  "files_promoted_or_copied": false
+}

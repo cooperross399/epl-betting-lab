@@ -57,11 +57,22 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          # The reviewed scope is whatever this PR's policy proposes, read
+          # from the checked-out head. The approval block must name exactly
+          # that scope, so widening or narrowing against the proposed policy
+          # is refused rather than transcribed.
+          MARKETS=$(python - <<'PY'
+          import json
+          policy = json.load(open("data/manual/staging_provider_policy.json"))
+          entry = policy["provider_allowlist_entries"]["the_odds_api"]
+          print(",".join(entry["required_markets"]))
+          PY
+          )
           python scripts/create_receipt_from_github_approval.py \
             --pr "${{ github.event.pull_request.number }}" \
             --repository "${{ github.repository }}" \
             --provider odds_api \
-            --markets "1x2,btts" \
+            --markets "$MARKETS" \
             --write-receipt
 
       - name: Check provider policy PR gate

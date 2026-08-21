@@ -109,7 +109,14 @@ def test_valid_review_approval_verifies(tmp_path: Path) -> None:
     assert approval["pr_number"] == PR
     assert approval["provider_name"] == "the_odds_api"
     assert approval["approved_markets"] == ["1x2", "btts"]
-    assert approval["excluded_markets"] == ["total_2_5"]
+    assert approval["excluded_markets"] == [
+        "corners_1x2",
+        "corners_total_10_5",
+        "corners_total_9_5",
+        "double_chance",
+        "draw_no_bet",
+        "total_2_5",
+    ]
     assert approval["source_kind"] == "review"
     assert approval["evidence_checksums_sha256"]
 
@@ -183,16 +190,50 @@ def test_missing_markets_declaration_is_refused(tmp_path: Path) -> None:
         _verify(_activity(body=body), tmp_path)
 
 
-def test_totals_in_the_approval_is_refused(tmp_path: Path) -> None:
-    """The one the user cares most about: totals must not sneak in."""
+def test_totals_beyond_the_reviewed_scope_is_refused(tmp_path: Path) -> None:
+    """A market cannot sneak into an approval the reviewed scope omits."""
     _evidence(tmp_path)
     body = _body(markets="1x2, btts, total_2_5")
 
-    with pytest.raises(GitHubApprovalError, match="excluded market"):
+    with pytest.raises(GitHubApprovalError, match="reviewed scope"):
         _verify(_activity(body=body), tmp_path)
 
 
-def test_totals_requested_as_expected_scope_is_refused(tmp_path: Path) -> None:
+def test_expanded_reviewed_scope_verifies_when_the_approval_matches(
+    tmp_path: Path,
+) -> None:
+    """Since the 2026-08-19 reopening, every priced market is approvable —
+    provided the approval names exactly the reviewed scope."""
+    _evidence(tmp_path)
+    scope = (
+        "1x2",
+        "btts",
+        "total_2_5",
+        "double_chance",
+        "draw_no_bet",
+        "corners_1x2",
+        "corners_total_9_5",
+        "corners_total_10_5",
+    )
+    body = _body(markets=", ".join(scope))
+
+    approval = _verify(
+        _activity(body=body), tmp_path, expected_markets=scope
+    )
+
+    assert approval["approved_markets"] == sorted(scope)
+
+
+def test_a_forbidden_market_is_still_refused(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """The exclusion mechanism outlives the empty list: a market placed back
+    in FORBIDDEN_MARKETS is refused even when the scope expects it."""
+    import epl_betting_lab.reports.github_approval as module
+
+    monkeypatch.setattr(
+        module, "FORBIDDEN_MARKETS", frozenset({"total_2_5"})
+    )
     _evidence(tmp_path)
 
     with pytest.raises(GitHubApprovalError, match="excluded market"):

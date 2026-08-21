@@ -476,7 +476,7 @@ def build_github_manual_run_verification(
                         "Staging receipt age": receipt_age_status
                         == "Within age limit",
                         "Staging Thursday cutoff": cutoff_policy_status
-                        == "Before cutoff",
+                        in ("Before cutoff", "Not a Thursday"),
                         "Staging provider policy timezone": bool(
                             provider_policy_timezone
                         ),

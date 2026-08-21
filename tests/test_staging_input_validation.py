@@ -466,6 +466,25 @@ def test_staging_validation_after_thursday_cutoff_needs_fixes(
     assert summary["handoff_eligible"] is False
 
 
+def test_non_thursday_receipt_is_still_handoff_eligible(tmp_path: Path) -> None:
+    """The Thursday cutoff only applies on Thursdays.
+
+    The card runs Friday through Monday as well; a receipt generated on those
+    days reports "Not a Thursday" and must pass, not fail, the cutoff check.
+    """
+    paths = _write_ready_inputs(tmp_path)
+    friday = datetime(2026, 8, 7, 12, 0, tzinfo=timezone.utc)
+    _set_provider_timestamp(paths, friday.isoformat(timespec="seconds"))
+
+    checks, summary = _build(tmp_path, paths, run_at=friday)
+
+    assert summary["provider_policy"]["cutoff_policy_status"] == "Not a Thursday"
+    cutoff_rows = checks[checks["check"] == "thursday_cutoff"]
+    assert set(cutoff_rows["severity"]) == {"info"}
+    assert summary["verdict"] == "Ready for handoff"
+    assert summary["handoff_eligible"] is True
+
+
 def test_missing_staging_inputs_get_missing_verdict(tmp_path: Path) -> None:
     staging = tmp_path / "data" / "staging"
     staging.mkdir(parents=True)

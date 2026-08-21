@@ -80,6 +80,48 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def _existing_receipt_for(
+    approval: dict, output_dir: Path | None
+) -> dict | None:
+    """The stored receipt, if it already transcribes this exact approval.
+
+    Identity is the human act itself: the same PR, the same review/comment id,
+    the same author, timestamp, provider, and market scope. Evidence checksums
+    and verification times are allowed to differ — they describe when the
+    transcription ran, not which approval it recorded.
+    """
+    from epl_betting_lab.config import OUTPUTS_DIR
+
+    outputs = Path(output_dir) if output_dir else OUTPUTS_DIR
+    path = outputs / "provider_human_acceptance_receipt.json"
+    if not path.is_file():
+        return None
+    try:
+        stored = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError):
+        return None
+    if not isinstance(stored, dict):
+        return None
+    bound = stored.get("github_approval")
+    if not isinstance(bound, dict):
+        return None
+    identity_fields = (
+        "pr_number",
+        "source_kind",
+        "source_id",
+        "reviewer_github_login",
+        "approved_at",
+        "provider_name",
+    )
+    if any(bound.get(field) != approval.get(field) for field in identity_fields):
+        return None
+    if sorted(bound.get("approved_markets") or []) != sorted(
+        approval.get("approved_markets") or []
+    ):
+        return None
+    return stored
+
+
 def _repository(explicit: str) -> str:
     if explicit:
         return explicit
@@ -148,6 +190,24 @@ def main() -> int:
     print(f"Approved markets: {approval['approved_markets']}")
     print(f"Excluded markets: {approval['excluded_markets']}")
     print(f"Evidence artifacts bound: {len(approval['evidence_checksums_sha256'])}")
+
+    # Transcribing the same approval twice must not produce a different
+    # record: the receipt's timestamps and id would move, which breaks every
+    # checksum bound to the receipt file — including the evidence bundle the
+    # PR gate is in the middle of verifying. If the stored receipt already
+    # records this exact human act, keep it.
+    if args.write_receipt:
+        existing = _existing_receipt_for(approval, args.output_dir)
+        if existing is not None:
+            print(
+                "Receipt already transcribed for this approval; leaving it "
+                "unchanged."
+            )
+            print(f"Receipt ID: {existing.get('receipt_id', '')}")
+            print(
+                "No secrets were printed or written. No bet, settlement, or cron."
+            )
+            return 0
 
     notes = (
         f"Approved in GitHub UI on PR #{approval['pr_number']} by "

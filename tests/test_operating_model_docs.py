@@ -152,7 +152,7 @@ def test_credential_guidance_never_instructs_printing_the_key() -> None:
 # --- routine prompts -------------------------------------------------------
 
 
-@pytest.mark.parametrize("routine", ["EPL Model", "EPL CARD", "EPL SETTLE"])
+@pytest.mark.parametrize("routine", ["EPL WATCH", "EPL CARD", "EPL SETTLE"])
 def test_each_routine_has_a_copy_paste_prompt(routine: str) -> None:
     text = _read("docs/epl_scheduled_tasks_bridge.md")
 

@@ -18,10 +18,10 @@ every report, and renders the card on the run page. It needs no laptop, no
 terminal, and no Claude routine. Read it at Actions → Matchday Refresh → latest
 run.
 
-The three Claude routines are optional and only work when the machine they point
-at is on. A routine that did not run is not the card failing; the two are
-independent and only the workflow is load-bearing. Never tell Cooper to open a
-terminal to get a card.
+The Claude routines — two are live, **EPL CARD** and **EPL WATCH** (formerly
+EPL Model) — are optional and read email, not the filesystem. A routine that
+did not run is not the card failing; the two are independent and only the
+workflow is load-bearing. Never tell Cooper to open a terminal to get a card.
 
 Every session, in this order. They replace chat history as project memory, so no
 prior conversation and no ChatGPT is needed to operate this repo.
@@ -29,8 +29,9 @@ prior conversation and no ChatGPT is needed to operate this repo.
 1. `CLAUDE.md` (this file) — hard rules, which override everything.
 2. `docs/claude_autonomy_operating_model.md` — how Claude works autonomously,
    what a hard stop means, and how to problem-solve instead of giving up.
-3. `docs/epl_scheduled_tasks_bridge.md` — the three Claude routines, and why
-   they are a reading layer rather than how the card is made.
+3. `docs/epl_scheduled_tasks_bridge.md` — the Claude routines (EPL CARD and
+   EPL WATCH), and why they are a reading layer rather than how the card is
+   made.
 4. `docs/no_terminal_operations.md` — doing things from a browser.
 5. `README.md` — full command reference.
 6. Latest `data/outputs/` reports, then GitHub PRs, Actions runs, and the

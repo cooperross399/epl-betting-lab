@@ -5,14 +5,16 @@
 > **no manual odds entry is required**. See
 > [API-first odds workflow](#api-first-odds-workflow) below.
 
-This document connects the three Claude scheduled tasks/routines to concrete
-repository outputs:
+This document connects the Claude scheduled tasks/routines to concrete
+repository outputs. Two routines are live — **EPL CARD** and **EPL WATCH**
+(the routine formerly named EPL Model; scripts and outputs keep the old
+name):
 
 | Routine | Command | Outputs |
 |:--------|:--------|:--------|
-| **EPL Model** | `scripts/run_epl_model_task.py` | `data/outputs/epl_model_task.{md,json}` |
+| **EPL WATCH** (formerly EPL Model) | `scripts/run_epl_model_task.py` | `data/outputs/epl_model_task.{md,json}` |
 | **EPL CARD** | `scripts/run_epl_card_task.py` | `data/outputs/epl_card_task.{md,json}` |
-| **EPL SETTLE (IGNORE)** | `scripts/run_epl_settle_preview_task.py` | `data/outputs/epl_settle_preview_task.{md,json}` |
+| **EPL SETTLE (IGNORE)** — not currently deployed | `scripts/run_epl_settle_preview_task.py` | `data/outputs/epl_settle_preview_task.{md,json}` |
 
 All three are **read-only status bridges**. They read report JSON that other
 commands already produced. None of them fetches odds, runs a provider, edits a
@@ -48,7 +50,7 @@ passed.
 
 ---
 
-## EPL Model
+## EPL WATCH (formerly EPL Model)
 
 **Question it answers:** is the model ready, and may EPL CARD run?
 
@@ -255,7 +257,7 @@ was probably missed rather than treating the old message as current.
 
 ---
 
-### EPL Model
+### EPL WATCH (formerly EPL Model)
 
 ```text
 Search Gmail for GitHub notifications for issue #162 in
@@ -316,7 +318,7 @@ move. A gap of more than four days does mean a run was missed.
 
 ---
 
-### EPL SETTLE (IGNORE)
+### EPL SETTLE (IGNORE) — not currently deployed
 
 ```text
 Do nothing that writes. This routine only checks that the machinery is alive.

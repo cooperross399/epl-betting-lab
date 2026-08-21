@@ -42,13 +42,18 @@ Use the repo, the reports, and GitHub.
 
 ## Current operating state
 
-- Provider **The Odds API is allowlisted**, scoped to `1x2` and `btts` only.
+- Provider **The Odds API is allowlisted for all eight priced markets** —
+  `1x2`, `btts`, `total_2_5`, `double_chance`, `draw_no_bet`, `corners_1x2`,
+  `corners_total_9_5`, `corners_total_10_5` — approved by Cooper on
+  2026-08-21 (PR #224, receipt
+  `odds_api-20260821T114655-0400-20ffa5677988`). The approval was made with
+  the measurement evidence in view and against its recommendation; the next
+  bullet is why that matters.
 - `total_2_5` was excluded on 2026-08-17 and **reopened on 2026-08-19**. The
   original finding — that the complete 2.5 line existed only at William Hill,
   Betsson and Nordic Bet — was true of the bulk `totals` market, the only one
   examined. It was never true of `alternate_totals`, where BetRivers and
-  FanDuel each carry 2.5 on every fixture. The market is sourced from there now
-  and awaits policy approval like any other.
+  FanDuel each carry 2.5 on every fixture. The market is sourced from there.
   - The lesson worth keeping: "no book offers this" was really "no book offers
     this *in the market we looked at*". Check coverage per bookmaker with
     `Provider Market Discovery` → `line_coverage` before concluding a market is
@@ -57,8 +62,10 @@ Use the repo, the reports, and GitHub.
   were bought per event. Not one interval excludes zero, `double_chance` is
   negative, `draw_no_bet`'s positive number rests on thirteen bets, and
   `corners_1x2` can never be measured because the provider does not retain it
-  historically. Enable nothing new on this evidence:
-  `docs/every_market_measured.md`.
+  historically. The measurement recommended enabling nothing; Cooper reviewed
+  that evidence and enabled all eight markets anyway on 2026-08-21. Both the
+  evidence and the decision stand on the record — say so plainly when asked
+  what the card's picks rest on: `docs/every_market_measured.md`.
 - **No market in this system has a demonstrated edge.** 1X2 measures +5.3% over
   500 bets (95% interval −3.4% to +14.1%); BTTS measures +15.0% over 51 bets
   (−12.4% to +42.5%). Both intervals include zero. Separating a true +5% edge

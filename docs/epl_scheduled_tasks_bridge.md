@@ -260,33 +260,48 @@ was probably missed rather than treating the old message as current.
 ### EPL WATCH (formerly EPL Model)
 
 ```text
-Search Gmail for GitHub notifications for issue #162 in
-cooperross399/epl-betting-lab, sorted by date, newest first — search relevance
-is not date order and will hand you an old message. Also look for GitHub
-Actions failure notifications for the "Matchday Refresh" workflow in the last
-seven days.
+You are running a weekly health check on the EPL betting model pipeline for
+Cooper (cooperross399@gmail.com). Do NOTHING that writes. This routine only
+checks the machinery is alive and reports the state of play.
 
-State the timestamp of the newest message you found.
+STEP 1 — Search Gmail (via the connector) for notifications for the repository
+cooperross399/epl-betting-lab from the last seven days for:
+1. GitHub Actions failure notifications for the workflow "Matchday Refresh".
+2. Any notification for issue #162 ("EPL Card — this week's picks") whose
+   first line says "Something went wrong".
+3. The most recent notification for issue #162 of any kind.
 
-Judge schedule health ONLY from issue #162 messages, and ignore any whose
-heading ends "— manual run": those were started by hand and say nothing about
-whether the schedule works. GitHub's own "Run failed" notifications carry no
-trigger label and no error text, so a count of them is not evidence — every
-failure this project has recorded was a manual dispatch, and two health checks
-in a row concluded the pipeline was broken by counting them.
+STEP 2 — Judge schedule health ONLY from issue #162 messages, ignoring any
+whose heading ends "— manual run": a manual run says nothing about whether the
+schedule works. GitHub's own "Run failed" notifications carry no trigger label
+and no error text, so counting them is not evidence — two health checks in a
+row once concluded the pipeline was broken by counting them. The issue #162
+headings say how each run started; trust those and nothing else.
+
+Say which of these is true:
+- A message within the last four days and no non-manual failures: the schedule
+  is running.
+- No messages at all for more than four days: a run was probably missed. Tell
+  Cooper to check Actions -> Matchday Refresh, and say the workflow may need
+  enabling.
+- A non-manual failure: say which run, when, and what the error line says.
+- Only manual failures: say the schedule looks healthy and that someone was
+  testing, and do not describe the pipeline as broken.
 
 If you cannot tell whether a failure came from the schedule, say you cannot
 tell rather than assuming it did.
 
-Tell me, in plain English:
+STEP 3 — From the most recent card email, report:
+- Whether the latest card was ready, blocked, or degraded.
+- Which markets are included and excluded.
+- How much provider quota remains and how many runs that buys.
 
-- when the card last changed, and whether the schedule appears to be running
-- whether the latest card was ready, blocked, or degraded, and why
-- which markets are included and excluded
-- how much provider quota remains, if the email states it, and how many runs
-  that buys
+A card from a manual run is a real card: manual and scheduled runs use the
+same reviewed configuration, so it is the current advice until a newer card
+replaces it. Say it was manual — that is about schedule health, not about the
+card — and do not call it a test.
 
-What is true about the markets, so you do not have to guess:
+FACTS ABOUT THE MARKETS — state these rather than guessing:
 - All eight priced markets are enabled since 2026-08-21: 1x2, btts, total_2_5,
   double_chance, draw_no_bet, corners_1x2, corners_total_9_5,
   corners_total_10_5. Cooper approved the scope on PR #224, bound to human
@@ -298,22 +313,25 @@ What is true about the markets, so you do not have to guess:
   because the provider does not retain it historically.
 - The measurement recommended enabling nothing new. Cooper reviewed that
   evidence and enabled all eight anyway; both the evidence and the decision
-  are on the record, and if I ask whether the picks rest on a demonstrated
+  are on the record, and if he asks whether the picks rest on a demonstrated
   edge, the honest answer is still no.
-- total_2_5 has its own history: excluded on 2026-08-17 on a finding that was
-  true of the bulk `totals` market and silent about `alternate_totals`, where
-  BetRivers and FanDuel carry the 2.5 line on every fixture; reopened on
-  2026-08-19 when that was noticed; enabled with the rest on 2026-08-21. Do
-  not re-run that investigation, and do not repeat the stale answer.
+- total_2_5 was excluded on 2026-08-17 on a finding that was true of the
+  bulk `totals` market and silent about alternate_totals, where BetRivers
+  and FanDuel carry the 2.5 line on every fixture; reopened on 2026-08-19; enabled with
+  the rest on 2026-08-21. Do not re-run that investigation, and do not repeat
+  the stale answer.
 
-Rules:
-- Generate no picks here. Place no bets. Apply no settlement.
+HARD RULES — follow exactly:
+- Generate no picks. Place no bets. Apply no settlement. Never edit the bet
+  ledger, record a result, or compute a profit or loss.
 - Do not propose enabling or disabling a market. Scope changes are reviewed
   decisions behind the policy gate, not something a health check suggests.
-- Never tell me to open a Terminal or to ask ChatGPT.
+- Report only what the emails say; if something is missing, say it is missing.
+- Never tell Cooper to open a Terminal or to ask ChatGPT.
 
-No card email does not mean the system is broken; it means the picks did not
-move. A gap of more than four days does mean a run was missed.
+Within a single day, no card email does not mean the system is broken; it
+can mean the picks did not move. A gap of more than four days does mean a
+run was missed.
 ```
 
 ---

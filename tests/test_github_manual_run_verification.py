@@ -237,6 +237,47 @@ def test_verification_requires_verified_binding_when_staging_receipt_is_required
     assert summary["staging_provider_policy_status"] == "Provider allowed"
 
 
+def test_verification_accepts_non_thursday_cutoff_status(tmp_path: Path) -> None:
+    """A receipt made on a non-Thursday reports "Not a Thursday" for the
+    cutoff, and that is a pass: the Thursday cutoff only applies on Thursdays.
+    """
+    output_dir = tmp_path / "data" / "outputs"
+    paths = _write_run(output_dir, allowed=True)
+    handoff = json.loads(paths["handoff_json"].read_text(encoding="utf-8"))
+    handoff.update(_ready_staging_policy_proof())
+    handoff["staging_cutoff_policy_status"] = "Not a Thursday"
+    scheduled = json.loads(paths["scheduled_json"].read_text(encoding="utf-8"))
+    scheduled["input_handoff"] = copy.deepcopy(handoff)
+    paths["handoff_json"].write_text(json.dumps(handoff), encoding="utf-8")
+    paths["scheduled_json"].write_text(json.dumps(scheduled), encoding="utf-8")
+
+    _, summary = build_github_manual_run_verification(output_dir)
+
+    assert summary["verdict"] == "Verified ready run"
+    assert not any(
+        "thursday cutoff" in item.lower() for item in summary["trust_failures"]
+    )
+
+
+def test_verification_rejects_after_cutoff_status(tmp_path: Path) -> None:
+    output_dir = tmp_path / "data" / "outputs"
+    paths = _write_run(output_dir, allowed=True)
+    handoff = json.loads(paths["handoff_json"].read_text(encoding="utf-8"))
+    handoff.update(_ready_staging_policy_proof())
+    handoff["staging_cutoff_policy_status"] = "After cutoff"
+    scheduled = json.loads(paths["scheduled_json"].read_text(encoding="utf-8"))
+    scheduled["input_handoff"] = copy.deepcopy(handoff)
+    paths["handoff_json"].write_text(json.dumps(handoff), encoding="utf-8")
+    paths["scheduled_json"].write_text(json.dumps(scheduled), encoding="utf-8")
+
+    _, summary = build_github_manual_run_verification(output_dir)
+
+    assert summary["verdict"] == "Failed/untrusted run"
+    assert any(
+        "thursday cutoff" in item.lower() for item in summary["trust_failures"]
+    )
+
+
 def test_verification_rejects_unverified_required_staging_receipt(
     tmp_path: Path,
 ) -> None:

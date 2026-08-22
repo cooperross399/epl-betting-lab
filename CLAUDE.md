@@ -83,17 +83,23 @@ Use the repo, the reports, and GitHub.
   points, and cannot be profit-backtested because no historical BTTS prices
   exist. It produces most of the picks on a card. Say so rather than patching
   it.
-- **Player props are built and measured, not enabled.** The provider prices
-  eight prop markets live and retains them historically (probed 2026-08-22);
-  the pipeline has a player-data source (Understat match logs), a per-player
-  Poisson model, and a walk-forward measurement
-  (`data/outputs/player_props_backtest.md`). First read on 114 fixtures:
-  broadly calibrated, consistently 2–3 points overconfident mid-range, and
-  clearly overconfident in its 60–70% bucket (64% predicted, 51% happened).
-  No edge is demonstrated and none can be at this size. Props reach the card
-  only through a calibration-corrected model, a held-out re-measurement, the
-  player/line-aware card schema (not yet built), and a reviewed policy
-  approval — in that order.
+- **Player props are built, measured, and calibration-corrected — not
+  enabled.** The provider prices eight prop markets live and retains them
+  historically (probed 2026-08-22). The pipeline has a player-data source
+  (Understat match logs), a per-player Poisson model, a fitted Platt
+  correction, a live staging fetch into its own file
+  (`data/staging/player_props_staging.csv`, invisible to the card), and a
+  walk-forward measurement with an honest split
+  (`data/outputs/player_props_backtest.md`). Held out entirely, April–May
+  2026 replicated the raw model's overconfidence (63.7% predicted, 52.7%
+  happened) and the correction — fitted only on February–March — straightened
+  every volume bucket (24.3 predicted vs 24.5 happened; 34.4 vs 34.9). The
+  corrected model clears an 8% edge bar four times in two months: it almost
+  never disagrees with the one-sided market prices by that much, no edge is
+  demonstrated, and none can be at this sample size. Props reach the card
+  only through the player/line-aware card integration (not built) and a
+  reviewed policy approval, and the measurement above is what that review
+  should weigh.
 - The active odds source is the **provider-derived automated card input**.
   Manual odds entry is not required.
 - `data/manual/current_odds.csv` is **legacy** and must not become active again.

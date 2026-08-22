@@ -164,11 +164,37 @@ def _eligible_markets_from_evidence(output_dir: Path | None = None) -> list[str]
     return [str(item).strip().lower() for item in markets if str(item).strip()]
 
 
+def _staged_prop_markets_from_evidence(
+    output_dir: Path | None = None,
+) -> list[str]:
+    """Prop markets whose staged-price evidence exists, if any.
+
+    The props card reports which prop markets hold staged prices even while
+    every one is held by policy — that is the evidence a props approval
+    binds to. No props evidence, no proposed prop scope.
+    """
+    outputs = OUTPUTS_DIR if output_dir is None else Path(output_dir)
+    path = outputs / "player_props_card.json"
+    if not path.is_file():
+        return []
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError):
+        return []
+    if not isinstance(payload, Mapping):
+        return []
+    markets = payload.get("markets_with_staged_prices")
+    if not isinstance(markets, list):
+        return []
+    return [str(item).strip() for item in markets if str(item).strip()]
+
+
 def _provider_markets_and_limitations(
     provider: object,
     output_dir: Path | None = None,
 ) -> tuple[list[str], list[str]]:
     eligible = _eligible_markets_from_evidence(output_dir)
+    props = _staged_prop_markets_from_evidence(output_dir)
     if eligible:
         limitations: list[str] = []
         for market in ("1x2", "total_2_5", "btts"):
@@ -178,11 +204,20 @@ def _provider_markets_and_limitations(
                     "not find it eligible. Its prices remain unavailable or "
                     "incomplete and must never be fabricated."
                 )
+        if props:
+            limitations.append(
+                "Player props carry no demonstrated edge: the held-out "
+                "measurement (data/outputs/player_props_backtest.md) found "
+                "the corrected model well calibrated and clearing its edge "
+                "bar about twice a month, and books reprice on the team "
+                "sheet after the card is built. Approving them approves "
+                "that trade-off."
+            )
         limitations.append(
             "Allowlisting does not bypass staging validation, freshness, "
             "completeness, checksum, receipt, or Thursday cutoff gates."
         )
-        return list(dict.fromkeys(eligible)), limitations
+        return list(dict.fromkeys([*eligible, *props])), limitations
 
     configuration = provider.public_configuration()
     featured = configuration.get("featured_markets_requested", [])

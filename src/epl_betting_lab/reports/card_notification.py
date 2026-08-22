@@ -249,6 +249,33 @@ def build_notification(
         lines += ["### Leans", ""]
         lines += _rows(leans) if leans else ["_None._", ""]
 
+        # Player props appear only when the reviewed policy has approved
+        # them and a pick cleared their deliberately high bar. No section
+        # means props are held by policy or found nothing — never a signal
+        # either way.
+        props = _read(outputs / "player_props_card.json")
+        prop_picks = props.get("picks") or []
+        if prop_picks:
+            lines += ["### Player props", ""]
+            for pick in prop_picks:
+                lines.append(
+                    f"- {_clean(pick.get('home_team'))} v "
+                    f"{_clean(pick.get('away_team'))} — "
+                    f"**{_clean(pick.get('player'))}** "
+                    f"`{_clean(pick.get('market'))}` "
+                    f"{_clean(pick.get('selection'))} at "
+                    f"{float(pick.get('american_odds', 0)):+.0f} "
+                    f"({_clean(pick.get('book'))}), "
+                    f"{pick.get('units')}u"
+                )
+            lines += [
+                "",
+                "_Props carry the smallest stake the card uses: the standing "
+                "measurement demonstrates no edge, and books reprice on the "
+                "team sheet after this card is built._",
+                "",
+            ]
+
         added = comparison.get("added") or []
         removed = comparison.get("removed") or []
         moved = comparison.get("moved_section") or []

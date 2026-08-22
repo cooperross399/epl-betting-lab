@@ -28,6 +28,7 @@ from typing import Any
 
 from epl_betting_lab.config import MANUAL_DIR, OUTPUTS_DIR
 from epl_betting_lab.market_eligibility import MARKET_SELECTIONS
+from epl_betting_lab.providers.player_props_staging import PROP_EVENT_MARKETS
 
 
 #: The exact token that marks a comment or review as an approval.
@@ -40,10 +41,14 @@ ALLOWED_REVIEWERS: tuple[str, ...] = ("cooperross399",)
 EXPECTED_PROVIDER = "the_odds_api"
 
 #: Markets an approval may grant: exactly the markets the project can price.
-#: Derived from the market registry so this flow and the card can never
-#: disagree about what a market is. Approvable is not approved — every scope
-#: still needs the human approval block and evidence this module verifies.
-APPROVABLE_MARKETS: frozenset[str] = frozenset(MARKET_SELECTIONS)
+#: Match markets come from the market registry; player-prop markets from the
+#: props staging list — both single sources, so this flow and the cards can
+#: never disagree about what a market is. Approvable is not approved — every
+#: scope still needs the human approval block and evidence this module
+#: verifies.
+APPROVABLE_MARKETS: frozenset[str] = frozenset(MARKET_SELECTIONS) | frozenset(
+    PROP_EVENT_MARKETS
+)
 
 #: Markets that must never appear in an approval while they are excluded.
 #:

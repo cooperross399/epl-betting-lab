@@ -793,3 +793,15 @@ def test_the_prompts_prefer_saying_they_cannot_tell() -> None:
     flat = " ".join(text.split())
 
     assert "say you cannot tell rather than assuming" in flat
+
+
+def test_the_props_step_cannot_cost_a_match_card() -> None:
+    """The props refresh runs with continue-on-error and gates itself on the
+    policy, so while props are held it spends nothing and when it breaks the
+    match card still ships."""
+    text = _workflow()
+
+    assert "run_props_card_refresh.py" in text
+    props_block = text.split("Refresh the props card", 1)[1].split("- name:", 1)[0]
+    assert "continue-on-error: true" in props_block
+    assert "EPL_ODDS_API_KEY" in props_block

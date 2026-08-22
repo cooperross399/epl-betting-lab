@@ -47,7 +47,10 @@ from pathlib import Path
 import pandas as pd
 
 from epl_betting_lab.config import OUTPUTS_DIR, PROCESSED_DIR, PROJECT_ROOT
-from epl_betting_lab.models.player_props import PlayerPropsModel
+from epl_betting_lab.models.player_props import (
+    PlayerPropsModel,
+    PropCalibration,
+)
 
 BACKTEST_JSON_FILENAME = "player_props_backtest.json"
 BACKTEST_MARKDOWN_FILENAME = "player_props_backtest.md"
@@ -192,6 +195,7 @@ def build_player_props_backtest(
     odds_path: Path | None = None,
     logs_path: Path | None = None,
     edge_threshold: float = DEFAULT_EDGE_THRESHOLD,
+    calibration_split: str | None = None,
     repository_root: Path | None = None,
 ) -> dict[str, object]:
     root = (repository_root or PROJECT_ROOT).resolve()
@@ -253,8 +257,7 @@ def build_player_props_backtest(
 
     unmatched_teams: set[str] = set()
     unmatched_players: set[str] = set()
-    bets: list[PropBet] = []
-    calibration_samples: list[tuple[str, float, bool]] = []
+    records: list[dict[str, object]] = []
     priced = 0
     no_opinion = 0
 
@@ -339,36 +342,62 @@ def build_player_props_backtest(
             continue
 
         american = float(row["american"])
+        settled = not appearance.empty
+        line = point if point is not None else 0.5
+        records.append(
+            {
+                "date": date,
+                "market": market,
+                "player": str(row["player"]),
+                "selection": str(row["selection"]),
+                "american": american,
+                "raw_probability": probability,
+                "settled": settled,
+                "won": (
+                    float(appearance[stat].iloc[0]) > line if settled else None
+                ),
+            }
+        )
+
+    # The correction is fitted strictly before the split and applied strictly
+    # after it; without a split, probabilities pass through untouched. Fitting
+    # and measuring on the same window would launder overconfidence into ROI.
+    correction: PropCalibration | None = None
+    if calibration_split:
+        correction = PropCalibration.fit(
+            [
+                (float(r["raw_probability"]), bool(r["won"]))
+                for r in records
+                if r["settled"] and str(r["date"]) < calibration_split
+            ]
+        )
+        evaluation = [r for r in records if str(r["date"]) >= calibration_split]
+    else:
+        evaluation = records
+    for record in records:
+        raw = float(record["raw_probability"])
+        record["probability"] = correction.apply(raw) if correction else raw
+
+    bets: list[PropBet] = []
+    for record in evaluation:
+        american = float(record["american"])
         implied = _implied_probability(american)
+        probability = float(record["probability"])
         edge = probability - implied
-
-        # Every priced outcome that settled calibrates the model, bet or not.
-        # Forty bets prove nothing; seventeen thousand probability-outcome
-        # pairs are where this sample actually has power.
-        if not appearance.empty:
-            actual_count = float(appearance[stat].iloc[0])
-            line = point if point is not None else 0.5
-            calibration_samples.append(
-                (market, probability, actual_count > line)
-            )
-
         if edge < edge_threshold:
             continue
-
-        if appearance.empty:
+        if not record["settled"]:
             outcome, profit = "void", 0.0
+        elif record["won"]:
+            outcome, profit = "won", _profit(american)
         else:
-            actual = float(appearance[stat].iloc[0])
-            threshold = point if point is not None else 0.5
-            won = actual > threshold
-            outcome = "won" if won else "lost"
-            profit = _profit(american) if won else -1.0
+            outcome, profit = "lost", -1.0
         bets.append(
             PropBet(
-                date=date,
-                market=market,
-                player=str(row["player"]),
-                selection=str(row["selection"]),
+                date=str(record["date"]),
+                market=str(record["market"]),
+                player=str(record["player"]),
+                selection=str(record["selection"]),
                 american=american,
                 model_probability=round(probability, 4),
                 implied_probability=round(implied, 4),
@@ -394,48 +423,72 @@ def build_player_props_backtest(
             "roi": round(profit / len(settled), 4) if settled else None,
         }
 
-    calibration: dict[str, list[dict[str, object]]] = {}
-    markets_present = sorted({m for m, _, _ in calibration_samples})
-    for market_name in ["all", *markets_present]:
-        samples = [
-            (p, won)
-            for m, p, won in calibration_samples
-            if market_name == "all" or m == market_name
+    def _tables(probability_field: str) -> dict[str, list[dict[str, object]]]:
+        samples_by_market: list[tuple[str, float, bool]] = [
+            (
+                str(r["market"]),
+                float(r[probability_field]),
+                bool(r["won"]),
+            )
+            for r in evaluation
+            if r["settled"]
         ]
-        buckets = []
-        for lower in (i / 10 for i in range(10)):
-            upper = lower + 0.1
-            inside = [
-                (p, won) for p, won in samples if lower <= p < upper
-            ] or (
-                [(p, won) for p, won in samples if p >= 0.9999]
-                if upper >= 1.0
-                else []
-            )
-            if not inside:
-                continue
-            buckets.append(
-                {
-                    "bucket": f"{lower:.0%}-{upper:.0%}",
-                    "n": len(inside),
-                    "mean_predicted": round(
-                        sum(p for p, _ in inside) / len(inside), 4
-                    ),
-                    "actual_rate": round(
-                        sum(1 for _, won in inside if won) / len(inside), 4
-                    ),
-                }
-            )
-        calibration[market_name] = buckets
+        tables: dict[str, list[dict[str, object]]] = {}
+        markets_present = sorted({m for m, _, _ in samples_by_market})
+        for market_name in ["all", *markets_present]:
+            samples = [
+                (p, won)
+                for m, p, won in samples_by_market
+                if market_name == "all" or m == market_name
+            ]
+            buckets = []
+            for lower in (i / 10 for i in range(10)):
+                upper = lower + 0.1
+                inside = [
+                    (p, won)
+                    for p, won in samples
+                    if lower <= p < upper or (upper >= 1.0 and p >= 0.9999)
+                ]
+                if not inside:
+                    continue
+                buckets.append(
+                    {
+                        "bucket": f"{lower:.0%}-{upper:.0%}",
+                        "n": len(inside),
+                        "mean_predicted": round(
+                            sum(p for p, _ in inside) / len(inside), 4
+                        ),
+                        "actual_rate": round(
+                            sum(1 for _, won in inside if won) / len(inside), 4
+                        ),
+                    }
+                )
+            tables[market_name] = buckets
+        return tables
+
+    settled_evaluation = sum(1 for r in evaluation if r["settled"])
+    calibration = _tables("probability")
+    calibration_raw = _tables("raw_probability") if correction else None
 
     return {
         "priced_outcomes": priced,
         "no_model_opinion": no_opinion,
-        "settled_calibration_samples": len(calibration_samples),
+        "settled_calibration_samples": settled_evaluation,
         "edge_threshold": edge_threshold,
+        "calibration_split": calibration_split,
+        "calibration_correction": (
+            {
+                "intercept": round(correction.intercept, 4),
+                "slope": round(correction.slope, 4),
+                "fitted_on": correction.fitted_on,
+            }
+            if correction
+            else None
+        ),
         "bets": [b.__dict__ for b in bets],
         "per_market": per_market,
         "calibration": calibration,
+        "calibration_raw": calibration_raw,
         "unmatched_teams": sorted(unmatched_teams),
         "unmatched_players": sorted(unmatched_players),
         "caveats": [
@@ -475,6 +528,18 @@ def save_player_props_backtest(
         f"- Priced outcomes with a model opinion: {summary['priced_outcomes']}",
         f"- Outcomes the model held no opinion on: {summary['no_model_opinion']}",
         f"- Edge threshold: {summary['edge_threshold']:.0%}",
+    ]
+    correction = summary.get("calibration_correction")
+    if correction:
+        lines += [
+            f"- Calibration split: fitted before {summary['calibration_split']}, "
+            "measured on and after it. Everything below — bets, ROI, and both "
+            "tables — is the held-out window only.",
+            f"- Fitted correction: sigmoid({correction['intercept']} + "
+            f"{correction['slope']} x logit(p)), from "
+            f"{correction['fitted_on']} pre-split outcomes.",
+        ]
+    lines += [
         "",
         "## Per market",
         "",
@@ -499,19 +564,27 @@ def save_player_props_backtest(
         f"sample has power ({summary['settled_calibration_samples']} "
         "probability-outcome pairs).",
     ]
-    for market_name, buckets in summary["calibration"].items():
+    def _render_tables(tables: Mapping[str, object], suffix: str = "") -> None:
+        for market_name, buckets in tables.items():
+            lines.append("")
+            lines.append(f"### {market_name}{suffix}")
+            lines.append("")
+            lines.append("| Predicted | n | Mean predicted | Actual rate |")
+            lines.append("|:----------|--:|---------------:|------------:|")
+            for bucket in buckets:
+                lines.append(
+                    f"| {bucket['bucket']} | {bucket['n']} | "
+                    f"{bucket['mean_predicted']:.1%} | "
+                    f"{bucket['actual_rate']:.1%} |"
+                )
+
+    _render_tables(summary["calibration"])
+    if summary.get("calibration_raw"):
         lines += [
             "",
-            f"### {market_name}",
-            "",
-            "| Predicted | n | Mean predicted | Actual rate |",
-            "|:----------|--:|---------------:|------------:|",
+            "## Calibration before the correction (same held-out window)",
         ]
-        for bucket in buckets:
-            lines.append(
-                f"| {bucket['bucket']} | {bucket['n']} | "
-                f"{bucket['mean_predicted']:.1%} | {bucket['actual_rate']:.1%} |"
-            )
+        _render_tables(summary["calibration_raw"], suffix=" (raw)")
     if summary["unmatched_teams"]:
         lines += ["", "## Unmatched fixtures", ""]
         lines += [f"- {item}" for item in summary["unmatched_teams"]]

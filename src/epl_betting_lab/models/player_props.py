@@ -57,6 +57,79 @@ def _position_group(position: str) -> str:
 
 
 @dataclass(frozen=True)
+class PropCalibration:
+    """A fitted correction for the model's measured miscalibration.
+
+    Platt scaling: corrected = sigmoid(intercept + slope * logit(raw)). Two
+    parameters are all the measured defect needs — the mid-range runs two to
+    three points hot and the top bucket collapses, which is the signature a
+    slope below one straightens out.
+
+    The honesty rule lives at the call site, not here: fit on one window,
+    apply on another, never both on the same data. `fitted_on` records the
+    sample count so a correction fitted on too little announces itself.
+    """
+
+    intercept: float
+    slope: float
+    fitted_on: int
+
+    #: Below this many settled outcomes a fitted curve is noise; the identity
+    #: correction is the honest fallback.
+    MINIMUM_SAMPLES = 200
+
+    @classmethod
+    def identity(cls, fitted_on: int = 0) -> "PropCalibration":
+        return cls(intercept=0.0, slope=1.0, fitted_on=fitted_on)
+
+    @classmethod
+    def fit(cls, samples: list[tuple[float, bool]]) -> "PropCalibration":
+        """Newton-fitted logistic regression of outcome on logit(probability)."""
+        if len(samples) < cls.MINIMUM_SAMPLES:
+            return cls.identity(fitted_on=len(samples))
+        xs = [_logit(p) for p, _ in samples]
+        ys = [1.0 if won else 0.0 for _, won in samples]
+        a, b = 0.0, 1.0
+        for _ in range(50):
+            g0 = g1 = 0.0
+            h00 = h01 = h11 = 0.0
+            for x, y in zip(xs, ys):
+                p = _sigmoid(a + b * x)
+                w = max(p * (1.0 - p), 1e-9)
+                g0 += p - y
+                g1 += (p - y) * x
+                h00 += w
+                h01 += w * x
+                h11 += w * x * x
+            det = h00 * h11 - h01 * h01
+            if abs(det) < 1e-12:
+                break
+            da = (h11 * g0 - h01 * g1) / det
+            db = (h00 * g1 - h01 * g0) / det
+            a -= da
+            b -= db
+            if abs(da) < 1e-10 and abs(db) < 1e-10:
+                break
+        return cls(intercept=a, slope=b, fitted_on=len(samples))
+
+    def apply(self, probability: float) -> float:
+        corrected = _sigmoid(self.intercept + self.slope * _logit(probability))
+        return max(0.0, min(1.0, corrected))
+
+
+def _logit(probability: float) -> float:
+    p = min(max(probability, 1e-4), 1.0 - 1e-4)
+    return math.log(p / (1.0 - p))
+
+
+def _sigmoid(value: float) -> float:
+    if value >= 0:
+        return 1.0 / (1.0 + math.exp(-value))
+    exp_value = math.exp(value)
+    return exp_value / (1.0 + exp_value)
+
+
+@dataclass(frozen=True)
 class PlayerRates:
     """One player's shrunk per-90 rates and minutes expectation."""
 

@@ -30,6 +30,14 @@ def parse_args() -> argparse.Namespace:
             "and books reprice on the team sheet."
         ),
     )
+    parser.add_argument(
+        "--calibration-split",
+        help=(
+            "ISO date. Outcomes before it fit the calibration correction; "
+            "everything reported — bets, ROI, tables — is on-or-after it "
+            "only. Never fit and measure on the same window."
+        ),
+    )
     parser.add_argument("--odds-path", type=Path)
     parser.add_argument("--logs-path", type=Path)
     parser.add_argument("--output-dir", type=Path)
@@ -44,6 +52,7 @@ def main() -> int:
             odds_path=args.odds_path,
             logs_path=args.logs_path,
             edge_threshold=args.edge_threshold,
+            calibration_split=args.calibration_split,
         )
     except (FileNotFoundError, KeyError) as exc:
         print(f"BLOCKED: {exc}")
@@ -58,6 +67,17 @@ def main() -> int:
     print(f"Priced outcomes with a model opinion: {summary['priced_outcomes']}")
     print(f"No model opinion: {summary['no_model_opinion']}")
     print(f"Edge threshold: {summary['edge_threshold']:.0%}")
+    correction = summary.get("calibration_correction")
+    if correction:
+        print(
+            f"Calibration split: {summary['calibration_split']} — everything "
+            "below is the held-out window only."
+        )
+        print(
+            f"Correction: sigmoid({correction['intercept']} + "
+            f"{correction['slope']} x logit(p)) from "
+            f"{correction['fitted_on']} pre-split outcomes."
+        )
     for market, stats in summary["per_market"].items():
         roi = stats["roi"]
         print(

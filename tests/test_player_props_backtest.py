@@ -370,3 +370,71 @@ class TestReports:
         assert "calibration-grade" in markdown
         assert Path(result["json"]).is_file()
         assert Path(result["csv"]).is_file()
+
+
+class TestCalibrationSplit:
+    def _split_setup(self, tmp_path: Path):
+        """History through April, priced outcomes in April and May.
+
+        April outcomes are pre-split (they fit the correction), May outcomes
+        are held out (they are measured).
+        """
+        logs = _training_logs()
+        odds = []
+        for d in range(1, 11):
+            date = f"2026-04-{d:02d}"
+            logs.append(
+                _log_row("Star Striker", date, f"apr{d}", shots_on_target=2)
+            )
+            odds.append(_odds_row(date=date))
+        logs.append(
+            _log_row("Star Striker", "2026-05-09", "may1", shots_on_target=2)
+        )
+        odds.append(_odds_row(date="2026-05-09"))
+        return odds, logs
+
+    def test_only_the_held_out_window_is_reported(self, tmp_path: Path) -> None:
+        odds, logs = self._split_setup(tmp_path)
+        summary = _build(
+            tmp_path, odds, logs, calibration_split="2026-05-01"
+        )
+
+        assert summary["calibration_split"] == "2026-05-01"
+        assert summary["settled_calibration_samples"] == 1
+        assert all(bet["date"] >= "2026-05-01" for bet in summary["bets"])
+
+    def test_the_correction_is_fitted_only_before_the_split(
+        self, tmp_path: Path
+    ) -> None:
+        odds, logs = self._split_setup(tmp_path)
+        summary = _build(
+            tmp_path, odds, logs, calibration_split="2026-05-01"
+        )
+        correction = summary["calibration_correction"]
+
+        assert correction is not None
+        assert correction["fitted_on"] == 10
+
+    def test_too_little_pre_split_history_keeps_probabilities_raw(
+        self, tmp_path: Path
+    ) -> None:
+        """Ten outcomes cannot fit a curve; the identity correction stands
+        and the held-out probabilities equal the raw ones."""
+        odds, logs = self._split_setup(tmp_path)
+        summary = _build(
+            tmp_path, odds, logs, calibration_split="2026-05-01"
+        )
+        correction = summary["calibration_correction"]
+
+        assert correction["slope"] == 1.0
+        held_out = summary["calibration"]["all"]
+        raw = summary["calibration_raw"]["all"]
+        assert held_out == raw
+
+    def test_without_a_split_nothing_changes_shape(self, tmp_path: Path) -> None:
+        odds, logs = self._split_setup(tmp_path)
+        summary = _build(tmp_path, odds, logs)
+
+        assert summary["calibration_correction"] is None
+        assert summary["calibration_raw"] is None
+        assert summary["settled_calibration_samples"] == 11

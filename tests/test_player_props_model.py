@@ -227,3 +227,49 @@ class TestPricing:
 
         for stat in PROP_STATS:
             assert stat in LOG_FIELDS
+
+
+class TestPropCalibration:
+    def _overconfident_samples(self, n: int = 2000) -> list:
+        """Raw probabilities whose true rate follows a flatter curve —
+        the exact defect the measurement found."""
+        import math as _math
+        import random
+
+        from epl_betting_lab.models.player_props import PropCalibration
+
+        rng = random.Random(7)
+        samples = []
+        for _ in range(n):
+            raw = rng.uniform(0.05, 0.75)
+            logit = _math.log(raw / (1 - raw))
+            true = 1 / (1 + _math.exp(-0.6 * logit))
+            samples.append((raw, rng.random() < true))
+        return samples
+
+    def test_the_fit_finds_the_flatter_curve(self) -> None:
+        from epl_betting_lab.models.player_props import PropCalibration
+
+        calibration = PropCalibration.fit(self._overconfident_samples())
+
+        assert 0.4 < calibration.slope < 0.8
+        assert calibration.fitted_on == 2000
+        # A confident raw probability is pulled toward the middle.
+        assert calibration.apply(0.64) < 0.60
+
+    def test_too_few_samples_fall_back_to_identity(self) -> None:
+        from epl_betting_lab.models.player_props import PropCalibration
+
+        calibration = PropCalibration.fit([(0.5, True)] * 50)
+
+        assert calibration.slope == 1.0
+        assert calibration.intercept == 0.0
+        assert calibration.apply(0.37) == pytest.approx(0.37, abs=1e-6)
+
+    def test_applied_probabilities_stay_probabilities(self) -> None:
+        from epl_betting_lab.models.player_props import PropCalibration
+
+        calibration = PropCalibration(intercept=3.0, slope=2.0, fitted_on=999)
+
+        assert 0.0 <= calibration.apply(0.0) <= 1.0
+        assert 0.0 <= calibration.apply(1.0) <= 1.0

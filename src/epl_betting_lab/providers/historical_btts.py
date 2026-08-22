@@ -164,7 +164,7 @@ def _event_prices(
         return {}
 
     wanted = {m.strip() for m in markets if m.strip()}
-    best: dict[str, dict[str, float]] = {}
+    best: dict[str, dict[tuple[str, str], float]] = {}
     for bookmaker in data.get("bookmakers", []) or []:
         if not isinstance(bookmaker, Mapping):
             continue
@@ -182,13 +182,20 @@ def _event_prices(
                 # Keep the line in the selection name, so a totals ladder does
                 # not collapse every line into one column.
                 selection = name if point is None else f"{name}@{point}"
+                # Player-prop outcomes name the player in `description`. It is
+                # part of the outcome's identity: without it every player's
+                # "Over@0.5" is the same key and the ladder collapses into one
+                # meaningless best price — which is exactly what the first
+                # props harvest bought.
+                player = str(outcome.get("description", "")).strip()
                 price = _american(outcome.get("price"))
                 if price is None:
                     continue
                 slot = best.setdefault(key, {})
+                identity = (player, selection)
                 # Best price = the one that pays most for the same outcome.
-                if selection not in slot or price > slot[selection]:
-                    slot[selection] = price
+                if identity not in slot or price > slot[identity]:
+                    slot[identity] = price
     return best
 
 
@@ -291,13 +298,15 @@ def harvest_btts_history(
         }
         # One row per market per selection. A wide table would need a column
         # per line of every ladder and would change shape whenever a book added
-        # one; long rows survive that.
+        # one; long rows survive that. `player` is empty for match-level
+        # markets and names the player for prop markets.
         for market_key, selections in sorted(prices.items()):
-            for selection, price in sorted(selections.items()):
+            for (player, selection), price in sorted(selections.items()):
                 result.rows.append(
                     {
                         **base,
                         "market": market_key,
+                        "player": player,
                         "selection": selection,
                         "american": price,
                     }

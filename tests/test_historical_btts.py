@@ -246,6 +246,61 @@ class TestHarvest:
         assert result.events_seen == 1
         assert result.events_with_btts == 0
 
+    def test_a_player_prop_row_names_its_player(self) -> None:
+        """The player is the outcome's identity. Without it every player's
+        Over@0.5 is one key and the ladder collapses into a single meaningless
+        best price — which is what the first props harvest bought."""
+        payload = {"data": {"bookmakers": [{"title": "FanDuel", "markets": [
+            {"key": "player_shots_on_target", "outcomes": [
+                {"name": "Over", "description": "Bukayo Saka", "point": 1.5, "price": -120},
+                {"name": "Over", "description": "Kai Havertz", "point": 1.5, "price": 210},
+            ]},
+        ]}]}}
+        result = harvest_btts_history(
+            DAY, api_key="k", budget=HarvestBudget(limit=1000),
+            markets=["player_shots_on_target"],
+            requester=_requester([_event()], payload),
+        )
+
+        assert len(result.rows) == 2
+        by_player = {r["player"]: r for r in result.rows}
+        assert by_player["Bukayo Saka"]["american"] == -120
+        assert by_player["Kai Havertz"]["american"] == 210
+        assert all(r["selection"] == "Over@1.5" for r in result.rows)
+
+    def test_best_price_is_per_player_not_per_line(self) -> None:
+        """Two books pricing the same player's line compare; two players on
+        the same line never do."""
+        payload = {"data": {"bookmakers": [
+            {"title": "FanDuel", "markets": [
+                {"key": "player_shots_on_target", "outcomes": [
+                    {"name": "Over", "description": "Bukayo Saka", "point": 0.5, "price": -200},
+                ]},
+            ]},
+            {"title": "DraftKings", "markets": [
+                {"key": "player_shots_on_target", "outcomes": [
+                    {"name": "Over", "description": "Bukayo Saka", "point": 0.5, "price": -185},
+                    {"name": "Over", "description": "Kai Havertz", "point": 0.5, "price": 105},
+                ]},
+            ]},
+        ]}}
+        result = harvest_btts_history(
+            DAY, api_key="k", budget=HarvestBudget(limit=1000),
+            markets=["player_shots_on_target"],
+            requester=_requester([_event()], payload),
+        )
+
+        by_player = {r["player"]: r["american"] for r in result.rows}
+        assert by_player == {"Bukayo Saka": -185, "Kai Havertz": 105}
+
+    def test_a_match_level_row_has_an_empty_player(self) -> None:
+        result = harvest_btts_history(
+            DAY, api_key="k", budget=HarvestBudget(limit=1000),
+            requester=_requester([_event()], _btts_payload()),
+        )
+
+        assert all(r["player"] == "" for r in result.rows)
+
 
 class TestBudget:
     def test_it_stops_before_exceeding_the_limit(self) -> None:
@@ -343,3 +398,81 @@ class TestTheHarvestWorkflow:
 
         for forbidden in ("settle", "bet_ledger", "staging_provider_policy", "--force"):
             assert forbidden not in text, forbidden
+
+
+class TestTheHarvestFile:
+    """The script's file handling: migration, and what counts as bought."""
+
+    def _module(self):
+        import importlib.util
+
+        from epl_betting_lab.config import PROJECT_ROOT
+
+        spec = importlib.util.spec_from_file_location(
+            "_harvest", PROJECT_ROOT / "scripts" / "harvest_historical_btts.py"
+        )
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
+
+    def _legacy_file(self, tmp_path):
+        path = tmp_path / "historical_market_odds.csv"
+        path.write_text(
+            "sampled_at,commence_time,home_team,away_team,market,selection,american\n"
+            "2026-05-09T11:00:00Z,2026-05-09T14:00:00Z,Fulham,Bournemouth,btts,Yes,150.0\n"
+            "2026-05-09T11:00:00Z,2026-05-09T14:00:00Z,Fulham,Everton,player_shots_on_target,Over@0.5,410.0\n",
+            encoding="utf-8",
+        )
+        return path
+
+    def test_a_playerless_prop_row_does_not_count_as_bought(self, tmp_path) -> None:
+        """It collapsed every player into one price; the fixture must be
+        re-bought correctly. The BTTS fixture stays bought."""
+        module = self._module()
+        already, legacy, needs_migration = module._read_existing(
+            self._legacy_file(tmp_path), append=True
+        )
+
+        assert needs_migration is True
+        assert len(legacy) == 2
+        assert already == ["2026-05-09|fulham|bournemouth"]
+
+    def test_migration_keeps_every_old_row_under_the_new_header(
+        self, tmp_path
+    ) -> None:
+        import csv as _csv
+
+        module = self._module()
+        path = self._legacy_file(tmp_path)
+        already, legacy, needs_migration = module._read_existing(path, append=True)
+
+        migrated = module._write_rows(
+            path,
+            [
+                {
+                    "sampled_at": "2026-05-09T11:00:00Z",
+                    "commence_time": "2026-05-09T14:00:00Z",
+                    "home_team": "Fulham",
+                    "away_team": "Everton",
+                    "market": "player_shots_on_target",
+                    "player": "Raul Jimenez",
+                    "selection": "Over@0.5",
+                    "american": 390.0,
+                }
+            ],
+            append=True,
+            needs_migration=needs_migration,
+            legacy_rows=legacy,
+        )
+
+        assert migrated == 2
+        with path.open(encoding="utf-8", newline="") as handle:
+            rows = list(_csv.DictReader(handle))
+        assert len(rows) == 3
+        assert rows[0]["player"] == ""
+        assert rows[2]["player"] == "Raul Jimenez"
+        # A second read no longer needs migration, and the attributed fixture
+        # now counts as bought.
+        already2, _, needs2 = module._read_existing(path, append=True)
+        assert needs2 is False
+        assert "2026-05-09|fulham|everton" in already2

@@ -1,312 +1,12 @@
 {
   "bets": [
     {
-      "american": 370.0,
-      "date": "2026-02-01",
-      "edge": 0.1086,
-      "implied_probability": 0.2128,
-      "market": "player_goal_scorer_anytime",
-      "model_probability": 0.3213,
-      "outcome": "lost",
-      "player": "Harry Wilson",
-      "profit": -1.0,
-      "selection": "Yes"
-    },
-    {
-      "american": 380.0,
-      "date": "2026-02-01",
-      "edge": 0.0864,
-      "implied_probability": 0.2083,
-      "market": "player_goal_scorer_anytime",
-      "model_probability": 0.2947,
-      "outcome": "won",
-      "player": "Raul Jimenez",
-      "profit": 3.8,
-      "selection": "Yes"
-    },
-    {
-      "american": 550.0,
-      "date": "2026-02-07",
-      "edge": 0.0953,
-      "implied_probability": 0.1538,
-      "market": "player_goal_scorer_anytime",
-      "model_probability": 0.2492,
-      "outcome": "lost",
-      "player": "Brian Brobbey",
-      "profit": -1.0,
-      "selection": "Yes"
-    },
-    {
-      "american": 390.0,
-      "date": "2026-02-07",
-      "edge": 0.1004,
-      "implied_probability": 0.2041,
-      "market": "player_shots_on_target",
-      "model_probability": 0.3045,
-      "outcome": "lost",
-      "player": "Ladislav Krejci",
-      "profit": -1.0,
-      "selection": "Over@0.5"
-    },
-    {
-      "american": 290.0,
-      "date": "2026-02-07",
-      "edge": 0.0996,
-      "implied_probability": 0.2564,
-      "market": "player_shots_on_target",
-      "model_probability": 0.356,
-      "outcome": "void",
-      "player": "Lewis Miley",
-      "profit": 0.0,
-      "selection": "Over@0.5"
-    },
-    {
-      "american": 107.0,
-      "date": "2026-02-07",
-      "edge": 0.1022,
-      "implied_probability": 0.4831,
-      "market": "player_shots_on_target",
-      "model_probability": 0.5853,
-      "outcome": "lost",
-      "player": "Mateus Mane",
-      "profit": -1.0,
-      "selection": "Over@0.5"
-    },
-    {
-      "american": 210.0,
-      "date": "2026-02-10",
-      "edge": 0.0854,
-      "implied_probability": 0.3226,
-      "market": "player_shots_on_target",
-      "model_probability": 0.408,
-      "outcome": "won",
-      "player": "Tomas Soucek",
-      "profit": 2.1,
-      "selection": "Over@0.5"
-    },
-    {
-      "american": 115.0,
-      "date": "2026-02-11",
-      "edge": 0.1033,
-      "implied_probability": 0.4651,
-      "market": "player_shots_on_target",
-      "model_probability": 0.5684,
-      "outcome": "won",
-      "player": "Harry Wilson",
-      "profit": 1.15,
-      "selection": "Over@0.5"
-    },
-    {
-      "american": 145.0,
-      "date": "2026-02-18",
-      "edge": 0.1234,
-      "implied_probability": 0.4082,
-      "market": "player_shots_on_target",
-      "model_probability": 0.5316,
-      "outcome": "lost",
-      "player": "Mateus Mane",
-      "profit": -1.0,
-      "selection": "Over@0.5"
-    },
-    {
-      "american": 180.0,
-      "date": "2026-02-21",
-      "edge": 0.1219,
-      "implied_probability": 0.3571,
-      "market": "player_shots_on_target",
-      "model_probability": 0.479,
-      "outcome": "lost",
-      "player": "Tomas Soucek",
-      "profit": -1.0,
-      "selection": "Over@0.5"
-    },
-    {
-      "american": 275.0,
-      "date": "2026-02-22",
-      "edge": 0.0921,
-      "implied_probability": 0.2667,
-      "market": "player_goal_scorer_anytime",
-      "model_probability": 0.3588,
-      "outcome": "lost",
-      "player": "Mohamed Salah",
-      "profit": -1.0,
-      "selection": "Yes"
-    },
-    {
-      "american": 800.0,
-      "date": "2026-02-28",
-      "edge": 0.084,
-      "implied_probability": 0.1111,
-      "market": "player_goal_scorer_anytime",
-      "model_probability": 0.1951,
-      "outcome": "won",
-      "player": "Tomas Soucek",
-      "profit": 8.0,
-      "selection": "Yes"
-    },
-    {
-      "american": 380.0,
-      "date": "2026-02-28",
-      "edge": 0.0899,
-      "implied_probability": 0.2083,
-      "market": "player_shots_on_target",
-      "model_probability": 0.2983,
-      "outcome": "lost",
-      "player": "Malick Thiaw",
-      "profit": -1.0,
-      "selection": "Over@0.5"
-    },
-    {
-      "american": 250.0,
-      "date": "2026-02-28",
-      "edge": 0.0932,
-      "implied_probability": 0.2857,
-      "market": "player_shots_on_target",
-      "model_probability": 0.3789,
-      "outcome": "won",
-      "player": "Tomas Soucek",
-      "profit": 2.5,
-      "selection": "Over@0.5"
-    },
-    {
-      "american": 145.0,
-      "date": "2026-03-01",
-      "edge": 0.0847,
-      "implied_probability": 0.4082,
-      "market": "player_shots_on_target",
-      "model_probability": 0.4929,
-      "outcome": "won",
-      "player": "Alex Iwobi",
-      "profit": 1.45,
-      "selection": "Over@0.5"
-    },
-    {
-      "american": 190.0,
-      "date": "2026-03-03",
-      "edge": 0.0886,
-      "implied_probability": 0.3448,
-      "market": "player_goal_scorer_anytime",
-      "model_probability": 0.4334,
-      "outcome": "won",
-      "player": "Mohamed Salah",
-      "profit": 1.9,
-      "selection": "Yes"
-    },
-    {
-      "american": 128.0,
-      "date": "2026-03-04",
-      "edge": 0.0845,
-      "implied_probability": 0.4386,
-      "market": "player_shots_on_target",
-      "model_probability": 0.5231,
-      "outcome": "won",
-      "player": "Alex Iwobi",
-      "profit": 1.28,
-      "selection": "Over@0.5"
-    },
-    {
-      "american": 170.0,
-      "date": "2026-03-04",
-      "edge": 0.1182,
-      "implied_probability": 0.3704,
-      "market": "player_shots_on_target",
-      "model_probability": 0.4885,
-      "outcome": "lost",
-      "player": "Kaoru Mitoma",
-      "profit": -1.0,
-      "selection": "Over@0.5"
-    },
-    {
-      "american": 320.0,
-      "date": "2026-03-15",
-      "edge": 0.0805,
-      "implied_probability": 0.2381,
-      "market": "player_goal_scorer_anytime",
-      "model_probability": 0.3186,
-      "outcome": "lost",
-      "player": "Ollie Watkins",
-      "profit": -1.0,
-      "selection": "Yes"
-    },
-    {
-      "american": 180.0,
-      "date": "2026-03-15",
-      "edge": 0.0907,
-      "implied_probability": 0.3571,
-      "market": "player_shots_on_target",
-      "model_probability": 0.4479,
-      "outcome": "lost",
-      "player": "Alex Iwobi",
-      "profit": -1.0,
-      "selection": "Over@0.5"
-    },
-    {
-      "american": 130.0,
-      "date": "2026-03-21",
-      "edge": 0.0837,
-      "implied_probability": 0.4348,
-      "market": "player_shots_on_target",
-      "model_probability": 0.5185,
-      "outcome": "lost",
-      "player": "Alex Iwobi",
-      "profit": -1.0,
-      "selection": "Over@0.5"
-    },
-    {
-      "american": 250.0,
-      "date": "2026-04-11",
-      "edge": 0.0855,
-      "implied_probability": 0.2857,
-      "market": "player_goal_scorer_anytime",
-      "model_probability": 0.3712,
-      "outcome": "lost",
-      "player": "Zian Flemming",
-      "profit": -1.0,
-      "selection": "Yes"
-    },
-    {
-      "american": 350.0,
-      "date": "2026-04-12",
-      "edge": 0.0809,
-      "implied_probability": 0.2222,
-      "market": "player_shots_on_target",
-      "model_probability": 0.3032,
-      "outcome": "lost",
-      "player": "Jefferson Lerma",
-      "profit": -1.0,
-      "selection": "Over@0.5"
-    },
-    {
-      "american": 170.0,
-      "date": "2026-04-18",
-      "edge": 0.0913,
-      "implied_probability": 0.3704,
-      "market": "player_shots_on_target",
-      "model_probability": 0.4617,
-      "outcome": "lost",
-      "player": "Alex Iwobi",
-      "profit": -1.0,
-      "selection": "Over@0.5"
-    },
-    {
-      "american": 300.0,
-      "date": "2026-04-19",
-      "edge": 0.0865,
-      "implied_probability": 0.25,
-      "market": "player_goal_scorer_anytime",
-      "model_probability": 0.3365,
-      "outcome": "won",
-      "player": "Zian Flemming",
-      "profit": 3.0,
-      "selection": "Yes"
-    },
-    {
       "american": 400.0,
       "date": "2026-04-20",
-      "edge": 0.1233,
+      "edge": 0.0864,
       "implied_probability": 0.2,
       "market": "player_shots_on_target",
-      "model_probability": 0.3233,
+      "model_probability": 0.2864,
       "outcome": "won",
       "player": "Jefferson Lerma",
       "profit": 4.0,
@@ -315,245 +15,228 @@
     {
       "american": 370.0,
       "date": "2026-04-22",
-      "edge": 0.1409,
+      "edge": 0.0996,
       "implied_probability": 0.2128,
       "market": "player_goal_scorer_anytime",
-      "model_probability": 0.3536,
+      "model_probability": 0.3123,
       "outcome": "lost",
       "player": "Zian Flemming",
       "profit": -1.0,
       "selection": "Yes"
-    },
-    {
-      "american": -104.0,
-      "date": "2026-04-22",
-      "edge": 0.138,
-      "implied_probability": 0.5098,
-      "market": "player_shots_on_target",
-      "model_probability": 0.6478,
-      "outcome": "lost",
-      "player": "Zian Flemming",
-      "profit": -1.0,
-      "selection": "Over@0.5"
-    },
-    {
-      "american": 400.0,
-      "date": "2026-04-22",
-      "edge": 0.0802,
-      "implied_probability": 0.2,
-      "market": "player_shots_on_target",
-      "model_probability": 0.2802,
-      "outcome": "lost",
-      "player": "Zian Flemming",
-      "profit": -1.0,
-      "selection": "Over@1.5"
-    },
-    {
-      "american": 500.0,
-      "date": "2026-04-25",
-      "edge": 0.0921,
-      "implied_probability": 0.1667,
-      "market": "player_shots_on_target",
-      "model_probability": 0.2588,
-      "outcome": "void",
-      "player": "Jefferson Lerma",
-      "profit": 0.0,
-      "selection": "Over@0.5"
-    },
-    {
-      "american": 300.0,
-      "date": "2026-04-27",
-      "edge": 0.0907,
-      "implied_probability": 0.25,
-      "market": "player_goal_scorer_anytime",
-      "model_probability": 0.3407,
-      "outcome": "void",
-      "player": "Matheus Cunha",
-      "profit": 0.0,
-      "selection": "Yes"
-    },
-    {
-      "american": -205.0,
-      "date": "2026-04-27",
-      "edge": 0.0885,
-      "implied_probability": 0.6721,
-      "market": "player_shots_on_target",
-      "model_probability": 0.7607,
-      "outcome": "void",
-      "player": "Matheus Cunha",
-      "profit": 0.0,
-      "selection": "Over@0.5"
-    },
-    {
-      "american": 205.0,
-      "date": "2026-04-27",
-      "edge": 0.0906,
-      "implied_probability": 0.3279,
-      "market": "player_shots_on_target",
-      "model_probability": 0.4184,
-      "outcome": "void",
-      "player": "Matheus Cunha",
-      "profit": 0.0,
-      "selection": "Over@1.5"
     },
     {
       "american": 340.0,
       "date": "2026-05-01",
-      "edge": 0.1332,
+      "edge": 0.091,
       "implied_probability": 0.2273,
       "market": "player_goal_scorer_anytime",
-      "model_probability": 0.3605,
+      "model_probability": 0.3182,
       "outcome": "lost",
       "player": "Zian Flemming",
-      "profit": -1.0,
-      "selection": "Yes"
-    },
-    {
-      "american": 320.0,
-      "date": "2026-05-03",
-      "edge": 0.0828,
-      "implied_probability": 0.2381,
-      "market": "player_goal_scorer_anytime",
-      "model_probability": 0.3209,
-      "outcome": "won",
-      "player": "Matheus Cunha",
-      "profit": 3.2,
-      "selection": "Yes"
-    },
-    {
-      "american": 460.0,
-      "date": "2026-05-03",
-      "edge": 0.1004,
-      "implied_probability": 0.1786,
-      "market": "player_shots_on_target",
-      "model_probability": 0.279,
-      "outcome": "lost",
-      "player": "Jefferson Lerma",
-      "profit": -1.0,
-      "selection": "Over@0.5"
-    },
-    {
-      "american": 270.0,
-      "date": "2026-05-10",
-      "edge": 0.0885,
-      "implied_probability": 0.2703,
-      "market": "player_goal_scorer_anytime",
-      "model_probability": 0.3587,
-      "outcome": "won",
-      "player": "Zian Flemming",
-      "profit": 2.7,
-      "selection": "Yes"
-    },
-    {
-      "american": 120.0,
-      "date": "2026-05-10",
-      "edge": 0.0856,
-      "implied_probability": 0.4545,
-      "market": "player_shots_on_target",
-      "model_probability": 0.5401,
-      "outcome": "won",
-      "player": "Jarrod Bowen",
-      "profit": 1.2,
-      "selection": "Over@0.5"
-    },
-    {
-      "american": 400.0,
-      "date": "2026-05-10",
-      "edge": 0.099,
-      "implied_probability": 0.2,
-      "market": "player_shots_on_target",
-      "model_probability": 0.299,
-      "outcome": "lost",
-      "player": "Jefferson Lerma",
-      "profit": -1.0,
-      "selection": "Over@0.5"
-    },
-    {
-      "american": 310.0,
-      "date": "2026-05-15",
-      "edge": 0.1001,
-      "implied_probability": 0.2439,
-      "market": "player_goal_scorer_anytime",
-      "model_probability": 0.344,
-      "outcome": "lost",
-      "player": "Mohamed Salah",
       "profit": -1.0,
       "selection": "Yes"
     },
     {
       "american": 550.0,
       "date": "2026-05-18",
-      "edge": 0.1244,
+      "edge": 0.0942,
       "implied_probability": 0.1538,
       "market": "player_goal_scorer_anytime",
-      "model_probability": 0.2782,
+      "model_probability": 0.2481,
       "outcome": "lost",
       "player": "Zian Flemming",
       "profit": -1.0,
       "selection": "Yes"
-    },
-    {
-      "american": 280.0,
-      "date": "2026-05-24",
-      "edge": 0.0993,
-      "implied_probability": 0.2632,
-      "market": "player_shots_on_target",
-      "model_probability": 0.3625,
-      "outcome": "won",
-      "player": "Curtis Jones",
-      "profit": 2.8,
-      "selection": "Over@0.5"
     }
   ],
   "calibration": {
     "all": [
       {
-        "actual_rate": 0.0299,
+        "actual_rate": 0.034,
         "bucket": "0%-10%",
-        "mean_predicted": 0.026,
-        "n": 10025
+        "mean_predicted": 0.0273,
+        "n": 5293
       },
       {
-        "actual_rate": 0.1386,
+        "actual_rate": 0.1518,
         "bucket": "10%-20%",
-        "mean_predicted": 0.1452,
-        "n": 2474
+        "mean_predicted": 0.144,
+        "n": 1298
       },
       {
-        "actual_rate": 0.2153,
+        "actual_rate": 0.2453,
         "bucket": "20%-30%",
-        "mean_predicted": 0.2436,
-        "n": 1124
+        "mean_predicted": 0.2427,
+        "n": 530
       },
       {
-        "actual_rate": 0.3101,
+        "actual_rate": 0.3491,
         "bucket": "30%-40%",
         "mean_predicted": 0.3443,
-        "n": 545
+        "n": 232
       },
       {
-        "actual_rate": 0.4386,
+        "actual_rate": 0.5103,
         "bucket": "40%-50%",
-        "mean_predicted": 0.4474,
-        "n": 342
+        "mean_predicted": 0.4434,
+        "n": 145
       },
       {
-        "actual_rate": 0.5078,
+        "actual_rate": 0.4776,
         "bucket": "50%-60%",
-        "mean_predicted": 0.5413,
-        "n": 193
-      },
-      {
-        "actual_rate": 0.5088,
-        "bucket": "60%-70%",
-        "mean_predicted": 0.6406,
-        "n": 114
+        "mean_predicted": 0.5434,
+        "n": 67
       },
       {
         "actual_rate": 0.8,
+        "bucket": "60%-70%",
+        "mean_predicted": 0.6374,
+        "n": 20
+      },
+      {
+        "actual_rate": 1.0,
         "bucket": "70%-80%",
-        "mean_predicted": 0.74,
-        "n": 25
+        "mean_predicted": 0.7438,
+        "n": 4
+      }
+    ],
+    "player_goal_scorer_anytime": [
+      {
+        "actual_rate": 0.0484,
+        "bucket": "0%-10%",
+        "mean_predicted": 0.0423,
+        "n": 1156
+      },
+      {
+        "actual_rate": 0.1509,
+        "bucket": "10%-20%",
+        "mean_predicted": 0.1444,
+        "n": 338
+      },
+      {
+        "actual_rate": 0.2519,
+        "bucket": "20%-30%",
+        "mean_predicted": 0.2429,
+        "n": 135
+      },
+      {
+        "actual_rate": 0.2667,
+        "bucket": "30%-40%",
+        "mean_predicted": 0.3295,
+        "n": 30
+      },
+      {
+        "actual_rate": 1.0,
+        "bucket": "40%-50%",
+        "mean_predicted": 0.4248,
+        "n": 5
+      }
+    ],
+    "player_shots_on_target": [
+      {
+        "actual_rate": 0.03,
+        "bucket": "0%-10%",
+        "mean_predicted": 0.0231,
+        "n": 4137
+      },
+      {
+        "actual_rate": 0.1521,
+        "bucket": "10%-20%",
+        "mean_predicted": 0.1439,
+        "n": 960
+      },
+      {
+        "actual_rate": 0.243,
+        "bucket": "20%-30%",
+        "mean_predicted": 0.2427,
+        "n": 395
+      },
+      {
+        "actual_rate": 0.3614,
+        "bucket": "30%-40%",
+        "mean_predicted": 0.3466,
+        "n": 202
+      },
+      {
+        "actual_rate": 0.4929,
+        "bucket": "40%-50%",
+        "mean_predicted": 0.4441,
+        "n": 140
+      },
+      {
+        "actual_rate": 0.4776,
+        "bucket": "50%-60%",
+        "mean_predicted": 0.5434,
+        "n": 67
+      },
+      {
+        "actual_rate": 0.8,
+        "bucket": "60%-70%",
+        "mean_predicted": 0.6374,
+        "n": 20
+      },
+      {
+        "actual_rate": 1.0,
+        "bucket": "70%-80%",
+        "mean_predicted": 0.7438,
+        "n": 4
+      }
+    ]
+  },
+  "calibration_correction": {
+    "fitted_on": 7254,
+    "intercept": -0.2383,
+    "slope": 0.9133
+  },
+  "calibration_raw": {
+    "all": [
+      {
+        "actual_rate": 0.0334,
+        "bucket": "0%-10%",
+        "mean_predicted": 0.0255,
+        "n": 5211
+      },
+      {
+        "actual_rate": 0.1331,
+        "bucket": "10%-20%",
+        "mean_predicted": 0.1441,
+        "n": 1202
+      },
+      {
+        "actual_rate": 0.2272,
+        "bucket": "20%-30%",
+        "mean_predicted": 0.2427,
+        "n": 581
+      },
+      {
+        "actual_rate": 0.3185,
+        "bucket": "30%-40%",
+        "mean_predicted": 0.3452,
+        "n": 270
+      },
+      {
+        "actual_rate": 0.4562,
+        "bucket": "40%-50%",
+        "mean_predicted": 0.4483,
+        "n": 160
+      },
+      {
+        "actual_rate": 0.4896,
+        "bucket": "50%-60%",
+        "mean_predicted": 0.5408,
+        "n": 96
+      },
+      {
+        "actual_rate": 0.5273,
+        "bucket": "60%-70%",
+        "mean_predicted": 0.6372,
+        "n": 55
+      },
+      {
+        "actual_rate": 0.9231,
+        "bucket": "70%-80%",
+        "mean_predicted": 0.7415,
+        "n": 13
       },
       {
         "actual_rate": 1.0,
@@ -564,34 +247,34 @@
     ],
     "player_goal_scorer_anytime": [
       {
-        "actual_rate": 0.0454,
+        "actual_rate": 0.0487,
         "bucket": "0%-10%",
-        "mean_predicted": 0.0398,
-        "n": 2179
+        "mean_predicted": 0.0403,
+        "n": 1129
       },
       {
-        "actual_rate": 0.1213,
+        "actual_rate": 0.1207,
         "bucket": "10%-20%",
-        "mean_predicted": 0.1449,
-        "n": 668
+        "mean_predicted": 0.1446,
+        "n": 323
       },
       {
-        "actual_rate": 0.2234,
+        "actual_rate": 0.227,
         "bucket": "20%-30%",
-        "mean_predicted": 0.2429,
-        "n": 291
+        "mean_predicted": 0.2426,
+        "n": 141
       },
       {
-        "actual_rate": 0.265,
+        "actual_rate": 0.339,
         "bucket": "30%-40%",
-        "mean_predicted": 0.3346,
-        "n": 117
+        "mean_predicted": 0.3333,
+        "n": 59
       },
       {
-        "actual_rate": 0.4615,
+        "actual_rate": 0.6364,
         "bucket": "40%-50%",
-        "mean_predicted": 0.4369,
-        "n": 26
+        "mean_predicted": 0.4388,
+        "n": 11
       },
       {
         "actual_rate": 1.0,
@@ -602,52 +285,52 @@
     ],
     "player_shots_on_target": [
       {
-        "actual_rate": 0.0256,
+        "actual_rate": 0.0292,
         "bucket": "0%-10%",
-        "mean_predicted": 0.0222,
-        "n": 7846
+        "mean_predicted": 0.0214,
+        "n": 4082
       },
       {
-        "actual_rate": 0.1451,
+        "actual_rate": 0.1377,
         "bucket": "10%-20%",
-        "mean_predicted": 0.1454,
-        "n": 1806
+        "mean_predicted": 0.1439,
+        "n": 879
       },
       {
-        "actual_rate": 0.2125,
+        "actual_rate": 0.2273,
         "bucket": "20%-30%",
-        "mean_predicted": 0.2438,
-        "n": 833
+        "mean_predicted": 0.2427,
+        "n": 440
       },
       {
-        "actual_rate": 0.3224,
+        "actual_rate": 0.3128,
         "bucket": "30%-40%",
-        "mean_predicted": 0.347,
-        "n": 428
+        "mean_predicted": 0.3486,
+        "n": 211
       },
       {
-        "actual_rate": 0.4367,
+        "actual_rate": 0.443,
         "bucket": "40%-50%",
-        "mean_predicted": 0.4483,
-        "n": 316
+        "mean_predicted": 0.449,
+        "n": 149
       },
       {
-        "actual_rate": 0.5052,
+        "actual_rate": 0.4842,
         "bucket": "50%-60%",
-        "mean_predicted": 0.5415,
-        "n": 192
+        "mean_predicted": 0.5411,
+        "n": 95
       },
       {
-        "actual_rate": 0.5088,
+        "actual_rate": 0.5273,
         "bucket": "60%-70%",
-        "mean_predicted": 0.6406,
-        "n": 114
+        "mean_predicted": 0.6372,
+        "n": 55
       },
       {
-        "actual_rate": 0.8,
+        "actual_rate": 0.9231,
         "bucket": "70%-80%",
-        "mean_predicted": 0.74,
-        "n": 25
+        "mean_predicted": 0.7415,
+        "n": 13
       },
       {
         "actual_rate": 1.0,
@@ -657,6 +340,7 @@
       }
     ]
   },
+  "calibration_split": "2026-04-01",
   "caveats": [
     "Prices are one-sided (Over/Yes only); implied probabilities are un-devigged and overstate truth, so edges here are understated.",
     "Shots on target settle on the Understat definition (Goal or SavedShot), close to but not identical to Opta counts.",
@@ -666,26 +350,26 @@
   "no_model_opinion": 1321,
   "per_market": {
     "player_goal_scorer_anytime": {
-      "bets": 16,
-      "flat_profit_units": 13.6,
-      "hit_rate": 0.4,
-      "roi": 0.9067,
-      "settled": 15,
-      "voids": 1,
-      "wins": 6
+      "bets": 3,
+      "flat_profit_units": -3.0,
+      "hit_rate": 0.0,
+      "roi": -1.0,
+      "settled": 3,
+      "voids": 0,
+      "wins": 0
     },
     "player_shots_on_target": {
-      "bets": 26,
-      "flat_profit_units": 2.48,
-      "hit_rate": 0.3636,
-      "roi": 0.1127,
-      "settled": 22,
-      "voids": 4,
-      "wins": 8
+      "bets": 1,
+      "flat_profit_units": 4.0,
+      "hit_rate": 1.0,
+      "roi": 4.0,
+      "settled": 1,
+      "voids": 0,
+      "wins": 1
     }
   },
   "priced_outcomes": 19939,
-  "settled_calibration_samples": 14843,
+  "settled_calibration_samples": 7589,
   "unmatched_players": [
     "Abdukodir Khusanov",
     "Adam Aznou",

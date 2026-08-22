@@ -33,11 +33,14 @@ name: Matchday Refresh
 # Each run lands before that day's earliest kick-off and stays fresh through its
 # latest, allowing for the UK being UTC+1 in summer:
 #
-#   Thursday  13:00 UTC  planning card; no matches
-#   Friday    13:00 UTC  ~6h before a 20:00 UK kick-off
+#   Thursday  11:30 UTC  planning card; no matches
+#   Friday    11:30 UTC  ~7.5h before a 20:00 UK kick-off
 #   Saturday  09:00 UTC  ~2.5h before a 12:30 UK kick-off, fresh until 21:00
 #   Sunday    09:00 UTC  covers the afternoon slate
-#   Monday    13:00 UTC  ~6h before a 20:00 UK kick-off
+#   Monday    11:30 UTC  ~7.5h before a 20:00 UK kick-off
+#
+# Weekday primaries sit at 11:30 UTC so every day's card email is in the
+# inbox before a 09:00 New York read, even with GitHub's cron delay.
 #
 # COST: measured, not estimated. A run is about 15 credits plus 10 for each
 # extra per-event market. Every run prints the quota remaining and how many
@@ -66,16 +69,20 @@ on:
     # which is 14:00 UTC in summer — so a backup ninety minutes late would be
     # blocked by policy every single Thursday, and would look like a provider
     # fault rather than a scheduling one.
+    # Friday and Monday mirror Thursday's times so every day's card is in
+    # the inbox before Cooper's 09:00 New York read. Their kick-offs are in
+    # the evening, so nothing pins them later; the weekend stays early
+    # because its 12:30 UK lunch kick-off does.
     - cron: "30 11 * * 4"
     - cron: "0 13 * * 4"
+    - cron: "30 11 * * 5"
     - cron: "0 13 * * 5"
-    - cron: "30 14 * * 5"
     - cron: "0 9 * * 6"
     - cron: "30 10 * * 6"
     - cron: "0 9 * * 0"
     - cron: "30 10 * * 0"
+    - cron: "30 11 * * 1"
     - cron: "0 13 * * 1"
-    - cron: "30 14 * * 1"
   workflow_dispatch:
     inputs:
       skip_provider_fetch:

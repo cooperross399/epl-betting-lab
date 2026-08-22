@@ -115,6 +115,10 @@ def test_valid_review_approval_verifies(tmp_path: Path) -> None:
         "corners_total_9_5",
         "double_chance",
         "draw_no_bet",
+        "player_assists",
+        "player_goal_scorer_anytime",
+        "player_shots",
+        "player_shots_on_target",
         "total_2_5",
     ]
     assert approval["source_kind"] == "review"

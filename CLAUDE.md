@@ -83,6 +83,17 @@ Use the repo, the reports, and GitHub.
   points, and cannot be profit-backtested because no historical BTTS prices
   exist. It produces most of the picks on a card. Say so rather than patching
   it.
+- **Player props are built and measured, not enabled.** The provider prices
+  eight prop markets live and retains them historically (probed 2026-08-22);
+  the pipeline has a player-data source (Understat match logs), a per-player
+  Poisson model, and a walk-forward measurement
+  (`data/outputs/player_props_backtest.md`). First read on 114 fixtures:
+  broadly calibrated, consistently 2–3 points overconfident mid-range, and
+  clearly overconfident in its 60–70% bucket (64% predicted, 51% happened).
+  No edge is demonstrated and none can be at this size. Props reach the card
+  only through a calibration-corrected model, a held-out re-measurement, the
+  player/line-aware card schema (not yet built), and a reviewed policy
+  approval — in that order.
 - The active odds source is the **provider-derived automated card input**.
   Manual odds entry is not required.
 - `data/manual/current_odds.csv` is **legacy** and must not become active again.

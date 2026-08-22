@@ -118,9 +118,32 @@ def _team_key(name: str) -> str:
     return TEAM_ALIASES.get(str(name).strip().casefold(), "")
 
 
+#: Letters NFKD cannot reduce because they are not base-plus-combining forms.
+#: Without these, "Nørgaard" never equals "Norgaard" however the accents are
+#: stripped.
+_LETTER_FALLBACKS = str.maketrans(
+    {
+        "ø": "o",
+        "Ø": "O",
+        "æ": "ae",
+        "Æ": "AE",
+        "ð": "d",
+        "Ð": "D",
+        "þ": "th",
+        "Þ": "Th",
+        "ł": "l",
+        "Ł": "L",
+        "ß": "ss",
+        "đ": "d",
+        "Đ": "D",
+    }
+)
+
+
 def _player_key(name: str) -> str:
     """Accent- and punctuation-insensitive identity for a player name."""
-    text = unicodedata.normalize("NFKD", str(name))
+    text = str(name).translate(_LETTER_FALLBACKS)
+    text = unicodedata.normalize("NFKD", text)
     text = "".join(c for c in text if not unicodedata.combining(c))
     text = text.casefold().replace("-", " ").replace(".", " ").replace("'", "")
     return " ".join(text.split())
@@ -199,9 +222,39 @@ def build_player_props_backtest(
     logs["team_key"] = logs["team"].map(_team_key)
     logs["player_key"] = logs["player"].map(_player_key)
 
+    # Books spell players their own way — extra surnames ("Carlos Baleba Noom
+    # Quomah"), or the surname alone ("Casemiro"). When the exact key misses,
+    # a name whose tokens contain or are contained by exactly one squad
+    # player's tokens is that player; any ambiguity stays unmatched.
+    squad_tokens: dict[str, list[tuple[str, frozenset[str]]]] = {}
+    for (team_key_value, player_key_value), _rows in logs.groupby(
+        ["team_key", "player_key"]
+    ):
+        squad_tokens.setdefault(str(team_key_value), []).append(
+            (str(player_key_value), frozenset(str(player_key_value).split()))
+        )
+
+    def _resolve_player_key(
+        book_key: str, home_key: str, away_key: str
+    ) -> str | None:
+        tokens = frozenset(book_key.split())
+        candidates: set[str] = set()
+        for team in (home_key, away_key):
+            for player_key_value, player_tokens in squad_tokens.get(team, []):
+                if player_key_value == book_key:
+                    return player_key_value
+                if player_tokens and (
+                    player_tokens <= tokens or tokens <= player_tokens
+                ):
+                    candidates.add(player_key_value)
+        if len(candidates) == 1:
+            return next(iter(candidates))
+        return None
+
     unmatched_teams: set[str] = set()
     unmatched_players: set[str] = set()
     bets: list[PropBet] = []
+    calibration_samples: list[tuple[str, float, bool]] = []
     priced = 0
     no_opinion = 0
 
@@ -224,11 +277,17 @@ def build_player_props_backtest(
         if not home_key or not away_key:
             unmatched_teams.add(f"{row['home_team']} v {row['away_team']}")
             continue
-        player_key = _player_key(row["player"])
+        resolved = _resolve_player_key(
+            _player_key(row["player"]), home_key, away_key
+        )
+        if resolved is None:
+            unmatched_players.add(str(row["player"]))
+            continue
+        player_key = resolved
         date = row["date"]
 
         # The player's appearance in this fixture, if any: identity is the
-        # date plus either team plus the normalised name.
+        # date plus either team plus the resolved name.
         appearance = logs[
             (logs["date"] == date)
             & (logs["team_key"].isin({home_key, away_key}))
@@ -282,6 +341,17 @@ def build_player_props_backtest(
         american = float(row["american"])
         implied = _implied_probability(american)
         edge = probability - implied
+
+        # Every priced outcome that settled calibrates the model, bet or not.
+        # Forty bets prove nothing; seventeen thousand probability-outcome
+        # pairs are where this sample actually has power.
+        if not appearance.empty:
+            actual_count = float(appearance[stat].iloc[0])
+            line = point if point is not None else 0.5
+            calibration_samples.append(
+                (market, probability, actual_count > line)
+            )
+
         if edge < edge_threshold:
             continue
 
@@ -324,12 +394,48 @@ def build_player_props_backtest(
             "roi": round(profit / len(settled), 4) if settled else None,
         }
 
+    calibration: dict[str, list[dict[str, object]]] = {}
+    markets_present = sorted({m for m, _, _ in calibration_samples})
+    for market_name in ["all", *markets_present]:
+        samples = [
+            (p, won)
+            for m, p, won in calibration_samples
+            if market_name == "all" or m == market_name
+        ]
+        buckets = []
+        for lower in (i / 10 for i in range(10)):
+            upper = lower + 0.1
+            inside = [
+                (p, won) for p, won in samples if lower <= p < upper
+            ] or (
+                [(p, won) for p, won in samples if p >= 0.9999]
+                if upper >= 1.0
+                else []
+            )
+            if not inside:
+                continue
+            buckets.append(
+                {
+                    "bucket": f"{lower:.0%}-{upper:.0%}",
+                    "n": len(inside),
+                    "mean_predicted": round(
+                        sum(p for p, _ in inside) / len(inside), 4
+                    ),
+                    "actual_rate": round(
+                        sum(1 for _, won in inside if won) / len(inside), 4
+                    ),
+                }
+            )
+        calibration[market_name] = buckets
+
     return {
         "priced_outcomes": priced,
         "no_model_opinion": no_opinion,
+        "settled_calibration_samples": len(calibration_samples),
         "edge_threshold": edge_threshold,
         "bets": [b.__dict__ for b in bets],
         "per_market": per_market,
+        "calibration": calibration,
         "unmatched_teams": sorted(unmatched_teams),
         "unmatched_players": sorted(unmatched_players),
         "caveats": [
@@ -385,6 +491,27 @@ def save_player_props_backtest(
             f"{stats['flat_profit_units']} | "
             f"{'' if roi is None else format(roi, '.1%')} |"
         )
+    lines += [
+        "",
+        "## Calibration",
+        "",
+        "Every priced outcome that settled, bet or not — this is where the "
+        f"sample has power ({summary['settled_calibration_samples']} "
+        "probability-outcome pairs).",
+    ]
+    for market_name, buckets in summary["calibration"].items():
+        lines += [
+            "",
+            f"### {market_name}",
+            "",
+            "| Predicted | n | Mean predicted | Actual rate |",
+            "|:----------|--:|---------------:|------------:|",
+        ]
+        for bucket in buckets:
+            lines.append(
+                f"| {bucket['bucket']} | {bucket['n']} | "
+                f"{bucket['mean_predicted']:.1%} | {bucket['actual_rate']:.1%} |"
+            )
     if summary["unmatched_teams"]:
         lines += ["", "## Unmatched fixtures", ""]
         lines += [f"- {item}" for item in summary["unmatched_teams"]]

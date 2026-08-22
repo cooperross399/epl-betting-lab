@@ -273,6 +273,46 @@ class TestIdentity:
         assert _player_key("Benjamin Šeško") == _player_key("Benjamin Sesko")
         assert _player_key("Heung-Min Son") == _player_key("Heung Min Son")
 
+    def test_player_keys_survive_letters_accents_cannot_explain(self) -> None:
+        """ø, æ and friends are whole letters, not base-plus-accent; NFKD
+        leaves them alone and \"Nørgaard\" never met \"Norgaard\"."""
+        assert _player_key("Christian Nørgaard") == _player_key(
+            "Christian Norgaard"
+        )
+        assert _player_key("Łukasz Fabiański") == _player_key(
+            "Lukasz Fabianski"
+        )
+
+    def test_a_books_longer_name_resolves_to_the_squad_player(
+        self, tmp_path: Path
+    ) -> None:
+        """Books append surnames Understat omits, or quote the surname
+        alone; either direction of containment resolves when exactly one
+        squad player fits."""
+        logs = _training_logs()
+        logs.append(
+            _log_row("Star Striker", "2026-05-09", "m1", shots_on_target=2)
+        )
+        summary = _build(
+            tmp_path,
+            [_odds_row(player="Star Striker Noom Quomah")],
+            logs,
+        )
+
+        assert len(summary["bets"]) == 1
+        assert summary["unmatched_players"] == []
+
+    def test_an_ambiguous_short_name_stays_unmatched(
+        self, tmp_path: Path
+    ) -> None:
+        logs = _training_logs()
+        logs.append(_log_row("Thiago Silva", "2026-01-11", "amb1"))
+        logs.append(_log_row("Bernardo Silva", "2026-01-11", "amb2"))
+        summary = _build(tmp_path, [_odds_row(player="Silva")], logs)
+
+        assert summary["bets"] == []
+        assert "Silva" in summary["unmatched_players"]
+
     def test_both_spellings_of_a_team_share_a_key(self) -> None:
         assert _team_key("Wolverhampton Wanderers") == _team_key("Wolves")
         assert _team_key("Nott'm Forest") == _team_key("Nottingham Forest")
@@ -282,6 +322,31 @@ class TestIdentity:
         assert _implied_probability(100) == pytest.approx(0.5)
         assert _implied_probability(300) == pytest.approx(0.25)
         assert _implied_probability(-150) == pytest.approx(0.6)
+
+
+class TestCalibration:
+    def test_every_settled_outcome_calibrates_bet_or_not(
+        self, tmp_path: Path
+    ) -> None:
+        """Forty bets prove nothing; the probability-outcome pairs are where
+        the sample has power, so even a no-edge outcome is counted."""
+        logs = _training_logs()
+        logs.append(
+            _log_row("Star Striker", "2026-05-09", "m1", shots_on_target=2)
+        )
+        # -2000 offers no edge, so no bet — but the outcome still settles.
+        summary = _build(tmp_path, [_odds_row(american=-2000)], logs)
+
+        assert summary["bets"] == []
+        assert summary["settled_calibration_samples"] == 1
+        buckets = summary["calibration"]["all"]
+        assert sum(b["n"] for b in buckets) == 1
+        assert summary["calibration"]["player_shots_on_target"]
+
+    def test_a_void_never_calibrates(self, tmp_path: Path) -> None:
+        summary = _build(tmp_path, [_odds_row()], _training_logs())
+
+        assert summary["settled_calibration_samples"] == 0
 
 
 class TestReports:

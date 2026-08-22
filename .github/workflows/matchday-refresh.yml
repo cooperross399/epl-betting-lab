@@ -265,6 +265,17 @@ jobs:
         run: |
           python scripts/refresh_all_reports.py
 
+      - name: Refresh the props card
+        # Self-gating: while the reviewed policy holds every prop market,
+        # this writes the Held-by-policy report and spends nothing. A props
+        # failure must never cost a match card, hence continue-on-error.
+        continue-on-error: true
+        env:
+          EPL_ODDS_API_KEY: ${{ secrets.EPL_ODDS_API_KEY }}
+          PYTHONPATH: src
+        run: |
+          python scripts/run_props_card_refresh.py
+
       - name: Write the card to the run summary
         if: always()
         env:

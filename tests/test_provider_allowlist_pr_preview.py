@@ -403,3 +403,38 @@ def test_missing_verification_writes_blocked_beginner_reports(tmp_path: Path) ->
     markdown = Path(result["markdown"]).read_text(encoding="utf-8")
     assert "Receipt verification report is missing" in markdown
     assert "nothing was applied" in markdown
+
+
+def test_staged_prop_evidence_joins_the_proposed_scope(tmp_path: Path) -> None:
+    """A props approval binds to the props card's staged-market evidence,
+    and the proposal carries the no-demonstrated-edge limitation for the
+    reviewer to weigh."""
+    outputs, policy_path, verification_path = _prepare_verified_evidence(
+        tmp_path
+    )
+    _write_json(
+        outputs / "automated_card_input.json",
+        {"eligibility": {"eligible_markets": ["1x2", "btts"]}},
+    )
+    _write_json(
+        outputs / "player_props_card.json",
+        {
+            "markets_with_staged_prices": [
+                "player_shots_on_target",
+                "player_goal_scorer_anytime",
+            ]
+        },
+    )
+
+    _, summary = _build(tmp_path, outputs, policy_path, verification_path)
+
+    entry = summary["proposed_provider_entry"]
+    assert entry["required_markets"] == [
+        "1x2",
+        "btts",
+        "player_shots_on_target",
+        "player_goal_scorer_anytime",
+    ]
+    assert any(
+        "no demonstrated edge" in item for item in entry["known_limitations"]
+    )

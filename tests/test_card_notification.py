@@ -673,3 +673,57 @@ class TestEveryRunSaysHowItStarted:
         )["body"]
 
         assert "started by hand" not in scheduled
+
+
+class TestPlayerPropsSection:
+    def test_prop_picks_join_the_message(self, tmp_path: Path) -> None:
+        _write(tmp_path, ready=True, comparison=_comparison(added=[{"label": "x"}]))
+        (tmp_path / "player_props_card.json").write_text(
+            json.dumps(
+                {
+                    "status": "Props card ready",
+                    "picks": [
+                        {
+                            "home_team": "Newcastle",
+                            "away_team": "Liverpool",
+                            "market": "player_shots_on_target",
+                            "player": "Alexander Isak",
+                            "selection": "Over@1.5",
+                            "american_odds": 120.0,
+                            "book": "FanDuel",
+                            "units": 0.1,
+                        }
+                    ],
+                }
+            ),
+            encoding="utf-8",
+        )
+        body = build_notification(output_dir=tmp_path, now=NOW)["body"]
+
+        assert "### Player props" in body
+        assert "Alexander Isak" in body
+        assert "Over@1.5" in body
+        assert "0.1u" in body
+        assert "no edge" in body
+
+    def test_no_props_file_means_no_section_and_no_signal(
+        self, tmp_path: Path
+    ) -> None:
+        """Held by policy or no qualifying pick both look the same: absent.
+        The section's absence must never read as a judgement."""
+        _write(tmp_path, ready=True, comparison=_comparison(added=[{"label": "x"}]))
+        body = build_notification(output_dir=tmp_path, now=NOW)["body"]
+
+        assert "Player props" not in body
+
+    def test_a_held_props_report_stays_out_of_the_message(
+        self, tmp_path: Path
+    ) -> None:
+        _write(tmp_path, ready=True, comparison=_comparison(added=[{"label": "x"}]))
+        (tmp_path / "player_props_card.json").write_text(
+            json.dumps({"status": "Held by policy", "picks": []}),
+            encoding="utf-8",
+        )
+        body = build_notification(output_dir=tmp_path, now=NOW)["body"]
+
+        assert "Player props" not in body

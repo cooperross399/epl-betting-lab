@@ -78,17 +78,21 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -u
-          previous=$(gh run list --workflow harvest-historical-btts.yml \
-            --status success --limit 1 --json databaseId \
-            --jq '.[0].databaseId // empty')
-          if [ -z "$previous" ]; then
-            echo "No previous harvest. Starting a new file."
-            exit 0
-          fi
           mkdir -p data/processed
-          gh run download "$previous" --name historical-btts --dir data/processed \
-            || echo "No prior file on run $previous."
-          wc -l data/processed/historical_market_odds.csv 2>/dev/null || true
+          # The newest run holding the file wins, whatever its conclusion:
+          # the artifact uploads even when a later step fails, and a failed
+          # run's purchases are still purchases. Restoring only from green
+          # runs once orphaned a harvest that crashed on its summary line,
+          # which would have re-bought every fixture it had just paid for.
+          for id in $(gh run list --workflow harvest-historical-btts.yml \
+            --limit 10 --json databaseId --jq '.[].databaseId'); do
+            if gh run download "$id" --name historical-btts --dir data/processed 2>/dev/null; then
+              echo "Restored the harvest file from run $id."
+              break
+            fi
+          done
+          wc -l data/processed/historical_market_odds.csv 2>/dev/null \
+            || echo "No previous harvest. Starting a new file."
 
       - name: Harvest
         env:

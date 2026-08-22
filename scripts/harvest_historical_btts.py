@@ -190,7 +190,7 @@ def main() -> int:
     print(f"Snapshots: {result.snapshots}")
     print(f"Fixtures seen: {result.events_seen}; priced: {result.events_with_btts}; "
           f"already had: {result.already_had}")
-    print(f"Rows written: {len(result.rows)} -> {path}")
+    print(f"Rows written: {len(result.rows)} -> {output_path}")
     print(f"Credits spent: {result.credits_spent}")
     if result.stopped_early:
         print("STOPPED EARLY: the credit ceiling was reached before the range ended.")

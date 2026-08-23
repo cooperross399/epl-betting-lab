@@ -258,8 +258,15 @@ Rules:
   say what, and point me at the Actions run linked in the email.
 
 A card is sent once a day while the schedule runs. If the newest message is
-from before today and today is a matchday (Thursday through Monday), say a run
-was probably missed rather than treating the old message as current.
+from before today and today is a matchday (Thursday through Monday), there
+are two possible causes and email alone cannot tell them apart: a run was
+missed, or GitHub stopped emailing while the pipeline stayed healthy — that
+second one really happened on 19 August, when four days of cards posted to
+issue #162 with zero emails delivered. Say both possibilities, and point me
+at the issue itself and the Actions page to settle it:
+https://github.com/cooperross399/epl-betting-lab/issues/162 and
+Actions -> Matchday Refresh. Never present the stale card's prices as
+current.
 ```
 
 ---
@@ -288,9 +295,11 @@ headings say how each run started; trust those and nothing else.
 Say which of these is true:
 - A message within the last four days and no non-manual failures: the schedule
   is running.
-- No messages at all for more than four days: a run was probably missed. Tell
-  Cooper to check Actions -> Matchday Refresh, and say the workflow may need
-  enabling.
+- No messages at all for more than four days: either a run was missed or
+  GitHub stopped emailing while the pipeline stayed healthy — the second
+  one really happened on 19 August. Say both, and tell Cooper to check the
+  issue itself and Actions -> Matchday Refresh rather than concluding from
+  the empty inbox: https://github.com/cooperross399/epl-betting-lab/issues/162
 - A non-manual failure: say which run, when, and what the error line says.
 - Only manual failures: say the schedule looks healthy and that someone was
   testing, and do not describe the pipeline as broken.

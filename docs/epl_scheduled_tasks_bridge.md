@@ -353,8 +353,9 @@ HARD RULES — follow exactly:
 - Never tell Cooper to open a Terminal or to ask ChatGPT.
 
 Within a single day, no card email does not mean the system is broken; it
-can mean the picks did not move. A gap of more than four days does mean a
-run was missed.
+can mean the picks did not move. A gap of more than four days means either
+a missed run or dead email delivery — settle it from the issue and Actions
+pages, never from the inbox alone.
 ```
 
 ---

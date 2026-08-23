@@ -214,6 +214,11 @@ Report two things separately, because they are often different messages:
   changed". A degraded run can arrive after the last good card, and the card is
   still the current advice.
 
+A message whose subject starts "EPL Card bridge copy" is a verbatim relay
+of the newest issue #162 comment, sent by a local bridge task because
+GitHub's notification email is broken: treat the comment it quotes exactly
+as you would a GitHub card email, using the posted timestamp it names.
+
 Read the first line of each before the tables. "Selections changed" means it is
 a card. "Something went wrong" means the run was degraded: say what broke
 first, then report whatever card was still built and note it may rest on stale

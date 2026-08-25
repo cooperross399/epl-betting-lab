@@ -321,6 +321,244 @@ def test_live_policy_listing_the_provider_clears_that_blocker(tmp_path: Path) ->
     )
 
 
+# --- kickoff guard ---------------------------------------------------------
+
+
+def _picks_csv(tmp_path: Path, rows: list[dict]) -> Path:
+    path = tmp_path / "thursday_best_bets.csv"
+    pd.DataFrame(rows).to_csv(path, index=False)
+    return path
+
+
+def _staging_fixtures(tmp_path: Path, rows: list[dict]) -> Path:
+    path = tmp_path / "upcoming_fixtures_staging.csv"
+    pd.DataFrame(
+        rows, columns=["date", "home_team", "away_team", "commence_time"]
+    ).to_csv(path, index=False)
+    return path
+
+
+def _pick_row(home: str, away: str, *, section: str = "Best bets") -> dict:
+    return {
+        "section": section,
+        "home_team": home,
+        "away_team": away,
+        "market": "1x2",
+        "selection": "home",
+        "status": "OK",
+        "confidence_tier": "A",
+        "calibrated_model_prob": 0.55,
+        "calibrated_edge": 0.05,
+        "raw_model_prob": 0.56,
+        "raw_edge": 0.06,
+        "fair_american": -122,
+        "american_odds": -110,
+        "suggested_units": 1.0,
+        "book": "BookA",
+        "notes": "",
+    }
+
+
+def _generated_card(
+    tmp_path: Path,
+    monkeypatch,
+    *,
+    picks: list[dict],
+    fixtures: list[dict],
+    now,
+) -> dict:
+    from epl_betting_lab.reports import automated_card
+
+    _ready_evidence(tmp_path, eligible=("1x2",))
+    card_input = tmp_path / "card_input.csv"
+    card_input.write_text("market,selection\n", encoding="utf-8")
+    picks_csv = _picks_csv(tmp_path, picks)
+    monkeypatch.setattr(
+        automated_card,
+        "run_thursday_best_bets_report",
+        lambda **_k: {"csv": str(picks_csv), "markdown": str(picks_csv)},
+    )
+    monkeypatch.setattr(
+        automated_card, "_provider_allowlisted_now", lambda *a, **k: True
+    )
+    return automated_card.build_automated_card(
+        output_dir=tmp_path,
+        card_input_path=card_input,
+        staging_fixtures_path=_staging_fixtures(tmp_path, fixtures),
+        now=now,
+    )
+
+
+def test_a_started_game_is_not_a_play(tmp_path: Path, monkeypatch) -> None:
+    """A pick whose kickoff has passed moves out of best bets entirely."""
+    from datetime import datetime, timezone
+
+    summary = _generated_card(
+        tmp_path,
+        monkeypatch,
+        picks=[_pick_row("Arsenal", "Chelsea"), _pick_row("Leeds", "Everton")],
+        fixtures=[
+            {
+                "date": "2026-08-23",
+                "home_team": "Arsenal",
+                "away_team": "Chelsea",
+                "commence_time": "2026-08-23T15:00:00Z",
+            },
+            {
+                "date": "2026-08-26",
+                "home_team": "Leeds",
+                "away_team": "Everton",
+                "commence_time": "2026-08-26T19:00:00Z",
+            },
+        ],
+        now=datetime(2026, 8, 25, 12, 0, tzinfo=timezone.utc),
+    )
+
+    assert summary["card_generated"] is True
+    assert [item["home_team"] for item in summary["best_bets"]] == ["Leeds"]
+    assert [item["home_team"] for item in summary["already_started"]] == ["Arsenal"]
+    started = summary["already_started"][0]
+    assert started["kickoff_status"] == "already started"
+    assert started["original_section"] == "Best bets"
+    assert started["kickoff_time"] == "2026-08-23T15:00:00+00:00"
+    # The stake follows the play out of the card.
+    assert [item["home_team"] for item in summary["unit_suggestions"]] == ["Leeds"]
+    guard = summary["kickoff_guard"]
+    assert guard["checked"] is True
+    assert guard["already_started_count"] == 1
+    assert guard["kickoff_unconfirmed_count"] == 0
+
+
+def test_an_unconfirmable_kickoff_is_not_a_play(tmp_path: Path, monkeypatch) -> None:
+    """No fixture row, no kickoff, no play — the safe side of ambiguity."""
+    from datetime import datetime, timezone
+
+    summary = _generated_card(
+        tmp_path,
+        monkeypatch,
+        picks=[_pick_row("Arsenal", "Chelsea")],
+        fixtures=[],
+        now=datetime(2026, 8, 25, 12, 0, tzinfo=timezone.utc),
+    )
+
+    assert summary["best_bets"] == []
+    assert summary["unit_suggestions"] == []
+    assert summary["already_started"][0]["kickoff_status"] == "kickoff unconfirmed"
+    assert summary["kickoff_guard"]["kickoff_unconfirmed_count"] == 1
+
+
+def test_conflicting_kickoff_times_read_as_unconfirmed(
+    tmp_path: Path, monkeypatch
+) -> None:
+    from datetime import datetime, timezone
+
+    summary = _generated_card(
+        tmp_path,
+        monkeypatch,
+        picks=[_pick_row("Arsenal", "Chelsea")],
+        fixtures=[
+            {
+                "date": "2026-08-26",
+                "home_team": "Arsenal",
+                "away_team": "Chelsea",
+                "commence_time": "2026-08-26T15:00:00Z",
+            },
+            {
+                "date": "2026-08-26",
+                "home_team": "Arsenal",
+                "away_team": "Chelsea",
+                "commence_time": "2026-08-26T19:00:00Z",
+            },
+        ],
+        now=datetime(2026, 8, 25, 12, 0, tzinfo=timezone.utc),
+    )
+
+    assert summary["best_bets"] == []
+    assert summary["already_started"][0]["kickoff_status"] == "kickoff unconfirmed"
+
+
+def test_a_future_kickoff_stays_a_play(tmp_path: Path, monkeypatch) -> None:
+    from datetime import datetime, timezone
+
+    summary = _generated_card(
+        tmp_path,
+        monkeypatch,
+        picks=[_pick_row("Arsenal", "Chelsea")],
+        fixtures=[
+            {
+                "date": "2026-08-26",
+                "home_team": "Arsenal",
+                "away_team": "Chelsea",
+                "commence_time": "2026-08-26T19:00:00Z",
+            }
+        ],
+        now=datetime(2026, 8, 25, 12, 0, tzinfo=timezone.utc),
+    )
+
+    assert [item["home_team"] for item in summary["best_bets"]] == ["Arsenal"]
+    assert summary["already_started"] == []
+
+
+def test_markdown_lists_started_games_outside_the_pick_sections(
+    tmp_path: Path, monkeypatch
+) -> None:
+    from datetime import datetime, timezone
+
+    from epl_betting_lab.reports.automated_card import render_automated_card
+
+    summary = _generated_card(
+        tmp_path,
+        monkeypatch,
+        picks=[_pick_row("Arsenal", "Chelsea")],
+        fixtures=[
+            {
+                "date": "2026-08-23",
+                "home_team": "Arsenal",
+                "away_team": "Chelsea",
+                "commence_time": "2026-08-23T15:00:00Z",
+            }
+        ],
+        now=datetime(2026, 8, 25, 12, 0, tzinfo=timezone.utc),
+    )
+    text = render_automated_card(summary)
+
+    assert "## Already started — no longer plays" in text
+    assert "already started" in text
+    # The started pick appears only in the quarantine table, not as a best bet.
+    best_bets_section = text.split("## Already started")[0]
+    assert "Arsenal" not in best_bets_section.split("## Best bets")[1]
+
+
+def test_bridge_carries_the_already_started_list(tmp_path: Path) -> None:
+    _bridge_evidence(tmp_path, card_generated=True)
+    _write(
+        tmp_path,
+        "automated_card.json",
+        {
+            "card_generated": True,
+            "best_bets": [],
+            "leans": [],
+            "passes_or_avoids": [],
+            "unit_suggestions": [],
+            "already_started": [
+                {
+                    "home_team": "Arsenal",
+                    "away_team": "Chelsea",
+                    "market": "1x2",
+                    "selection": "home",
+                    "kickoff_status": "already started",
+                }
+            ],
+        },
+    )
+
+    summary = build_epl_card_task(output_dir=tmp_path)
+
+    assert summary["best_bets"] == []
+    assert len(summary["already_started"]) == 1
+    assert "never be presented" in summary["already_started_note"]
+
+
 # --- book attribution ------------------------------------------------------
 
 

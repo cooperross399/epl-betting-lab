@@ -597,6 +597,7 @@ def build_epl_card_task(
     leans: list[dict[str, Any]] = []
     passes: list[dict[str, Any]] = []
     unit_suggestions: list[dict[str, Any]] = []
+    already_started: list[dict[str, Any]] = []
 
     # Selections are carried only when the gates pass AND a card was actually
     # generated. A blocked card yields empty lists, never placeholders.
@@ -605,6 +606,7 @@ def build_epl_card_task(
         leans = list(generated.get("leans", []) or [])
         passes = list(generated.get("passes_or_avoids", []) or [])
         unit_suggestions = list(generated.get("unit_suggestions", []) or [])
+        already_started = list(generated.get("already_started", []) or [])
 
     if card_ready:
         next_action = (
@@ -636,6 +638,13 @@ def build_epl_card_task(
         "leans": leans,
         "passes_or_avoids": passes,
         "unit_suggestions": unit_suggestions,
+        "already_started": already_started,
+        "already_started_note": (
+            "Selections listed under already_started have games that kicked "
+            "off before the card was generated, or kickoffs that could not be "
+            "confirmed. They are not plays and must never be presented as "
+            "best bets, leans, or stakes."
+        ),
         "market_eligibility": eligibility,
         "market_investigation": investigation,
         "card_scope": (
@@ -739,6 +748,10 @@ def render_epl_card_task(summary: Mapping[str, Any]) -> str:
                 f"- Leans: {len(summary['leans'])}",
                 f"- Passes/avoids: {len(summary['passes_or_avoids'])}",
                 f"- Unit suggestions: {len(summary['unit_suggestions'])}",
+                (
+                    "- Already started / kickoff unconfirmed: "
+                    f"{len(summary.get('already_started') or [])} (not plays)"
+                ),
                 "",
             ]
         )

@@ -19,6 +19,14 @@ Two rules shape everything here:
 The card refuses to generate at all unless the provider is trusted and the
 eligibility gate passes, so a blocked state yields no selections rather than
 placeholder ones.
+
+A third rule joined the first two once a stale card surfaced picks for games
+that had already been played:
+
+* **A game that has kicked off is not a play.** Every selection is checked
+  against the provider's fixture kickoff times, and one whose game has started
+  — or whose kickoff cannot be confirmed — is quarantined into its own section
+  rather than presented as a best bet, lean, pass, or stake.
 """
 
 from __future__ import annotations
@@ -53,6 +61,18 @@ CARD_MARKDOWN_FILENAME = "automated_card.md"
 BEST_BETS_SECTION = "Best bets"
 LEANS_SECTION = "Leans"
 PASSES_SECTION = "Passes / notable avoids"
+
+STAGING_FIXTURES_FILENAME = "upcoming_fixtures_staging.csv"
+
+ALREADY_STARTED_STATUS = "already started"
+KICKOFF_UNCONFIRMED_STATUS = "kickoff unconfirmed"
+
+KICKOFF_GUARD_NOTE = (
+    "A game that has kicked off is no longer a play. Selections whose kickoff "
+    "is at or before generation time, or whose kickoff could not be confirmed "
+    "from the provider fixture staging, are listed under 'Already started' and "
+    "are never presented as best bets, leans, passes, or stakes."
+)
 
 #: Columns carried into the routine-facing payload.
 PICK_FIELDS = (
@@ -109,6 +129,83 @@ def _rows(frame: pd.DataFrame, section: str) -> list[dict[str, Any]]:
             record[field] = value
         records.append(record)
     return records
+
+
+def _load_kickoffs(path: Path) -> dict[tuple[str, str], pd.Timestamp]:
+    """Map (home, away) -> kickoff time from the provider fixture staging.
+
+    A fixture pair listed with conflicting or unparseable kickoff times cannot
+    confirm that its game has not started, so the pair is dropped and its
+    picks fall to "kickoff unconfirmed" — the safe side of ambiguity.
+    """
+    if not path.is_file():
+        return {}
+    try:
+        frame = pd.read_csv(path, dtype=str).fillna("")
+    except (OSError, UnicodeError, pd.errors.EmptyDataError, pd.errors.ParserError):
+        return {}
+    if not {"home_team", "away_team", "commence_time"}.issubset(frame.columns):
+        return {}
+    kickoffs: dict[tuple[str, str], pd.Timestamp] = {}
+    ambiguous: set[tuple[str, str]] = set()
+    for _, row in frame.iterrows():
+        key = (
+            _clean(row.get("home_team")).casefold(),
+            _clean(row.get("away_team")).casefold(),
+        )
+        parsed = pd.to_datetime(
+            _clean(row.get("commence_time")), errors="coerce", utc=True
+        )
+        if pd.isna(parsed):
+            ambiguous.add(key)
+            continue
+        seen = kickoffs.get(key)
+        if seen is not None and seen != parsed:
+            ambiguous.add(key)
+            continue
+        kickoffs[key] = parsed
+    for key in ambiguous:
+        kickoffs.pop(key, None)
+    return kickoffs
+
+
+def _split_started(
+    rows: Sequence[Mapping[str, Any]],
+    *,
+    section: str,
+    kickoffs: Mapping[tuple[str, str], pd.Timestamp],
+    now: pd.Timestamp,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Return (playable, quarantined) for one card section."""
+    playable: list[dict[str, Any]] = []
+    quarantined: list[dict[str, Any]] = []
+    for row in rows:
+        key = (
+            _clean(row.get("home_team")).casefold(),
+            _clean(row.get("away_team")).casefold(),
+        )
+        kickoff = kickoffs.get(key)
+        if kickoff is None:
+            quarantined.append(
+                {
+                    **row,
+                    "original_section": section,
+                    "kickoff_status": KICKOFF_UNCONFIRMED_STATUS,
+                    "kickoff_time": None,
+                }
+            )
+        elif kickoff <= now:
+            quarantined.append(
+                {
+                    **row,
+                    "original_section": section,
+                    "kickoff_status": ALREADY_STARTED_STATUS,
+                    "kickoff_time": kickoff.isoformat(),
+                }
+            )
+        else:
+            playable.append(dict(row))
+    return playable, quarantined
 
 
 def _unit_suggestions(best_bets: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
@@ -182,6 +279,7 @@ def build_automated_card(
     provider_name: str = "the_odds_api",
     matches_path: Path | None = None,
     fixtures_path: Path | None = None,
+    staging_fixtures_path: Path | None = None,
     now: datetime | None = None,
 ) -> dict[str, Any]:
     """Generate the card from eligible markets, or explain why it cannot."""
@@ -190,6 +288,11 @@ def build_automated_card(
         STAGING_DIR / CARD_INPUT_FILENAME
         if card_input_path is None
         else Path(card_input_path)
+    )
+    staging_fixtures = (
+        STAGING_DIR / STAGING_FIXTURES_FILENAME
+        if staging_fixtures_path is None
+        else Path(staging_fixtures_path)
     )
     generated_at = now or datetime.now(timezone.utc)
 
@@ -273,6 +376,7 @@ def build_automated_card(
         "best_bets": [],
         "leans": [],
         "passes_or_avoids": [],
+        "already_started": [],
         "unit_suggestions": [],
         "validation_warnings": [],
         "blockers": blockers,
@@ -283,6 +387,14 @@ def build_automated_card(
             "reviewed policy allowlist. They are never presented as passes, "
             "avoids, or no-value calls, and no price was invented for them."
         ),
+        "kickoff_guard": {
+            "checked": False,
+            "checked_at": generated_at.isoformat(timespec="seconds"),
+            "fixtures_with_confirmed_kickoff": 0,
+            "already_started_count": 0,
+            "kickoff_unconfirmed_count": 0,
+            "note": KICKOFF_GUARD_NOTE,
+        },
         "safety": {
             "odds_fabricated": False,
             "protected_files_written": False,
@@ -353,13 +465,60 @@ def build_automated_card(
     else:
         leaked = []
 
-    best_bets = _rows(report, BEST_BETS_SECTION)
+    # A game that has kicked off — or whose kickoff cannot be confirmed — is
+    # not a play. Quarantine such selections out of every section before
+    # anything downstream (units, the routine bridge, the emails) sees them.
+    kickoffs = _load_kickoffs(staging_fixtures)
+    guard_now = pd.Timestamp(generated_at)
+    if guard_now.tzinfo is None:
+        guard_now = guard_now.tz_localize(timezone.utc)
+    already_started: list[dict[str, Any]] = []
+    best_bets, quarantined = _split_started(
+        _rows(report, BEST_BETS_SECTION),
+        section=BEST_BETS_SECTION,
+        kickoffs=kickoffs,
+        now=guard_now,
+    )
+    already_started.extend(quarantined)
+    leans, quarantined = _split_started(
+        _rows(report, LEANS_SECTION),
+        section=LEANS_SECTION,
+        kickoffs=kickoffs,
+        now=guard_now,
+    )
+    already_started.extend(quarantined)
+    passes, quarantined = _split_started(
+        _rows(report, PASSES_SECTION),
+        section=PASSES_SECTION,
+        kickoffs=kickoffs,
+        now=guard_now,
+    )
+    already_started.extend(quarantined)
+
+    summary["kickoff_guard"].update(
+        {
+            "checked": True,
+            "fixtures_with_confirmed_kickoff": len(kickoffs),
+            "already_started_count": sum(
+                1
+                for item in already_started
+                if item["kickoff_status"] == ALREADY_STARTED_STATUS
+            ),
+            "kickoff_unconfirmed_count": sum(
+                1
+                for item in already_started
+                if item["kickoff_status"] == KICKOFF_UNCONFIRMED_STATUS
+            ),
+        }
+    )
+
     summary.update(
         {
             "card_generated": True,
             "best_bets": best_bets,
-            "leans": _rows(report, LEANS_SECTION),
-            "passes_or_avoids": _rows(report, PASSES_SECTION),
+            "leans": leans,
+            "passes_or_avoids": passes,
+            "already_started": already_started,
             "unit_suggestions": _unit_suggestions(best_bets),
             "markets_filtered_out": leaked,
             "card_report_csv": str(paths["csv"]),
@@ -443,6 +602,34 @@ def render_automated_card(summary: Mapping[str, Any]) -> str:
         lines.extend(_table(summary["leans"], "leans"))
         lines.extend(["## Passes / notable avoids", ""])
         lines.extend(_table(summary["passes_or_avoids"], "passes"))
+        lines.extend(["## Already started — no longer plays", ""])
+        already_started = summary.get("already_started") or []
+        guard = summary.get("kickoff_guard") or {}
+        lines.extend([str(guard.get("note", KICKOFF_GUARD_NOTE)), ""])
+        if already_started:
+            lines.extend(
+                [
+                    "| Match | Market | Selection | Was | Kickoff (UTC) | Why removed |",
+                    "|:------|:-------|:----------|:----|:--------------|:------------|",
+                    *[
+                        f"| {_clean(item.get('home_team'))} v {_clean(item.get('away_team'))} "
+                        f"| `{_clean(item.get('market'))}` | {_clean(item.get('selection'))} "
+                        f"| {_clean(item.get('original_section'))} "
+                        f"| {_clean(item.get('kickoff_time')) or '-'} "
+                        f"| {_clean(item.get('kickoff_status'))} |"
+                        for item in already_started
+                    ],
+                    "",
+                ]
+            )
+        else:
+            lines.extend(
+                [
+                    "_None. Every selection's game kicks off after this card "
+                    "was generated._",
+                    "",
+                ]
+            )
         lines.extend(["## Unit suggestions", ""])
         if summary["unit_suggestions"]:
             lines.extend(
@@ -501,6 +688,7 @@ def save_automated_card(
     provider_name: str = "the_odds_api",
     matches_path: Path | None = None,
     fixtures_path: Path | None = None,
+    staging_fixtures_path: Path | None = None,
     now: datetime | None = None,
 ) -> dict[str, Any]:
     outputs = OUTPUTS_DIR if output_dir is None else Path(output_dir)
@@ -511,6 +699,7 @@ def save_automated_card(
         provider_name=provider_name,
         matches_path=matches_path,
         fixtures_path=fixtures_path,
+        staging_fixtures_path=staging_fixtures_path,
         now=now,
     )
     outputs.mkdir(parents=True, exist_ok=True)

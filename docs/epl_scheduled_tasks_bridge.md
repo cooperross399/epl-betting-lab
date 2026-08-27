@@ -214,11 +214,6 @@ Report two things separately, because they are often different messages:
   changed". A degraded run can arrive after the last good card, and the card is
   still the current advice.
 
-A message whose subject starts "EPL Card bridge copy" is a verbatim relay
-of the newest issue #162 comment, sent by a local bridge task because
-GitHub's notification email is broken: treat the comment it quotes exactly
-as you would a GitHub card email, using the posted timestamp it names.
-
 Read the first line of each before the tables. "Selections changed" means it is
 a card. "Something went wrong" means the run was degraded: say what broke
 first, then report whatever card was still built and note it may rest on stale
@@ -263,15 +258,22 @@ Rules:
   say what, and point me at the Actions run linked in the email.
 
 A card is sent once a day while the schedule runs. If the newest message is
-from before today and today is a matchday (Thursday through Monday), there
-are two possible causes and email alone cannot tell them apart: a run was
-missed, or GitHub stopped emailing while the pipeline stayed healthy — that
-second one really happened on 19 August, when four days of cards posted to
-issue #162 with zero emails delivered. Say both possibilities, and point me
-at the issue itself and the Actions page to settle it:
+from before today and today is a matchday (Thursday through Monday), the
+likely cause is a missed run. Point me at the issue itself and the Actions
+page to settle it:
 https://github.com/cooperross399/epl-betting-lab/issues/162 and
 Actions -> Matchday Refresh. Never present the stale card's prices as
 current.
+
+Do not attribute a gap to GitHub having stopped emailing. That was believed
+once, from 19 to 27 August 2026, and it was false. A Gmail search returns
+only a SUBSET of the messages in a thread, and issue #162's notifications
+are one long-running thread: a search showed five messages ending 19 August
+and that was read as an outage. Opening the thread in full listed
+twenty-seven, running through 24 August, each arriving about twenty seconds
+after its comment was posted. Delivery had never failed. Before ever
+claiming mail stopped, open the notification thread itself — absence in a
+search result is not absence in the mailbox.
 ```
 
 ---
@@ -300,11 +302,13 @@ headings say how each run started; trust those and nothing else.
 Say which of these is true:
 - A message within the last four days and no non-manual failures: the schedule
   is running.
-- No messages at all for more than four days: either a run was missed or
-  GitHub stopped emailing while the pipeline stayed healthy — the second
-  one really happened on 19 August. Say both, and tell Cooper to check the
-  issue itself and Actions -> Matchday Refresh rather than concluding from
-  the empty inbox: https://github.com/cooperross399/epl-betting-lab/issues/162
+- No messages at all for more than four days: a run was probably missed.
+  Tell Cooper to check the issue itself and Actions -> Matchday Refresh
+  rather than concluding from the inbox:
+  https://github.com/cooperross399/epl-betting-lab/issues/162 . Do not blame
+  email delivery without first opening the issue #162 notification thread in
+  full — a Gmail search shows only part of a thread, and in August 2026 that
+  artifact was mistaken for an eight-day email outage that never happened.
 - A non-manual failure: say which run, when, and what the error line says.
 - Only manual failures: say the schedule looks healthy and that someone was
   testing, and do not describe the pipeline as broken.
@@ -358,9 +362,9 @@ HARD RULES — follow exactly:
 - Never tell Cooper to open a Terminal or to ask ChatGPT.
 
 Within a single day, no card email does not mean the system is broken; it
-can mean the picks did not move. A gap of more than four days means either
-a missed run or dead email delivery — settle it from the issue and Actions
-pages, never from the inbox alone.
+can mean the picks did not move. A gap of more than four days most likely
+means a missed run — settle it from the issue and Actions pages, never from
+the inbox alone.
 ```
 
 ---

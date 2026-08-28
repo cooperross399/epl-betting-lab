@@ -73,6 +73,32 @@ def test_the_weekend_runs_land_before_the_earliest_kick_off() -> None:
         assert at <= 11.0, f"{hour}:{minute} UTC is too late for a 12:30 UK kick-off"
 
 
+#: The relay that carries the card to Cooper runs at 07:30 New York (11:30
+#: UTC in summer) so he can read it at 08:00. Every trigger has to land in
+#: front of it.
+RELAY_UTC = 11.5
+
+
+def test_every_trigger_lands_before_the_relay_reads_it() -> None:
+    """A card built after the read is a card he sees the following day.
+
+    Friday and Monday used to fire at 11:30 and 13:00 UTC, which was early
+    enough for their own evening kick-offs and too late for a reader who opens
+    the card at 08:00 New York. Kick-off is not the only deadline a schedule
+    has.
+    """
+    late = []
+    for line in _workflow().splitlines():
+        if "- cron:" not in line:
+            continue
+        minute, hour = line.split('"')[1].split()[:2]
+        at = int(hour) + int(minute) / 60
+        if at >= RELAY_UTC:
+            late.append(f"{hour}:{minute} UTC")
+
+    assert not late, f"triggers fire at or after the relay: {late}"
+
+
 def test_every_matchday_has_a_backup_trigger() -> None:
     """GitHub drops scheduled events under load, and dropped one the day this
     was written: 13:00 Thursday produced no run at all. A trigger that usually

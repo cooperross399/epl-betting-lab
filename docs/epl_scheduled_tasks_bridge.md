@@ -205,6 +205,24 @@ Two files, rewritten by every run:
   latest_status.json     — date, degraded, trigger, run_url
   latest_card_comment.md — the rendered card
 
+The repository is PRIVATE. Reading it needs a credential, so use whichever of
+these this session actually has, in order, and do not spend long on the others
+once one works:
+
+  1. the `gh` CLI, if it is installed and authenticated:
+       gh api "repos/cooperross399/epl-betting-lab/contents/latest_status.json?ref=card-feed" --jq .content | base64 -d
+       gh api "repos/cooperross399/epl-betting-lab/contents/latest_card_comment.md?ref=card-feed" --jq .content | base64 -d
+  2. a GitHub connector, if one is attached to this task
+  3. the repository itself, if it is attached to this task as a source — read
+     the two files on the `card-feed` branch
+
+Plain web fetch will NOT work and neither will an unauthenticated clone: a
+private repo answers both with 404 or a credential prompt. If none of the three
+above is available, say exactly that — the card could not be READ — and do not
+describe it as a card that is missing, blocked, or late. A read failure here is
+evidence about this task's access and nothing whatever about the pipeline. Say
+that the fix is to give this task access to the repository, and stop.
+
 Do not search email. Delivery moved off email on 28 August 2026; the issue
 comment still exists as the record but notifies nobody, so an empty inbox
 means nothing at all.
@@ -257,10 +275,14 @@ Rules:
 - Never tell me to open a Terminal or to ask ChatGPT. If something looks wrong,
   say what, and point me at the `run_url`.
 
-FINISH by sending a PushNotification whose body is the full report above, so
-the card appears in Claude. That notification is the delivery — do not end the
-run without it. If the PushNotification tool is not already available, find it
-with ToolSearch first.
+DELIVERY: your final message IS the delivery. Put the full report in it — the
+whole card, not a summary and not a pointer back to GitHub — because that
+message is what appears in Claude when this task runs.
+
+If a PushNotification tool exists in this session, also send the report that
+way so it reaches a phone. If there is no such tool, that is fine and is not a
+failure: send nothing extra, do not hunt for it, and do not report delivery as
+broken. The final message already arrived.
 ```
 
 ---

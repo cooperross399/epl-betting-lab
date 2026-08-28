@@ -795,19 +795,37 @@ def test_the_prompts_know_about_manual_runs() -> None:
     assert "the card itself is real" in flat
 
 
-def test_the_card_routine_ends_by_pushing_the_card_into_claude() -> None:
-    """The PushNotification is the delivery now, not a courtesy on top of it.
+def test_the_card_routine_delivers_in_its_own_final_message() -> None:
+    """The run's own message is the delivery; a push is a bonus on top.
 
-    Email is gone, so a run that reports only into its own transcript has not
-    reached anybody.
+    The first version made PushNotification the delivery. The routine surface
+    has no such tool, so the run reported delivery as broken while its own
+    message — the thing that actually appears in Claude — carried nothing.
     """
     text = (PROJECT_ROOT / "docs" / "epl_scheduled_tasks_bridge.md").read_text(
         encoding="utf-8"
     )
     flat = " ".join(text.split())
 
-    assert "PushNotification" in flat
-    assert "do not end the run without it" in flat
+    assert "your final message IS the delivery" in flat
+    assert "is not a failure" in flat
+
+
+def test_the_card_routine_knows_the_repository_is_private() -> None:
+    """A read failure was reported as though the card might be late.
+
+    The two are opposite conclusions: one is this task's access, the other is
+    the pipeline. A prompt that does not name the difference invites the wrong
+    one on the day it matters.
+    """
+    text = (PROJECT_ROOT / "docs" / "epl_scheduled_tasks_bridge.md").read_text(
+        encoding="utf-8"
+    )
+    flat = " ".join(text.split())
+
+    assert "The repository is PRIVATE" in flat
+    assert "Plain web fetch will NOT work" in flat
+    assert "the card could not be READ" in flat
 
 
 def test_a_refused_bundle_is_not_reported_as_a_failed_fetch() -> None:

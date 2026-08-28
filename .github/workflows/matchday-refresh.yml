@@ -114,11 +114,16 @@ on:
         default: false
 
 permissions:
-  contents: read
+  # Write, for exactly one ref: the card-feed branch, where each run publishes
+  # the rendered card so the EPL CARD routine can read it over plain git and
+  # present it in Claude. Nothing in this workflow pushes anywhere else, and
+  # main only changes through pull requests.
+  contents: write
   # Read-only, and only so the run can fetch the previous run's state.
   actions: read
-  # Lets the run comment the card on an issue, which is what delivers it by
-  # email. This writes issue comments and nothing else.
+  # Lets the run write the card to an issue. That issue is now the written
+  # record rather than the delivery: the comment mentions nobody and the
+  # repository's notifications are ignored, so it arrives in no inbox.
   issues: write
 
 concurrency:
@@ -228,6 +233,29 @@ jobs:
         run: |
           python scripts/fetch_data.py
 
+      - name: Refresh the upcoming slate
+        # The card can only look as far ahead as `upcoming_fixtures.csv` goes.
+        # While that file was typed by hand it was a standing appointment
+        # somebody had to keep, and when it ran out the selected window found
+        # nothing upcoming and the card went quiet looking like a provider
+        # fault. Football-Data publishes the coming fixtures as public CSV —
+        # no key, no quota, no secret — in the same team naming the results
+        # use.
+        #
+        # Deliberately not the odds provider: this file is the denominator the
+        # shadow verifier uses to ask whether the provider covered the slate,
+        # and a provider checked against itself always passes.
+        #
+        # Soft, and it never writes an empty slate: a bad day at Football-Data
+        # leaves the previous fixtures in place, which is far better than a
+        # card with no fixtures to be about.
+        id: fixtures
+        continue-on-error: true
+        env:
+          PYTHONPATH: src
+        run: |
+          python scripts/refresh_upcoming_fixtures.py
+
       - name: Refetch provider prices
         # Soft for the same reason: without fresh prices the card is refused by
         # the freshness policy, and a blocked card that explains itself beats a
@@ -255,6 +283,9 @@ jobs:
             echo "No match dataset: the model cannot be fitted, so no card can be built. Football-Data could not be reached and no previous copy was restored." >> run_degraded.txt
           elif [ "${{ steps.results.outcome }}" = "failure" ]; then
             echo "Historical results could not be refreshed; the model was fitted on the previously stored dataset." >> run_degraded.txt
+          fi
+          if [ "${{ steps.fixtures.outcome }}" = "failure" ]; then
+            echo "The upcoming slate could not be refreshed from Football-Data; the previously stored fixtures were used. A slate that stops moving eventually leaves the card with no fixture in window." >> run_degraded.txt
           fi
           if [ "${{ steps.prices.outcome }}" = "failure" ]; then
             # The step exits non-zero both when the fetch fails and when the
@@ -361,6 +392,59 @@ jobs:
           fi
           gh issue comment "$NUMBER" --body-file card_comment.md
           echo "Card posted to issue #$NUMBER."
+
+      - name: Publish the card to the card-feed branch
+        # This is the delivery now. The EPL CARD routine reads today's card
+        # from this branch with the plain git credential a cloud session
+        # already holds for the repository — no API call, no extra token, no
+        # inbox. Every run publishes here, including runs that decide not to
+        # comment, so a missing commit for today means the workflow itself did
+        # not finish, which is exactly what the routine should speak up about.
+        #
+        # Plumbing commits on purpose: the working tree is full of generated
+        # files that must never reach a branch, and hash-object/mktree/
+        # commit-tree build the two-file commit without touching it. Each push
+        # parents on the current tip, so it is always a fast-forward and never
+        # a force.
+        if: always()
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -u
+          # The checkout deliberately drops its credential, so this step
+          # authenticates its own git calls. The token is the run's own, masked
+          # in logs, and dies with the runner.
+          REMOTE="https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}"
+          DAY=$(TZ=America/New_York date +%F)
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          if [ ! -f card_comment.md ]; then
+            echo "No card was rendered this run." > card_comment.md
+          fi
+          jq -n \
+            --arg date "$DAY" \
+            --arg degraded "${{ steps.health.outputs.degraded || 'unknown' }}" \
+            --arg trigger "${{ github.event_name }}" \
+            --arg run_url "$RUN_URL" \
+            '{date: $date, degraded: $degraded, trigger: $trigger,
+              run_url: $run_url}' > card_status.json
+          BLOB_MD=$(git hash-object -w card_comment.md)
+          BLOB_JSON=$(git hash-object -w card_status.json)
+          TREE=$(printf '100644 blob %s\tlatest_card_comment.md\n100644 blob %s\tlatest_status.json' \
+            "$BLOB_MD" "$BLOB_JSON" | git mktree)
+          PARENT=""
+          if git fetch "$REMOTE" +refs/heads/card-feed:refs/card-feed-tip 2>/dev/null; then
+            PARENT=$(git rev-parse refs/card-feed-tip)
+          fi
+          export GIT_AUTHOR_NAME="Matchday Refresh" GIT_AUTHOR_EMAIL="actions@github.com"
+          export GIT_COMMITTER_NAME="Matchday Refresh" GIT_COMMITTER_EMAIL="actions@github.com"
+          if [ -n "$PARENT" ]; then
+            COMMIT=$(git commit-tree "$TREE" -p "$PARENT" -m "card $DAY")
+          else
+            COMMIT=$(git commit-tree "$TREE" -m "card $DAY")
+          fi
+          git push "$REMOTE" "$COMMIT:refs/heads/card-feed"
+          echo "card-feed updated for $DAY."
 
       - name: Upload reports
         if: always()

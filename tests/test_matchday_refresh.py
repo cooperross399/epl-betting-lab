@@ -288,9 +288,9 @@ def test_summary_survives_missing_reports(tmp_path: Path) -> None:
 def test_routine_prompts_do_the_work_rather_than_asking_cooper_to() -> None:
     """They no longer ask him to run anything because they no longer run anything.
 
-    The work moved to the schedule and the card arrives by email, so the
-    routines read rather than execute. The property being protected is the same
-    one: a routine must never hand a task back to Cooper.
+    The work moved to the schedule and the card is published to a branch, so
+    the routines read rather than execute. The property being protected is the
+    same one: a routine must never hand a task back to Cooper.
     """
     text = (PROJECT_ROOT / "docs" / "epl_scheduled_tasks_bridge.md").read_text(
         encoding="utf-8"
@@ -298,7 +298,7 @@ def test_routine_prompts_do_the_work_rather_than_asking_cooper_to() -> None:
     prompts = text.split("## Exact routine prompts", 1)[1]
     prompts = prompts.split("## Safe vs unsafe actions", 1)[0]
 
-    assert prompts.count("Search Gmail") >= 3  # one per routine
+    assert prompts.count("card-feed") >= 2  # one per live routine
     for handoff in ("open a Terminal", "ask ChatGPT"):
         assert handoff in prompts
     # Nothing in a prompt may tell him to run a command.
@@ -373,14 +373,21 @@ def test_the_archive_outlives_the_reports() -> None:
     assert "retention-days: 90" in text
 
 
-def test_reading_actions_is_the_only_permission_added() -> None:
+def test_the_workflow_takes_no_permission_it_does_not_use() -> None:
+    """`contents: write` is here for the card feed and nothing else.
+
+    It was `contents: read` until delivery moved off email: publishing the card
+    to a branch needs write. The narrowing that keeps that honest is not in the
+    permission — GitHub cannot scope it to one ref — but in
+    `test_every_push_targets_the_card_feed_branch`, which pins every push in
+    this file to `refs/heads/card-feed`.
+    """
     text = _workflow()
     header = text.split("jobs:", 1)[0]
 
     assert "actions: read" in header
-    assert "contents: read" in header
-    # Nothing in this workflow may write to the repository.
-    assert "contents: write" not in header
+    assert "contents: write" in header
+    # Still nothing that could approve, merge, or rewrite history.
     assert "actions: write" not in header
     assert "pull-requests: write" not in header
 
@@ -656,7 +663,7 @@ def test_the_routine_prompt_carries_the_honest_headline() -> None:
 
 
 def test_the_prompts_tell_a_card_apart_from_a_failure() -> None:
-    """Both arrive from the same issue and read very differently."""
+    """One publish can be either, and they read very differently."""
     text = (PROJECT_ROOT / "docs" / "epl_scheduled_tasks_bridge.md").read_text(
         encoding="utf-8"
     )
@@ -664,7 +671,9 @@ def test_the_prompts_tell_a_card_apart_from_a_failure() -> None:
 
     assert "Selections changed" in flat
     assert "Something went wrong" in flat
-    assert "Read the first line" in flat
+    # The status file settles it before any table is read.
+    assert "START with latest_status.json" in flat
+    assert "degraded" in flat
 
 
 def test_the_prompts_use_the_same_staleness_window_as_the_watchdog() -> None:
@@ -731,41 +740,47 @@ def test_the_settle_routine_checks_the_schedule_is_alive() -> None:
     assert "may need enabling" in flat
 
 
-def test_the_prompts_demand_date_order_not_search_relevance() -> None:
-    """The first routine run read yesterday's message as today's state.
+def test_the_prompts_check_the_feed_is_todays() -> None:
+    """The feed holds one card, so the risk is reading an old one as current.
 
-    It missed a card issued that morning. Search relevance is not date order,
-    and "most recent" is not an instruction a search tool reliably honours.
+    A routine run once reported yesterday's state as today's. The branch always
+    answers, and it answers with whatever the last run left, so the date is the
+    only thing that separates a fresh card from a stale one.
     """
     text = (PROJECT_ROOT / "docs" / "epl_scheduled_tasks_bridge.md").read_text(
         encoding="utf-8"
     )
     flat = " ".join(text.split())
 
-    assert "Sort by date and take the newest" in flat
-    assert "search relevance" in flat.lower()
+    assert "State the `date` you are reading" in flat
+    assert "a run did not finish" in flat
+    assert "Never present a stale card's prices as current" in flat
 
 
-def test_the_prompts_require_stating_the_timestamp_read() -> None:
+def test_the_prompts_require_stating_what_was_read() -> None:
     """A stale answer should be visible as one."""
     text = (PROJECT_ROOT / "docs" / "epl_scheduled_tasks_bridge.md").read_text(
         encoding="utf-8"
     )
     flat = " ".join(text.split())
 
-    assert "stating the timestamp" in flat or "State the timestamp" in flat
-    assert "more than 24 hours old" in flat
+    assert "State the `date` you are reading" in flat
+    assert "not today and today is a matchday" in flat
 
 
-def test_the_prompts_separate_the_newest_message_from_the_newest_card() -> None:
-    """A degraded run can arrive after the last good card."""
+def test_a_degraded_publish_is_not_reported_as_no_card() -> None:
+    """A degraded run still publishes whatever card it managed to build.
+
+    Reading `degraded` as "there is nothing here" would throw away a real card
+    on exactly the days something already went wrong.
+    """
     text = (PROJECT_ROOT / "docs" / "epl_scheduled_tasks_bridge.md").read_text(
         encoding="utf-8"
     )
     flat = " ".join(text.split())
 
-    assert "the newest actual CARD" in flat
-    assert "still the current advice" in flat
+    assert "report whatever card was still built" in flat
+    assert "may rest on stale prices" in flat
 
 
 def test_the_prompts_know_about_manual_runs() -> None:
@@ -774,8 +789,25 @@ def test_the_prompts_know_about_manual_runs() -> None:
     )
     flat = " ".join(text.split())
 
-    assert "manual run" in flat
-    assert "started it by hand" in flat
+    assert "workflow_dispatch" in flat
+    assert "started by hand" in flat
+    # A manual run's card is real even though its trigger proves nothing.
+    assert "the card itself is real" in flat
+
+
+def test_the_card_routine_ends_by_pushing_the_card_into_claude() -> None:
+    """The PushNotification is the delivery now, not a courtesy on top of it.
+
+    Email is gone, so a run that reports only into its own transcript has not
+    reached anybody.
+    """
+    text = (PROJECT_ROOT / "docs" / "epl_scheduled_tasks_bridge.md").read_text(
+        encoding="utf-8"
+    )
+    flat = " ".join(text.split())
+
+    assert "PushNotification" in flat
+    assert "do not end the run without it" in flat
 
 
 def test_a_refused_bundle_is_not_reported_as_a_failed_fetch() -> None:
@@ -803,8 +835,8 @@ def test_the_prompts_judge_health_from_labelled_messages_only() -> None:
     )
     flat = " ".join(text.split())
 
-    assert "Judge schedule health ONLY from issue #162 messages" in flat
-    assert "counting them is not evidence" in flat or "not evidence" in flat
+    assert 'counting only commits whose `trigger` was "schedule"' in flat
+    assert "not evidence" in flat
 
 
 def test_the_prompts_say_what_only_manual_failures_mean() -> None:
@@ -837,3 +869,80 @@ def test_the_props_step_cannot_cost_a_match_card() -> None:
     props_block = text.split("Refresh the props card", 1)[1].split("- name:", 1)[0]
     assert "continue-on-error: true" in props_block
     assert "EPL_ODDS_API_KEY" in props_block
+
+# --- card-feed delivery ----------------------------------------------------
+
+
+def _workflow_dir():
+    return PROJECT_ROOT / ".github" / "workflows"
+
+
+def test_only_the_matchday_refresh_can_write_to_the_repository() -> None:
+    """`contents: write` is the one permission that can rewrite this repo.
+
+    It exists so a run can publish the card to `card-feed`, and for nothing
+    else. Any other workflow granting it would be able to move main without a
+    pull request.
+    """
+    granted = [
+        path.name
+        for path in sorted(_workflow_dir().glob("*.yml"))
+        if "contents: write" in path.read_text(encoding="utf-8")
+    ]
+
+    assert granted == ["matchday-refresh.yml"], granted
+
+
+def test_every_push_targets_the_card_feed_branch() -> None:
+    """The write permission is repository-wide; the discipline is not.
+
+    Nothing here may push to main, to a tag, or to a branch named by a
+    variable — the card feed is the only ref this workflow is allowed to move.
+    """
+    pushes = [
+        line.strip()
+        for line in _workflow().splitlines()
+        if "git push" in line
+    ]
+
+    assert pushes, "the publish step should push"
+    for line in pushes:
+        assert line.endswith(':refs/heads/card-feed"'), line
+
+
+def test_the_card_feed_publishes_on_every_run() -> None:
+    """A missing commit for today has to mean the run did not finish.
+
+    If publishing were conditional on a card existing, a degraded run would
+    leave the feed looking exactly like a workflow that never ran, and the
+    routine could not tell silence from failure.
+    """
+    text = _workflow()
+    publish = text.index("Publish the card to the card-feed branch")
+    following = text[publish : publish + 4000]
+
+    assert "if: always()" in following
+    assert "latest_card_comment.md" in following
+    assert "latest_status.json" in following
+
+
+def test_the_card_comment_notifies_nobody() -> None:
+    """Delivery is the feed now, so the comment must not reach an inbox.
+
+    An @mention overrides an ignored subscription, so a mention left in the
+    body would keep the emails arriving whatever the watch settings said.
+    """
+    from epl_betting_lab.reports.card_notification import NOTIFY_HANDLE
+
+    assert NOTIFY_HANDLE == ""
+
+
+def test_the_slate_is_refreshed_before_prices_are_fetched() -> None:
+    """A stale slate makes every fetched price fall outside the window.
+
+    Refreshing it afterwards would spend the provider quota first and only then
+    discover there was no fixture to spend it on.
+    """
+    text = _workflow()
+
+    assert text.index("Refresh the upcoming slate") < text.index("Refetch provider prices")

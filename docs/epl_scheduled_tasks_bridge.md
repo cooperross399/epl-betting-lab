@@ -155,73 +155,70 @@ Claude Code does not edit your scheduled tasks. Paste these into the routine
 definitions yourself, and re-paste them when this file changes — a routine is
 text living in another system, and it does not update itself.
 
-**These prompts read email, not the filesystem.** The card is built by GitHub
-Actions and posted to issue #162, *EPL Card — this week's picks*, which
-mentions Cooper so GitHub always emails it. A routine reading that mail works
-from anywhere with the laptop shut and needs only the Gmail connector. Earlier
-versions ran commands against a local checkout, so they silently could not run
-whenever the machine was off — the exact situation a scheduled routine is for.
+**These prompts read the repository, not email.** The card is built by GitHub
+Actions and published to the **`card-feed` branch** of
+`cooperross399/epl-betting-lab` as two files, rewritten every run:
 
-**One email can be either a card or a failure.** Both arrive from the same
-issue. A card leads with *"Selections changed"*; a failure leads with
-*"Something went wrong"* and lists what broke before showing whatever card
-could still be built. Read the first line before reading the tables.
+| File | What it holds |
+|:-----|:--------------|
+| `latest_card_comment.md` | the rendered card, exactly as the issue records it |
+| `latest_status.json` | `date`, `degraded`, `trigger`, `run_url` |
 
-**A card arrives once a day, and silence means a missed run.** The schedule
-fires ten times a week — Thursday through Monday, twice a day — and the first
-run of each day that produces a card sends it, whether or not the selections
-moved. Later runs the same day stay quiet unless something changed or broke.
+A routine with the repository as a git source reads both over plain git, with
+the laptop shut and no inbox involved. This replaced email on 2026-08-28 at
+Cooper's request: the card still lands on issue #162 as the written record, but
+the comment now mentions nobody and the repository's notifications are ignored,
+so nothing about it reaches a mailbox.
 
-So a matchday with no message at all means a run did not happen, which is a
-sharper signal than the old rule of "mail only when the picks move". That rule
-was right for a person reading an inbox and wrong for a routine reading daily:
-the first routine run read a message from the previous day and reported it as
-the state of play.
+**End the run with a PushNotification carrying the card.** That is what makes
+it appear in Claude. The run's final message is what Cooper reads, so the card
+belongs in it in full — not a summary, and not a pointer back to GitHub.
 
-**A search is not a sort.** The first routine run read a message from the
-previous day and reported it as the current state, missing a card issued that
-morning. Ask for newest by date, and say which timestamp you read, so a stale
-answer is visible as one.
+**One publish can be either a card or a failure.** `latest_status.json` says
+which: `degraded` is `"true"` when something broke. The card file leads with
+*"Selections changed"* when it is a card and *"Something went wrong"* when the
+run was degraded. Read the status before the tables.
 
-**Every run says how it started — but only in the issue message.** Its heading
-ends "— scheduled run" or "— manual run". A message with neither predates
-labelling and is old, which is itself worth knowing. GitHub's own "Run failed" notifications carry no such label and
-no error text either, so they cannot tell you whether the schedule is healthy.
-Judge that from the issue #162 messages, which are labelled, and treat raw
-Actions failure mail as a pointer to look rather than as evidence.
+**The feed is written on every run, including runs that publish no card.** So
+`date` in `latest_status.json` is the sharpest health signal there is: if it is
+not today and today is a matchday, a run did not finish. That is a real
+question to raise, not a stale card to read out.
+
+**Every run says how it started.** `trigger` is `schedule` or
+`workflow_dispatch`. A manual run says nothing about whether the *schedule* is
+healthy, but its card is real — manual and scheduled runs use the same reviewed
+configuration, so a manual card is the current advice until a newer one
+replaces it.
 
 This matters more than it sounds. Every failure this project has recorded was a
-manual dispatch; the only scheduled run so far succeeded. Two health checks in a
-row concluded the pipeline was broken by counting failure notifications that
-were all someone testing.
+manual dispatch; two health checks in a row once concluded the pipeline was
+broken by counting failure notifications that were all someone testing.
 
 ---
 
 ### EPL CARD
 
 ```text
-Search Gmail for GitHub notifications for issue #162, "EPL Card — this week's
-picks", in cooperross399/epl-betting-lab. Sort by date and take the newest.
-Do not rely on search relevance: the first result is often not the latest.
+Read the card from the `card-feed` branch of cooperross399/epl-betting-lab.
+Two files, rewritten by every run:
 
-Start by stating the timestamp of the message you are reading, which is in its
-first line. If it is more than 24 hours old, say so before anything else — a
-newer one probably exists and you have the wrong message.
+  latest_status.json     — date, degraded, trigger, run_url
+  latest_card_comment.md — the rendered card
 
-Report two things separately, because they are often different messages:
-- the newest message of any kind, and what it says
-- the newest actual CARD, meaning one whose first line says "Selections
-  changed". A degraded run can arrive after the last good card, and the card is
-  still the current advice.
+Do not search email. Delivery moved off email on 28 August 2026; the issue
+comment still exists as the record but notifies nobody, so an empty inbox
+means nothing at all.
 
-Read the first line of each before the tables. "Selections changed" means it is
-a card. "Something went wrong" means the run was degraded: say what broke
-first, then report whatever card was still built and note it may rest on stale
-prices. A heading ending "— manual run" means someone started it by hand rather
-than the schedule. Say so — it says nothing about whether the *schedule* is
-healthy — but the card itself is real: manual and scheduled runs use the same
-reviewed configuration, so a manual card is still the current advice until a
-newer card replaces it.
+START with latest_status.json. State the `date` you are reading. If it is not
+today and today is a matchday (Thursday through Monday), say that first: the
+feed is written on every run, so a date that is not today means a run did not
+finish. Point me at Actions -> Matchday Refresh and the `run_url`. Never
+present a stale card's prices as current.
+
+If `degraded` is "true", say what broke before reporting anything else, then
+report whatever card was still built and note it may rest on stale prices. If
+`trigger` is "workflow_dispatch", say the run was started by hand — it says
+nothing about whether the schedule is healthy, but the card itself is real.
 
 Then tell me, in plain English:
 
@@ -234,10 +231,13 @@ Then tell me, in plain English:
 - which markets were included and excluded
 
 Rules:
-- Report only what the email says. Do not compute, adjust, or invent a
+- Report only what the card file says. Do not compute, adjust, or invent a
   selection, a price, or an edge. If something is missing, say it is missing.
 - A blocked card means nothing was generated. It never means "no value found",
   and it is never a reason to suggest a bet.
+- If the card is blocked, read the "Selected window" line before blaming the
+  provider. A window with no fixtures in it is the fixture slate having run
+  out, not a provider fault.
 - A lean is information, not a bet. It fires at a 1.5% modelled edge, which is
   below this model's own error and below a book's margin; measured, leans
   returned about -9% over 150 bets. Never present one as a play.
@@ -255,25 +255,12 @@ Rules:
   qualified — never a judgement either way.
 - Place no bets. Apply no settlement. Suggest no stake beyond the units shown.
 - Never tell me to open a Terminal or to ask ChatGPT. If something looks wrong,
-  say what, and point me at the Actions run linked in the email.
+  say what, and point me at the `run_url`.
 
-A card is sent once a day while the schedule runs. If the newest message is
-from before today and today is a matchday (Thursday through Monday), the
-likely cause is a missed run. Point me at the issue itself and the Actions
-page to settle it:
-https://github.com/cooperross399/epl-betting-lab/issues/162 and
-Actions -> Matchday Refresh. Never present the stale card's prices as
-current.
-
-Do not attribute a gap to GitHub having stopped emailing. That was believed
-once, from 19 to 27 August 2026, and it was false. A Gmail search returns
-only a SUBSET of the messages in a thread, and issue #162's notifications
-are one long-running thread: a search showed five messages ending 19 August
-and that was read as an outage. Opening the thread in full listed
-twenty-seven, running through 24 August, each arriving about twenty seconds
-after its comment was posted. Delivery had never failed. Before ever
-claiming mail stopped, open the notification thread itself — absence in a
-search result is not absence in the mailbox.
+FINISH by sending a PushNotification whose body is the full report above, so
+the card appears in Claude. That notification is the delivery — do not end the
+run without it. If the PushNotification tool is not already available, find it
+with ToolSearch first.
 ```
 
 ---
@@ -285,19 +272,17 @@ You are running a weekly health check on the EPL betting model pipeline for
 Cooper (cooperross399@gmail.com). Do NOTHING that writes. This routine only
 checks the machinery is alive and reports the state of play.
 
-STEP 1 — Search Gmail (via the connector) for notifications for the repository
-cooperross399/epl-betting-lab from the last seven days for:
-1. GitHub Actions failure notifications for the workflow "Matchday Refresh".
-2. Any notification for issue #162 ("EPL Card — this week's picks") whose
-   first line says "Something went wrong".
-3. The most recent notification for issue #162 of any kind.
+STEP 1 — Read the `card-feed` branch of cooperross399/epl-betting-lab, not
+email. `latest_status.json` carries `date`, `degraded`, `trigger` and
+`run_url`; `latest_card_comment.md` carries the card the run published. The
+branch history is the run history: each commit is one run, so `git log` on that
+branch tells you how many runs happened over the last seven days and when.
 
-STEP 2 — Judge schedule health ONLY from issue #162 messages, ignoring any
-whose heading ends "— manual run": a manual run says nothing about whether the
-schedule works. GitHub's own "Run failed" notifications carry no trigger label
-and no error text, so counting them is not evidence — two health checks in a
-row once concluded the pipeline was broken by counting them. The issue #162
-headings say how each run started; trust those and nothing else.
+STEP 2 — Judge schedule health from that history, counting only commits whose
+`trigger` was "schedule": a manual run says nothing about whether the schedule
+works. Do not count GitHub Actions failure mail — it carries no trigger label
+and no error text, and two health checks in a row once concluded the pipeline
+was broken by counting failures that were all someone testing.
 
 Say which of these is true:
 - A message within the last four days and no non-manual failures: the schedule
@@ -370,6 +355,10 @@ the inbox alone.
 ---
 
 ### EPL SETTLE (IGNORE) — not currently deployed
+
+> Left as written, and still email-shaped. Nothing runs it, so it was not worth
+> rewriting for the card feed; if it is ever deployed it needs the same change
+> the other two got — read `card-feed`, not Gmail.
 
 ```text
 Do nothing that writes. This routine only checks that the machinery is alive.

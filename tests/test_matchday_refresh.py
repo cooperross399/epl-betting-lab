@@ -105,6 +105,10 @@ REQUESTS_PER_EXTRA_MARKET_PER_RUN = 10
 #: The plan in use. Raised from 500 once the schedule needed to cover every
 #: matchday and price every market; at 500 those two were mutually exclusive.
 MONTHLY_REQUEST_ALLOWANCE = 20_000
+#: 10:00 America/New_York in summer, the Thursday automation cutoff.
+THURSDAY_CUTOFF_UTC = 14.0
+#: Midnight America/New_York in summer: earlier is still Wednesday there.
+NEW_YORK_MIDNIGHT_UTC = 4.0
 WEEKS_PER_MONTH = 4.35
 
 
@@ -572,9 +576,17 @@ def test_the_stated_credit_cost_matches_the_schedule() -> None:
     monthly = runs_per_week * WEEKS_PER_MONTH * MEASURED_REQUESTS_PER_RUN
 
     # The comment should state a figure within a reasonable distance of truth.
-    assert "2,700 credits a month" in text
-    assert 2_200 < monthly < 3_200, f"schedule now costs ~{monthly:.0f}"
+    assert "3,000 credits a month" in text
+    assert 2_600 < monthly < 3_400, f"schedule now costs ~{monthly:.0f}"
     assert monthly < MONTHLY_REQUEST_ALLOWANCE
+
+
+def _thursday_trigger_hours() -> list[float]:
+    return sorted(
+        int(line.split('"')[1].split()[1]) + int(line.split('"')[1].split()[0]) / 60
+        for line in _workflow().splitlines()
+        if "- cron:" in line and line.rstrip().endswith('* * 4"')
+    )
 
 
 def test_thursday_triggers_precede_the_policy_cutoff() -> None:
@@ -582,19 +594,39 @@ def test_thursday_triggers_precede_the_policy_cutoff() -> None:
 
     That is 14:00 UTC in summer. A Thursday trigger later than that is blocked
     by policy every week, and reports a provider fault rather than a scheduling
-    one — so Thursday's backup runs before the primary rather than after it.
+    one.
     """
-    text = _workflow()
-    thursday = [
-        line for line in text.splitlines()
-        if "- cron:" in line and line.rstrip().endswith('* * 4"')
-    ]
+    for at in _thursday_trigger_hours():
+        assert at < THURSDAY_CUTOFF_UTC, f"{at:.2f} UTC is past the cutoff"
 
-    assert len(thursday) >= 2
-    for line in thursday:
-        minute, hour = line.split('"')[1].split()[:2]
-        at = int(hour) + int(minute) / 60
-        assert at < 14.0, f"{hour}:{minute} UTC is past the 10:00 New York cutoff"
+
+def test_thursday_triggers_start_on_thursday_in_new_york() -> None:
+    """A trigger before 04:00 UTC is Wednesday evening in New York.
+
+    Its receipt would not be a Thursday receipt, so the cutoff would never be
+    evaluated at all. Buying slack that way skips the gate rather than beating
+    it, which is not the trade this schedule is allowed to make.
+    """
+    for at in _thursday_trigger_hours():
+        assert at >= NEW_YORK_MIDNIGHT_UTC, f"{at:.2f} UTC is Wednesday in New York"
+
+
+def test_thursday_keeps_slack_for_a_late_cron() -> None:
+    """Landing inside the window is not the same as surviving a delay.
+
+    The triggers were legal on 2026-08-27 and still produced no card: GitHub
+    started both about nine and a half hours late, so both receipts were
+    stamped past the deadline. The earliest trigger therefore has to hold most
+    of the window open behind it, and one trigger is not a schedule — a single
+    dropped run would take the whole Thursday with it.
+    """
+    hours = _thursday_trigger_hours()
+
+    assert len(hours) >= 3, "one late or dropped trigger must not cost the day"
+    slack = THURSDAY_CUTOFF_UTC - hours[0]
+    assert slack >= 9.0, f"earliest Thursday trigger has only {slack:.1f}h of slack"
+    # Spread, not clustered: three triggers in one hour share one outage.
+    assert hours[-1] - hours[0] >= 5.0, "triggers are bunched too closely together"
 
 
 def test_the_card_routine_prompt_matches_how_leans_are_staked() -> None:

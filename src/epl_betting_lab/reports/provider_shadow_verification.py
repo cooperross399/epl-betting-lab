@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from datetime import datetime
+from datetime import date, datetime
 import json
 from pathlib import Path
 
@@ -22,8 +22,8 @@ from epl_betting_lab.providers.team_names import (
 from epl_betting_lab.market_eligibility import evaluate_market_eligibility
 from epl_betting_lab.reports.current_odds_template import SUPPORTED_MARKETS
 from epl_betting_lab.selected_slate import (
-    SELECTED_WEEK1_LABEL,
     filter_to_selected_window,
+    frame_window_label,
 )
 from epl_betting_lab.reports.provider_shadow_history import (
     archive_provider_shadow_run,
@@ -210,6 +210,7 @@ def _slate_coverage_metrics(
     fixtures: pd.DataFrame,
     *,
     repository_root: Path,
+    today: date | None = None,
 ) -> dict[str, object]:
     """Report fixture coverage against three explicitly different denominators.
 
@@ -232,9 +233,12 @@ def _slate_coverage_metrics(
 
     upcoming_keys = _fixture_keys(upcoming) if not upcoming.empty else set()
     selected = (
-        filter_to_selected_window(upcoming) if not upcoming.empty else pd.DataFrame()
+        filter_to_selected_window(upcoming, today=today)
+        if not upcoming.empty
+        else pd.DataFrame()
     )
     selected_keys = _fixture_keys(selected) if not selected.empty else set()
+    window_label = frame_window_label(upcoming, today=today)
 
     def _scope(
         label: str,
@@ -267,7 +271,7 @@ def _slate_coverage_metrics(
     )
     selected_scope = _scope(
         "selected_week1_window",
-        f"fixtures inside the selected Week 1 window ({SELECTED_WEEK1_LABEL})",
+        f"fixtures inside the selected round ({window_label})",
         selected_keys,
     )
     full_scope = _scope(
@@ -303,7 +307,7 @@ def _slate_coverage_metrics(
         )
 
     return {
-        "selected_window": SELECTED_WEEK1_LABEL,
+        "selected_window": window_label,
         "provider_returned": provider_scope,
         "selected_week1_window": selected_scope,
         "full_upcoming_fixtures": full_scope,
@@ -1055,7 +1059,7 @@ def _eligible_markets_for_validation(
         mapping_verified=True,
         validation_passed=True,
         freshness_passed=True,
-        window_label=SELECTED_WEEK1_LABEL,
+        window_label=frame_window_label(fixtures),
         restrict_to_window=False,
     )
     eligible = list(report.eligible_markets)
@@ -1160,7 +1164,7 @@ def save_provider_shadow_verification(
         mapping_verified=team_mapping.get("status") == "Verified",
         validation_passed=not validation_error,
         freshness_passed=True,
-        window_label=SELECTED_WEEK1_LABEL,
+        window_label=frame_window_label(fixtures),
         # Bundle-scoped, not window-scoped: this verdict describes the staged
         # bundle it was handed. Week 1 windowing lives in slate_coverage and in
         # the card-input builder.

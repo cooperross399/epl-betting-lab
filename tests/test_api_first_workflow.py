@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from datetime import date
 from pathlib import Path
 
 import pandas as pd
@@ -30,6 +31,8 @@ WINDOW_FIXTURES = [
     ("2026-08-23", "Man City", "Bournemouth"),
 ]
 OUTSIDE_FIXTURE = ("2026-08-29", "Liverpool", "Nott'm Forest")
+#: A day before WINDOW_FIXTURES, so they are the round still to be played.
+BEFORE_THE_ROUND = date(2026, 8, 17)
 
 
 def _fixtures(rows) -> pd.DataFrame:
@@ -64,8 +67,13 @@ def _odds(rows, markets=("1x2", "total_2_5"), books=("BookA",)) -> pd.DataFrame:
 
 
 def _evaluate(odds, fixtures, **kwargs):
+    # Pinned: the window is the round still to be played, so a helper that let
+    # the real clock decide would quietly change what these tests assert.
     defaults = dict(
-        mapping_verified=True, validation_passed=True, freshness_passed=True
+        mapping_verified=True,
+        validation_passed=True,
+        freshness_passed=True,
+        today=BEFORE_THE_ROUND,
     )
     defaults.update(kwargs)
     return evaluate_market_eligibility(odds, fixtures, **defaults)

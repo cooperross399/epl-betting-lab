@@ -27,7 +27,6 @@ import pandas as pd
 
 from epl_betting_lab.config import MANUAL_DIR, OUTPUTS_DIR, PROJECT_ROOT
 from epl_betting_lab.reports.pick_display import format_market_list
-from epl_betting_lab.selected_slate import SELECTED_WEEK1_LABEL
 
 
 MODEL_TASK_JSON = "epl_model_task.json"
@@ -266,7 +265,7 @@ def _odds_status(readiness: Mapping[str, Any]) -> dict[str, Any]:
             readiness.get("validation_warning_count", 0) or 0
         ),
         "selected_window": _clean(readiness.get("selected_window"))
-        or SELECTED_WEEK1_LABEL,
+        or "no dated fixtures",
         "selected_window_fixture_count": int(
             readiness.get("selected_window_fixture_count", 0) or 0
         ),

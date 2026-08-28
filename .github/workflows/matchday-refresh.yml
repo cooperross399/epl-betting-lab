@@ -33,7 +33,8 @@ name: Matchday Refresh
 # Each run lands before that day's earliest kick-off and stays fresh through its
 # latest, allowing for the UK being UTC+1 in summer:
 #
-#   Thursday  11:30 UTC  planning card; no matches
+#   Thursday  04:30 UTC  planning card; no matches, and a 10:00 New York
+#                        policy cutoff the run has to land in front of
 #   Friday    11:30 UTC  ~7.5h before a 20:00 UK kick-off
 #   Saturday  09:00 UTC  ~2.5h before a 12:30 UK kick-off, fresh until 21:00
 #   Sunday    09:00 UTC  covers the afternoon slate
@@ -59,22 +60,38 @@ on:
     # email only fires when the selections change — so a duplicate run is
     # invisible unless it has something new to say.
     #
-    # Ten runs a week is about 2,700 credits a month against 20,000 — roughly an
-    # eighth of the allowance. Measured from consecutive runs: the counter moves
+    # Eleven runs a week is about 3,000 credits a month against 20,000 —
+    # roughly a seventh of the allowance. Measured from consecutive runs: the counter moves
     # about 62 a run with every market fetched. Two earlier notes here were
     # wrong in both directions, 1,050 and 4,600, each computed rather than
     # measured.
-    # Thursday's backup runs BEFORE the primary, not after. The provider
-    # policy refuses a Thursday receipt made after 10:00 America/New_York,
-    # which is 14:00 UTC in summer — so a backup ninety minutes late would be
-    # blocked by policy every single Thursday, and would look like a provider
-    # fault rather than a scheduling one.
-    # Friday and Monday mirror Thursday's times so every day's card is in
-    # the inbox before Cooper's 09:00 New York read. Their kick-offs are in
-    # the evening, so nothing pins them later; the weekend stays early
-    # because its 12:30 UK lunch kick-off does.
+    # Thursday is the one day with a deadline in front of it. The provider
+    # policy refuses a Thursday receipt made after 10:00 America/New_York —
+    # 14:00 UTC in summer — so a Thursday run has a window, not just a time,
+    # and every trigger has to land inside it.
+    #
+    # These used to sit at 11:30 and 13:00 UTC: the last two and a half hours
+    # of a ten-hour window, leaving the later one an hour of slack. On
+    # 2026-08-27 GitHub started both of them roughly nine and a half hours
+    # late, at 21:06 and 22:50 UTC. Both produced a receipt stamped well after
+    # the deadline, both were refused, and the emails read as a provider fault
+    # rather than what it was — a cron that arrived late twice.
+    #
+    # So they now sit at the front of the window instead of the back. The
+    # earliest legal trigger is 04:00 UTC, which is midnight in New York and
+    # the moment the receipt first counts as Thursday's; 04:30 keeps clear of
+    # that boundary and buys about nine and a half hours of slack, and the
+    # three are spread so a delay would have to swallow the whole window
+    # rather than a single trigger. The 11:30 run stays because it is the one
+    # whose prices are freshest at the 09:00 New York read.
+    #
+    # Nothing here relaxes the cutoff: a run that arrives after 10:00 New York
+    # is still refused. Dispatching the workflow by hand is the documented way
+    # through — the policy exempts a manual run because a person choosing to
+    # run it late is the deliberate act the deadline exists to protect.
+    - cron: "30 4 * * 4"
+    - cron: "0 8 * * 4"
     - cron: "30 11 * * 4"
-    - cron: "0 13 * * 4"
     - cron: "30 11 * * 5"
     - cron: "0 13 * * 5"
     - cron: "0 9 * * 6"

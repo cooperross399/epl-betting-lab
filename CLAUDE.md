@@ -19,9 +19,12 @@ terminal, and no Claude routine. Read it at Actions → Matchday Refresh → lat
 run.
 
 The Claude routines — two are live, **EPL CARD** and **EPL WATCH** (formerly
-EPL Model) — are optional and read email, not the filesystem. A routine that
-did not run is not the card failing; the two are independent and only the
-workflow is load-bearing. Never tell Cooper to open a terminal to get a card.
+EPL Model) — are optional and read the **`card-feed` branch**, not email and
+not the filesystem. Every run publishes `latest_card_comment.md` and
+`latest_status.json` there, and the routine presents the card in Claude with a
+PushNotification. A routine that did not run is not the card failing; the two
+are independent and only the workflow is load-bearing. Never tell Cooper to
+open a terminal to get a card.
 
 Every session, in this order. They replace chat history as project memory, so no
 prior conversation and no ChatGPT is needed to operate this repo.
@@ -109,9 +112,19 @@ Use the repo, the reports, and GitHub.
   mapping and the completeness checks all passed. A green run with no card is
   the signature of that class of fault — check the selected window in
   `data/outputs/automated_card_input.md` first.
-- `data/manual/upcoming_fixtures.csv` is still filled in by a human, and the
-  window can only advance as far as that file goes. Keep at least the next
-  round in it.
+- `data/manual/upcoming_fixtures.csv` is **fetched, not typed**. Every run
+  refreshes it from Football-Data's public fixtures feed
+  (`scripts/refresh_upcoming_fixtures.py`), so the slate advances on its own.
+  Deliberately not sourced from the odds provider: this file is the denominator
+  the shadow verifier uses to ask whether the provider covered the slate, and a
+  provider checked against itself always passes. A failed fetch leaves the
+  previous slate in place and marks the run degraded rather than emptying it.
+- **Card delivery is the `card-feed` branch, and no email.** Each run publishes
+  `latest_card_comment.md` + `latest_status.json` there; the issue #162 comment
+  remains as the written record but mentions nobody, and the repository's
+  notifications are set to ignored. Changed 2026-08-28 at Cooper's request
+  ("i dont want emails anymore"). An @mention overrides an ignored
+  subscription, so putting one back into the comment would resume the emails.
 - The active odds source is the **provider-derived automated card input**.
   Manual odds entry is not required.
 - `data/manual/current_odds.csv` is **legacy** and must not become active again.

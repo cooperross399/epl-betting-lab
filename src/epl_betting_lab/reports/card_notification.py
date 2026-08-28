@@ -33,15 +33,19 @@ from epl_betting_lab.reports.pick_display import (
 
 ISSUE_TITLE = "EPL Card — this week's picks"
 
-#: Who to mention so the comment actually reaches a person.
+#: Deliberately nobody.
 #:
-#: Posting a comment is not the same as delivering it. On a repository you own,
-#: GitHub's default notification setting is "participating and @mentions", so a
-#: comment written by Actions on an issue nobody has touched can notify nobody
-#: at all — the delivery would look like it worked on every run and quietly
-#: reach no one. An explicit mention always notifies, whatever the watch
-#: settings are, and needs nothing configured by hand.
-NOTIFY_HANDLE = "@cooperross399"
+#: This comment used to open "@cooperross399 —", because an @mention notifies
+#: whatever the watch settings say and the issue was the delivery mechanism.
+#: Delivery has moved: the card is published to the `card-feed` branch and the
+#: EPL CARD routine reads it there and presents it in Claude. The comment stays
+#: as the written record, and the mention would now do nothing except force an
+#: email that was asked to stop — a mention overrides an ignored subscription,
+#: so silencing notifications without removing this would not have worked.
+#:
+#: Anything that needs a person's attention belongs in the routine's message,
+#: not in a mention here.
+NOTIFY_HANDLE = ""
 
 
 def _read(path: Path) -> dict[str, Any]:
@@ -206,7 +210,7 @@ def build_notification(
     lines = [
         heading,
         "",
-        f"{NOTIFY_HANDLE} — {reason}",
+        reason,
         "",
     ]
     if manual:

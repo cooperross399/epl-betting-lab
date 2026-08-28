@@ -260,11 +260,18 @@ class TestTheWorkflowAgrees:
     def test_the_delivery_step_exists(self) -> None:
         assert "Email the card" in self._workflow()
 
-    def test_it_may_write_issues_and_nothing_else(self) -> None:
+    def test_it_may_write_issues_and_the_card_feed_and_nothing_else(self) -> None:
+        """`contents: write` arrived with the card feed, which is delivery now.
+
+        `tests/test_matchday_refresh.py` pins every push in the workflow to
+        `refs/heads/card-feed`, which is the part that keeps the permission
+        honest — GitHub cannot scope it to a single ref.
+        """
         header = self._workflow().split("jobs:", 1)[0]
 
         assert "issues: write" in header
-        assert "contents: write" not in header
+        assert "contents: write" in header
+        assert "pull-requests: write" not in header
 
     def test_delivery_failure_does_not_fail_the_run(self) -> None:
         """A card that was built must not be lost because email broke."""
@@ -317,41 +324,33 @@ class TestSendingOnDemand:
 
 
 class TestTheCommentReachesAPerson:
-    """Posting is not delivering.
+    """The comment is the record now, not the delivery.
 
-    On a repository you own, GitHub's default notification setting is
-    "participating and @mentions". A comment written by Actions on an issue
-    nobody has touched can notify nobody — the delivery step would report
-    success on every run and quietly reach no one, which is the failure mode
-    this whole design is meant to avoid.
+    Delivery moved to the `card-feed` branch, which the EPL CARD routine reads
+    and presents in Claude. The comment must therefore notify nobody: an
+    @mention overrides an ignored subscription, so leaving one in would have
+    kept the emails arriving no matter what the watch settings said.
     """
 
     def _body(self, tmp_path: Path) -> str:
         _write(tmp_path, ready=True, comparison=_comparison(added=[{"label": "x"}]))
         return build_notification(output_dir=tmp_path, now=NOW)["body"]
 
-    def test_the_comment_mentions_someone(self, tmp_path: Path) -> None:
-        from epl_betting_lab.reports.card_notification import NOTIFY_HANDLE
+    def test_the_comment_mentions_nobody(self, tmp_path: Path) -> None:
+        assert "@" not in self._body(tmp_path)
 
-        assert NOTIFY_HANDLE.startswith("@")
-        assert NOTIFY_HANDLE in self._body(tmp_path)
-
-    def test_the_mention_is_near_the_top_where_it_notifies(
-        self, tmp_path: Path
-    ) -> None:
-        from epl_betting_lab.reports.card_notification import NOTIFY_HANDLE
-
-        body = self._body(tmp_path)
-        assert body.index(NOTIFY_HANDLE) < 120
-
-    def test_a_blocked_card_still_reaches_someone(self, tmp_path: Path) -> None:
-        """Losing the card is exactly when the message must not go unseen."""
-        from epl_betting_lab.reports.card_notification import NOTIFY_HANDLE
-
+    def test_a_blocked_card_still_mentions_nobody(self, tmp_path: Path) -> None:
+        """The quiet rule holds on exactly the runs it is tempting to break."""
         _write(tmp_path, ready=False, comparison=_comparison(removed=[{"label": "x"}]))
         body = build_notification(output_dir=tmp_path, now=NOW)["body"]
 
-        assert NOTIFY_HANDLE in body
+        assert "@" not in body
+
+    def test_the_reason_still_leads_the_comment(self, tmp_path: Path) -> None:
+        """Whatever replaced the mention must not have taken the headline."""
+        body = self._body(tmp_path)
+
+        assert "Selections changed" in body[:200]
 
 
 class TestADegradedRunAlwaysSends:

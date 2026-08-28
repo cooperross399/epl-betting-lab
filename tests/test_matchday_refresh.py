@@ -811,20 +811,22 @@ def test_the_card_routine_delivers_in_its_own_final_message() -> None:
     assert "is not a failure" in flat
 
 
-def test_the_card_routine_knows_the_repository_is_private() -> None:
-    """A read failure was reported as though the card might be late.
+def test_the_card_routine_knows_where_the_files_actually_are() -> None:
+    """The feed is an orphan branch, so a checkout of main does not hold it.
 
-    The two are opposite conclusions: one is this task's access, the other is
-    the pipeline. A prompt that does not name the difference invites the wrong
-    one on the day it matters.
+    The first live run had the repository attached and still found nothing:
+    the prompt named two files that are not on the branch it had, so the run
+    fell through to a web fetch and an unauthenticated clone that a private
+    repo can only refuse. It read as an access problem and was a branch
+    problem.
     """
     text = (PROJECT_ROOT / "docs" / "epl_scheduled_tasks_bridge.md").read_text(
         encoding="utf-8"
     )
     flat = " ".join(text.split())
 
-    assert "The repository is PRIVATE" in flat
-    assert "Plain web fetch will NOT work" in flat
+    assert "`card-feed` IS AN ORPHAN BRANCH" in flat
+    assert "git fetch origin card-feed" in flat
     assert "the card could not be READ" in flat
 
 

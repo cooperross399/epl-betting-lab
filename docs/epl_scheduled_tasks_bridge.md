@@ -205,23 +205,29 @@ Two files, rewritten by every run:
   latest_status.json     — date, degraded, trigger, run_url
   latest_card_comment.md — the rendered card
 
-The repository is PRIVATE. Reading it needs a credential, so use whichever of
-these this session actually has, in order, and do not spend long on the others
-once one works:
+`card-feed` IS AN ORPHAN BRANCH. Neither file exists on `main`, and the two
+branches share no history, so a checkout of this repository does NOT contain
+them and looking for them in the working tree will always come up empty. That
+is not a broken card and not missing access — it is the wrong branch. Fetch it
+explicitly, from inside the checkout, which already holds the credential it was
+cloned with:
 
-  1. the `gh` CLI, if it is installed and authenticated:
-       gh api "repos/cooperross399/epl-betting-lab/contents/latest_status.json?ref=card-feed" --jq .content | base64 -d
-       gh api "repos/cooperross399/epl-betting-lab/contents/latest_card_comment.md?ref=card-feed" --jq .content | base64 -d
-  2. a GitHub connector, if one is attached to this task
-  3. the repository itself, if it is attached to this task as a source — read
-     the two files on the `card-feed` branch
+    git fetch origin card-feed
+    git show FETCH_HEAD:latest_status.json
+    git show FETCH_HEAD:latest_card_comment.md
 
-Plain web fetch will NOT work and neither will an unauthenticated clone: a
-private repo answers both with 404 or a credential prompt. If none of the three
-above is available, say exactly that — the card could not be READ — and do not
-describe it as a card that is missing, blocked, or late. A read failure here is
-evidence about this task's access and nothing whatever about the pipeline. Say
-that the fix is to give this task access to the repository, and stop.
+If there is no checkout, use the `gh` CLI instead, if it is installed and
+authenticated:
+
+    gh api "repos/cooperross399/epl-betting-lab/contents/latest_status.json?ref=card-feed" --jq .content | base64 -d
+    gh api "repos/cooperross399/epl-betting-lab/contents/latest_card_comment.md?ref=card-feed" --jq .content | base64 -d
+
+The repository is private, so plain web fetch and a fresh unauthenticated clone
+both fail — 404 or a credential prompt. Neither is worth trying: they cannot
+succeed and their failure says nothing. If both the fetch and `gh` are
+genuinely unavailable, say exactly that — the card could not be READ — and do
+not describe it as a card that is missing, blocked, or late. A read failure is
+evidence about this task's access and nothing whatever about the pipeline.
 
 Do not search email. Delivery moved off email on 28 August 2026; the issue
 comment still exists as the record but notifies nobody, so an empty inbox

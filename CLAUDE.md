@@ -100,6 +100,18 @@ Use the repo, the reports, and GitHub.
   only through the player/line-aware card integration (not built) and a
   reviewed policy approval, and the measurement above is what that review
   should weigh.
+- **The card's fixture window moves with the calendar.** It is the round still
+  to be played, derived in `src/epl_betting_lab/selected_slate.py` from the
+  fixtures in hand, not a pair of dates written down. It used to be hardcoded
+  to the opening round (2026-08-21 through 2026-08-24), which was correct for
+  one week: after that every provider price fell outside it, every market read
+  `unavailable`, and every card came back **Blocked** while the fetch, the
+  mapping and the completeness checks all passed. A green run with no card is
+  the signature of that class of fault — check the selected window in
+  `data/outputs/automated_card_input.md` first.
+- `data/manual/upcoming_fixtures.csv` is still filled in by a human, and the
+  window can only advance as far as that file goes. Keep at least the next
+  round in it.
 - The active odds source is the **provider-derived automated card input**.
   Manual odds entry is not required.
 - `data/manual/current_odds.csv` is **legacy** and must not become active again.

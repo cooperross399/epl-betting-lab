@@ -20,8 +20,8 @@ from epl_betting_lab.reports.current_odds_validation import (
     render_current_odds_validation_report,
 )
 from epl_betting_lab.selected_slate import (
-    SELECTED_WEEK1_LABEL,
     filter_to_selected_window,
+    frame_window_label,
     outside_selected_window,
 )
 from epl_betting_lab.workflow_status import (
@@ -401,7 +401,7 @@ def _base_summary(
         "fixtures_path": str(fixtures_path),
         "upcoming_fixture_count": 0,
         "week1_fixture_count": 0,
-        "selected_window": SELECTED_WEEK1_LABEL,
+        "selected_window": "no dated fixtures",
         "selected_window_fixture_count": 0,
         "fixtures_outside_selected_window_count": 0,
         "fixtures_outside_selected_window": [],
@@ -583,9 +583,10 @@ def run_week1_launch_readiness(
     # Without a matchweek column the old fallback counted every upcoming fixture
     # as "Week 1", which reported a two-round slate as a single week. Fall back
     # to the reviewed date window instead.
-    selected_fixtures = filter_to_selected_window(upcoming_fixtures)
-    outside_fixtures = outside_selected_window(upcoming_fixtures)
-    summary["selected_window"] = SELECTED_WEEK1_LABEL
+    selected_fixtures = filter_to_selected_window(upcoming_fixtures, today=today)
+    outside_fixtures = outside_selected_window(upcoming_fixtures, today=today)
+    window_label = frame_window_label(upcoming_fixtures, today=today)
+    summary["selected_window"] = window_label
     summary["selected_window_fixture_count"] = int(len(selected_fixtures))
     summary["fixtures_outside_selected_window_count"] = int(len(outside_fixtures))
     summary["fixtures_outside_selected_window"] = [
@@ -602,12 +603,12 @@ def run_week1_launch_readiness(
     if not week_column:
         slate_warnings.append(
             "`upcoming_fixtures.csv` has no matchweek column, so Week 1 is "
-            f"determined by the reviewed date window ({SELECTED_WEEK1_LABEL})."
+            f"determined by the reviewed date window ({window_label})."
         )
     if len(outside_fixtures):
         slate_warnings.append(
             f"{len(outside_fixtures)} upcoming fixture(s) fall outside the "
-            f"selected Week 1 window ({SELECTED_WEEK1_LABEL}). They belong to a "
+            f"selected Week 1 window ({window_label}). They belong to a "
             "later round and should not be treated as Week 1."
         )
     summary["slate_warnings"] = slate_warnings
@@ -714,7 +715,9 @@ def run_week1_launch_readiness(
 
     # Warn (never rewrite) when the odds template spans more than Week 1. The
     # file is protected: this reports the mismatch and leaves the fix to a human.
-    odds_outside = outside_selected_window(odds) if not odds.empty else odds.iloc[0:0]
+    odds_outside = (
+        outside_selected_window(odds, today=today) if not odds.empty else odds.iloc[0:0]
+    )
     summary["odds_rows_outside_selected_window_count"] = int(len(odds_outside))
     outside_matches = sorted(
         {
@@ -728,7 +731,7 @@ def run_week1_launch_readiness(
         summary.setdefault("slate_warnings", []).append(
             f"`{current_odds_path.name}` contains {len(odds_outside)} row(s) "
             f"across {len(outside_matches)} match(es) outside the selected "
-            f"Week 1 window ({SELECTED_WEEK1_LABEL}). The file was not modified; "
+            f"Week 1 window ({window_label}). The file was not modified; "
             "trim or re-scope it deliberately before treating it as Week 1."
         )
 

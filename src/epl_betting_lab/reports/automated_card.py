@@ -52,7 +52,6 @@ from epl_betting_lab.reports.pick_display import (
 from epl_betting_lab.reports.current_odds_validation import (
     CurrentOddsValidationError,
 )
-from epl_betting_lab.selected_slate import SELECTED_WEEK1_LABEL
 
 
 CARD_JSON_FILENAME = "automated_card.json"
@@ -366,7 +365,7 @@ def build_automated_card(
     summary: dict[str, Any] = {
         "report": "Automated EPL Card",
         "generated_at": generated_at.isoformat(timespec="seconds"),
-        "window_label": SELECTED_WEEK1_LABEL,
+        "window_label": str(input_report.get("window_label") or "no dated fixtures"),
         "card_generated": False,
         "odds_source": str(card_input),
         "manual_odds_entry_required": False,

@@ -48,8 +48,8 @@ from epl_betting_lab.providers.odds_api_staging_provider import (
 from epl_betting_lab.providers.team_names import normalize_team_name
 from epl_betting_lab.providers.credential_check import redact
 from epl_betting_lab.selected_slate import (
-    SELECTED_WEEK1_LABEL,
     in_selected_window,
+    selected_window_label,
 )
 
 
@@ -177,6 +177,11 @@ def summarize_bulk_response(
         )
 
     frame = pd.DataFrame(rows)
+    window_label = (
+        selected_window_label(frame["date"])
+        if not frame.empty
+        else "no dated fixtures"
+    )
     if restrict_to_window and not frame.empty:
         frame = frame[in_selected_window(frame["date"])]
 
@@ -186,6 +191,7 @@ def summarize_bulk_response(
 
     return {
         "endpoint": "bulk",
+        "window_label": window_label,
         "event_count": len(considered),
         "events": considered,
         "markets_ever_returned": sorted(
@@ -964,7 +970,7 @@ def save_provider_market_discovery(
         "generated_at": (now or datetime.now(timezone.utc)).isoformat(
             timespec="seconds"
         ),
-        "window_label": SELECTED_WEEK1_LABEL,
+        "window_label": str(bulk.get("window_label") or "no dated fixtures"),
         "bulk_capable_markets": list(BULK_CAPABLE_MARKETS),
         "event_only_markets": list(EVENT_ONLY_MARKETS),
         "event_endpoint_queried": event_summary is not None,

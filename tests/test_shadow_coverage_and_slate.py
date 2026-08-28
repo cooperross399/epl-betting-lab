@@ -15,11 +15,10 @@ from epl_betting_lab.reports.provider_shadow_verification import (
 )
 from epl_betting_lab.reports.week1_launch_readiness import run_week1_launch_readiness
 from epl_betting_lab.selected_slate import (
-    SELECTED_WEEK1_END,
-    SELECTED_WEEK1_LABEL,
-    SELECTED_WEEK1_START,
     filter_to_selected_window,
     outside_selected_window,
+    selected_window,
+    selected_window_label,
 )
 
 
@@ -70,24 +69,72 @@ def _odds_frame(
 # --- selected window -------------------------------------------------------
 
 
-def test_selected_window_is_the_opening_round_only() -> None:
-    assert SELECTED_WEEK1_START == date(2026, 8, 21)
-    assert SELECTED_WEEK1_END == date(2026, 8, 24)
+def test_selected_window_is_the_round_still_to_be_played() -> None:
+    frame = _fixture_frame(ROUND_ONE + ROUND_TWO)
+
+    assert selected_window(frame["date"], today=date(2026, 8, 17)) == (
+        date(2026, 8, 21),
+        date(2026, 8, 24),
+    )
+
+
+def test_selected_window_moves_on_once_the_round_has_been_played() -> None:
+    """The bug this replaces: a window written down once stops matching.
+
+    Every provider price falls outside a window that has stopped moving, so
+    every market reads `unavailable` and the card comes back Blocked with
+    nothing wrong anywhere else.
+    """
+    frame = _fixture_frame(ROUND_ONE + ROUND_TWO)
+
+    assert selected_window(frame["date"], today=date(2026, 8, 25)) == (
+        date(2026, 8, 28),
+        date(2026, 8, 30),
+    )
+    assert len(filter_to_selected_window(frame, today=date(2026, 8, 25))) == 2
+
+
+def test_selected_window_holds_while_its_own_round_is_in_progress() -> None:
+    frame = _fixture_frame(ROUND_ONE + ROUND_TWO)
+
+    # Saturday of a Friday-to-Sunday round still describes the whole round,
+    # so a card built mid-round covers the fixtures that are left.
+    assert selected_window(frame["date"], today=date(2026, 8, 29)) == (
+        date(2026, 8, 28),
+        date(2026, 8, 30),
+    )
+
+
+def test_selected_window_falls_back_to_the_last_round_when_nothing_is_upcoming() -> None:
+    frame = _fixture_frame(ROUND_ONE)
+
+    assert selected_window(frame["date"], today=date(2027, 1, 1)) == (
+        date(2026, 8, 21),
+        date(2026, 8, 24),
+    )
 
 
 def test_window_filters_split_the_two_rounds() -> None:
     frame = _fixture_frame(ROUND_ONE + ROUND_TWO)
+    today = date(2026, 8, 17)
 
-    assert len(filter_to_selected_window(frame)) == 3
-    assert len(outside_selected_window(frame)) == 2
+    assert len(filter_to_selected_window(frame, today=today)) == 3
+    assert len(outside_selected_window(frame, today=today)) == 2
 
 
 def test_window_boundaries_are_inclusive() -> None:
     frame = _fixture_frame(
-        [("2026-08-21", "A", "B"), ("2026-08-24", "C", "D"), ("2026-08-25", "E", "F")]
+        [("2026-08-21", "A", "B"), ("2026-08-24", "C", "D"), ("2026-09-01", "E", "F")]
     )
 
-    assert len(filter_to_selected_window(frame)) == 2
+    assert len(filter_to_selected_window(frame, today=date(2026, 8, 17))) == 2
+
+
+def test_an_undated_frame_selects_nothing_rather_than_everything() -> None:
+    frame = _fixture_frame([]).assign(date=[])
+
+    assert selected_window(frame["date"], today=date(2026, 8, 17)) is None
+    assert filter_to_selected_window(frame, today=date(2026, 8, 17)).empty
 
 
 # --- coverage scopes -------------------------------------------------------
@@ -106,7 +153,7 @@ def test_coverage_scopes_use_different_denominators(tmp_path: Path) -> None:
     staging_fixtures = _fixture_frame(ROUND_ONE)
 
     coverage = _slate_coverage_metrics(
-        odds, staging_fixtures, repository_root=tmp_path
+        odds, staging_fixtures, repository_root=tmp_path, today=date(2026, 8, 17)
     )
 
     assert coverage["provider_returned"]["status"] == "Complete"
@@ -318,4 +365,8 @@ def test_week1_never_overwrites_an_existing_odds_file(tmp_path: Path) -> None:
 
 def test_window_label_is_shared_between_reports(tmp_path: Path) -> None:
     summary = _run_readiness(tmp_path, ROUND_ONE)
-    assert summary["selected_window"] == SELECTED_WEEK1_LABEL
+    expected = selected_window_label(
+        _fixture_frame(ROUND_ONE)["date"], today=date(2026, 8, 17)
+    )
+    assert summary["selected_window"] == expected
+    assert expected == "2026-08-21 through 2026-08-24"

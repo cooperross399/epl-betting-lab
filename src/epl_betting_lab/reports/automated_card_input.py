@@ -38,8 +38,8 @@ from epl_betting_lab.market_eligibility import (
 )
 from epl_betting_lab.reports.pick_display import format_market_list
 from epl_betting_lab.selected_slate import (
-    SELECTED_WEEK1_LABEL,
     filter_to_selected_window,
+    frame_window_label,
 )
 
 
@@ -414,6 +414,10 @@ def save_automated_card_input(
         dict.fromkeys(list(disabled_markets) + policy_disabled)
     )
 
+    # The window is the round the fixtures are about, not a fixed pair of
+    # dates, so the card follows the calendar instead of expiring with it.
+    window_label = frame_window_label(fixtures)
+
     eligibility = evaluate_market_eligibility(
         odds,
         fixtures,
@@ -421,7 +425,7 @@ def save_automated_card_input(
         validation_passed=bool(validation_passed),
         freshness_passed=bool(freshness_passed),
         disabled_markets=effective_disabled,
-        window_label=SELECTED_WEEK1_LABEL,
+        window_label=window_label,
     )
 
     frame, notes = build_automated_card_input(odds, fixtures, eligibility=eligibility)
@@ -451,7 +455,7 @@ def save_automated_card_input(
         "report": "Automated Card Input",
         "generated_at": generated_at.isoformat(timespec="seconds"),
         "status": status,
-        "window_label": SELECTED_WEEK1_LABEL,
+        "window_label": window_label,
         "fixtures_in_window": eligibility.fixtures_in_window,
         "row_count": int(len(frame)),
         "card_input_path": display_path,

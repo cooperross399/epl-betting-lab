@@ -29,6 +29,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass, field
+from datetime import date
 
 import pandas as pd
 
@@ -215,6 +216,7 @@ def evaluate_market_eligibility(
     markets: Iterable[str] | None = None,
     window_label: str = "",
     restrict_to_window: bool = True,
+    today: date | None = None,
 ) -> EligibilityReport:
     """Decide, per market, whether the automated card may use it.
 
@@ -226,9 +228,13 @@ def evaluate_market_eligibility(
     disabled = {m.strip().casefold() for m in disabled_markets}
 
     window_fixtures = (
-        filter_to_selected_window(fixtures) if restrict_to_window else fixtures
+        filter_to_selected_window(fixtures, today=today)
+        if restrict_to_window
+        else fixtures
     )
-    window_odds = filter_to_selected_window(odds) if restrict_to_window else odds
+    window_odds = (
+        filter_to_selected_window(odds, today=today) if restrict_to_window else odds
+    )
 
     expected_ids = _fixture_ids(window_fixtures)
     labels = {

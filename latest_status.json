@@ -1,6 +1,6 @@
 {
-  "date": "2026-08-28",
+  "date": "2026-08-29",
   "degraded": "false",
-  "trigger": "workflow_dispatch",
-  "run_url": "https://github.com/cooperross399/epl-betting-lab/actions/runs/33176533102"
+  "trigger": "schedule",
+  "run_url": "https://github.com/cooperross399/epl-betting-lab/actions/runs/33256804672"
 }

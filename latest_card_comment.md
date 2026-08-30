@@ -1,18 +1,16 @@
-## Sunday 30 August, 14:19 UTC — scheduled run
+## Sunday 30 August, 14:57 UTC — scheduled run
 
-Selections changed: 3 added, 16 dropped.
+Selections changed: 4 dropped.
 
-Provider quota: 4054339 (about 65392 more runs)
+Provider quota: 4054202 (about 65390 more runs)
 
-Markets: **1x2, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: total_2_5, btts)
+Markets: **1x2, corners_1x2** (excluded: total_2_5, btts, double_chance, draw_no_bet, corners_total_9_5, corners_total_10_5)
 
 ### Best bets
 
 | Match | Market | Selection | Tier | Edge | Price | Book | Units |
 |:------|:-------|:----------|:-----|-----:|------:|:-----|------:|
-| Man United v Ipswich | `corners_total_9_5` | over | B | +5.5% | -120 | Caesars | 0.25 |
 | Man United v Ipswich | `corners_1x2` | away | C | +6.9% | +550 | DraftKings | 0.1 |
-| Man United v Ipswich | `corners_total_10_5` | over | C | +5.0% | +135 | DraftKings | 0.1 |
 
 ### Leans
 
@@ -20,25 +18,10 @@ _None._
 
 ### What changed
 
-- **Added:** Aston Villa v Arsenal draw_no_bet home
-- **Added:** Man United v Ipswich corners_1x2 away
-- **Added:** Man United v Ipswich corners_total_10_5 over
-- **Dropped:** Aston Villa v Arsenal corners_1x2 home
-- **Dropped:** Aston Villa v Arsenal corners_total_10_5 over
-- **Dropped:** Chelsea v Brighton corners_1x2 home
-- **Dropped:** Chelsea v Brighton double_chance draw_or_away
-- **Dropped:** Chelsea v Brighton draw_no_bet away
-- **Dropped:** Leeds v Brentford double_chance draw_or_away
-- **Dropped:** Sunderland v Fulham 1x2 away
-- **Dropped:** Sunderland v Fulham btts no
-- **Dropped:** Sunderland v Fulham double_chance draw_or_away
-- **Dropped:** Sunderland v Fulham draw_no_bet away
-- **Dropped:** Sunderland v Fulham total_2_5 under
-- **Dropped:** Tottenham v Newcastle corners_1x2 away
-- **Dropped:** Tottenham v Newcastle corners_total_10_5 over
-- **Dropped:** Tottenham v Newcastle corners_total_9_5 over
-- **Dropped:** Tottenham v Newcastle double_chance draw_or_away
-- **Dropped:** Tottenham v Newcastle draw_no_bet away
+- **Dropped:** Aston Villa v Arsenal draw_no_bet home
+- **Dropped:** Man United v Ipswich corners_total_10_5 over
+- **Dropped:** Man United v Ipswich corners_total_9_5 over
+- **Dropped:** Man United v Ipswich draw_no_bet home
 
 ### How the recommendations have done
 
@@ -57,4 +40,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/33316524560)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/33318225777)

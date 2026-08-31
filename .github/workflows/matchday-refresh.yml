@@ -446,6 +446,16 @@ jobs:
         # comment, so a missing commit for today means the workflow itself did
         # not finish, which is exactly what the routine should speak up about.
         #
+        # ONE EXCEPTION, and it protects that promise rather than weakening it:
+        # a degraded run never replaces a good card from the same day. The feed
+        # holds two files and the last writer wins, so a run that produces
+        # nothing would otherwise overwrite a card that had already been built
+        # and delivered — and the day's later triggers are exactly the ones most
+        # likely to arrive after a deadline. Today's commit is already on the
+        # branch when this skip fires, so "no commit today" still means "the run
+        # did not finish". The blocked run is still recorded: it finishes red,
+        # its summary says what broke, and the issue comment carries it.
+        #
         # Plumbing commits on purpose: the working tree is full of generated
         # files that must never reach a branch, and hash-object/mktree/
         # commit-tree build the two-file commit without touching it. Each push
@@ -480,6 +490,20 @@ jobs:
           PARENT=""
           if git fetch "$REMOTE" +refs/heads/card-feed:refs/card-feed-tip 2>/dev/null; then
             PARENT=$(git rev-parse refs/card-feed-tip)
+          fi
+          # A good card outranks a later bad one from the same day. "unknown"
+          # counts as degraded here: a run that cannot say whether it went
+          # wrong is not evidence good enough to discard a card that worked.
+          DEGRADED="${{ steps.health.outputs.degraded || 'unknown' }}"
+          if [ -n "$PARENT" ] && [ "$DEGRADED" != "false" ]; then
+            PREV=$(git show "$PARENT:latest_status.json" 2>/dev/null || echo "{}")
+            PREV_DAY=$(printf '%s' "$PREV" | jq -r '.date // ""')
+            PREV_DEGRADED=$(printf '%s' "$PREV" | jq -r '.degraded // ""')
+            if [ "$PREV_DAY" = "$DAY" ] && [ "$PREV_DEGRADED" = "false" ]; then
+              echo "card-feed left alone: $DAY already holds a good card and this run is degraded ($DEGRADED)."
+              echo "The blocked card is in this run's summary and in the issue comment."
+              exit 0
+            fi
           fi
           export GIT_AUTHOR_NAME="Matchday Refresh" GIT_AUTHOR_EMAIL="actions@github.com"
           export GIT_COMMITTER_NAME="Matchday Refresh" GIT_COMMITTER_EMAIL="actions@github.com"

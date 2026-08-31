@@ -67,8 +67,8 @@ on:
     # email only fires when the selections change — so a duplicate run is
     # invisible unless it has something new to say.
     #
-    # Eleven runs a week is about 3,000 credits a month against 20,000 —
-    # roughly a seventh of the allowance. Measured from consecutive runs: the counter moves
+    # Nineteen runs a week is about 5,100 credits a month against 20,000 —
+    # roughly a quarter of the allowance. Measured from consecutive runs: the counter moves
     # about 62 a run with every market fetched. Two earlier notes here were
     # wrong in both directions, 1,050 and 4,600, each computed rather than
     # measured.
@@ -84,29 +84,67 @@ on:
     # the deadline, both were refused, and the emails read as a provider fault
     # rather than what it was — a cron that arrived late twice.
     #
-    # So they now sit at the front of the window instead of the back. The
-    # earliest legal trigger is 04:00 UTC, which is midnight in New York and
-    # the moment the receipt first counts as Thursday's; 04:30 keeps clear of
-    # that boundary and buys about nine and a half hours of slack, and the
-    # three are spread so a delay would have to swallow the whole window
-    # rather than a single trigger. The 11:30 run stays because it is the one
-    # whose prices are freshest at the 09:00 New York read.
+    # So they now sit at the front of the window instead of the back, and the
+    # window is measured in landing times rather than nominal ones — see the
+    # lateness note below, which is what moved the last Thursday trigger from
+    # 10:30 to 08:15. At the observed delay 10:30 lands about 15:30 UTC and is
+    # refused every week, and because it fires last it would replace that
+    # morning's good card with a blocked one.
     #
     # Nothing here relaxes the cutoff: a run that arrives after 10:00 New York
     # is still refused. Dispatching the workflow by hand is the documented way
     # through — the policy exempts a manual run because a person choosing to
     # run it late is the deliberate act the deadline exists to protect.
-    - cron: "30 4 * * 4"
-    - cron: "0 8 * * 4"
-    - cron: "30 10 * * 4"
+    #
+    # LATENESS IS PART OF THE SCHEDULE NOW. Since 2026-08-27 GitHub has started
+    # this repository's triggers four and a half to five and a half hours late,
+    # every one of them; before that week the same crons ran 15 to 55 minutes
+    # late. Measured, not assumed: 09:00 fired at 14:08 and 14:18 on the 29th
+    # and 30th, and 10:30 fired at 15:08 and 14:56. Four for four. A nominal
+    # time is therefore not a landing time, and every deadline below is checked
+    # against nominal + 5h30 rather than against nominal.
+    #
+    # That splits each matchday's triggers into two roles:
+    #
+    #   READER   early enough that even a late start lands before the 11:30 UTC
+    #            relay carries the card to the 08:00 New York read. A card built
+    #            after the relay is a card he sees the following day, which is
+    #            exactly what happened all weekend.
+    #   FRESHNESS late enough that its card is still inside the 12-hour window at
+    #            a 20:00 UTC evening kick-off. A reader trigger alone expires
+    #            early afternoon; a freshness trigger alone never beats the relay.
+    #
+    # One trigger cannot hold both ends: 12-hour freshness at a 20:00 kick-off
+    # needs 08:00 UTC or later, and beating the relay through a 5h30 delay needs
+    # 06:00 UTC or earlier. So each matchday gets a pair of each, ninety minutes
+    # apart, and the pairs are what makes a dropped trigger survivable.
+    - cron: "0 3 * * 5"
+    - cron: "30 4 * * 5"
     - cron: "0 9 * * 5"
     - cron: "30 10 * * 5"
+    - cron: "0 3 * * 6"
+    - cron: "30 4 * * 6"
     - cron: "0 9 * * 6"
     - cron: "30 10 * * 6"
+    - cron: "0 3 * * 0"
+    - cron: "30 4 * * 0"
     - cron: "0 9 * * 0"
     - cron: "30 10 * * 0"
+    - cron: "0 3 * * 1"
+    - cron: "30 4 * * 1"
     - cron: "0 9 * * 1"
     - cron: "30 10 * * 1"
+    # Thursday is the exception, and the tightest day in the schedule. It has no
+    # matches, so nothing needs to stay fresh into an evening — but it is fenced
+    # on both sides: nothing before 04:00 UTC counts as a Thursday receipt in New
+    # York, and nothing landing after 14:00 UTC is accepted at all. Through a
+    # 5h30 delay that leaves 04:00 to 08:30 UTC for every trigger, and a spread
+    # of 4 hours rather than the 6 it used to have. 04:15 keeps clear of the
+    # New York midnight boundary, 05:45 is the last trigger that still beats
+    # the relay, and 08:15 is the last one that cannot be refused outright.
+    - cron: "15 4 * * 4"
+    - cron: "45 5 * * 4"
+    - cron: "15 8 * * 4"
   workflow_dispatch:
     inputs:
       skip_provider_fetch:

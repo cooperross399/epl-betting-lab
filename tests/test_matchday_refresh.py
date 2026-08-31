@@ -53,50 +53,100 @@ def test_every_matchday_has_a_run() -> None:
     assert days == {"4", "5", "6", "0", "1"}
 
 
-def test_the_weekend_runs_land_before_the_earliest_kick_off() -> None:
-    """A 12:30 UK kick-off is 11:30 UTC in summer.
-
-    Every weekend trigger, primary and backup, has to precede it — a backup
-    that fires after kick-off would refresh prices nobody can take.
-    """
-    text = _workflow()
-    weekend = [
-        line
-        for line in text.splitlines()
-        if "- cron:" in line and line.rstrip().endswith(('* * 6"', '* * 0"'))
-    ]
-
-    assert len(weekend) >= 2
-    for line in weekend:
-        minute, hour = line.split('"')[1].split()[:2]
-        at = int(hour) + int(minute) / 60
-        assert at <= 11.0, f"{hour}:{minute} UTC is too late for a 12:30 UK kick-off"
-
-
 #: The relay that carries the card to Cooper runs at 07:30 New York (11:30
-#: UTC in summer) so he can read it at 08:00. Every trigger has to land in
-#: front of it.
+#: UTC in summer) so he can read it at 08:00.
 RELAY_UTC = 11.5
 
+#: What GitHub's scheduler actually adds to a trigger on this repository.
+#:
+#: Measured, not assumed. On 2026-08-29 and 30 the 09:00 cron fired at 14:08
+#: and 14:18, and the 10:30 cron at 15:08 and 14:56 — four for four, between
+#: 4h26 and 5h18 late. The same crons ran 15 to 55 minutes late the week
+#: before, so this is a change in GitHub's behaviour rather than a constant of
+#: the schedule, and 5h30 is the observed worst case with a little room.
+#:
+#: Every deadline in this file is checked against nominal + this, because the
+#: fix that preceded it was checked against nominal and shipped a schedule
+#: that had already stopped working. If GitHub's delays shrink again, this may
+#: come down — but only on evidence, and the early triggers cost little enough
+#: that there is no hurry.
+OBSERVED_LATENESS_H = 5.5
 
-def test_every_trigger_lands_before_the_relay_reads_it() -> None:
-    """A card built after the read is a card he sees the following day.
+#: A 12:30 UK kick-off is 11:30 UTC in summer: the earliest of the week.
+EARLIEST_KICK_OFF_UTC = 11.5
+#: A 20:00 UK evening kick-off is 19:00 UTC; 20:00 UTC is the safe ceiling.
+LATEST_KICK_OFF_UTC = 20.0
+#: A run older than this is refused as stale, so a card has to be built within
+#: this many hours of the kick-off it is meant to cover.
+STALE_AFTER_H = 12.0
 
-    Friday and Monday used to fire at 11:30 and 13:00 UTC, which was early
-    enough for their own evening kick-offs and too late for a reader who opens
-    the card at 08:00 New York. Kick-off is not the only deadline a schedule
-    has.
+#: Thursday carries the planning card and has no matches of its own.
+MATCH_DAYS = ("5", "6", "0", "1")
+
+
+def _trigger_hours(day: str) -> list[float]:
+    """Nominal UTC hours of every trigger on one cron weekday."""
+    return sorted(
+        int(line.split('"')[1].split()[1]) + int(line.split('"')[1].split()[0]) / 60
+        for line in _workflow().splitlines()
+        if "- cron:" in line and line.rstrip().endswith(f'* * {day}"')
+    )
+
+
+def test_every_matchday_beats_the_relay_even_when_github_runs_late() -> None:
+    """A card built after the relay is a card he sees the following day.
+
+    This is the failure the 5h30 constant exists for. Every trigger was legal
+    at its nominal time all weekend and every one of them landed after the
+    relay had already read the feed, so the 08:00 New York read got Saturday's
+    card on Sunday and Sunday's on Monday. Nothing failed; the schedule was
+    simply being graded on a clock GitHub had stopped keeping.
+
+    Two per day, because one is not a schedule.
     """
-    late = []
-    for line in _workflow().splitlines():
-        if "- cron:" not in line:
-            continue
-        minute, hour = line.split('"')[1].split()[:2]
-        at = int(hour) + int(minute) / 60
-        if at >= RELAY_UTC:
-            late.append(f"{hour}:{minute} UTC")
+    for day in ("4",) + MATCH_DAYS:
+        readers = [
+            at
+            for at in _trigger_hours(day)
+            if at + OBSERVED_LATENESS_H <= RELAY_UTC
+        ]
+        assert len(readers) >= 2, (
+            f"day {day} has {len(readers)} trigger(s) that still beat the relay "
+            f"at +{OBSERVED_LATENESS_H}h"
+        )
 
-    assert not late, f"triggers fire at or after the relay: {late}"
+
+def test_the_weekend_runs_land_before_the_earliest_kick_off() -> None:
+    """A refresh that arrives after kick-off prices nobody can take."""
+    for day in ("6", "0"):
+        in_time = [
+            at
+            for at in _trigger_hours(day)
+            if at + OBSERVED_LATENESS_H <= EARLIEST_KICK_OFF_UTC
+        ]
+        assert in_time, f"day {day} has no trigger landing before a 12:30 UK kick-off"
+
+
+def test_every_matchday_stays_fresh_through_an_evening_kick_off() -> None:
+    """The other end of the same rope, and the reason one trigger cannot do it.
+
+    Beating the relay through a 5h30 delay needs a trigger at 06:00 UTC or
+    earlier; surviving twelve hours to a 20:00 UTC kick-off needs one at 08:00
+    UTC or later. Drop the late pair to satisfy the relay and every evening
+    match reads a card that expired in the early afternoon — which is why the
+    fix here was to add triggers rather than to move them.
+
+    Freshness is measured at nominal, where a run is oldest at kick-off; a
+    late start only makes the card fresher.
+    """
+    for day in MATCH_DAYS:
+        covering = [
+            at
+            for at in _trigger_hours(day)
+            if at + STALE_AFTER_H >= LATEST_KICK_OFF_UTC
+            and at + OBSERVED_LATENESS_H <= LATEST_KICK_OFF_UTC
+        ]
+        assert covering, f"day {day} has no trigger still fresh at a 20:00 UTC kick-off"
 
 
 def test_every_matchday_has_a_backup_trigger() -> None:
@@ -609,17 +659,13 @@ def test_the_stated_credit_cost_matches_the_schedule() -> None:
     monthly = runs_per_week * WEEKS_PER_MONTH * MEASURED_REQUESTS_PER_RUN
 
     # The comment should state a figure within a reasonable distance of truth.
-    assert "3,000 credits a month" in text
-    assert 2_600 < monthly < 3_400, f"schedule now costs ~{monthly:.0f}"
+    assert "5,100 credits a month" in text
+    assert 4_700 < monthly < 5_600, f"schedule now costs ~{monthly:.0f}"
     assert monthly < MONTHLY_REQUEST_ALLOWANCE
 
 
 def _thursday_trigger_hours() -> list[float]:
-    return sorted(
-        int(line.split('"')[1].split()[1]) + int(line.split('"')[1].split()[0]) / 60
-        for line in _workflow().splitlines()
-        if "- cron:" in line and line.rstrip().endswith('* * 4"')
-    )
+    return _trigger_hours("4")
 
 
 def test_thursday_triggers_precede_the_policy_cutoff() -> None:
@@ -628,9 +674,17 @@ def test_thursday_triggers_precede_the_policy_cutoff() -> None:
     That is 14:00 UTC in summer. A Thursday trigger later than that is blocked
     by policy every week, and reports a provider fault rather than a scheduling
     one.
+
+    Checked at the landing time, not the nominal one. 10:30 UTC was inside the
+    window on paper and outside it in practice: at the delay GitHub actually
+    runs it lands about 15:30, is refused every Thursday, and — firing last —
+    replaces that morning's good card on the feed with a blocked one.
     """
     for at in _thursday_trigger_hours():
-        assert at < THURSDAY_CUTOFF_UTC, f"{at:.2f} UTC is past the cutoff"
+        landing = at + OBSERVED_LATENESS_H
+        assert landing < THURSDAY_CUTOFF_UTC, (
+            f"{at:.2f} UTC lands at {landing:.2f} UTC, past the cutoff"
+        )
 
 
 def test_thursday_triggers_start_on_thursday_in_new_york() -> None:
@@ -658,8 +712,12 @@ def test_thursday_keeps_slack_for_a_late_cron() -> None:
     assert len(hours) >= 3, "one late or dropped trigger must not cost the day"
     slack = THURSDAY_CUTOFF_UTC - hours[0]
     assert slack >= 9.0, f"earliest Thursday trigger has only {slack:.1f}h of slack"
-    # Spread, not clustered: three triggers in one hour share one outage.
-    assert hours[-1] - hours[0] >= 5.0, "triggers are bunched too closely together"
+    # Spread, not clustered: three triggers in one hour share one outage. Four
+    # hours rather than six, because Thursday is fenced on both sides — nothing
+    # before 04:00 UTC is a Thursday receipt in New York, and nothing landing
+    # after 14:00 UTC is accepted — which leaves 04:00 to 08:30 UTC once the
+    # observed delay is taken off the back. The whole window is the spread.
+    assert hours[-1] - hours[0] >= 4.0, "triggers are bunched too closely together"
 
 
 def test_the_card_routine_prompt_matches_how_leans_are_staked() -> None:

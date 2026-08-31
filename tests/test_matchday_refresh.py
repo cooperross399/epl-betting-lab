@@ -1030,6 +1030,49 @@ def test_the_card_feed_publishes_on_every_run() -> None:
     assert "latest_status.json" in following
 
 
+def test_a_degraded_run_never_replaces_a_good_card_from_the_same_day() -> None:
+    """The feed is two files and the last writer wins.
+
+    A day's later triggers are the ones most likely to arrive after a deadline
+    and be refused, and a refused run still reaches the publish step because it
+    is `if: always()`. Without this guard, Thursday's 10:30 trigger landing past
+    the 14:00 cutoff would replace that morning's good card with a blocked one,
+    and the relay would carry the blocked one to the read.
+
+    The guard is narrow on purpose: same day, previous card good, this run not
+    good. A first-of-the-day failure still publishes, because then there is no
+    good card to protect and the routine needs to see the blocker.
+    """
+    text = _workflow()
+    publish = text.index("Publish the card to the card-feed branch")
+    following = text[publish : publish + 6000]
+
+    assert 'PREV_DAY" = "$DAY"' in following, "the guard must compare the same day"
+    assert 'PREV_DEGRADED" = "false"' in following, "it must only protect a good card"
+    assert 'DEGRADED" != "false"' in following, "a good run must still publish"
+    # "unknown" must not read as healthy: it is the value when the health step
+    # never ran, which is a run that cannot vouch for itself.
+    assert "|| 'unknown' }}" in following
+
+
+def test_a_first_failure_of_the_day_still_reaches_the_feed() -> None:
+    """Silence has to keep meaning "the run did not finish".
+
+    The guard may only skip when the branch already holds today's commit. If it
+    could skip on an empty or older feed, a blocked run would leave the branch
+    looking exactly like a workflow that never started, which is the one thing
+    the feed exists to rule out.
+    """
+    text = _workflow()
+    publish = text.index("Publish the card to the card-feed branch")
+    following = text[publish : publish + 6000]
+    guard = following[following.index("A good card outranks") :]
+    skip = guard[: guard.index("exit 0")]
+
+    assert '[ -n "$PARENT" ]' in skip, "no parent means nothing to protect"
+    assert skip.count("exit 0") == 0
+
+
 def test_the_card_comment_notifies_nobody() -> None:
     """Delivery is the feed now, so the comment must not reach an inbox.
 

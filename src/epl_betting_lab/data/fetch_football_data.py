@@ -75,6 +75,18 @@ def load_season(path: Path, season: str) -> pd.DataFrame:
         "B365H", "B365D", "B365A", "AvgH", "AvgD", "AvgA", "MaxH", "MaxD", "MaxA",
         "B365>2.5", "B365<2.5", "Avg>2.5", "Avg<2.5", "Max>2.5", "Max<2.5",
         "AHh", "B365AHH", "B365AHA", "AvgAHH", "AvgAHA",
+        # Closing odds. Football-Data marks them with a C: AvgCH is the average
+        # home price at kick-off, AvgH the opening one.
+        #
+        # These were being dropped, and the backtest asked for `CloseH` and
+        # always got nothing — so every closing-line column came back empty and
+        # CLV could not be computed at all. That matters more than it sounds:
+        # profit needs about 1,500 settled bets to separate a 5% edge from
+        # zero, roughly twelve seasons, while beating the closing line gives a
+        # readable signal per bet. It is the only feedback loop here that
+        # returns an answer inside a season.
+        "B365CH", "B365CD", "B365CA", "AvgCH", "AvgCD", "AvgCA",
+        "B365C>2.5", "B365C<2.5", "AvgC>2.5", "AvgC<2.5",
     ]
     keep = [c for c in desired if c in df.columns]
     df = df[keep].copy()

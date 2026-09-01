@@ -115,6 +115,13 @@ Season code examples:
 
 ```bash
 python scripts/run_backtest.py
+
+# Team xG from Understat (needed by the xG ratings and the out-of-sample report)
+python scripts/fetch_understat_xg.py
+
+# Bet rules scored on seasons they were not tuned on, per ratings config;
+# read the test columns and docs/no_edge_out_of_sample.md
+python scripts/run_out_of_sample.py
 ```
 
 This creates:

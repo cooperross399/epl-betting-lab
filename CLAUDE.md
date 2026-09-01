@@ -76,6 +76,28 @@ Use the repo, the reports, and GitHub.
   from zero would take about 1,537 bets — roughly twelve seasons at the rate
   this system bets. Say this plainly when asked whether it works:
   `docs/what_we_can_and_cannot_claim.md`.
+- **The model has better ratings available, and the live card does not use
+  them yet — on purpose.** Opponent-adjusted attack/defence, a 365-day
+  half-life on match age, and ratings fitted on 70% Understat xG / 30% goals
+  (`RatingConfig`, `src/epl_betting_lab/models/poisson_goals.py`) beat the old
+  goals-ratio ratings on every threshold-free measure: 1X2 log loss 1.0014 →
+  0.9835 against the market's 0.9654. The card still runs `CARD_RATINGS =
+  RatingConfig.legacy()` because its bet rule was tuned to the old model and,
+  under that rule, the new one bets draws and long-priced away sides for −74
+  units. Do not switch the card's ratings without rebuilding the rule and
+  passing a held-out-season test: `docs/no_edge_out_of_sample.md`.
+- **1X2 has no edge out of sample.** With rules chosen on 2021/22–2024/25 and
+  read on 2025/26–2026/27, every configuration of both models loses, and
+  training-season CLV is negative in every cell. The historical +34 units was
+  created by the calibration filter removing 272 of 774 raw bets, and the
+  filter was tuned on the same pass. Whether 1X2 stays on the card is a
+  market-scope decision for Cooper; the evidence is in that doc. The 2.5 line
+  with the new ratings is the one candidate that is not demonstrably behind
+  the price, and it should be tracked forward by CLV before any stake rises.
+- **Closing odds and CLV are real now.** `AvgCH/AvgCD/AvgCA/AvgC>2.5/AvgC<2.5`
+  are kept from Football-Data and reach every backtested bet; before
+  2026-08-28 they were dropped at build time and every CLV figure was blank.
+  `scripts/run_out_of_sample.py` regenerates the season-split tables.
 - **Calibration is a precondition, not a goal.** It can rule a model out; it
   cannot rule one in. Never ship a model change on calibration evidence alone
   where a price-based backtest is available — Football-Data ships historical

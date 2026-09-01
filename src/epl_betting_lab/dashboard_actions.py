@@ -6,7 +6,7 @@ import pandas as pd
 
 from epl_betting_lab.config import MANUAL_DIR, MAX_DEFAULT_JUICE, MIN_EDGE, OUTPUTS_DIR
 from epl_betting_lab.data.loaders import load_current_odds, load_matches, load_upcoming_fixtures
-from epl_betting_lab.models.poisson_goals import PoissonGoalsModel
+from epl_betting_lab.models.poisson_goals import CARD_RATINGS, PoissonGoalsModel
 from epl_betting_lab.reports.bet_ledger import load_bet_ledger, save_bet_ledger_reports
 from epl_betting_lab.reports.bet_ledger_health import save_bet_ledger_health_check
 from epl_betting_lab.reports.bet_settlement import build_settlement_preview, save_settlement_preview
@@ -760,7 +760,7 @@ def run_thursday_best_bets_report(
 
     odds = load_current_odds(odds_path)
 
-    model = PoissonGoalsModel().fit(matches, last_n_matches_per_team=38)
+    model = PoissonGoalsModel().fit(matches, last_n_matches_per_team=38, config=CARD_RATINGS)
     projections = model.project_fixtures(fixtures)
     # Every market the project can price is evaluated here. Which of them may
     # reach a card is decided by the reviewed policy allowlist upstream, not by

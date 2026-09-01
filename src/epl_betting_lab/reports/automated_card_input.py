@@ -30,6 +30,21 @@ from pathlib import Path
 import pandas as pd
 
 from epl_betting_lab.config import MANUAL_DIR, OUTPUTS_DIR, PROJECT_ROOT, STAGING_DIR
+#: Markets the CARD does not stake, on evidence, whatever the provider covers.
+#:
+#: Distinct from `market_eligibility.DEFAULT_DISABLED_MARKETS`, which stays
+#: empty: the library judges any market on coverage, and this is the card's own
+#: scope decision layered on top of it.
+#:
+#: `1x2` — removed 2026-08-28. Rules chosen on 2021/22–2024/25 and read on
+#: 2025/26–2026/27 lose in every configuration for both the old and the new
+#: ratings, and training-season CLV is negative in every cell; the historical
+#: +34 units was the calibration filter, tuned on the same pass, removing 272
+#: of 774 raw bets. Evidence: docs/no_edge_out_of_sample.md. Cooper directed the
+#: removal in chat ("yes keep going do everything") after being told it was
+#: his market-scope call; this comment is that record, not a signed receipt.
+CARD_DISABLED_MARKETS: tuple[str, ...] = ("1x2",)
+
 from epl_betting_lab.market_eligibility import (
     DEFAULT_DISABLED_MARKETS,
     MARKET_SELECTIONS,
@@ -328,7 +343,7 @@ def save_automated_card_input(
     staging_fixtures_path: Path | None = None,
     output_dir: Path | None = None,
     card_input_path: Path | None = None,
-    disabled_markets: Sequence[str] = DEFAULT_DISABLED_MARKETS,
+    disabled_markets: Sequence[str] = CARD_DISABLED_MARKETS,
     policy_path: Path | None = None,
     mapping_verified: bool | None = None,
     validation_passed: bool | None = None,

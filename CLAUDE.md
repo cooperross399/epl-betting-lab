@@ -86,14 +86,21 @@ Use the repo, the reports, and GitHub.
   under that rule, the new one bets draws and long-priced away sides for −74
   units. Do not switch the card's ratings without rebuilding the rule and
   passing a held-out-season test: `docs/no_edge_out_of_sample.md`.
-- **1X2 has no edge out of sample.** With rules chosen on 2021/22–2024/25 and
-  read on 2025/26–2026/27, every configuration of both models loses, and
+- **1X2 is off the card (2026-08-28).** With rules chosen on 2021/22–2024/25
+  and read on 2025/26–2026/27, every configuration of both models loses, and
   training-season CLV is negative in every cell. The historical +34 units was
   created by the calibration filter removing 272 of 774 raw bets, and the
-  filter was tuned on the same pass. Whether 1X2 stays on the card is a
-  market-scope decision for Cooper; the evidence is in that doc. The 2.5 line
-  with the new ratings is the one candidate that is not demonstrably behind
-  the price, and it should be tracked forward by CLV before any stake rises.
+  filter was tuned on the same pass. Cooper directed the removal in chat after
+  being told it was his market-scope call; `CARD_DISABLED_MARKETS` records
+  it. Put it back only with new held-out evidence, never on a single-pass
+  profit figure.
+- **The 2.5 line runs on `TOTALS_RATINGS` under the market-anchored rule
+  (`evaluate_total_25_anchored`, weight 0.5, lift 0.03), capped at tier C.**
+  Held out by season it sits at zero CLV — no edge shown, none ruled out — so
+  the stake stays at 0.1u until the forward CLV record says otherwise. The
+  parameters were fixed before the test seasons were read; do not re-tune
+  them on the test seasons. The matchday workflow fetches Understat xG each
+  run (soft: a match without xG is rated on goals).
 - **Closing odds and CLV are real now.** `AvgCH/AvgCD/AvgCA/AvgC>2.5/AvgC<2.5`
   are kept from Football-Data and reach every backtested bet; before
   2026-08-28 they were dropped at build time and every CLV figure was blank.

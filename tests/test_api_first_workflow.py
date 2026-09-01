@@ -265,7 +265,7 @@ def test_save_writes_outside_manual_and_reports_no_manual_entry(
 ) -> None:
     staging_odds = tmp_path / "odds.csv"
     staging_fixtures = tmp_path / "fixtures.csv"
-    _odds(WINDOW_FIXTURES, markets=("1x2",)).to_csv(staging_odds, index=False)
+    _odds(WINDOW_FIXTURES, markets=("total_2_5",)).to_csv(staging_odds, index=False)
     _fixtures(WINDOW_FIXTURES).to_csv(staging_fixtures, index=False)
 
     result = save_automated_card_input(
@@ -283,15 +283,40 @@ def test_save_writes_outside_manual_and_reports_no_manual_entry(
     assert summary["manual_entry_required"] is False
     assert summary["safety"]["odds_fabricated"] is False
     assert summary["safety"]["protected_files_written"] is False
-    assert summary["included_markets"] == ["1x2"]
+    assert summary["included_markets"] == ["total_2_5"]
     assert Path(result["card_input"]).is_file()
+
+
+def test_the_card_does_not_stake_1x2_even_with_full_coverage(tmp_path: Path) -> None:
+    """Card scope, not coverage: 1X2 lost on every held-out season.
+
+    The library still judges 1X2 on coverage like any market; the card
+    declines it on top. See docs/no_edge_out_of_sample.md.
+    """
+    from epl_betting_lab.reports.automated_card_input import CARD_DISABLED_MARKETS
+
+    assert "1x2" in CARD_DISABLED_MARKETS
+    assert "1x2" not in DEFAULT_DISABLED_MARKETS  # the library default stays neutral
+
+    staging_odds = tmp_path / "odds.csv"
+    staging_fixtures = tmp_path / "fixtures.csv"
+    _odds(WINDOW_FIXTURES, markets=("1x2", "total_2_5")).to_csv(staging_odds, index=False)
+    _fixtures(WINDOW_FIXTURES).to_csv(staging_fixtures, index=False)
+    summary = save_automated_card_input(
+        staging_odds_path=staging_odds, staging_fixtures_path=staging_fixtures,
+        output_dir=tmp_path, card_input_path=tmp_path / "card_input.csv",
+        mapping_verified=True, validation_passed=True, freshness_passed=True,
+    )["summary"]
+
+    assert summary["included_markets"] == ["total_2_5"]
+    assert "1x2" in summary["excluded_markets"]
 
 
 def test_no_manual_odds_file_is_required_anywhere_in_the_flow(tmp_path: Path) -> None:
     """The whole point: the flow completes with no manual template present."""
     staging_odds = tmp_path / "odds.csv"
     staging_fixtures = tmp_path / "fixtures.csv"
-    _odds(WINDOW_FIXTURES, markets=("1x2",)).to_csv(staging_odds, index=False)
+    _odds(WINDOW_FIXTURES, markets=("total_2_5",)).to_csv(staging_odds, index=False)
     _fixtures(WINDOW_FIXTURES).to_csv(staging_fixtures, index=False)
 
     assert not (tmp_path / "current_odds.csv").exists()
@@ -313,7 +338,7 @@ def test_no_manual_odds_file_is_required_anywhere_in_the_flow(tmp_path: Path) ->
 def test_reports_contain_no_secret_values(tmp_path: Path) -> None:
     staging_odds = tmp_path / "odds.csv"
     staging_fixtures = tmp_path / "fixtures.csv"
-    _odds(WINDOW_FIXTURES, markets=("1x2",)).to_csv(staging_odds, index=False)
+    _odds(WINDOW_FIXTURES, markets=("total_2_5",)).to_csv(staging_odds, index=False)
     _fixtures(WINDOW_FIXTURES).to_csv(staging_fixtures, index=False)
 
     result = save_automated_card_input(

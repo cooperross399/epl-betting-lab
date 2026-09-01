@@ -1093,3 +1093,18 @@ def test_the_slate_is_refreshed_before_prices_are_fetched() -> None:
     text = _workflow()
 
     assert text.index("Refresh the upcoming slate") < text.index("Refetch provider prices")
+
+
+def test_team_xg_is_fetched_softly_before_prices_are_bought() -> None:
+    """The 2.5 line is priced on xG ratings; a bad day at Understat must
+    degrade the ratings to goals, not the card to nothing, and must not
+    spend provider quota first."""
+    text = _workflow()
+
+    assert text.index("Fetch team xG") < text.index("Refetch provider prices")
+    block = text.split("- name: Fetch team xG", 1)[1].split("- name:", 1)[0]
+    assert "continue-on-error: true" in block
+    assert "fetch_understat_xg.py" in block
+    assert "secrets." not in block
+    assert "Team xG could not be fetched" in text
+

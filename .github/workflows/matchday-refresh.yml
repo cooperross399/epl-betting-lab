@@ -301,6 +301,18 @@ jobs:
         run: |
           python scripts/refresh_upcoming_fixtures.py
 
+      - name: Fetch team xG
+        # Understat's per-match expected goals, for the ratings the 2.5 line
+        # is priced on. Public JSON, no key, no quota. Soft: a match with no xG
+        # on file is rated on its goals instead, so a bad day at Understat
+        # degrades the ratings rather than the card.
+        id: xg
+        continue-on-error: true
+        env:
+          PYTHONPATH: src
+        run: |
+          python scripts/fetch_understat_xg.py
+
       - name: Refetch provider prices
         # Soft for the same reason: without fresh prices the card is refused by
         # the freshness policy, and a blocked card that explains itself beats a
@@ -328,6 +340,9 @@ jobs:
             echo "No match dataset: the model cannot be fitted, so no card can be built. Football-Data could not be reached and no previous copy was restored." >> run_degraded.txt
           elif [ "${{ steps.results.outcome }}" = "failure" ]; then
             echo "Historical results could not be refreshed; the model was fitted on the previously stored dataset." >> run_degraded.txt
+          fi
+          if [ "${{ steps.xg.outcome }}" = "failure" ]; then
+            echo "Team xG could not be fetched from Understat; the ratings used goals alone this run." >> run_degraded.txt
           fi
           if [ "${{ steps.fixtures.outcome }}" = "failure" ]; then
             echo "The upcoming slate could not be refreshed from Football-Data; the previously stored fixtures were used. A slate that stops moving eventually leaves the card with no fixture in window." >> run_degraded.txt

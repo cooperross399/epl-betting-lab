@@ -68,6 +68,20 @@ class RatingConfig:
 CARD_RATINGS = RatingConfig.legacy()
 
 
+#: The ratings the 2.5 goals line is priced on.
+#:
+#: The one market where the new ratings earned a place. Fitted on 70% Understat
+#: xG / 30% goals with opponent adjustment and a 365-day half-life, they score
+#: 0.6719 log loss on over-2.5 against the closing market's 0.6698 — nearly on
+#: it — where the old ratings score 0.6836. Held out by season the anchored
+#: rule built on them sits at zero CLV with profit scattered either side; no
+#: edge shown and none ruled out, which is why its stake is capped small and it
+#: is tracked forward by CLV. See docs/no_edge_out_of_sample.md.
+TOTALS_RATINGS = RatingConfig(
+    opponent_adjusted=True, half_life_days=365, goal_source="blend", xg_weight=0.7
+)
+
+
 class PoissonGoalsModel:
     """Simple EPL goals model.
 

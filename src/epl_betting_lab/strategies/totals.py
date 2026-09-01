@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import math
+
 import pandas as pd
 
 
@@ -100,3 +102,124 @@ def evaluate_total_25(
                 **grade,
             })
     return pd.DataFrame(rows).sort_values(["status", "edge"], ascending=[True, False]) if rows else pd.DataFrame()
+
+
+#: The market-anchored rule on the 2.5 line.
+#:
+#: The model's probability is blended with the market's in logit space, weight
+#: `MODEL_WEIGHT` on the model, and a selection is a bet only if the blend still
+#: clears the market by `ANCHOR_THRESHOLD`. `a = 1` would be the old rule (pure
+#: model); `a = 0` never bets. A model with nothing the market lacks earns a
+#: small weight and few bets — that is the rule working, not failing.
+#:
+#: These two values were fixed before any held-out season was read, at the
+#: conservative end of the grid: 0.5 / 0.03 had +2.2% on the training seasons
+#: (183 bets) and is the setting the out-of-sample report is judged at. They
+#: are not to be re-tuned on the test seasons; that is the mistake the report
+#: exists to prevent.
+MODEL_WEIGHT = 0.5
+ANCHOR_THRESHOLD = 0.03
+SELECTION_RULE = "market_anchored"
+
+
+def _logit(p: float) -> float:
+    p = min(max(float(p), 1e-6), 1 - 1e-6)
+    return math.log(p / (1 - p))
+
+
+def _sigmoid(x: float) -> float:
+    return 1.0 / (1.0 + math.exp(-x))
+
+
+def _implied(american: float) -> float:
+    a = float(american)
+    return 100.0 / (a + 100.0) if a > 0 else -a / (-a + 100.0)
+
+
+def market_probability_over(
+    home_team: str, away_team: str, odds: pd.DataFrame, market_odds: pd.DataFrame | None
+) -> tuple[float | None, str]:
+    """De-vigged probability of over 2.5 as the market prices it.
+
+    From every book's over and under when the per-book staging is on hand —
+    the consensus — and otherwise from the single best over and best under
+    in the card input, which is biased long because two books' best prices
+    sum to less than one. The second is named as such in the row.
+    """
+    for frame, label in ((market_odds, "consensus"), (odds, "best-price pair")):
+        if frame is None or frame.empty:
+            continue
+        rows = frame[(frame.home_team == home_team) & (frame.away_team == away_team) & (frame.market == "total_2_5")]
+        over = rows[rows.selection == "over"]["american_odds"].map(_implied)
+        under = rows[rows.selection == "under"]["american_odds"].map(_implied)
+        if over.empty or under.empty:
+            continue
+        o, u = float(over.mean()), float(under.mean())
+        if o + u <= 0:
+            continue
+        return o / (o + u), label
+    return None, "none"
+
+
+def evaluate_total_25_anchored(
+    projections: pd.DataFrame,
+    odds: pd.DataFrame,
+    *,
+    market_odds: pd.DataFrame | None = None,
+    model_weight: float = MODEL_WEIGHT,
+    threshold: float = ANCHOR_THRESHOLD,
+    max_juice: int = -160,
+) -> pd.DataFrame:
+    """Over/under 2.5 rows under the market-anchored rule.
+
+    `projections` must come from the ratings the rule was measured on
+    (`TOTALS_RATINGS`); handing it the old ratings would be a different rule.
+    Emits the same row shape as `evaluate_total_25`, plus `selection_rule` so
+    the card can cap the stake and CLV tracking can tell the two apart.
+    """
+    rows = []
+    for _, p in projections.iterrows():
+        game_odds = odds[(odds.home_team == p.home_team) & (odds.away_team == p.away_team) & (odds.market == "total_2_5")]
+        if game_odds.empty:
+            continue
+        p_market_over, source = market_probability_over(p.home_team, p.away_team, odds, market_odds)
+        if p_market_over is None:
+            continue
+        for selection, prob_col in (("over", "over_2_5"), ("under", "under_2_5")):
+            line = game_odds[game_odds.selection == selection]
+            if line.empty:
+                continue
+            american = float(line.iloc[0].american_odds)
+            p_model = float(p[prob_col])
+            p_market = p_market_over if selection == "over" else 1.0 - p_market_over
+            p_final = _sigmoid(model_weight * _logit(p_model) + (1 - model_weight) * _logit(p_market))
+            lift = p_final - p_market
+            price_edge = p_final - _implied(american)
+            if american < 0 and american < max_juice:
+                status = "PASS - too much juice"
+            elif lift > threshold and price_edge > 0:
+                status = "BETTABLE"
+            else:
+                status = "PASS"
+            rows.append({
+                "home_team": p.home_team, "away_team": p.away_team,
+                "market": "total_2_5", "selection": selection,
+                "american_odds": american, "book": _book_of(line),
+                "opening_american_odds": american,
+                "opening_implied_probability": round(_implied(american), 4),
+                "closing_american_odds": line.iloc[0].get("closing_american_odds", pd.NA),
+                "raw_model_prob": round(p_model, 4),
+                "market_prob": round(p_market, 4),
+                "market_prob_source": source,
+                "calibrated_model_prob": round(p_final, 4),
+                "raw_edge": round(p_model - _implied(american), 4),
+                "calibrated_edge": round(price_edge, 4),
+                "anchor_lift": round(lift, 4),
+                "raw_status": status,
+                "calibrated_status": status,
+                "status": status,
+                "selection_rule": SELECTION_RULE,
+                "model_weight": model_weight,
+                "anchor_threshold": threshold,
+            })
+    return pd.DataFrame(rows)

@@ -242,7 +242,13 @@ def _confidence_tier(row: pd.Series) -> str:
     else:
         tier = "Pass/Avoid"
     if market == "total_2_5" and selection == "under" and tier == "A":
-        return "B"
+        tier = "B"
+    # The market-anchored 2.5 rule has no demonstrated edge — held out by
+    # season it sits at zero CLV — so it is tracked forward at the smallest
+    # stake the card uses, whatever its ranking score says. Raising this is a
+    # decision for the CLV record to earn, not for a score to grant.
+    if str(row.get("selection_rule", "")) == "market_anchored" and tier in {"A", "B"}:
+        return "C"
     return tier
 
 

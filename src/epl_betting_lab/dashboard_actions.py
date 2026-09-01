@@ -4,9 +4,9 @@ from pathlib import Path
 
 import pandas as pd
 
-from epl_betting_lab.config import MANUAL_DIR, MAX_DEFAULT_JUICE, MIN_EDGE, OUTPUTS_DIR
-from epl_betting_lab.data.loaders import load_current_odds, load_matches, load_upcoming_fixtures
-from epl_betting_lab.models.poisson_goals import CARD_RATINGS, PoissonGoalsModel
+from epl_betting_lab.config import MANUAL_DIR, MAX_DEFAULT_JUICE, MIN_EDGE, OUTPUTS_DIR, STAGING_DIR
+from epl_betting_lab.data.loaders import load_current_odds, load_matches, load_matches_with_xg, load_upcoming_fixtures
+from epl_betting_lab.models.poisson_goals import CARD_RATINGS, TOTALS_RATINGS, PoissonGoalsModel
 from epl_betting_lab.reports.bet_ledger import load_bet_ledger, save_bet_ledger_reports
 from epl_betting_lab.reports.bet_ledger_health import save_bet_ledger_health_check
 from epl_betting_lab.reports.bet_settlement import build_settlement_preview, save_settlement_preview
@@ -136,7 +136,7 @@ from epl_betting_lab.strategies.derived_result import (
     evaluate_draw_no_bet,
 )
 from epl_betting_lab.strategies.ml_value import evaluate_1x2_value
-from epl_betting_lab.strategies.totals import evaluate_total_25
+from epl_betting_lab.strategies.totals import evaluate_total_25, evaluate_total_25_anchored
 
 
 def require_existing_ledger(ledger_path: Path | None = None) -> pd.DataFrame:
@@ -762,6 +762,14 @@ def run_thursday_best_bets_report(
 
     model = PoissonGoalsModel().fit(matches, last_n_matches_per_team=38, config=CARD_RATINGS)
     projections = model.project_fixtures(fixtures)
+    # The 2.5 line is priced on its own ratings: opponent-adjusted, decayed,
+    # fitted on xG where Understat has it and goals where it does not. Every
+    # other market keeps CARD_RATINGS, whose bet rules were tuned to them.
+    totals_matches = load_matches_with_xg(matches_path) if matches_path is not None else load_matches_with_xg()
+    totals_projections = PoissonGoalsModel().fit(totals_matches, config=TOTALS_RATINGS).project_fixtures(fixtures)
+    # Per-book prices for a consensus line; absent, the rule says so per row.
+    staging_odds_path = STAGING_DIR / "current_odds_staging.csv"
+    market_odds = load_current_odds(staging_odds_path) if staging_odds_path.exists() else None
     # Every market the project can price is evaluated here. Which of them may
     # reach a card is decided by the reviewed policy allowlist upstream, not by
     # what happens to be wired in — so a market being absent from the card is a
@@ -771,7 +779,7 @@ def run_thursday_best_bets_report(
     # strategies skip fixtures they have no price for, and never invent one.
     frames = [
         evaluate_1x2_value(projections, odds, min_edge=MIN_EDGE, max_juice=MAX_DEFAULT_JUICE),
-        evaluate_total_25(projections, odds, min_edge=MIN_EDGE, max_juice=MAX_DEFAULT_JUICE, matches=matches),
+        evaluate_total_25_anchored(totals_projections, odds, market_odds=market_odds, max_juice=MAX_DEFAULT_JUICE),
         evaluate_btts(projections, odds, min_edge=MIN_EDGE, max_juice=MAX_DEFAULT_JUICE),
         evaluate_double_chance(projections, odds, min_edge=MIN_EDGE, max_juice=MAX_DEFAULT_JUICE),
         evaluate_draw_no_bet(projections, odds, min_edge=MIN_EDGE, max_juice=MAX_DEFAULT_JUICE),

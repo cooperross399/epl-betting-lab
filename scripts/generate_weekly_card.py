@@ -5,7 +5,7 @@ import pandas as pd
 
 from epl_betting_lab.config import MAX_DEFAULT_JUICE, MIN_EDGE, OUTPUTS_DIR
 from epl_betting_lab.data.loaders import load_matches, load_upcoming_fixtures, load_current_odds
-from epl_betting_lab.models.poisson_goals import PoissonGoalsModel
+from epl_betting_lab.models.poisson_goals import CARD_RATINGS, PoissonGoalsModel
 from epl_betting_lab.reports.weekly_card import build_weekly_card, card_to_markdown
 from epl_betting_lab.strategies.btts import evaluate_btts
 from epl_betting_lab.strategies.ml_value import evaluate_1x2_value
@@ -18,7 +18,7 @@ def main() -> None:
     fixtures = load_upcoming_fixtures()
     odds = load_current_odds()
 
-    model = PoissonGoalsModel().fit(matches, last_n_matches_per_team=38)
+    model = PoissonGoalsModel().fit(matches, last_n_matches_per_team=38, config=CARD_RATINGS)
     projections = model.project_fixtures(fixtures)
     candidates = pd.concat([
         evaluate_1x2_value(projections, odds, min_edge=MIN_EDGE, max_juice=MAX_DEFAULT_JUICE),

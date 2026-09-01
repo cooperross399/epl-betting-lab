@@ -41,3 +41,32 @@ def load_upcoming_fixtures(path: Path | None = None) -> pd.DataFrame:
     if not path.exists():
         raise FileNotFoundError(f"Missing {path}.")
     return pd.read_csv(path, parse_dates=["date"])
+
+
+def load_team_xg(path: Path | None = None) -> pd.DataFrame:
+    """Understat per-match team xG in Football-Data naming; empty if not fetched."""
+    path = path or PROCESSED_DIR / "understat_team_xg.csv"
+    if not path.exists():
+        return pd.DataFrame(columns=["date", "home_team", "away_team", "home_xg", "away_xg"])
+    frame = pd.read_csv(path, parse_dates=["date"])
+    frame["date"] = pd.to_datetime(frame["date"]).dt.normalize()
+    return frame
+
+
+def load_matches_with_xg(
+    matches_path: Path | None = None, xg_path: Path | None = None
+) -> pd.DataFrame:
+    """Historical matches with `home_xg`/`away_xg` joined on where Understat has them.
+
+    A left join: a match without xG keeps its goals and gets NaN, so a rating
+    fitted on xG falls back to goals for that match rather than dropping it.
+    """
+    matches = load_matches(matches_path).copy()
+    matches["date"] = pd.to_datetime(matches["date"]).dt.normalize()
+    xg = load_team_xg(xg_path)
+    if xg.empty:
+        matches["home_xg"] = float("nan")
+        matches["away_xg"] = float("nan")
+        return matches
+    return matches.merge(xg, on=["date", "home_team", "away_team"], how="left")
+

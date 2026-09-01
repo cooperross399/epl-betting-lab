@@ -10,7 +10,7 @@ from epl_betting_lab.models.calibration import (
     ShrinkageConfig,
 )
 from epl_betting_lab.models.goal_environment import adjust_total_probability
-from epl_betting_lab.models.poisson_goals import PoissonGoalsModel
+from epl_betting_lab.models.poisson_goals import PoissonGoalsModel, RatingConfig
 from epl_betting_lab.models.value import decimal_to_american, grade_edge
 
 
@@ -53,6 +53,20 @@ def _valid_decimal_odds(value: object) -> float | None:
     return value if value > 1 else None
 
 
+def _closing(game: pd.Series, *columns: str) -> object:
+    """The first closing price present, preferring the market average.
+
+    Football-Data marks closing columns with a C. They were absent from the
+    processed dataset until 2026-08-28, so this used to be handed a `CloseH`
+    that never existed and every CLV figure was silently blank.
+    """
+    for column in columns:
+        value = game.get(column)
+        if value is not None and pd.notna(value):
+            return value
+    return None
+
+
 def run_walk_forward_backtest(
     matches: pd.DataFrame,
     start_after_matches: int = 380,
@@ -60,19 +74,29 @@ def run_walk_forward_backtest(
     max_juice: int = MAX_DEFAULT_JUICE,
     last_n_fit_matches_per_team: int | None = 38,
     calibration_config: ShrinkageConfig = ShrinkageConfig(),
+    rating_config: RatingConfig | None = None,
 ) -> pd.DataFrame:
     """Walk-forward backtest using only matches before each test game.
 
     The starter project tests basic 1X2, totals 2.5, and BTTS where odds columns exist.
     Stake is 1 unit per flagged bet.
     """
+    rating_config = rating_config or RatingConfig.legacy()
     df = matches.dropna(subset=["home_goals", "away_goals", "date"]).sort_values("date").reset_index(drop=True)
     bets = []
 
     for i in range(start_after_matches, len(df)):
         train = df.iloc[:i].copy()
         game = df.iloc[i]
-        model = PoissonGoalsModel().fit(train, last_n_matches_per_team=last_n_fit_matches_per_team)
+        # An opponent-adjusted fit reads the whole training window and
+        # weights it by age itself, so the blunt last-N cut-off is dropped.
+        model = PoissonGoalsModel().fit(
+            train,
+            last_n_matches_per_team=(
+                None if rating_config.opponent_adjusted else last_n_fit_matches_per_team
+            ),
+            config=rating_config,
+        )
         probs = model.match_probabilities(game.home_team, game.away_team)
         projected_home_goals = float(probs["home_xg"])
         projected_away_goals = float(probs["away_xg"])
@@ -83,13 +107,13 @@ def run_walk_forward_backtest(
         candidates = []
         # 1X2 odds: prefer Avg columns, fall back to B365.
         candidates.extend([
-            ("1x2", "home", probs["home_win"], game.get("AvgH") if pd.notna(game.get("AvgH")) else game.get("B365H"), game.get("CloseH")),
-            ("1x2", "draw", probs["draw"], game.get("AvgD") if pd.notna(game.get("AvgD")) else game.get("B365D"), game.get("CloseD")),
-            ("1x2", "away", probs["away_win"], game.get("AvgA") if pd.notna(game.get("AvgA")) else game.get("B365A"), game.get("CloseA")),
+            ("1x2", "home", probs["home_win"], game.get("AvgH") if pd.notna(game.get("AvgH")) else game.get("B365H"), _closing(game, "AvgCH", "B365CH")),
+            ("1x2", "draw", probs["draw"], game.get("AvgD") if pd.notna(game.get("AvgD")) else game.get("B365D"), _closing(game, "AvgCD", "B365CD")),
+            ("1x2", "away", probs["away_win"], game.get("AvgA") if pd.notna(game.get("AvgA")) else game.get("B365A"), _closing(game, "AvgCA", "B365CA")),
         ])
         candidates.extend([
-            ("total_2_5", "over", probs["over_2_5"], game.get("Avg>2.5") if pd.notna(game.get("Avg>2.5")) else game.get("B365>2.5"), game.get("Close>2.5")),
-            ("total_2_5", "under", probs["under_2_5"], game.get("Avg<2.5") if pd.notna(game.get("Avg<2.5")) else game.get("B365<2.5"), game.get("Close<2.5")),
+            ("total_2_5", "over", probs["over_2_5"], game.get("Avg>2.5") if pd.notna(game.get("Avg>2.5")) else game.get("B365>2.5"), _closing(game, "AvgC>2.5", "B365C>2.5")),
+            ("total_2_5", "under", probs["under_2_5"], game.get("Avg<2.5") if pd.notna(game.get("Avg<2.5")) else game.get("B365<2.5"), _closing(game, "AvgC<2.5", "B365C<2.5")),
         ])
 
         for market, selection, model_prob, dec_odds, close_dec_odds in candidates:

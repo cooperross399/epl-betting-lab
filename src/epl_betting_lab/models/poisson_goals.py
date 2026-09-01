@@ -13,6 +13,61 @@ class TeamStrength:
     defense: float
 
 
+@dataclass(frozen=True)
+class RatingConfig:
+    """How team attack and defence are estimated from past results.
+
+    The original ratings were a team's goals per game divided by the league
+    average, over its last `last_n_matches_per_team` games. Two things are
+    wrong with that, and both are fixable without new data.
+
+    **It ignores who the goals were against.** Three past Coventry counted the
+    same as three past Man City, so a team with an easy run looked strong and
+    was then bet at a price that already knew better. `opponent_adjusted`
+    replaces the raw ratio with the standard multiplicative Poisson fit: a
+    team's attack is its goals scored divided by what an average attack would
+    have scored against those particular defences, solved jointly for every
+    team by iteration.
+
+    **It treats a match from four years ago as it treats last week's**, or else
+    discards it entirely at an arbitrary cut-off. `half_life_days` weights each
+    match by age instead, so evidence fades rather than falling off a cliff.
+
+    `prior_matches` shrinks a team toward league average by the weight of that
+    many average games. Promoted sides arrive with almost no top-flight
+    history, and an unshrunk fit will happily call three games' worth of noise
+    a strength.
+    """
+
+    opponent_adjusted: bool = False
+    half_life_days: float | None = None
+    iterations: int = 12
+    prior_matches: float = 8.0
+    #: What a match teaches about a team: its goals, its expected goals, or a
+    #: blend. Goals record what happened; xG records the chances that were
+    #: created, which is closer to what the next match will look like. A match
+    #: with no xG on file always falls back to its goals.
+    goal_source: str = "goals"
+    xg_weight: float = 0.7
+
+    @classmethod
+    def legacy(cls) -> "RatingConfig":
+        """The unadjusted ratio ratings, kept so a change can be measured."""
+        return cls()
+
+
+#: The ratings the live card runs on.
+#:
+#: Still the old goals-ratio ratings, on purpose. The opponent-adjusted xG
+#: ratings are a better probability model on every threshold-free measure —
+#: see docs/no_edge_out_of_sample.md — but the only bet rule the card has was
+#: tuned to the old model's overconfidence, and under that rule the new model
+#: bets the compression artefact: draws and long-priced away sides, 381 bets
+#: and −98 units in the single-pass backtest. Switching this before the rule
+#: is rebuilt and held-out-tested would be the change the doc warns against.
+CARD_RATINGS = RatingConfig.legacy()
+
+
 class PoissonGoalsModel:
     """Simple EPL goals model.
 
@@ -26,7 +81,13 @@ class PoissonGoalsModel:
         self.avg_away_goals: float | None = None
         self.team_strengths: dict[str, TeamStrength] = {}
 
-    def fit(self, matches: pd.DataFrame, last_n_matches_per_team: int | None = None) -> "PoissonGoalsModel":
+    def fit(
+        self,
+        matches: pd.DataFrame,
+        last_n_matches_per_team: int | None = None,
+        config: RatingConfig | None = None,
+    ) -> "PoissonGoalsModel":
+        config = config or RatingConfig.legacy()
         df = matches.dropna(subset=["home_goals", "away_goals"]).copy()
         df = df.sort_values("date")
 
@@ -37,6 +98,9 @@ class PoissonGoalsModel:
                 team_rows = df[(df["home_team"] == team) | (df["away_team"] == team)].tail(last_n_matches_per_team)
                 idx.update(team_rows.index.tolist())
             df = df.loc[sorted(idx)].copy()
+
+        if config.opponent_adjusted:
+            return self._fit_opponent_adjusted(df, config)
 
         self.avg_home_goals = float(df["home_goals"].mean())
         self.avg_away_goals = float(df["away_goals"].mean())
@@ -65,6 +129,103 @@ class PoissonGoalsModel:
     @staticmethod
     def _poisson_pmf(k: int, lam: float) -> float:
         return (math.exp(-lam) * lam**k) / math.factorial(k)
+
+    def _match_weights(self, df: pd.DataFrame, half_life_days: float | None) -> np.ndarray:
+        """One weight per match, halving every `half_life_days` into the past."""
+        if not half_life_days:
+            return np.ones(len(df), dtype=float)
+        dates = pd.to_datetime(df["date"], errors="coerce")
+        latest = dates.max()
+        age_days = (latest - dates).dt.total_seconds().to_numpy() / 86400.0
+        age_days = np.nan_to_num(age_days, nan=0.0)
+        return np.power(0.5, age_days / float(half_life_days))
+
+    @staticmethod
+    def _scoring_arrays(df: pd.DataFrame, config: RatingConfig) -> tuple[np.ndarray, np.ndarray]:
+        """Goals, xG, or a blend — per match, with goals as the fallback."""
+        goals_h = df["home_goals"].to_numpy(dtype=float)
+        goals_a = df["away_goals"].to_numpy(dtype=float)
+        source = str(config.goal_source).strip().lower()
+        if source == "goals" or "home_xg" not in df.columns or "away_xg" not in df.columns:
+            return goals_h, goals_a
+        xg_h = pd.to_numeric(df["home_xg"], errors="coerce").to_numpy(dtype=float)
+        xg_a = pd.to_numeric(df["away_xg"], errors="coerce").to_numpy(dtype=float)
+        weight = 1.0 if source == "xg" else float(min(max(config.xg_weight, 0.0), 1.0))
+        blend_h = weight * xg_h + (1.0 - weight) * goals_h
+        blend_a = weight * xg_a + (1.0 - weight) * goals_a
+        return (
+            np.where(np.isnan(blend_h), goals_h, blend_h),
+            np.where(np.isnan(blend_a), goals_a, blend_a),
+        )
+
+    def _fit_opponent_adjusted(
+        self, df: pd.DataFrame, config: RatingConfig
+    ) -> "PoissonGoalsModel":
+        """Solve attack and defence jointly, so the schedule cannot flatter a team.
+
+        Each match says a team scored some goals against a particular defence.
+        A team's attack is therefore its goals divided by what a league-average
+        attack would have been expected to score against those same defences —
+        which depends on every other team's defence, which in turn depends on
+        every attack. There is no closed form, so it iterates: hold defences
+        fixed and solve attacks, hold attacks fixed and solve defences, repeat.
+        A dozen passes is far past the point where the numbers stop moving.
+
+        Home and away are kept separate because home advantage is real and
+        belongs in the venue term, not smeared into a team's rating.
+        """
+        weights = self._match_weights(df, config.half_life_days)
+        teams = sorted(set(df["home_team"]).union(set(df["away_team"])))
+        index = {team: i for i, team in enumerate(teams)}
+        home = df["home_team"].map(index).to_numpy()
+        away = df["away_team"].map(index).to_numpy()
+        home_goals, away_goals = self._scoring_arrays(df, config)
+
+        total_weight = float(weights.sum())
+        if total_weight <= 0 or not teams:
+            self.avg_home_goals = float(df["home_goals"].mean())
+            self.avg_away_goals = float(df["away_goals"].mean())
+            self.team_strengths = {t: TeamStrength(1.0, 1.0) for t in teams}
+            return self
+
+        mu_home = float((weights * home_goals).sum() / total_weight)
+        mu_away = float((weights * away_goals).sum() / total_weight)
+
+        count = len(teams)
+        attack = np.ones(count, dtype=float)
+        defense = np.ones(count, dtype=float)
+        # Pseudo-observations of an exactly average team, in expected-goal
+        # units, so `prior_matches` reads as "this many league-average games".
+        prior = float(config.prior_matches) * (mu_home + mu_away) / 2.0
+
+        for _ in range(max(1, int(config.iterations))):
+            scored = np.zeros(count)
+            expected = np.zeros(count)
+            np.add.at(scored, home, weights * home_goals)
+            np.add.at(scored, away, weights * away_goals)
+            np.add.at(expected, home, weights * mu_home * defense[away])
+            np.add.at(expected, away, weights * mu_away * defense[home])
+            attack = (scored + prior) / np.maximum(expected + prior, 1e-9)
+            attack = np.clip(attack, 0.2, 5.0)
+            attack /= max(float(attack.mean()), 1e-9)
+
+            conceded = np.zeros(count)
+            expected = np.zeros(count)
+            np.add.at(conceded, home, weights * away_goals)
+            np.add.at(conceded, away, weights * home_goals)
+            np.add.at(expected, home, weights * mu_away * attack[away])
+            np.add.at(expected, away, weights * mu_home * attack[home])
+            defense = (conceded + prior) / np.maximum(expected + prior, 1e-9)
+            defense = np.clip(defense, 0.2, 5.0)
+            defense /= max(float(defense.mean()), 1e-9)
+
+        self.avg_home_goals = mu_home
+        self.avg_away_goals = mu_away
+        self.team_strengths = {
+            team: TeamStrength(attack=float(attack[i]), defense=float(defense[i]))
+            for team, i in index.items()
+        }
+        return self
 
     def expected_goals(self, home_team: str, away_team: str) -> tuple[float, float]:
         if self.avg_home_goals is None or self.avg_away_goals is None:

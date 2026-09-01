@@ -1,31 +1,27 @@
-## Monday 31 August, 17:42 UTC — scheduled run
+## Tuesday 01 September, 23:59 UTC — manual run
 
-Selections changed: 1 moved section.
+Something went wrong in this run.
 
-Provider quota: 4053919 (about 65385 more runs)
+_This run was started by hand, not by the schedule. If you did not start it, someone was testing._
 
-Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: none)
+### What went wrong
 
-### Best bets
+- The upcoming slate could not be refreshed from Football-Data; the previously stored fixtures were used. A slate that stops moving eventually leaves the card with no fixture in window.
 
-| Match | Market | Selection | Tier | Edge | Price | Book | Units |
-|:------|:-------|:----------|:-----|-----:|------:|:-----|------:|
-| Aston Villa v Arsenal | `corners_1x2` | home | C | +3.9% | +240 | Fanatics | 0.1 |
+The card below was still built, from whatever evidence was available. Treat it with that in mind.
 
-### Leans
+Provider quota: 3635981 (about 58644 more runs)
 
-_None._
+### No card was produced
 
-### What changed
-
-- **Moved section:** Aston Villa v Arsenal corners_1x2 home
+This is a **blocked** card, not a card with no value: nothing was generated, so nothing is being withheld as a judgement.
 
 ### How the recommendations have done
 
-- Settled: **13** selections, 5 won
-- Staked: 2.20 units
-- Profit: **-0.17 units** (-7.7% on turnover)
-- Still pending: 20
+- Settled: **22** selections, 10 won
+- Staked: 3.85 units
+- Profit: **+0.55 units** (+14.2% on turnover)
+- Still pending: 11
 
 Each selection is scored at the first price a card offered it, and only rows the card staked are counted — a lean carries no stake and is not a recommendation.
 
@@ -37,4 +33,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/33420892002)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/33573328605)

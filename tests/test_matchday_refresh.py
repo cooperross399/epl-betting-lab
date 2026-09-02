@@ -1124,3 +1124,43 @@ def test_the_slate_gets_a_second_pass_once_provider_staging_exists() -> None:
     block = text.split("- name: Fill the slate from the provider if Football-Data had nothing", 1)[1].split("- name:", 1)[0]
     assert "refresh_upcoming_fixtures.py" in block and "continue-on-error: true" in block
 
+
+
+def test_every_report_the_refresh_produces_is_uploaded() -> None:
+    """A measurement nobody can read is not a measurement.
+
+    `count_calibration` and `live_clv` were added to the refresh and not to the
+    artifact, so they ran on every matchday and existed only inside the runner,
+    vanishing with it.
+
+    The mapping is written out rather than derived from the step names, because
+    a derived version quietly checks nothing: `live_clv` produces
+    `live_clv_report.md`, not `live_clv.md`, so a name-matching test passes
+    while covering the very step that motivated it. An explicit list has to be
+    edited when a step is added, which is the point.
+    """
+    from epl_betting_lab.reports.refresh_all import _steps
+
+    published = {
+        "card_input": "automated_card_input.md",
+        "automated_card": "automated_card.md",
+        "card_comparison": "automated_card_comparison.md",
+        "epl_model_task": "epl_model_task.md",
+        "epl_card_task": "epl_card_task.md",
+        "epl_settle_preview_task": "epl_settle_preview_task.md",
+        "count_calibration": "count_calibration.md",
+        "live_clv": "live_clv_report.md",
+    }
+    text = _workflow()
+    upload = text.split("name: matchday-reports", 1)[1].split("- name:", 1)[0]
+
+    step_names = {name for name, _, _ in _steps()}
+    # archive_card writes into the state artifact, not the reports one, and
+    # status_page writes status.html, which is uploaded under its own name.
+    unmapped = step_names - set(published) - {"archive_card", "status_page"}
+    assert not unmapped, f"new refresh step with no decision about publishing it: {unmapped}"
+
+    for step, filename in published.items():
+        if step not in step_names:
+            continue
+        assert f"data/outputs/{filename}" in upload, f"{step} produces {filename}, not uploaded"

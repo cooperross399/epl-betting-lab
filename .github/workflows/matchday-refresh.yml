@@ -605,6 +605,11 @@ jobs:
             data/outputs/epl_model_task.md
             data/outputs/epl_card_task.md
             data/outputs/epl_settle_preview_task.md
+            # Both of these are produced by every run and were not being
+            # uploaded, so they existed only inside the runner and vanished
+            # with it. A measurement nobody can read is not a measurement.
+            data/outputs/count_calibration.md
+            data/outputs/live_clv_report.md
           if-no-files-found: warn
           retention-days: 30
 

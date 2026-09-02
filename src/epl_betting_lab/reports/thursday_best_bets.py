@@ -33,6 +33,13 @@ REPORT_COLUMNS = [
     "ranking_reason",
     "totals_note",
     "notes",
+    # The market-anchored 2.5 rule. Blank for every other market. These are
+    # what forward CLV tracking needs to tell an anchored bet from the rest,
+    # and what the stake cap in _confidence_tier reads.
+    "selection_rule",
+    "market_prob",
+    "market_prob_source",
+    "anchor_lift",
 ]
 
 ARCHIVE_COLUMNS = [
@@ -303,6 +310,11 @@ def build_thursday_best_bets(
     df["market_reliability_note"] = df.apply(lambda row: _market_reliability_note(row, market_reliability), axis=1)
     df["qualifies_reason"] = df.apply(lambda row: _qualifies_reason(row, row["section"]), axis=1)
     df["suggested_units"] = df["confidence_tier"].apply(_suggested_units)
+    # Only the anchored 2.5 rule carries these; every other market's rows are
+    # blank for them rather than absent, so the column selection below holds.
+    for column in ("selection_rule", "market_prob", "market_prob_source", "anchor_lift"):
+        if column not in df.columns:
+            df[column] = pd.NA
     df["suggested_wager_$"] = (df["suggested_units"] * BANKROLL_UNIT_DOLLARS).round(2)
 
     best = df[df["section"] == "Best bets"].sort_values(["ranking_score", "calibrated_edge"], ascending=False).head(max_best_bets)

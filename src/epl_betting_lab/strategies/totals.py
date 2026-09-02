@@ -200,13 +200,17 @@ def evaluate_total_25_anchored(
             # and implied fields the ranking and the renderer read. The status
             # is then overridden: this rule bets on lift, not on that edge.
             grade = grade_edge(p_final, american, min_edge=0.0, max_default_juice=max_juice)
-            # The measured rule bets on lift alone: the held-out numbers were
-            # produced with profit taken at the opening price, so the margin
-            # is already inside them, and a 3-point lift over the de-vigged
-            # consensus is what clears it. Adding a "must also beat the best
-            # price" gate would make the live rule stricter than the one that
-            # was tested, and untested is untested in either direction. The
-            # card-wide juice cap still applies.
+            # Flagged on lift over the de-vigged consensus. The card then
+            # applies a second gate that is NOT here: _confidence_tier zeroes
+            # any row whose edge against the posted price is not positive, so a
+            # row can be BETTABLE and staked at nothing. That was an accident —
+            # this comment used to claim the gate had been deliberately left
+            # out to match the measurement — and it made the live rule tighter
+            # than the measured one. It is now resolved the other way:
+            # reports/out_of_sample.score_rule applies the price gate too, so
+            # the published figures describe what runs. The gate is kept
+            # because a row with edge <= 0 is a price this model's own final
+            # number calls negative.
             if american < 0 and american < max_juice:
                 status = "PASS - too much juice"
             elif lift > threshold:

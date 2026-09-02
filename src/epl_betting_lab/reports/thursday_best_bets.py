@@ -75,27 +75,42 @@ def _float_value(row: pd.Series, column: str, fallback: float = 0.0) -> float:
     return fallback if pd.isna(numeric) else float(numeric)
 
 
-def _market_reliability_from_backtest(path: Path | None = None) -> dict[str, float]:
-    path = path or OUTPUTS_DIR / "backtest_market_breakdown.csv"
-    default = {"1x2": 8.0, "btts": 2.0, "total_2_5": -8.0}
-    if not path.exists():
-        return default
-    try:
-        backtest = pd.read_csv(path)
-    except Exception:
-        return default
-    required = {"market", "status", "roi"}
-    if not required.issubset(backtest.columns):
-        return default
+#: A market needs at least this many settled bets before its measured return
+#: may nudge the ranking at all.
+#:
+#: Not a significance threshold — CLAUDE.md's own arithmetic puts that near
+#: 1,500 bets — but a floor below which a number is plainly noise. `total_2_5`
+#: was drawing the maximum +12 adjustment from FIVE backtested bets at +40.8%.
+MINIMUM_BETS_FOR_MARKET_RELIABILITY = 200
 
-    reliability = default.copy()
-    bettable = backtest[backtest["status"].astype(str).str.upper() == "BETTABLE"]
-    for _, row in bettable.iterrows():
-        market = str(row.get("market", "")).strip()
-        roi = pd.to_numeric(row.get("roi"), errors="coerce")
-        if market and not pd.isna(roi):
-            reliability[market] = max(-12.0, min(12.0, float(roi) * 50))
-    return reliability
+
+def _market_reliability_from_backtest(path: Path | None = None) -> dict[str, float]:
+    """Measured per-market return, as points on the 0-100 ranking score.
+
+    Empty in practice, and the emptiness is the point.
+
+    This read `backtest_market_breakdown.csv` and scaled each market's ROI by
+    50 into a +/-12 band. Three things were wrong with that at once. The
+    `total_2_5` row is five bets at +40.8%, which pinned the maximum bonus to
+    the noisiest number in the file. The `1x2` row is the +34.41 units over 502
+    bets that `docs/no_edge_out_of_sample.md` repudiates — profit produced by a
+    calibration filter tuned on the very pass it was scored on, and negative on
+    every held-out season. And the file is an IN-SAMPLE backtest whichever row
+    you read, so no row in it can justify moving a live ranking.
+
+    Meanwhile the markets that actually carry the card got nothing: corners are
+    23 of the first 42 best bets, with draw_no_bet and double_chance another
+    12, and none of the five appears in the file at all. So the ranking was
+    being nudged for markets that barely reach the card and left alone for the
+    ones that dominate it.
+
+    The mechanism stays — `build_thursday_best_bets` still takes an override,
+    and `MINIMUM_BETS_FOR_MARKET_RELIABILITY` is here for the day a forward
+    record earns one. The forward record is the only honest source, and at 33
+    settled selections it is nowhere near able to fill this. Until then every
+    market is treated alike, which is what "we do not know" looks like.
+    """
+    return {}
 
 
 def _notes_for_totals(row: pd.Series) -> str:

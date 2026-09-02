@@ -94,8 +94,23 @@ Use the repo, the reports, and GitHub.
   being told it was his market-scope call; `CARD_DISABLED_MARKETS` records
   it. Put it back only with new held-out evidence, never on a single-pass
   profit figure.
+- **The card's ranking takes no reliability nudge from the backtest.**
+  `_market_reliability_from_backtest` returns `{}`. It used to scale each
+  market's in-sample ROI into a ±12 band, which handed `total_2_5` the maximum
+  +12 from FIVE bets at +40.8% and `1x2` a bonus from the +34.41u that
+  `docs/no_edge_out_of_sample.md` repudiates — while the markets that actually
+  carry the card (corners 23 of the first 42 best bets, draw_no_bet and
+  double_chance another 12) appeared in that file not at all. The mechanism and
+  `MINIMUM_BETS_FOR_MARKET_RELIABILITY` remain for the day a forward record can
+  fill it; at 33 settled selections it cannot.
 - **The 2.5 line runs on `TOTALS_RATINGS` under the market-anchored rule
   (`evaluate_total_25_anchored`, weight 0.5, lift 0.03), capped at tier C.**
+  Note the second gate: the card zeroes any row whose edge against the posted
+  price is not positive, so the live rule is tighter than lift alone. That was
+  an accident, and it is now the measured rule too — `score_rule` applies the
+  price gate by default. Held out at the live setting: 95 bets, ROI +7.5%, CLV
+  **−0.138 points**. Positive profit and negative closing-line value on 95 bets
+  is not an edge, it is too small a sample for either proxy to speak.
   Held out by season it sits at zero CLV — no edge shown, none ruled out — so
   the stake stays at 0.1u until the forward CLV record says otherwise. The
   parameters were fixed before the test seasons were read; do not re-tune

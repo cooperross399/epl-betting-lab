@@ -250,34 +250,59 @@ def test_only_two_markets_can_ever_be_profit_backtested():
     assert PROFIT_BACKTESTABLE_MARKETS == {"1x2", "total_2_5"}
 
 
-def test_a_market_whose_profit_cannot_be_verified_stakes_one_tier_lower():
-    """Not a calibration judgement — the corner models are well calibrated
+def test_a_market_whose_profit_cannot_be_verified_stakes_at_the_floor():
+    """Not a calibration judgement - the corner models are well calibrated
     (gaps of -0.0, 0.0, 0.0 over 924 and 616 walk-forward predictions). Being
     right about how often something happens is not being right about whether a
     price is wrong, and for these markets the second can never be checked."""
     from epl_betting_lab.reports.thursday_best_bets import _confidence_tier
 
     top = {"status": "BETTABLE", "selection": "over", "ranking_score": 90.0, "calibrated_edge": 0.08}
-    assert _confidence_tier(pd.Series({**top, "market": "corners_total_9_5"})) == "B"
-    assert _confidence_tier(pd.Series({**top, "market": "btts"})) == "B"
+    assert _confidence_tier(pd.Series({**top, "market": "corners_total_9_5"})) == "C"
+    assert _confidence_tier(pd.Series({**top, "market": "btts"})) == "C"
     # ...while a market with a held-out test behind it keeps its tier.
     assert _confidence_tier(pd.Series({**top, "market": "1x2"})) == "A"
 
 
-def test_the_step_down_never_reaches_zero_units():
-    """One tier, not a floor. The ranking still says which of these are better
-    than the others, and discarding that would be its own kind of pretending."""
+def test_every_market_the_card_can_actually_stake_lands_on_one_size():
+    """The honest consequence, pinned so nobody has to rediscover it.
+
+    An earlier version of this claimed to step "one tier down, not a floor,
+    so the ranking still moves the stake". It never could: of the markets on
+    the card only total_2_5 is profit-backtestable and the anchored rule caps
+    that at C too, while A was never reached in 162 archived best bets. Every
+    stakeable row is C. If that ever stops being true this test should fail and
+    the card's wording should change with it.
+    """
+    from epl_betting_lab.reports.automated_card_input import CARD_DISABLED_MARKETS
+    from epl_betting_lab.market_eligibility import MARKET_SELECTIONS
     from epl_betting_lab.reports.thursday_best_bets import (
-        UNVERIFIABLE_TIER_STEP_DOWN,
+        PROFIT_BACKTESTABLE_MARKETS,
+        _confidence_tier,
+    )
+
+    on_card = [m for m in MARKET_SELECTIONS if m not in CARD_DISABLED_MARKETS]
+    verifiable = [m for m in on_card if m in PROFIT_BACKTESTABLE_MARKETS]
+    assert verifiable == ["total_2_5"], verifiable
+
+    for market in on_card:
+        row = {"status": "BETTABLE", "market": market, "selection": "over",
+               "ranking_score": 95.0, "calibrated_edge": 0.09}
+        if market == "total_2_5":
+            row["selection_rule"] = "market_anchored"   # the only way it reaches the card
+        assert _confidence_tier(pd.Series(row)) == "C", market
+
+
+def test_the_floor_still_carries_a_real_stake():
+    from epl_betting_lab.reports.thursday_best_bets import (
+        UNVERIFIABLE_MARKET_TIER,
         _suggested_units,
     )
 
-    for tier, stepped in UNVERIFIABLE_TIER_STEP_DOWN.items():
-        assert _suggested_units(stepped) > 0, tier
-        assert _suggested_units(stepped) <= _suggested_units(tier)
+    assert _suggested_units(UNVERIFIABLE_MARKET_TIER) > 0
 
 
-def test_passes_and_leans_are_untouched_by_the_step_down():
+def test_passes_and_leans_are_untouched_by_the_floor():
     """A zero-unit row has no stake to reduce."""
     from epl_betting_lab.reports.thursday_best_bets import LEAN_TIER, _confidence_tier
 

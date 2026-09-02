@@ -587,3 +587,57 @@ def test_all_three_evaluators_expose_book_extraction() -> None:
 
     for module in (ml_value, totals, btts):
         assert hasattr(module, "_book_of"), module.__name__
+
+
+def test_a_card_where_every_bet_is_the_same_size_says_so(tmp_path, monkeypatch):
+    """A column of identical tiers must not read as a ranking that sizes bets.
+
+    Every market the card can stake is capped at the floor: only `total_2_5` is
+    profit-backtestable and the anchored rule caps that too, while A was never
+    reached across 162 archived best bets. So the tier orders the card and does
+    not size the bet, and eight rows of "C" with no explanation invites exactly
+    the wrong reading.
+    """
+    from datetime import datetime, timezone
+
+    from epl_betting_lab.reports.automated_card import render_automated_card
+
+    picks = [
+        {**_pick_row("Arsenal", "Chelsea"), "confidence_tier": "C", "suggested_units": 0.1},
+        {**_pick_row("Everton", "Fulham"), "confidence_tier": "C", "suggested_units": 0.1},
+    ]
+    fixtures = [
+        {"date": "2026-09-05", "home_team": h, "away_team": a,
+         "commence_time": "2026-09-05T14:00:00Z", "provider_event_id": "1a2b3c4d"}
+        for h, a in (("Arsenal", "Chelsea"), ("Everton", "Fulham"))
+    ]
+    now = datetime(2026, 9, 4, 12, 0, tzinfo=timezone.utc)
+    text = render_automated_card(
+        _generated_card(tmp_path, monkeypatch, picks=picks, fixtures=fixtures, now=now)
+    )
+
+    assert "Every bet below is 0.1u" in text
+    assert "does not size the bet" in text
+
+
+def test_a_card_with_differing_stakes_gets_no_such_note(tmp_path, monkeypatch):
+    """The note is a description of the card, not a slogan printed regardless."""
+    from datetime import datetime, timezone
+
+    from epl_betting_lab.reports.automated_card import render_automated_card
+
+    picks = [
+        {**_pick_row("Arsenal", "Chelsea"), "confidence_tier": "C", "suggested_units": 0.1},
+        {**_pick_row("Everton", "Fulham"), "confidence_tier": "B", "suggested_units": 0.25},
+    ]
+    fixtures = [
+        {"date": "2026-09-05", "home_team": h, "away_team": a,
+         "commence_time": "2026-09-05T14:00:00Z", "provider_event_id": "1a2b3c4d"}
+        for h, a in (("Arsenal", "Chelsea"), ("Everton", "Fulham"))
+    ]
+    now = datetime(2026, 9, 4, 12, 0, tzinfo=timezone.utc)
+    text = render_automated_card(
+        _generated_card(tmp_path, monkeypatch, picks=picks, fixtures=fixtures, now=now)
+    )
+
+    assert "Every bet below is" not in text

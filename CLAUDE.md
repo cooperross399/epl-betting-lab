@@ -180,6 +180,30 @@ Use the repo, the reports, and GitHub.
   and the workflow runs it a second time after the price fetch because that
   staging does not exist on a fresh runner before it. That blocked the card on
   2026-09-01 with 160 `fixture_not_found` rows.
+- **The corner markets are measured, and they are well calibrated.** Walk-forward
+  gaps of -0.0, 0.0 and 0.0 points overall (`scripts/run_count_calibration.py`,
+  `data/outputs/count_calibration.md`), which matters because corners are 23 of
+  the first 42 best bets and their whole prior validation was synthetic unit
+  tests plus six `@needs_dataset` checks that never run in CI. Good calibration
+  is a precondition and cannot license a stake; a bad number there would be a
+  reason to stake less, never a licence to fit the model until it moves.
+- **The card stakes one tier lower on any market whose profit can never be
+  verified.** `PROFIT_BACKTESTABLE_MARKETS` is `{1x2, total_2_5}` — the only two
+  Football-Data ships odds for. Everything else steps A->B->C (not to a floor:
+  the ranking still distinguishes them). Measured on the live card: 1.10 units
+  becomes 0.80, and only two rows move. This is NOT a calibration judgement —
+  see the bullet above — it is that being right about how often something
+  happens is not being right about whether a price is wrong. Reversible, and
+  meant to be revisited once `live_clv_report.md` has forward evidence.
+- **Every backtest breakdown is stamped `in_sample_backtest_not_evidence_of_edge`.**
+  `backtest_market_breakdown.csv` carried `1x2 ... +34.41 units` for weeks and
+  the ranking scaled it into a bonus. The ranking no longer reads those files;
+  the stamp is for whoever opens one anyway.
+- **The Closing Snapshot workflow is watched, twice.** The weekly check fails
+  when it has not run in 14 days, and `live_clv_report.md` shouts when fewer
+  than half of played picks have a price captured — because a snapshot that
+  never fires and one that always fires late look identical in the record, and
+  only the first leaves a missing run.
 - **Live closing-line value is real from 2026-09-02, and empty until the feed
   fills.** Every CLV figure before that date came from `run_backtest.py`
   measuring backtested bets against Football-Data closes — in-sample, and a

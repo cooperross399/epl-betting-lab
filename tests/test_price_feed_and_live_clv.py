@@ -223,3 +223,26 @@ def test_the_refresh_produces_the_live_clv_report():
     assert step["status"] == "ok", step.get("error")
     assert (out / "live_clv_report.md").is_file()
     assert (out / "live_clv_bets.csv").is_file()
+
+
+def test_the_report_shouts_when_capture_is_failing():
+    """A snapshot that never fires and one that always fires late look
+    identical here — both leave the column empty. The weekly watchdog catches
+    only the first, because a late run still succeeds."""
+    played = [_card(), _card(market="corners_1x2", selection="home")]
+    frame = build_live_clv(played, _feed([("btts", "yes", -105, "X")], when="2026-09-05T15:00:00+00:00"), now=NOW)
+    text = render_live_clv(frame, summarize_live_clv(frame))
+    assert "Capture is failing" in text
+    assert "firing early enough" in text
+
+
+def test_no_warning_when_capture_is_working():
+    frame = build_live_clv([_card()], _feed([("btts", "yes", -105, "X")]), now=NOW)
+    assert "Capture is failing" not in render_live_clv(frame, summarize_live_clv(frame))
+
+
+def test_fixtures_not_yet_played_never_trigger_the_warning():
+    """Most of what is on file at any moment has not kicked off."""
+    frame = build_live_clv([_card()], _feed([("btts", "yes", -105, "X")]),
+                           now=pd.Timestamp("2026-09-05T10:00:00Z"))
+    assert "Capture is failing" not in render_live_clv(frame, summarize_live_clv(frame))

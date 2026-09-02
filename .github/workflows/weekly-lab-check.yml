@@ -68,3 +68,28 @@ jobs:
             --status success --limit 5 --json createdAt \
             --jq '.[].createdAt' | tr '\n' ' ')
           python scripts/check_schedule_health.py $previous --fail-when-stale
+
+      - name: Watch that the closing snapshot is still running
+        # Added 2026-09-02 with the price feed, because that feed is the only
+        # forward evidence the corner markets will ever have and it fails
+        # silently by design: `live_clv` ignores any observation taken after
+        # kick-off, so a snapshot that never fires and one that always fires
+        # late produce the same empty column. Nothing else would notice.
+        #
+        # A longer window than the matchday check: snapshots run on match days
+        # only, so an international break is legitimately quiet.
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PYTHONPATH: src
+        run: |
+          set -u
+          previous=$(gh run list --workflow closing-snapshot.yml \
+            --status success --limit 5 --json createdAt \
+            --jq '.[].createdAt' | tr '\n' ' ')
+          if [ -z "$previous" ]; then
+            echo "::warning::No successful Closing Snapshot run on record yet."
+            exit 0
+          fi
+          python scripts/check_schedule_health.py $previous \
+            --max-days 14 --fail-when-stale

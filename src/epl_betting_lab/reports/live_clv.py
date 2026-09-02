@@ -104,6 +104,41 @@ def _consensus_implied(rows: pd.DataFrame, selection: str, siblings: pd.DataFram
     return float(per_selection.loc[selection]) / total
 
 
+#: Below this share of played picks captured, the feed is not doing its job.
+MIN_CAPTURE_RATE = 0.5
+
+
+def _coverage_warning(frame: pd.DataFrame) -> list[str]:
+    """Say so when the capture is failing, because it fails silently.
+
+    A snapshot that never fires and one that always fires after kick-off
+    produce exactly the same thing here: an empty column. The weekly watchdog
+    catches the first — a workflow that stops running leaves no successful run
+    — and cannot catch the second, because those runs succeed. This is the
+    check for the second, and it is the reason the report states a rate rather
+    than only a mean.
+    """
+    if frame.empty:
+        return []
+    played = frame[frame["state"] != NOT_PLAYED]
+    played = played[played["state"] != NO_KICKOFF]
+    if played.empty:
+        return []
+    captured = int((played["state"] == CAPTURED).sum())
+    rate = captured / len(played)
+    if rate >= MIN_CAPTURE_RATE:
+        return []
+    return [
+        f"> **Capture is failing: {captured} of {len(played)} played picks have a "
+        f"price observed before kick-off.** A snapshot that never runs and one "
+        "that always runs late look identical here, because an observation "
+        "taken after kick-off is ignored rather than trusted. Check that the "
+        "Closing Snapshot workflow is firing, and firing early enough — GitHub "
+        "has delayed this repository's crons by nine hours before now.",
+        "",
+    ]
+
+
 def build_live_clv(
     cards: Sequence[Mapping[str, Any]],
     feed: pd.DataFrame,
@@ -234,6 +269,7 @@ def render_live_clv(frame: pd.DataFrame, summary: pd.DataFrame) -> str:
             "about the model.",
             "",
         ]
+    lines += _coverage_warning(frame)
     lines += [
         "`clv_points_best` compares against the best price across books at the last",
         "observation — like for like, since the card takes the best price.",

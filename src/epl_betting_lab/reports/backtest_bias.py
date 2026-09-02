@@ -239,6 +239,31 @@ def render_bias_report(
     return "\n".join(lines)
 
 
+#: Stamped on every row of every breakdown this module writes.
+#:
+#: These files are a walk-forward backtest of seasons already in the dataset,
+#: scored by filters tuned on the same pass. `backtest_market_breakdown.csv`
+#: carried `1x2 … 502 bets … +34.41 units … roi 0.069` for weeks, and the
+#: card's ranking scaled that ROI into a bonus — while
+#: `docs/no_edge_out_of_sample.md` shows the same rule losing on every held-out
+#: season, and the profit coming from a filter that removed 272 of 774 raw bets
+#: and was chosen while looking at the result. A `total_2_5` row of five bets at
+#: +40.8% was drawing the maximum bonus alongside it.
+#:
+#: The ranking no longer reads these files. This column is for the reader who
+#: opens one anyway, and for the next session that finds a headline number in a
+#: CSV and has no way to know it was disowned.
+EVIDENCE_NOTE = "in_sample_backtest_not_evidence_of_edge"
+
+
+def _stamp_evidence(report: pd.DataFrame) -> pd.DataFrame:
+    if report.empty:
+        return report
+    stamped = report.copy()
+    stamped["evidence"] = EVIDENCE_NOTE
+    return stamped
+
+
 def save_backtest_bias_reports(bets: pd.DataFrame, output_dir: Path) -> dict[str, Path]:
     output_dir.mkdir(parents=True, exist_ok=True)
     enriched = enrich_backtest_bets(bets)
@@ -266,6 +291,7 @@ def save_backtest_bias_reports(bets: pd.DataFrame, output_dir: Path) -> dict[str
     }
 
     for name, report in reports.items():
+        report = _stamp_evidence(report)
         report.to_csv(paths[name], index=False)
 
     markdown = render_bias_report(

@@ -23,10 +23,28 @@ import json
 from pathlib import Path
 from typing import Any, Callable
 
-from epl_betting_lab.config import OUTPUTS_DIR
+from epl_betting_lab.config import OUTPUTS_DIR, PROCESSED_DIR
 
 
 REFRESH_JSON_FILENAME = "refresh_all_reports.json"
+
+
+def _archived_cards() -> list[dict]:
+    """Every archived card, oldest first. Missing or unreadable ones are skipped.
+
+    The archive is the only record of what the card actually recommended; it is
+    restored from the previous run's artifact at the top of each workflow run.
+    """
+    root = OUTPUTS_DIR / "archive" / "automated_cards"
+    if not root.is_dir():
+        return []
+    cards = []
+    for path in sorted(root.glob("*/*/automated_card.json")):
+        try:
+            cards.append(json.loads(path.read_text(encoding="utf-8")))
+        except (OSError, UnicodeError, ValueError):
+            continue
+    return cards
 
 
 def _steps() -> list[tuple[str, str, Callable[[Path], Any]]]:
@@ -36,6 +54,8 @@ def _steps() -> list[tuple[str, str, Callable[[Path], Any]]]:
         save_automated_card_input,
     )
     from epl_betting_lab.reports.browser_status import save_status_html
+    from epl_betting_lab.reports.live_clv import save_live_clv_reports
+    from epl_betting_lab.reports.price_feed import load_feed
     from epl_betting_lab.reports.card_history import (
         archive_card,
         save_card_comparison,
@@ -47,6 +67,13 @@ def _steps() -> list[tuple[str, str, Callable[[Path], Any]]]:
     )
 
     return [
+        (
+            "live_clv",
+            "Score the card's own picks against the prices later observed",
+            lambda outputs: save_live_clv_reports(
+                _archived_cards(), load_feed(PROCESSED_DIR / "price_feed.csv"), outputs
+            ),
+        ),
         (
             "card_input",
             "Derive the card input from provider staging evidence",

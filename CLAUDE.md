@@ -148,6 +148,13 @@ Use the repo, the reports, and GitHub.
   the shadow verifier uses to ask whether the provider covered the slate, and a
   provider checked against itself always passes. A failed fetch leaves the
   previous slate in place and marks the run degraded rather than emptying it.
+  An *empty* feed is different: Football-Data lists only the coming round and
+  goes empty around an international break, which is a quiet week, not a
+  fault — the script then takes the provider's staged fixtures (noted as such
+  in the file) so the card is not blocked against a stale committed slate,
+  and the workflow runs it a second time after the price fetch because that
+  staging does not exist on a fresh runner before it. That blocked the card on
+  2026-09-01 with 160 `fixture_not_found` rows.
 - **Card delivery is the `card-feed` branch, and no email.** Each run publishes
   `latest_card_comment.md` + `latest_status.json` there; the issue #162 comment
   remains as the written record but mentions nobody, and the repository's

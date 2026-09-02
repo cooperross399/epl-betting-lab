@@ -37,11 +37,22 @@ FIXTURE_COLUMNS = ("date", "home_team", "away_team", "notes")
 
 
 class FixturesUnavailable(RuntimeError):
-    """The feed could not be read, or held no fixture for this league.
+    """The feed could not be read.
 
     Raised rather than returning an empty frame: an empty result written over
     the file would erase the slate, and a slate erased silently is the exact
     failure this module exists to end.
+    """
+
+
+class NoUpcomingFixtures(FixturesUnavailable):
+    """The feed was read fine and simply lists no fixture for this league yet.
+
+    Football-Data publishes only the coming round, so during an international
+    break the file has nothing for the Premier League. That is a quiet week,
+    not a fault: the previous slate is kept and the run is not degraded. It
+    became a degradation once, and every off-week run went red for it — which
+    is how a reader learns to ignore red.
     """
 
 
@@ -85,7 +96,7 @@ def parse_fixtures(
     moment = today or date.today()
     frame = frame[frame["date"] >= moment]
     if frame.empty:
-        raise FixturesUnavailable(
+        raise NoUpcomingFixtures(
             f"The fixtures feed holds no {league} fixture on or after "
             f"{moment.isoformat()}."
         )

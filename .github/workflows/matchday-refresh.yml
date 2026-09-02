@@ -327,6 +327,22 @@ jobs:
           python scripts/run_provider_shadow_verification.py \
             --provider odds_api --live --overwrite-staging --include-event-markets
 
+      - name: Fill the slate from the provider if Football-Data had nothing
+        # The slate refresh above runs before any quota is spent, which is
+        # right on a normal week and useless on a quiet one: Football-Data's
+        # feed lists only the coming round and goes empty around an
+        # international break, and on a fresh runner the provider's staged
+        # fixtures do not exist until the price fetch has run. On 2026-09-01
+        # that left the committed slate — weeks old — standing, and the card
+        # was blocked at validation with 160 `fixture_not_found` rows while
+        # ten correct fixtures sat in staging. The same script again, now that
+        # staging exists: on a normal week it rewrites the same slate.
+        continue-on-error: true
+        env:
+          PYTHONPATH: src
+        run: |
+          python scripts/refresh_upcoming_fixtures.py
+
       - name: Record what went wrong
         # One place that knows whether the run was degraded, so the summary,
         # the email, and the exit status cannot disagree about it.

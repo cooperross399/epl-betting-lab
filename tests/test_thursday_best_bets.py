@@ -312,3 +312,48 @@ def test_passes_and_leans_are_untouched_by_the_floor():
     avoid = pd.Series({"status": "PASS", "market": "corners_1x2", "selection": "home",
                        "ranking_score": 10.0, "calibrated_edge": -0.01})
     assert _confidence_tier(avoid) == "Pass/Avoid"
+
+
+# --- the price a bet stops being a bet at ------------------------------------
+
+
+def test_the_limit_is_longer_than_fair_because_fair_is_break_even():
+    """Fair is zero edge — taking a bet there is paying the vig for a coin
+    flip. The limit is where the edge falls to this market's bar, which is
+    strictly a longer price than fair."""
+    from epl_betting_lab.models.value import fair_american_from_prob
+    from epl_betting_lab.reports.thursday_best_bets import _bet_down_to
+
+    row = pd.Series({"market": "btts", "selection": "yes", "calibrated_model_prob": 0.55})
+    limit, fair = _bet_down_to(row), fair_american_from_prob(0.55)
+    # Longer price = lower implied probability.
+    assert _implied(limit) < _implied(fair)
+
+
+def _implied(american):
+    a = float(american)
+    return 100 / (a + 100) if a > 0 else -a / (-a + 100)
+
+
+def test_a_market_with_a_higher_bar_demands_a_longer_price():
+    """total_2_5 unders carry a 0.08 floor against btts's 0.045, so the same
+    model probability has to be paid more to be worth taking."""
+    from epl_betting_lab.reports.thursday_best_bets import _bet_down_to
+
+    same = {"calibrated_model_prob": 0.60}
+    strict = _bet_down_to(pd.Series({**same, "market": "total_2_5", "selection": "under"}))
+    loose = _bet_down_to(pd.Series({**same, "market": "btts", "selection": "yes"}))
+    assert _implied(strict) < _implied(loose)
+
+
+def test_a_probability_that_cannot_produce_a_price_returns_blank_not_a_guess():
+    from epl_betting_lab.reports.thursday_best_bets import _bet_down_to
+
+    for prob in (None, 0.0, 1.0, 0.01):
+        assert _bet_down_to(pd.Series({"market": "btts", "selection": "yes",
+                                       "calibrated_model_prob": prob})) == ""
+
+
+def test_the_limit_reaches_the_report():
+    report = build_thursday_best_bets(_candidates())
+    assert "bet_down_to_american" in report.columns

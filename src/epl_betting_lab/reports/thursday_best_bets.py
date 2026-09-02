@@ -6,6 +6,10 @@ from pathlib import Path
 
 import pandas as pd
 
+from epl_betting_lab.config import MIN_EDGE
+from epl_betting_lab.models.calibration import min_calibrated_edge
+from epl_betting_lab.models.value import fair_american_from_prob
+
 from epl_betting_lab.config import BANKROLL_UNIT_DOLLARS, MAX_DEFAULT_JUICE, OUTPUTS_DIR
 
 
@@ -24,6 +28,7 @@ REPORT_COLUMNS = [
     "confidence_tier",
     "fair_american",
     "american_odds",
+    "bet_down_to_american",
     "suggested_units",
     "suggested_wager_$",
     "book",
@@ -269,6 +274,32 @@ PROFIT_BACKTESTABLE_MARKETS: frozenset[str] = frozenset({"1x2", "total_2_5"})
 UNVERIFIABLE_MARKET_TIER = "C"
 
 
+#: The shortest price at which a pick is still worth taking.
+#:
+#: Named for the convention Cooper's golf cards already use — model fair odds
+#: quoted with a "bet down to" threshold. A card that only shows the price at
+#: one book at one moment answers the wrong question: by the time he looks, the
+#: line has usually moved. What he needs is the number it stops being a bet at.
+#:
+#: It is NOT the fair price. Fair is break-even — zero edge — and taking a bet
+#: at fair is taking a coin flip with the vig still to pay. The limit is the
+#: price at which the edge falls to the bar this market has to clear, which is
+#: strictly longer than fair. Cross it and the bet is off, not marginal.
+def _bet_down_to(row: pd.Series) -> float | str:
+    market = str(row.get("market", "")).strip()
+    selection = str(row.get("selection", "")).strip().lower()
+    probability = _float_value(row, "calibrated_model_prob", _float_value(row, "model_prob"))
+    if not probability or not 0 < probability < 1:
+        return ""
+    floor = min_calibrated_edge(market, selection, MIN_EDGE)
+    # A stake is only advised while edge >= floor, so implied must not exceed
+    # probability - floor. Above that the price has stopped paying for the risk.
+    limit = probability - floor
+    if limit <= 0 or limit >= 1:
+        return ""
+    return round(fair_american_from_prob(limit))
+
+
 def _confidence_tier(row: pd.Series) -> str:
     section = row.get("section")
     status = str(row.get("status", "")).upper()
@@ -358,6 +389,7 @@ def build_thursday_best_bets(
     scores_and_reasons = df.apply(lambda row: _ranking_components(row, market_reliability), axis=1)
     df["ranking_score"] = scores_and_reasons.apply(lambda item: item[0])
     df["ranking_reason"] = scores_and_reasons.apply(lambda item: "; ".join(item[1]))
+    df["bet_down_to_american"] = df.apply(_bet_down_to, axis=1)
     df["confidence_tier"] = df.apply(_confidence_tier, axis=1)
     df["risk_flags"] = df.apply(_risk_flags, axis=1)
     df["market_reliability_note"] = df.apply(lambda row: _market_reliability_note(row, market_reliability), axis=1)

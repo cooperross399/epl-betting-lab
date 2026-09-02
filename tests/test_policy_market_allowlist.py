@@ -56,7 +56,7 @@ def _staging(tmp_path: Path, markets) -> tuple[Path, Path]:
                         "selection": selection,
                         "american_odds": "-110",
                         "closing_american_odds": "",
-                        "book": "BookA",
+                        "book": "FanDuel",
                         "notes": "",
                     }
                 )

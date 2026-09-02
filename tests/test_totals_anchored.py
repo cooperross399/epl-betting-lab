@@ -12,7 +12,7 @@ from epl_betting_lab.strategies.totals import (
 )
 
 
-def _odds(over=-110, under=-110, books=("A",)):
+def _odds(over=-110, under=-110, books=("FanDuel",)):
     rows = []
     for b in books:
         rows += [{"home_team": "H", "away_team": "A", "market": "total_2_5", "selection": "over", "american_odds": over, "book": b},
@@ -29,7 +29,7 @@ def test_the_fixed_parameters_are_the_conservative_end_of_the_grid():
 
 
 def test_consensus_is_preferred_and_named():
-    p, source = market_probability_over("H", "A", _odds(), _odds(over=-120, under=+100, books=("A", "B")))
+    p, source = market_probability_over("H", "A", _odds(), _odds(over=-120, under=+100, books=("FanDuel", "DraftKings")))
     assert source == "consensus" and 0.45 < p < 0.6
     p2, source2 = market_probability_over("H", "A", _odds(), None)
     assert source2 == "best-price pair" and abs(p2 - 0.5) < 1e-9

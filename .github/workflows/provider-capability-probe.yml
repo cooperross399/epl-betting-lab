@@ -1,0 +1,62 @@
+name: Provider Capability Probe
+
+# Manual only. Asks the provider what it will actually sell, instead of
+# asserting it from memory.
+#
+# Two claims arrived from outside this project and both contradict what
+# CLAUDE.md has been saying. Getting either wrong is expensive in a different
+# direction: believing a market is unbuyable stops it ever being validated —
+# which is exactly what happened to corners, wrongly, for weeks — and believing
+# it is buyable spends a research programme on nothing.
+#
+# It exists as a workflow rather than a local script because the working API key
+# is a repository secret. GitHub never returns a secret's value to anyone, by
+# design, so the honest way to use it is to run the code where it already lives
+# rather than copying it onto a laptop.
+#
+# SCOPE: reads a handful of events. Writes no staging bundle, creates no shadow
+# run, touches no protected file, and cannot disturb the acceptance evidence
+# window. It spends a few credits against 3.6M remaining.
+
+on:
+  workflow_dispatch:
+    inputs:
+      historical_date:
+        description: "UTC timestamp to probe for historical markets, e.g. 2025-09-20T12:00:00Z (blank = ~200 days ago)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    name: Provider Capability Probe
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install project
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install -e .
+
+      - name: Probe
+        env:
+          EPL_ODDS_API_KEY: ${{ secrets.EPL_ODDS_API_KEY }}
+          PYTHONPATH: src
+        run: |
+          python scripts/probe_provider_capabilities.py \
+            --historical-date "${{ inputs.historical_date }}"

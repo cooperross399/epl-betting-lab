@@ -19,11 +19,13 @@ from epl_betting_lab.providers.env_file import load_provider_env
 from epl_betting_lab.providers.historical_btts import (
     HarvestBudget,
     harvest_btts_history,
+    holding_key,
     matchdays_between,
 )
 
 API_KEY_ENV = "EPL_ODDS_API_KEY"
 DEFAULT_OUTPUT = "historical_market_odds.csv"
+MISSES_SUFFIX = "_misses.csv"
 FIELDS = [
     "sampled_at",
     "commence_time",
@@ -69,8 +71,44 @@ def _read_existing(
             day = str(row.get("commence_time", ""))[:10]
             home = str(row.get("home_team", "")).strip().casefold()
             away = str(row.get("away_team", "")).strip().casefold()
-            already.append(f"{day}|{home}|{away}")
+            already.append(holding_key(f"{day}|{home}|{away}", market))
     return already, legacy_rows, needs_migration
+
+
+def _read_misses(path: Path) -> list[str]:
+    """Fixture/market pairs the provider had no price for.
+
+    Without this they are re-bought on every run forever, because the only
+    record of a purchase is a row and a miss produces none. A season is meant
+    to be bought in affordable pieces, so "nothing there" has to be
+    remembered as firmly as a price.
+    """
+    if not path.is_file():
+        return []
+    with path.open(encoding="utf-8", newline="") as handle:
+        return [
+            holding_key(
+                f"{str(row.get('commence_time', ''))[:10]}"
+                f"|{str(row.get('home_team', '')).strip().casefold()}"
+                f"|{str(row.get('away_team', '')).strip().casefold()}",
+                str(row.get("market", "")),
+            )
+            for row in csv.DictReader(handle)
+        ]
+
+
+MISS_FIELDS = ["sampled_at", "commence_time", "home_team", "away_team", "market"]
+
+
+def _write_misses(path: Path, misses: list[dict[str, object]], *, append: bool) -> None:
+    exists = path.is_file()
+    mode = "a" if (append and exists) else "w"
+    with path.open(mode, newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=MISS_FIELDS)
+        if mode == "w" or not exists:
+            writer.writeheader()
+        for row in misses:
+            writer.writerow({field: row.get(field, "") for field in MISS_FIELDS})
 
 
 def _write_rows(
@@ -154,6 +192,9 @@ def main() -> int:
     already, legacy_rows, needs_migration = _read_existing(
         output_path, append=args.append
     )
+    misses_path = output_path.with_name(output_path.stem + MISSES_SUFFIX)
+    known_misses = _read_misses(misses_path) if args.append else []
+    already.extend(known_misses)
 
     days = matchdays_between(_day(args.start), _day(args.end))
     print(f"EPL Betting Lab - Historical BTTS harvest")
@@ -162,7 +203,11 @@ def main() -> int:
     print(f"Sampling {args.hours_before}h before each fixture's own kick-off.")
     print(f"Markets: {args.markets}")
     if already:
-        print(f"Already hold {len(already)} fixture(s); they will not be re-bought.")
+        print(
+            f"Already hold {len(already)} fixture/market pair(s) "
+            f"({len(known_misses)} of them known to have no price); "
+            "they will not be re-bought."
+        )
 
     result = harvest_btts_history(
         days,
@@ -191,6 +236,12 @@ def main() -> int:
     print(f"Fixtures seen: {result.events_seen}; priced: {result.events_with_btts}; "
           f"already had: {result.already_had}")
     print(f"Rows written: {len(result.rows)} -> {output_path}")
+    if result.misses:
+        _write_misses(misses_path, result.misses, append=args.append)
+        print(
+            f"No price at any book for {len(result.misses)} fixture/market "
+            f"pair(s); recorded -> {misses_path}"
+        )
     print(f"Credits spent: {result.credits_spent}")
     if result.stopped_early:
         print("STOPPED EARLY: the credit ceiling was reached before the range ended.")

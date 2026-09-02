@@ -73,6 +73,9 @@ class HarvestResult:
     events_seen: int = 0
     events_with_btts: int = 0
     already_had: int = 0
+    #: Fixture/market pairs paid for that returned no price, so a later run
+    #: does not buy the same nothing again.
+    misses: list[dict[str, Any]] = field(default_factory=list)
     stopped_early: bool = False
     errors: list[str] = field(default_factory=list)
 
@@ -219,6 +222,19 @@ def _fixture_key(event: Mapping[str, Any]) -> str:
     return f"{day}|{home}|{away}"
 
 
+def holding_key(fixture_key: str, market: str) -> str:
+    """What is held is a fixture *and a market*, never a fixture alone.
+
+    Keying on the fixture only meant a date already bought for corners
+    counted as bought for everything: `--markets btts` over the corners
+    window would skip all 150 fixtures, spend nothing, and print a green
+    "already hold 150 fixture(s)" while recording no BTTS price at all.
+    That is the same shape as every other fault found here - a run that
+    reports fine while nothing lands.
+    """
+    return f"{fixture_key}|{str(market).strip().casefold()}"
+
+
 def harvest_btts_history(
     matchdays: Sequence[datetime],
     *,
@@ -264,7 +280,10 @@ def harvest_btts_history(
 
     for event_id, event in fixtures.items():
         key = _fixture_key(event)
-        if key in seen:
+        # Buy only the markets this fixture is missing. Requesting one it
+        # already holds would charge full price for a duplicate row.
+        wanted = [m for m in markets if holding_key(key, m) not in seen]
+        if not wanted:
             result.already_had += 1
             continue
         kickoff = _parse_time(event.get("commence_time"))
@@ -272,30 +291,37 @@ def harvest_btts_history(
             result.errors.append(f"Event {event_id}: unreadable kick-off time.")
             continue
         when = kickoff - timedelta(hours=hours_before)
-        if not budget.can_afford(HISTORICAL_CREDITS_PER_REQUEST * len(markets)):
+        if not budget.can_afford(HISTORICAL_CREDITS_PER_REQUEST * len(wanted)):
             result.stopped_early = True
             break
         prices = _event_prices(
             api_key=api_key,
             event_id=event_id,
             when=when,
-            markets=markets,
+            markets=wanted,
             request=request,
             root=root,
             sport_key=sport_key,
             timeout_seconds=timeout_seconds,
         )
-        budget.charge(HISTORICAL_CREDITS_PER_REQUEST * len(markets))
-        if not prices:
-            continue
-        result.events_with_btts += 1
-        seen.add(key)
+        budget.charge(HISTORICAL_CREDITS_PER_REQUEST * len(wanted))
         base = {
             "sampled_at": when.strftime("%Y-%m-%dT%H:%M:%SZ"),
             "commence_time": kickoff.strftime("%Y-%m-%dT%H:%M:%SZ"),
             "home_team": str(event.get("home_team", "")),
             "away_team": str(event.get("away_team", "")),
         }
+        # A market can be paid for and come back empty - no book offered it at
+        # that moment. Record the miss per market, not per fixture: buying
+        # corners for a fixture says nothing about whether its BTTS price
+        # exists.
+        for market in wanted:
+            seen.add(holding_key(key, market))
+            if not prices.get(market):
+                result.misses.append({**base, "market": market})
+        if not prices:
+            continue
+        result.events_with_btts += 1
         # One row per market per selection. A wide table would need a column
         # per line of every ladder and would change shape whenever a book added
         # one; long rows survive that. `player` is empty for match-level

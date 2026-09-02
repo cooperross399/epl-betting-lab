@@ -6,3 +6,13 @@ __pycache__/
 data/raw/*.csv
 data/processed/*.csv
 data/outputs/*.csv
+
+# Local run debris. These are produced by running the pipeline on a laptop and
+# are not inputs to anything: staging is rebuilt every run, data/raw is
+# refetched, and data/manual/current_odds.csv is a protected file that a
+# `git add -A` must never sweep into a commit. It did once, on 2026-09-02,
+# along with provider responses whose 32-hex event ids look enough like an API
+# key to trip the secrets guard - which is how it was caught.
+data/staging/
+data/raw/understat_league_EPL_*.json
+data/manual/current_odds.csv

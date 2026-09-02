@@ -2,10 +2,13 @@ name: Harvest Historical BTTS
 
 # Manual only, and it spends real provider credits: ten per event.
 #
-# BTTS produces most of the picks on a card and has never been backtested for
-# profit, because Football-Data ships no BTTS odds at all. The provider sells
-# them through the per-event historical endpoint, one event at a time. This buys
-# them so the market can be measured rather than assumed.
+# Despite the name it buys whatever `markets` asks for, and until 2026-09-02
+# it had bought corners and player props and never once bought BTTS - the
+# market it is named after, and the market the repo kept describing as
+# impossible to backtest. The reason it never did is now fixed: what counted
+# as "already bought" was a fixture, with no market in the key, so asking for
+# BTTS over a window already bought for corners skipped every fixture and
+# spent nothing while reporting success.
 #
 # The credit ceiling is required, not defaulted. A harvest that silently spent
 # a season's budget would be a worse outcome than one that stops short.
@@ -112,7 +115,11 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: historical-btts
-          path: data/processed/historical_market_odds.csv
+          # The misses file rides along or it is lost, and a fixture/market
+          # pair with no price anywhere gets re-bought on every future run.
+          path: |
+            data/processed/historical_market_odds.csv
+            data/processed/historical_market_odds_misses.csv
           if-no-files-found: warn
           retention-days: 90
 

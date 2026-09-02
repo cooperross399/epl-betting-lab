@@ -31,6 +31,7 @@ backtest measures the same decision the system would have made.
 
 from __future__ import annotations
 
+import time
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
@@ -100,6 +101,32 @@ def _american(price: object) -> float | None:
     return value
 
 
+#: Transient network failures are retried this many times before giving up on
+#: one request. Patched to 0 sleep in tests.
+REQUEST_ATTEMPTS = 3
+_sleep = time.sleep
+
+
+def _request_with_retries(
+    request: Requester, url: str, *, params: Mapping[str, Any], timeout: float
+) -> Any | None:
+    """One request, retried, returning None rather than raising.
+
+    A single `Connection reset by peer` used to abort the whole harvest, and
+    because the rows are written only at the end, every credit that run had
+    already spent was lost with it. A blip two-thirds of the way through a
+    season is not a reason to throw away the season.
+    """
+    for attempt in range(REQUEST_ATTEMPTS):
+        try:
+            return request(url, params=params, timeout=timeout)
+        except Exception:  # noqa: BLE001 - any transport failure is retryable
+            if attempt == REQUEST_ATTEMPTS - 1:
+                return None
+            _sleep(2.0 * (attempt + 1))
+    return None
+
+
 def _slate_snapshot(
     *,
     api_key: str,
@@ -109,7 +136,8 @@ def _slate_snapshot(
     sport_key: str,
     timeout_seconds: float,
 ) -> list[Mapping[str, Any]]:
-    response = request(
+    response = _request_with_retries(
+        request,
         f"{root}/v4/historical/sports/{sport_key}/odds",
         params={
             "apiKey": api_key,
@@ -120,7 +148,7 @@ def _slate_snapshot(
         },
         timeout=timeout_seconds,
     )
-    if int(getattr(response, "status_code", 0) or 0) != 200:
+    if response is None or int(getattr(response, "status_code", 0) or 0) != 200:
         return []
     payload = response.json()
     data = payload.get("data") if isinstance(payload, Mapping) else payload
@@ -146,7 +174,8 @@ def _event_prices(
     prices every market at the same instant. Prices sampled minutes apart are
     not strictly comparable, and comparing markets is the whole point.
     """
-    response = request(
+    response = _request_with_retries(
+        request,
         f"{root}/v4/historical/sports/{sport_key}/events/{event_id}/odds",
         params={
             "apiKey": api_key,
@@ -157,7 +186,7 @@ def _event_prices(
         },
         timeout=timeout_seconds,
     )
-    if int(getattr(response, "status_code", 0) or 0) != 200:
+    if response is None or int(getattr(response, "status_code", 0) or 0) != 200:
         return {}
     payload = response.json()
     data = payload.get("data") if isinstance(payload, Mapping) else payload

@@ -123,10 +123,29 @@ def selections_long(probs: pd.DataFrame, market: str) -> pd.DataFrame:
     return out
 
 
-def score_rule(long: pd.DataFrame, a: float, threshold: float) -> dict | None:
-    """Bets, CLV and profit for one (a, threshold) on one set of rows."""
+def score_rule(
+    long: pd.DataFrame, a: float, threshold: float, *, require_price_edge: bool = True
+) -> dict | None:
+    """Bets, CLV and profit for one (a, threshold) on one set of rows.
+
+    `require_price_edge` is the rule the card actually runs, and it must stay
+    the default. The strategy flags a bet on LIFT over the de-vigged consensus,
+    and then `thursday_best_bets._confidence_tier` zeroes any row whose edge
+    against the posted price is not positive — so a row can clear the lift bar,
+    be marked BETTABLE, and be staked at nothing. On live prices that is common
+    rather than hypothetical: the largest lift on 2026-09-02 was +0.024 against
+    an edge of -0.009.
+
+    Scoring without the gate therefore measured a rule nobody runs, and the
+    looser rule is the one that stakes money on a price the model's own final
+    number says is negative. The gate is applied here so the published figures
+    describe the live rule, and the difference is reported rather than hidden.
+    """
     blended = _sigmoid(a * _logit(long["p_model"]) + (1 - a) * _logit(long["p_market"]))
-    bets = long[(blended - long["p_market"]) > threshold]
+    qualifies = (blended - long["p_market"]) > threshold
+    if require_price_edge:
+        qualifies &= blended > (1.0 / long["open_dec"])
+    bets = long[qualifies]
     if len(bets) < MIN_BETS:
         return None
     with_close = bets.dropna(subset=["clv"])
@@ -167,10 +186,15 @@ def evaluate_out_of_sample(
             tr, te = score_rule(train, a, threshold), score_rule(test, a, threshold)
             if tr is None or te is None:
                 continue
+            # The looser rule, reported alongside so the cost of the price gate
+            # is visible rather than asserted.
+            te_loose = score_rule(test, a, threshold, require_price_edge=False)
             rows.append({
                 "market": market, "model_weight": a, "threshold": threshold,
                 **{f"train_{k}": v for k, v in tr.items()},
                 **{f"test_{k}": v for k, v in te.items()},
+                "test_bets_no_price_gate": (te_loose or {}).get("bets"),
+                "test_units_no_price_gate": (te_loose or {}).get("units"),
             })
     out = pd.DataFrame(rows)
     return out.sort_values("train_clv_points", ascending=False).reset_index(drop=True) if not out.empty else out

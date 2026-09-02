@@ -780,7 +780,14 @@ def run_thursday_best_bets_report(
     frames = [
         evaluate_1x2_value(projections, odds, min_edge=MIN_EDGE, max_juice=MAX_DEFAULT_JUICE),
         evaluate_total_25_anchored(totals_projections, odds, market_odds=market_odds, max_juice=MAX_DEFAULT_JUICE),
-        evaluate_btts(projections, odds, min_edge=MIN_EDGE, max_juice=MAX_DEFAULT_JUICE),
+        # BTTS moves to the xG ratings too, on its own evidence: they remove the
+        # nine-point under-statement recorded as unfixed, and Brier and log loss
+        # improve with the calibration rather than in spite of it. Every other
+        # score-matrix market stays on CARD_RATINGS — double_chance and
+        # draw_no_bet are derived from the 1X2 probabilities that produced the
+        # compression artefact, and nothing market-specific has been measured
+        # for them.
+        evaluate_btts(totals_projections, odds, min_edge=MIN_EDGE, max_juice=MAX_DEFAULT_JUICE),
         evaluate_double_chance(projections, odds, min_edge=MIN_EDGE, max_juice=MAX_DEFAULT_JUICE),
         evaluate_draw_no_bet(projections, odds, min_edge=MIN_EDGE, max_juice=MAX_DEFAULT_JUICE),
     ]

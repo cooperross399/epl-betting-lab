@@ -82,6 +82,41 @@ TOTALS_RATINGS = RatingConfig(
 )
 
 
+#: The ratings both-teams-to-score is priced on.
+#:
+#: The same configuration the 2.5 line uses, adopted here for a reason specific
+#: to this market rather than by extension.
+#:
+#: BTTS carried a measured, recorded, unfixed bias: the model under-stated how
+#: often both teams score, by roughly nine points in the bands where it bets.
+#: `docs/why_better_calibration_lost_money.md` is the record of the attempt to
+#: fix it by shrinking toward a league-average prior, which improved the gap to
+#: 3.9 points and cost about 140 units, because shrinking toward a prior that
+#: disagrees with sharp prices manufactures edges — 546 bets became 851.
+#:
+#: These ratings remove the bias instead of masking it. Walk-forward over 1,540
+#: matches (`scripts/run_btts_calibration.py`), the overall gap goes +4.2 -> -0.7
+#: points, and in the bands that produce bets +10.2 -> band emptied and
+#: +6.2 -> +0.2. Brier and log loss improve with it, 0.2492 -> 0.2444 and
+#: 0.6921 -> 0.6818, which is the part that distinguishes this from the failed
+#: fix: a shrinkage improves calibration by saying less and would leave those
+#: flat or worse; better ratings improve it by being more right.
+#:
+#: The bias had a direction, and so does removing it. Under-stating BTTS-yes
+#: manufactures false edges on the `no` side, and the live card was indeed
+#: staking `no` — on the 2026-09-02 slate the legacy ratings bet 2 `no` and 1
+#: `yes`, and these bet 2 `yes` and no `no`. Fewer bets, not more, which is the
+#: opposite of the failed fix's signature.
+#:
+#: What this still cannot say is whether it makes money. BTTS has no historical
+#: prices at any source this project can reach, so no bet rule on it can ever be
+#: profit-backtested. That is a reason to keep its stake modest and its forward
+#: record separate, not a reason to keep a bias that has been measured out.
+BTTS_RATINGS = RatingConfig(
+    opponent_adjusted=True, half_life_days=365, goal_source="blend", xg_weight=0.7
+)
+
+
 class PoissonGoalsModel:
     """Simple EPL goals model.
 

@@ -195,13 +195,26 @@ def evaluate_total_25_anchored(
             p_final = _sigmoid(model_weight * _logit(p_model) + (1 - model_weight) * _logit(p_market))
             lift = p_final - p_market
             price_edge = p_final - _implied(american)
+            # Grade the blended probability against the price the way every
+            # other market is graded, so the row carries the fair price, ROI
+            # and implied fields the ranking and the renderer read. The status
+            # is then overridden: this rule bets on lift, not on that edge.
+            grade = grade_edge(p_final, american, min_edge=0.0, max_default_juice=max_juice)
+            # The measured rule bets on lift alone: the held-out numbers were
+            # produced with profit taken at the opening price, so the margin
+            # is already inside them, and a 3-point lift over the de-vigged
+            # consensus is what clears it. Adding a "must also beat the best
+            # price" gate would make the live rule stricter than the one that
+            # was tested, and untested is untested in either direction. The
+            # card-wide juice cap still applies.
             if american < 0 and american < max_juice:
                 status = "PASS - too much juice"
-            elif lift > threshold and price_edge > 0:
+            elif lift > threshold:
                 status = "BETTABLE"
             else:
                 status = "PASS"
             rows.append({
+                **grade,
                 "home_team": p.home_team, "away_team": p.away_team,
                 "market": "total_2_5", "selection": selection,
                 "american_odds": american, "book": _book_of(line),

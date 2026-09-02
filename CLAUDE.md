@@ -111,10 +111,20 @@ Use the repo, the reports, and GitHub.
   odds for 1X2 and the 2.5 line, so for those it always is. A change that
   improved calibration on every market cost about 140 units in the backtest:
   `docs/why_better_calibration_lost_money.md`.
-- BTTS has a known, measured, **unfixed** calibration bias of roughly nine
-  points, and cannot be profit-backtested because no historical BTTS prices
-  exist. It produces most of the picks on a card. Say so rather than patching
-  it.
+- **BTTS's nine-point bias is measured out (2026-09-02), by the ratings rather
+  than by a patch.** It runs on `BTTS_RATINGS` — the same opponent-adjusted,
+  365-day, xG-blended configuration as the 2.5 line. Walk-forward over 1,540
+  matches the overall gap goes +4.2 → −0.7 points and Brier and log loss
+  improve with it, which is what separates this from the shrinkage that cost
+  140 units: that improved calibration by saying less. It also bets fewer, not
+  more. `docs/the_btts_bias_was_a_ratings_problem.md`,
+  `scripts/run_btts_calibration.py`. Still true: **no BTTS bet rule can ever be
+  profit-backtested** — no source this project can reach has historical BTTS
+  prices — so removing a bias is not demonstrating an edge.
+- **BTTS does not produce most of the picks.** That was carried here for weeks
+  and is false: from the `card-feed` branch, BTTS is 4 of the first 42 best
+  bets and corners are 23. Check the feed, not `data/outputs/`, before making
+  a claim about what the card stakes — the working tree holds stale runs.
 - **Player props are built, measured, and calibration-corrected — not
   enabled.** The provider prices eight prop markets live and retains them
   historically (probed 2026-08-22). The pipeline has a player-data source

@@ -133,9 +133,22 @@ Use the repo, the reports, and GitHub.
   improve with it, which is what separates this from the shrinkage that cost
   140 units: that improved calibration by saying less. It also bets fewer, not
   more. `docs/the_btts_bias_was_a_ratings_problem.md`,
-  `scripts/run_btts_calibration.py`. Still true: **no BTTS bet rule can ever be
-  profit-backtested** — no source this project can reach has historical BTTS
-  prices — so removing a bias is not demonstrating an edge.
+  `scripts/run_btts_calibration.py`.
+- **BTTS *can* be profit-backtested, and the claim that it never could was
+  false (2026-09-02).** The provider serves historical `btts` — along with
+  `draw_no_bet`, `double_chance` and `alternate_totals_corners` — at BetMGM,
+  BetRivers, Bovada, DraftKings and FanDuel, all bettable books, verified by
+  dispatching `Provider Capability Probe`. The tool to buy them has been in
+  this repo the whole time, is *named after BTTS*, and had bought corners and
+  player props and never one BTTS price. It could not: what counted as
+  "already bought" was a fixture with no market in the key, so a BTTS harvest
+  over the window already bought for corners skipped all 150 fixtures, spent
+  nothing, and printed a green "already hold 150 fixtures". Fixed in
+  `providers/historical_btts.holding_key`, with a misses ledger so a
+  fixture/market pair that genuinely has no price is not re-bought forever.
+  This is the same shape as every other fault found here: **a run that reports
+  fine while nothing lands**. Before writing "no source this project can reach
+  has X", dispatch the probe and read the answer.
 - **BTTS does not produce most of the picks.** That was carried here for weeks
   and is false: from the `card-feed` branch, BTTS is 4 of the first 42 best
   bets and corners are 23. Check the feed, not `data/outputs/`, before making
@@ -229,8 +242,13 @@ Use the repo, the reports, and GitHub.
   looked like findings: normalising the margin away manufactures longshot
   edges, and "the best price beats a sharp book" is true of 93% of selections
   and so measures nothing. The live signal worth testing is reverse line
-  movement, which needs the price feed to accumulate — and needs Pinnacle,
-  which `--regions us` does not return.
+  movement, which needs the price feed to accumulate.
+- **Pinnacle IS reachable: `bookmakers=pinnacle` overrides `regions`
+  (2026-09-02).** Probed live — 20 events, one credit, Pinnacle returned. The
+  repo said for weeks that `--regions us` does not return it and treated the
+  sharp reference as out of reach; that was never tested against the provider.
+  Pinnacle is a reference book, NOT on `BETTABLE_BOOKS`: it anchors and
+  measures, and the card may never price a bet at it.
 - **Every backtest breakdown is stamped `in_sample_backtest_not_evidence_of_edge`.**
   `backtest_market_breakdown.csv` carried `1x2 ... +34.41 units` for weeks and
   the ranking scaled it into a bonus. The ranking no longer reads those files;

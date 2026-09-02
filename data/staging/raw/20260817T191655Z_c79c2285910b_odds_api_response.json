@@ -1,0 +1,4158 @@
+[
+  {
+    "away_team": "Coventry City",
+    "bookmakers": [
+      {
+        "key": "fanduel",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Arsenal",
+                "price": -700
+              },
+              {
+                "name": "Coventry City",
+                "price": 1300
+              },
+              {
+                "name": "Draw",
+                "price": 650
+              }
+            ]
+          },
+          {
+            "key": "btts",
+            "last_update": "2026-08-17T19:16:40Z",
+            "outcomes": [
+              {
+                "name": "Yes",
+                "price": 150
+              },
+              {
+                "name": "No",
+                "price": -192
+              }
+            ]
+          }
+        ],
+        "title": "FanDuel"
+      },
+      {
+        "key": "betmgm",
+        "last_update": "2026-08-17T19:16:03Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:03Z",
+            "outcomes": [
+              {
+                "name": "Arsenal",
+                "price": -550
+              },
+              {
+                "name": "Coventry City",
+                "price": 1300
+              },
+              {
+                "name": "Draw",
+                "price": 600
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:16:03Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 2.5,
+                "price": -185
+              },
+              {
+                "name": "Under",
+                "point": 2.5,
+                "price": 130
+              }
+            ]
+          },
+          {
+            "key": "btts",
+            "last_update": "2026-08-17T19:16:03Z",
+            "outcomes": [
+              {
+                "name": "Yes",
+                "price": 145
+              },
+              {
+                "name": "No",
+                "price": -200
+              }
+            ]
+          }
+        ],
+        "title": "BetMGM"
+      },
+      {
+        "key": "draftkings",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Arsenal",
+                "price": -600
+              },
+              {
+                "name": "Coventry City",
+                "price": 1400
+              },
+              {
+                "name": "Draw",
+                "price": 650
+              }
+            ]
+          },
+          {
+            "key": "btts",
+            "last_update": "2026-08-17T19:15:54Z",
+            "outcomes": [
+              {
+                "name": "Yes",
+                "price": 145
+              },
+              {
+                "name": "No",
+                "price": -195
+              }
+            ]
+          }
+        ],
+        "title": "DraftKings"
+      },
+      {
+        "key": "betrivers",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Arsenal",
+                "price": -590
+              },
+              {
+                "name": "Coventry City",
+                "price": 1600
+              },
+              {
+                "name": "Draw",
+                "price": 650
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 2.5,
+                "price": -175
+              },
+              {
+                "name": "Under",
+                "point": 2.5,
+                "price": 133
+              }
+            ]
+          },
+          {
+            "key": "btts",
+            "last_update": "2026-08-17T19:15:03Z",
+            "outcomes": [
+              {
+                "name": "Yes",
+                "price": 155
+              },
+              {
+                "name": "No",
+                "price": -215
+              }
+            ]
+          }
+        ],
+        "title": "BetRivers"
+      },
+      {
+        "key": "betonlineag",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Arsenal",
+                "price": -560
+              },
+              {
+                "name": "Coventry City",
+                "price": 1505
+              },
+              {
+                "name": "Draw",
+                "price": 700
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 3.0,
+                "price": -108
+              },
+              {
+                "name": "Under",
+                "point": 3.0,
+                "price": -108
+              }
+            ]
+          }
+        ],
+        "title": "BetOnline.ag"
+      },
+      {
+        "key": "lowvig",
+        "last_update": "2026-08-17T19:15:43Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:15:43Z",
+            "outcomes": [
+              {
+                "name": "Arsenal",
+                "price": -560
+              },
+              {
+                "name": "Coventry City",
+                "price": 1505
+              },
+              {
+                "name": "Draw",
+                "price": 700
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:15:43Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 3.0,
+                "price": -108
+              },
+              {
+                "name": "Under",
+                "point": 3.0,
+                "price": -108
+              }
+            ]
+          }
+        ],
+        "title": "LowVig.ag"
+      },
+      {
+        "key": "bovada",
+        "last_update": "2026-08-17T19:14:38Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:14:38Z",
+            "outcomes": [
+              {
+                "name": "Arsenal",
+                "price": -550
+              },
+              {
+                "name": "Coventry City",
+                "price": 1400
+              },
+              {
+                "name": "Draw",
+                "price": 625
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:14:38Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 3.0,
+                "price": -110
+              },
+              {
+                "name": "Under",
+                "point": 3.0,
+                "price": -110
+              }
+            ]
+          }
+        ],
+        "title": "Bovada"
+      },
+      {
+        "key": "betus",
+        "last_update": "2026-08-17T19:15:43Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:15:42Z",
+            "outcomes": [
+              {
+                "name": "Arsenal",
+                "price": -600
+              },
+              {
+                "name": "Coventry City",
+                "price": 1400
+              },
+              {
+                "name": "Draw",
+                "price": 650
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:15:42Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 3.0,
+                "price": -110
+              },
+              {
+                "name": "Under",
+                "point": 3.0,
+                "price": -110
+              }
+            ]
+          }
+        ],
+        "title": "BetUS"
+      },
+      {
+        "key": "mybookieag",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Arsenal",
+                "price": -625
+              },
+              {
+                "name": "Coventry City",
+                "price": 1350
+              },
+              {
+                "name": "Draw",
+                "price": 570
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 2.5,
+                "price": -183
+              },
+              {
+                "name": "Under",
+                "point": 2.5,
+                "price": 131
+              }
+            ]
+          },
+          {
+            "key": "btts",
+            "last_update": "2026-08-17T19:16:39Z",
+            "outcomes": [
+              {
+                "name": "Yes",
+                "price": 141
+              },
+              {
+                "name": "No",
+                "price": -199
+              }
+            ]
+          }
+        ],
+        "title": "MyBookie.ag"
+      }
+    ],
+    "commence_time": "2026-08-21T19:00:00Z",
+    "home_team": "Arsenal",
+    "id": "eb2553d10d63dc912b99f8fd0d675721",
+    "sport_key": "soccer_epl",
+    "sport_title": "EPL"
+  },
+  {
+    "away_team": "Manchester United",
+    "bookmakers": [
+      {
+        "key": "fanduel",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Hull City",
+                "price": 700
+              },
+              {
+                "name": "Manchester United",
+                "price": -300
+              },
+              {
+                "name": "Draw",
+                "price": 370
+              }
+            ]
+          },
+          {
+            "key": "btts",
+            "last_update": "2026-08-17T19:14:59Z",
+            "outcomes": [
+              {
+                "name": "Yes",
+                "price": -106
+              },
+              {
+                "name": "No",
+                "price": -118
+              }
+            ]
+          }
+        ],
+        "title": "FanDuel"
+      },
+      {
+        "key": "betmgm",
+        "last_update": "2026-08-17T19:16:03Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:03Z",
+            "outcomes": [
+              {
+                "name": "Hull City",
+                "price": 625
+              },
+              {
+                "name": "Manchester United",
+                "price": -250
+              },
+              {
+                "name": "Draw",
+                "price": 360
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:16:03Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 2.5,
+                "price": -145
+              },
+              {
+                "name": "Under",
+                "point": 2.5,
+                "price": 105
+              }
+            ]
+          },
+          {
+            "key": "btts",
+            "last_update": "2026-08-17T19:16:03Z",
+            "outcomes": [
+              {
+                "name": "Yes",
+                "price": -110
+              },
+              {
+                "name": "No",
+                "price": -130
+              }
+            ]
+          }
+        ],
+        "title": "BetMGM"
+      },
+      {
+        "key": "draftkings",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Hull City",
+                "price": 650
+              },
+              {
+                "name": "Manchester United",
+                "price": -250
+              },
+              {
+                "name": "Draw",
+                "price": 370
+              }
+            ]
+          },
+          {
+            "key": "btts",
+            "last_update": "2026-08-17T19:15:19Z",
+            "outcomes": [
+              {
+                "name": "Yes",
+                "price": -110
+              },
+              {
+                "name": "No",
+                "price": -120
+              }
+            ]
+          }
+        ],
+        "title": "DraftKings"
+      },
+      {
+        "key": "betrivers",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Hull City",
+                "price": 750
+              },
+              {
+                "name": "Manchester United",
+                "price": -250
+              },
+              {
+                "name": "Draw",
+                "price": 360
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 2.5,
+                "price": -143
+              },
+              {
+                "name": "Under",
+                "point": 2.5,
+                "price": 112
+              }
+            ]
+          },
+          {
+            "key": "btts",
+            "last_update": "2026-08-17T19:15:21Z",
+            "outcomes": [
+              {
+                "name": "Yes",
+                "price": -107
+              },
+              {
+                "name": "No",
+                "price": -127
+              }
+            ]
+          }
+        ],
+        "title": "BetRivers"
+      },
+      {
+        "key": "betonlineag",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Hull City",
+                "price": 715
+              },
+              {
+                "name": "Manchester United",
+                "price": -230
+              },
+              {
+                "name": "Draw",
+                "price": 365
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 2.5,
+                "price": -133
+              },
+              {
+                "name": "Under",
+                "point": 2.5,
+                "price": 117
+              }
+            ]
+          }
+        ],
+        "title": "BetOnline.ag"
+      },
+      {
+        "key": "lowvig",
+        "last_update": "2026-08-17T19:15:43Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:15:43Z",
+            "outcomes": [
+              {
+                "name": "Hull City",
+                "price": 715
+              },
+              {
+                "name": "Manchester United",
+                "price": -230
+              },
+              {
+                "name": "Draw",
+                "price": 365
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:15:43Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 2.5,
+                "price": -133
+              },
+              {
+                "name": "Under",
+                "point": 2.5,
+                "price": 117
+              }
+            ]
+          }
+        ],
+        "title": "LowVig.ag"
+      },
+      {
+        "key": "bovada",
+        "last_update": "2026-08-17T19:14:38Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:14:38Z",
+            "outcomes": [
+              {
+                "name": "Hull City",
+                "price": 650
+              },
+              {
+                "name": "Manchester United",
+                "price": -240
+              },
+              {
+                "name": "Draw",
+                "price": 380
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:14:38Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 2.5,
+                "price": -136
+              },
+              {
+                "name": "Under",
+                "point": 2.5,
+                "price": 113
+              }
+            ]
+          }
+        ],
+        "title": "Bovada"
+      },
+      {
+        "key": "betus",
+        "last_update": "2026-08-17T19:15:43Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:15:42Z",
+            "outcomes": [
+              {
+                "name": "Hull City",
+                "price": 715
+              },
+              {
+                "name": "Manchester United",
+                "price": -230
+              },
+              {
+                "name": "Draw",
+                "price": 365
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:15:42Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 2.5,
+                "price": -135
+              },
+              {
+                "name": "Under",
+                "point": 2.5,
+                "price": 115
+              }
+            ]
+          }
+        ],
+        "title": "BetUS"
+      },
+      {
+        "key": "mybookieag",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Hull City",
+                "price": 620
+              },
+              {
+                "name": "Manchester United",
+                "price": -270
+              },
+              {
+                "name": "Draw",
+                "price": 370
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 2.5,
+                "price": -149
+              },
+              {
+                "name": "Under",
+                "point": 2.5,
+                "price": 108
+              }
+            ]
+          }
+        ],
+        "title": "MyBookie.ag"
+      }
+    ],
+    "commence_time": "2026-08-22T11:30:00Z",
+    "home_team": "Hull City",
+    "id": "95bb16d19debff3ec39919f361f072a4",
+    "sport_key": "soccer_epl",
+    "sport_title": "EPL"
+  },
+  {
+    "away_team": "Crystal Palace",
+    "bookmakers": [
+      {
+        "key": "fanduel",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Crystal Palace",
+                "price": 230
+              },
+              {
+                "name": "Everton",
+                "price": 115
+              },
+              {
+                "name": "Draw",
+                "price": 230
+              }
+            ]
+          },
+          {
+            "key": "btts",
+            "last_update": "2026-08-17T19:14:31Z",
+            "outcomes": [
+              {
+                "name": "Yes",
+                "price": -144
+              },
+              {
+                "name": "No",
+                "price": 114
+              }
+            ]
+          }
+        ],
+        "title": "FanDuel"
+      },
+      {
+        "key": "betmgm",
+        "last_update": "2026-08-17T19:16:03Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:03Z",
+            "outcomes": [
+              {
+                "name": "Crystal Palace",
+                "price": 220
+              },
+              {
+                "name": "Everton",
+                "price": 110
+              },
+              {
+                "name": "Draw",
+                "price": 240
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:16:03Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 2.5,
+                "price": -120
+              },
+              {
+                "name": "Under",
+                "point": 2.5,
+                "price": -115
+              }
+            ]
+          },
+          {
+            "key": "btts",
+            "last_update": "2026-08-17T19:16:03Z",
+            "outcomes": [
+              {
+                "name": "Yes",
+                "price": -145
+              },
+              {
+                "name": "No",
+                "price": 105
+              }
+            ]
+          }
+        ],
+        "title": "BetMGM"
+      },
+      {
+        "key": "draftkings",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Crystal Palace",
+                "price": 235
+              },
+              {
+                "name": "Everton",
+                "price": 115
+              },
+              {
+                "name": "Draw",
+                "price": 240
+              }
+            ]
+          },
+          {
+            "key": "btts",
+            "last_update": "2026-08-17T19:15:25Z",
+            "outcomes": [
+              {
+                "name": "Yes",
+                "price": -150
+              },
+              {
+                "name": "No",
+                "price": 115
+              }
+            ]
+          }
+        ],
+        "title": "DraftKings"
+      },
+      {
+        "key": "betrivers",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Crystal Palace",
+                "price": 235
+              },
+              {
+                "name": "Everton",
+                "price": 120
+              },
+              {
+                "name": "Draw",
+                "price": 240
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 2.5,
+                "price": -112
+              },
+              {
+                "name": "Under",
+                "point": 2.5,
+                "price": -114
+              }
+            ]
+          },
+          {
+            "key": "btts",
+            "last_update": "2026-08-17T19:15:03Z",
+            "outcomes": [
+              {
+                "name": "Yes",
+                "price": -143
+              },
+              {
+                "name": "No",
+                "price": 106
+              }
+            ]
+          }
+        ],
+        "title": "BetRivers"
+      },
+      {
+        "key": "betonlineag",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Crystal Palace",
+                "price": 245
+              },
+              {
+                "name": "Everton",
+                "price": 120
+              },
+              {
+                "name": "Draw",
+                "price": 245
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 2.5,
+                "price": -105
+              },
+              {
+                "name": "Under",
+                "point": 2.5,
+                "price": -111
+              }
+            ]
+          }
+        ],
+        "title": "BetOnline.ag"
+      },
+      {
+        "key": "lowvig",
+        "last_update": "2026-08-17T19:15:43Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:15:43Z",
+            "outcomes": [
+              {
+                "name": "Crystal Palace",
+                "price": 245
+              },
+              {
+                "name": "Everton",
+                "price": 120
+              },
+              {
+                "name": "Draw",
+                "price": 245
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:15:43Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 2.5,
+                "price": -105
+              },
+              {
+                "name": "Under",
+                "point": 2.5,
+                "price": -111
+              }
+            ]
+          }
+        ],
+        "title": "LowVig.ag"
+      },
+      {
+        "key": "bovada",
+        "last_update": "2026-08-17T19:14:38Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:14:38Z",
+            "outcomes": [
+              {
+                "name": "Crystal Palace",
+                "price": 235
+              },
+              {
+                "name": "Everton",
+                "price": 115
+              },
+              {
+                "name": "Draw",
+                "price": 245
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:14:38Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 2.5,
+                "price": -110
+              },
+              {
+                "name": "Under",
+                "point": 2.5,
+                "price": -110
+              }
+            ]
+          }
+        ],
+        "title": "Bovada"
+      },
+      {
+        "key": "betus",
+        "last_update": "2026-08-17T19:15:43Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:15:43Z",
+            "outcomes": [
+              {
+                "name": "Crystal Palace",
+                "price": 220
+              },
+              {
+                "name": "Everton",
+                "price": 110
+              },
+              {
+                "name": "Draw",
+                "price": 240
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:15:43Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 2.5,
+                "price": -110
+              },
+              {
+                "name": "Under",
+                "point": 2.5,
+                "price": -110
+              }
+            ]
+          }
+        ],
+        "title": "BetUS"
+      },
+      {
+        "key": "mybookieag",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Crystal Palace",
+                "price": 228
+              },
+              {
+                "name": "Everton",
+                "price": 111
+              },
+              {
+                "name": "Draw",
+                "price": 232
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 2.5,
+                "price": -116
+              },
+              {
+                "name": "Under",
+                "point": 2.5,
+                "price": -118
+              }
+            ]
+          },
+          {
+            "key": "btts",
+            "last_update": "2026-08-17T19:15:58Z",
+            "outcomes": [
+              {
+                "name": "Yes",
+                "price": -141
+              },
+              {
+                "name": "No",
+                "price": 102
+              }
+            ]
+          }
+        ],
+        "title": "MyBookie.ag"
+      }
+    ],
+    "commence_time": "2026-08-22T14:00:00Z",
+    "home_team": "Everton",
+    "id": "cd1f0173ec061d9b8a8b22ab8f2f8393",
+    "sport_key": "soccer_epl",
+    "sport_title": "EPL"
+  },
+  {
+    "away_team": "Sunderland",
+    "bookmakers": [
+      {
+        "key": "fanduel",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Ipswich Town",
+                "price": 165
+              },
+              {
+                "name": "Sunderland",
+                "price": 165
+              },
+              {
+                "name": "Draw",
+                "price": 220
+              }
+            ]
+          },
+          {
+            "key": "btts",
+            "last_update": "2026-08-17T19:16:53Z",
+            "outcomes": [
+              {
+                "name": "Yes",
+                "price": -158
+              },
+              {
+                "name": "No",
+                "price": 124
+              }
+            ]
+          }
+        ],
+        "title": "FanDuel"
+      },
+      {
+        "key": "betmgm",
+        "last_update": "2026-08-17T19:16:03Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:03Z",
+            "outcomes": [
+              {
+                "name": "Ipswich Town",
+                "price": 165
+              },
+              {
+                "name": "Sunderland",
+                "price": 150
+              },
+              {
+                "name": "Draw",
+                "price": 225
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:16:03Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 2.5,
+                "price": -115
+              },
+              {
+                "name": "Under",
+                "point": 2.5,
+                "price": -120
+              }
+            ]
+          },
+          {
+            "key": "btts",
+            "last_update": "2026-08-17T19:16:03Z",
+            "outcomes": [
+              {
+                "name": "Yes",
+                "price": -145
+              },
+              {
+                "name": "No",
+                "price": 105
+              }
+            ]
+          }
+        ],
+        "title": "BetMGM"
+      },
+      {
+        "key": "draftkings",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Ipswich Town",
+                "price": 170
+              },
+              {
+                "name": "Sunderland",
+                "price": 160
+              },
+              {
+                "name": "Draw",
+                "price": 225
+              }
+            ]
+          },
+          {
+            "key": "btts",
+            "last_update": "2026-08-17T19:16:29Z",
+            "outcomes": [
+              {
+                "name": "Yes",
+                "price": -150
+              },
+              {
+                "name": "No",
+                "price": 110
+              }
+            ]
+          }
+        ],
+        "title": "DraftKings"
+      },
+      {
+        "key": "betrivers",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Ipswich Town",
+                "price": 165
+              },
+              {
+                "name": "Sunderland",
+                "price": 165
+              },
+              {
+                "name": "Draw",
+                "price": 230
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 2.5,
+                "price": -106
+              },
+              {
+                "name": "Under",
+                "point": 2.5,
+                "price": -120
+              }
+            ]
+          },
+          {
+            "key": "btts",
+            "last_update": "2026-08-17T19:15:45Z",
+            "outcomes": [
+              {
+                "name": "Yes",
+                "price": -143
+              },
+              {
+                "name": "No",
+                "price": 105
+              }
+            ]
+          }
+        ],
+        "title": "BetRivers"
+      },
+      {
+        "key": "betonlineag",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Ipswich Town",
+                "price": 178
+              },
+              {
+                "name": "Sunderland",
+                "price": 168
+              },
+              {
+                "name": "Draw",
+                "price": 231
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 2.5,
+                "price": -101
+              },
+              {
+                "name": "Under",
+                "point": 2.5,
+                "price": -115
+              }
+            ]
+          }
+        ],
+        "title": "BetOnline.ag"
+      },
+      {
+        "key": "lowvig",
+        "last_update": "2026-08-17T19:15:43Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:15:43Z",
+            "outcomes": [
+              {
+                "name": "Ipswich Town",
+                "price": 178
+              },
+              {
+                "name": "Sunderland",
+                "price": 168
+              },
+              {
+                "name": "Draw",
+                "price": 231
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:15:43Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 2.5,
+                "price": -101
+              },
+              {
+                "name": "Under",
+                "point": 2.5,
+                "price": -115
+              }
+            ]
+          }
+        ],
+        "title": "LowVig.ag"
+      },
+      {
+        "key": "bovada",
+        "last_update": "2026-08-17T19:14:38Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:14:38Z",
+            "outcomes": [
+              {
+                "name": "Ipswich Town",
+                "price": 175
+              },
+              {
+                "name": "Sunderland",
+                "price": 160
+              },
+              {
+                "name": "Draw",
+                "price": 235
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:14:38Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 2.5,
+                "price": -108
+              },
+              {
+                "name": "Under",
+                "point": 2.5,
+                "price": -112
+              }
+            ]
+          }
+        ],
+        "title": "Bovada"
+      },
+      {
+        "key": "betus",
+        "last_update": "2026-08-17T19:15:43Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:15:43Z",
+            "outcomes": [
+              {
+                "name": "Ipswich Town",
+                "price": 163
+              },
+              {
+                "name": "Sunderland",
+                "price": 155
+              },
+              {
+                "name": "Draw",
+                "price": 220
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:15:43Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 2.5,
+                "price": -105
+              },
+              {
+                "name": "Under",
+                "point": 2.5,
+                "price": -115
+              }
+            ]
+          }
+        ],
+        "title": "BetUS"
+      },
+      {
+        "key": "mybookieag",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Ipswich Town",
+                "price": 165
+              },
+              {
+                "name": "Sunderland",
+                "price": 155
+              },
+              {
+                "name": "Draw",
+                "price": 222
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 2.5,
+                "price": -114
+              },
+              {
+                "name": "Under",
+                "point": 2.5,
+                "price": -121
+              }
+            ]
+          },
+          {
+            "key": "btts",
+            "last_update": "2026-08-17T19:16:49Z",
+            "outcomes": [
+              {
+                "name": "Yes",
+                "price": -144
+              },
+              {
+                "name": "No",
+                "price": 104
+              }
+            ]
+          }
+        ],
+        "title": "MyBookie.ag"
+      }
+    ],
+    "commence_time": "2026-08-22T14:00:00Z",
+    "home_team": "Ipswich Town",
+    "id": "01615d9573ef1e5aa8c09eb32a4a983b",
+    "sport_key": "soccer_epl",
+    "sport_title": "EPL"
+  },
+  {
+    "away_team": "Leeds United",
+    "bookmakers": [
+      {
+        "key": "fanduel",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Leeds United",
+                "price": 210
+              },
+              {
+                "name": "Nottingham Forest",
+                "price": 125
+              },
+              {
+                "name": "Draw",
+                "price": 230
+              }
+            ]
+          },
+          {
+            "key": "btts",
+            "last_update": "2026-08-17T19:16:18Z",
+            "outcomes": [
+              {
+                "name": "Yes",
+                "price": -144
+              },
+              {
+                "name": "No",
+                "price": 114
+              }
+            ]
+          }
+        ],
+        "title": "FanDuel"
+      },
+      {
+        "key": "betmgm",
+        "last_update": "2026-08-17T19:16:03Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:03Z",
+            "outcomes": [
+              {
+                "name": "Leeds United",
+                "price": 200
+              },
+              {
+                "name": "Nottingham Forest",
+                "price": 120
+              },
+              {
+                "name": "Draw",
+                "price": 240
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:16:03Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 2.5,
+                "price": -120
+              },
+              {
+                "name": "Under",
+                "point": 2.5,
+                "price": -115
+              }
+            ]
+          },
+          {
+            "key": "btts",
+            "last_update": "2026-08-17T19:16:03Z",
+            "outcomes": [
+              {
+                "name": "Yes",
+                "price": -150
+              },
+              {
+                "name": "No",
+                "price": 105
+              }
+            ]
+          }
+        ],
+        "title": "BetMGM"
+      },
+      {
+        "key": "draftkings",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Leeds United",
+                "price": 210
+              },
+              {
+                "name": "Nottingham Forest",
+                "price": 125
+              },
+              {
+                "name": "Draw",
+                "price": 235
+              }
+            ]
+          },
+          {
+            "key": "btts",
+            "last_update": "2026-08-17T19:16:11Z",
+            "outcomes": [
+              {
+                "name": "Yes",
+                "price": -150
+              },
+              {
+                "name": "No",
+                "price": 115
+              }
+            ]
+          }
+        ],
+        "title": "DraftKings"
+      },
+      {
+        "key": "betrivers",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Leeds United",
+                "price": 215
+              },
+              {
+                "name": "Nottingham Forest",
+                "price": 130
+              },
+              {
+                "name": "Draw",
+                "price": 235
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 2.5,
+                "price": -114
+              },
+              {
+                "name": "Under",
+                "point": 2.5,
+                "price": -112
+              }
+            ]
+          },
+          {
+            "key": "btts",
+            "last_update": "2026-08-17T19:15:45Z",
+            "outcomes": [
+              {
+                "name": "Yes",
+                "price": -150
+              },
+              {
+                "name": "No",
+                "price": 110
+              }
+            ]
+          }
+        ],
+        "title": "BetRivers"
+      },
+      {
+        "key": "betonlineag",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Leeds United",
+                "price": 229
+              },
+              {
+                "name": "Nottingham Forest",
+                "price": 126
+              },
+              {
+                "name": "Draw",
+                "price": 246
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 2.5,
+                "price": -103
+              },
+              {
+                "name": "Under",
+                "point": 2.5,
+                "price": -113
+              }
+            ]
+          }
+        ],
+        "title": "BetOnline.ag"
+      },
+      {
+        "key": "lowvig",
+        "last_update": "2026-08-17T19:15:43Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:15:43Z",
+            "outcomes": [
+              {
+                "name": "Leeds United",
+                "price": 229
+              },
+              {
+                "name": "Nottingham Forest",
+                "price": 126
+              },
+              {
+                "name": "Draw",
+                "price": 246
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:15:43Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 2.5,
+                "price": -103
+              },
+              {
+                "name": "Under",
+                "point": 2.5,
+                "price": -113
+              }
+            ]
+          }
+        ],
+        "title": "LowVig.ag"
+      },
+      {
+        "key": "bovada",
+        "last_update": "2026-08-17T19:14:38Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:14:38Z",
+            "outcomes": [
+              {
+                "name": "Leeds United",
+                "price": 210
+              },
+              {
+                "name": "Nottingham Forest",
+                "price": 130
+              },
+              {
+                "name": "Draw",
+                "price": 245
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:14:38Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 2.5,
+                "price": -112
+              },
+              {
+                "name": "Under",
+                "point": 2.5,
+                "price": -108
+              }
+            ]
+          }
+        ],
+        "title": "Bovada"
+      },
+      {
+        "key": "betus",
+        "last_update": "2026-08-17T19:15:43Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:15:43Z",
+            "outcomes": [
+              {
+                "name": "Leeds United",
+                "price": 210
+              },
+              {
+                "name": "Nottingham Forest",
+                "price": 125
+              },
+              {
+                "name": "Draw",
+                "price": 230
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:15:43Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 2.5,
+                "price": -105
+              },
+              {
+                "name": "Under",
+                "point": 2.5,
+                "price": -115
+              }
+            ]
+          }
+        ],
+        "title": "BetUS"
+      },
+      {
+        "key": "mybookieag",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Leeds United",
+                "price": 202
+              },
+              {
+                "name": "Nottingham Forest",
+                "price": 126
+              },
+              {
+                "name": "Draw",
+                "price": 226
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 2.5,
+                "price": -116
+              },
+              {
+                "name": "Under",
+                "point": 2.5,
+                "price": -119
+              }
+            ]
+          },
+          {
+            "key": "btts",
+            "last_update": "2026-08-17T19:15:58Z",
+            "outcomes": [
+              {
+                "name": "Yes",
+                "price": -144
+              },
+              {
+                "name": "No",
+                "price": 104
+              }
+            ]
+          }
+        ],
+        "title": "MyBookie.ag"
+      }
+    ],
+    "commence_time": "2026-08-22T14:00:00Z",
+    "home_team": "Nottingham Forest",
+    "id": "ee99154f8db029efcf567c5f7f7a0c0b",
+    "sport_key": "soccer_epl",
+    "sport_title": "EPL"
+  },
+  {
+    "away_team": "Tottenham Hotspur",
+    "bookmakers": [
+      {
+        "key": "fanduel",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Brentford",
+                "price": 140
+              },
+              {
+                "name": "Tottenham Hotspur",
+                "price": 175
+              },
+              {
+                "name": "Draw",
+                "price": 250
+              }
+            ]
+          },
+          {
+            "key": "btts",
+            "last_update": "2026-08-17T19:16:12Z",
+            "outcomes": [
+              {
+                "name": "Yes",
+                "price": -196
+              },
+              {
+                "name": "No",
+                "price": 152
+              }
+            ]
+          }
+        ],
+        "title": "FanDuel"
+      },
+      {
+        "key": "betmgm",
+        "last_update": "2026-08-17T19:16:03Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:03Z",
+            "outcomes": [
+              {
+                "name": "Brentford",
+                "price": 138
+              },
+              {
+                "name": "Tottenham Hotspur",
+                "price": 170
+              },
+              {
+                "name": "Draw",
+                "price": 240
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:16:03Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 2.5,
+                "price": -160
+              },
+              {
+                "name": "Under",
+                "point": 2.5,
+                "price": 115
+              }
+            ]
+          },
+          {
+            "key": "btts",
+            "last_update": "2026-08-17T19:16:03Z",
+            "outcomes": [
+              {
+                "name": "Yes",
+                "price": -200
+              },
+              {
+                "name": "No",
+                "price": 135
+              }
+            ]
+          }
+        ],
+        "title": "BetMGM"
+      },
+      {
+        "key": "draftkings",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Brentford",
+                "price": 140
+              },
+              {
+                "name": "Tottenham Hotspur",
+                "price": 175
+              },
+              {
+                "name": "Draw",
+                "price": 260
+              }
+            ]
+          },
+          {
+            "key": "btts",
+            "last_update": "2026-08-17T19:15:46Z",
+            "outcomes": [
+              {
+                "name": "Yes",
+                "price": -200
+              },
+              {
+                "name": "No",
+                "price": 150
+              }
+            ]
+          }
+        ],
+        "title": "DraftKings"
+      },
+      {
+        "key": "betrivers",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Brentford",
+                "price": 143
+              },
+              {
+                "name": "Tottenham Hotspur",
+                "price": 175
+              },
+              {
+                "name": "Draw",
+                "price": 260
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 2.5,
+                "price": -152
+              },
+              {
+                "name": "Under",
+                "point": 2.5,
+                "price": 120
+              }
+            ]
+          },
+          {
+            "key": "btts",
+            "last_update": "2026-08-17T19:15:45Z",
+            "outcomes": [
+              {
+                "name": "Yes",
+                "price": -190
+              },
+              {
+                "name": "No",
+                "price": 138
+              }
+            ]
+          }
+        ],
+        "title": "BetRivers"
+      },
+      {
+        "key": "betonlineag",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Brentford",
+                "price": 148
+              },
+              {
+                "name": "Tottenham Hotspur",
+                "price": 178
+              },
+              {
+                "name": "Draw",
+                "price": 268
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 3.0,
+                "price": 115
+              },
+              {
+                "name": "Under",
+                "point": 3.0,
+                "price": -131
+              }
+            ]
+          }
+        ],
+        "title": "BetOnline.ag"
+      },
+      {
+        "key": "lowvig",
+        "last_update": "2026-08-17T19:15:43Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:15:43Z",
+            "outcomes": [
+              {
+                "name": "Brentford",
+                "price": 148
+              },
+              {
+                "name": "Tottenham Hotspur",
+                "price": 178
+              },
+              {
+                "name": "Draw",
+                "price": 268
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:15:43Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 3.0,
+                "price": 115
+              },
+              {
+                "name": "Under",
+                "point": 3.0,
+                "price": -131
+              }
+            ]
+          }
+        ],
+        "title": "LowVig.ag"
+      },
+      {
+        "key": "bovada",
+        "last_update": "2026-08-17T19:14:38Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:14:38Z",
+            "outcomes": [
+              {
+                "name": "Brentford",
+                "price": 145
+              },
+              {
+                "name": "Tottenham Hotspur",
+                "price": 175
+              },
+              {
+                "name": "Draw",
+                "price": 260
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:14:38Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 3.0,
+                "price": 111
+              },
+              {
+                "name": "Under",
+                "point": 3.0,
+                "price": -132
+              }
+            ]
+          }
+        ],
+        "title": "Bovada"
+      },
+      {
+        "key": "betus",
+        "last_update": "2026-08-17T19:15:43Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:15:43Z",
+            "outcomes": [
+              {
+                "name": "Brentford",
+                "price": 145
+              },
+              {
+                "name": "Tottenham Hotspur",
+                "price": 175
+              },
+              {
+                "name": "Draw",
+                "price": 265
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:15:43Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 3.0,
+                "price": 110
+              },
+              {
+                "name": "Under",
+                "point": 3.0,
+                "price": -130
+              }
+            ]
+          }
+        ],
+        "title": "BetUS"
+      },
+      {
+        "key": "mybookieag",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Brentford",
+                "price": 139
+              },
+              {
+                "name": "Tottenham Hotspur",
+                "price": 166
+              },
+              {
+                "name": "Draw",
+                "price": 250
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 2.5,
+                "price": -161
+              },
+              {
+                "name": "Under",
+                "point": 2.5,
+                "price": 116
+              }
+            ]
+          },
+          {
+            "key": "btts",
+            "last_update": "2026-08-17T19:16:05Z",
+            "outcomes": [
+              {
+                "name": "Yes",
+                "price": -188
+              },
+              {
+                "name": "No",
+                "price": 134
+              }
+            ]
+          }
+        ],
+        "title": "MyBookie.ag"
+      }
+    ],
+    "commence_time": "2026-08-22T16:30:00Z",
+    "home_team": "Brentford",
+    "id": "8b4b033209bb204516cbd1f523614f25",
+    "sport_key": "soccer_epl",
+    "sport_title": "EPL"
+  },
+  {
+    "away_team": "Aston Villa",
+    "bookmakers": [
+      {
+        "key": "fanduel",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Aston Villa",
+                "price": 200
+              },
+              {
+                "name": "Brighton and Hove Albion",
+                "price": 120
+              },
+              {
+                "name": "Draw",
+                "price": 260
+              }
+            ]
+          },
+          {
+            "key": "btts",
+            "last_update": "2026-08-17T19:16:38Z",
+            "outcomes": [
+              {
+                "name": "Yes",
+                "price": -200
+              },
+              {
+                "name": "No",
+                "price": 154
+              }
+            ]
+          }
+        ],
+        "title": "FanDuel"
+      },
+      {
+        "key": "betmgm",
+        "last_update": "2026-08-17T19:16:03Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:03Z",
+            "outcomes": [
+              {
+                "name": "Aston Villa",
+                "price": 185
+              },
+              {
+                "name": "Brighton and Hove Albion",
+                "price": 120
+              },
+              {
+                "name": "Draw",
+                "price": 250
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:16:03Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 2.5,
+                "price": -175
+              },
+              {
+                "name": "Under",
+                "point": 2.5,
+                "price": 125
+              }
+            ]
+          },
+          {
+            "key": "btts",
+            "last_update": "2026-08-17T19:16:03Z",
+            "outcomes": [
+              {
+                "name": "Yes",
+                "price": -200
+              },
+              {
+                "name": "No",
+                "price": 138
+              }
+            ]
+          }
+        ],
+        "title": "BetMGM"
+      },
+      {
+        "key": "draftkings",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Aston Villa",
+                "price": 195
+              },
+              {
+                "name": "Brighton and Hove Albion",
+                "price": 125
+              },
+              {
+                "name": "Draw",
+                "price": 260
+              }
+            ]
+          },
+          {
+            "key": "btts",
+            "last_update": "2026-08-17T19:16:10Z",
+            "outcomes": [
+              {
+                "name": "Yes",
+                "price": -205
+              },
+              {
+                "name": "No",
+                "price": 155
+              }
+            ]
+          }
+        ],
+        "title": "DraftKings"
+      },
+      {
+        "key": "betrivers",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Aston Villa",
+                "price": 205
+              },
+              {
+                "name": "Brighton and Hove Albion",
+                "price": 123
+              },
+              {
+                "name": "Draw",
+                "price": 265
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 2.5,
+                "price": -162
+              },
+              {
+                "name": "Under",
+                "point": 2.5,
+                "price": 128
+              }
+            ]
+          },
+          {
+            "key": "btts",
+            "last_update": "2026-08-17T19:15:05Z",
+            "outcomes": [
+              {
+                "name": "Yes",
+                "price": -200
+              },
+              {
+                "name": "No",
+                "price": 145
+              }
+            ]
+          }
+        ],
+        "title": "BetRivers"
+      },
+      {
+        "key": "betonlineag",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Aston Villa",
+                "price": 210
+              },
+              {
+                "name": "Brighton and Hove Albion",
+                "price": 125
+              },
+              {
+                "name": "Draw",
+                "price": 273
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 3.0,
+                "price": 100
+              },
+              {
+                "name": "Under",
+                "point": 3.0,
+                "price": -116
+              }
+            ]
+          }
+        ],
+        "title": "BetOnline.ag"
+      },
+      {
+        "key": "lowvig",
+        "last_update": "2026-08-17T19:15:43Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:15:43Z",
+            "outcomes": [
+              {
+                "name": "Aston Villa",
+                "price": 210
+              },
+              {
+                "name": "Brighton and Hove Albion",
+                "price": 125
+              },
+              {
+                "name": "Draw",
+                "price": 273
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:15:43Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 3.0,
+                "price": 100
+              },
+              {
+                "name": "Under",
+                "point": 3.0,
+                "price": -116
+              }
+            ]
+          }
+        ],
+        "title": "LowVig.ag"
+      },
+      {
+        "key": "bovada",
+        "last_update": "2026-08-17T19:14:38Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:14:38Z",
+            "outcomes": [
+              {
+                "name": "Aston Villa",
+                "price": 200
+              },
+              {
+                "name": "Brighton and Hove Albion",
+                "price": 130
+              },
+              {
+                "name": "Draw",
+                "price": 265
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:14:38Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 3.0,
+                "price": 100
+              },
+              {
+                "name": "Under",
+                "point": 3.0,
+                "price": -120
+              }
+            ]
+          }
+        ],
+        "title": "Bovada"
+      },
+      {
+        "key": "betus",
+        "last_update": "2026-08-17T19:15:43Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:15:43Z",
+            "outcomes": [
+              {
+                "name": "Aston Villa",
+                "price": 188
+              },
+              {
+                "name": "Brighton and Hove Albion",
+                "price": 120
+              },
+              {
+                "name": "Draw",
+                "price": 240
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:15:43Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 3.0,
+                "price": -105
+              },
+              {
+                "name": "Under",
+                "point": 3.0,
+                "price": -115
+              }
+            ]
+          }
+        ],
+        "title": "BetUS"
+      },
+      {
+        "key": "mybookieag",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Aston Villa",
+                "price": 189
+              },
+              {
+                "name": "Brighton and Hove Albion",
+                "price": 123
+              },
+              {
+                "name": "Draw",
+                "price": 250
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 2.5,
+                "price": -172
+              },
+              {
+                "name": "Under",
+                "point": 2.5,
+                "price": 124
+              }
+            ]
+          },
+          {
+            "key": "btts",
+            "last_update": "2026-08-17T19:15:56Z",
+            "outcomes": [
+              {
+                "name": "Yes",
+                "price": -199
+              },
+              {
+                "name": "No",
+                "price": 141
+              }
+            ]
+          }
+        ],
+        "title": "MyBookie.ag"
+      }
+    ],
+    "commence_time": "2026-08-23T13:00:00Z",
+    "home_team": "Brighton and Hove Albion",
+    "id": "f5086c74d4a767e3ad7ea69bd4a66b76",
+    "sport_key": "soccer_epl",
+    "sport_title": "EPL"
+  },
+  {
+    "away_team": "Bournemouth",
+    "bookmakers": [
+      {
+        "key": "fanduel",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Bournemouth",
+                "price": 500
+              },
+              {
+                "name": "Manchester City",
+                "price": -250
+              },
+              {
+                "name": "Draw",
+                "price": 390
+              }
+            ]
+          },
+          {
+            "key": "btts",
+            "last_update": "2026-08-17T19:15:08Z",
+            "outcomes": [
+              {
+                "name": "Yes",
+                "price": -190
+              },
+              {
+                "name": "No",
+                "price": 146
+              }
+            ]
+          }
+        ],
+        "title": "FanDuel"
+      },
+      {
+        "key": "betmgm",
+        "last_update": "2026-08-17T19:16:03Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:03Z",
+            "outcomes": [
+              {
+                "name": "Bournemouth",
+                "price": 475
+              },
+              {
+                "name": "Manchester City",
+                "price": -220
+              },
+              {
+                "name": "Draw",
+                "price": 360
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:16:03Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 3.5,
+                "price": 100
+              },
+              {
+                "name": "Under",
+                "point": 3.5,
+                "price": -140
+              }
+            ]
+          },
+          {
+            "key": "btts",
+            "last_update": "2026-08-17T19:16:03Z",
+            "outcomes": [
+              {
+                "name": "Yes",
+                "price": -185
+              },
+              {
+                "name": "No",
+                "price": 125
+              }
+            ]
+          }
+        ],
+        "title": "BetMGM"
+      },
+      {
+        "key": "draftkings",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Bournemouth",
+                "price": 475
+              },
+              {
+                "name": "Manchester City",
+                "price": -215
+              },
+              {
+                "name": "Draw",
+                "price": 390
+              }
+            ]
+          },
+          {
+            "key": "btts",
+            "last_update": "2026-08-17T19:15:19Z",
+            "outcomes": [
+              {
+                "name": "Yes",
+                "price": -185
+              },
+              {
+                "name": "No",
+                "price": 140
+              }
+            ]
+          }
+        ],
+        "title": "DraftKings"
+      },
+      {
+        "key": "betrivers",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Bournemouth",
+                "price": 540
+              },
+              {
+                "name": "Manchester City",
+                "price": -225
+              },
+              {
+                "name": "Draw",
+                "price": 390
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 3.5,
+                "price": 102
+              },
+              {
+                "name": "Under",
+                "point": 3.5,
+                "price": -130
+              }
+            ]
+          },
+          {
+            "key": "btts",
+            "last_update": "2026-08-17T19:15:39Z",
+            "outcomes": [
+              {
+                "name": "Yes",
+                "price": -190
+              },
+              {
+                "name": "No",
+                "price": 138
+              }
+            ]
+          }
+        ],
+        "title": "BetRivers"
+      },
+      {
+        "key": "betonlineag",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Bournemouth",
+                "price": 555
+              },
+              {
+                "name": "Manchester City",
+                "price": -225
+              },
+              {
+                "name": "Draw",
+                "price": 425
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 3.5,
+                "price": 109
+              },
+              {
+                "name": "Under",
+                "point": 3.5,
+                "price": -125
+              }
+            ]
+          }
+        ],
+        "title": "BetOnline.ag"
+      },
+      {
+        "key": "lowvig",
+        "last_update": "2026-08-17T19:15:43Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:15:43Z",
+            "outcomes": [
+              {
+                "name": "Bournemouth",
+                "price": 555
+              },
+              {
+                "name": "Manchester City",
+                "price": -225
+              },
+              {
+                "name": "Draw",
+                "price": 425
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:15:43Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 3.5,
+                "price": 109
+              },
+              {
+                "name": "Under",
+                "point": 3.5,
+                "price": -125
+              }
+            ]
+          }
+        ],
+        "title": "LowVig.ag"
+      },
+      {
+        "key": "bovada",
+        "last_update": "2026-08-17T19:14:38Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:14:38Z",
+            "outcomes": [
+              {
+                "name": "Bournemouth",
+                "price": 475
+              },
+              {
+                "name": "Manchester City",
+                "price": -205
+              },
+              {
+                "name": "Draw",
+                "price": 390
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:14:38Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 3.5,
+                "price": 112
+              },
+              {
+                "name": "Under",
+                "point": 3.5,
+                "price": -134
+              }
+            ]
+          }
+        ],
+        "title": "Bovada"
+      },
+      {
+        "key": "betus",
+        "last_update": "2026-08-17T19:15:43Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:15:43Z",
+            "outcomes": [
+              {
+                "name": "Bournemouth",
+                "price": 475
+              },
+              {
+                "name": "Manchester City",
+                "price": -222
+              },
+              {
+                "name": "Draw",
+                "price": 375
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:15:43Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 3.5,
+                "price": 105
+              },
+              {
+                "name": "Under",
+                "point": 3.5,
+                "price": -125
+              }
+            ]
+          }
+        ],
+        "title": "BetUS"
+      },
+      {
+        "key": "mybookieag",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Bournemouth",
+                "price": 460
+              },
+              {
+                "name": "Manchester City",
+                "price": -224
+              },
+              {
+                "name": "Draw",
+                "price": 380
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 3.5,
+                "price": 104
+              },
+              {
+                "name": "Under",
+                "point": 3.5,
+                "price": -144
+              }
+            ]
+          },
+          {
+            "key": "btts",
+            "last_update": "2026-08-17T19:16:19Z",
+            "outcomes": [
+              {
+                "name": "Yes",
+                "price": -175
+              },
+              {
+                "name": "No",
+                "price": 125
+              }
+            ]
+          }
+        ],
+        "title": "MyBookie.ag"
+      }
+    ],
+    "commence_time": "2026-08-23T13:00:00Z",
+    "home_team": "Manchester City",
+    "id": "87c7c9bfd5e3072bded20c702f553c63",
+    "sport_key": "soccer_epl",
+    "sport_title": "EPL"
+  },
+  {
+    "away_team": "Liverpool",
+    "bookmakers": [
+      {
+        "key": "fanduel",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Liverpool",
+                "price": -115
+              },
+              {
+                "name": "Newcastle United",
+                "price": 270
+              },
+              {
+                "name": "Draw",
+                "price": 280
+              }
+            ]
+          },
+          {
+            "key": "btts",
+            "last_update": "2026-08-17T19:14:52Z",
+            "outcomes": [
+              {
+                "name": "Yes",
+                "price": -250
+              },
+              {
+                "name": "No",
+                "price": 188
+              }
+            ]
+          }
+        ],
+        "title": "FanDuel"
+      },
+      {
+        "key": "betmgm",
+        "last_update": "2026-08-17T19:16:03Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:03Z",
+            "outcomes": [
+              {
+                "name": "Liverpool",
+                "price": -110
+              },
+              {
+                "name": "Newcastle United",
+                "price": 230
+              },
+              {
+                "name": "Draw",
+                "price": 275
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:16:03Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 3.5,
+                "price": 115
+              },
+              {
+                "name": "Under",
+                "point": 3.5,
+                "price": -160
+              }
+            ]
+          },
+          {
+            "key": "btts",
+            "last_update": "2026-08-17T19:16:03Z",
+            "outcomes": [
+              {
+                "name": "Yes",
+                "price": -225
+              },
+              {
+                "name": "No",
+                "price": 155
+              }
+            ]
+          }
+        ],
+        "title": "BetMGM"
+      },
+      {
+        "key": "draftkings",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Liverpool",
+                "price": -105
+              },
+              {
+                "name": "Newcastle United",
+                "price": 245
+              },
+              {
+                "name": "Draw",
+                "price": 290
+              }
+            ]
+          },
+          {
+            "key": "btts",
+            "last_update": "2026-08-17T19:15:18Z",
+            "outcomes": [
+              {
+                "name": "Yes",
+                "price": -240
+              },
+              {
+                "name": "No",
+                "price": 175
+              }
+            ]
+          }
+        ],
+        "title": "DraftKings"
+      },
+      {
+        "key": "betrivers",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Liverpool",
+                "price": -112
+              },
+              {
+                "name": "Newcastle United",
+                "price": 270
+              },
+              {
+                "name": "Draw",
+                "price": 290
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 3.5,
+                "price": 123
+              },
+              {
+                "name": "Under",
+                "point": 3.5,
+                "price": -157
+              }
+            ]
+          },
+          {
+            "key": "btts",
+            "last_update": "2026-08-17T19:15:31Z",
+            "outcomes": [
+              {
+                "name": "Yes",
+                "price": -230
+              },
+              {
+                "name": "No",
+                "price": 163
+              }
+            ]
+          }
+        ],
+        "title": "BetRivers"
+      },
+      {
+        "key": "betonlineag",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Liverpool",
+                "price": -111
+              },
+              {
+                "name": "Newcastle United",
+                "price": 269
+              },
+              {
+                "name": "Draw",
+                "price": 296
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 3.0,
+                "price": -132
+              },
+              {
+                "name": "Under",
+                "point": 3.0,
+                "price": 116
+              }
+            ]
+          }
+        ],
+        "title": "BetOnline.ag"
+      },
+      {
+        "key": "lowvig",
+        "last_update": "2026-08-17T19:15:43Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:15:43Z",
+            "outcomes": [
+              {
+                "name": "Liverpool",
+                "price": -111
+              },
+              {
+                "name": "Newcastle United",
+                "price": 269
+              },
+              {
+                "name": "Draw",
+                "price": 296
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:15:43Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 3.0,
+                "price": -132
+              },
+              {
+                "name": "Under",
+                "point": 3.0,
+                "price": 116
+              }
+            ]
+          }
+        ],
+        "title": "LowVig.ag"
+      },
+      {
+        "key": "bovada",
+        "last_update": "2026-08-17T19:14:38Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:14:38Z",
+            "outcomes": [
+              {
+                "name": "Liverpool",
+                "price": -105
+              },
+              {
+                "name": "Newcastle United",
+                "price": 250
+              },
+              {
+                "name": "Draw",
+                "price": 295
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:14:38Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 3.0,
+                "price": -140
+              },
+              {
+                "name": "Under",
+                "point": 3.0,
+                "price": 115
+              }
+            ]
+          }
+        ],
+        "title": "Bovada"
+      },
+      {
+        "key": "betus",
+        "last_update": "2026-08-17T19:15:43Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:15:43Z",
+            "outcomes": [
+              {
+                "name": "Liverpool",
+                "price": -111
+              },
+              {
+                "name": "Newcastle United",
+                "price": 240
+              },
+              {
+                "name": "Draw",
+                "price": 290
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:15:43Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 3.0,
+                "price": -130
+              },
+              {
+                "name": "Under",
+                "point": 3.0,
+                "price": 110
+              }
+            ]
+          }
+        ],
+        "title": "BetUS"
+      },
+      {
+        "key": "mybookieag",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Liverpool",
+                "price": -111
+              },
+              {
+                "name": "Newcastle United",
+                "price": 242
+              },
+              {
+                "name": "Draw",
+                "price": 280
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 3.5,
+                "price": 109
+              },
+              {
+                "name": "Under",
+                "point": 3.5,
+                "price": -151
+              }
+            ]
+          },
+          {
+            "key": "btts",
+            "last_update": "2026-08-17T19:16:19Z",
+            "outcomes": [
+              {
+                "name": "Yes",
+                "price": -226
+              },
+              {
+                "name": "No",
+                "price": 159
+              }
+            ]
+          }
+        ],
+        "title": "MyBookie.ag"
+      }
+    ],
+    "commence_time": "2026-08-23T15:30:00Z",
+    "home_team": "Newcastle United",
+    "id": "ea0bacc4c23f813c6af97ec9b306a850",
+    "sport_key": "soccer_epl",
+    "sport_title": "EPL"
+  },
+  {
+    "away_team": "Chelsea",
+    "bookmakers": [
+      {
+        "key": "fanduel",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Chelsea",
+                "price": -105
+              },
+              {
+                "name": "Fulham",
+                "price": 240
+              },
+              {
+                "name": "Draw",
+                "price": 280
+              }
+            ]
+          },
+          {
+            "key": "btts",
+            "last_update": "2026-08-17T19:16:52Z",
+            "outcomes": [
+              {
+                "name": "Yes",
+                "price": -176
+              },
+              {
+                "name": "No",
+                "price": 138
+              }
+            ]
+          }
+        ],
+        "title": "FanDuel"
+      },
+      {
+        "key": "betmgm",
+        "last_update": "2026-08-17T19:16:03Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:03Z",
+            "outcomes": [
+              {
+                "name": "Chelsea",
+                "price": 100
+              },
+              {
+                "name": "Fulham",
+                "price": 225
+              },
+              {
+                "name": "Draw",
+                "price": 250
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:16:03Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 2.5,
+                "price": -165
+              },
+              {
+                "name": "Under",
+                "point": 2.5,
+                "price": 120
+              }
+            ]
+          },
+          {
+            "key": "btts",
+            "last_update": "2026-08-17T19:16:03Z",
+            "outcomes": [
+              {
+                "name": "Yes",
+                "price": -190
+              },
+              {
+                "name": "No",
+                "price": 135
+              }
+            ]
+          }
+        ],
+        "title": "BetMGM"
+      },
+      {
+        "key": "draftkings",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Chelsea",
+                "price": -105
+              },
+              {
+                "name": "Fulham",
+                "price": 245
+              },
+              {
+                "name": "Draw",
+                "price": 285
+              }
+            ]
+          },
+          {
+            "key": "btts",
+            "last_update": "2026-08-17T19:15:21Z",
+            "outcomes": [
+              {
+                "name": "Yes",
+                "price": -195
+              },
+              {
+                "name": "No",
+                "price": 145
+              }
+            ]
+          }
+        ],
+        "title": "DraftKings"
+      },
+      {
+        "key": "betrivers",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Chelsea",
+                "price": 100
+              },
+              {
+                "name": "Fulham",
+                "price": 250
+              },
+              {
+                "name": "Draw",
+                "price": 280
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 2.5,
+                "price": -162
+              },
+              {
+                "name": "Under",
+                "point": 2.5,
+                "price": 128
+              }
+            ]
+          },
+          {
+            "key": "btts",
+            "last_update": "2026-08-17T19:15:30Z",
+            "outcomes": [
+              {
+                "name": "Yes",
+                "price": -190
+              },
+              {
+                "name": "No",
+                "price": 138
+              }
+            ]
+          }
+        ],
+        "title": "BetRivers"
+      },
+      {
+        "key": "betonlineag",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Chelsea",
+                "price": 100
+              },
+              {
+                "name": "Fulham",
+                "price": 255
+              },
+              {
+                "name": "Draw",
+                "price": 295
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 3.0,
+                "price": 102
+              },
+              {
+                "name": "Under",
+                "point": 3.0,
+                "price": -118
+              }
+            ]
+          }
+        ],
+        "title": "BetOnline.ag"
+      },
+      {
+        "key": "lowvig",
+        "last_update": "2026-08-17T19:15:43Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:15:43Z",
+            "outcomes": [
+              {
+                "name": "Chelsea",
+                "price": 100
+              },
+              {
+                "name": "Fulham",
+                "price": 255
+              },
+              {
+                "name": "Draw",
+                "price": 295
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:15:43Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 3.0,
+                "price": 102
+              },
+              {
+                "name": "Under",
+                "point": 3.0,
+                "price": -118
+              }
+            ]
+          }
+        ],
+        "title": "LowVig.ag"
+      },
+      {
+        "key": "bovada",
+        "last_update": "2026-08-17T19:14:38Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:14:38Z",
+            "outcomes": [
+              {
+                "name": "Chelsea",
+                "price": 100
+              },
+              {
+                "name": "Fulham",
+                "price": 245
+              },
+              {
+                "name": "Draw",
+                "price": 280
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:14:38Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 3.0,
+                "price": 100
+              },
+              {
+                "name": "Under",
+                "point": 3.0,
+                "price": -120
+              }
+            ]
+          }
+        ],
+        "title": "Bovada"
+      },
+      {
+        "key": "betus",
+        "last_update": "2026-08-17T19:15:43Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:15:43Z",
+            "outcomes": [
+              {
+                "name": "Chelsea",
+                "price": -111
+              },
+              {
+                "name": "Fulham",
+                "price": 250
+              },
+              {
+                "name": "Draw",
+                "price": 270
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:15:43Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 3.0,
+                "price": 100
+              },
+              {
+                "name": "Under",
+                "point": 3.0,
+                "price": -120
+              }
+            ]
+          }
+        ],
+        "title": "BetUS"
+      },
+      {
+        "key": "mybookieag",
+        "last_update": "2026-08-17T19:16:42Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Chelsea",
+                "price": -105
+              },
+              {
+                "name": "Fulham",
+                "price": 240
+              },
+              {
+                "name": "Draw",
+                "price": 265
+              }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-08-17T19:16:42Z",
+            "outcomes": [
+              {
+                "name": "Over",
+                "point": 2.5,
+                "price": -170
+              },
+              {
+                "name": "Under",
+                "point": 2.5,
+                "price": 122
+              }
+            ]
+          },
+          {
+            "key": "btts",
+            "last_update": "2026-08-17T19:16:05Z",
+            "outcomes": [
+              {
+                "name": "Yes",
+                "price": -185
+              },
+              {
+                "name": "No",
+                "price": 132
+              }
+            ]
+          }
+        ],
+        "title": "MyBookie.ag"
+      }
+    ],
+    "commence_time": "2026-08-24T19:00:00Z",
+    "home_team": "Fulham",
+    "id": "4e4a813bf4218cc527e6f8ef2351170d",
+    "sport_key": "soccer_epl",
+    "sport_title": "EPL"
+  }
+]

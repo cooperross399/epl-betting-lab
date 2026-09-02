@@ -210,11 +210,54 @@ class TestHarvest:
         result = harvest_btts_history(
             DAY, api_key="k", budget=HarvestBudget(limit=1000),
             requester=_requester([_event()], _btts_payload()),
-            already_harvested=["2025-08-16|arsenal|chelsea"],
+            already_harvested=["2025-08-16|arsenal|chelsea|btts"],
         )
 
         assert result.rows == []
         assert result.already_had == 1
+
+    def test_a_fixture_bought_for_one_market_is_still_bought_for_another(self) -> None:
+        """What is held is a fixture AND a market.
+
+        Keying on the fixture alone meant the 150 dates already bought for
+        corners counted as bought for everything: a BTTS harvest over that
+        window would skip all of them, spend nothing, and report a green
+        "already hold 150 fixtures" while recording no BTTS price. The
+        harvester is named after BTTS and had never bought any.
+        """
+        result = harvest_btts_history(
+            DAY, api_key="k", budget=HarvestBudget(limit=1000),
+            markets=["btts"],
+            requester=_requester([_event()], _btts_payload()),
+            already_harvested=["2025-08-16|arsenal|chelsea|alternate_totals_corners"],
+        )
+
+        assert result.already_had == 0
+        assert [row["market"] for row in result.rows] == ["btts", "btts"]
+
+    def test_only_the_missing_markets_are_paid_for(self) -> None:
+        """Re-requesting a held market would charge full price for a duplicate."""
+        result = harvest_btts_history(
+            DAY, api_key="k", budget=HarvestBudget(limit=1000),
+            markets=["btts", "alternate_totals_corners"],
+            requester=_requester([_event()], _btts_payload()),
+            already_harvested=["2025-08-16|arsenal|chelsea|alternate_totals_corners"],
+        )
+
+        # One slate snapshot plus the ONE missing market, at ten credits
+        # each. Requesting both markets would have cost thirty.
+        assert result.credits_spent == 10 + 10
+
+    def test_a_market_with_no_price_anywhere_is_recorded_as_a_miss(self) -> None:
+        """A miss leaves no row, so without this it is re-bought forever."""
+        result = harvest_btts_history(
+            DAY, api_key="k", budget=HarvestBudget(limit=1000),
+            markets=["btts", "draw_no_bet"],
+            requester=_requester([_event()], _btts_payload()),
+        )
+
+        assert [miss["market"] for miss in result.misses] == ["draw_no_bet"]
+        assert result.misses[0]["home_team"] == "Arsenal"
 
     def test_an_unreadable_kick_off_is_reported_not_guessed(self) -> None:
         broken = dict(_event())
@@ -435,7 +478,7 @@ class TestTheHarvestFile:
 
         assert needs_migration is True
         assert len(legacy) == 2
-        assert already == ["2026-05-09|fulham|bournemouth"]
+        assert already == ["2026-05-09|fulham|bournemouth|btts"]
 
     def test_migration_keeps_every_old_row_under_the_new_header(
         self, tmp_path
@@ -475,4 +518,4 @@ class TestTheHarvestFile:
         # now counts as bought.
         already2, _, needs2 = module._read_existing(path, append=True)
         assert needs2 is False
-        assert "2026-05-09|fulham|everton" in already2
+        assert "2026-05-09|fulham|everton|player_shots_on_target" in already2

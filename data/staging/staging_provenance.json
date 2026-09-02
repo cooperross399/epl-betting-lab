@@ -1,0 +1,43 @@
+{
+  "generated_at": "2026-08-17T16:39:44-04:00",
+  "generated_by": "scripts/run_provider_shadow_verification.py",
+  "notes": "Controlled provider shadow verification run.",
+  "provider_name": "the_odds_api",
+  "provider_type": "odds_api",
+  "raw_source_checksum_sha256": "d5d8e5972ce0f42c3619d5e66b1a245af298098d9a7c40b0b967593dfa6e8da5",
+  "raw_source_files": {
+    "odds_api_response": {
+      "checksum_sha256": "d5d8e5972ce0f42c3619d5e66b1a245af298098d9a7c40b0b967593dfa6e8da5",
+      "path": "data/staging/raw/20260817T203944Z_d5d8e5972ce0_odds_api_response.json",
+      "size_bytes": 99264
+    }
+  },
+  "schema_version": 1,
+  "source_checksum_sha256": "e75461f600a2fe359502c3cd6c9673131c785f9dab1a2c47e976a2d2ee2ea21a",
+  "source_file_path": "data/staging/source_current_odds.csv",
+  "source_files": {
+    "current_odds": {
+      "checksum_sha256": "e75461f600a2fe359502c3cd6c9673131c785f9dab1a2c47e976a2d2ee2ea21a",
+      "path": "data/staging/source_current_odds.csv",
+      "row_count": 448
+    },
+    "upcoming_fixtures": {
+      "checksum_sha256": "880a5cf8f62874c8cbafc9bdc95156a4334546879e186701ec1485aeabaf2cdf",
+      "path": "data/staging/source_upcoming_fixtures.csv",
+      "row_count": 10
+    }
+  },
+  "source_url": "https://api.the-odds-api.com/v4/sports/soccer_epl/odds",
+  "staging_files": {
+    "current_odds": {
+      "checksum_sha256": "e75461f600a2fe359502c3cd6c9673131c785f9dab1a2c47e976a2d2ee2ea21a",
+      "path": "data/staging/current_odds_staging.csv",
+      "row_count": 448
+    },
+    "upcoming_fixtures": {
+      "checksum_sha256": "880a5cf8f62874c8cbafc9bdc95156a4334546879e186701ec1485aeabaf2cdf",
+      "path": "data/staging/upcoming_fixtures_staging.csv",
+      "row_count": 10
+    }
+  }
+}

@@ -1,0 +1,141 @@
+date,home_team,away_team,market,selection,american_odds,closing_american_odds,book,notes
+2026-08-21,Arsenal,Coventry,1x2,home,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-21,Arsenal,Coventry,1x2,draw,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-21,Arsenal,Coventry,1x2,away,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-21,Arsenal,Coventry,total_2_5,over,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-21,Arsenal,Coventry,total_2_5,under,,,,High caution: totals unders have been a model leak. Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-21,Arsenal,Coventry,btts,yes,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-21,Arsenal,Coventry,btts,no,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-22,Hull,Man United,1x2,home,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-22,Hull,Man United,1x2,draw,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-22,Hull,Man United,1x2,away,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-22,Hull,Man United,total_2_5,over,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-22,Hull,Man United,total_2_5,under,,,,High caution: totals unders have been a model leak. Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-22,Hull,Man United,btts,yes,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-22,Hull,Man United,btts,no,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-22,Everton,Crystal Palace,1x2,home,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-22,Everton,Crystal Palace,1x2,draw,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-22,Everton,Crystal Palace,1x2,away,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-22,Everton,Crystal Palace,total_2_5,over,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-22,Everton,Crystal Palace,total_2_5,under,,,,High caution: totals unders have been a model leak. Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-22,Everton,Crystal Palace,btts,yes,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-22,Everton,Crystal Palace,btts,no,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-22,Ipswich,Sunderland,1x2,home,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-22,Ipswich,Sunderland,1x2,draw,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-22,Ipswich,Sunderland,1x2,away,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-22,Ipswich,Sunderland,total_2_5,over,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-22,Ipswich,Sunderland,total_2_5,under,,,,High caution: totals unders have been a model leak. Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-22,Ipswich,Sunderland,btts,yes,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-22,Ipswich,Sunderland,btts,no,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-22,Nott'm Forest,Leeds,1x2,home,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-22,Nott'm Forest,Leeds,1x2,draw,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-22,Nott'm Forest,Leeds,1x2,away,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-22,Nott'm Forest,Leeds,total_2_5,over,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-22,Nott'm Forest,Leeds,total_2_5,under,,,,High caution: totals unders have been a model leak. Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-22,Nott'm Forest,Leeds,btts,yes,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-22,Nott'm Forest,Leeds,btts,no,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-22,Brentford,Tottenham,1x2,home,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-22,Brentford,Tottenham,1x2,draw,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-22,Brentford,Tottenham,1x2,away,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-22,Brentford,Tottenham,total_2_5,over,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-22,Brentford,Tottenham,total_2_5,under,,,,High caution: totals unders have been a model leak. Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-22,Brentford,Tottenham,btts,yes,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-22,Brentford,Tottenham,btts,no,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-23,Brighton,Aston Villa,1x2,home,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-23,Brighton,Aston Villa,1x2,draw,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-23,Brighton,Aston Villa,1x2,away,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-23,Brighton,Aston Villa,total_2_5,over,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-23,Brighton,Aston Villa,total_2_5,under,,,,High caution: totals unders have been a model leak. Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-23,Brighton,Aston Villa,btts,yes,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-23,Brighton,Aston Villa,btts,no,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-23,Man City,Bournemouth,1x2,home,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-23,Man City,Bournemouth,1x2,draw,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-23,Man City,Bournemouth,1x2,away,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-23,Man City,Bournemouth,total_2_5,over,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-23,Man City,Bournemouth,total_2_5,under,,,,High caution: totals unders have been a model leak. Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-23,Man City,Bournemouth,btts,yes,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-23,Man City,Bournemouth,btts,no,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-23,Newcastle,Liverpool,1x2,home,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-23,Newcastle,Liverpool,1x2,draw,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-23,Newcastle,Liverpool,1x2,away,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-23,Newcastle,Liverpool,total_2_5,over,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-23,Newcastle,Liverpool,total_2_5,under,,,,High caution: totals unders have been a model leak. Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-23,Newcastle,Liverpool,btts,yes,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-23,Newcastle,Liverpool,btts,no,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-24,Fulham,Chelsea,1x2,home,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-24,Fulham,Chelsea,1x2,draw,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-24,Fulham,Chelsea,1x2,away,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-24,Fulham,Chelsea,total_2_5,over,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-24,Fulham,Chelsea,total_2_5,under,,,,High caution: totals unders have been a model leak. Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-24,Fulham,Chelsea,btts,yes,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-24,Fulham,Chelsea,btts,no,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-28,Crystal Palace,Man City,1x2,home,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-28,Crystal Palace,Man City,1x2,draw,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-28,Crystal Palace,Man City,1x2,away,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-28,Crystal Palace,Man City,total_2_5,over,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-28,Crystal Palace,Man City,total_2_5,under,,,,High caution: totals unders have been a model leak. Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-28,Crystal Palace,Man City,btts,yes,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-28,Crystal Palace,Man City,btts,no,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-29,Liverpool,Nott'm Forest,1x2,home,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-29,Liverpool,Nott'm Forest,1x2,draw,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-29,Liverpool,Nott'm Forest,1x2,away,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-29,Liverpool,Nott'm Forest,total_2_5,over,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-29,Liverpool,Nott'm Forest,total_2_5,under,,,,High caution: totals unders have been a model leak. Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-29,Liverpool,Nott'm Forest,btts,yes,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-29,Liverpool,Nott'm Forest,btts,no,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-29,Aston Villa,Arsenal,1x2,home,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-29,Aston Villa,Arsenal,1x2,draw,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-29,Aston Villa,Arsenal,1x2,away,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-29,Aston Villa,Arsenal,total_2_5,over,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-29,Aston Villa,Arsenal,total_2_5,under,,,,High caution: totals unders have been a model leak. Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-29,Aston Villa,Arsenal,btts,yes,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-29,Aston Villa,Arsenal,btts,no,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-29,Bournemouth,Everton,1x2,home,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-29,Bournemouth,Everton,1x2,draw,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-29,Bournemouth,Everton,1x2,away,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-29,Bournemouth,Everton,total_2_5,over,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-29,Bournemouth,Everton,total_2_5,under,,,,High caution: totals unders have been a model leak. Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-29,Bournemouth,Everton,btts,yes,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-29,Bournemouth,Everton,btts,no,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-29,Coventry,Hull,1x2,home,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-29,Coventry,Hull,1x2,draw,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-29,Coventry,Hull,1x2,away,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-29,Coventry,Hull,total_2_5,over,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-29,Coventry,Hull,total_2_5,under,,,,High caution: totals unders have been a model leak. Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-29,Coventry,Hull,btts,yes,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-29,Coventry,Hull,btts,no,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-29,Tottenham,Newcastle,1x2,home,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-29,Tottenham,Newcastle,1x2,draw,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-29,Tottenham,Newcastle,1x2,away,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-29,Tottenham,Newcastle,total_2_5,over,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-29,Tottenham,Newcastle,total_2_5,under,,,,High caution: totals unders have been a model leak. Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-29,Tottenham,Newcastle,btts,yes,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-29,Tottenham,Newcastle,btts,no,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-30,Chelsea,Brighton,1x2,home,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-30,Chelsea,Brighton,1x2,draw,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-30,Chelsea,Brighton,1x2,away,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-30,Chelsea,Brighton,total_2_5,over,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-30,Chelsea,Brighton,total_2_5,under,,,,High caution: totals unders have been a model leak. Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-30,Chelsea,Brighton,btts,yes,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-30,Chelsea,Brighton,btts,no,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-30,Leeds,Brentford,1x2,home,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-30,Leeds,Brentford,1x2,draw,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-30,Leeds,Brentford,1x2,away,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-30,Leeds,Brentford,total_2_5,over,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-30,Leeds,Brentford,total_2_5,under,,,,High caution: totals unders have been a model leak. Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-30,Leeds,Brentford,btts,yes,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-30,Leeds,Brentford,btts,no,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-30,Sunderland,Fulham,1x2,home,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-30,Sunderland,Fulham,1x2,draw,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-30,Sunderland,Fulham,1x2,away,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-30,Sunderland,Fulham,total_2_5,over,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-30,Sunderland,Fulham,total_2_5,under,,,,High caution: totals unders have been a model leak. Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-30,Sunderland,Fulham,btts,yes,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-30,Sunderland,Fulham,btts,no,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-30,Man United,Ipswich,1x2,home,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-30,Man United,Ipswich,1x2,draw,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-30,Man United,Ipswich,1x2,away,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-30,Man United,Ipswich,total_2_5,over,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-30,Man United,Ipswich,total_2_5,under,,,,High caution: totals unders have been a model leak. Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-30,Man United,Ipswich,btts,yes,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.
+2026-08-30,Man United,Ipswich,btts,no,,,,Enter real sportsbook odds. Avoid heavy juice worse than about -160 unless the model clearly supports it.

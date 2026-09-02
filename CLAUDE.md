@@ -193,6 +193,24 @@ Use the repo, the reports, and GitHub.
   and the workflow runs it a second time after the price fetch because that
   staging does not exist on a fresh runner before it. That blocked the card on
   2026-09-01 with 160 `fixture_not_found` rows.
+- **All four derived markets are now profit-backtested against real offered
+  prices, and none of them shows an edge (2026-09-02).** A full 2025/26 season
+  bought from the provider at T-3h, filtered to books Cooper can actually bet,
+  run through the card's own `evaluate_*` rules walk-forward:
+  `data/outputs/derived_market_backtest.md`,
+  `scripts/run_derived_market_backtest.py`. **370 bets, ROI -0.74%, 95%
+  interval -14.8% to +14.5%.** Per market: `corners_total_9_5` +6.5% over 82,
+  `draw_no_bet` +7.1% over 82, `btts` -1.5% over 46, `double_chance` -5.5% over
+  77, `corners_total_10_5` **-10.8% over 83**. Every interval includes zero.
+  - The half-season read +1.8% and the full season reads -0.74%. That is what
+    213 bets buys you, and it is the reason to quote the interval and never
+    the point.
+  - Two corner lines of the same market with the same model disagree by 17
+    points of ROI. Treat that as the noise floor of a 370-bet sample, not as a
+    reason to bet 9.5 and fade 10.5.
+  - There is **no CLV here**: one snapshot per fixture means no close to
+    compare against. Profit is the weaker instrument. `live_clv_report.md` is
+    still where a market earns a bigger stake.
 - **The corner markets are measured, and they are well calibrated.** Walk-forward
   gaps of -0.0, 0.0 and 0.0 points overall (`scripts/run_count_calibration.py`,
   `data/outputs/count_calibration.md`), which matters because corners are 23 of

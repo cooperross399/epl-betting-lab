@@ -180,6 +180,24 @@ Use the repo, the reports, and GitHub.
   and the workflow runs it a second time after the price fetch because that
   staging does not exist on a fresh runner before it. That blocked the card on
   2026-09-01 with 160 `fixture_not_found` rows.
+- **Live closing-line value is real from 2026-09-02, and empty until the feed
+  fills.** Every CLV figure before that date came from `run_backtest.py`
+  measuring backtested bets against Football-Data closes — in-sample, and a
+  different population from the card. The live card's `closing_american_odds`
+  is written as `""` by its only producer and 0 of 448 staged rows ever carried
+  one. Now every run appends its observed prices to `refs/heads/price-feed`
+  (`reports/price_feed.py`), the **Closing Snapshot** workflow adds readings
+  ~20 minutes before each kick-off slot, and `reports/live_clv.py` scores the
+  card's own picks against them. Read `data/outputs/live_clv_report.md`, not
+  `clv_report.md`, for anything about the live card.
+  - This is the ONLY feedback corners will ever have: no source retains their
+    historical prices, so no corner rule can be profit-backtested, and corners
+    are 23 of the first 42 best bets.
+  - The 42 picks archived before this date carry no kickoff or event id and
+    report as `kickoff unknown` forever. Information not captured on the day is
+    not recoverable.
+  - A late snapshot is safe: `live_clv` only reads observations strictly before
+    kick-off, so a delayed cron is ignored rather than trusted.
 - **Card delivery is the `card-feed` branch, and no email.** Each run publishes
   `latest_card_comment.md` + `latest_status.json` there; the issue #162 comment
   remains as the written record but mentions nobody, and the repository's

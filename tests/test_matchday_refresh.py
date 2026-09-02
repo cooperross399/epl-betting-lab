@@ -984,9 +984,9 @@ def _workflow_dir():
 def test_only_the_matchday_refresh_can_write_to_the_repository() -> None:
     """`contents: write` is the one permission that can rewrite this repo.
 
-    It exists so a run can publish the card to `card-feed`, and for nothing
-    else. Any other workflow granting it would be able to move main without a
-    pull request.
+    Two workflows hold it, for two append-only refs: `card-feed` and
+    `price-feed`. Any other workflow granting it would be able to move main
+    without a pull request.
     """
     granted = [
         path.name
@@ -994,7 +994,7 @@ def test_only_the_matchday_refresh_can_write_to_the_repository() -> None:
         if "contents: write" in path.read_text(encoding="utf-8")
     ]
 
-    assert granted == ["matchday-refresh.yml"], granted
+    assert granted == ["closing-snapshot.yml", "matchday-refresh.yml"], granted
 
 
 def test_every_push_targets_the_card_feed_branch() -> None:
@@ -1010,8 +1010,9 @@ def test_every_push_targets_the_card_feed_branch() -> None:
     ]
 
     assert pushes, "the publish step should push"
+    allowed = (':refs/heads/card-feed"', ':refs/heads/price-feed"')
     for line in pushes:
-        assert line.endswith(':refs/heads/card-feed"'), line
+        assert line.endswith(allowed), line
 
 
 def test_the_card_feed_publishes_on_every_run() -> None:

@@ -34,6 +34,7 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from datetime import datetime, timezone
 import json
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -90,6 +91,13 @@ PICK_FIELDS = (
     "suggested_units",
     "book",
     "notes",
+    # The market-anchored 2.5 rule. Blank for every other market. Without
+    # these the archive cannot tell an anchored bet from any other, so the
+    # rule could never be judged forward on its own record.
+    "selection_rule",
+    "market_prob",
+    "market_prob_source",
+    "anchor_lift",
 )
 
 
@@ -130,12 +138,29 @@ def _rows(frame: pd.DataFrame, section: str) -> list[dict[str, Any]]:
     return records
 
 
-def _load_kickoffs(path: Path) -> dict[tuple[str, str], pd.Timestamp]:
-    """Map (home, away) -> kickoff time from the provider fixture staging.
+@dataclass(frozen=True)
+class FixtureFact:
+    """What the provider staging knows about a fixture, beyond its teams."""
+
+    kickoff: pd.Timestamp
+    provider_event_id: str
+
+
+def _load_fixture_facts(path: Path) -> dict[tuple[str, str], FixtureFact]:
+    """Map (home, away) -> kickoff and the provider's own event id.
 
     A fixture pair listed with conflicting or unparseable kickoff times cannot
     confirm that its game has not started, so the pair is dropped and its
-    picks fall to "kickoff unconfirmed" — the safe side of ambiguity.
+    picks fall to "kickoff unconfirmed" — the safe side of ambiguity. A pair
+    listed with two different event ids is dropped the same way, for the same
+    reason: an ambiguous identity is worse than none.
+
+    The event id is carried because a closing-price snapshot has to find its
+    way back to the bet it is the closing price OF, and team names are the
+    weakest key available — they are normalised differently by every source
+    and the same pairing recurs every season. The provider's own id is exact,
+    it is already in the staging file, and it costs nothing to keep. Cards
+    archived before 2026-09-02 do not have it, and never will.
     """
     if not path.is_file():
         return {}
@@ -146,6 +171,7 @@ def _load_kickoffs(path: Path) -> dict[tuple[str, str], pd.Timestamp]:
     if not {"home_team", "away_team", "commence_time"}.issubset(frame.columns):
         return {}
     kickoffs: dict[tuple[str, str], pd.Timestamp] = {}
+    event_ids: dict[tuple[str, str], str] = {}
     ambiguous: set[tuple[str, str]] = set()
     for _, row in frame.iterrows():
         key = (
@@ -162,20 +188,38 @@ def _load_kickoffs(path: Path) -> dict[tuple[str, str], pd.Timestamp]:
         if seen is not None and seen != parsed:
             ambiguous.add(key)
             continue
+        event_id = _clean(row.get("provider_event_id"))
+        seen_id = event_ids.get(key)
+        if seen_id and event_id and seen_id != event_id:
+            ambiguous.add(key)
+            continue
         kickoffs[key] = parsed
+        if event_id:
+            event_ids[key] = event_id
     for key in ambiguous:
         kickoffs.pop(key, None)
-    return kickoffs
+        event_ids.pop(key, None)
+    return {
+        key: FixtureFact(kickoff=when, provider_event_id=event_ids.get(key, ""))
+        for key, when in kickoffs.items()
+    }
 
 
 def _split_started(
     rows: Sequence[Mapping[str, Any]],
     *,
     section: str,
-    kickoffs: Mapping[tuple[str, str], pd.Timestamp],
+    kickoffs: Mapping[tuple[str, str], FixtureFact],
     now: pd.Timestamp,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-    """Return (playable, quarantined) for one card section."""
+    """Return (playable, quarantined) for one card section.
+
+    Playable rows now carry their kickoff and event id too. They used to carry
+    neither — only quarantined rows got a kickoff_time, as a reason for being
+    quarantined — so the archive recorded the identity of exactly the bets the
+    card had decided not to make. Information not captured on the day a card is
+    issued is not recoverable later.
+    """
     playable: list[dict[str, Any]] = []
     quarantined: list[dict[str, Any]] = []
     for row in rows:
@@ -183,27 +227,35 @@ def _split_started(
             _clean(row.get("home_team")).casefold(),
             _clean(row.get("away_team")).casefold(),
         )
-        kickoff = kickoffs.get(key)
-        if kickoff is None:
+        fact = kickoffs.get(key)
+        if fact is None:
             quarantined.append(
                 {
                     **row,
                     "original_section": section,
                     "kickoff_status": KICKOFF_UNCONFIRMED_STATUS,
                     "kickoff_time": None,
+                    "provider_event_id": None,
                 }
             )
-        elif kickoff <= now:
+        elif fact.kickoff <= now:
             quarantined.append(
                 {
                     **row,
                     "original_section": section,
                     "kickoff_status": ALREADY_STARTED_STATUS,
-                    "kickoff_time": kickoff.isoformat(),
+                    "kickoff_time": fact.kickoff.isoformat(),
+                    "provider_event_id": fact.provider_event_id or None,
                 }
             )
         else:
-            playable.append(dict(row))
+            playable.append(
+                {
+                    **row,
+                    "kickoff_time": fact.kickoff.isoformat(),
+                    "provider_event_id": fact.provider_event_id or None,
+                }
+            )
     return playable, quarantined
 
 
@@ -467,7 +519,7 @@ def build_automated_card(
     # A game that has kicked off — or whose kickoff cannot be confirmed — is
     # not a play. Quarantine such selections out of every section before
     # anything downstream (units, the routine bridge, the emails) sees them.
-    kickoffs = _load_kickoffs(staging_fixtures)
+    kickoffs = _load_fixture_facts(staging_fixtures)
     guard_now = pd.Timestamp(generated_at)
     if guard_now.tzinfo is None:
         guard_now = guard_now.tz_localize(timezone.utc)

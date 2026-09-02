@@ -206,3 +206,35 @@ def test_list_recent_thursday_archives(tmp_path) -> None:
     assert list(archives["generated_at"]) == ["2026-07-09T12:30:05", "2026-07-08T12:30:05"]
     assert archives.iloc[0]["markdown"] == str(newer["archive_markdown"])
     assert archives.iloc[1]["csv"] == str(older["archive_csv"])
+
+
+# --- market reliability -----------------------------------------------------
+
+
+def test_no_market_gets_a_ranking_nudge_from_the_in_sample_backtest():
+    """The ranking must not be moved by numbers the project has repudiated.
+
+    `total_2_5` was drawing the maximum +12 adjustment from five backtested
+    bets at +40.8%, and `1x2` from the +34.41u that docs/no_edge_out_of_sample.md
+    shows was a filter tuned on the pass it was scored on. Both come from an
+    in-sample file, so neither can justify moving a live ranking, while the
+    corner markets that are 55% of the card appear in that file not at all.
+    """
+    from epl_betting_lab.reports.thursday_best_bets import _market_reliability_from_backtest
+
+    assert _market_reliability_from_backtest() == {}
+
+
+def test_the_reliability_mechanism_is_kept_for_a_forward_record():
+    """Neutered, not deleted: a real forward record should be able to fill it."""
+    from epl_betting_lab.reports.thursday_best_bets import (
+        MINIMUM_BETS_FOR_MARKET_RELIABILITY,
+        build_thursday_best_bets,
+    )
+
+    assert MINIMUM_BETS_FOR_MARKET_RELIABILITY >= 200
+    nudged = build_thursday_best_bets(_candidates(), market_reliability={"1x2": 12.0})
+    plain = build_thursday_best_bets(_candidates(), market_reliability={})
+    ones = nudged[nudged.market == "1x2"]["ranking_score"]
+    zeros = plain[plain.market == "1x2"]["ranking_score"]
+    assert list(ones) != list(zeros)

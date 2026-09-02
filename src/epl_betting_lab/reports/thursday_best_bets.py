@@ -238,28 +238,35 @@ LEAN_TIER = "Lean (no stake)"
 #: the bought provider history covers props and corner totals only.
 PROFIT_BACKTESTABLE_MARKETS: frozenset[str] = frozenset({"1x2", "total_2_5"})
 
-#: One tier down for a market whose profit can never be verified.
+#: The stake for a market whose profit can never be verified: the smallest one.
 #:
-#: This is NOT a calibration judgement. The corner models are well calibrated —
-#: overall gaps of -0.0, 0.0 and 0.0 points across 924 and 616 walk-forward
-#: predictions (`data/outputs/count_calibration.md`) — and BTTS's bias has been
-#: measured out. The reason is narrower and harder: for these markets no
-#: historical price exists at any source, so no rule on them can ever be shown
-#: to make money, however well the probabilities are calibrated. Being right
-#: about how often something happens is not the same as being right about
-#: whether a price is wrong, and this repository has the receipt for that
-#: distinction in docs/why_better_calibration_lost_money.md.
+#: This was written as "one tier down, not a floor - the ranking still says
+#: which of these are better than the others". That claim was false the moment
+#: it shipped, and the numbers were there to check it. Of the markets the card
+#: can stake, only `total_2_5` is profit-backtestable, and it is separately
+#: capped at C by the anchored rule. Every other market steps down. Across the
+#: first 162 archived best bets the card issued B 69 times and C 93 times and A
+#: never once - so "one tier down" from an unreachable A is B->C, and every
+#: stakeable row lands on C. It is a floor. Saying otherwise made the card
+#: print eight rows of "C" while the commit message claimed the ranking still
+#: moved the stake.
 #:
-#: So the card stakes most where it can check itself. One tier, not a floor to
-#: the minimum: the ranking still says which of these are better than the
-#: others, and throwing that away would be its own kind of pretending not to
-#: know. Corners are the majority of the card and its worst settled market
-#: (-0.59 units over 11), which is a small sample and not the argument — the
-#: argument is that there is no way to find out.
+#: So it is a floor, deliberately and in the open. Nothing on this card has a
+#: demonstrated edge; the honest position is that every bet is the same small
+#: size until the forward record says one of them deserves more.
 #:
-#: Reversible, and meant to be revisited: `data/outputs/live_clv_report.md`
-#: accumulates the first forward evidence these markets have ever had.
-UNVERIFIABLE_TIER_STEP_DOWN = {"A": "B", "B": "C", "C": "C"}
+#: NOT a calibration judgement. The corner models are well calibrated - gaps of
+#: -0.0, 0.0 and 0.0 points over 924 and 616 walk-forward predictions - and
+#: BTTS's bias has been measured out. The reason is narrower: for these markets
+#: no historical price exists at any source, so no rule on them can ever be
+#: shown to make money however well the probabilities are calibrated.
+#:
+#: The tier is still computed and still shown, because it orders the card and
+#: says which bets the model likes most. It just no longer changes the stake,
+#: and the card now says so rather than leaving a column of Cs to be puzzled
+#: over. Reversible: `data/outputs/live_clv_report.md` is where a market earns
+#: its way back to a bigger stake.
+UNVERIFIABLE_MARKET_TIER = "C"
 
 
 def _confidence_tier(row: pd.Series) -> str:
@@ -300,8 +307,8 @@ def _confidence_tier(row: pd.Series) -> str:
     # decision for the CLV record to earn, not for a score to grant.
     if str(row.get("selection_rule", "")) == "market_anchored" and tier in {"A", "B"}:
         return "C"
-    if market and market not in PROFIT_BACKTESTABLE_MARKETS:
-        return UNVERIFIABLE_TIER_STEP_DOWN.get(tier, tier)
+    if market and market not in PROFIT_BACKTESTABLE_MARKETS and tier in {"A", "B"}:
+        return UNVERIFIABLE_MARKET_TIER
     return tier
 
 

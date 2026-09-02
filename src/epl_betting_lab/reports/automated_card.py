@@ -584,9 +584,38 @@ def build_automated_card(
     return summary
 
 
+def _units(value: object) -> float:
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return 0.0
+
+
 def render_automated_card(summary: Mapping[str, Any]) -> str:
+    def _one_size_note(rows: Sequence[Mapping[str, Any]]) -> list[str]:
+        """Explain a column of identical tiers, when that is what the card has.
+
+        Every market the card can stake is capped at the smallest size, so the
+        tier orders the bets without changing what is staked on them. Eight
+        rows of "C" with no explanation invites the reader to think the ranking
+        is sizing the bet. It is not, and the reason is worth a sentence: none
+        of these markets can be profit-backtested, so none has earned more.
+        """
+        staked = [r for r in rows if _units(r.get("suggested_units")) > 0]
+        tiers = {_clean(r.get("confidence_tier")) for r in staked}
+        if len(staked) < 2 or len(tiers) != 1:
+            return []
+        size = _units(staked[0].get("suggested_units"))
+        return [
+            f"_Every bet below is {size}u. No market on this card has a "
+            "demonstrated edge and none of them can be profit-backtested, so "
+            "they are staked the same small size while the closing-line record "
+            "accumulates. The tier orders the card; it does not size the bet._",
+            "",
+        ]
+
     def _rows_table(rows: Sequence[Mapping[str, Any]]) -> list[str]:
-        lines = [
+        lines = _one_size_note(rows) + [
             "| Match | Market | Selection | Tier | Model prob | Edge | Price | Book |",
             "|:------|:-------|:----------|:-----|:-----------|:-----|:------|:-----|",
         ]

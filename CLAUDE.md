@@ -187,14 +187,29 @@ Use the repo, the reports, and GitHub.
   tests plus six `@needs_dataset` checks that never run in CI. Good calibration
   is a precondition and cannot license a stake; a bad number there would be a
   reason to stake less, never a licence to fit the model until it moves.
-- **The card stakes one tier lower on any market whose profit can never be
-  verified.** `PROFIT_BACKTESTABLE_MARKETS` is `{1x2, total_2_5}` — the only two
-  Football-Data ships odds for. Everything else steps A->B->C (not to a floor:
-  the ranking still distinguishes them). Measured on the live card: 1.10 units
-  becomes 0.80, and only two rows move. This is NOT a calibration judgement —
-  see the bullet above — it is that being right about how often something
-  happens is not being right about whether a price is wrong. Reversible, and
-  meant to be revisited once `live_clv_report.md` has forward evidence.
+- **Every bet on the card is the same size: 0.1 units.**
+  `PROFIT_BACKTESTABLE_MARKETS` is `{1x2, total_2_5}` — the only two
+  Football-Data ships odds for — and `1x2` is off the card while the anchored
+  rule caps `total_2_5` at C anyway. Tier A was never reached across 162
+  archived best bets, so `UNVERIFIABLE_MARKET_TIER` is a **floor**, not the
+  "one tier down, ranking still moves the stake" an earlier commit of mine
+  claimed. The tier orders the card; it does not size the bet, and the card
+  now prints a line saying so above the table. NOT a calibration judgement —
+  see the bullet above — it is that no market here can be profit-backtested,
+  so none has earned more. `live_clv_report.md` is where one earns its way
+  back to a bigger stake.
+- **Fading the public was tested and is not in the static prices.**
+  Football-Data ships Pinnacle on 1,730 matches. Held out by date, fading the
+  public returns −34.6% and *following* it −41.4% — a signal and its inverse
+  both losing means the sample has nothing to say — and a fair-probability
+  disagreement over two points fires on **0.0%** of selections: once each
+  margin is removed properly the bookmaker average already sits on the sharpest
+  book. Two dead ends are recorded in `docs/fading_the_public.md` because both
+  looked like findings: normalising the margin away manufactures longshot
+  edges, and "the best price beats a sharp book" is true of 93% of selections
+  and so measures nothing. The live signal worth testing is reverse line
+  movement, which needs the price feed to accumulate — and needs Pinnacle,
+  which `--regions us` does not return.
 - **Every backtest breakdown is stamped `in_sample_backtest_not_evidence_of_edge`.**
   `backtest_market_breakdown.csv` carried `1x2 ... +34.41 units` for weeks and
   the ranking scaled it into a bonus. The ranking no longer reads those files;

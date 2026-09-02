@@ -1108,3 +1108,18 @@ def test_team_xg_is_fetched_softly_before_prices_are_bought() -> None:
     assert "secrets." not in block
     assert "Team xG could not be fetched" in text
 
+
+def test_the_slate_gets_a_second_pass_once_provider_staging_exists() -> None:
+    """A quiet week at Football-Data must not leave the committed slate standing.
+
+    The provider's staged fixtures only exist after the price fetch, so the
+    fallback the refresh script has for an empty feed can only work from a
+    second pass placed after it.
+    """
+    text = _workflow()
+    prices = text.index("Refetch provider prices")
+    second = text.index("Fill the slate from the provider if Football-Data had nothing")
+    assert second > prices
+    block = text.split("- name: Fill the slate from the provider if Football-Data had nothing", 1)[1].split("- name:", 1)[0]
+    assert "refresh_upcoming_fixtures.py" in block and "continue-on-error: true" in block
+

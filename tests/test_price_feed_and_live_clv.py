@@ -32,7 +32,10 @@ from epl_betting_lab.reports.price_feed import (
     snapshot_rows,
 )
 
-NOTES = "the_odds_api event eb2553d10d63dc912b99f8fd0d675721; bookmaker betmgm; fetched 2026-08-17T16:39:44-04:00"
+#: Deliberately an 8-character id, not the provider's 32-hex shape: a real one
+#: is indistinguishable from an API key and `test_no_secrets_committed` refuses
+#: it in a tracked file, correctly. `event_id_from_notes` accepts 8 or more.
+NOTES = "the_odds_api event 1a2b3c4d; bookmaker betmgm; fetched 2026-08-17T16:39:44-04:00"
 
 
 def _staged(rows):
@@ -51,7 +54,7 @@ def _prov(when="2026-09-05T12:00:00+00:00"):
 
 
 def test_the_event_id_is_recovered_from_the_notes_every_staged_row_carries():
-    assert event_id_from_notes(NOTES) == "eb2553d10d63dc912b99f8fd0d675721"
+    assert event_id_from_notes(NOTES) == "1a2b3c4d"
     assert event_id_from_notes("no id here") == ""
     assert event_id_from_notes(None) == ""
 
@@ -92,7 +95,7 @@ def test_a_later_observation_of_the_same_price_is_kept_as_its_own_row():
 
 
 def _card(market="btts", selection="yes", odds=-110, kickoff="2026-09-05T14:00:00+00:00",
-          event="eb2553d10d63dc912b99f8fd0d675721", generated="2026-09-05T08:00:00+00:00"):
+          event="1a2b3c4d", generated="2026-09-05T08:00:00+00:00"):
     return {
         "card_generated": True,
         "generated_at": generated,

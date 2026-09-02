@@ -12,6 +12,7 @@ from datetime import datetime, timezone
 
 import pytest
 
+from epl_betting_lab.providers import historical_btts
 from epl_betting_lab.providers.historical_btts import (
     HarvestBudget,
     harvest_btts_history,
@@ -268,6 +269,47 @@ class TestHarvest:
 
         assert [miss["market"] for miss in result.misses] == ["draw_no_bet"]
         assert result.misses[0]["home_team"] == "Arsenal"
+
+    def test_a_dropped_connection_does_not_throw_away_the_whole_harvest(
+        self, monkeypatch
+    ) -> None:
+        """A blip two-thirds through a season used to lose the season.
+
+        Rows are written only at the end, so an exception escaping mid-run
+        discarded every credit that run had already spent - which is exactly
+        what a `Connection reset by peer` did on 2026-09-02, after roughly
+        four minutes of paid requests.
+        """
+        monkeypatch.setattr(historical_btts, "_sleep", lambda _seconds: None)
+        underlying = _requester([_event()], _btts_payload())
+        calls = {"n": 0}
+
+        def flaky(url, **kwargs):
+            calls["n"] += 1
+            if calls["n"] == 2:
+                raise ConnectionError("Connection reset by peer")
+            return underlying(url, **kwargs)
+
+        result = harvest_btts_history(
+            DAY, api_key="k", budget=HarvestBudget(limit=1000), requester=flaky,
+        )
+
+        # The retry carried it: the fixture is still priced.
+        assert result.rows
+
+    def test_a_request_that_never_recovers_is_skipped_not_raised(
+        self, monkeypatch
+    ) -> None:
+        monkeypatch.setattr(historical_btts, "_sleep", lambda _seconds: None)
+
+        def dead(url, **kwargs):
+            raise ConnectionError("Connection reset by peer")
+
+        result = harvest_btts_history(
+            DAY, api_key="k", budget=HarvestBudget(limit=1000), requester=dead,
+        )
+
+        assert result.rows == []
 
     def test_an_unreadable_kick_off_is_reported_not_guessed(self) -> None:
         broken = dict(_event())

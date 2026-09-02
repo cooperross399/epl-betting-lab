@@ -32,6 +32,7 @@ FIELDS = [
     "home_team",
     "away_team",
     "market",
+    "book",
     "player",
     "selection",
     "american",
@@ -52,6 +53,12 @@ def _read_existing(
     not count as holding that fixture — the fixture may be re-bought
     correctly. The old rows stay in the file (nothing is deleted); analysis
     requires a player on prop rows and so never reads them.
+
+    A row without a `book` is unusable for the same reason and does not count
+    as held either. It carries the best price across every bookmaker the
+    provider returned, including ones the card may not bet, so a backtest on
+    it measures an edge against a price Cooper cannot take — optimistic by
+    construction, and exactly the fault PR #266 fixed on the live card.
     """
     already: list[str] = []
     legacy_rows: list[dict[str, str]] = []
@@ -60,13 +67,16 @@ def _read_existing(
         return already, legacy_rows, needs_migration
     with output_path.open(encoding="utf-8", newline="") as handle:
         reader = csv.DictReader(handle)
-        needs_migration = "player" not in (reader.fieldnames or [])
+        fieldnames = reader.fieldnames or []
+        needs_migration = "player" not in fieldnames or "book" not in fieldnames
         for row in reader:
             legacy_rows.append(dict(row))
             market = str(row.get("market", "")).strip()
             if market.startswith("player_") and not str(
                 row.get("player", "") or ""
             ).strip():
+                continue
+            if not str(row.get("book", "") or "").strip():
                 continue
             day = str(row.get("commence_time", ""))[:10]
             home = str(row.get("home_team", "")).strip().casefold()
@@ -121,9 +131,9 @@ def _write_rows(
 ) -> int:
     """Write the harvest. Returns how many existing rows were migrated.
 
-    A file that predates the `player` column cannot be appended to: rows with
-    more fields than the header would misalign. It is rewritten once under
-    the new header, every old row kept with an empty player.
+    A file that predates the `player` or `book` column cannot be appended to:
+    rows with more fields than the header would misalign. It is rewritten once
+    under the new header, every old row kept with the new columns empty.
     """
     exists = path.is_file()
     if append and exists and needs_migration:

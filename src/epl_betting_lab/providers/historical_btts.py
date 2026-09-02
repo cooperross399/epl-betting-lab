@@ -167,10 +167,17 @@ def _event_prices(
         return {}
 
     wanted = {m.strip() for m in markets if m.strip()}
-    best: dict[str, dict[tuple[str, str], float]] = {}
+    # Best price PER BOOK, not best across all books. Collapsing them threw
+    # away the only thing that says whether a price could have been taken:
+    # `bettable_only` fails closed without a book, and a maximum taken over
+    # books Cooper cannot bet is optimistic by construction - the same fault
+    # PR #266 fixed on the live card. The book is already in the response, so
+    # keeping it costs nothing and buys the Pinnacle reference for free.
+    best: dict[str, dict[tuple[str, str, str], float]] = {}
     for bookmaker in data.get("bookmakers", []) or []:
         if not isinstance(bookmaker, Mapping):
             continue
+        book = str(bookmaker.get("title", "") or bookmaker.get("key", "")).strip()
         for market in bookmaker.get("markets", []) or []:
             if not isinstance(market, Mapping):
                 continue
@@ -195,7 +202,7 @@ def _event_prices(
                 if price is None:
                     continue
                 slot = best.setdefault(key, {})
-                identity = (player, selection)
+                identity = (book, player, selection)
                 # Best price = the one that pays most for the same outcome.
                 if identity not in slot or price > slot[identity]:
                     slot[identity] = price
@@ -327,11 +334,12 @@ def harvest_btts_history(
         # one; long rows survive that. `player` is empty for match-level
         # markets and names the player for prop markets.
         for market_key, selections in sorted(prices.items()):
-            for (player, selection), price in sorted(selections.items()):
+            for (book, player, selection), price in sorted(selections.items()):
                 result.rows.append(
                     {
                         **base,
                         "market": market_key,
+                        "book": book,
                         "player": player,
                         "selection": selection,
                         "american": price,

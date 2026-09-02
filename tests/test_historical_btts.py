@@ -148,8 +148,15 @@ class TestHarvest:
         # One slate snapshot, plus ten credits per market on one event.
         assert budget.spent == 10 + 30
 
-    def test_it_keeps_the_best_price_across_books(self) -> None:
-        """The card quotes the best book it can reach, so this must too."""
+    def test_it_keeps_every_book_named_rather_than_one_maximum(self) -> None:
+        """Which book quoted a price is the only thing that says whether it
+        could have been taken.
+
+        Collapsing books into a single maximum is optimistic by construction -
+        the max runs over books Cooper may not bet, and `bettable_only` fails
+        closed without a `book` column. The book is already in the response,
+        so keeping it costs nothing and buys the Pinnacle reference free.
+        """
         payload = {
             "data": {
                 "bookmakers": [
@@ -165,7 +172,10 @@ class TestHarvest:
             requester=_requester([_event()], payload),
         )
 
-        assert result.rows[0]["american"] == 165
+        assert {(r["book"], r["american"]) for r in result.rows} == {
+            ("A", 140),
+            ("B", 165),
+        }
 
     def test_it_samples_before_that_fixture_own_kick_off(self) -> None:
         """Not at a fixed hour of the day.
@@ -311,9 +321,9 @@ class TestHarvest:
         assert by_player["Kai Havertz"]["american"] == 210
         assert all(r["selection"] == "Over@1.5" for r in result.rows)
 
-    def test_best_price_is_per_player_not_per_line(self) -> None:
-        """Two books pricing the same player's line compare; two players on
-        the same line never do."""
+    def test_a_price_is_per_book_per_player_never_pooled(self) -> None:
+        """Two players on the same line must never collapse into one price,
+        and neither must two books."""
         payload = {"data": {"bookmakers": [
             {"title": "FanDuel", "markets": [
                 {"key": "player_shots_on_target", "outcomes": [
@@ -333,8 +343,26 @@ class TestHarvest:
             requester=_requester([_event()], payload),
         )
 
-        by_player = {r["player"]: r["american"] for r in result.rows}
-        assert by_player == {"Bukayo Saka": -185, "Kai Havertz": 105}
+        assert {(r["book"], r["player"], r["american"]) for r in result.rows} == {
+            ("FanDuel", "Bukayo Saka", -200),
+            ("DraftKings", "Bukayo Saka", -185),
+            ("DraftKings", "Kai Havertz", 105),
+        }
+
+    def test_a_row_that_names_its_book_does_count_as_held(self) -> None:
+        """The migration rule must not make every run re-buy everything."""
+        result = harvest_btts_history(
+            DAY, api_key="k", budget=HarvestBudget(limit=1000),
+            requester=_requester([_event()], _btts_payload()),
+        )
+        assert result.rows and all(row["book"] for row in result.rows)
+
+        again = harvest_btts_history(
+            DAY, api_key="k", budget=HarvestBudget(limit=1000),
+            requester=_requester([_event()], _btts_payload()),
+            already_harvested=["2025-08-16|arsenal|chelsea|btts"],
+        )
+        assert again.rows == []
 
     def test_a_match_level_row_has_an_empty_player(self) -> None:
         result = harvest_btts_history(
@@ -478,7 +506,7 @@ class TestTheHarvestFile:
 
         assert needs_migration is True
         assert len(legacy) == 2
-        assert already == ["2026-05-09|fulham|bournemouth|btts"]
+        assert already == []  # no `book` column, so nothing counts as held
 
     def test_migration_keeps_every_old_row_under_the_new_header(
         self, tmp_path
@@ -518,4 +546,4 @@ class TestTheHarvestFile:
         # now counts as bought.
         already2, _, needs2 = module._read_existing(path, append=True)
         assert needs2 is False
-        assert "2026-05-09|fulham|everton|player_shots_on_target" in already2
+        assert already2 == []  # migrated rows still carry no book

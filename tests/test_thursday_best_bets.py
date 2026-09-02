@@ -238,3 +238,52 @@ def test_the_reliability_mechanism_is_kept_for_a_forward_record():
     ones = nudged[nudged.market == "1x2"]["ranking_score"]
     zeros = plain[plain.market == "1x2"]["ranking_score"]
     assert list(ones) != list(zeros)
+
+
+# --- staking where the card cannot check itself -----------------------------
+
+
+def test_only_two_markets_can_ever_be_profit_backtested():
+    """Football-Data ships odds for 1X2 and the 2.5 line and nothing else."""
+    from epl_betting_lab.reports.thursday_best_bets import PROFIT_BACKTESTABLE_MARKETS
+
+    assert PROFIT_BACKTESTABLE_MARKETS == {"1x2", "total_2_5"}
+
+
+def test_a_market_whose_profit_cannot_be_verified_stakes_one_tier_lower():
+    """Not a calibration judgement — the corner models are well calibrated
+    (gaps of -0.0, 0.0, 0.0 over 924 and 616 walk-forward predictions). Being
+    right about how often something happens is not being right about whether a
+    price is wrong, and for these markets the second can never be checked."""
+    from epl_betting_lab.reports.thursday_best_bets import _confidence_tier
+
+    top = {"status": "BETTABLE", "selection": "over", "ranking_score": 90.0, "calibrated_edge": 0.08}
+    assert _confidence_tier(pd.Series({**top, "market": "corners_total_9_5"})) == "B"
+    assert _confidence_tier(pd.Series({**top, "market": "btts"})) == "B"
+    # ...while a market with a held-out test behind it keeps its tier.
+    assert _confidence_tier(pd.Series({**top, "market": "1x2"})) == "A"
+
+
+def test_the_step_down_never_reaches_zero_units():
+    """One tier, not a floor. The ranking still says which of these are better
+    than the others, and discarding that would be its own kind of pretending."""
+    from epl_betting_lab.reports.thursday_best_bets import (
+        UNVERIFIABLE_TIER_STEP_DOWN,
+        _suggested_units,
+    )
+
+    for tier, stepped in UNVERIFIABLE_TIER_STEP_DOWN.items():
+        assert _suggested_units(stepped) > 0, tier
+        assert _suggested_units(stepped) <= _suggested_units(tier)
+
+
+def test_passes_and_leans_are_untouched_by_the_step_down():
+    """A zero-unit row has no stake to reduce."""
+    from epl_betting_lab.reports.thursday_best_bets import LEAN_TIER, _confidence_tier
+
+    lean = pd.Series({"status": "LEAN", "market": "corners_1x2", "selection": "home",
+                      "ranking_score": 60.0, "calibrated_edge": 0.02})
+    assert _confidence_tier(lean) == LEAN_TIER
+    avoid = pd.Series({"status": "PASS", "market": "corners_1x2", "selection": "home",
+                       "ranking_score": 10.0, "calibrated_edge": -0.01})
+    assert _confidence_tier(avoid) == "Pass/Avoid"

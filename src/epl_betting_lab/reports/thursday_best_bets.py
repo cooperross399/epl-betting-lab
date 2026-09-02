@@ -233,6 +233,35 @@ def _ranking_components(row: pd.Series, market_reliability: dict[str, float]) ->
 LEAN_TIER = "Lean (no stake)"
 
 
+#: Markets a bet rule can be profit-backtested on, because a historical price
+#: source exists. Football-Data ships odds for these two and nothing else, and
+#: the bought provider history covers props and corner totals only.
+PROFIT_BACKTESTABLE_MARKETS: frozenset[str] = frozenset({"1x2", "total_2_5"})
+
+#: One tier down for a market whose profit can never be verified.
+#:
+#: This is NOT a calibration judgement. The corner models are well calibrated —
+#: overall gaps of -0.0, 0.0 and 0.0 points across 924 and 616 walk-forward
+#: predictions (`data/outputs/count_calibration.md`) — and BTTS's bias has been
+#: measured out. The reason is narrower and harder: for these markets no
+#: historical price exists at any source, so no rule on them can ever be shown
+#: to make money, however well the probabilities are calibrated. Being right
+#: about how often something happens is not the same as being right about
+#: whether a price is wrong, and this repository has the receipt for that
+#: distinction in docs/why_better_calibration_lost_money.md.
+#:
+#: So the card stakes most where it can check itself. One tier, not a floor to
+#: the minimum: the ranking still says which of these are better than the
+#: others, and throwing that away would be its own kind of pretending not to
+#: know. Corners are the majority of the card and its worst settled market
+#: (-0.59 units over 11), which is a small sample and not the argument — the
+#: argument is that there is no way to find out.
+#:
+#: Reversible, and meant to be revisited: `data/outputs/live_clv_report.md`
+#: accumulates the first forward evidence these markets have ever had.
+UNVERIFIABLE_TIER_STEP_DOWN = {"A": "B", "B": "C", "C": "C"}
+
+
 def _confidence_tier(row: pd.Series) -> str:
     section = row.get("section")
     status = str(row.get("status", "")).upper()
@@ -271,6 +300,8 @@ def _confidence_tier(row: pd.Series) -> str:
     # decision for the CLV record to earn, not for a score to grant.
     if str(row.get("selection_rule", "")) == "market_anchored" and tier in {"A", "B"}:
         return "C"
+    if market and market not in PROFIT_BACKTESTABLE_MARKETS:
+        return UNVERIFIABLE_TIER_STEP_DOWN.get(tier, tier)
     return tier
 
 

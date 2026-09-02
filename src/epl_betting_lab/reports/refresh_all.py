@@ -53,7 +53,13 @@ def _steps() -> list[tuple[str, str, Callable[[Path], Any]]]:
     from epl_betting_lab.reports.automated_card_input import (
         save_automated_card_input,
     )
+    from epl_betting_lab.data.loaders import load_matches
     from epl_betting_lab.reports.browser_status import save_status_html
+    from epl_betting_lab.reports.count_calibration import (
+        calibration_table as count_calibration_table,
+        save_count_calibration_reports,
+        walk_forward_counts,
+    )
     from epl_betting_lab.reports.live_clv import save_live_clv_reports
     from epl_betting_lab.reports.price_feed import load_feed
     from epl_betting_lab.reports.card_history import (
@@ -67,6 +73,13 @@ def _steps() -> list[tuple[str, str, Callable[[Path], Any]]]:
     )
 
     return [
+        (
+            "count_calibration",
+            "Measure the corner markets against what happened",
+            lambda outputs: save_count_calibration_reports(
+                count_calibration_table(walk_forward_counts(load_matches())), outputs
+            ),
+        ),
         (
             "live_clv",
             "Score the card's own picks against the prices later observed",

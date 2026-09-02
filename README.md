@@ -66,7 +66,7 @@ This is built for a practical betting workflow:
 The starter project is designed around these public data sources:
 
 - **Football-Data.co.uk** for historical EPL results, match stats, and odds CSVs.
-- **ClubElo** for team strength ratings.
+- **Understat** for per-match team expected goals (`scripts/fetch_understat_xg.py`).
 - **Manual odds entry** at first, because sportsbook lines vary by state/book and change constantly.
 
 The included `data/manual/upcoming_fixtures.csv` is a starter fixture sheet for early 2026/27 EPL matches. Fixtures and times can change, so update it before betting.

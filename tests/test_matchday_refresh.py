@@ -984,9 +984,15 @@ def _workflow_dir():
 def test_only_the_matchday_refresh_can_write_to_the_repository() -> None:
     """`contents: write` is the one permission that can rewrite this repo.
 
-    Two workflows hold it, for two append-only refs: `card-feed` and
-    `price-feed`. Any other workflow granting it would be able to move main
-    without a pull request.
+    Three workflows hold it, for three append-only refs: `card-feed`,
+    `price-feed` and `odds-history`. Any other workflow granting it would be
+    able to move main without a pull request.
+
+    `odds-history` was added on 2026-09-02 to hold purchased historical prices,
+    which had been living only in a 90-day artifact - about 26,000 credits of
+    evidence on a countdown. Granting the permission is only half of it: the
+    test below pins the ref that workflow may actually push to, because the
+    permission is repository-wide and the discipline is not.
     """
     granted = [
         path.name
@@ -994,7 +1000,37 @@ def test_only_the_matchday_refresh_can_write_to_the_repository() -> None:
         if "contents: write" in path.read_text(encoding="utf-8")
     ]
 
-    assert granted == ["closing-snapshot.yml", "matchday-refresh.yml"], granted
+    assert granted == [
+        "closing-snapshot.yml",
+        "harvest-historical-btts.yml",
+        "matchday-refresh.yml",
+    ], granted
+
+
+def test_the_harvest_can_only_push_to_the_odds_history_branch() -> None:
+    """It buys prices with real credits; it must never be able to move main."""
+    text = (_workflow_dir() / "harvest-historical-btts.yml").read_text(
+        encoding="utf-8"
+    )
+    pushes = [line.strip() for line in text.splitlines() if "git push" in line]
+
+    assert pushes, "the publish step should push"
+    for line in pushes:
+        assert line.endswith(':refs/heads/odds-history"'), line
+
+
+def test_the_harvest_publishes_before_it_uploads_an_artifact() -> None:
+    """The permanent record is written first.
+
+    If the artifact upload came first and the publish failed, the run would
+    still look complete while the durable copy silently did not exist - the
+    fault shape this repo keeps producing.
+    """
+    text = (_workflow_dir() / "harvest-historical-btts.yml").read_text(
+        encoding="utf-8"
+    )
+
+    assert text.index("odds-history branch") < text.index("Upload the prices")
 
 
 def test_every_push_targets_the_card_feed_branch() -> None:

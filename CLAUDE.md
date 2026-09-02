@@ -286,9 +286,12 @@ Use the repo, the reports, and GitHub.
   ~20 minutes before each kick-off slot, and `reports/live_clv.py` scores the
   card's own picks against them. Read `data/outputs/live_clv_report.md`, not
   `clv_report.md`, for anything about the live card.
-  - This is the ONLY feedback corners will ever have: no source retains their
-    historical prices, so no corner rule can be profit-backtested, and corners
-    are 23 of the first 42 best bets.
+  - Live CLV is the only *closing-line* feedback corners have — but it is no
+    longer their only feedback at all. "No source retains their historical
+    prices" was false: the provider sells them, they have been bought for a
+    full season, and `data/outputs/derived_market_backtest.md` measures the
+    corner rule against money. Corners are 23 of the first 42 best bets, so
+    this mattered more than any other wrong claim here.
   - The 42 picks archived before this date carry no kickoff or event id and
     report as `kickoff unknown` forever. Information not captured on the day is
     not recoverable.

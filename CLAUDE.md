@@ -194,8 +194,16 @@ Use the repo, the reports, and GitHub.
   taking a bet there is paying the vig for a coin flip. The tier column was
   dropped from the table because every bet is the same size, so it printed the
   same letter on every row.
-- **The card may only price a bet at a book on `books.BETTABLE_BOOKS`.**
-  `_best_quote` skips every other bookmaker. A price that cannot be taken is
+- **The card may only price a bet at a book on `books.BETTABLE_BOOKS`, and the
+  filter runs BEFORE market eligibility.** `bettable_only` fails closed — a
+  frame with no `book` column returns empty, because "I cannot tell whose price
+  this is" must never mean "price it anyway". Filtering only at pricing let
+  eligibility certify a market at 10 of 10 fixtures while the card quietly
+  priced fewer, since uncovered selections just produce no row: demonstrated
+  2026-09-02, eligibility said 2/2 and the card priced 1. The anchored totals
+  consensus is filtered too, or an unusable book would move the anchor and
+  change which bets fire. `_best_quote` keeps its own check as defence in
+  depth. A price that cannot be taken is
   worse than no price, because on the card it looks like the ones that can.
   Bookmakers the provider returns that are not on the list are NAMED in the
   card input report rather than dropped quietly — if one is a book Cooper can

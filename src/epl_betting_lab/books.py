@@ -81,3 +81,22 @@ def unknown_books(books: Iterable[object]) -> list[str]:
         and not is_reference(book)
     }
     return sorted(seen)
+
+
+def bettable_only(frame):
+    """Only the rows priced at a book that may be staked.
+
+    Fails CLOSED. A frame with no `book` column returns empty rather than
+    unchanged, because "I cannot tell whose price this is" must never mean
+    "price it anyway" — that is the one input where the obvious implementation
+    lets everything through, and it is the shape of the bug this exists to stop.
+
+    Applied BEFORE market eligibility, not only at pricing. Judging coverage on
+    every book and then pricing from a subset lets the report certify a market
+    `eligible` with 10 of 10 fixtures covered while the card silently prices
+    fewer, because uncovered selections simply produce no row. Demonstrated on
+    2026-09-02: eligibility said 2/2, the card priced 1.
+    """
+    if "book" not in getattr(frame, "columns", []):
+        return frame.iloc[0:0]
+    return frame[frame["book"].map(is_bettable)]

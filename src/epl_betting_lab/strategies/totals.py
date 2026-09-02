@@ -4,6 +4,8 @@ import math
 
 import pandas as pd
 
+from epl_betting_lab.books import bettable_only
+
 
 def _book_of(line: pd.DataFrame) -> str:
     """Sportsbook name for a priced line, blank when the source omitted it."""
@@ -148,6 +150,14 @@ def market_probability_over(
     """
     for frame, label in ((market_odds, "consensus"), (odds, "best-price pair")):
         if frame is None or frame.empty:
+            continue
+        # The consensus must be built from the same books the card can bet at.
+        # Averaging a book Cooper cannot use into the fair price would move the
+        # anchor, and so which totals bets fire, on the strength of a price he
+        # can never take. Latent while every fetched book is bettable; not
+        # latent the day a region changes.
+        frame = bettable_only(frame)
+        if frame.empty:
             continue
         rows = frame[(frame.home_team == home_team) & (frame.away_team == away_team) & (frame.market == "total_2_5")]
         over = rows[rows.selection == "over"]["american_odds"].map(_implied)

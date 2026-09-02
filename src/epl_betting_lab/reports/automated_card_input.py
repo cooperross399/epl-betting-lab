@@ -51,7 +51,7 @@ from epl_betting_lab.market_eligibility import (
     EligibilityReport,
     evaluate_market_eligibility,
 )
-from epl_betting_lab.books import BETTABLE_BOOKS, is_bettable, unknown_books
+from epl_betting_lab.books import BETTABLE_BOOKS, bettable_only, is_bettable, unknown_books
 from epl_betting_lab.reports.pick_display import format_market_list
 from epl_betting_lab.selected_slate import (
     filter_to_selected_window,
@@ -423,8 +423,12 @@ def save_automated_card_input(
             )
     if not blockers:
         try:
-            odds = pd.read_csv(staging_odds, dtype=str).fillna("")
+            staged = pd.read_csv(staging_odds, dtype=str).fillna("")
             fixtures = pd.read_csv(staging_fixtures, dtype=str).fillna("")
+            # Filter before eligibility, not only at pricing. Coverage judged on
+            # every book and prices taken from a subset lets the report certify
+            # a market eligible at 10 of 10 while the card quietly prices fewer.
+            odds = bettable_only(staged)
         except (OSError, UnicodeError, pd.errors.EmptyDataError, pd.errors.ParserError) as exc:
             blockers.append(f"Staging evidence could not be read: {type(exc).__name__}.")
 
@@ -469,6 +473,11 @@ def save_automated_card_input(
     # dates, so the card follows the calendar instead of expiring with it.
     window_label = frame_window_label(fixtures)
 
+    # What the bettable-book filter removed, counted from the pre-filter frame.
+    # Silence here would be the same fault the filter exists to prevent.
+    excluded_books = unknown_books(staged["book"].tolist()) if "book" in staged.columns else []
+    rows_excluded = int(len(staged) - len(odds))
+
     eligibility = evaluate_market_eligibility(
         odds,
         fixtures,
@@ -507,6 +516,10 @@ def save_automated_card_input(
         "generated_at": generated_at.isoformat(timespec="seconds"),
         "status": status,
         "window_label": window_label,
+        "books": {
+            "rows_excluded_as_unbettable": rows_excluded,
+            "books_the_card_will_not_price_at": excluded_books,
+        },
         "fixtures_in_window": eligibility.fixtures_in_window,
         "row_count": int(len(frame)),
         "card_input_path": display_path,

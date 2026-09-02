@@ -154,12 +154,12 @@ def test_run_create_current_odds_template_creates_file_without_overwrite(tmp_pat
         lambda: pd.DataFrame([{"date": "2026-08-21", "home_team": "Arsenal", "away_team": "Coventry"}]),
     )
 
-    paths = run_create_current_odds_template(odds_path, book="ExampleBook")
+    paths = run_create_current_odds_template(odds_path, book="FanDuel")
 
     assert paths["csv"] == odds_path
     assert odds_path.exists()
     original = odds_path.read_text(encoding="utf-8")
-    assert "ExampleBook" in original
+    assert "FanDuel" in original
 
     with pytest.raises(FileExistsError):
         run_create_current_odds_template(odds_path)
@@ -210,7 +210,7 @@ def test_run_current_odds_import_preview_does_not_edit_current_odds(tmp_path) ->
         "market": "1x2",
         "selection": "home",
         "american_odds": "+120",
-        "book": "ExampleBook",
+        "book": "FanDuel",
     }
     pd.DataFrame([row]).to_csv(import_path, index=False)
     pd.DataFrame([{**row, "american_odds": "+110", "custom_column": "keep"}]).to_csv(odds_path, index=False)
@@ -252,7 +252,7 @@ def test_run_odds_export_conversion_preview_never_writes_import_file(tmp_path, m
             "bet_type": "1x2",
             "pick": "home",
             "odds": "+120",
-            "sportsbook": "ExampleBook",
+            "sportsbook": "FanDuel",
         }
     ]).to_csv(source_path, index=False)
 
@@ -311,7 +311,7 @@ def test_run_odds_export_profile_diagnostic_is_read_only(tmp_path) -> None:
             "bet_type": "1x2",
             "pick": "home",
             "odds": "+120",
-            "sportsbook": "ExampleBook",
+            "sportsbook": "FanDuel",
         }
     ]).to_csv(source_path, index=False)
 
@@ -354,7 +354,7 @@ def test_run_odds_export_profile_suggestion_is_read_only(tmp_path) -> None:
             "bet_type": "1x2",
             "pick": "home",
             "odds": "+120",
-            "sportsbook": "ExampleBook",
+            "sportsbook": "FanDuel",
         }
     ]).to_csv(source_path, index=False)
     profiles_path.write_text('{"profiles":{"keep":{}}}\n', encoding="utf-8")
@@ -403,7 +403,7 @@ def test_run_odds_export_profile_suggestion_validation_is_read_only(tmp_path) ->
             "bet_type": "1x2",
             "pick": "home",
             "odds": "+120",
-            "sportsbook": "ExampleBook",
+            "sportsbook": "FanDuel",
         }
     ]).to_csv(source_path, index=False)
     profiles_path.write_text('{"profiles":{"keep":{}}}\n', encoding="utf-8")
@@ -534,7 +534,7 @@ def test_run_installed_odds_profile_verification_is_read_only(tmp_path) -> None:
             "bet_type": "1x2",
             "pick": "home",
             "odds": "+120",
-            "sportsbook": "ExampleBook",
+            "sportsbook": "FanDuel",
         }
     ]).to_csv(source_path, index=False)
 
@@ -862,7 +862,7 @@ def test_thursday_best_bets_stops_on_serious_validation_issues(tmp_path, monkeyp
             "market": "shots",
             "selection": "over",
             "american_odds": "+120",
-            "book": "ExampleBook",
+            "book": "FanDuel",
         }
     ]).to_csv(odds_path, index=False)
     monkeypatch.setattr(

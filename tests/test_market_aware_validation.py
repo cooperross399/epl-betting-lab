@@ -41,7 +41,7 @@ def _odds_csv(tmp_path: Path, markets, *, skip_totals_for=()) -> Path:
                         "selection": selection,
                         "american_odds": "-110",
                         "closing_american_odds": "",
-                        "book": "BookA",
+                        "book": "FanDuel",
                         "notes": "",
                     }
                 )
@@ -104,7 +104,7 @@ def test_excluded_market_rows_are_not_judged(tmp_path: Path) -> None:
                     "market": "1x2",
                     "selection": selection,
                     "american_odds": "-110",
-                    "book": "BookA",
+                    "book": "FanDuel",
                 }
             )
         # A blank totals price would normally be a serious error.
@@ -116,7 +116,7 @@ def test_excluded_market_rows_are_not_judged(tmp_path: Path) -> None:
                 "market": "total_2_5",
                 "selection": "over",
                 "american_odds": "",
-                "book": "BookA",
+                "book": "FanDuel",
             }
         )
     path = tmp_path / "odds.csv"

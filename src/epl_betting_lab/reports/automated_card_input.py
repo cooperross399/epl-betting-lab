@@ -51,6 +51,7 @@ from epl_betting_lab.market_eligibility import (
     EligibilityReport,
     evaluate_market_eligibility,
 )
+from epl_betting_lab.books import BETTABLE_BOOKS, is_bettable, unknown_books
 from epl_betting_lab.reports.pick_display import format_market_list
 from epl_betting_lab.selected_slate import (
     filter_to_selected_window,
@@ -121,10 +122,18 @@ def _best_quote(rows: pd.DataFrame) -> pd.Series | None:
 
     "Best" = lowest implied probability, i.e. the most favourable price the
     bettor could actually have taken. No averaging, no synthesis.
+
+    Only bookmakers on `books.BETTABLE_BOOKS` are considered. The `eu` region
+    is fetched for Pinnacle, which is the sharp reference and is not available
+    to a US customer — and this function is the one place that would otherwise
+    hand its price to the card as a recommendation. A price that cannot be
+    taken is worse than no price, because on the card it looks like the others.
     """
     best_row: pd.Series | None = None
     best_probability: float | None = None
     for _, row in rows.iterrows():
+        if not is_bettable(row.get("book")):
+            continue
         american = _american_value(row.get("american_odds"))
         if american is None:
             continue
@@ -224,6 +233,7 @@ def build_automated_card_input(
     selected = window_odds[market_key.isin(eligible)]
 
     records: list[dict[str, object]] = []
+    unusable: set[str] = set()
     grouped = selected.groupby(
         [
             selected["date"].astype(str).str.strip(),
@@ -237,8 +247,15 @@ def build_automated_card_input(
     for (match_date, home, away, market, selection), rows in grouped:
         best = _best_quote(rows)
         if best is None:
-            # Every quote for this selection was unusable. Leave it out rather
-            # than substituting anything.
+            # Every quote for this selection was unusable, or none of them came
+            # from a book Cooper can bet at. Leave it out rather than
+            # substituting anything — but say so, per book. A selection priced
+            # only at books the card will not use is money left on the table if
+            # the book is real and simply unlisted, and this project's recurring
+            # failure is exactly the thing that is skipped without a trace.
+            unusable.update(
+                _clean(book) for book in rows["book"].tolist() if _clean(book)
+            )
             continue
         records.append(
             {
@@ -251,13 +268,32 @@ def build_automated_card_input(
                 "closing_american_odds": _clean(best.get("closing_american_odds")),
                 "book": _clean(best.get("book")),
                 "notes": (
-                    f"Provider-derived best price of {len(rows)} quote(s); "
-                    "no odds were invented."
+                    f"Provider-derived best price of "
+                    f"{int(rows['book'].map(is_bettable).sum())} bettable quote(s) "
+                    f"of {len(rows)}; no odds were invented."
                 ),
             }
         )
 
     frame = pd.DataFrame(records, columns=CARD_INPUT_COLUMNS)
+    unlisted = unknown_books(selected["book"].tolist()) if "book" in selected.columns else []
+    if unlisted:
+        notes.append(
+            "Bookmakers the provider returned that the card will not price at: "
+            + ", ".join(unlisted)
+            + ". Listed here rather than dropped silently — if one of these is a "
+            "book Cooper can use, add it to books.BETTABLE_BOOKS and the card "
+            "will start taking its prices."
+        )
+    if unusable:
+        dropped = sorted(unusable - set(BETTABLE_BOOKS))
+        if dropped:
+            notes.append(
+                f"{len(dropped)} bookmaker(s) priced selections that produced no "
+                "card row because no bettable book quoted them: "
+                + ", ".join(dropped)
+                + "."
+            )
     notes.append(
         f"Included markets: {format_market_list(sorted(eligible))}. Excluded: "
         f"{format_market_list(eligibility.excluded_markets)}."

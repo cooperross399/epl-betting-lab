@@ -187,6 +187,19 @@ Use the repo, the reports, and GitHub.
   tests plus six `@needs_dataset` checks that never run in CI. Good calibration
   is a precondition and cannot license a stake; a bad number there would be a
   reason to stake less, never a licence to fit the model until it moves.
+- **Each pick carries a "bet down to" price, and the card shows it instead of
+  the tier.** `_bet_down_to` in `reports/thursday_best_bets.py`: the price at
+  which the edge falls to that market's own bar, so the line can drift that far
+  and the bet still stands. It is NOT the fair price — fair is break-even, and
+  taking a bet there is paying the vig for a coin flip. The tier column was
+  dropped from the table because every bet is the same size, so it printed the
+  same letter on every row.
+- **The card may only price a bet at a book on `books.BETTABLE_BOOKS`.**
+  `_best_quote` skips every other bookmaker. A price that cannot be taken is
+  worse than no price, because on the card it looks like the ones that can.
+  Bookmakers the provider returns that are not on the list are NAMED in the
+  card input report rather than dropped quietly — if one is a book Cooper can
+  use, adding it is a decision about where he holds money, not a heuristic.
 - **Every bet on the card is the same size: 0.1 units.**
   `PROFIT_BACKTESTABLE_MARKETS` is `{1x2, total_2_5}` — the only two
   Football-Data ships odds for — and `1x2` is off the card while the anchored

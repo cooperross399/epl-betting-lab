@@ -64,7 +64,7 @@ def test_current_odds_validation_separates_errors_and_warnings(tmp_path) -> None
             "market": "total_2_5",
             "selection": "under",
             "american_odds": "abc",
-            "book": "ExampleBook",
+            "book": "FanDuel",
         },
         {
             "date": "2026-08-23",
@@ -73,7 +73,7 @@ def test_current_odds_validation_separates_errors_and_warnings(tmp_path) -> None
             "market": "shots",
             "selection": "over",
             "american_odds": "",
-            "book": "ExampleBook",
+            "book": "FanDuel",
         },
     ]).to_csv(odds_path, index=False)
 
@@ -101,7 +101,7 @@ def test_save_current_odds_validation_writes_csv_and_markdown(tmp_path) -> None:
             "market": "btts",
             "selection": "yes",
             "american_odds": "+120",
-            "book": "ExampleBook",
+            "book": "FanDuel",
         }
     ]).to_csv(odds_path, index=False)
 
@@ -125,7 +125,7 @@ def test_validation_report_and_thursday_card_show_serious_warning() -> None:
             "market": "shots",
             "selection": "over",
             "american_odds": "+120",
-            "book": "ExampleBook",
+            "book": "FanDuel",
             "details": "Supported markets are 1x2, total_2_5, and btts.",
         }
     ])

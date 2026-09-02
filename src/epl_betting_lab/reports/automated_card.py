@@ -88,6 +88,7 @@ PICK_FIELDS = (
     "raw_edge",
     "fair_american",
     "american_odds",
+    "bet_down_to_american",
     "suggested_units",
     "book",
     "notes",
@@ -616,8 +617,13 @@ def render_automated_card(summary: Mapping[str, Any]) -> str:
 
     def _rows_table(rows: Sequence[Mapping[str, Any]]) -> list[str]:
         lines = _one_size_note(rows) + [
-            "| Match | Market | Selection | Tier | Model prob | Edge | Price | Book |",
-            "|:------|:-------|:----------|:-----|:-----------|:-----|:------|:-----|",
+            # "Bet down to" replaces the tier column. Every bet is the same
+            # size, so the tier was the same letter on every row and told the
+            # reader nothing; the note above the table says so. The price a bet
+            # stops being a bet at is the number worth having, because by the
+            # time a card is read the line has usually moved.
+            "| Match | Market | Selection | Model prob | Edge | Price | Bet down to | Book |",
+            "|:------|:-------|:----------|:-----------|:-----|:------|:------------|:-----|",
         ]
         for row in rows:
             prob = row.get("calibrated_model_prob")
@@ -625,10 +631,10 @@ def render_automated_card(summary: Mapping[str, Any]) -> str:
             lines.append(
                 f"| {_clean(row.get('home_team'))} v {_clean(row.get('away_team'))} "
                 f"| `{_clean(row.get('market'))}` | {_clean(row.get('selection'))} "
-                f"| {_clean(row.get('confidence_tier')) or '-'} "
                 f"| {f'{float(prob):.1%}' if isinstance(prob, (int, float)) else '-'} "
                 f"| {f'{float(edge):+.1%}' if isinstance(edge, (int, float)) else '-'} "
                 f"| {format_american_odds(row.get('american_odds'), missing='-')} "
+                f"| {format_american_odds(row.get('bet_down_to_american'), missing='-')} "
                 f"| {_clean(row.get('book')) or '-'} |"
             )
         lines.append("")

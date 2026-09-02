@@ -164,15 +164,15 @@ def test_unit_suggestions_reuse_the_pipeline_stake() -> None:
     """Staking comes from the existing pipeline, not a second model here."""
     picks = [
         {"home_team": "A", "away_team": "B", "market": "1x2", "selection": "home",
-         "confidence_tier": "A", "suggested_units": 1.0, "book": "BookA"},
+         "confidence_tier": "A", "suggested_units": 1.0, "book": "FanDuel"},
         {"home_team": "C", "away_team": "D", "market": "btts", "selection": "yes",
-         "confidence_tier": "B", "suggested_units": 0.75, "book": "BookB"},
+         "confidence_tier": "B", "suggested_units": 0.75, "book": "DraftKings"},
     ]
 
     suggestions = _unit_suggestions(picks)
 
     assert [item["suggested_units"] for item in suggestions] == [1.0, 0.75]
-    assert [item["book"] for item in suggestions] == ["BookA", "BookB"]
+    assert [item["book"] for item in suggestions] == ["FanDuel", "DraftKings"]
     assert all("no second staking model" in item["basis"] for item in suggestions)
 
 
@@ -354,7 +354,7 @@ def _pick_row(home: str, away: str, *, section: str = "Best bets") -> dict:
         "fair_american": -122,
         "american_odds": -110,
         "suggested_units": 1.0,
-        "book": "BookA",
+        "book": "FanDuel",
         "notes": "",
     }
 

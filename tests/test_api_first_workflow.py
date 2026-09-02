@@ -39,7 +39,7 @@ def _fixtures(rows) -> pd.DataFrame:
     return pd.DataFrame(rows, columns=["date", "home_team", "away_team"])
 
 
-def _odds(rows, markets=("1x2", "total_2_5"), books=("BookA",)) -> pd.DataFrame:
+def _odds(rows, markets=("1x2", "total_2_5"), books=("FanDuel",)) -> pd.DataFrame:
     selections = {
         "1x2": ("home", "draw", "away"),
         "total_2_5": ("over", "under"),
@@ -226,8 +226,8 @@ def test_card_input_includes_btts_once_every_fixture_is_covered() -> None:
 
 
 def test_card_input_picks_best_real_quote_and_never_synthesises() -> None:
-    odds = _odds(WINDOW_FIXTURES[:1], markets=("1x2",), books=("BookA", "BookB"))
-    odds.loc[odds["book"] == "BookB", "american_odds"] = "+150"
+    odds = _odds(WINDOW_FIXTURES[:1], markets=("1x2",), books=("FanDuel", "DraftKings"))
+    odds.loc[odds["book"] == "DraftKings", "american_odds"] = "+150"
     fixtures = _fixtures(WINDOW_FIXTURES[:1])
     report = _evaluate(odds, fixtures)
 
@@ -235,7 +235,7 @@ def test_card_input_picks_best_real_quote_and_never_synthesises() -> None:
 
     # +150 beats -110, and the winning row keeps its real book attribution.
     assert set(frame["american_odds"]) == {"+150"} or "150" in set(frame["american_odds"])
-    assert set(frame["book"]) == {"BookB"}
+    assert set(frame["book"]) == {"DraftKings"}
 
 
 def test_card_input_is_empty_when_no_market_is_eligible() -> None:

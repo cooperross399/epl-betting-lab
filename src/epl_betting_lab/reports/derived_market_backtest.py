@@ -44,6 +44,10 @@ from epl_betting_lab.strategies.count_markets import (
     evaluate_count_market,
     fit_count_models,
 )
+from epl_betting_lab.reports.thursday_best_bets import (
+    MAX_BEST_BETS_DEFAULT,
+    _ranking_components,
+)
 from epl_betting_lab.strategies.derived_result import (
     evaluate_double_chance,
     evaluate_draw_no_bet,
@@ -66,6 +70,17 @@ MIN_TRAINING_MATCHES = 380
 #: denominator at zero profit. Dropping pushes removed 33 of 115 draw-no-bet
 #: selections and reported +7.1% for a rule that returned +5.1%.
 PUSH = "push"
+
+
+#: The card markets this report is supposed to cover. Named here so a market
+#: that produced nothing is visibly absent rather than invisibly absent.
+EXPECTED_MARKETS = (
+    "btts",
+    "corners_total_9_5",
+    "corners_total_10_5",
+    "double_chance",
+    "draw_no_bet",
+)
 
 
 @dataclass
@@ -316,6 +331,14 @@ def _corner_bets(odds: pd.DataFrame, matches: pd.DataFrame) -> list[dict[str, ob
         f"corners_total_{str(line).replace('.', '_')}" for line in subset["line"]
     ]
 
+    if not {"HC", "AC"}.issubset(matches.columns):
+        raise ValueError(
+            "Corner prices were bought but the matches frame has no HC/AC "
+            "columns, so `fit_count_models` would return no corner model and "
+            "every corner date would be skipped in silence. The report would "
+            "then blame a missing model for a missing column."
+        )
+
     rows: list[dict[str, object]] = []
     for match_date, day_odds in subset.groupby("date", sort=True):
         train = matches[matches["date"] < match_date]
@@ -413,7 +436,12 @@ def build_backtest(odds: pd.DataFrame, matches: pd.DataFrame) -> BacktestResult:
         prices, played
     )
     if not candidates:
-        result.notes.append("No fixture had enough prior matches to fit a model.")
+        result.notes.append(
+            "No selection could be graded. Possible causes, none of them "
+            "checked here: no fixture had enough prior matches, no provider "
+            "market key matched, or every selection failed to map to a card "
+            "selection. Naming one of them would be a guess."
+        )
         return result
 
     scored: list[dict[str, object]] = []
@@ -467,10 +495,55 @@ def build_backtest(odds: pd.DataFrame, matches: pd.DataFrame) -> BacktestResult:
     # The card bets a row only when its calibrated status says so. Reading the
     # status is what makes this the card's rule rather than a rule of mine.
     if "status" in frame.columns:
-        result.bets = frame[frame["status"].astype(str).str.upper() == "BETTABLE"].copy()
+        bettable = frame[frame["status"].astype(str).str.upper() == "BETTABLE"].copy()
     else:
-        result.bets = frame.copy()
+        bettable = frame.copy()
+    result.bets = _cap_to_a_card(bettable, result)
     return result
+
+
+def _cap_to_a_card(bettable: pd.DataFrame, result: BacktestResult) -> pd.DataFrame:
+    """Keep only the bets that would have fitted on a card.
+
+    The card publishes at most `MAX_BEST_BETS_DEFAULT` best bets per run,
+    ranked by `ranking_score` then `calibrated_edge`. Counting every BETTABLE
+    row instead measured a population the card would never have bet: the
+    BETTABLE rows ran to a median of ten a week and a maximum of twenty-four,
+    and exceeded the cap in twenty-four weeks out of thirty-six.
+
+    The real card is tighter still, because `total_2_5` rows compete for the
+    same slots and are not in this backtest at all. So this is an upper bound
+    on what the card would have bet, and it is said out loud rather than left
+    for a reader to discover.
+    """
+    if bettable.empty:
+        return bettable
+    ranked = bettable.copy()
+    ranked["ranking_score"] = [
+        _ranking_components(row, {})[0] for _, row in ranked.iterrows()
+    ]
+    if "calibrated_edge" not in ranked.columns:
+        ranked["calibrated_edge"] = ranked.get("edge", 0.0)
+    # One card per fixture round; the round is the week the match falls in.
+    ranked["_round"] = pd.to_datetime(ranked["date"]).dt.to_period("W")
+    capped = (
+        ranked.sort_values(
+            ["ranking_score", "calibrated_edge"], ascending=False
+        )
+        .groupby("_round", sort=False, group_keys=False)
+        .head(MAX_BEST_BETS_DEFAULT)
+        .drop(columns=["_round"])
+    )
+    dropped = len(ranked) - len(capped)
+    if dropped:
+        result.notes.append(
+            f"{dropped} BETTABLE selection(s) ranked below the card's "
+            f"{MAX_BEST_BETS_DEFAULT}-per-round limit and could never have "
+            "appeared on a card, so they are not counted as bets. The real "
+            "card is tighter again: `total_2_5` competes for the same slots "
+            "and is not in this backtest."
+        )
+    return capped
 
 
 def bootstrap_interval(
@@ -532,9 +605,10 @@ def render(result: BacktestResult, summary: pd.DataFrame) -> str:
     lines = [
         "# Derived market backtest",
         "",
-        "The first time corners, BTTS, draw-no-bet and double chance have been "
-        "judged against prices that were really offered, at books that can "
-        "really be bet.",
+        "Corners, BTTS, draw-no-bet and double chance judged against prices "
+        "that were really offered, at books that can really be bet. Which of "
+        "them this particular run actually covered is in the Coverage table "
+        "at the bottom — read that before the ROI column.",
         "",
         "One snapshot per fixture at a fixed lead before kick-off, so there is "
         "**no closing line here and no CLV** — only profit, which is the weaker "
@@ -557,6 +631,31 @@ def render(result: BacktestResult, summary: pd.DataFrame) -> str:
             f"Scored candidates: {len(result.scored)}. "
             f"Bets the card rule would have taken: {len(result.bets)}."
         )
+
+    # A market absent from the table above could have been priced and passed,
+    # or never priced at all. Nothing distinguished those, while the opening
+    # line asserted all four had been judged - so deleting every BTTS row from
+    # the input produced a confident table that simply did not mention BTTS.
+    lines.extend(["", "## Coverage", "", "| market | scored | bets |", "|---|---:|---:|"])
+    scored_counts = (
+        result.scored["market"].value_counts().to_dict()
+        if not result.scored.empty
+        else {}
+    )
+    bet_counts = (
+        result.bets["market"].value_counts().to_dict()
+        if not result.bets.empty
+        else {}
+    )
+    for market in EXPECTED_MARKETS:
+        scored_n = int(scored_counts.get(market, 0))
+        bets_n = int(bet_counts.get(market, 0))
+        note = "" if scored_n else "  ← never priced or never graded"
+        lines.append(f"| {market} | {scored_n} | {bets_n}{note} |")
+    unexpected = sorted(set(scored_counts) - set(EXPECTED_MARKETS))
+    if unexpected:
+        lines.append("")
+        lines.append(f"Also scored, unexpectedly: {', '.join(unexpected)}.")
     if result.notes:
         lines.extend(["", "## What was dropped, and why", ""])
         lines.extend(f"- {note}" for note in result.notes)

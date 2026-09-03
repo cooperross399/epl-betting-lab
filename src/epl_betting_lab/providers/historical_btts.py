@@ -148,6 +148,21 @@ def _request_with_retries(
     return None
 
 
+def _payload_of(response: Any) -> Any | None:
+    """The decoded body, or None if it will not decode.
+
+    A gateway can answer 200 with an HTML interstitial. `response.json()` then
+    raises straight out of the harvest, and because rows are written once at
+    the end, a run that had already bought 1,399 fixtures loses all of them
+    and the credits with them - the exact failure the retry loop was added to
+    prevent, arriving through a door it does not cover.
+    """
+    try:
+        return response.json()
+    except Exception:  # noqa: BLE001 - any decode failure is a failed request
+        return None
+
+
 def _slate_snapshot(
     *,
     api_key: str,
@@ -171,7 +186,9 @@ def _slate_snapshot(
     )
     if response is None or int(getattr(response, "status_code", 0) or 0) != 200:
         return None
-    payload = response.json()
+    payload = _payload_of(response)
+    if payload is None:
+        return None
     data = payload.get("data") if isinstance(payload, Mapping) else payload
     return [event for event in (data or []) if isinstance(event, Mapping)]
 
@@ -213,7 +230,9 @@ def _event_prices(
         # never earn that record, or a rate-limit burst writes a season of
         # false negatives that no later run will ever re-buy.
         return None
-    payload = response.json()
+    payload = _payload_of(response)
+    if payload is None:
+        return None
     data = payload.get("data") if isinstance(payload, Mapping) else payload
     if isinstance(data, list):
         data = data[0] if data else {}

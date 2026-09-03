@@ -260,12 +260,20 @@ def main() -> int:
     # nothing, which is the failure this project keeps producing.
     unmapped = [d for d in days if d.strftime("%Y-%m-%d") not in fixture_cache]
     snapshot_cost = len(unmapped) * HISTORICAL_CREDITS_PER_REQUEST
-    if args.credit_limit <= snapshot_cost:
+    # A ceiling has to cover the snapshots AND one fixture's markets, or the
+    # run passes the check and still buys nothing: five unmapped days, four
+    # markets and a ceiling of 80 cleared a snapshot cost of 50 and then spent
+    # all of it on snapshots. Clearing the guard must mean at least one price.
+    market_list = [m.strip() for m in args.markets.split(",") if m.strip()]
+    floor = snapshot_cost + HISTORICAL_CREDITS_PER_REQUEST * len(market_list)
+    if args.credit_limit < floor:
         print(
-            f"BLOCKED: {len(unmapped)} day(s) still need a slate snapshot, "
-            f"which costs {snapshot_cost} credits before any price is bought. "
-            f"The ceiling is {args.credit_limit}. Raise it above "
-            f"{snapshot_cost}, or narrow the date range."
+            f"BLOCKED: {len(unmapped)} day(s) still need a slate snapshot "
+            f"({snapshot_cost} credits) and one fixture across "
+            f"{len(market_list)} market(s) costs "
+            f"{HISTORICAL_CREDITS_PER_REQUEST * len(market_list)} more. "
+            f"The ceiling is {args.credit_limit}, so this run could not buy a "
+            f"single price. Raise it to at least {floor}, or narrow the range."
         )
         return 2
     print(f"EPL Betting Lab - Historical BTTS harvest")
@@ -274,9 +282,13 @@ def main() -> int:
     print(f"Sampling {args.hours_before}h before each fixture's own kick-off.")
     print(f"Markets: {args.markets}")
     if already:
+        # Distinct pairs, not CSV rows. One pair produces a row per book per
+        # selection, so counting rows reported 36,903 for a file holding
+        # 1,520 - a progress number the operator uses to decide whether a
+        # range still needs buying, wrong by a factor of twenty-four.
         print(
-            f"Already hold {len(already)} fixture/market pair(s) "
-            f"({len(known_misses)} of them known to have no price); "
+            f"Already hold {len(set(already))} fixture/market pair(s) "
+            f"({len(set(known_misses))} of them known to have no price); "
             "they will not be re-bought."
         )
 

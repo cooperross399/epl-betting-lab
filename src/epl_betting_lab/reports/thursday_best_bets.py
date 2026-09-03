@@ -362,9 +362,15 @@ def _section(status: object) -> str:
     return "Passes / notable avoids"
 
 
+#: How many best bets one card publishes. Named so the backtest can measure
+#: the same limit the card applies; as an inline default the two would drift
+#: apart silently, and the backtest counted every BETTABLE row for a while.
+MAX_BEST_BETS_DEFAULT = 8
+
+
 def build_thursday_best_bets(
     candidates: pd.DataFrame,
-    max_best_bets: int = 8,
+    max_best_bets: int = MAX_BEST_BETS_DEFAULT,
     max_passes: int = 12,
     market_reliability: dict[str, float] | None = None,
 ) -> pd.DataFrame:

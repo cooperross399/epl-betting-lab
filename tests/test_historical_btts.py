@@ -426,6 +426,39 @@ class TestHarvest:
         assert result.events_seen == 0
         assert result.errors
 
+    def test_a_200_with_a_non_json_body_does_not_kill_the_run(
+        self, monkeypatch
+    ) -> None:
+        """A gateway can answer 200 with an HTML interstitial.
+
+        `response.json()` then raised straight out of the harvest, and because
+        rows are written once at the end, a run that had already bought 1,399
+        fixtures lost all of them and the credits with them - the exact
+        failure the retry loop was added to prevent, through a door it did
+        not cover.
+        """
+        monkeypatch.setattr(historical_btts, "_sleep", lambda _seconds: None)
+
+        class _Html:
+            status_code = 200
+
+            def json(self):
+                raise ValueError("Expecting value: line 1 column 1 (char 0)")
+
+        def gateway(url, **kwargs):
+            if "/events/" in url:
+                return _Html()
+            return _Response({"data": [_event()]})
+
+        result = harvest_btts_history(
+            DAY, api_key="k", budget=HarvestBudget(limit=1000),
+            markets=["btts"], requester=gateway,
+        )
+
+        assert result.rows == []
+        assert result.misses == [], "an undecodable body is not an absent price"
+        assert result.errors
+
     def test_an_unreadable_kick_off_is_reported_not_guessed(self) -> None:
         broken = dict(_event())
         broken["commence_time"] = "not a time"

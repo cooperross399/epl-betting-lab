@@ -13,8 +13,11 @@ import pandas as pd
 import pytest
 
 from epl_betting_lab.reports.derived_market_backtest import (
+    PUSH,
+    _require_xg,
     _selection_for,
     _settle,
+    _settle_corner,
     american_to_profit,
     bootstrap_interval,
     build_backtest,
@@ -64,14 +67,46 @@ class TestSettlement:
         assert _settle("btts", "no", self._match(2, 0)) is True
 
     def test_a_drawn_draw_no_bet_is_a_push_not_a_loss(self):
-        """A returned stake is neither a win nor a loss; counting it as either
-        moves the ROI."""
-        assert _settle("draw_no_bet", "home", self._match(1, 1)) is None
+        """A returned stake is neither a win nor a loss - but it IS a bet.
+
+        Dropping pushes removed 33 of 115 draw-no-bet selections from the
+        denominator and reported +7.1% for a rule that returned +5.1%.
+        """
+        assert _settle("draw_no_bet", "home", self._match(1, 1)) is PUSH
+
+    def test_a_corner_total_landing_on_the_line_is_a_push(self):
+        row = pd.Series({"selection": "over", "line": 9.5})
+        assert _settle_corner(row, pd.Series({"HC": 5, "AC": 5})) is True
+        row = pd.Series({"selection": "over", "line": 10.0})
+        assert _settle_corner(row, pd.Series({"HC": 5, "AC": 5})) is PUSH
+
+    def test_a_match_with_no_corner_counts_is_unsettleable_not_a_push(self):
+        """Conflating the two hid both: a push belongs in the denominator, an
+        unsettleable row has to be counted and reported as dropped."""
+        row = pd.Series({"selection": "over", "line": 9.5})
+        assert _settle_corner(row, pd.Series({"HC": None, "AC": None})) is None
 
     def test_double_chance_covers_two_of_three_results(self):
         assert _settle("double_chance", "home_or_draw", self._match(0, 0)) is True
         assert _settle("double_chance", "home_or_draw", self._match(0, 1)) is False
         assert _settle("double_chance", "home_or_away", self._match(0, 0)) is False
+
+
+class TestTheModelMeasuredIsTheModelBet:
+    def test_a_frame_without_xg_is_refused(self):
+        """BTTS_RATINGS asks for a 70/30 xG blend and PoissonGoalsModel
+        silently serves pure goals when the columns are absent, so passing
+        load_matches() measured a model the card does not bet - BTTS read
+        -1.5% where the real rule returned -10.6%."""
+        goals_only = pd.DataFrame({"home_goals": [1], "away_goals": [0]})
+        with pytest.raises(ValueError, match="xG blend"):
+            _require_xg(goals_only)
+
+    def test_a_frame_with_xg_is_accepted(self):
+        with_xg = pd.DataFrame(
+            {"home_goals": [1], "away_goals": [0], "home_xg": [1.2], "away_xg": [0.7]}
+        )
+        _require_xg(with_xg)  # does not raise
 
 
 class TestOnlyTakeablePrices:

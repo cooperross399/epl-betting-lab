@@ -13,7 +13,7 @@ from pathlib import Path
 import pandas as pd
 
 from epl_betting_lab.config import OUTPUTS_DIR, PROCESSED_DIR
-from epl_betting_lab.data.loaders import load_matches
+from epl_betting_lab.data.loaders import load_matches_with_xg
 from epl_betting_lab.reports.derived_market_backtest import (
     build_backtest,
     render,
@@ -35,7 +35,11 @@ def main() -> int:
         print("Run the Harvest Historical BTTS workflow first.")
         return 2
 
-    result = build_backtest(pd.read_csv(odds_path), load_matches())
+    # xG, not plain goals. BTTS_RATINGS asks for a 70/30 xG blend and
+    # PoissonGoalsModel silently serves pure goals when the columns are
+    # absent, so passing load_matches() measured a model the card does not
+    # bet: BTTS read -1.5% instead of the -10.6% the real rule returned.
+    result = build_backtest(pd.read_csv(odds_path), load_matches_with_xg())
     summary = summarize(result)
     report = render(result, summary)
 

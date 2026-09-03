@@ -62,6 +62,11 @@ CORNER_LINES = (9.5, 10.5)
 #: Below this many prior matches the ratings are noise, not a model.
 MIN_TRAINING_MATCHES = 380
 
+#: A bet that was placed and returned the stake. It is a bet: it belongs in the
+#: denominator at zero profit. Dropping pushes removed 33 of 115 draw-no-bet
+#: selections and reported +7.1% for a rule that returned +5.1%.
+PUSH = "push"
+
 
 @dataclass
 class BacktestResult:
@@ -177,7 +182,7 @@ def _settle(market: str, selection: str, row: pd.Series) -> bool | None:
         return both if selection == "yes" else not both
     if market == "draw_no_bet":
         if home_goals == away_goals:
-            return None  # push: stake returned, not a win and not a loss
+            return PUSH  # stake returned: a bet, at zero profit
         winner = "home" if home_goals > away_goals else "away"
         return selection == winner
     if market == "double_chance":
@@ -355,19 +360,44 @@ def _corner_bets(odds: pd.DataFrame, matches: pd.DataFrame) -> list[dict[str, ob
     return rows
 
 
-def _settle_corner(row: pd.Series, match: pd.Series) -> bool | None:
+def _settle_corner(row: pd.Series, match: pd.Series) -> bool | str | None:
+    """None means the match cannot be settled at all; PUSH means it landed on
+    the line. Conflating the two hid both."""
     if pd.isna(match.get("HC")) or pd.isna(match.get("AC")):
         return None
     total = float(match["HC"]) + float(match["AC"])
     line = float(row["line"])
     if total == line:
-        return None
+        return PUSH
     return total > line if row["selection"] == "over" else total < line
+
+
+def _require_xg(matches: pd.DataFrame) -> None:
+    """Refuse to measure BTTS on a model the card does not bet.
+
+    `BTTS_RATINGS` asks for a 70/30 xG blend, and `PoissonGoalsModel` quietly
+    serves pure goals when `home_xg`/`away_xg` are missing. Passing
+    `load_matches()` therefore measured a different model and said so nowhere:
+    BTTS reported -1.5% where the rule the card actually bets returned -10.6%.
+    A docstring promising "what is measured is what is bet" has to be enforced,
+    not asserted.
+    """
+    if matches.empty:
+        return
+    missing = [c for c in ("home_xg", "away_xg") if c not in matches.columns]
+    if missing:
+        raise ValueError(
+            "The matches frame has no "
+            f"{' or '.join(missing)}, so BTTS would be fitted on goals rather "
+            "than the xG blend the live card bets. Load it with "
+            "`load_matches_with_xg()`."
+        )
 
 
 def build_backtest(odds: pd.DataFrame, matches: pd.DataFrame) -> BacktestResult:
     """Score every card-rule bet these prices would have produced."""
     result = BacktestResult()
+    _require_xg(matches)
     prices, notes = load_bettable_prices(odds)
     result.notes.extend(notes)
     if prices.empty:
@@ -388,6 +418,7 @@ def build_backtest(odds: pd.DataFrame, matches: pd.DataFrame) -> BacktestResult:
 
     scored: list[dict[str, object]] = []
     unjoined = 0
+    unsettleable = 0
     for row in candidates:
         index = (row["date"], row["home_team"], row["away_team"])
         if index not in lookup.index:
@@ -401,9 +432,23 @@ def build_backtest(odds: pd.DataFrame, matches: pd.DataFrame) -> BacktestResult:
         else:
             won = _settle(str(row["market"]), str(row["selection"]), match)
         if won is None:
-            continue  # push or unsettleable; a stake returned is not a result
-        scored.append({**row, "won": bool(won)})
+            unsettleable += 1
+            continue
+        scored.append(
+            {
+                **row,
+                "won": False if won is PUSH else bool(won),
+                "push": won is PUSH,
+            }
+        )
 
+    if unsettleable:
+        result.notes.append(
+            f"{unsettleable} selection(s) could not be settled at all (no "
+            "corner counts on the result row) and were dropped. Counted here "
+            "because an uncounted drop is indistinguishable from a bet that "
+            "was never placed."
+        )
     if unjoined:
         result.notes.append(
             f"{unjoined} priced selection(s) had no matching result and were "
@@ -415,8 +460,8 @@ def build_backtest(odds: pd.DataFrame, matches: pd.DataFrame) -> BacktestResult:
 
     frame = pd.DataFrame(scored)
     frame["profit"] = [
-        american_to_profit(float(a), bool(w))
-        for a, w in zip(frame["american_odds"], frame["won"])
+        0.0 if bool(p) else american_to_profit(float(a), bool(w))
+        for a, w, p in zip(frame["american_odds"], frame["won"], frame["push"])
     ]
     result.scored = frame
     # The card bets a row only when its calibrated status says so. Reading the
@@ -470,6 +515,7 @@ def summarize(result: BacktestResult) -> pd.DataFrame:
             {
                 "market": market,
                 "bets": len(group),
+                "pushes": int(group["push"].sum()),
                 "win_rate": round(float(group["won"].mean()) * 100, 1),
                 "units": round(float(group["profit"].sum()), 2),
                 "roi_pct": round(float(group["profit"].mean()) * 100, 2),
@@ -494,6 +540,12 @@ def render(result: BacktestResult, summary: pd.DataFrame) -> str:
         "**no closing line here and no CLV** — only profit, which is the weaker "
         "instrument. Read the interval, not the point estimate: an interval "
         "that includes zero has not demonstrated an edge, whatever the ROI says.",
+        "",
+        "`pushes` are bets that returned the stake — a drawn draw-no-bet, a "
+        "corner total landing on the line. They are bets, so they sit in the "
+        "denominator at zero profit; dropping them once removed 33 of 115 "
+        "draw-no-bet selections and reported +7.1% for a rule that returned "
+        "+5.1%. `win_rate` is therefore over all bets, pushes included.",
         "",
     ]
     if summary.empty:

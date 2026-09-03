@@ -17,6 +17,7 @@ from pathlib import Path
 from epl_betting_lab.config import PROCESSED_DIR
 from epl_betting_lab.providers.env_file import load_provider_env
 from epl_betting_lab.providers.historical_btts import (
+    HISTORICAL_CREDITS_PER_REQUEST,
     HarvestBudget,
     harvest_btts_history,
     holding_key,
@@ -26,6 +27,8 @@ from epl_betting_lab.providers.historical_btts import (
 API_KEY_ENV = "EPL_ODDS_API_KEY"
 DEFAULT_OUTPUT = "historical_market_odds.csv"
 MISSES_SUFFIX = "_misses.csv"
+FIXTURES_SUFFIX = "_fixtures.csv"
+FIXTURE_FIELDS = ["day", "id", "commence_time", "home_team", "away_team"]
 FIELDS = [
     "sampled_at",
     "commence_time",
@@ -83,6 +86,49 @@ def _read_existing(
             away = str(row.get("away_team", "")).strip().casefold()
             already.append(holding_key(f"{day}|{home}|{away}", market))
     return already, legacy_rows, needs_migration
+
+
+def _read_fixture_cache(path: Path) -> dict[str, list[dict[str, str]]]:
+    """Days already mapped to their fixtures, so no slate is bought twice.
+
+    Slates were re-bought on every run. A season is 283 calendar days at ten
+    credits each, so 2,830 credits went on snapshots before a single price was
+    bought - and re-running the same --start to resume paid all of it again.
+    """
+    if not path.is_file():
+        return {}
+    cache: dict[str, list[dict[str, str]]] = {}
+    with path.open(encoding="utf-8", newline="") as handle:
+        for row in csv.DictReader(handle):
+            day = str(row.get("day", "")).strip()
+            if not day:
+                continue
+            cache.setdefault(day, []).append(dict(row))
+    return cache
+
+
+def _write_fixture_cache(
+    path: Path, cache: dict[str, list[dict[str, str]]], discovered: list[dict[str, object]]
+) -> int:
+    """Merge what this run learned into the cache and rewrite it."""
+    merged = {day: list(events) for day, events in cache.items()}
+    added = 0
+    for event in discovered:
+        day = str(event.get("day", "")).strip()
+        if not day:
+            continue
+        existing = merged.setdefault(day, [])
+        if any(str(row.get("id", "")) == str(event.get("id", "")) for row in existing):
+            continue
+        existing.append({field: str(event.get(field, "")) for field in FIXTURE_FIELDS})
+        added += 1
+    with path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=FIXTURE_FIELDS)
+        writer.writeheader()
+        for day in sorted(merged):
+            for row in merged[day]:
+                writer.writerow({field: row.get(field, "") for field in FIXTURE_FIELDS})
+    return added
 
 
 def _read_misses(path: Path) -> list[str]:
@@ -205,8 +251,23 @@ def main() -> int:
     misses_path = output_path.with_name(output_path.stem + MISSES_SUFFIX)
     known_misses = _read_misses(misses_path) if args.append else []
     already.extend(known_misses)
+    fixtures_path = output_path.with_name(output_path.stem + FIXTURES_SUFFIX)
+    fixture_cache = _read_fixture_cache(fixtures_path)
 
     days = matchdays_between(_day(args.start), _day(args.end))
+    # Refuse a ceiling that cannot reach a single price. Spending the whole
+    # budget on slate snapshots and buying nothing is a green run that bought
+    # nothing, which is the failure this project keeps producing.
+    unmapped = [d for d in days if d.strftime("%Y-%m-%d") not in fixture_cache]
+    snapshot_cost = len(unmapped) * HISTORICAL_CREDITS_PER_REQUEST
+    if args.credit_limit <= snapshot_cost:
+        print(
+            f"BLOCKED: {len(unmapped)} day(s) still need a slate snapshot, "
+            f"which costs {snapshot_cost} credits before any price is bought. "
+            f"The ceiling is {args.credit_limit}. Raise it above "
+            f"{snapshot_cost}, or narrow the date range."
+        )
+        return 2
     print(f"EPL Betting Lab - Historical BTTS harvest")
     print(f"Range: {args.start} to {args.end} ({len(days)} day(s))")
     print(f"Credit ceiling: {args.credit_limit}")
@@ -226,6 +287,7 @@ def main() -> int:
         hours_before=args.hours_before,
         markets=[m.strip() for m in args.markets.split(",") if m.strip()],
         already_harvested=already,
+        cached_events=fixture_cache,
     )
 
     PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
@@ -242,7 +304,12 @@ def main() -> int:
             "a `player` column."
         )
 
-    print(f"Snapshots: {result.snapshots}")
+    added = _write_fixture_cache(fixtures_path, fixture_cache, result.discovered)
+    print(
+        f"Snapshots: {result.snapshots} bought, "
+        f"{result.snapshots_from_cache} served from cache "
+        f"({added} new fixture(s) cached -> {fixtures_path})"
+    )
     print(f"Fixtures seen: {result.events_seen}; priced: {result.events_with_btts}; "
           f"already had: {result.already_had}")
     print(f"Rows written: {len(result.rows)} -> {output_path}")

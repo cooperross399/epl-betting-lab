@@ -22,9 +22,9 @@ on:
         description: "Last day to sample, YYYY-MM-DD"
         required: true
       credit_limit:
-        description: "Hard ceiling on credits spent. ~110 buys one matchday."
+        description: "Hard ceiling on credits. Slate snapshots cost 10/day for days not yet cached, BEFORE any price; the run refuses a ceiling below that."
         required: true
-        default: "500"
+        default: "15000"
       markets:
         description: "Comma-separated market keys. Each multiplies the credit cost."
         required: false
@@ -95,6 +95,8 @@ jobs:
               > data/processed/historical_market_odds.csv 2>/dev/null || true
             git show refs/odds-history-tip:historical_market_odds_misses.csv \
               > data/processed/historical_market_odds_misses.csv 2>/dev/null || true
+            git show refs/odds-history-tip:historical_market_odds_fixtures.csv \
+              > data/processed/historical_market_odds_fixtures.csv 2>/dev/null || true
             echo "Restored from the odds-history branch."
           fi
           # Fall back to artifacts, which is where every harvest before
@@ -154,6 +156,14 @@ jobs:
             ENTRIES=$(printf '%s\n100644 blob %s\thistorical_market_odds_misses.csv' \
               "$ENTRIES" "$MISSES")
           fi
+          # The fixture cache rides along or every run re-buys the slate
+          # snapshots: 283 days a season, ten credits each, 2,830 credits
+          # before a single price.
+          if [ -s data/processed/historical_market_odds_fixtures.csv ]; then
+            FIXTURES=$(git hash-object -w data/processed/historical_market_odds_fixtures.csv)
+            ENTRIES=$(printf '%s\n100644 blob %s\thistorical_market_odds_fixtures.csv' \
+              "$ENTRIES" "$FIXTURES")
+          fi
           TREE=$(printf '%s\n' "$ENTRIES" | git mktree)
           if [ -n "$PARENT" ] && [ "$(git rev-parse "$PARENT^{tree}")" = "$TREE" ]; then
             echo "Nothing new was bought; not committing."
@@ -180,6 +190,7 @@ jobs:
           path: |
             data/processed/historical_market_odds.csv
             data/processed/historical_market_odds_misses.csv
+            data/processed/historical_market_odds_fixtures.csv
           if-no-files-found: warn
           retention-days: 90
 

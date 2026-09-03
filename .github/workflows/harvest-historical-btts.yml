@@ -22,9 +22,9 @@ on:
         description: "Last day to sample, YYYY-MM-DD"
         required: true
       credit_limit:
-        description: "Hard ceiling on credits spent. ~110 buys one matchday."
+        description: "Hard ceiling on credits. Slate snapshots cost 10/day for days not yet cached, BEFORE any price; the run refuses a ceiling below that."
         required: true
-        default: "500"
+        default: "15000"
       markets:
         description: "Comma-separated market keys. Each multiplies the credit cost."
         required: false
@@ -40,7 +40,10 @@ on:
         default: true
 
 permissions:
-  contents: read
+  # Write, for exactly one ref: the odds-history branch, the same way the
+  # Closing Snapshot workflow owns price-feed. Nothing here pushes anywhere
+  # else, and main only ever changes through a pull request.
+  contents: write
   actions: read
 
 concurrency:
@@ -82,18 +85,36 @@ jobs:
         run: |
           set -u
           mkdir -p data/processed
-          # The newest run holding the file wins, whatever its conclusion:
-          # the artifact uploads even when a later step fails, and a failed
-          # run's purchases are still purchases. Restoring only from green
-          # runs once orphaned a harvest that crashed on its summary line,
-          # which would have re-bought every fixture it had just paid for.
-          for id in $(gh run list --workflow harvest-historical-btts.yml \
-            --limit 10 --json databaseId --jq '.[].databaseId'); do
-            if gh run download "$id" --name historical-btts --dir data/processed 2>/dev/null; then
-              echo "Restored the harvest file from run $id."
-              break
-            fi
-          done
+          # The odds-history branch first: it is permanent. Artifacts expire
+          # after ninety days, and roughly 26,000 credits of purchased prices
+          # living only in one is a countdown to re-buying a season nobody
+          # noticed had gone.
+          REMOTE="https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}"
+          if git fetch "$REMOTE" +refs/heads/odds-history:refs/odds-history-tip 2>/dev/null; then
+            git show refs/odds-history-tip:historical_market_odds.csv \
+              > data/processed/historical_market_odds.csv 2>/dev/null || true
+            git show refs/odds-history-tip:historical_market_odds_misses.csv \
+              > data/processed/historical_market_odds_misses.csv 2>/dev/null || true
+            git show refs/odds-history-tip:historical_market_odds_fixtures.csv \
+              > data/processed/historical_market_odds_fixtures.csv 2>/dev/null || true
+            echo "Restored from the odds-history branch."
+          fi
+          # Fall back to artifacts, which is where every harvest before
+          # 2026-09-02 put its rows. The newest run holding the file wins,
+          # whatever its conclusion: the artifact uploads even when a later
+          # step fails, and a failed run's purchases are still purchases.
+          # Restoring only from green runs once orphaned a harvest that
+          # crashed on its summary line, which would have re-bought every
+          # fixture it had just paid for.
+          if [ ! -s data/processed/historical_market_odds.csv ]; then
+            for id in $(gh run list --workflow harvest-historical-btts.yml \
+              --limit 10 --json databaseId --jq '.[].databaseId'); do
+              if gh run download "$id" --name historical-btts --dir data/processed 2>/dev/null; then
+                echo "Restored the harvest file from run $id."
+                break
+              fi
+            done
+          fi
           wc -l data/processed/historical_market_odds.csv 2>/dev/null \
             || echo "No previous harvest. Starting a new file."
 
@@ -110,6 +131,55 @@ jobs:
             --markets "${{ inputs.markets }}" \
             ${{ inputs.append == true && '--append' || '' }}
 
+      - name: Publish the prices to the odds-history branch
+        # Permanent, unlike an artifact. Same mechanism the Closing Snapshot
+        # workflow uses for price-feed: an orphan commit built with
+        # commit-tree, pushed to one ref, touching nothing else.
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -eu
+          if [ ! -s data/processed/historical_market_odds.csv ]; then
+            echo "Nothing bought; nothing to publish."
+            exit 0
+          fi
+          REMOTE="https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}"
+          PARENT=""
+          if git rev-parse refs/odds-history-tip >/dev/null 2>&1; then
+            PARENT=$(git rev-parse refs/odds-history-tip)
+          fi
+          ODDS=$(git hash-object -w data/processed/historical_market_odds.csv)
+          ENTRIES=$(printf '100644 blob %s\thistorical_market_odds.csv' "$ODDS")
+          if [ -s data/processed/historical_market_odds_misses.csv ]; then
+            MISSES=$(git hash-object -w data/processed/historical_market_odds_misses.csv)
+            ENTRIES=$(printf '%s\n100644 blob %s\thistorical_market_odds_misses.csv' \
+              "$ENTRIES" "$MISSES")
+          fi
+          # The fixture cache rides along or every run re-buys the slate
+          # snapshots: 283 days a season, ten credits each, 2,830 credits
+          # before a single price.
+          if [ -s data/processed/historical_market_odds_fixtures.csv ]; then
+            FIXTURES=$(git hash-object -w data/processed/historical_market_odds_fixtures.csv)
+            ENTRIES=$(printf '%s\n100644 blob %s\thistorical_market_odds_fixtures.csv' \
+              "$ENTRIES" "$FIXTURES")
+          fi
+          TREE=$(printf '%s\n' "$ENTRIES" | git mktree)
+          if [ -n "$PARENT" ] && [ "$(git rev-parse "$PARENT^{tree}")" = "$TREE" ]; then
+            echo "Nothing new was bought; not committing."
+            exit 0
+          fi
+          export GIT_AUTHOR_NAME="Historical Harvest" GIT_AUTHOR_EMAIL="actions@github.com"
+          export GIT_COMMITTER_NAME="Historical Harvest" GIT_COMMITTER_EMAIL="actions@github.com"
+          if [ -n "$PARENT" ]; then
+            COMMIT=$(git commit-tree "$TREE" -p "$PARENT" -m "odds $(date -u +%FT%TZ)")
+          else
+            COMMIT=$(git commit-tree "$TREE" -m "odds $(date -u +%FT%TZ)")
+          fi
+          git push "$REMOTE" "$COMMIT:refs/heads/odds-history"
+          wc -l < data/processed/historical_market_odds.csv \
+            | xargs echo "odds-history rows:"
+
       - name: Upload the prices
         if: always()
         uses: actions/upload-artifact@v4
@@ -120,6 +190,7 @@ jobs:
           path: |
             data/processed/historical_market_odds.csv
             data/processed/historical_market_odds_misses.csv
+            data/processed/historical_market_odds_fixtures.csv
           if-no-files-found: warn
           retention-days: 90
 

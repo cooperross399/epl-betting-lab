@@ -74,6 +74,11 @@ class HarvestResult:
     events_seen: int = 0
     events_with_btts: int = 0
     already_had: int = 0
+    #: Fixtures learned from paid slate snapshots this run, so the next run
+    #: does not pay to learn them again.
+    discovered: list[dict[str, Any]] = field(default_factory=list)
+    #: Slate snapshots that were served from cache instead of bought.
+    snapshots_from_cache: int = 0
     #: Fixture/market pairs paid for that returned no price, so a later run
     #: does not buy the same nothing again.
     misses: list[dict[str, Any]] = field(default_factory=list)
@@ -106,6 +111,12 @@ def _american(price: object) -> float | None:
 REQUEST_ATTEMPTS = 3
 _sleep = time.sleep
 
+#: Statuses worth trying again. The provider's requester is a bare
+#: `requests.get` with no `raise_for_status`, so a 429 or a 502 comes back as a
+#: perfectly ordinary response object and raises nothing — which meant the
+#: retry loop added for dropped connections never saw them at all.
+RETRYABLE_STATUS = frozenset({408, 425, 429, 500, 502, 503, 504})
+
 
 def _request_with_retries(
     request: Requester, url: str, *, params: Mapping[str, Any], timeout: float
@@ -116,14 +127,24 @@ def _request_with_retries(
     because the rows are written only at the end, every credit that run had
     already spent was lost with it. A blip two-thirds of the way through a
     season is not a reason to throw away the season.
+
+    None means "this request did not succeed" and is never to be read as "the
+    provider has nothing here" — see `_event_prices`.
     """
     for attempt in range(REQUEST_ATTEMPTS):
+        last = attempt == REQUEST_ATTEMPTS - 1
         try:
-            return request(url, params=params, timeout=timeout)
+            response = request(url, params=params, timeout=timeout)
         except Exception:  # noqa: BLE001 - any transport failure is retryable
-            if attempt == REQUEST_ATTEMPTS - 1:
+            if last:
                 return None
             _sleep(2.0 * (attempt + 1))
+            continue
+        status = int(getattr(response, "status_code", 0) or 0)
+        if status in RETRYABLE_STATUS and not last:
+            _sleep(2.0 * (attempt + 1))
+            continue
+        return response
     return None
 
 
@@ -135,7 +156,7 @@ def _slate_snapshot(
     root: str,
     sport_key: str,
     timeout_seconds: float,
-) -> list[Mapping[str, Any]]:
+) -> list[Mapping[str, Any]] | None:
     response = _request_with_retries(
         request,
         f"{root}/v4/historical/sports/{sport_key}/odds",
@@ -149,7 +170,7 @@ def _slate_snapshot(
         timeout=timeout_seconds,
     )
     if response is None or int(getattr(response, "status_code", 0) or 0) != 200:
-        return []
+        return None
     payload = response.json()
     data = payload.get("data") if isinstance(payload, Mapping) else payload
     return [event for event in (data or []) if isinstance(event, Mapping)]
@@ -187,7 +208,11 @@ def _event_prices(
         timeout=timeout_seconds,
     )
     if response is None or int(getattr(response, "status_code", 0) or 0) != 200:
-        return {}
+        # NOT an empty dict. `{}` means the provider answered and had no price,
+        # which the caller records as a permanent miss; a failed request must
+        # never earn that record, or a rate-limit burst writes a season of
+        # false negatives that no later run will ever re-buy.
+        return None
     payload = response.json()
     data = payload.get("data") if isinstance(payload, Mapping) else payload
     if isinstance(data, list):
@@ -279,6 +304,7 @@ def harvest_btts_history(
     hours_before: int = 3,
     markets: Sequence[str] = ("btts",),
     already_harvested: Sequence[str] = (),
+    cached_events: Mapping[str, Sequence[Mapping[str, Any]]] | None = None,
     requester: Requester | None = None,
     base_url: str = DEFAULT_API_BASE_URL,
     sport_key: str = "soccer_epl",
@@ -293,7 +319,22 @@ def harvest_btts_history(
     # paid request per fixture, at the right moment, with no duplicates.
     seen: set[str] = set(already_harvested or ())
     fixtures: dict[str, Mapping[str, Any]] = {}
+    cache = {str(day): list(events) for day, events in (cached_events or {}).items()}
     for matchday in matchdays:
+        day_key = matchday.strftime("%Y-%m-%d")
+        # A day already mapped costs nothing. Slates were re-bought on every
+        # run: a season is 283 calendar days at ten credits each, so 2,830
+        # credits went on snapshots before a single price, and re-running the
+        # same --start to resume paid all of it again. At the workflow's own
+        # default ceiling of 500 that bought fifty snapshots, zero prices, and
+        # reported STOPPED EARLY.
+        if day_key in cache:
+            result.snapshots_from_cache += 1
+            for event in cache[day_key]:
+                event_id = str(event.get("id", "")).strip()
+                if event_id and event_id not in fixtures:
+                    fixtures[event_id] = event
+            continue
         if not budget.can_afford():
             result.stopped_early = True
             break
@@ -307,10 +348,26 @@ def harvest_btts_history(
         )
         budget.charge()
         result.snapshots += 1
+        if events is None:
+            result.errors.append(
+                f"{matchday:%Y-%m-%d}: slate request failed; that day's "
+                "fixtures were not learned and may be missing from this run."
+            )
+            continue
         for event in events:
             event_id = str(event.get("id", "")).strip()
             if event_id and event_id not in fixtures:
                 fixtures[event_id] = event
+            if event_id:
+                result.discovered.append(
+                    {
+                        "day": day_key,
+                        "id": event_id,
+                        "commence_time": str(event.get("commence_time", "")),
+                        "home_team": str(event.get("home_team", "")),
+                        "away_team": str(event.get("away_team", "")),
+                    }
+                )
 
     result.events_seen = len(fixtures)
 
@@ -327,6 +384,8 @@ def harvest_btts_history(
             result.errors.append(f"Event {event_id}: unreadable kick-off time.")
             continue
         when = kickoff - timedelta(hours=hours_before)
+        base_home = str(event.get("home_team", ""))
+        base_away = str(event.get("away_team", ""))
         if not budget.can_afford(HISTORICAL_CREDITS_PER_REQUEST * len(wanted)):
             result.stopped_early = True
             break
@@ -341,6 +400,17 @@ def harvest_btts_history(
             timeout_seconds=timeout_seconds,
         )
         budget.charge(HISTORICAL_CREDITS_PER_REQUEST * len(wanted))
+        if prices is None:
+            # Paid for and not delivered. Recording this as "no price at any
+            # book" would write a permanent false negative: the misses ledger
+            # is fed back into `already` on every later --append run, so the
+            # pair would never be bought again. Leave it unheld and say so.
+            result.errors.append(
+                f"{base_home} v {base_away}: request failed for "
+                f"{', '.join(wanted)}; not recorded as a miss, so a later run "
+                "will retry it."
+            )
+            continue
         base = {
             "sampled_at": when.strftime("%Y-%m-%dT%H:%M:%SZ"),
             "commence_time": kickoff.strftime("%Y-%m-%dT%H:%M:%SZ"),

@@ -311,6 +311,121 @@ class TestHarvest:
 
         assert result.rows == []
 
+    def test_a_rate_limited_request_is_not_recorded_as_no_price(
+        self, monkeypatch
+    ) -> None:
+        """The worst bug this harvester has had.
+
+        `_event_prices` returned `{}` for "the provider answered and had no
+        price" AND for "the request failed". The caller wrote the second into
+        the misses ledger, which is fed back into `already` on every later
+        --append run - so one rate-limit burst across a 150-fixture window
+        would spend 1,500 credits, record 150 permanent false negatives, and
+        exit 0. No later run would ever buy them.
+
+        A non-200 raises nothing: the requester is a bare `requests.get`.
+        """
+        monkeypatch.setattr(historical_btts, "_sleep", lambda _seconds: None)
+
+        def rate_limited(url, **kwargs):
+            if "/events/" in url:
+                return _Response({}, status_code=429)
+            return _Response({"data": [_event()]})
+
+        result = harvest_btts_history(
+            DAY, api_key="k", budget=HarvestBudget(limit=1000),
+            markets=["btts"], requester=rate_limited,
+        )
+
+        assert result.misses == [], "a failed request is not an absent price"
+        assert result.rows == []
+        assert result.errors, "and it has to be said out loud"
+
+    def test_a_retryable_status_is_actually_retried(self, monkeypatch) -> None:
+        """The retry loop only caught raised exceptions, so a 429 - which
+        `requests.get` returns rather than raises - was never retried once."""
+        monkeypatch.setattr(historical_btts, "_sleep", lambda _seconds: None)
+        calls = {"n": 0}
+
+        def flaky(url, **kwargs):
+            if "/events/" not in url:
+                return _Response({"data": [_event()]})
+            calls["n"] += 1
+            if calls["n"] == 1:
+                return _Response({}, status_code=429)
+            return _Response(_btts_payload())
+
+        result = harvest_btts_history(
+            DAY, api_key="k", budget=HarvestBudget(limit=1000),
+            markets=["btts"], requester=flaky,
+        )
+
+        assert calls["n"] == 2
+        assert result.rows
+
+    def test_a_genuine_empty_answer_is_still_recorded_as_a_miss(
+        self, monkeypatch
+    ) -> None:
+        """The fix must not stop real misses being remembered, or every run
+        re-buys the same nothing."""
+        monkeypatch.setattr(historical_btts, "_sleep", lambda _seconds: None)
+        result = harvest_btts_history(
+            DAY, api_key="k", budget=HarvestBudget(limit=1000),
+            markets=["btts", "draw_no_bet"],
+            requester=_requester([_event()], _btts_payload()),
+        )
+
+        assert [miss["market"] for miss in result.misses] == ["draw_no_bet"]
+
+    def test_a_cached_day_costs_nothing(self) -> None:
+        """Slates were re-bought on every run: a season is 283 days at ten
+        credits, so 2,830 credits went on snapshots before a single price,
+        and resuming from the same --start paid all of it again."""
+        event = _event()
+        cache = {
+            "2025-08-16": [
+                {
+                    "id": event["id"],
+                    "commence_time": event["commence_time"],
+                    "home_team": event["home_team"],
+                    "away_team": event["away_team"],
+                }
+            ]
+        }
+        result = harvest_btts_history(
+            DAY, api_key="k", budget=HarvestBudget(limit=1000),
+            markets=["btts"],
+            requester=_requester([_event()], _btts_payload()),
+            cached_events=cache,
+        )
+
+        assert result.snapshots == 0
+        assert result.snapshots_from_cache == 1
+        # Ten for the one market, and nothing for the slate.
+        assert result.credits_spent == 10
+        assert result.rows
+
+    def test_what_a_paid_snapshot_learned_is_handed_back_for_caching(self) -> None:
+        result = harvest_btts_history(
+            DAY, api_key="k", budget=HarvestBudget(limit=1000),
+            markets=["btts"],
+            requester=_requester([_event()], _btts_payload()),
+        )
+
+        assert [row["day"] for row in result.discovered] == ["2025-08-16"]
+        assert result.discovered[0]["home_team"] == "Arsenal"
+
+    def test_a_failed_slate_is_not_an_empty_matchday(self, monkeypatch) -> None:
+        """Returning [] would silently mean 'no fixtures that day'."""
+        monkeypatch.setattr(historical_btts, "_sleep", lambda _seconds: None)
+        result = harvest_btts_history(
+            DAY, api_key="k", budget=HarvestBudget(limit=1000),
+            requester=lambda url, **kwargs: _Response({}, status_code=503),
+        )
+
+        assert result.events_seen == 0
+        assert result.errors
+
     def test_an_unreadable_kick_off_is_reported_not_guessed(self) -> None:
         broken = dict(_event())
         broken["commence_time"] = "not a time"

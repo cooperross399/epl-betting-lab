@@ -13,7 +13,9 @@ import pandas as pd
 import pytest
 
 from epl_betting_lab.reports.derived_market_backtest import (
+    EXPECTED_MARKETS,
     PUSH,
+    _corner_bets,
     _require_xg,
     _selection_for,
     _settle,
@@ -22,6 +24,7 @@ from epl_betting_lab.reports.derived_market_backtest import (
     bootstrap_interval,
     build_backtest,
     load_bettable_prices,
+    render,
     summarize,
 )
 
@@ -203,3 +206,71 @@ class TestTheReportRefusesToInventBets:
         assert result.bets.empty
         assert result.notes
         assert summarize(result).empty
+
+
+class TestTheReportCannotHideAMarket:
+    def test_every_expected_market_appears_in_coverage_even_at_zero(self):
+        """A market absent from the ROI table could have been priced and
+        passed, or never priced at all. Deleting every BTTS row from the input
+        once produced a confident table that simply did not mention BTTS."""
+        result = build_backtest(
+            pd.DataFrame(
+                columns=[
+                    "commence_time", "home_team", "away_team", "market",
+                    "book", "player", "selection", "american",
+                ]
+            ),
+            pd.DataFrame(),
+        )
+        report = render(result, summarize(result))
+
+        assert "## Coverage" in report
+        for market in EXPECTED_MARKETS:
+            assert market in report, market
+        assert "never priced or never graded" in report
+
+    def test_it_does_not_name_a_cause_it_never_checked(self):
+        """The empty-run note used to assert 'no fixture had enough prior
+        matches', which was flatly false when the real cause was a missing
+        column."""
+        result = build_backtest(
+            pd.DataFrame(
+                columns=[
+                    "commence_time", "home_team", "away_team", "market",
+                    "book", "player", "selection", "american",
+                ]
+            ),
+            pd.DataFrame(),
+        )
+        assert not any(
+            "enough prior matches." in note for note in result.notes
+        ), "a guess must not be stated as the cause"
+
+
+class TestCornersCannotVanishSilently:
+    def test_missing_corner_columns_raise_rather_than_skip_every_date(self):
+        """`fit_count_models` returns {} when HC/AC are absent, so every corner
+        date was skipped in silence and the report blamed a missing model for
+        a missing column."""
+        odds = pd.DataFrame(
+            {
+                "date": [pd.Timestamp("2025-08-16")],
+                "home_team": ["Arsenal"],
+                "away_team": ["Chelsea"],
+                "market": ["alternate_totals_corners"],
+                "selection": ["Over@9.5"],
+                "american": [110.0],
+                "book": ["FanDuel"],
+            }
+        )
+        matches = pd.DataFrame(
+            {
+                "date": [pd.Timestamp("2025-01-01")],
+                "home_team": ["Arsenal"],
+                "away_team": ["Chelsea"],
+                "home_goals": [1],
+                "away_goals": [0],
+            }
+        )
+        with pytest.raises(ValueError, match="HC/AC"):
+            _corner_bets(odds, matches)

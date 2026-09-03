@@ -198,11 +198,17 @@ Use the repo, the reports, and GitHub.
   bought from the provider at T-3h, filtered to books Cooper can actually bet,
   run through the card's own `evaluate_*` rules walk-forward:
   `data/outputs/derived_market_backtest.md`,
-  `scripts/run_derived_market_backtest.py`. **394 bets, ROI -1.51%, 95%
-  interval -14.8% to +11.2%.** Per market: `corners_total_9_5` +6.5% over 82,
-  `draw_no_bet` +5.1% over 115 (33 of them pushes), `double_chance` -5.5% over
-  77, `corners_total_10_5` -10.8% over 83, `btts` **-10.6% over 37**. Every
+  `scripts/run_derived_market_backtest.py`. **273 bets, ROI -0.35%, 95%
+  interval -14.7% to +15.6%.** Per market: `draw_no_bet` +8.2% over 68 (18 of
+  them pushes), `corners_total_9_5` +7.6% over 74, `btts` +0.7% over 31,
+  `double_chance` -6.5% over 52, `corners_total_10_5` -18.8% over 48. Every
   interval includes zero.
+  - The count is capped at the card's real limit of
+    `MAX_BEST_BETS_DEFAULT` = 8 per round. Counting every BETTABLE row
+    measured a population the card would never have bet - a median of ten a
+    week, a maximum of twenty-four, over the cap in 24 weeks of 36. Even 273
+    is an upper bound, because `total_2_5` competes for the same slots and is
+    not in this backtest.
   - The half-season read +1.8% and the full season reads -1.51%. That is what
     213 bets buys you, and it is the reason to quote the interval and never
     the point.

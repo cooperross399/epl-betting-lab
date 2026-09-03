@@ -46,8 +46,11 @@ def main() -> int:
     output_path = Path(args.output)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(report, encoding="utf-8")
-    if not result.scored.empty:
-        result.scored.to_csv(output_path.with_suffix(".csv"), index=False)
+    # Always write the sidecar, even when empty. Guarding it left the previous
+    # run's scored bets sitting beside a fresh report that said nothing was
+    # produced, so the two artefacts described different runs.
+    scored_path = output_path.with_suffix(".csv")
+    result.scored.to_csv(scored_path, index=False)
     print(report)
     print(f"Wrote {output_path}")
     return 0

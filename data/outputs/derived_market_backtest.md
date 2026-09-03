@@ -1,6 +1,6 @@
 # Derived market backtest
 
-The first time corners, BTTS, draw-no-bet and double chance have been judged against prices that were really offered, at books that can really be bet.
+Corners, BTTS, draw-no-bet and double chance judged against prices that were really offered, at books that can really be bet. Which of them this particular run actually covered is in the Coverage table at the bottom — read that before the ROI column.
 
 One snapshot per fixture at a fixed lead before kick-off, so there is **no closing line here and no CLV** — only profit, which is the weaker instrument. Read the interval, not the point estimate: an interval that includes zero has not demonstrated an edge, whatever the ROI says.
 
@@ -8,15 +8,26 @@ One snapshot per fixture at a fixed lead before kick-off, so there is **no closi
 
 | market             |   bets |   pushes |   win_rate |   units |   roi_pct |   ci_low_pct |   ci_high_pct |   p_above_zero |
 |:-------------------|-------:|---------:|-----------:|--------:|----------:|-------------:|--------------:|---------------:|
-| btts               |     37 |        0 |       45.9 |   -3.92 |    -10.61 |        -42.9 |          19.1 |           0.24 |
-| corners_total_10_5 |     83 |        0 |       41   |   -8.97 |    -10.81 |        -34.8 |          13.1 |           0.2  |
-| corners_total_9_5  |     82 |        0 |       58.5 |    5.3  |      6.46 |        -13.2 |          25.9 |           0.76 |
-| double_chance      |     77 |        0 |       42.9 |   -4.22 |     -5.48 |        -31.3 |          21.1 |           0.34 |
-| draw_no_bet        |    115 |       33 |       26.1 |    5.86 |      5.09 |        -17.6 |          30.9 |           0.65 |
-| ALL                |    394 |       33 |       41.1 |   -5.96 |     -1.51 |        -14.8 |          11.2 |           0.39 |
+| btts               |     31 |        0 |       51.6 |    0.21 |      0.66 |        -34.2 |          34.7 |           0.5  |
+| corners_total_10_5 |     48 |        0 |       37.5 |   -9.03 |    -18.82 |        -47   |          11.7 |           0.11 |
+| corners_total_9_5  |     74 |        0 |       59.5 |    5.62 |      7.6  |        -12.5 |          28.6 |           0.77 |
+| double_chance      |     52 |        0 |       44.2 |   -3.36 |     -6.47 |        -34.8 |          23.4 |           0.33 |
+| draw_no_bet        |     68 |       18 |       27.9 |    5.6  |      8.24 |        -22.4 |          43.9 |           0.67 |
+| ALL                |    273 |       18 |       44   |   -0.96 |     -0.35 |        -14.7 |          15.6 |           0.47 |
 
-Scored candidates: 4180. Bets the card rule would have taken: 394.
+Scored candidates: 4180. Bets the card rule would have taken: 273.
+
+## Coverage
+
+| market | scored | bets |
+|---|---:|---:|
+| btts | 760 | 31 |
+| corners_total_9_5 | 760 | 74 |
+| corners_total_10_5 | 760 | 48 |
+| double_chance | 1140 | 52 |
+| draw_no_bet | 760 | 68 |
 
 ## What was dropped, and why
 
 - Dropped 29021 row(s) with no book — a cross-book maximum cannot be shown to have been takeable.
+- 121 BETTABLE selection(s) ranked below the card's 8-per-round limit and could never have appeared on a card, so they are not counted as bets. The real card is tighter again: `total_2_5` competes for the same slots and is not in this backtest.

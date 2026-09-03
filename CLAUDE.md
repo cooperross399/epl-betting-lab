@@ -198,13 +198,22 @@ Use the repo, the reports, and GitHub.
   bought from the provider at T-3h, filtered to books Cooper can actually bet,
   run through the card's own `evaluate_*` rules walk-forward:
   `data/outputs/derived_market_backtest.md`,
-  `scripts/run_derived_market_backtest.py`. **370 bets, ROI -0.74%, 95%
-  interval -14.8% to +14.5%.** Per market: `corners_total_9_5` +6.5% over 82,
-  `draw_no_bet` +7.1% over 82, `btts` -1.5% over 46, `double_chance` -5.5% over
-  77, `corners_total_10_5` **-10.8% over 83**. Every interval includes zero.
-  - The half-season read +1.8% and the full season reads -0.74%. That is what
+  `scripts/run_derived_market_backtest.py`. **394 bets, ROI -1.51%, 95%
+  interval -14.8% to +11.2%.** Per market: `corners_total_9_5` +6.5% over 82,
+  `draw_no_bet` +5.1% over 115 (33 of them pushes), `double_chance` -5.5% over
+  77, `corners_total_10_5` -10.8% over 83, `btts` **-10.6% over 37**. Every
+  interval includes zero.
+  - The half-season read +1.8% and the full season reads -1.51%. That is what
     213 bets buys you, and it is the reason to quote the interval and never
     the point.
+  - Two numbers here were wrong for a few hours on 2026-09-02 and an
+    adversarial review caught both. The runner passed `load_matches()`, and
+    `PoissonGoalsModel` silently serves pure goals when `home_xg` is absent,
+    so BTTS was measured on a model the card does not bet and read -1.5%
+    instead of -10.6%; `build_backtest` now refuses a frame without xG rather
+    than degrading quietly. And drawn draw-no-bets were dropped instead of
+    counted as pushes, removing 33 of 115 bets from the denominator and
+    reporting +7.1% for a rule that returned +5.1%. **A push is a bet.**
   - Two corner lines of the same market with the same model disagree by 17
     points of ROI. Treat that as the noise floor of a 370-bet sample, not as a
     reason to bet 9.5 and fade 10.5.

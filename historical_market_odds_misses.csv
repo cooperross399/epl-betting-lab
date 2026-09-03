@@ -1,0 +1,33 @@
+sampled_at,commence_time,home_team,away_team,market
+2025-09-20T11:00:00Z,2025-09-20T14:00:00Z,Bournemouth,Newcastle United,btts
+2025-09-20T11:00:00Z,2025-09-20T14:00:00Z,Bournemouth,Newcastle United,draw_no_bet
+2025-09-20T11:00:00Z,2025-09-20T14:00:00Z,Bournemouth,Newcastle United,double_chance
+2025-09-20T11:00:00Z,2025-09-20T14:00:00Z,Bournemouth,Newcastle United,alternate_totals_corners
+2026-04-11T11:00:00Z,2026-04-11T14:00:00Z,Nottingham Forest,Aston Villa,btts
+2026-04-11T11:00:00Z,2026-04-11T14:00:00Z,Nottingham Forest,Aston Villa,draw_no_bet
+2026-04-11T11:00:00Z,2026-04-11T14:00:00Z,Nottingham Forest,Aston Villa,double_chance
+2026-04-11T11:00:00Z,2026-04-11T14:00:00Z,Nottingham Forest,Aston Villa,alternate_totals_corners
+2026-04-11T11:00:00Z,2026-04-11T14:00:00Z,Crystal Palace,Newcastle United,btts
+2026-04-11T11:00:00Z,2026-04-11T14:00:00Z,Crystal Palace,Newcastle United,draw_no_bet
+2026-04-11T11:00:00Z,2026-04-11T14:00:00Z,Crystal Palace,Newcastle United,double_chance
+2026-04-11T11:00:00Z,2026-04-11T14:00:00Z,Crystal Palace,Newcastle United,alternate_totals_corners
+2026-04-18T11:00:00Z,2026-04-18T14:00:00Z,Manchester City,Arsenal,btts
+2026-04-18T11:00:00Z,2026-04-18T14:00:00Z,Manchester City,Arsenal,draw_no_bet
+2026-04-18T11:00:00Z,2026-04-18T14:00:00Z,Manchester City,Arsenal,double_chance
+2026-04-18T11:00:00Z,2026-04-18T14:00:00Z,Manchester City,Arsenal,alternate_totals_corners
+2026-04-18T11:00:00Z,2026-04-18T14:00:00Z,Aston Villa,Sunderland,btts
+2026-04-18T11:00:00Z,2026-04-18T14:00:00Z,Aston Villa,Sunderland,draw_no_bet
+2026-04-18T11:00:00Z,2026-04-18T14:00:00Z,Aston Villa,Sunderland,double_chance
+2026-04-18T11:00:00Z,2026-04-18T14:00:00Z,Aston Villa,Sunderland,alternate_totals_corners
+2026-04-18T11:00:00Z,2026-04-18T14:00:00Z,Nottingham Forest,Burnley,btts
+2026-04-18T11:00:00Z,2026-04-18T14:00:00Z,Nottingham Forest,Burnley,draw_no_bet
+2026-04-18T11:00:00Z,2026-04-18T14:00:00Z,Nottingham Forest,Burnley,double_chance
+2026-04-18T11:00:00Z,2026-04-18T14:00:00Z,Nottingham Forest,Burnley,alternate_totals_corners
+2026-05-02T11:00:00Z,2026-05-02T14:00:00Z,Bournemouth,Crystal Palace,btts
+2026-05-02T11:00:00Z,2026-05-02T14:00:00Z,Bournemouth,Crystal Palace,draw_no_bet
+2026-05-02T11:00:00Z,2026-05-02T14:00:00Z,Bournemouth,Crystal Palace,double_chance
+2026-05-02T11:00:00Z,2026-05-02T14:00:00Z,Bournemouth,Crystal Palace,alternate_totals_corners
+2026-05-17T08:30:00Z,2026-05-17T11:30:00Z,Aston Villa,Liverpool,btts
+2026-05-17T08:30:00Z,2026-05-17T11:30:00Z,Aston Villa,Liverpool,draw_no_bet
+2026-05-17T08:30:00Z,2026-05-17T11:30:00Z,Aston Villa,Liverpool,double_chance
+2026-05-17T08:30:00Z,2026-05-17T11:30:00Z,Aston Villa,Liverpool,alternate_totals_corners

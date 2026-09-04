@@ -286,15 +286,26 @@ class TestDatesSurviveTheRoundTrip:
 
         assert _read_dates(legacy).iloc[0].year == 2021
 
-    def test_seasons_land_in_the_years_they_name(self) -> None:
-        """The check that would have caught this at any point."""
-        from epl_betting_lab.config import PROCESSED_DIR
+    def test_seasons_land_in_the_years_they_name(self, monkeypatch, tmp_path: Path) -> None:
+        """The check that would have caught this at any point.
+
+        Built end to end in `tmp_path` — fetched (stubbed), combined, written
+        by `fetch_and_build_dataset`, read back by `load_matches` — rather
+        than read from the derived dataset, which a clean checkout does not
+        have. It used to skip on that, and a skip that cannot resolve in CI is
+        a test that does not exist.
+        """
         from epl_betting_lab.data.loaders import load_matches
 
-        if not (PROCESSED_DIR / "epl_historical_matches.csv").is_file():
-            pytest.skip("needs the match dataset")
+        monkeypatch.setattr(fetcher, "RAW_DIR", tmp_path / "raw")
+        monkeypatch.setattr(fetcher, "PROCESSED_DIR", tmp_path / "processed")
+        _stub_fetch(monkeypatch, unpublished=set())
+        fetcher.fetch_and_build_dataset(["2526"], force=True)
 
-        matches = load_matches()
+        matches = load_matches(tmp_path / "processed" / "epl_historical_matches.csv")
+
+        assert set(matches["season"].astype(str)) == {"2526"}
+        assert pd.api.types.is_datetime64_any_dtype(matches["date"])
         for season, group in matches.groupby("season"):
             expected_start = 2000 + int(str(season)[:2])
             assert group["date"].min().year == expected_start, season

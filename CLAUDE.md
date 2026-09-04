@@ -230,7 +230,8 @@ Use the repo, the reports, and GitHub.
   gaps of -0.0, 0.0 and 0.0 points overall (`scripts/run_count_calibration.py`,
   `data/outputs/count_calibration.md`), which matters because corners are 23 of
   the first 42 best bets and their whole prior validation was synthetic unit
-  tests plus six `@needs_dataset` checks that never run in CI. Good calibration
+  tests plus six `@needs_dataset` checks that never ran in CI (since replaced
+  by checks on a generated league that run everywhere). Good calibration
   is a precondition and cannot license a stake; a bad number there would be a
   reason to stake less, never a licence to fit the model until it moves.
 - **Each pick carries a "bet down to" price, and the card shows it instead of
@@ -355,7 +356,7 @@ streamlit run app.py
 PYTHONPATH=src python -m pytest -q
 
 # Compile smoke check after structural changes
-python -m compileall -q src scripts app.py
+python -m compileall -q -f src scripts app.py
 ```
 
 ## Hard rules (never break these)
@@ -373,7 +374,17 @@ python -m compileall -q src scripts app.py
 - **Never add `total_2_5` or alternate totals** as official markets without a
   separate reviewed approval.
 - **Never print, write, compare, or commit an API key.** The secrets guard in
-  `tests/test_no_secrets_committed.py` enforces this; do not weaken it.
+  `tests/test_no_secrets_committed.py` enforces this; do not weaken it. It
+  scans every tracked path, symlink target and body — no file is exempt for
+  what it is called — and it lists the shapes it still cannot see in
+  `test_the_gaps_this_guard_still_has_are_the_ones_written_down`.
+- **Never delete, rename, narrow around, or run around a hard-rule guard.**
+  `tests/test_the_guards_exist.py` names them (the secrets guard, the
+  sibling-import guard, `tests/test_workflows.py`, and itself) and
+  `tests/conftest.py` ends any run in which one of them contributed no test.
+  `tests/test_workflows.py` parses and executes `.github/workflows/tests.yml`
+  so the `Full test suite` check that branch protection requires cannot be
+  renamed, emptied, narrowed, disabled or made to swallow a failure.
 - **Never weaken the Provider Policy PR Gate** or sign a human acceptance
   receipt on Cooper's behalf.
 - **Never merge with failing CI**, and never force-merge or force-push.

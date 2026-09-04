@@ -495,11 +495,14 @@ The PR workflow runs this archive step automatically and publishes the latest
 archive report and dated package as artifacts. The Odds Import page shows the
 latest archive verdict, archive receipt ID, gate receipt ID, and PR/run context.
 
-To make this a required check, a repository administrator must open GitHub
-**Settings > Rules > Rulesets** (or **Branches > Branch protection rules**),
-require status checks for `main`, and select **Provider Policy PR Gate**. The
-project deliberately does not modify repository rules through an API: branch
-protection is an administrative decision. A passing check validates preserved
+**Provider Policy PR Gate** and **Full test suite** are both required status
+checks on `main` (read from the repository's branch protection on 2026-09-04),
+so nothing merges with either red. A repository administrator sets that under
+GitHub **Settings > Rules > Rulesets** (or **Branches > Branch protection
+rules**); the project deliberately does not modify repository rules through an
+API, because branch protection is an administrative decision. What the suite
+itself enforces is that the `Full test suite` job cannot be quietly hollowed
+out: `tests/test_workflows.py` parses and executes `.github/workflows/tests.yml`. A passing check validates preserved
 evidence only; merging the separate policy PR is still what changes the
 allowlist, and cron remains disabled.
 

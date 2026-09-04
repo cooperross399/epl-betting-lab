@@ -310,7 +310,9 @@ class TestNoSourceInterpolatesAMarketList:
         # `{something['..._markets']}` with no formatting call around it.
         bare = re.compile(r"\{[A-Za-z_]+\[['\"][a-z_]*markets['\"]\][^}]*\}")
         offenders: list[str] = []
-        for path in sorted((PROJECT_ROOT / "src").rglob("*.py")):
+        paths = sorted((PROJECT_ROOT / "src").rglob("*.py"))
+        assert len(paths) > 10, "a scan over nothing is green for the wrong reason"
+        for path in paths:
             for number, line in enumerate(
                 path.read_text(encoding="utf-8").splitlines(), start=1
             ):

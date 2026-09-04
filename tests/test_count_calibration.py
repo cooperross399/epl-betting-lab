@@ -3,9 +3,10 @@
 Corners are 23 of the first 42 best bets — the majority of the card — and no
 source retains their historical prices, so no corner rule can ever be
 profit-backtested. Their whole validation was synthetic unit tests plus six
-real-data checks that are `@needs_dataset`-skipped and never run in CI, and
-those check the fit against league averages rather than whether a stated
-probability happens that often.
+real-data checks that were `@needs_dataset`-skipped and never ran in CI (they
+now run everywhere, on a generated league whose truth is known —
+tests/test_poisson_counts.py), and those check the fit against league
+averages rather than whether a stated probability happens that often.
 """
 
 from __future__ import annotations

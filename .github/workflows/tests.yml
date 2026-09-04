@@ -4,6 +4,21 @@ name: Tests
 # "CI is green" mean the suite passed, rather than only that the policy gate
 # passed. It uses no secrets and fetches no odds, so it is safe to run on any
 # branch.
+#
+# The job below is named `Full test suite`, and that name is a contract:
+# branch protection on `main` requires that status context (alongside
+# `Provider Policy PR Gate`), so nothing merges with it red. That sentence is
+# true here because this repository is public and protected; it is not a
+# property of the YAML. What IS enforced from inside the suite is that the
+# contract cannot be hollowed out: tests/test_workflows.py parses this file
+# with yaml.safe_load and fails if the job is renamed, if no step invokes
+# pytest as a command, if the invocation carries a narrowing flag or a
+# positional path, if PYTEST_ADDOPTS is bound anywhere, if the job or a step
+# carries an `if:` other than always(), continue-on-error or a shell override,
+# if pull_request is filtered, or if the secrets context is touched — and it
+# EXECUTES every run block here under stubs and requires that a failing
+# command fails the block. Do not read "the suite is green" as a property of
+# this comment; read it as a property of those tests.
 on:
   pull_request:
   push:
@@ -42,8 +57,20 @@ jobs:
         # A module can be syntactically invalid on the CI Python and still pass
         # the suite if no test imports it. weekly_card.py sat broken on 3.11 for
         # over a month that way, failing only the scheduled job nobody reads.
+        #
+        # The existence checks are the gate, not decoration: `compileall`
+        # prints "Can't list 'src'" and EXITS 0 when a path names nothing
+        # (run on 3.12, not recalled), so a rename or a bad checkout would turn
+        # this step into a green report about no files. `-f` forces
+        # recompilation so a stale __pycache__ cannot mask a source that no
+        # longer parses. tests/test_workflows.py runs this block in a sandbox
+        # with each path absent in turn and requires a non-zero exit.
         run: |
-          python -m compileall -q src scripts app.py
+          for d in src scripts; do
+            [ -d "$d" ] || { echo "::error::$d is missing; the compile step would have passed on nothing."; exit 1; }
+          done
+          [ -f app.py ] || { echo "::error::app.py is missing; the compile step would have passed on nothing."; exit 1; }
+          python -m compileall -q -f src scripts app.py
 
       - name: Run the full test suite
         # No credential is provided on purpose: every test must pass without

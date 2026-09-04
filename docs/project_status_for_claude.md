@@ -108,7 +108,7 @@ python scripts/run_bet_ledger.py                   # ledger reports
 python scripts/check_bet_ledger.py                 # ledger health check
 streamlit run app.py                               # dashboard
 PYTHONPATH=src python -m pytest -q                 # tests
-python -m compileall -q src scripts app.py         # compile smoke check
+python -m compileall -q -f src scripts app.py         # compile smoke check
 ```
 
 ## Current priority

@@ -20,6 +20,13 @@ Two things are asserted, because either alone is insufficient:
 
 The second is the one that actually bit. A test that only read source would have
 passed all day.
+
+Two things this guard used to do quietly and no longer does: it skipped any
+module that failed to parse (`except SyntaxError: continue`), so a module
+broken on purpose was a module this guard did not read; and it would have
+reported green over an empty corpus. An unparseable module is now a failure
+that names the file, and the corpus is asserted non-empty. Absence is never a
+pass.
 """
 
 from __future__ import annotations
@@ -37,25 +44,38 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 #: happened to cause this.
 SIBLING_PACKAGES = ("cbb_betting_lab", "football_betting_lab", "ncaaf_betting_lab", "nhl_betting_lab",)
 
+SCANNED_ROOTS = ("src", "scripts", "tests")
 
-def _python_files() -> list[Path]:
+
+def _python_files(project_root: Path = PROJECT_ROOT) -> list[Path]:
     keep: list[Path] = []
-    for root in (PROJECT_ROOT / "src", PROJECT_ROOT / "scripts", PROJECT_ROOT / "tests"):
+    for name in SCANNED_ROOTS:
+        root = project_root / name
         if root.is_dir():
             keep.extend(
-                p for p in root.rglob("*.py")
+                p for p in sorted(root.rglob("*.py"))
                 if ".venv" not in p.parts and p.name != Path(__file__).name
             )
     return keep
 
 
-def test_no_module_imports_a_sibling_lab() -> None:
+def _sibling_imports(paths: list[Path]) -> list[str]:
+    """`file:line: imports name` for every sibling import in `paths`.
+
+    A `SyntaxError` is raised as an `AssertionError` naming the file. It used
+    to be `continue`, which made a module that does not parse a module this
+    guard had not read — and a guard that skips what it cannot read is a
+    guard that can be walked past by breaking the file.
+    """
     offenders: list[str] = []
-    for path in _python_files():
+    for path in paths:
         try:
-            tree = ast.parse(path.read_text(encoding="utf-8"))
-        except SyntaxError:
-            continue
+            tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+        except SyntaxError as exc:
+            raise AssertionError(
+                f"{path} does not parse ({exc.msg}, line {exc.lineno}); this guard "
+                "cannot read it and refuses to report it clean."
+            ) from exc
         for node in ast.walk(tree):
             names: list[str] = []
             if isinstance(node, ast.Import):
@@ -65,11 +85,53 @@ def test_no_module_imports_a_sibling_lab() -> None:
             for name in names:
                 if name.split(".")[0] in SIBLING_PACKAGES:
                     offenders.append(f"{path.name}:{node.lineno}: imports {name}")
+    return offenders
+
+
+def test_the_corpus_is_not_empty() -> None:
+    """A guard with nothing to read reports green."""
+    files = _python_files()
+
+    assert len(files) > 100, len(files)
+    assert any(p.parts[-3:-1] == ("src", "epl_betting_lab") or "epl_betting_lab" in p.parts for p in files)
+    assert any(p.parent.name == "scripts" for p in files)
+    assert any(p.parent.name == "tests" for p in files)
+
+
+def test_no_module_imports_a_sibling_lab() -> None:
+    files = _python_files()
+    assert files, "no Python file found under src/, scripts/ or tests/"
+
+    offenders = _sibling_imports(files)
+
     assert not offenders, (
         "This lab imports a sibling lab. Machinery is shared by PORTING it "
         "here, visibly, never by coupling two repositories:\n  "
         + "\n  ".join(offenders)
     )
+
+
+def test_a_sibling_import_is_a_finding(tmp_path: Path) -> None:
+    """Positive control: the scanner fires on the thing it hunts."""
+    module = tmp_path / "coupled.py"
+    module.write_text(
+        "import nhl_betting_lab\nfrom football_betting_lab.models import x\n",
+        encoding="utf-8",
+    )
+
+    assert _sibling_imports([module]) == [
+        "coupled.py:1: imports nhl_betting_lab",
+        "coupled.py:2: imports football_betting_lab.models",
+    ]
+
+
+def test_a_module_that_does_not_parse_is_a_failure_naming_the_file(tmp_path: Path) -> None:
+    """Not `continue`. Breaking the file was a way past this guard."""
+    broken = tmp_path / "broken.py"
+    broken.write_text("import nhl_betting_lab\ndef (\n", encoding="utf-8")
+
+    with pytest.raises(AssertionError, match="broken.py does not parse"):
+        _sibling_imports([broken])
 
 
 @pytest.mark.parametrize("package", SIBLING_PACKAGES)

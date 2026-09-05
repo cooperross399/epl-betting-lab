@@ -9,16 +9,39 @@ name: Tests
 # branch protection on `main` requires that status context (alongside
 # `Provider Policy PR Gate`), so nothing merges with it red. That sentence is
 # true here because this repository is public and protected; it is not a
-# property of the YAML. What IS enforced from inside the suite is that the
-# contract cannot be hollowed out: tests/test_workflows.py parses this file
-# with yaml.safe_load and fails if the job is renamed, if no step invokes
-# pytest as a command, if the invocation carries a narrowing flag or a
-# positional path, if PYTEST_ADDOPTS is bound anywhere, if the job or a step
-# carries an `if:` other than always(), continue-on-error or a shell override,
-# if pull_request is filtered, or if the secrets context is touched — and it
-# EXECUTES every run block here under stubs and requires that a failing
-# command fails the block. Do not read "the suite is green" as a property of
-# this comment; read it as a property of those tests.
+# property of the YAML.
+#
+# WHAT THE SUITE ITSELF ENFORCES about this file, so the list can be checked
+# rather than believed. tests/test_workflows.py parses it with yaml.safe_load
+# and fails if: the job is renamed or a second job takes the name; no step
+# invokes pytest as a command; the pytest line carries an argument outside the
+# whitelist (`-q`, `-rs`, `-p no:...`) — a whitelist, because `--version` and
+# `-h` exit 0 having run nothing and no blocklist of narrowing flags contains
+# them; PYTEST_ADDOPTS or PYTEST_PLUGINS is bound anywhere, in any spelling;
+# the job carries `needs:` or `strategy:`, or any OTHER job in this file
+# carries an `if:` — a required job skipped by a `needs:` on a job that did
+# not run is reported to branch protection as Success, which is `if: false`
+# reworded; the job or a step carries an `if:` other than always(),
+# continue-on-error, or a shell override; pull_request is filtered; the
+# secrets context is touched; or the suite step does not set PYTHONSAFEPATH.
+# It then EXECUTES every run block here under stubs and requires that a
+# failing command fails the block, and it reads the PYTHONSAFEPATH each
+# command was actually invoked with, because `PYTHONSAFEPATH= python -m
+# pytest` is a prefix assignment that unsays the `env:` above it.
+#
+# The "Refuse a tracked module that would replace the test runner" step below
+# runs BEFORE the suite on purpose. A tracked pytest.py on the working
+# directory or on PYTHONPATH IS the suite, so the suite cannot report it;
+# tests/test_the_guards_exist.py makes the same assertion for the case where
+# the suite does get to run.
+#
+# WHAT IT DOES NOT COVER, so nobody reads more into a green check than is
+# there: branch protection itself lives in repository settings, not in this
+# repository, and a settings change is invisible to every test here; a commit
+# that deletes the guard modules AND tests/conftest.py together is green,
+# because nothing outside the suite vouches for the suite; and a plugin added
+# to requirements.txt runs before the guards are counted. A reviewer is the
+# backstop for all three.
 on:
   pull_request:
   push:
@@ -72,12 +95,36 @@ jobs:
           [ -f app.py ] || { echo "::error::app.py is missing; the compile step would have passed on nothing."; exit 1; }
           python -m compileall -q -f src scripts app.py
 
+      - name: Refuse a tracked module that would replace the test runner
+        # A tracked pytest.py in the working directory or on a PYTHONPATH
+        # entry IS the suite: `python -m pytest` imports it and exits 0 having
+        # run nothing, so no test in the suite can report it — the shadow is
+        # what stops the suite from starting. tests/test_the_guards_exist.py
+        # makes the same assertion; this step is what makes it in time.
+        # PYTHONPATH is bound to the same value the suite step uses, and
+        # tests/test_the_guards_exist.py fails if the two drift apart.
+        env:
+          PYTHONPATH: src
+          PYTHONSAFEPATH: "1"
+        run: |
+          python scripts/refuse_shadow_modules.py
+
       - name: Run the full test suite
         # No credential is provided on purpose: every test must pass without
         # one. A test that needs a live key would make the suite unrunnable on
         # a fork and would risk exposing the key in a log.
         env:
           PYTHONPATH: src
+          # `python -m` puts the working directory ahead of site-packages, so
+          # a tracked root pytest.py shadows the suite entirely: measured on
+          # 8a50474, a two-line pytest.py printed one line and exited 0 with
+          # the check green. PYTHONSAFEPATH drops that entry. PYTHONPATH is
+          # unaffected, and the suite is green under it (2005 passed, 0
+          # skipped, 95.9 s, measured 2026-09-04 with
+          # `PYTHONPATH=src PYTHONSAFEPATH=1 python -m pytest -q`).
+          # tests/test_the_guards_exist.py refuses the tracked shadow names as
+          # well; this is the belt behind that brace.
+          PYTHONSAFEPATH: "1"
         run: |
           python -m pytest -q
 

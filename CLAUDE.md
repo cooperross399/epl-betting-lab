@@ -382,9 +382,21 @@ python -m compileall -q -f src scripts app.py
   `tests/test_the_guards_exist.py` names them (the secrets guard, the
   sibling-import guard, `tests/test_workflows.py`, and itself) and
   `tests/conftest.py` ends any run in which one of them contributed no test.
-  `tests/test_workflows.py` parses and executes `.github/workflows/tests.yml`
-  so the `Full test suite` check that branch protection requires cannot be
-  renamed, emptied, narrowed, disabled or made to swallow a failure.
+  `tests/conftest.py` also ends any run that SKIPPED anything — including a
+  module-level `pytest.skip` or `importorskip`, which arrive as collection
+  reports and never reach a test-report hook — and any run pytest parsed a
+  `-k`, `-m`, `--deselect`, `--ignore` or an `addopts` into while a guard was
+  enforced. The floor is per TEST, not per module: deselecting one guard test
+  is as red as deleting the file.
+  `tests/test_workflows.py` parses and executes `.github/workflows/tests.yml`,
+  and the list of what it refuses is in that module's docstring — a renamed
+  job, `needs:`/`strategy:` on the gate, an `if:` on any other job in the
+  file, a pytest argument outside the whitelist, a missing `PYTHONSAFEPATH`,
+  a bound `PYTEST_ADDOPTS`, a filtered trigger, a secret, a condition, a
+  swallowed failure. What no test here covers: branch protection itself is a
+  repository setting, a commit that deletes the guards and the conftest
+  together is green, and a plugin in `requirements.txt` loads before the
+  guards are counted.
 - **Never weaken the Provider Policy PR Gate** or sign a human acceptance
   receipt on Cooper's behalf.
 - **Never merge with failing CI**, and never force-merge or force-push.

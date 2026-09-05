@@ -26,13 +26,31 @@ declares nothing is a failure, not a quiet pass. Every rule has a synthetic
 case that proves it fires — `test_every_rule_has_a_case_that_proves_it_fires`
 refuses a rule nobody has watched reject anything.
 
+Three of the rules here were added after the first round shipped, because the
+first round left routes open that read as clean YAML:
+
+* `needs:` on the required job. A required job that is SKIPPED because a job
+  it needs was skipped or failed is reported to branch protection as Success
+  — GitHub's troubleshooting documentation says a conditionally-skipped
+  required check is treated as successful, and only a path-filtered one stays
+  pending. Reading `if:` on the gate job caught nothing, because the `if:`
+  was on the OTHER job. `strategy:` is the same shape with one job.
+* the pytest argument list was a BLOCKLIST of narrowing flags. `--version`,
+  `-h` and `--help` are in no blocklist, exit 0 and collect nothing; all
+  three passed every rule here as the suite line. It is a whitelist now.
+* nothing required `PYTHONSAFEPATH`, so a tracked root `pytest.py` was the
+  module `python -m pytest` ran.
+
 What this file does NOT do, stated so it is not assumed: the operational
 workflows (matchday refresh, closing snapshot, harvest, discovery) use
 secrets, `continue-on-error` and `contents: write` on purpose, and their run
 blocks swallow failures they have decided to tolerate. Those workflows get the
 universal rules only — parse, trigger, shell, pinned Python, and the pytest
 rules on any step of theirs that runs the suite. The strict rules and the
-executed rules are for the workflow that carries the required check.
+executed rules are for the workflow that carries the required check. Nothing
+here reads branch protection itself: the requirement that `Full test suite`
+be a required context lives in repository settings, and a change there is
+invisible to every test in this repository.
 
 Ported from the NCAAF lab's linter with this lab's names and workflows; the
 harness is the same mechanism, the rule set is this lab's.
@@ -88,6 +106,24 @@ PYTEST_ADDOPTS = "PYTEST_ADDOPTS"
 #: Neither may be bound anywhere in a workflow, in any casing.
 PYTEST_ENVIRONMENT_NAMES = frozenset({PYTEST_ADDOPTS, "PYTEST_PLUGINS"})
 PYTEST_ADDOPTS_PATTERN = re.compile(r"(?i)\bPYTEST_(?:ADDOPTS|PLUGINS)\b")
+
+#: The ONLY arguments a pytest line may carry, as a whitelist. A blocklist of
+#: narrowing flags proves only that those spellings are absent: `--version`,
+#: `-h` and `--help` are in no blocklist, exit 0, and run no test. Measured on
+#: 8a50474: `python -m pytest --version` as the suite line passed all thirteen
+#: rules. `-p` is admitted here and its VALUE is checked separately — it must
+#: begin `no:`, because `-p <module>` LOADS a plugin.
+PERMITTED_PYTEST_ARGUMENTS = frozenset({"-q", "-rs", "-p"})
+
+#: The environment variable that drops the working directory from `sys.path`.
+#: `python -m pytest` puts cwd ahead of site-packages, so a tracked root
+#: `pytest.py` becomes the module that runs. Required as the string "1".
+SAFE_PATH_VARIABLE = "PYTHONSAFEPATH"
+
+#: The tracked basenames that would shadow the suite or run before it.
+SHADOWING_BASENAMES = frozenset(
+    {"pytest.py", "coverage.py", "sitecustomize.py", "usercustomize.py"}
+)
 
 #: The only `if:` a gate step may carry. `always()` WIDENS when a step runs;
 #: every other expression narrows, and a narrowed gate is a gate that does
@@ -481,6 +517,7 @@ def stub_preamble(
     unmodelled_log: Path,
     marker: Path,
     environment_log: Path,
+    safepath_log: Path,
 ) -> str:
     """One shell function per command word, of known exit status.
 
@@ -520,6 +557,11 @@ def stub_preamble(
             + ' "${PYTEST_ADDOPTS-}" "${PYTEST_PLUGINS-}" >> '
             + _quote(str(environment_log))
         )
+        body.append(
+            "  printf '%s\\t%s\\n' " + _quote(word)
+            + ' "${PYTHONSAFEPATH-<unset>}" >> '
+            + _quote(str(safepath_log))
+        )
         body.append("  printf 'stub:%s\\n' " + _quote(word))
         body.append("  return %d" % status)
         body.append("}")
@@ -538,6 +580,10 @@ class BlockRun(NamedTuple):
     addopts_seen: list[tuple[str, str, str]]
     #: What the block wrote into $GITHUB_ENV — bindings for every later step.
     github_env: str
+    #: (command word, PYTHONSAFEPATH) as that command saw it. "<unset>" when
+    #: the variable was not in the environment at all, which is different from
+    #: the empty string only in the message it produces.
+    safepath_seen: list[tuple[str, str]]
 
 
 def run_block_under_stubs(
@@ -546,6 +592,7 @@ def run_block_under_stubs(
     sandbox: Path,
     *,
     present: tuple[str, ...] = (),
+    environment_extra: dict[str, str] | None = None,
 ) -> BlockRun:
     """Execute one run block with every command replaced by a stub.
 
@@ -575,7 +622,8 @@ def run_block_under_stubs(
     unmodelled_log = sandbox / "unmodelled_commands.txt"
     marker = sandbox / "preamble_completed"
     environment_log = sandbox / "environment_seen.txt"
-    for log in (failure_log, any_failure_log, unmodelled_log, environment_log):
+    safepath_log = sandbox / "safepath_seen.txt"
+    for log in (failure_log, any_failure_log, unmodelled_log, environment_log, safepath_log):
         log.write_text("", encoding="utf-8")
     if marker.exists():
         marker.unlink()
@@ -586,7 +634,8 @@ def run_block_under_stubs(
     unstubbable = [word for word in words if not STUB_SAFE_NAME.match(word)]
     preamble = stub_preamble(
         [word for word in words if STUB_SAFE_NAME.match(word)],
-        failing, failure_log, any_failure_log, unmodelled_log, marker, environment_log,
+        failing, failure_log, any_failure_log, unmodelled_log, marker,
+        environment_log, safepath_log,
     )
     parsed = subprocess.run([HARNESS_SHELL, "-n"], input=preamble, capture_output=True, text=True)
     if parsed.returncode != 0:
@@ -607,6 +656,11 @@ def run_block_under_stubs(
         environment[name] = str(target)
     for name in referenced_variables(block):
         environment.setdefault(name, "__harness__")
+    # The step's own `env:`, applied the way the runner applies it — after
+    # the runner's variables and before the block runs. Without this the
+    # harness would be judging a block that never saw the workflow's env.
+    for name, value in (environment_extra or {}).items():
+        environment[name] = value
 
     completed = subprocess.run(
         [HARNESS_SHELL, "-e", str(script)],
@@ -634,6 +688,10 @@ def run_block_under_stubs(
         any_failure_log.read_text(encoding="utf-8").split(),
         addopts_seen,
         (sandbox / "github_env").read_text(encoding="utf-8"),
+        [
+            ((line.split("\t") + [""])[0], (line.split("\t") + [""])[1])
+            for line in safepath_log.read_text(encoding="utf-8").splitlines()
+        ],
     )
 
 
@@ -827,6 +885,168 @@ def check_no_pytest_step_anywhere_is_narrowed_or_disabled(directory: Path) -> No
                 )
 
 
+def _environment_for(document: Any, job: dict, step: dict) -> dict:
+    """The `env:` a step runs with: workflow, then job, then step."""
+    merged: dict = {}
+    for node in (document, job, step):
+        environment = node.get("env") if isinstance(node, dict) else None
+        if isinstance(environment, dict):
+            merged.update({str(key): value for key, value in environment.items()})
+    return merged
+
+
+def check_every_pytest_line_carries_only_whitelisted_arguments(directory: Path) -> None:
+    """A WHITELIST, because a blocklist proves only that its spellings are absent.
+
+    `--version`, `-h` and `--help` make pytest print and exit 0 without
+    collecting anything, and they appear in no list of narrowing flags. The
+    rule that read a blocklist accepted all three as the suite line (measured
+    on 8a50474). This one accepts `-q`, `-rs` and `-p no:<plugin>` and
+    nothing else, so an argument nobody has thought of yet is rejected by
+    default rather than admitted by default.
+    """
+    for path, document in _documents(directory):
+        for job_name, job in jobs_of(document).items():
+            for step in suite_steps(job):
+                name = str(step.get("name", "<unnamed step>"))
+                for arguments in pytest_invocations(step["run"]):
+                    plugin_values = {
+                        index + 1 for index, flag in enumerate(arguments) if flag == "-p"
+                    }
+                    for index, argument in enumerate(arguments):
+                        if index in plugin_values:
+                            assert argument.startswith("no:"), (
+                                f"{path.name}: step {name!r} loads a pytest plugin "
+                                f"with -p {argument}"
+                            )
+                            continue
+                        assert argument in PERMITTED_PYTEST_ARGUMENTS, (
+                            f"{path.name}: step {name!r} passes {argument!r} to "
+                            f"pytest. The whitelist is {sorted(PERMITTED_PYTEST_ARGUMENTS)}: "
+                            "an argument outside it is rejected whether or not "
+                            "anyone has worked out what it does yet — "
+                            "`--version` and `-h` exit 0 having run nothing."
+                        )
+
+
+def check_every_pytest_step_drops_the_working_directory_from_sys_path(directory: Path) -> None:
+    """`python -m pytest` searches the working directory first.
+
+    So a tracked root `pytest.py` IS the suite: measured on 8a50474, a
+    two-line `pytest.py` in the repository root made `python -m pytest` print
+    one line and exit 0, with no rule here and no test in the suite noticing.
+    `PYTHONSAFEPATH=1` removes that entry (PYTHONPATH entries are untouched).
+    tests/test_the_guards_exist.py refuses the tracked names; this requires
+    the interpreter flag as well, because the two fail differently — a name
+    the guard has not thought of is still on cwd, and a file that is untracked
+    on the runner is not in `git ls-files`.
+    """
+    for path, document in _documents(directory):
+        for job_name, job in jobs_of(document).items():
+            for step in suite_steps(job):
+                name = str(step.get("name", "<unnamed step>"))
+                environment = _environment_for(document, job, step)
+                value = environment.get(SAFE_PATH_VARIABLE)
+                assert value is not None, (
+                    f"{path.name}: the pytest step {name!r} does not set "
+                    f"{SAFE_PATH_VARIABLE}. Without it the working directory is "
+                    "ahead of site-packages and a tracked root pytest.py is the "
+                    "suite."
+                )
+                assert str(value).strip() == "1", (
+                    f"{path.name}: step {name!r} sets {SAFE_PATH_VARIABLE}="
+                    f"{value!r}; only \"1\" enables it. Python treats an empty "
+                    "string as off."
+                )
+
+
+def check_pytest_actually_runs_with_a_safe_path(directory: Path) -> None:
+    """OBSERVED: what PYTHONSAFEPATH is when the pytest command is invoked.
+
+    The declaration rule reads `env:`. That is a spelling, and a run line can
+    unsay it: `PYTHONSAFEPATH= python -m pytest -q` is a prefix assignment
+    that empties the variable for exactly that command, and Python treats the
+    empty string as off. `unset PYTHONSAFEPATH` and `export PYTHONSAFEPATH=`
+    are two more spellings of the same act. So the block is executed with the
+    step's declared `env:` applied, every command stubbed, and the value each
+    command was invoked with is read out of the stub's log.
+    """
+    for path, document in _documents(directory):
+        for job_name, job in jobs_of(document).items():
+            for index, step in enumerate(suite_steps(job)):
+                name = str(step.get("name", "<unnamed step>"))
+                block = step["run"]
+                declared = {
+                    str(key): str(value)
+                    for key, value in _environment_for(document, job, step).items()
+                }
+                with tempfile.TemporaryDirectory() as directory_name:
+                    result = run_block_under_stubs(
+                        block, set(), Path(directory_name) / str(index),
+                        present=_workspace_entries(job), environment_extra=declared,
+                    )
+                assert not result.unmodelled, (
+                    f"{path.name}: step {name!r}: unmodelled {result.unmodelled}"
+                )
+                carriers = [
+                    (word, value) for word, value in result.safepath_seen
+                    if word == "pytest" or re.match(r"^(?:.*/)?python[0-9.]*$", word)
+                ]
+                assert carriers, (
+                    f"{path.name}: step {name!r}: no command carrying pytest reached "
+                    "the harness, so nothing was observed. Absence is not a pass."
+                )
+                wrong = [pair for pair in carriers if pair[1] != "1"]
+                assert not wrong, (
+                    f"{path.name}: step {name!r} invoked {wrong[0][0]} with "
+                    f"PYTHONSAFEPATH={wrong[0][1]!r}. The `env:` says \"1\"; this is "
+                    "the value the command actually saw, and Python reads an empty "
+                    "string as off."
+                )
+
+
+def check_the_gate_job_is_not_gated_by_another_job(directory: Path) -> None:
+    """`needs:` is `if: false` reworded, and GitHub reports it as Success.
+
+    A required job that is SKIPPED because a job it `needs:` was skipped or
+    failed is reported to branch protection as a passing check — GitHub's own
+    troubleshooting documentation says a conditionally-skipped required check
+    is treated as successful, and only a PATH-filtered one stays pending. So a
+    one-line `needs: prep` above a `prep` job carrying `if: false` turns the
+    required check green while nothing runs. The rule that read `if:` saw
+    nothing wrong with it (measured on 8a50474: all thirteen rules passed).
+
+    `strategy:` is the same shape without the second job — a matrix that
+    expands to zero combinations produces no job to run.
+
+    An `if:` on any OTHER job in the gate workflow is refused for the same
+    reason: it is the half of the trick that this file can see.
+    """
+    path, job_name, job = the_gate(directory)
+    assert "needs" not in job, (
+        f"{path.name}: job {job_name!r} carries `needs: {job['needs']!r}`. A "
+        "required job skipped because its dependency was skipped reports as "
+        "Success to branch protection; `needs:` on the gate is `if: false` "
+        "with a second job holding the condition."
+    )
+    assert "strategy" not in job, (
+        f"{path.name}: job {job_name!r} carries `strategy:`. A matrix that "
+        "expands to nothing produces no job, and no job is reported as a "
+        "skipped — that is, successful — required check."
+    )
+    document = load(path)
+    for other_name, other in jobs_of(document).items():
+        if other_name == job_name:
+            continue
+        condition = _condition(other)
+        assert condition is None, (
+            f"{path.name}: job {other_name!r} carries `if: {condition}`. In the "
+            "workflow that carries the required check, a conditional job is "
+            "half of a route to skipping the required one; the other half is a "
+            "`needs:`, and this file refuses both."
+        )
+
+
 def check_exactly_one_job_carries_the_required_check_name(directory: Path) -> None:
     path, _, _ = the_gate(directory)
     assert path.name == "tests.yml", (
@@ -857,7 +1077,15 @@ def check_the_gate_runs_the_whole_suite(directory: Path) -> None:
 def check_the_gate_cannot_be_switched_off(directory: Path) -> None:
     """No `if:` (but `always()`), no continue-on-error, no `shell:`, no
     `defaults.run.shell` — on the gate job, on its suite steps, and on the
-    workflow. A job-level condition switches every step off at once."""
+    workflow. A job-level condition switches every step off at once.
+
+    The name is narrower than it sounds and this is the whole of it: this rule
+    reads conditions and error tolerance. The route that carries no condition
+    on the gate at all — `needs:` a job that does not run — is
+    `check_the_gate_job_is_not_gated_by_another_job`, and the route that runs
+    the gate honestly with a pytest line that collects nothing is
+    `check_every_pytest_line_carries_only_whitelisted_arguments`.
+    """
     path, job_name, job = the_gate(directory)
     document = load(path)
     job_condition = _condition(job)
@@ -1071,6 +1299,10 @@ CHECKS: dict[str, Callable[[Path], None]] = {
     "no_workflow_overrides_the_shell": check_no_workflow_overrides_the_shell,
     "python_version_is_pinned_to_an_exact_minor": check_python_version_is_pinned_to_an_exact_minor,
     "no_pytest_step_anywhere_is_narrowed_or_disabled": check_no_pytest_step_anywhere_is_narrowed_or_disabled,
+    "every_pytest_line_carries_only_whitelisted_arguments": check_every_pytest_line_carries_only_whitelisted_arguments,
+    "every_pytest_step_drops_the_working_directory_from_sys_path": check_every_pytest_step_drops_the_working_directory_from_sys_path,
+    "pytest_actually_runs_with_a_safe_path": check_pytest_actually_runs_with_a_safe_path,
+    "the_gate_job_is_not_gated_by_another_job": check_the_gate_job_is_not_gated_by_another_job,
     "exactly_one_job_carries_the_required_check_name": check_exactly_one_job_carries_the_required_check_name,
     "the_gate_runs_the_whole_suite": check_the_gate_runs_the_whole_suite,
     "the_gate_cannot_be_switched_off": check_the_gate_cannot_be_switched_off,
@@ -1189,6 +1421,7 @@ jobs:
       - name: Run the full test suite
         env:
           PYTHONPATH: src
+          PYTHONSAFEPATH: "1"
         run: |
           python -m pytest -q
       - name: Confirm no odds were fetched
@@ -1236,6 +1469,10 @@ def test_every_rule_has_a_case_that_proves_it_fires() -> None:
         "no_workflow_overrides_the_shell": "test_a_custom_shell_is_rejected",
         "python_version_is_pinned_to_an_exact_minor": "test_an_unpinned_python_version_is_rejected",
         "no_pytest_step_anywhere_is_narrowed_or_disabled": "test_a_narrowing_pytest_flag_is_rejected",
+        "every_pytest_line_carries_only_whitelisted_arguments": "test_an_argument_outside_the_pytest_whitelist_is_rejected",
+        "every_pytest_step_drops_the_working_directory_from_sys_path": "test_a_pytest_step_without_pythonsafepath_is_rejected",
+        "pytest_actually_runs_with_a_safe_path": "test_a_run_line_that_unsays_pythonsafepath_is_rejected",
+        "the_gate_job_is_not_gated_by_another_job": "test_a_needs_or_strategy_on_the_gate_job_is_rejected",
         "exactly_one_job_carries_the_required_check_name": "test_a_renamed_gate_job_is_rejected",
         "the_gate_runs_the_whole_suite": "test_an_echo_in_place_of_pytest_is_rejected",
         "the_gate_cannot_be_switched_off": "test_a_condition_on_the_gate_is_rejected",
@@ -1320,6 +1557,162 @@ def test_an_unpinned_python_version_is_rejected(tmp_path: Path, version: str) ->
 def test_a_narrowing_pytest_flag_is_rejected(tmp_path: Path, suite_line: str) -> None:
     directory = workflow_dir(tmp_path, mutate(SUITE_LINE, f"          {suite_line}\n"))
     assert_rejects(check_no_pytest_step_anywhere_is_narrowed_or_disabled, directory)
+
+
+@pytest.mark.parametrize(
+    "suite_line",
+    [
+        # Exits 0 having collected nothing, and is in no blocklist.
+        "python -m pytest --version",
+        "python -m pytest -h",
+        "python -m pytest --help",
+        "python -m pytest -q --version",
+        "python -m pytest --co",
+        "python -m pytest -q --tb=no",
+        "python -m pytest -q --durations=0",
+        "python -m pytest -q --pdb",
+        "python -m pytest -q -W ignore",
+        "pytest --version",
+    ],
+)
+def test_an_argument_outside_the_pytest_whitelist_is_rejected(
+    tmp_path: Path, suite_line: str
+) -> None:
+    """The whitelist is what makes `--version` a failure. A blocklist of
+    narrowing flags accepted it, because nobody had put it on the list."""
+    directory = workflow_dir(tmp_path, mutate(SUITE_LINE, f"          {suite_line}\n"))
+    assert_rejects(check_every_pytest_line_carries_only_whitelisted_arguments, directory)
+
+
+@pytest.mark.parametrize("suite_line", ["python -m pytest -q", "python -m pytest", "python -m pytest -q -rs", "python -m pytest -q -p no:cacheprovider"])
+def test_the_whitelisted_pytest_lines_are_accepted(tmp_path: Path, suite_line: str) -> None:
+    """Without this, the rejections above could be rejections of everything."""
+    directory = workflow_dir(tmp_path, mutate(SUITE_LINE, f"          {suite_line}\n"))
+    check_every_pytest_line_carries_only_whitelisted_arguments(directory)
+
+
+@pytest.mark.parametrize(
+    "environment_line",
+    ["", '          PYTHONSAFEPATH: ""\n', "          PYTHONSAFEPATH: '0'\n", "          PYTHONSAFEPATH: false\n"],
+)
+def test_a_pytest_step_without_pythonsafepath_is_rejected(
+    tmp_path: Path, environment_line: str
+) -> None:
+    text = GOOD_WORKFLOW.replace('          PYTHONSAFEPATH: "1"\n', environment_line, 1)
+    assert text != GOOD_WORKFLOW
+    assert_rejects(
+        check_every_pytest_step_drops_the_working_directory_from_sys_path,
+        workflow_dir(tmp_path, text),
+    )
+
+
+def test_pythonsafepath_at_the_job_or_workflow_level_is_accepted(tmp_path: Path) -> None:
+    """The variable has to reach the step; where it is declared does not
+    matter, and a rule that insisted on the step level would be a rule about
+    style."""
+    lifted = GOOD_WORKFLOW.replace('          PYTHONSAFEPATH: "1"\n', "", 1)
+    job = lifted.replace(
+        "    runs-on: ubuntu-latest\n",
+        '    runs-on: ubuntu-latest\n    env:\n      PYTHONSAFEPATH: "1"\n',
+        1,
+    )
+    check_every_pytest_step_drops_the_working_directory_from_sys_path(workflow_dir(tmp_path, job))
+    workflow = lifted.replace(
+        PERMISSIONS_BLOCK, PERMISSIONS_BLOCK + 'env:\n  PYTHONSAFEPATH: "1"\n', 1
+    )
+    check_every_pytest_step_drops_the_working_directory_from_sys_path(
+        workflow_dir(tmp_path, workflow)
+    )
+
+
+@pytest.mark.parametrize(
+    "suite_block",
+    [
+        "PYTHONSAFEPATH= python -m pytest -q",
+        "PYTHONSAFEPATH='' python -m pytest -q",
+        "unset PYTHONSAFEPATH\n          python -m pytest -q",
+        "export PYTHONSAFEPATH=\n          python -m pytest -q",
+        'export PYTHONSAFEPATH="${NOTHING:-}"\n          python -m pytest -q',
+    ],
+)
+def test_a_run_line_that_unsays_pythonsafepath_is_rejected(
+    tmp_path: Path, suite_block: str
+) -> None:
+    """The `env:` declares it and the run line takes it away. Only the
+    executed rule sees that; the declaration rule reads the `env:` and is
+    satisfied — which is why both rules exist."""
+    text = mutate(SUITE_LINE, f"          {suite_block}\n")
+    directory = workflow_dir(tmp_path, text)
+    check_every_pytest_step_drops_the_working_directory_from_sys_path(directory)
+    assert_rejects(check_pytest_actually_runs_with_a_safe_path, directory)
+
+
+def test_the_harness_reports_the_safe_path_a_command_ran_with(tmp_path: Path) -> None:
+    """The instrument, checked before it is trusted."""
+    result = run_block_under_stubs(
+        "python -m pytest -q\n", set(), tmp_path,
+        environment_extra={"PYTHONSAFEPATH": "1"},
+    )
+
+    assert ("python", "1") in result.safepath_seen
+    cleared = run_block_under_stubs(
+        "PYTHONSAFEPATH= python -m pytest -q\n", set(), tmp_path / "cleared",
+        environment_extra={"PYTHONSAFEPATH": "1"},
+    )
+    assert ("python", "") in cleared.safepath_seen
+
+
+PREP_JOB = (
+    "  prep:\n"
+    "    if: false\n"
+    "    runs-on: ubuntu-latest\n"
+    "    steps:\n"
+    "      - run: echo prep\n"
+)
+
+
+@pytest.mark.parametrize(
+    "needs", ["needs: prep", "needs: [prep]", "needs:\n      - prep"]
+)
+def test_a_needs_or_strategy_on_the_gate_job_is_rejected(tmp_path: Path, needs: str) -> None:
+    """A required job skipped through `needs:` is reported as Success. Both
+    halves are refused: the `needs:` on the gate, and the `if:` on the job it
+    waits for."""
+    gated = mutate("    runs-on: ubuntu-latest\n", f"    runs-on: ubuntu-latest\n    {needs}\n")
+    gated = gated.replace("jobs:\n", "jobs:\n" + PREP_JOB, 1)
+    assert_rejects(check_the_gate_job_is_not_gated_by_another_job, workflow_dir(tmp_path, gated))
+
+    # The `needs:` alone, with a sibling job that always runs: still refused,
+    # because a job can also fail rather than be skipped.
+    honest_prep = mutate("    runs-on: ubuntu-latest\n", f"    runs-on: ubuntu-latest\n    {needs}\n")
+    honest_prep = honest_prep.replace(
+        "jobs:\n",
+        "jobs:\n  prep:\n    runs-on: ubuntu-latest\n    steps:\n      - run: false\n",
+        1,
+    )
+    assert_rejects(check_the_gate_job_is_not_gated_by_another_job, workflow_dir(tmp_path, honest_prep))
+
+    # The conditional sibling alone, with no `needs:` on the gate.
+    sibling = GOOD_WORKFLOW.replace("jobs:\n", "jobs:\n" + PREP_JOB, 1)
+    assert sibling != GOOD_WORKFLOW
+    assert_rejects(check_the_gate_job_is_not_gated_by_another_job, workflow_dir(tmp_path, sibling))
+
+    matrix = mutate(
+        "    runs-on: ubuntu-latest\n",
+        "    runs-on: ubuntu-latest\n    strategy:\n      matrix:\n        python: []\n",
+    )
+    assert_rejects(check_the_gate_job_is_not_gated_by_another_job, workflow_dir(tmp_path, matrix))
+
+
+def test_an_unconditional_sibling_job_is_accepted(tmp_path: Path) -> None:
+    """The rule is about conditions and dependencies, not about company: a
+    second job that always runs takes nothing away from the required one."""
+    sibling = GOOD_WORKFLOW.replace(
+        "jobs:\n",
+        "jobs:\n  lint:\n    runs-on: ubuntu-latest\n    steps:\n      - run: echo lint\n",
+        1,
+    )
+    check_the_gate_job_is_not_gated_by_another_job(workflow_dir(tmp_path, sibling))
 
 
 def test_pytest_addopts_is_rejected_at_every_level(tmp_path: Path) -> None:

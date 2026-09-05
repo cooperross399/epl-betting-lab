@@ -696,9 +696,10 @@ def test_an_option_value_that_names_a_file_is_not_a_developer_selection(tmp_path
     existing file would make the exemption reachable by anyone: under such a
     walk, `pytest --ignore tests/test_books.py -k "not no_secrets_committed"`
     would exit 0 with none of the secrets guard's tests collected, because
-    `--ignore`'s value would be mistaken for the developer's selection. No
-    commit here holds that walk, so nothing re-measures it; what is measured
-    below is that the code that IS here refuses the shape.
+    `--ignore`'s value would be mistaken for the developer's selection. 8a50474
+    and c8ebe33 both hold that walk (`git log -S 'invocation_params.args' --
+    tests/conftest.py`), so it re-measures there; what is measured below is
+    that the code that IS here refuses the shape.
     """
     tree = _synthetic_tree(tmp_path)
     (tree / "tests" / "test_ordinary.py").write_text(STUB_GUARD, encoding="utf-8")

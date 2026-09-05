@@ -2,9 +2,11 @@
 
 Branch protection on `main` requires two contexts, `Full test suite` and
 `Provider Policy PR Gate`. Until this file existed, the only thing in the
-repository that read `.github/workflows/tests.yml` was `assert "pytest" in
-text` in tests/test_operating_model_docs.py, which the YAML job key `pytest:`
-satisfied on its own. Every one of the following left the suite green: rename
+repository that read `.github/workflows/tests.yml` FOR ITS BEHAVIOUR was
+`assert "pytest" in text` in tests/test_operating_model_docs.py, which the YAML
+job key `pytest:` satisfied on its own. That module reads the file in several
+other assertions — it was not the only reader, only the only check on whether
+the suite runs. Every one of the following left the suite green: rename
 the job (the context goes pending forever, or a job in another workflow
 takes the name); replace `python -m pytest` with `echo`; put `if: false` or
 `continue-on-error: true` on the step; run `pytest -x`, `pytest tests/x.py`,

@@ -19,8 +19,15 @@ catches is written down and executed in
   enforced, and `--deselect tests/test_no_secrets_committed.py::
   test_env_file_is_never_tracked` walked straight past it: the module still
   contributed its other tests, so it was still counted as present and the run
-  exited 0. That draft is not in this repository's history, so no commit and
-  no command here would reproduce it; what IS run, every time, is
+  exited 0. That draft IS in this branch's history and reproduces: at
+  8a50474 this file defines `_end_the_session_if_a_guard_contributed_nothing`
+  with `if count == 0`, and there
+  `PYTEST_ADDOPTS='--deselect tests/test_no_secrets_committed.py::test_env_file_is_never_tracked'
+  python -m pytest -q` gives 2004 passed, 1 deselected, exit 0. (An earlier
+  version of this comment said no command would reproduce it. That is a worse
+  error than the stale number it replaced: a stale number invites a
+  re-measurement, an unreproducibility claim tells the reader to stop looking.)
+  What IS run, every time, is
   `test_deselecting_one_test_from_a_guard_ends_the_session_red`, which
   deselects exactly one guard test in a synthetic tree and requires exit 1.
   The floor is per test, so removing one costs the same as removing all.
@@ -109,8 +116,10 @@ def _command_line_selection(config: pytest.Config) -> list[Path] | None:
     anyone: under it, `pytest --ignore tests/test_books.py -k "not
     no_secrets_committed"` would have read `tests/test_books.py` — the value
     of `--ignore` — as the developer's selection and enforced no guard at all.
-    That walk was replaced before it was committed, so no commit here holds
-    it and no command would reproduce it. The shape is run against the code
+    That walk is in this branch's history: `git log -S
+    'invocation_params.args' -- tests/conftest.py` names 8a50474 and c8ebe33,
+    and 8a50474's `_command_line_selection` reads it literally. The shape is
+    also run against the code
     that IS here, every time, by
     `test_an_option_value_that_names_a_file_is_not_a_developer_selection`,
     which requires exit 1.

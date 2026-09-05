@@ -13,13 +13,18 @@ def test_the_unreachable_fetcher_is_not_back():
 
 def test_nothing_imports_it():
     roots = [PROJECT_ROOT / "src", PROJECT_ROOT / "scripts", PROJECT_ROOT / ".github"]
+    scanned: list[Path] = []
     hits = []
     for root in roots:
         for path in root.rglob("*"):
             if path.suffix not in {".py", ".yml", ".yaml"} or "egg-info" in path.parts:
                 continue
+            scanned.append(path)
             if "clubelo" in path.read_text(encoding="utf-8", errors="ignore").lower():
                 hits.append(str(path.relative_to(PROJECT_ROOT)))
+    # A scan over nothing is green for the wrong reason.
+    assert len(scanned) > 100, len(scanned)
+    assert any(path.suffix == ".yml" for path in scanned)
     assert not hits, hits
 
 

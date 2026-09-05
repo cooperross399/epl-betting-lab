@@ -31,7 +31,7 @@ def test_manual_thursday_workflow_runs_supported_checks_and_runner() -> None:
     assert "uses: actions/setup-python@v5" in text
     assert 'python-version: "3.11"' in text
     assert "python -m pip install -r requirements.txt" in text
-    assert "python -m compileall -q src scripts app.py" in text
+    assert "python -m compileall -q -f src scripts app.py" in text
     assert "python -m pytest" in text
     assert "python scripts/run_scheduled_thursday_workflow.py" in text
     assert "python scripts/verify_github_manual_thursday_run.py" in text

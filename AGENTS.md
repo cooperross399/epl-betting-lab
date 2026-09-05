@@ -31,7 +31,7 @@ Honor these by default unless the user explicitly overrides them:
 - Do not claim profitability without a backtest and clear sample-size warnings.
 - Do not overwrite raw data without a `--force` option or clear reason.
 - Run tests after code changes: `python -m pytest`.
-- Run a smoke compile check after structural changes: `python -m compileall -q src scripts app.py`.
+- Run a smoke compile check after structural changes: `python -m compileall -q -f src scripts app.py`.
 - Keep beginner-friendly commands in `README.md` and `docs/`.
 
 ## Preferred workflow for Codex tasks
@@ -116,7 +116,7 @@ Tests:
 
 ```bash
 python -m pytest
-python -m compileall -q src scripts app.py
+python -m compileall -q -f src scripts app.py
 ```
 
 ## Weekly betting card style

@@ -63,10 +63,22 @@ jobs:
 
       - name: Compile check
         id: compile
-        run: python -m compileall -q src scripts app.py
+        # compileall exits 0 on a path that names nothing, so each path is
+        # asserted first and -f forces recompilation past a stale __pycache__.
+        # Same shape as tests.yml, where tests/test_workflows.py executes it.
+        run: |
+          for d in src scripts; do
+            [ -d "$d" ] || { echo "::error::$d is missing; the compile step would have passed on nothing."; exit 1; }
+          done
+          [ -f app.py ] || { echo "::error::app.py is missing; the compile step would have passed on nothing."; exit 1; }
+          python -m compileall -q -f src scripts app.py
 
       - name: Run tests
         id: tests
+        # See tests.yml for why: `python -m` would otherwise let a
+        # tracked root pytest.py shadow the suite.
+        env:
+          PYTHONSAFEPATH: "1"
         run: python -m pytest
 
       - name: Run safe scheduled Thursday workflow

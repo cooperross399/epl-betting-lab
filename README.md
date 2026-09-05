@@ -495,11 +495,32 @@ The PR workflow runs this archive step automatically and publishes the latest
 archive report and dated package as artifacts. The Odds Import page shows the
 latest archive verdict, archive receipt ID, gate receipt ID, and PR/run context.
 
-To make this a required check, a repository administrator must open GitHub
-**Settings > Rules > Rulesets** (or **Branches > Branch protection rules**),
-require status checks for `main`, and select **Provider Policy PR Gate**. The
-project deliberately does not modify repository rules through an API: branch
-protection is an administrative decision. A passing check validates preserved
+**Provider Policy PR Gate** and **Full test suite** are both required status
+checks on `main`, so nothing merges with either red. Read on 2026-09-05 with
+`gh api repos/cooperross399/epl-betting-lab/branches/main/protection`: both
+contexts required, admins included, force pushes and deletions off — and no
+required review, so the "a reviewer is the backstop" note below describes a
+practice rather than a gate. Nothing in this repository reads that setting, so
+re-read it rather than trusting this paragraph. A repository administrator sets that under
+GitHub **Settings > Rules > Rulesets** (or **Branches > Branch protection
+rules**); the project deliberately does not modify repository rules through an
+API, because branch protection is an administrative decision.
+
+What the suite itself enforces about the `Full test suite` job is a list, not
+an absolute: `tests/test_workflows.py` parses `.github/workflows/tests.yml`
+with `yaml.safe_load` and refuses a renamed job, a job with `needs:` or
+`strategy:` (a required job skipped through a dependency is reported as
+Success), any other job in the file carrying an `if:`, a pytest line with an
+argument outside `-q`/`-rs`/`-p no:...`, a missing `PYTHONSAFEPATH`, a bound
+`PYTEST_ADDOPTS`, a filtered `pull_request`, a secret, or a condition on the
+job or its steps — and then EXECUTES every run block under stubs to check that
+a failing command fails the step. What it does not cover: branch protection
+lives in repository settings, and a change there is invisible to every test
+here; a commit deleting the guard modules and `tests/conftest.py` together is
+green; and a pytest plugin added to `requirements.txt` loads before the guards
+are counted. A reviewer is the backstop for those three.
+
+A passing check validates preserved
 evidence only; merging the separate policy PR is still what changes the
 allowlist, and cron remains disabled.
 

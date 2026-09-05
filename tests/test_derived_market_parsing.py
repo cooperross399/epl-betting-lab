@@ -455,7 +455,9 @@ class TestOneMarketRegistry:
         """The literal that caused this must not come back anywhere."""
         from epl_betting_lab.config import PROJECT_ROOT
 
-        for path in (PROJECT_ROOT / "src").rglob("*.py"):
+        paths = sorted((PROJECT_ROOT / "src").rglob("*.py"))
+        assert len(paths) > 10, "a scan over nothing is green for the wrong reason"
+        for path in paths:
             text = path.read_text(encoding="utf-8")
             assert "Supported markets are 1x2, total_2_5, and btts" not in text, path
             assert '{"1x2": 0, "total_2_5": 0, "btts": 0}' not in text, path

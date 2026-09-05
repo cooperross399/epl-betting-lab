@@ -9,7 +9,11 @@ name: Tests
 # branch protection on `main` requires that status context (alongside
 # `Provider Policy PR Gate`), so nothing merges with it red. That sentence is
 # true here because this repository is public and protected; it is not a
-# property of the YAML.
+# property of the YAML. Read on 2026-09-05 with
+# `gh api repos/cooperross399/epl-betting-lab/branches/main/protection`:
+# required contexts `Full test suite` and `Provider Policy PR Gate`,
+# enforce_admins true, force pushes and deletions off. Re-read it rather than
+# trusting this line; it is a snapshot of a setting nothing here can see.
 #
 # WHAT THE SUITE ITSELF ENFORCES about this file, so the list can be checked
 # rather than believed. tests/test_workflows.py parses it with yaml.safe_load
@@ -19,9 +23,12 @@ name: Tests
 # `-h` exit 0 having run nothing and no blocklist of narrowing flags contains
 # them; PYTEST_ADDOPTS or PYTEST_PLUGINS is bound anywhere, in any spelling;
 # the job carries `needs:` or `strategy:`, or any OTHER job in this file
-# carries an `if:` — a required job skipped by a `needs:` on a job that did
-# not run is reported to branch protection as Success, which is `if: false`
-# reworded; the job or a step carries an `if:` other than always(),
+# carries an `if:` — GitHub's troubleshooting documentation says a
+# conditionally-skipped required check is treated as successful, so a required
+# job skipped by a `needs:` on a job that did not run is `if: false` reworded.
+# That is GitHub's behaviour and not this repository's: no test here can run
+# it, which is why the rule refuses the shape outright rather than reasoning
+# about it; the job or a step carries an `if:` other than always(),
 # continue-on-error, or a shell override; pull_request is filtered; the
 # secrets context is touched; or the suite step does not set PYTHONSAFEPATH.
 # It then EXECUTES every run block here under stubs and requires that a
@@ -41,7 +48,9 @@ name: Tests
 # that deletes the guard modules AND tests/conftest.py together is green,
 # because nothing outside the suite vouches for the suite; and a plugin added
 # to requirements.txt runs before the guards are counted. A reviewer is the
-# backstop for all three.
+# backstop for all three, and that backstop is a practice rather than a gate:
+# the same protection read shows no required review on `main`, so nothing
+# outside this repository forces a second pair of eyes onto such a commit.
 on:
   pull_request:
   push:
@@ -86,8 +95,11 @@ jobs:
         # (run on 3.12, not recalled), so a rename or a bad checkout would turn
         # this step into a green report about no files. `-f` forces
         # recompilation so a stale __pycache__ cannot mask a source that no
-        # longer parses. tests/test_workflows.py runs this block in a sandbox
-        # with each path absent in turn and requires a non-zero exit.
+        # longer parses — run rather than recalled in tests/test_workflows.py
+        # (`test_a_stale_pycache_hides_a_broken_source_from_compileall_without_f`):
+        # break a module, restore its mtime, and the plain command exits 0
+        # while `-f` exits 1. tests/test_workflows.py also runs this block in a
+        # sandbox with each path absent in turn and requires a non-zero exit.
         run: |
           for d in src scripts; do
             [ -d "$d" ] || { echo "::error::$d is missing; the compile step would have passed on nothing."; exit 1; }
@@ -116,12 +128,15 @@ jobs:
         env:
           PYTHONPATH: src
           # `python -m` puts the working directory ahead of site-packages, so
-          # a tracked root pytest.py shadows the suite entirely: measured on
-          # 8a50474, a two-line pytest.py printed one line and exited 0 with
-          # the check green. PYTHONSAFEPATH drops that entry. PYTHONPATH is
-          # unaffected, and the suite is green under it (2005 passed, 0
-          # skipped, 95.9 s, measured 2026-09-04 with
-          # `PYTHONPATH=src PYTHONSAFEPATH=1 python -m pytest -q`).
+          # a tracked root pytest.py shadows the suite entirely: run again at
+          # c8ebe33, a two-line tracked pytest.py in the repository root made
+          # `PYTHONPATH=src python -m pytest -q` print one line and exit 0.
+          # PYTHONSAFEPATH drops that entry; PYTHONPATH is untouched, and the
+          # suite is green under it with NO SKIPS -- a skip ends the session
+          # red here, so "green" means every collected test ran. No test count
+          # and no wall clock is written down: both move with every commit,
+          # and a stale absolute in a file whose whole job is to be trusted is
+          # worse than no number at all.
           # tests/test_the_guards_exist.py refuses the tracked shadow names as
           # well; this is the belt behind that brace.
           PYTHONSAFEPATH: "1"

@@ -8,17 +8,22 @@ leaves the old path in the manifest, or `PYTEST_ADDOPTS` carrying any of those
 into a command line that looks clean. Every one of those leaves the suite
 green and smaller.
 
-Three hooks, because each closes a different route:
+Three hooks, because each catches a different route. What none of them
+catches is written down and executed in
+`tests/test_the_guards_exist.py::test_the_gaps_these_guards_still_have_are_the_ones_written_down`:
 
 * the collection hooks count, per required module, the test FUNCTIONS that
   survived collection and deselection, and compare them against the `def
   test_*` this module reads out of the file with `ast`. A module floor —
-  "contributed at least one item" — is what the first version of this file
+  "contributed at least one item" — is what the first draft of this file
   enforced, and `--deselect tests/test_no_secrets_committed.py::
-  test_env_file_is_never_tracked` walked straight past it: 2004 of 2005
-  collected, every required module still non-empty, exit 0 (measured on
-  8a50474 with `PYTEST_ADDOPTS` carrying the deselect and `--collect-only`).
-  The floor is now per test, so removing one costs the same as removing all.
+  test_env_file_is_never_tracked` walked straight past it: the module still
+  contributed its other tests, so it was still counted as present and the run
+  exited 0. That draft is not in this repository's history, so no commit and
+  no command here would reproduce it; what IS run, every time, is
+  `test_deselecting_one_test_from_a_guard_ends_the_session_red`, which
+  deselects exactly one guard test in a synthetic tree and requires exit 1.
+  The floor is per test, so removing one costs the same as removing all.
 * `_end_the_session_if_the_run_was_narrowed` asks pytest what it ACTUALLY
   RECEIVED — `config.getoption("deselect")`, `"keyword"`, `"markexpr"`,
   `"ignore"`, `"ignore_glob"`, the ini `addopts` (via `getini`), and `PYTEST_ADDOPTS` — and
@@ -47,7 +52,9 @@ tests/test_value.py` on a laptop selects nothing from the guard modules on
 purpose, and killing that session would teach everyone to bypass the hook.
 The selection is read from the POSITIONAL destination pytest parsed
 (`file_or_dir`, which is empty when `PYTEST_ADDOPTS` supplied the only
-narrowing, and which never confuses an option's value for an argument), and a
+narrowing, and which pytest fills from its own parse rather than from the raw
+argv, so an option's VALUE does not land in it — asserted for `--ignore` in
+`test_an_option_value_that_names_a_file_is_not_a_developer_selection`), and a
 required module outside the selection is not enforced; the narrowing check is likewise silent when no guard is
 enforced. In CI there is no positional argument — the workflow linter rejects
 one — so there every required module is enforced on every run.
@@ -98,12 +105,15 @@ def _command_line_selection(config: pytest.Config) -> list[Path] | None:
     Read from `config.getoption("file_or_dir")`, the positional destination,
     rather than by walking `invocation_params.args` and keeping every word
     that names an existing file. That walk could not tell an argument from an
-    option's VALUE, and the exemption meant for a developer was reachable by
-    anyone: measured on 8a50474, `pytest --collect-only --ignore
-    tests/test_books.py -k "not no_secrets_committed"` exited 0 with the
-    whole secrets guard deselected, because `tests/test_books.py` — the value
-    of `--ignore` — was read as the developer's selection and no guard was
-    then enforced at all.
+    option's VALUE, so the exemption meant for a developer was reachable by
+    anyone: under it, `pytest --ignore tests/test_books.py -k "not
+    no_secrets_committed"` would have read `tests/test_books.py` — the value
+    of `--ignore` — as the developer's selection and enforced no guard at all.
+    That walk was replaced before it was committed, so no commit here holds
+    it and no command would reproduce it. The shape is run against the code
+    that IS here, every time, by
+    `test_an_option_value_that_names_a_file_is_not_a_developer_selection`,
+    which requires exit 1.
 
     If the option is not there to read, this returns `None`: everything is
     enforced. A guard that cannot tell what was selected must not conclude
@@ -295,8 +305,15 @@ def pytest_collectreport(report: pytest.CollectReport) -> None:
 
     `pytest.skip(..., allow_module_level=True)` and a module-level
     `pytest.importorskip` are resolved during COLLECTION and reported here.
-    Measured on 8a50474: either one on tests/test_books.py gave `180 passed,
-    1 skipped` and exit 0.
+
+    Measured at f030ec6, the commit before this file existed, by adding
+    `pytest.skip("no data on this runner", allow_module_level=True)` to
+    tests/test_books.py and running `PYTHONPATH=src python -m pytest -q` from
+    the repository root: `1829 passed, 11 skipped` became `1817 passed, 12
+    skipped`, and BOTH runs exited 0. Twelve tests stopped running and the
+    exit code did not move. (Those eleven pre-existing skips are the ones this
+    branch removed.) `test_a_collection_phase_skip_ends_the_session_red` runs
+    both module-level shapes against this hook and requires exit 1.
     """
     if report.skipped:
         _SKIPS.append(("collection", str(report.nodeid), str(report.longrepr)))

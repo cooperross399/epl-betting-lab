@@ -11,9 +11,10 @@ The first version of this module was five such greps, and an audit walked a
 synthetic key past every one of them without touching the module:
 
 * any file whose *name* contained "checksum" or "receipt" was skipped from the
-  hex scan outright — a by-name exemption that covered twenty-nine tracked
-  files, fourteen of them source, and aimed the blind spot at the acceptance
-  receipts whose whole job is to record provenance;
+  hex scan outright, which aimed the blind spot at the acceptance receipts
+  whose whole job is to record provenance. The size of that hole at f030ec6,
+  the commit before this branch: `git ls-files | grep -Ei 'checksum|receipt'`
+  lists 30 tracked files there, 14 of them `.py`;
 * `\\b[0-9a-f]{32}\\b` would not open beside an underscore, because `_` is a
   word character, so `<key>_odds.json` inside a string hid the key; and the
   class was lowercase only, so an uppercased copy of the key was not a key;

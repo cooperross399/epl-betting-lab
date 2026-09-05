@@ -21,10 +21,16 @@ with. The verdict is the exit code. That is what catches `set +e`, `|| true`,
 `if ! cmd; then echo; fi`, a `trap` that exits zero, and every rewording of
 those that has not been thought of yet.
 
-Every rule fails closed: a workflow that cannot be found, cannot be parsed or
-declares nothing is a failure, not a quiet pass. Every rule has a synthetic
-case that proves it fires — `test_every_rule_has_a_case_that_proves_it_fires`
-refuses a rule nobody has watched reject anything.
+Every rule fails closed on a workflow it cannot READ, and that is run, not
+asserted: `test_every_rule_fails_closed_on_a_workflow_it_cannot_read` points
+all of them at a missing directory, an empty one, and unparseable YAML, and
+requires every rule to reject each. A document that parses to something that
+is not a workflow mapping is a weaker case, and the same test records which
+rules pass it: the universal rules find nothing to iterate and say nothing,
+and it is `check_every_workflow_parses_and_declares_a_trigger` that carries
+the verdict. Every rule also has a synthetic case that proves it fires —
+`test_every_rule_has_a_case_that_proves_it_fires` refuses a rule nobody has
+watched reject anything.
 
 Three of the rules here were added after the first round shipped, because the
 first round left routes open that read as clean YAML:
@@ -36,8 +42,14 @@ first round left routes open that read as clean YAML:
   pending. Reading `if:` on the gate job caught nothing, because the `if:`
   was on the OTHER job. `strategy:` is the same shape with one job.
 * the pytest argument list was a BLOCKLIST of narrowing flags. `--version`,
-  `-h` and `--help` are in no blocklist, exit 0 and collect nothing; all
-  three passed every rule here as the suite line. It is a whitelist now.
+  `-h` and `--help` are in no blocklist, exit 0 and collect nothing. Measured
+  at 8a50474 by running that commit's `CHECKS` against its control workflow
+  with the suite line replaced: each of the three passed all thirteen rules
+  the file had then. It is a whitelist now, and the whitelist is the rule
+  that stops them —
+  `test_the_whitelist_is_the_rule_that_refuses_a_no_op_suite_line` re-measures
+  that against the rules as they stand, so the sentence cannot go stale
+  quietly.
 * nothing required `PYTHONSAFEPATH`, so a tracked root `pytest.py` was the
   module `python -m pytest` ran.
 
@@ -58,10 +70,12 @@ harness is the same mechanism, the rule set is this lab's.
 
 from __future__ import annotations
 
+import os
 import re
 import shlex
 import shutil
 import subprocess
+import sys
 import tempfile
 from collections.abc import Callable, Iterator
 from pathlib import Path
@@ -73,9 +87,13 @@ import yaml
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 WORKFLOWS_DIR = PROJECT_ROOT / ".github" / "workflows"
 
-#: The context branch protection on `main` requires. Verified against the
-#: repository's protection settings on 2026-09-04 (both contexts present);
-#: the string here is what a `name:` in tests.yml must equal exactly.
+#: The context branch protection on `main` requires. Checked against the
+#: repository's protection settings on 2026-09-05 with
+#: `gh api repos/cooperross399/epl-betting-lab/branches/main/protection`
+#: (required contexts: `Full test suite`, `Provider Policy PR Gate`). Nothing
+#: in this repository reads that setting, so this is a hand-copied value with
+#: a date on it, not a fact the suite can keep true; the string here is what a
+#: `name:` in tests.yml must equal exactly.
 REQUIRED_CHECK = "Full test suite"
 
 #: The provider credential's names. The gate workflow may not bind either.
@@ -107,17 +125,30 @@ PYTEST_ADDOPTS = "PYTEST_ADDOPTS"
 PYTEST_ENVIRONMENT_NAMES = frozenset({PYTEST_ADDOPTS, "PYTEST_PLUGINS"})
 PYTEST_ADDOPTS_PATTERN = re.compile(r"(?i)\bPYTEST_(?:ADDOPTS|PLUGINS)\b")
 
-#: The ONLY arguments a pytest line may carry, as a whitelist. A blocklist of
+#: The only arguments a pytest line may carry, as a whitelist. A blocklist of
 #: narrowing flags proves only that those spellings are absent: `--version`,
-#: `-h` and `--help` are in no blocklist, exit 0, and run no test. Measured on
-#: 8a50474: `python -m pytest --version` as the suite line passed all thirteen
-#: rules. `-p` is admitted here and its VALUE is checked separately — it must
-#: begin `no:`, because `-p <module>` LOADS a plugin.
+#: `-h` and `--help` are in no blocklist, exit 0, and run no test. Measured at
+#: 8a50474 by running that commit's `CHECKS` over its control workflow with
+#: the suite line replaced: `python -m pytest --version` passed all thirteen
+#: rules the file had then, and so did `-h` and `--help`. `-p` is admitted
+#: here and its VALUE is checked separately — it must begin `no:`, because
+#: `-p <module>` LOADS a plugin.
 PERMITTED_PYTEST_ARGUMENTS = frozenset({"-q", "-rs", "-p"})
 
 #: The environment variable that drops the working directory from `sys.path`.
 #: `python -m pytest` puts cwd ahead of site-packages, so a tracked root
-#: `pytest.py` becomes the module that runs. Required as the string "1".
+#: `pytest.py` becomes the module that runs.
+#:
+#: Required here as the literal string "1", which is STRICTER than CPython.
+#: CPython enables the safe path on any non-empty value: measured on 3.12.13,
+#: `PYTHONSAFEPATH=0` and `PYTHONSAFEPATH=false` both drop the working
+#: directory, and only the empty string (or the variable being unset) leaves
+#: it on `sys.path`. `test_only_an_empty_pythonsafepath_leaves_cwd_on_sys_path`
+#: runs that on the interpreter in hand rather than quoting the manual. One
+#: spelling is required anyway, for two reasons: a value that reads as "off"
+#: while being on is exactly the line a later tidy-up empties, and the
+#: observed-value rule below compares against the same literal, so the `env:`
+#: and the value the command actually saw cannot disagree by spelling.
 SAFE_PATH_VARIABLE = "PYTHONSAFEPATH"
 
 #: The tracked basenames that would shadow the suite or run before it.
@@ -900,10 +931,13 @@ def check_every_pytest_line_carries_only_whitelisted_arguments(directory: Path) 
 
     `--version`, `-h` and `--help` make pytest print and exit 0 without
     collecting anything, and they appear in no list of narrowing flags. The
-    rule that read a blocklist accepted all three as the suite line (measured
-    on 8a50474). This one accepts `-q`, `-rs` and `-p no:<plugin>` and
-    nothing else, so an argument nobody has thought of yet is rejected by
-    default rather than admitted by default.
+    rule that read a blocklist accepted all three as the suite line: measured
+    at 8a50474 by running that commit's `CHECKS` over its control workflow,
+    all thirteen rules it had then passed each of the three. This one accepts
+    `-q`, `-rs` and `-p no:<plugin>` and nothing else, so an argument nobody
+    has thought of yet is rejected by default rather than admitted by
+    default. `test_the_whitelist_is_the_rule_that_refuses_a_no_op_suite_line`
+    re-measures, against the current rule set, which rules reject them.
     """
     for path, document in _documents(directory):
         for job_name, job in jobs_of(document).items():
@@ -932,9 +966,10 @@ def check_every_pytest_line_carries_only_whitelisted_arguments(directory: Path) 
 def check_every_pytest_step_drops_the_working_directory_from_sys_path(directory: Path) -> None:
     """`python -m pytest` searches the working directory first.
 
-    So a tracked root `pytest.py` IS the suite: measured on 8a50474, a
-    two-line `pytest.py` in the repository root made `python -m pytest` print
-    one line and exit 0, with no rule here and no test in the suite noticing.
+    So a tracked root `pytest.py` IS the suite: measured at c8ebe33, in a
+    worktree with a two-line tracked `pytest.py` in the repository root,
+    `PYTHONPATH=src python -m pytest -q` printed one line and exited 0, with
+    no test in the suite reached and nothing to notice it.
     `PYTHONSAFEPATH=1` removes that entry (PYTHONPATH entries are untouched).
     tests/test_the_guards_exist.py refuses the tracked names; this requires
     the interpreter flag as well, because the two fail differently — a name
@@ -955,8 +990,14 @@ def check_every_pytest_step_drops_the_working_directory_from_sys_path(directory:
                 )
                 assert str(value).strip() == "1", (
                     f"{path.name}: step {name!r} sets {SAFE_PATH_VARIABLE}="
-                    f"{value!r}; only \"1\" enables it. Python treats an empty "
-                    "string as off."
+                    f"{value!r}. This lab requires the literal \"1\". CPython is "
+                    "looser than that — it enables the safe path on ANY "
+                    "non-empty value, so \"0\" and \"false\" switch it ON and "
+                    "only the empty string leaves the working directory on "
+                    "sys.path. That is the reason for the strictness: a value "
+                    "reading as \"off\" while being on is the line a later "
+                    "tidy-up empties, and emptying it is the one edit that "
+                    "actually disables it."
                 )
 
 
@@ -1000,8 +1041,10 @@ def check_pytest_actually_runs_with_a_safe_path(directory: Path) -> None:
                 assert not wrong, (
                     f"{path.name}: step {name!r} invoked {wrong[0][0]} with "
                     f"PYTHONSAFEPATH={wrong[0][1]!r}. The `env:` says \"1\"; this is "
-                    "the value the command actually saw, and Python reads an empty "
-                    "string as off."
+                    "the value the command actually saw. Python reads the empty "
+                    "string as off and any non-empty value as on; this rule "
+                    "compares against the same literal the declaration rule "
+                    "requires, so the two cannot disagree by spelling."
                 )
 
 
@@ -1014,7 +1057,9 @@ def check_the_gate_job_is_not_gated_by_another_job(directory: Path) -> None:
     is treated as successful, and only a PATH-filtered one stays pending. So a
     one-line `needs: prep` above a `prep` job carrying `if: false` turns the
     required check green while nothing runs. The rule that read `if:` saw
-    nothing wrong with it (measured on 8a50474: all thirteen rules passed).
+    nothing wrong with it: measured at 8a50474 by running that commit's
+    `CHECKS` over its control workflow with that mutation applied, all
+    thirteen rules it had then passed.
 
     `strategy:` is the same shape without the second job — a matrix that
     expands to zero combinations produces no job to run.
@@ -1461,6 +1506,129 @@ def assert_rejects(check: Callable[[Path], None], directory: Path) -> None:
 @pytest.mark.parametrize("rule", sorted(CHECKS), ids=sorted(CHECKS))
 def test_the_control_workflow_passes_every_rule(tmp_path: Path, rule: str) -> None:
     CHECKS[rule](workflow_dir(tmp_path, GOOD_WORKFLOW))
+
+
+def test_every_rule_fails_closed_on_a_workflow_it_cannot_read(tmp_path: Path) -> None:
+    """A linter that says nothing about a file it could not read is a linter
+    that reports "clean" on a deleted workflow.
+
+    Three unreadable shapes, and every rule must reject each of them. The
+    fourth shape is weaker and is recorded rather than claimed: a document
+    that PARSES but is not a workflow mapping gives the universal rules
+    nothing to iterate, so they pass it. That is not a hole — the run is still
+    red, because `check_every_workflow_parses_and_declares_a_trigger` rejects
+    it — but "every rule fails closed" is not true of it, and the assertion
+    below is what stops that sentence being written again.
+    """
+    unreadable = {
+        "directory does not exist": tmp_path / "absent",
+        "directory is empty": (tmp_path / "empty" / "workflows"),
+        "yaml does not parse": workflow_dir(tmp_path / "broken", "a: [1,\n  b: {{{\n"),
+    }
+    unreadable["directory is empty"].mkdir(parents=True)
+
+    for label, directory in unreadable.items():
+        passed = sorted(
+            name for name, check in CHECKS.items() if _rule_passes(check, directory)
+        )
+        assert not passed, f"{label}: rules that did not fail closed: {passed}"
+
+    not_a_workflow = workflow_dir(tmp_path / "scalar", "just a string\n")
+    silent = sorted(
+        name for name, check in CHECKS.items() if _rule_passes(check, not_a_workflow)
+    )
+    assert "every_workflow_parses_and_declares_a_trigger" not in silent, (
+        "the one rule that carries the not-a-workflow case now passes it"
+    )
+    assert silent == [
+        "every_pytest_line_carries_only_whitelisted_arguments",
+        "every_pytest_step_drops_the_working_directory_from_sys_path",
+        "no_pytest_step_anywhere_is_narrowed_or_disabled",
+        "no_workflow_overrides_the_shell",
+        "pytest_actually_runs_with_a_safe_path",
+        "python_version_is_pinned_to_an_exact_minor",
+    ], (
+        "the set of rules that stay silent on a document that is not a workflow "
+        f"has changed: {silent}. If it shrank, good news — update this list. If "
+        "it grew, a rule stopped failing closed."
+    )
+
+
+def test_the_whitelist_is_the_rule_that_refuses_a_no_op_suite_line(tmp_path: Path) -> None:
+    """`--version`, `-h` and `--help` exit 0 having collected nothing.
+
+    At 8a50474 the argument list was a blocklist and all thirteen rules the
+    file had then passed each of the three. This measures the same three
+    against the rules as they stand now, so the docstring above does not have
+    to be believed — and so that if some other rule ever grows teeth here,
+    the list below has to be updated rather than quietly outgrown.
+    """
+    for flag in ("--version", "-h", "--help"):
+        directory = workflow_dir(
+            tmp_path / flag.strip("-"),
+            mutate(SUITE_LINE, f"          python -m pytest {flag}\n"),
+        )
+        rejecting = sorted(
+            name for name, check in CHECKS.items() if not _rule_passes(check, directory)
+        )
+        assert "every_pytest_line_carries_only_whitelisted_arguments" in rejecting, (
+            f"nothing stops `python -m pytest {flag}` as the suite line: {rejecting}"
+        )
+        assert rejecting == ["every_pytest_line_carries_only_whitelisted_arguments"], (
+            f"`python -m pytest {flag}` is now refused by {rejecting}. More than "
+            "the whitelist catching it is good news; say so here rather than "
+            "leaving this file claiming the whitelist is the only thing between "
+            "the required check and a suite line that runs nothing."
+        )
+
+
+def test_only_an_empty_pythonsafepath_leaves_cwd_on_sys_path(tmp_path: Path) -> None:
+    """The interpreter in hand, asked rather than quoted.
+
+    The rule above requires the literal "1" and says why. The reason it gives
+    rests on a fact about CPython — that the safe path is enabled by ANY
+    non-empty value, so "0" is ON and only the empty string is OFF — and a
+    fact about CPython written into a comment is a fact nobody re-checks. So
+    it is measured here: a module in the working directory is importable only
+    when the variable is unset or empty.
+    """
+    (tmp_path / "a_module_only_on_cwd.py").write_text("VALUE = 1\n", encoding="utf-8")
+
+    def imports_from_cwd(value: str | None) -> bool:
+        environment = dict(os.environ)
+        environment.pop("PYTHONSAFEPATH", None)
+        environment.pop("PYTHONPATH", None)
+        if value is not None:
+            environment["PYTHONSAFEPATH"] = value
+        result = subprocess.run(
+            [sys.executable, "-c", "import a_module_only_on_cwd"],
+            cwd=tmp_path, env=environment, capture_output=True, text=True, timeout=60,
+        )
+        return result.returncode == 0
+
+    assert imports_from_cwd(None), "unset: the working directory should be on sys.path"
+    assert imports_from_cwd(""), "empty: this is the one value that disables the flag"
+    for enabling in ("1", "0", "false", "no"):
+        assert not imports_from_cwd(enabling), (
+            f"PYTHONSAFEPATH={enabling!r} did not drop the working directory. If "
+            "CPython has changed which values enable the safe path, the comment "
+            "on SAFE_PATH_VARIABLE and the assertion message that quotes it are "
+            "both now wrong."
+        )
+
+
+def _rule_passes(check: Callable[[Path], None], directory: Path) -> bool:
+    """Did this rule accept the workflows in `directory`?
+
+    Any exception is a rejection, not just `AssertionError`: a rule that blows
+    up on a file it cannot read has still refused to call it clean, and that
+    is the behaviour being measured.
+    """
+    try:
+        check(directory)
+    except Exception:
+        return False
+    return True
 
 
 def test_every_rule_has_a_case_that_proves_it_fires() -> None:
@@ -1968,3 +2136,38 @@ def test_compileall_really_exits_zero_on_a_missing_path(tmp_path: Path) -> None:
     )
 
     assert result.returncode == 0, result
+
+
+def test_a_stale_pycache_hides_a_broken_source_from_compileall_without_f(tmp_path: Path) -> None:
+    """The other premise of the compile rule: why every quoted `compileall`
+    line in this repository carries `-f`.
+
+    `compileall` skips a module whose cached byte-code still looks current,
+    and "current" is decided by the source's mtime — not by whether the source
+    still parses. Restore the old mtime after breaking the file and the plain
+    command reports success on a module that no longer compiles. `-f` forces
+    the recompilation and the exit code moves. Run here rather than asserted
+    in a comment, because a comment about an interpreter's caching rules is
+    the kind of sentence nobody re-checks.
+    """
+    module = tmp_path / "m.py"
+    module.write_text("X = 1\n", encoding="utf-8")
+    stamp = (1_577_836_800, 1_577_836_800)
+    os.utime(module, stamp)
+
+    def compile_it(*flags: str) -> int:
+        return subprocess.run(
+            [sys.executable, "-m", "compileall", "-q", *flags, str(tmp_path)],
+            capture_output=True, text=True,
+        ).returncode
+
+    assert compile_it() == 0, "the control: a module that parses compiles clean"
+
+    module.write_text("def (:\n", encoding="utf-8")
+    os.utime(module, stamp)
+
+    assert compile_it() == 0, (
+        "compileall now rejects a stale cache on its own. Good news: say so on "
+        "the compile steps, which currently explain `-f` by this behaviour."
+    )
+    assert compile_it("-f") == 1, "`-f` did not force the recompilation"

@@ -496,8 +496,12 @@ archive report and dated package as artifacts. The Odds Import page shows the
 latest archive verdict, archive receipt ID, gate receipt ID, and PR/run context.
 
 **Provider Policy PR Gate** and **Full test suite** are both required status
-checks on `main` (read from the repository's branch protection on 2026-09-04),
-so nothing merges with either red. A repository administrator sets that under
+checks on `main`, so nothing merges with either red. Read on 2026-09-05 with
+`gh api repos/cooperross399/epl-betting-lab/branches/main/protection`: both
+contexts required, admins included, force pushes and deletions off — and no
+required review, so the "a reviewer is the backstop" note below describes a
+practice rather than a gate. Nothing in this repository reads that setting, so
+re-read it rather than trusting this paragraph. A repository administrator sets that under
 GitHub **Settings > Rules > Rulesets** (or **Branches > Branch protection
 rules**); the project deliberately does not modify repository rules through an
 API, because branch protection is an administrative decision.

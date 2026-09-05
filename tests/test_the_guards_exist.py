@@ -1,4 +1,9 @@
-"""The hard-rule guards are tracked, non-empty, and cannot be run around.
+"""The hard-rule guards are tracked, non-empty, and hard to run around.
+
+Not impossible. The routes that still work are listed and EXECUTED in
+`test_the_gaps_these_guards_still_have_are_the_ones_written_down`, which goes
+red if one of them is closed and the line is left standing. "Cannot" is the
+word this file will not use about itself.
 
 The audit's cheapest attack on every lab was `git rm` of the guard modules:
 the suite went green with BETTER metrics, because nothing in the suite knew
@@ -24,10 +29,11 @@ Four mechanisms, because no one of them is sufficient:
 * `scripts/refuse_shadow_modules.py` makes that last assertion again as its
   own workflow step, BEFORE the suite. It has to: a tracked `pytest.py` is
   what stops the suite from starting, and a suite that did not start reports
-  nothing. Measured on this branch, with `shadow/pytest.py` tracked and
-  `PYTHONPATH: shadow:src`, `python -m pytest -q` exited 0 having collected
-  nothing with `PYTHONSAFEPATH=1` set, because that variable drops the
-  working directory and not PYTHONPATH.
+  nothing. Measured at c8ebe33, in a worktree with a two-line
+  `shadow/pytest.py` added and `git add`ed:
+  `PYTHONPATH=shadow:src PYTHONSAFEPATH=1 python -m pytest -q` printed one
+  line and exited 0 having collected nothing, because PYTHONSAFEPATH drops
+  the working directory and not PYTHONPATH.
 
 What none of them covers is written down and executed in
 `test_the_gaps_these_guards_still_have_are_the_ones_written_down`.
@@ -60,8 +66,8 @@ REQUIRED_GUARDS: tuple[str, ...] = (
     "tests/test_no_secrets_committed.py",
     # No import of, and no importable, sibling lab.
     "tests/test_no_sibling_lab_import.py",
-    # The required status check cannot be renamed, emptied, narrowed,
-    # disabled or made to swallow a failure.
+    # The required status check: this refuses a rename, an emptying, a
+    # narrowing, a disabling and a swallowed failure in the workflow file.
     "tests/test_workflows.py",
     # This file.
     "tests/test_the_guards_exist.py",
@@ -345,10 +351,12 @@ def test_the_positive_control_collects_both_guards_and_exits_clean() -> None:
 
 
 def test_a_developer_running_one_unrelated_module_is_left_alone() -> None:
-    """The one exemption, stated so it cannot be widened by accident: a
-    positional selection on the command line that contains no guard module
-    enforces no guard module. In CI there is no positional — the workflow
-    linter refuses one — so this exemption never applies there."""
+    """The one exemption, written out so that widening it takes a deliberate
+    edit: a positional selection on the command line that contains no guard
+    module enforces no guard module. The workflow linter refuses a positional
+    on any pytest line, so while that linter is green the CI run reaches this
+    exemption with nothing to match and it does not apply. That is a
+    condition, not a property: it holds because another guard holds."""
     result = _run_pytest("tests/test_value.py")
 
     assert result.returncode == 0, result.stdout + result.stderr
@@ -361,8 +369,9 @@ def test_a_developer_running_one_unrelated_module_is_left_alone() -> None:
 # `python -m pytest` puts the working directory ahead of site-packages, and
 # the workflow adds `src` to PYTHONPATH ahead of it too. So a tracked file
 # with the right name never has to touch the workflow to replace the suite:
-# measured on 8a50474, a two-line `pytest.py` in the repository root made
-# `python -m pytest -q` print one line and exit 0 with every guard green.
+# measured at c8ebe33, in a worktree with a two-line tracked `pytest.py` in
+# the repository root, `PYTHONPATH=src python -m pytest -q` printed one line
+# and exited 0 with no test run and every guard unreported.
 # `sitecustomize.py` is worse: the interpreter imports it before pytest
 # starts, so it can set PYTEST_ADDOPTS from inside the tree.
 #
@@ -484,7 +493,7 @@ def test_the_gate_workflow_declares_a_pythonpath_this_guard_could_read() -> None
 # The conftest's own behaviour, observed in a synthetic tree.
 #
 # A synthetic tree rather than the real one, because these need a guard
-# module to be mutilated and the real guards cannot be. The tree holds a
+# module to be mutilated and the real ones have to stay intact. The tree holds a
 # copy of tests/conftest.py and a stub at each required guard path, so the
 # hook enforces exactly what it enforces in this repository.
 # --------------------------------------------------------------------------
@@ -541,9 +550,11 @@ def test_the_synthetic_tree_is_green_before_it_is_mutilated(tmp_path: Path) -> N
 def test_a_collection_phase_skip_ends_the_session_red(tmp_path: Path, shape: str) -> None:
     """`pytest_runtest_logreport` never sees these: a module that skips itself
     is resolved during COLLECTION and arrives as a CollectReport. That is what
-    made a permanent skip on absent data invisible — measured on 8a50474,
-    either shape on a real test module gave `180 passed, 1 skipped` and exit
-    0."""
+    made a permanent skip on absent data invisible. Measured at f030ec6, the
+    commit before tests/conftest.py existed, with the first shape added to
+    tests/test_books.py: `PYTHONPATH=src python -m pytest -q` went from `1829
+    passed, 11 skipped` to `1817 passed, 12 skipped` and exited 0 both
+    times."""
     tree = _synthetic_tree(tmp_path)
     (tree / "tests" / "test_ordinary.py").write_text(
         shape + "\n\ndef test_something() -> None:\n    assert True\n", encoding="utf-8"
@@ -583,6 +594,26 @@ def test_a_skipif_marker_that_is_true_ends_the_session_red(tmp_path: Path) -> No
     result = _run_in(tree)
 
     assert result.returncode == 1, result.stdout + result.stderr
+
+
+def test_collect_ignore_of_a_guard_module_ends_the_session_red(tmp_path: Path) -> None:
+    """The other half of the `collect_ignore` line in the gaps ledger.
+
+    That ledger records `collect_ignore` dropping a NON-guard module as a
+    route that is still open, and it is. This is the half that is closed:
+    pointed at a guard module the same two lines produce a module that
+    contributed no test, and the per-test floor ends the session with status
+    1. Both halves are run, so neither sentence rests on memory.
+    """
+    tree = _synthetic_tree(tmp_path)
+    with (tree / "tests" / "conftest.py").open("a", encoding="utf-8") as handle:
+        handle.write('\n\ncollect_ignore = ["test_workflows.py"]\n')
+
+    result = _run_in(tree)
+
+    assert result.returncode == 1, result.stdout + result.stderr
+    assert "contributed no test" in result.stdout, result.stdout
+    assert "tests/test_workflows.py" in result.stdout, result.stdout
 
 
 def test_deselecting_one_test_from_a_guard_ends_the_session_red(tmp_path: Path) -> None:
@@ -644,10 +675,11 @@ def test_a_narrowing_option_is_read_from_the_parsed_config(
 
 
 def test_a_developer_selecting_one_unrelated_module_may_still_narrow_it(tmp_path: Path) -> None:
-    """The exemption, stated so it cannot be widened by accident and so its
-    width is not guessed at: a positional selection holding no guard module
-    enforces no guard module, and the narrowing check is silent there too.
-    In CI there is no positional — the workflow linter refuses one."""
+    """The exemption, written out so that widening it takes a deliberate edit
+    and so that its width is not guessed at: a positional selection holding no
+    guard module enforces no guard module, and the narrowing check is silent
+    there too. In CI there is no positional, because the workflow linter
+    refuses one — a condition that holds while that linter holds."""
     tree = _synthetic_tree(tmp_path)
     (tree / "tests" / "test_ordinary.py").write_text(STUB_GUARD, encoding="utf-8")
 
@@ -661,10 +693,12 @@ def test_an_option_value_that_names_a_file_is_not_a_developer_selection(tmp_path
     positional destination pytest parsed.
 
     Reading it by walking the raw argv and keeping every word that names an
-    existing file made the exemption reachable by anyone: measured on
-    8a50474, `pytest --collect-only --ignore tests/test_books.py -k "not
-    no_secrets_committed"` exited 0 with none of the secrets guard's tests
-    collected, because `--ignore`'s value was mistaken for the selection.
+    existing file would make the exemption reachable by anyone: under such a
+    walk, `pytest --ignore tests/test_books.py -k "not no_secrets_committed"`
+    would exit 0 with none of the secrets guard's tests collected, because
+    `--ignore`'s value would be mistaken for the developer's selection. No
+    commit here holds that walk, so nothing re-measures it; what is measured
+    below is that the code that IS here refuses the shape.
     """
     tree = _synthetic_tree(tmp_path)
     (tree / "tests" / "test_ordinary.py").write_text(STUB_GUARD, encoding="utf-8")
@@ -704,11 +738,12 @@ def _gate_steps() -> list[dict]:
 def test_the_workflow_refuses_a_shadow_before_it_runs_the_suite() -> None:
     """The assertions above cannot run when the shadow is doing its job: a
     tracked pytest.py is what stops the suite from starting, and a suite that
-    did not start reports nothing. Measured on this branch, with a tracked
-    `shadow/pytest.py` and `PYTHONPATH: shadow:src`: `python -m pytest -q`
-    exited 0 having collected nothing, PYTHONSAFEPATH=1 included, because
-    PYTHONSAFEPATH drops the working directory and not PYTHONPATH. So the
-    check also runs as its own step, before the suite, in the workflow.
+    did not start reports nothing. Measured at c8ebe33, in a worktree with a
+    two-line `shadow/pytest.py` added and `git add`ed:
+    `PYTHONPATH=shadow:src PYTHONSAFEPATH=1 python -m pytest -q` exited 0
+    having collected nothing — PYTHONSAFEPATH included, because it drops the
+    working directory and not PYTHONPATH. So the check also runs as its own
+    step, before the suite, in the workflow.
     """
     assert _tracked("scripts/refuse_shadow_modules.py")
     steps = _gate_steps()
@@ -831,13 +866,19 @@ def test_the_gaps_these_guards_still_have_are_the_ones_written_down(
     is to close it and delete the line, and a failure here means someone
     closed one.
 
-    Executed below, so the ledger cannot rot:
+    The first three are EXECUTED below, so those three cannot rot: if one is
+    closed, this test goes red. The rest are stated and not executed, and
+    those CAN rot — nothing re-checks them, and a reader should treat them as
+    the last thing somebody looked at rather than as the current state.
 
-    * `collect_ignore` in tests/conftest.py drops whole modules with no skip
-      report, no deselection and no narrowing option for the conftest to read.
-      Measured in a clone of this branch: 2062 collected became 2050, exit 0.
-      What stops it is that tests/conftest.py is one tracked, reviewed file
-      that four guards assert the contents of.
+    * `collect_ignore` in tests/conftest.py drops a module that is NOT one of
+      the four guards, with no skip report, no deselection and no narrowing
+      option for the conftest to read: the run is smaller and still exit 0.
+      On a GUARD module it is caught, because that module then contributes no
+      test and the per-test floor fires —
+      `test_collect_ignore_of_a_guard_module_ends_the_session_red` runs that
+      half. What stops the non-guard half is that tests/conftest.py is one
+      tracked, reviewed file that four guards assert the contents of.
     * A guard test whose BODY is replaced by `pass` still contributes an item
       under its own name, so the per-test floor counts it. The floor knows
       that a test ran, not that it asserted anything.
@@ -850,16 +891,28 @@ def test_the_gaps_these_guards_still_have_are_the_ones_written_down(
     * A commit that deletes all four guard modules AND tests/conftest.py in
       one change is green: each guard vouches for the manifest and the
       manifest for each guard, but nothing outside the suite vouches for the
-      suite. Branch protection and a reviewer are that backstop.
+      suite. Not a guess — measured at c8ebe33, in a worktree with those five
+      files removed: `PYTHONPATH=src PYTHONSAFEPATH=1 python -m pytest -q`
+      exited 0. It is stated here rather than executed because the test that
+      would report it is one of the files being deleted. Branch protection and
+      a reviewer are the backstop, and only the first of those two is enforced
+      anywhere: see the note below.
     * A pytest plugin added to requirements.txt is loaded before the guards
       are counted and can report any outcome it likes from
       `pytest_runtest_protocol`. It is a reviewed line in a reviewed file.
     * Branch protection itself is a repository setting. Nothing here reads
-      it; `REQUIRED_CHECK` is a value verified against the settings by hand on
-      2026-09-04, and a change there is invisible to every test in this repo.
+      it; `REQUIRED_CHECK` is a value checked against the settings by hand
+      with `gh api repos/cooperross399/epl-betting-lab/branches/main/protection`
+      on 2026-09-05, and a change there is invisible to every test in this
+      repository. The same read shows no required review on `main`, so the
+      "a reviewer is the backstop" lines elsewhere describe a practice and
+      not a gate.
     * `concurrency: cancel-in-progress: true` on the gate workflow is not
-      refused. It was tried: a cancelled check is not reported as a passing
-      one, so it makes the check noisy rather than falsely green.
+      refused, on the understanding that GitHub reports a cancelled check as
+      cancelled rather than as a pass, which makes the check noisy rather
+      than falsely green. That is a statement about GitHub's reporting; no
+      test in this repository can check it, and if it is wrong this is a
+      hole rather than a note.
     * PYTHONSAFEPATH drops the working directory and NOT the PYTHONPATH
       entries. The shadow rules know four basenames and three directory
       names; a tracked module under any other importable name on a declared

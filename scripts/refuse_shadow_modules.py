@@ -2,9 +2,14 @@
 
 `python -m pytest` searches the working directory before site-packages, and
 the workflow puts `src` on PYTHONPATH ahead of it as well. So a tracked file
-called `pytest.py` in either place IS the suite: measured on 8a50474, a
-two-line `pytest.py` in the repository root made `python -m pytest -q` print
-one line and exit 0 with every check green. `sitecustomize.py` is worse — the
+called `pytest.py` in either place IS the suite. Measured at c8ebe33, in a
+worktree with a two-line tracked `pytest.py` in the repository root:
+`PYTHONPATH=src python -m pytest -q` printed one line and exited 0 with no
+test reached. On PYTHONPATH it survives the interpreter flag — the same
+worktree with `shadow/pytest.py` and
+`PYTHONPATH=shadow:src PYTHONSAFEPATH=1 python -m pytest -q` also exited 0
+having collected nothing, because PYTHONSAFEPATH drops the working directory
+and not PYTHONPATH. `sitecustomize.py` is worse — the
 interpreter imports it before it reaches pytest at all, so it can set
 PYTEST_ADDOPTS from inside the tree.
 

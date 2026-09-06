@@ -1,4 +1,4 @@
-## Sunday 06 September, 12:42 UTC — scheduled run
+## Sunday 06 September, 13:47 UTC — scheduled run
 
 Something went wrong in this run.
 
@@ -9,7 +9,7 @@ Something went wrong in this run.
 
 The card below was still built, from whatever evidence was available. Treat it with that in mind.
 
-Provider quota: 1117458 (about 18023 more runs)
+Provider quota: 1117344 (about 18021 more runs)
 
 ### No card was produced
 
@@ -32,4 +32,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/34033828596)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/34037081795)

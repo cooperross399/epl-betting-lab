@@ -18,6 +18,14 @@ import sys
 from datetime import date
 from pathlib import Path
 
+#: Football-Data failed and the slate was rebuilt from the provider staging.
+#: Non-zero because an outage is a degradation whether or not the card
+#: survived it, but distinct from a plain 1 so the caller can say which
+#: fixtures the card ended up about without grepping this script's prose.
+#: Not 2: argparse exits 2 on a usage error, and a mistyped flag must not be
+#: mistaken for a rescued slate.
+EXIT_RESCUED_FROM_STAGING = 4
+
 import pandas as pd
 
 from epl_betting_lab.config import MANUAL_DIR, STAGING_DIR
@@ -133,14 +141,14 @@ def main() -> int:
                 f"Dry run: {len(staged)} fixture(s) from the provider staging "
                 f"({window}) would have been written to `{args.path}`."
             )
-            return 1
+            return EXIT_RESCUED_FROM_STAGING
         args.path.parent.mkdir(parents=True, exist_ok=True)
         staged.to_csv(args.path, index=False)
         print(
             f"Wrote {len(staged)} fixture(s) from the provider staging to "
             f"`{args.path}`: {window}."
         )
-        return 1
+        return EXIT_RESCUED_FROM_STAGING
 
     before = 0
     if args.path.is_file():

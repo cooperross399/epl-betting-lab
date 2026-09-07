@@ -152,7 +152,8 @@ def test_an_outage_falls_back_to_the_provider_slate_but_stays_degraded(tmp_path,
     monkeypatch.setattr(script, "fetch_upcoming_fixtures", lambda: (_ for _ in ()).throw(mod.FixturesUnavailable("503")))
     monkeypatch.setattr(sys, "argv", ["refresh", "--path", str(slate), "--staging-fixtures", str(staged)])
 
-    assert script.main() == 1, "an outage is a degradation even when the slate is rescued"
+    assert script.main() == script.EXIT_RESCUED_FROM_STAGING, "an outage is a degradation even when the slate is rescued"
+    assert script.EXIT_RESCUED_FROM_STAGING != 0
     written = slate.read_text(encoding="utf-8")
     assert "Arsenal,Chelsea" in written
     assert "Stale" not in written and "Old,Match" not in written
@@ -170,7 +171,7 @@ def test_a_slate_rescued_from_an_outage_says_so_and_not_that_the_feed_was_empty(
     monkeypatch.setattr(script, "fetch_upcoming_fixtures", lambda: (_ for _ in ()).throw(mod.FixturesUnavailable("503")))
     monkeypatch.setattr(sys, "argv", ["refresh", "--path", str(slate), "--staging-fixtures", str(staged)])
 
-    assert script.main() == 1
+    assert script.main() == script.EXIT_RESCUED_FROM_STAGING
     written = slate.read_text(encoding="utf-8")
     assert "from provider staging: Football-Data was unreachable" in written
     assert "listed no upcoming fixture" not in written
@@ -237,6 +238,16 @@ def test_a_dry_run_during_an_outage_writes_nothing(tmp_path, monkeypatch, capsys
     monkeypatch.setattr(script, "fetch_upcoming_fixtures", lambda: (_ for _ in ()).throw(mod.FixturesUnavailable("503")))
     monkeypatch.setattr(sys, "argv", ["refresh", "--path", str(slate), "--staging-fixtures", str(staged), "--dry-run"])
 
-    assert script.main() == 1
+    assert script.main() == script.EXIT_RESCUED_FROM_STAGING
     assert "Dry run" in capsys.readouterr().out
     assert slate.read_text(encoding="utf-8") == "date,home_team,away_team,notes\n2026-09-04,A,B,\n"
+
+
+def test_a_rescued_slate_and_a_stale_one_do_not_share_an_exit_code():
+    """Both are degraded, but the run summary has to say which fixtures the
+    card ended up about, and the workflow reads that from the code alone."""
+    script = _script()
+    assert script.EXIT_RESCUED_FROM_STAGING not in (0, 1), (
+        "0 would hide the outage; 1 is the code for a slate that was NOT rescued"
+    )
+    assert script.EXIT_RESCUED_FROM_STAGING != 2, "argparse exits 2 on a usage error"

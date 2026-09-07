@@ -1155,10 +1155,89 @@ def test_the_slate_gets_a_second_pass_once_provider_staging_exists() -> None:
     """
     text = _workflow()
     prices = text.index("Refetch provider prices")
-    second = text.index("Fill the slate from the provider if Football-Data had nothing")
+    second = text.index("Fill the slate from the provider if Football-Data failed us")
     assert second > prices
-    block = text.split("- name: Fill the slate from the provider if Football-Data had nothing", 1)[1].split("- name:", 1)[0]
+    block = text.split("- name: Fill the slate from the provider if Football-Data failed us", 1)[1].split("- name:", 1)[0]
     assert "refresh_upcoming_fixtures.py" in block and "continue-on-error: true" in block
+
+
+def test_the_second_pass_reports_whether_it_actually_rebuilt_the_slate() -> None:
+    """The exit code cannot answer this, on purpose.
+
+    `refresh_upcoming_fixtures.py` exits non-zero on a Football-Data outage
+    whether or not the staging fallback supplied fixtures, so that a rescued
+    run still reads as degraded. That leaves the health step unable to tell a
+    rescued slate from a stale one unless the step measures it.
+    """
+    text = _workflow()
+    block = text.split("- name: Fill the slate from the provider if Football-Data failed us", 1)[1].split("- name:", 1)[0]
+
+    from epl_betting_lab.config import MANUAL_DIR  # noqa: F401  (guard below)
+
+    assert "id: fixtures_fallback" in block
+    assert "rebuilt=true" in block and "rebuilt=false" in block
+    # Read from the exit code, not out of what the script printed: a message
+    # this workflow greps for is a message the script can reword without
+    # anything noticing.
+    assert f'-eq {_rescued_exit_code()}' in block
+    assert "grep " not in block and "| grep" not in block
+    # The step must still report the failure it just worked around.
+    assert "exit $status" in block
+
+
+def _rescued_exit_code() -> int:
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "refresh_upcoming_fixtures", PROJECT_ROOT / "scripts" / "refresh_upcoming_fixtures.py"
+    )
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod.EXIT_RESCUED_FROM_STAGING
+
+
+def test_the_workflow_and_the_script_agree_on_the_rescued_exit_code() -> None:
+    """The number is written in two files. If the script moves it and the
+    workflow does not, every rescued slate is reported as a stale one and
+    nothing fails — the run is degraded either way, which is exactly the kind
+    of disagreement that reports fine while nothing lands."""
+    block = _workflow().split(
+        "- name: Fill the slate from the provider if Football-Data failed us", 1
+    )[1].split("- name:", 1)[0]
+
+    code = _rescued_exit_code()
+    assert code != 0, "a rescued slate must still read as degraded"
+    assert code != 2, "argparse exits 2 on a usage error"
+    assert f'[ "$status" -eq {code} ]' in block
+
+
+def test_the_degradation_message_is_decided_by_the_second_pass() -> None:
+    """The first pass runs before any quota is spent, so on a fresh runner
+    during an outage it is *expected* to fail — the provider's staged fixtures
+    cannot exist yet. Reporting it would announce a fault the second pass went
+    on to repair."""
+    text = _workflow()
+    health = text.split("- name: Record what went wrong", 1)[1].split("- name:", 1)[0]
+
+    assert "steps.fixtures_fallback.outcome" in health
+    assert health.index("steps.fixtures_fallback.outcome") < health.index("steps.fixtures.outcome"), (
+        "the second pass decides; the first is only the fallback when the second never ran"
+    )
+
+
+def test_a_rescued_slate_is_not_reported_as_the_previously_stored_one() -> None:
+    """Run #80 could not have hit this, because the slate could not yet be
+    rebuilt from staging. Now that it can, the old unconditional line would
+    have told the reader the card was running on fixtures weeks old at the
+    exact moment it was running on the right ones."""
+    text = _workflow()
+    health = text.split("- name: Record what went wrong", 1)[1].split("- name:", 1)[0]
+
+    assert "steps.fixtures_fallback.outputs.rebuilt" in health
+    assert "the provider's staged fixtures were used instead" in health
+    # The old wording survives, but only on the branch where it is true.
+    stale = "and no staged fixtures were on hand; the previously stored fixtures were used"
+    assert stale in health
+    assert "no fixture in window" in health
 
 
 

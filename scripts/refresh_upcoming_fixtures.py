@@ -5,9 +5,11 @@ The card can only look as far ahead as this file goes, and while it was typed
 by hand that was a standing appointment somebody had to keep. Now it is
 fetched. Football-Data is public CSV over HTTP: no key, no quota, no secret.
 
-The file is only ever replaced by a fetch that produced fixtures. A bad day at
-Football-Data leaves the previous slate in place and says so, because a slate
-erased is worse than a slate that is a few days old.
+The file is only ever replaced by fixtures that were actually produced. A bad
+day at Football-Data — a feed listing nothing, or a feed that will not answer
+at all — falls back to the provider's staged fixtures, and failing that leaves
+the previous slate in place and says so, because a slate erased is worse than a
+slate that is a few days old.
 """
 from __future__ import annotations
 
@@ -26,8 +28,18 @@ from epl_betting_lab.data.fetch_fixtures import (
 )
 
 
-def staged_provider_fixtures(path: Path, today: date | None = None) -> pd.DataFrame | None:
-    """Upcoming fixtures from the provider staging, in the slate's shape."""
+def staged_provider_fixtures(
+    path: Path,
+    today: date | None = None,
+    reason: str = "Football-Data listed no upcoming fixture",
+) -> pd.DataFrame | None:
+    """Upcoming fixtures from the provider staging, in the slate's shape.
+
+    `reason` goes in the notes column. Two different failures now reach here —
+    a feed that listed nothing and a feed that could not be read at all — and
+    a slate that names the wrong one is a slate lying about its own
+    provenance.
+    """
     if not path.is_file():
         return None
     try:
@@ -45,7 +57,7 @@ def staged_provider_fixtures(path: Path, today: date | None = None) -> pd.DataFr
         "date": [d.isoformat() for d in parsed[keep.index]],
         "home_team": keep["home_team"].astype(str).str.strip().values,
         "away_team": keep["away_team"].astype(str).str.strip().values,
-        "notes": "from provider staging: Football-Data listed no upcoming fixture",
+        "notes": f"from provider staging: {reason}",
     })
     return out.drop_duplicates(["date", "home_team", "away_team"]).sort_values(["date", "home_team"]).reset_index(drop=True)
 
@@ -62,7 +74,7 @@ def main() -> int:
         "--staging-fixtures",
         type=Path,
         default=STAGING_DIR / "upcoming_fixtures_staging.csv",
-        help="The provider's staged fixtures, used only when Football-Data lists none.",
+        help="The provider's staged fixtures, used only when Football-Data fails us.",
     )
     parser.add_argument(
         "--dry-run",
@@ -94,9 +106,40 @@ def main() -> int:
         fixtures = staged
         print(f"Using {len(fixtures)} upcoming fixture(s) from the provider staging instead.")
     except FixturesUnavailable as exc:
+        # Football-Data is down. The fallback above was wired to the quiet-week
+        # branch only, so on 2026-09-07 a 503 on both endpoints walked straight
+        # past ten correct staged fixtures, left the committed slate — weeks
+        # old — in place, and the card was blocked at validation with 160
+        # `fixture_not_found` rows. An outage and an empty feed are different
+        # faults with the same consequence for the slate, so both fall back.
         print(f"Fixtures were not refreshed: {exc}")
-        if args.path.is_file():
-            print(f"The previous slate at `{args.path}` was left in place.")
+        staged = staged_provider_fixtures(
+            args.staging_fixtures, reason="Football-Data was unreachable"
+        )
+        if staged is None or staged.empty:
+            if args.path.is_file():
+                print(f"The previous slate at `{args.path}` was left in place.")
+            return 1
+
+        # Written and returned here rather than falling through to the shared
+        # write path below, which returns 0. It looks like duplication and is
+        # not: an outage is a real degradation whether or not the slate was
+        # rescued, and the run summary has to keep saying so. Falling through
+        # would rescue the card and hide the fault that made the rescue
+        # necessary.
+        window = f"{staged['date'].iloc[0]} through {staged['date'].iloc[-1]}"
+        if args.dry_run:
+            print(
+                f"Dry run: {len(staged)} fixture(s) from the provider staging "
+                f"({window}) would have been written to `{args.path}`."
+            )
+            return 1
+        args.path.parent.mkdir(parents=True, exist_ok=True)
+        staged.to_csv(args.path, index=False)
+        print(
+            f"Wrote {len(staged)} fixture(s) from the provider staging to "
+            f"`{args.path}`: {window}."
+        )
         return 1
 
     before = 0

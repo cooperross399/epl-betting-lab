@@ -132,3 +132,111 @@ def test_without_any_staged_fixtures_the_previous_slate_stands(tmp_path, monkeyp
     assert script.main() == 0
     assert "2026-09-04,A,B" in slate.read_text(encoding="utf-8")
 
+
+
+def test_an_outage_falls_back_to_the_provider_slate_but_stays_degraded(tmp_path, monkeypatch):
+    """On 2026-09-07 Football-Data answered 503 on both endpoints. The fallback
+    added after 2026-09-01 was wired to the quiet-week branch only, so the
+    outage walked straight past ten correct staged fixtures and the card was
+    blocked with 160 `fixture_not_found` rows.
+
+    Rescuing the slate must not also hide the outage: the exit code stays
+    non-zero so the run summary keeps reporting a degraded run."""
+    import sys
+    from epl_betting_lab.data import fetch_fixtures as mod
+    script = _script()
+    staged = tmp_path / "upcoming_fixtures_staging.csv"
+    staged.write_text("date,home_team,away_team\n2020-01-01,Old,Match\n2099-09-04,Arsenal,Chelsea\n", encoding="utf-8")
+    slate = tmp_path / "upcoming_fixtures.csv"
+    slate.write_text("date,home_team,away_team,notes\n2026-08-21,Stale,Slate,\n", encoding="utf-8")
+    monkeypatch.setattr(script, "fetch_upcoming_fixtures", lambda: (_ for _ in ()).throw(mod.FixturesUnavailable("503")))
+    monkeypatch.setattr(sys, "argv", ["refresh", "--path", str(slate), "--staging-fixtures", str(staged)])
+
+    assert script.main() == 1, "an outage is a degradation even when the slate is rescued"
+    written = slate.read_text(encoding="utf-8")
+    assert "Arsenal,Chelsea" in written
+    assert "Stale" not in written and "Old,Match" not in written
+
+
+def test_a_slate_rescued_from_an_outage_says_so_and_not_that_the_feed_was_empty(tmp_path, monkeypatch):
+    """Two failures now reach the staging fallback. A slate that names the
+    wrong one misreports its own provenance."""
+    import sys
+    from epl_betting_lab.data import fetch_fixtures as mod
+    script = _script()
+    staged = tmp_path / "upcoming_fixtures_staging.csv"
+    staged.write_text("date,home_team,away_team\n2099-09-04,Arsenal,Chelsea\n", encoding="utf-8")
+    slate = tmp_path / "upcoming_fixtures.csv"
+    monkeypatch.setattr(script, "fetch_upcoming_fixtures", lambda: (_ for _ in ()).throw(mod.FixturesUnavailable("503")))
+    monkeypatch.setattr(sys, "argv", ["refresh", "--path", str(slate), "--staging-fixtures", str(staged)])
+
+    assert script.main() == 1
+    written = slate.read_text(encoding="utf-8")
+    assert "from provider staging: Football-Data was unreachable" in written
+    assert "listed no upcoming fixture" not in written
+
+
+def test_a_quiet_week_still_reports_the_feed_listed_nothing(tmp_path, monkeypatch):
+    """The default reason must not have drifted onto the outage wording."""
+    import sys
+    from epl_betting_lab.data import fetch_fixtures as mod
+    script = _script()
+    staged = tmp_path / "upcoming_fixtures_staging.csv"
+    staged.write_text("date,home_team,away_team\n2099-09-04,Arsenal,Chelsea\n", encoding="utf-8")
+    slate = tmp_path / "upcoming_fixtures.csv"
+    monkeypatch.setattr(script, "fetch_upcoming_fixtures", lambda: (_ for _ in ()).throw(mod.NoUpcomingFixtures("quiet")))
+    monkeypatch.setattr(sys, "argv", ["refresh", "--path", str(slate), "--staging-fixtures", str(staged)])
+
+    assert script.main() == 0
+    assert "from provider staging: Football-Data listed no upcoming fixture" in slate.read_text(encoding="utf-8")
+
+
+def test_an_outage_with_no_staging_behaves_exactly_as_before(tmp_path, monkeypatch, capsys):
+    """The first invocation on a fresh runner: staging does not exist yet
+    because no quota has been spent. The fallback must do nothing at all."""
+    import sys
+    from epl_betting_lab.data import fetch_fixtures as mod
+    script = _script()
+    slate = tmp_path / "upcoming_fixtures.csv"
+    slate.write_text("date,home_team,away_team,notes\n2026-09-04,A,B,\n", encoding="utf-8")
+    monkeypatch.setattr(script, "fetch_upcoming_fixtures", lambda: (_ for _ in ()).throw(mod.FixturesUnavailable("503")))
+    monkeypatch.setattr(sys, "argv", ["refresh", "--path", str(slate), "--staging-fixtures", str(tmp_path / "missing.csv")])
+
+    assert script.main() == 1
+    assert "was left in place" in capsys.readouterr().out
+    assert slate.read_text(encoding="utf-8") == "date,home_team,away_team,notes\n2026-09-04,A,B,\n"
+
+
+def test_an_outage_whose_staging_holds_nothing_upcoming_leaves_the_slate(tmp_path, monkeypatch):
+    """Staging exists but every fixture in it has already been played — the
+    same fact as no staging at all, and it must not overwrite the slate."""
+    import sys
+    from epl_betting_lab.data import fetch_fixtures as mod
+    script = _script()
+    staged = tmp_path / "upcoming_fixtures_staging.csv"
+    staged.write_text("date,home_team,away_team\n2020-01-01,Old,Match\n", encoding="utf-8")
+    slate = tmp_path / "upcoming_fixtures.csv"
+    slate.write_text("date,home_team,away_team,notes\n2026-09-04,A,B,\n", encoding="utf-8")
+    monkeypatch.setattr(script, "fetch_upcoming_fixtures", lambda: (_ for _ in ()).throw(mod.FixturesUnavailable("503")))
+    monkeypatch.setattr(sys, "argv", ["refresh", "--path", str(slate), "--staging-fixtures", str(staged)])
+
+    assert script.main() == 1
+    assert slate.read_text(encoding="utf-8") == "date,home_team,away_team,notes\n2026-09-04,A,B,\n"
+
+
+def test_a_dry_run_during_an_outage_writes_nothing(tmp_path, monkeypatch, capsys):
+    """The rescue path is a second write path, so it needs the dry-run guard
+    the shared one has, or `--dry-run` quietly stops being a dry run."""
+    import sys
+    from epl_betting_lab.data import fetch_fixtures as mod
+    script = _script()
+    staged = tmp_path / "upcoming_fixtures_staging.csv"
+    staged.write_text("date,home_team,away_team\n2099-09-04,Arsenal,Chelsea\n", encoding="utf-8")
+    slate = tmp_path / "upcoming_fixtures.csv"
+    slate.write_text("date,home_team,away_team,notes\n2026-09-04,A,B,\n", encoding="utf-8")
+    monkeypatch.setattr(script, "fetch_upcoming_fixtures", lambda: (_ for _ in ()).throw(mod.FixturesUnavailable("503")))
+    monkeypatch.setattr(sys, "argv", ["refresh", "--path", str(slate), "--staging-fixtures", str(staged), "--dry-run"])
+
+    assert script.main() == 1
+    assert "Dry run" in capsys.readouterr().out
+    assert slate.read_text(encoding="utf-8") == "date,home_team,away_team,notes\n2026-09-04,A,B,\n"

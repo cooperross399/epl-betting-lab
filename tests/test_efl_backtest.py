@@ -131,6 +131,44 @@ class TestAWrongProbabilityKeyCannotPassInSilence:
                 assert key in returned, f"{market}.{selection} asks for {key!r}"
 
 
+class TestItMeasuresTheConfigurationTheCardActuallyRuns:
+    """The card does not fit one model. Measuring one and reporting it against
+    a card that runs two is the same fault as measuring a blend and betting
+    goals — it was in the first version of this module, for `1x2` and
+    `draw_no_bet`, which the card prices on the unadjusted legacy ratio."""
+
+    def test_every_measurable_market_names_the_config_the_card_uses(self):
+        from epl_betting_lab.reports.efl_backtest import (
+            CARD_CONFIG_FOR_MARKET,
+            MEASURABLE_MARKETS,
+            RATING_CONFIGS,
+        )
+
+        for market in MEASURABLE_MARKETS:
+            assert market in CARD_CONFIG_FOR_MARKET, market
+            assert CARD_CONFIG_FOR_MARKET[market] in RATING_CONFIGS
+
+    def test_the_mapping_matches_the_model_module_rather_than_itself(self):
+        """Pinned against the card's own constants, so a change there fails
+        here instead of quietly making this report answer the wrong question."""
+        from epl_betting_lab.models.poisson_goals import (
+            CARD_RATINGS,
+            TOTALS_RATINGS,
+        )
+        from epl_betting_lab.reports.efl_backtest import RATING_CONFIGS
+
+        legacy = RATING_CONFIGS["legacy_goals"]
+        assert legacy.opponent_adjusted == CARD_RATINGS.opponent_adjusted
+        assert legacy.half_life_days == CARD_RATINGS.half_life_days
+
+        adjusted = RATING_CONFIGS["adjusted_goals"]
+        assert adjusted.opponent_adjusted == TOTALS_RATINGS.opponent_adjusted
+        assert adjusted.half_life_days == TOTALS_RATINGS.half_life_days
+        # The one deliberate difference, and the whole reason this module exists.
+        assert TOTALS_RATINGS.goal_source == "blend"
+        assert adjusted.goal_source == "goals"
+
+
 class TestItIsHonestAboutBeingADifferentModel:
     def test_the_config_asks_for_goals_not_a_blend(self):
         """Asking for the blend would not fail. It would silently produce this

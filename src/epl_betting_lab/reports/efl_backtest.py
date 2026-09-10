@@ -144,19 +144,37 @@ class EflBacktestResult:
     matches_bet: int = 0
 
 
-def _goals_only_config() -> RatingConfig:
-    """The card's rating shape, with the one thing the EFL cannot have removed.
+#: The card does not fit one model. `total_2_5` and `btts` are priced on
+#: TOTALS_RATINGS/BTTS_RATINGS — opponent-adjusted, a 365-day half life, a 70/30
+#: xG blend — while `1x2` and `draw_no_bet` are priced on
+#: `CARD_RATINGS = RatingConfig.legacy()`, which is the unadjusted ratio with no
+#: time decay at all. Measuring one config and reporting it against a card that
+#: runs two is the same fault this module was written to avoid, so both are run
+#: and both are reported.
+RATING_CONFIGS = {
+    "adjusted_goals": RatingConfig(
+        opponent_adjusted=True, half_life_days=365, goal_source="goals"
+    ),
+    "legacy_goals": RatingConfig.legacy(),
+}
 
-    `RatingConfig.btts()` and friends ask for `goal_source="blend"`. Asking for
-    it here would not fail — it would silently produce a goals model, because
-    every EFL row has NaN xG. So goals are requested explicitly, and the report
-    says the model is not the card's.
+#: Which config the live card actually uses for each market it bets, so the
+#: report can point at the row that answers the question.
+CARD_CONFIG_FOR_MARKET = {
+    "1x2": "legacy_goals",
+    "draw_no_bet": "legacy_goals",
+    "total_2_5": "adjusted_goals",
+}
+
+
+def _goals_only_config() -> RatingConfig:
+    """The totals/BTTS rating shape, with the one thing the EFL cannot have.
+
+    `TOTALS_RATINGS` and `BTTS_RATINGS` ask for `goal_source="blend"`. Asking
+    for it here would not fail — it would silently produce this same goals
+    model, because every EFL row has NaN xG. So goals are requested explicitly.
     """
-    return RatingConfig(
-        opponent_adjusted=True,
-        half_life_days=365,
-        goal_source="goals",
-    )
+    return RATING_CONFIGS["adjusted_goals"]
 
 
 def _decimal(value: object) -> float:
@@ -214,6 +232,7 @@ def run_division(
     *,
     min_training: int = MIN_TRAINING_MATCHES,
     price_sets: tuple[PriceSet, ...] = PRICE_SETS,
+    ratings: str = "adjusted_goals",
 ) -> EflBacktestResult:
     """Walk forward through one division, betting only on what was already known.
 
@@ -251,7 +270,7 @@ def run_division(
             continue
         if trained_from is None:
             trained_from = day
-        model = PoissonGoalsModel().fit(history, config=_goals_only_config())
+        model = PoissonGoalsModel().fit(history, config=RATING_CONFIGS[ratings])
         today = frame[frame["date"] == day]
 
         for _, match in today.iterrows():
@@ -286,6 +305,7 @@ def run_division(
                         rows.append(
                             {
                                 "division": division,
+                                "ratings": ratings,
                                 "date": match["date"],
                                 "home_team": home,
                                 "away_team": away,
@@ -382,14 +402,18 @@ def summarize(bets: pd.DataFrame, *, threshold: float = HEADLINE_THRESHOLD) -> p
     if picked.empty:
         return pd.DataFrame()
     out = []
-    keys = ["division", "price_set", "market"]
-    for (division, price_set, market), group in picked.groupby(keys, sort=True):
+    if "ratings" not in picked.columns:
+        picked = picked.assign(ratings="adjusted_goals")
+    keys = ["ratings", "division", "price_set", "market"]
+    for (ratings, division, price_set, market), group in picked.groupby(keys, sort=True):
         low, high, above = bootstrap_interval(group)
         out.append(
             {
+                "ratings": ratings,
                 "division": division,
                 "price_set": price_set,
                 "market": market,
+                "card_config": CARD_CONFIG_FOR_MARKET.get(market) == ratings,
                 "bets": len(group),
                 "matches": group.groupby(["date", "home_team", "away_team"]).ngroups,
                 "staked": float(len(group)),
@@ -513,6 +537,33 @@ def render(bets: pd.DataFrame, summary: pd.DataFrame) -> str:
         f"- probability the true ROI is above zero: **{above:.1%}**",
         "",
     ]
+
+    if "ratings" in bets.columns and bets["ratings"].nunique() > 1:
+        lines += [
+            "## The card does not fit one model, so both are measured",
+            "",
+            "`total_2_5` and `btts` are priced on TOTALS_RATINGS — opponent "
+            "adjusted, 365-day half life. `1x2` and `draw_no_bet` are priced on "
+            "`CARD_RATINGS = RatingConfig.legacy()`, the unadjusted ratio with no "
+            "time decay. Measuring one and reporting it against a card that runs "
+            "two is the fault this module exists to avoid, so the row marked "
+            "**card** below is the one that answers the question for that market; "
+            "the other is a robustness check.",
+            "",
+            "| Market | Ratings | Bets | ROI | 95% interval | P(>0) | |",
+            "|:--|:--|--:|--:|:--|--:|:--|",
+        ]
+        pooled = closing[closing["edge"] >= HEADLINE_THRESHOLD]
+        for (market, ratings), group in pooled.groupby(["market", "ratings"], sort=True):
+            band_low, band_high, band_above = bootstrap_interval(group)
+            is_card = CARD_CONFIG_FOR_MARKET.get(market) == ratings
+            lines.append(
+                f"| `{market}` | {ratings} | {len(group):,} | "
+                f"{group['profit'].mean() * 100:+.2f}% | "
+                f"{band_low:+.2f}% to {band_high:+.2f}% | {band_above:.1%} | "
+                f"{'**card**' if is_card else ''} |"
+            )
+        lines.append("")
 
     lines += ["## By division and market", "", "Closing average, edge >= "
               f"{HEADLINE_THRESHOLD * 100:.0f}%. An interval that excludes zero is a "

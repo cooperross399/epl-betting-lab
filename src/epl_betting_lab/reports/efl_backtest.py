@@ -113,7 +113,31 @@ OPENING_AVERAGE = PriceSet(
     handicap_column="AHh",
 )
 
-PRICE_SETS = (CLOSING_AVERAGE, OPENING_AVERAGE)
+CLOSING_BEST = PriceSet(
+    key="closing_best",
+    label="best of the panel at the close",
+    columns={
+        "1x2": {"home": "MaxCH", "draw": "MaxCD", "away": "MaxCA"},
+        "total_2_5": {"over": "MaxC>2.5", "under": "MaxC<2.5"},
+        "draw_no_bet": {"home": "MaxCAHH", "away": "MaxCAHA"},
+    },
+    handicap_column="AHCh",
+)
+
+PRICE_SETS = (CLOSING_AVERAGE, CLOSING_BEST, OPENING_AVERAGE)
+
+#: Price sets whose ROI is an upper bound rather than a result.
+#:
+#: `MaxC*` is the highest price Football-Data saw across its panel at its
+#: collection instant. Taking it requires an account at whichever book happened
+#: to be the outlier, that book still offering it, and it accepting the stake —
+#: and the book offering an outlier price is the book most likely to restrict
+#: the account that keeps taking it. It is also unverified whether the panel
+#: maximum is simultaneously obtainable at all, or an artefact of prices
+#: collected at slightly different moments. Reported because the gap to the
+#: average is the largest effect measured in this project; flagged because a
+#: number nobody can take is not a return.
+OPTIMISTIC_PRICE_SETS = frozenset({"closing_best"})
 
 #: Which model probability answers which selection. `match_probabilities`
 #: returns all of these from one score matrix, so the 1X2 and draw-no-bet
@@ -564,6 +588,41 @@ def render(bets: pd.DataFrame, summary: pd.DataFrame) -> str:
                 f"{'**card**' if is_card else ''} |"
             )
         lines.append("")
+
+    lines += [
+        "## The price you pay, on identical bets",
+        "",
+        "Same model, same selections, same threshold — settled at three different "
+        "execution prices. The spread between them is larger than any model change "
+        "measured in this project.",
+        "",
+        "| Price taken | Ratings | Bets | ROI | 95% interval | P(>0) |",
+        "|:--|:--|--:|--:|:--|--:|",
+    ]
+    priced = bets[bets["edge"] >= HEADLINE_THRESHOLD]
+    if "ratings" not in priced.columns:
+        priced = priced.assign(ratings="adjusted_goals")
+    for (price_key, ratings), group in priced.groupby(["price_set", "ratings"], sort=True):
+        set_low, set_high, set_above = bootstrap_interval(group)
+        flag = " *" if price_key in OPTIMISTIC_PRICE_SETS else ""
+        lines.append(
+            f"| {price_key}{flag} | {ratings} | {len(group):,} | "
+            f"{group['profit'].mean() * 100:+.2f}% | "
+            f"{set_low:+.2f}% to {set_high:+.2f}% | {set_above:.1%} |"
+        )
+    lines += [
+        "",
+        "\\* `closing_best` is an **upper bound, not a result.** It is the highest "
+        "price Football-Data saw across its panel at its collection instant. Taking "
+        "it requires an account at whichever book was the outlier, that book still "
+        "offering it, and it accepting the stake — and the book offering an outlier "
+        "price is the one most likely to restrict an account that keeps taking it. "
+        "It is also unverified whether the panel maximum is simultaneously "
+        "obtainable at all, or an artefact of prices collected moments apart. "
+        "Treat the gap between `closing_average` and `closing_best` as the size of "
+        "the execution problem, not as profit.",
+        "",
+    ]
 
     lines += ["## By division and market", "", "Closing average, edge >= "
               f"{HEADLINE_THRESHOLD * 100:.0f}%. An interval that excludes zero is a "

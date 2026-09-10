@@ -108,7 +108,7 @@ def _consensus_implied(rows: pd.DataFrame, selection: str, siblings: pd.DataFram
 MIN_CAPTURE_RATE = 0.5
 
 
-def _coverage_warning(frame: pd.DataFrame) -> list[str]:
+def _coverage_warning(frame: pd.DataFrame, feed_rows: int | None = None) -> list[str]:
     """Say so when the capture is failing, because it fails silently.
 
     A snapshot that never fires and one that always fires after kick-off
@@ -128,13 +128,34 @@ def _coverage_warning(frame: pd.DataFrame) -> list[str]:
     rate = captured / len(played)
     if rate >= MIN_CAPTURE_RATE:
         return []
+    # Name every cause, cheapest to check first, and do not assert one of
+    # them. This warning previously said only "check that the Closing Snapshot
+    # workflow is firing". It was firing — eight consecutive green runs and
+    # 64,489 observations — while the report that accused it was being built
+    # before the feed had been fetched onto the runner at all. A diagnosis
+    # stated as a single cause sends the reader to the wrong place, and this
+    # one sent them to the one component that was working.
+    if feed_rows is not None and feed_rows <= 0:
+        return [
+            f"> **Capture is failing: {captured} of {len(played)} played picks "
+            "have a price observed before kick-off, and the price feed is empty "
+            "on this runner.** That is the whole explanation — nothing was "
+            "joined because there was nothing to join against. The feed lives "
+            "on the `price-feed` branch; check that it was restored before the "
+            "reports were rebuilt, not after.",
+            "",
+        ]
     return [
         f"> **Capture is failing: {captured} of {len(played)} played picks have a "
-        f"price observed before kick-off.** A snapshot that never runs and one "
-        "that always runs late look identical here, because an observation "
-        "taken after kick-off is ignored rather than trusted. Check that the "
-        "Closing Snapshot workflow is firing, and firing early enough — GitHub "
-        "has delayed this repository's crons by nine hours before now.",
+        f"price observed before kick-off.** Three causes look identical here, "
+        "because an observation taken after kick-off is ignored rather than "
+        "trusted. In the order they are cheapest to rule out: the feed was not "
+        "restored onto this runner before the reports were rebuilt; the "
+        "selections or event ids in the feed do not match the ones the card "
+        "recorded; or the Closing Snapshot workflow is not firing early enough "
+        "— GitHub has delayed this repository's crons by nine hours before now."
+        + (f" The feed on this runner holds {feed_rows:,} observations."
+           if feed_rows else ""),
         "",
     ]
 
@@ -237,7 +258,9 @@ def summarize_live_clv(frame: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows).sort_values("picks", ascending=False).reset_index(drop=True)
 
 
-def render_live_clv(frame: pd.DataFrame, summary: pd.DataFrame) -> str:
+def render_live_clv(
+    frame: pd.DataFrame, summary: pd.DataFrame, *, feed_rows: int | None = None
+) -> str:
     captured = frame[frame["state"] == CAPTURED] if not frame.empty else frame
     lines = [
         "# Live closing-line value",
@@ -269,7 +292,7 @@ def render_live_clv(frame: pd.DataFrame, summary: pd.DataFrame) -> str:
             "about the model.",
             "",
         ]
-    lines += _coverage_warning(frame)
+    lines += _coverage_warning(frame, feed_rows)
     lines += [
         "`clv_points_best` compares against the best price across books at the last",
         "observation — like for like, since the card takes the best price.",
@@ -300,5 +323,8 @@ def save_live_clv_reports(
     }
     frame.to_csv(paths["detail"], index=False)
     summary.to_csv(paths["summary"], index=False)
-    paths["markdown"].write_text(render_live_clv(frame, summary), encoding="utf-8")
+    paths["markdown"].write_text(
+        render_live_clv(frame, summary, feed_rows=0 if feed is None else len(feed)),
+        encoding="utf-8",
+    )
     return paths

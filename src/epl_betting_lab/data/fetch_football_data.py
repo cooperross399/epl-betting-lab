@@ -108,6 +108,14 @@ def load_season(path: Path, season: str) -> pd.DataFrame:
         # all — the same way the `C` closing columns above were once dropped
         # and CLV silently could not be computed.
         "AHCh", "B365CAHH", "B365CAHA", "AvgCAHH", "AvgCAHA",
+        # Best of the panel at the close. Football-Data's Max* columns are the
+        # highest price across every book it polls, and the gap to the average
+        # is the largest measured effect anywhere in this project: mean closing
+        # booksum is 1.0591 at the average, 1.0352 at Pinnacle and 1.0091 at
+        # the best of the panel. Whether that price is simultaneously
+        # obtainable is a separate and unanswered question — see the caveat the
+        # EFL report prints beside every best-price number.
+        "MaxCH", "MaxCD", "MaxCA", "MaxC>2.5", "MaxC<2.5", "MaxCAHH", "MaxCAHA",
     ]
     keep = [c for c in desired if c in df.columns]
     df = df[keep].copy()

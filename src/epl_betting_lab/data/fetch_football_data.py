@@ -1,4 +1,4 @@
-"""Fetch and normalize English Premier League historical data from Football-Data.co.uk.
+"""Fetch and normalize English league results from Football-Data.co.uk.
 
 Football-Data season codes look like:
 - 2122 = 2021/22
@@ -7,7 +7,21 @@ Football-Data season codes look like:
 - 2425 = 2024/25
 - 2526 = 2025/26
 
-The EPL division code is E0.
+Division codes are E0 Premier League, E1 Championship, E2 League One, E3 League
+Two. All four are published in the same 114-column schema, including the corner
+counts (`HC`/`AC`) three of the card's markets are settled on, and the closing
+odds columns — verified present and fully populated for every season from
+2021/22 onward in all four divisions.
+
+**Each division is built into its own file, and that is not an accident.** A
+team rating is fitted on the matches in one pool and has meaning only against
+that pool: pooling E0 and E3 rows into one dataset produces a single scale
+across four divisions that share almost no opponents, so a League Two side's
+rating would be compared against a Premier League side's as though the numbers
+were commensurable. They are not, and nothing downstream would report the
+error — the ratings would simply be wrong and the card would look normal. So
+the division is part of the output path, and `fetch_and_build_dataset` refuses
+to write one division's matches over another's file.
 """
 
 from __future__ import annotations
@@ -115,8 +129,23 @@ def load_season(path: Path, season: str) -> pd.DataFrame:
     return df
 
 
-def fetch_and_build_dataset(seasons: Iterable[str], force: bool = False) -> pd.DataFrame:
-    """Download missing seasons and combine them into one processed CSV."""
+def processed_path_for(league: str) -> Path:
+    """Where one division's built dataset lives.
+
+    E0 keeps `epl_historical_matches.csv`. Every reader in the project — the
+    ratings, the backtests, the card, the scoreboard — names that file, and
+    renaming it to something tidier would be a wide change whose only benefit
+    is symmetry. The other divisions get their own file beside it.
+    """
+    if league == LEAGUE_CODE:
+        return PROCESSED_DIR / "epl_historical_matches.csv"
+    return PROCESSED_DIR / f"football_data_{league}_matches.csv"
+
+
+def fetch_and_build_dataset(
+    seasons: Iterable[str], force: bool = False, league: str = LEAGUE_CODE
+) -> pd.DataFrame:
+    """Download missing seasons for one division and combine them into one CSV."""
     RAW_DIR.mkdir(parents=True, exist_ok=True)
     PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -124,10 +153,10 @@ def fetch_and_build_dataset(seasons: Iterable[str], force: bool = False) -> pd.D
     frames: list[pd.DataFrame] = []
     skipped: list[str] = []
     for season in ordered:
-        raw_path = RAW_DIR / f"football_data_{LEAGUE_CODE}_{season}.csv"
+        raw_path = RAW_DIR / f"football_data_{league}_{season}.csv"
         try:
             if force or not raw_path.exists():
-                fetch_season(season)
+                fetch_season(season, league)
             frames.append(load_season(raw_path, season))
         except SeasonNotPublished as exc:
             # Only the season being played is allowed to be missing, and only
@@ -154,7 +183,22 @@ def fetch_and_build_dataset(seasons: Iterable[str], force: bool = False) -> pd.D
 
     combined = pd.concat(frames, ignore_index=True)
     combined = combined.sort_values(["date", "home_team", "away_team"], na_position="last")
-    out = PROCESSED_DIR / "epl_historical_matches.csv"
+
+    # The rows carry the division Football-Data put in them, so the file can be
+    # checked against the division it claims to be rather than trusted. A
+    # mismatch here means a fetch went to the wrong URL or a stale raw file was
+    # picked up, and either way the dataset about to be written would train a
+    # model on the wrong league while looking entirely ordinary.
+    if "Div" in combined.columns:
+        divisions = {str(d).strip() for d in combined["Div"].dropna().unique()}
+        if divisions and divisions != {league}:
+            raise RuntimeError(
+                f"Refusing to write a {league} dataset built from rows in "
+                f"{sorted(divisions)}. A rating fitted across divisions has no "
+                "common scale, and nothing downstream would notice."
+            )
+
+    out = processed_path_for(league)
     # Write the date as a readable string. Left to itself, pandas serialised a
     # microsecond-resolution datetime column as a bare integer, which read back
     # as nanoseconds and put every match in 1970. Ordering survived — the

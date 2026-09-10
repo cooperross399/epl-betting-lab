@@ -111,6 +111,38 @@ class TestTheModelMeasuredIsTheModelBet:
         )
         _require_xg(with_xg)  # does not raise
 
+    def test_columns_that_exist_but_hold_nothing_are_refused(self):
+        """The guard checked presence, and `load_matches_with_xg` always creates
+        both columns - filling them with NaN when Understat returns nothing. So
+        a full xG outage, or any division below the Premier League (Understat
+        covers none of them), passed this guard and was measured as a blend
+        while `_scoring_arrays` fitted it on goals row by row. The guard written
+        to stop exactly that could not fire."""
+        empty_xg = pd.DataFrame(
+            {
+                "home_goals": [1, 2],
+                "away_goals": [0, 1],
+                "home_xg": [float("nan"), float("nan")],
+                "away_xg": [float("nan"), float("nan")],
+            }
+        )
+        with pytest.raises(ValueError, match="fall back to goals"):
+            _require_xg(empty_xg)
+
+    def test_a_partial_outage_still_passes(self):
+        """Some rows missing xG is the normal state - Understat lags the
+        results feed by a day or two. Refusing that would block every ordinary
+        run, so the guard fires only when nothing at all is covered."""
+        partial = pd.DataFrame(
+            {
+                "home_goals": [1, 2],
+                "away_goals": [0, 1],
+                "home_xg": [1.2, float("nan")],
+                "away_xg": [0.7, float("nan")],
+            }
+        )
+        _require_xg(partial)  # does not raise
+
 
 class TestOnlyTakeablePrices:
     def _rows(self, book):

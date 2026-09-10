@@ -416,6 +416,26 @@ def _require_xg(matches: pd.DataFrame) -> None:
             "`load_matches_with_xg()`."
         )
 
+    # Presence was never the question. `load_matches_with_xg` creates both
+    # columns unconditionally and fills them with NaN when Understat returns
+    # nothing, and `_scoring_arrays` then falls back to goals row by row. So a
+    # frame with a full xG outage — or any competition Understat does not
+    # cover, which is every division below the Premier League — passed this
+    # guard and was measured as a blend while being fitted on goals. The guard
+    # written to stop exactly that could not fire.
+    covered = (
+        pd.to_numeric(matches["home_xg"], errors="coerce").notna()
+        & pd.to_numeric(matches["away_xg"], errors="coerce").notna()
+    )
+    if not covered.any():
+        raise ValueError(
+            f"All {len(matches)} matches have empty home_xg/away_xg, so every "
+            "row would fall back to goals and BTTS would be measured on a "
+            "model the card does not bet. Understat covers no division below "
+            "the Premier League; for those, fit goals explicitly and say so "
+            "rather than calling the result a blend."
+        )
+
 
 def build_backtest(odds: pd.DataFrame, matches: pd.DataFrame) -> BacktestResult:
     """Score every card-rule bet these prices would have produced."""

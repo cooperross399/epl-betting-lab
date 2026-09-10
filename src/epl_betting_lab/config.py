@@ -57,6 +57,19 @@ CURRENT_SEASON = DEFAULT_SEASONS[-1]
 
 LEAGUE_CODE = "E0"  # English Premier League on Football-Data.co.uk
 
+#: The English divisions Football-Data publishes, in the same 114-column shape
+#: as E0 — corners and closing odds included. Each is modelled on its own; see
+#: `fetch_football_data` for why they are never pooled into one dataset.
+DIVISION_NAMES = {
+    "E0": "Premier League",
+    "E1": "Championship",
+    "E2": "League One",
+    "E3": "League Two",
+}
+
+#: The three EFL divisions, i.e. everything below the Premier League.
+EFL_DIVISIONS = ("E1", "E2", "E3")
+
 # User preference baked in: avoid laying heavy juice unless manually approved.
 MAX_DEFAULT_JUICE = -160
 

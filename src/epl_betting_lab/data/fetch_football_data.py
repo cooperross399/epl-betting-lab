@@ -101,6 +101,13 @@ def load_season(path: Path, season: str) -> pd.DataFrame:
         # returns an answer inside a season.
         "B365CH", "B365CD", "B365CA", "AvgCH", "AvgCD", "AvgCA",
         "B365C>2.5", "B365C<2.5", "AvgC>2.5", "AvgC<2.5",
+        # The closing Asian handicap. A level-ball line (handicap 0) is exactly
+        # draw-no-bet: the draw voids and the stake comes back. It is the only
+        # quoted price Football-Data carries for a market the card actually
+        # bets, so without these columns draw-no-bet cannot be measured here at
+        # all — the same way the `C` closing columns above were once dropped
+        # and CLV silently could not be computed.
+        "AHCh", "B365CAHH", "B365CAHA", "AvgCAHH", "AvgCAHA",
     ]
     keep = [c for c in desired if c in df.columns]
     df = df[keep].copy()

@@ -31,14 +31,17 @@ def main() -> int:
             print(f"{division}: no dataset at `{path}`. Build it with "
                   f"`scripts/fetch_data.py --divisions {division}` first.")
             return 2
-        result = backtest.run_division(pd.read_csv(path), division)
-        for note in result.notes:
-            print(f"{division}: {note}")
-        print(
-            f"{division}: {result.matches_bet:,} of {result.matches_seen:,} matches "
-            f"priced, {len(result.bets):,} candidate selections"
-        )
-        frames.append(result.bets)
+        matches = pd.read_csv(path)
+        for ratings in backtest.RATING_CONFIGS:
+            result = backtest.run_division(matches, division, ratings=ratings)
+            for note in result.notes:
+                print(f"{division}/{ratings}: {note}")
+            print(
+                f"{division}/{ratings}: {result.matches_bet:,} of "
+                f"{result.matches_seen:,} matches priced, "
+                f"{len(result.bets):,} candidate selections"
+            )
+            frames.append(result.bets)
 
     bets = pd.concat([f for f in frames if not f.empty], ignore_index=True) if any(
         not f.empty for f in frames

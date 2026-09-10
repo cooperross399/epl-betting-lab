@@ -425,6 +425,42 @@ jobs:
             echo "Nothing went wrong."
           fi
 
+      - name: Restore the price feed before anything reads it
+        # `live_clv` measures the card's own picks against what the market did
+        # afterwards, and it reads `data/processed/price_feed.csv`. That file
+        # lives on the price-feed branch, and until now the only step that
+        # fetched it was "Record this run's prices in the price feed" — which
+        # runs AFTER the reports are rebuilt. So the live CLV report was built
+        # against a feed that was not on disk yet, found nothing for every
+        # pick, and printed "Capture is failing: 0 of 8 played picks have a
+        # price observed before kick-off. Check that the Closing Snapshot
+        # workflow is firing." The Closing Snapshot was firing perfectly: eight
+        # consecutive green runs, 64,489 observations, every one of the card's
+        # markets. Replaying the same join locally against that feed captures
+        # the picks the report said were uncapturable.
+        #
+        # A report that renders cleanly, a workflow that publishes faithfully,
+        # and the two never meeting — with the report blaming the workflow.
+        #
+        # Read-only: this fetches, it does not append or push. Appending and
+        # publishing stay where they were, after the prices are bought.
+        if: always()
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -u
+          REMOTE="https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}"
+          mkdir -p data/processed
+          if git fetch "$REMOTE" +refs/heads/price-feed:refs/price-feed-tip 2>/dev/null; then
+            git show refs/price-feed-tip:price_feed.csv > data/processed/price_feed.csv 2>/dev/null || true
+          fi
+          if [ -s data/processed/price_feed.csv ]; then
+            wc -l < data/processed/price_feed.csv | xargs echo "price feed rows restored:"
+          else
+            echo "No price feed yet; live CLV will report zero coverage, which is true."
+          fi
+
       - name: Rebuild every report
         # Soft: refresh_all_reports already continues past a failed step and
         # exits non-zero at the end, so letting it stop the job here would

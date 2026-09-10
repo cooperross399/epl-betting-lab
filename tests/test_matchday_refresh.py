@@ -1241,6 +1241,43 @@ def test_a_rescued_slate_is_not_reported_as_the_previously_stored_one() -> None:
 
 
 
+def test_the_price_feed_is_restored_before_the_reports_are_rebuilt() -> None:
+    """`live_clv` reads `data/processed/price_feed.csv`, and that file arrives
+    only by being fetched from the price-feed branch.
+
+    For as long as the only step that fetched it was "Record this run's prices
+    in the price feed", which runs after "Rebuild every report", the live CLV
+    report was built against a feed that was not on disk yet. It found nothing
+    for every pick and printed "Capture is failing... Check that the Closing
+    Snapshot workflow is firing" — while that workflow was firing perfectly,
+    with 64,489 observations covering every market on the card.
+
+    An ordering bug with no failing step and a report that blamed the one
+    component that was working.
+    """
+    text = _workflow()
+    # Anchored on the step names. The first version of this test searched for
+    # the bare phrase "Record this run's prices in the price feed" and matched
+    # the sentence inside the new step's own comment, which sits earlier in the
+    # file — a guard that failed on the very ordering it was written to prove.
+    restore = text.index("- name: Restore the price feed before anything reads it")
+    rebuild = text.index("- name: Rebuild every report")
+    record = text.index("- name: Record this run's prices in the price feed")
+
+    assert restore < rebuild, "the feed must be on disk before live_clv reads it"
+    assert rebuild < record, (
+        "appending this run's prices still belongs after the prices are bought"
+    )
+
+    block = text.split("- name: Restore the price feed before anything reads it", 1)[1]
+    block = block.split("- name:", 1)[0]
+    assert "refs/heads/price-feed" in block
+    # Read-only. Publishing stays in the later step; a second pusher would race
+    # the first for the same ref.
+    assert "git push" not in block
+    assert "append_price_snapshot" not in block
+
+
 def test_every_report_the_refresh_produces_is_uploaded() -> None:
     """A measurement nobody can read is not a measurement.
 

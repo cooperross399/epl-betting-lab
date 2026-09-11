@@ -16,6 +16,21 @@ run always emails, so the news travels.
 runs on its own cron; if the matchday refresh has gone quiet it says so there.
 Two schedules failing in the same week is far less likely than one, and nothing
 here can detect its own total absence.
+
+**"Did it run" and "did it succeed" are different questions.** Both callers used
+to ask the first with the answer to the second — `gh run list --status success`
+— and a data outage therefore masqueraded as a scheduler outage. Every matchday
+run is red by design while Football-Data is down, so from 2026-09-09 the check
+saw no run at all, reported "at least one run did not happen. Check that the
+workflow is still enabled", and put that sentence at the top of every card while
+19 of 19 crons had fired. Worse, it latched: the false sentence alone made the
+run degraded, a degraded run exits non-zero, and a non-zero run is not a success
+— so the gap could never close again, even after the upstream feed recovered.
+
+The gap check now counts every run whatever its conclusion. The condition the
+success filter was accidentally watching — runs happening but not succeeding —
+is a real thing worth escalating, and `degraded_streak_report` below asks it
+directly instead.
 """
 
 from __future__ import annotations
@@ -82,3 +97,43 @@ def most_recent(timestamps: Sequence[str]) -> datetime | None:
     """The latest readable timestamp, ignoring any that will not parse."""
     parsed = [t for t in (parse_run_time(value) for value in timestamps) if t]
     return max(parsed) if parsed else None
+
+
+#: How many consecutive non-succeeding runs before the streak is worth saying
+#: out loud. Two is one bad matchday; four is a pattern that has survived a
+#: whole weekend and nobody has looked.
+MAX_QUIET_DEGRADED_RUNS = 4
+
+
+def degraded_streak_report(
+    conclusions: Sequence[str], *, limit: int = MAX_QUIET_DEGRADED_RUNS
+) -> tuple[bool, str]:
+    """How many runs in a row have finished without succeeding?
+
+    This is the question the `--status success` filter was asking by accident,
+    and it is worth asking on purpose. On 2026-09-06 the matchday refresh began
+    failing on a Football-Data outage and produced eight blocked cards over two
+    days; nothing escalated, because every individual run reported its own
+    degradation and no one thing counted them.
+
+    `conclusions` is most-recent-first, as `gh run list` returns them. An
+    in-flight run has no conclusion yet and is skipped rather than counted
+    either way — it has not finished failing.
+    """
+    streak = 0
+    for conclusion in conclusions:
+        state = str(conclusion or "").strip().lower()
+        if state in {"", "in_progress", "queued", "waiting", "pending", "requested"}:
+            continue
+        if state == "success":
+            break
+        streak += 1
+
+    if streak < limit:
+        return False, f"The last {streak} run(s) did not succeed, which is within the usual range."
+    return True, (
+        f"{streak} consecutive runs have finished without succeeding. Individually "
+        "each one reported its own fault; together they are a pattern that has "
+        "outlasted a weekend. Check whether the cause is upstream and still "
+        "unresolved, rather than reading another degraded card."
+    )

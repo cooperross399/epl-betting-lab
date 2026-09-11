@@ -76,10 +76,41 @@ jobs:
           PYTHONPATH: src
         run: |
           set -u
+          # Every run, not only the green ones — see the note in
+          # matchday-refresh.yml. Filtering to successes turned this watchdog
+          # into a detector for "the upstream data feed is down", which is a
+          # real thing but not the thing it is for, and would have failed this
+          # check outright on 2026-09-14 while the schedule was perfect.
           previous=$(gh run list --workflow matchday-refresh.yml \
-            --status success --limit 5 --json createdAt \
+            --limit 10 --json createdAt \
             --jq '.[].createdAt' | tr '\n' ' ')
           python scripts/check_schedule_health.py $previous --fail-when-stale
+
+      - name: Watch for a run of matchday failures
+        # "Did the cron fire" and "is it succeeding" are different questions.
+        # The gap check above asks the first. This asks the second, and it has
+        # to be asked from here rather than from the matchday run itself: a
+        # streak reported into that run's degradation list would make the run
+        # fail, and the failure it caused would be inside the window the next
+        # run counts. It would never let go. This watchdog is on its own cron
+        # and its own conclusion is not what it is counting, so it can say so
+        # and go red without feeding itself.
+        #
+        # The condition is real and went unescalated once already: from
+        # 2026-09-06 the refresh failed on a Football-Data outage and produced
+        # eight blocked cards over two days. Every run reported its own fault
+        # and nothing counted them.
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PYTHONPATH: src
+        run: |
+          set -u
+          conclusions=$(gh run list --workflow matchday-refresh.yml \
+            --limit 10 --json conclusion \
+            --jq '.[].conclusion // "pending"' | tr '\n' ' ')
+          python scripts/check_schedule_health.py \
+            --conclusions $conclusions --fail-when-streaking
 
       - name: Watch that the closing snapshot is still running
         # Added 2026-09-02 with the price feed, because that feed is the only
@@ -96,8 +127,12 @@ jobs:
           PYTHONPATH: src
         run: |
           set -u
+          # Same reasoning: a snapshot run that fires and fails still proves
+          # the cron is alive. Whether it is *collecting* is a different
+          # question, and `live_clv` already answers it directly by reporting
+          # the capture rate against played picks.
           previous=$(gh run list --workflow closing-snapshot.yml \
-            --status success --limit 5 --json createdAt \
+            --limit 10 --json createdAt \
             --jq '.[].createdAt' | tr '\n' ' ')
           if [ -z "$previous" ]; then
             echo "::warning::No successful Closing Snapshot run on record yet."

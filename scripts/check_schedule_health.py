@@ -11,7 +11,11 @@ import argparse
 import sys
 from datetime import timedelta
 
-from epl_betting_lab.reports.schedule_health import gap_report, most_recent
+from epl_betting_lab.reports.schedule_health import (
+    degraded_streak_report,
+    gap_report,
+    most_recent,
+)
 
 
 def main() -> int:
@@ -37,7 +41,23 @@ def main() -> int:
         action="store_true",
         help="Exit non-zero when a run is missing, so a watchdog goes red.",
     )
+    parser.add_argument(
+        "--conclusions",
+        nargs="*",
+        default=None,
+        help="Run conclusions, most recent first, to check for a run of runs "
+        "that fired but did not succeed. A different question from the gap: "
+        "asking it with `--status success` is what made a data outage look "
+        "like a scheduler outage.",
+    )
     args = parser.parse_args()
+
+    if args.conclusions is not None:
+        streaking, streak_sentence = degraded_streak_report(args.conclusions)
+        print(streak_sentence)
+        if streaking and args.append_to:
+            with open(args.append_to, "a", encoding="utf-8") as handle:
+                handle.write(streak_sentence + "\n")
 
     previous = most_recent(args.timestamps)
     if args.max_days:

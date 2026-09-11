@@ -76,8 +76,13 @@ jobs:
           PYTHONPATH: src
         run: |
           set -u
+          # Every run, not only the green ones — see the note in
+          # matchday-refresh.yml. Filtering to successes turned this watchdog
+          # into a detector for "the upstream data feed is down", which is a
+          # real thing but not the thing it is for, and would have failed this
+          # check outright on 2026-09-14 while the schedule was perfect.
           previous=$(gh run list --workflow matchday-refresh.yml \
-            --status success --limit 5 --json createdAt \
+            --limit 10 --json createdAt \
             --jq '.[].createdAt' | tr '\n' ' ')
           python scripts/check_schedule_health.py $previous --fail-when-stale
 
@@ -96,8 +101,12 @@ jobs:
           PYTHONPATH: src
         run: |
           set -u
+          # Same reasoning: a snapshot run that fires and fails still proves
+          # the cron is alive. Whether it is *collecting* is a different
+          # question, and `live_clv` already answers it directly by reporting
+          # the capture rate against played picks.
           previous=$(gh run list --workflow closing-snapshot.yml \
-            --status success --limit 5 --json createdAt \
+            --limit 10 --json createdAt \
             --jq '.[].createdAt' | tr '\n' ' ')
           if [ -z "$previous" ]; then
             echo "::warning::No successful Closing Snapshot run on record yet."

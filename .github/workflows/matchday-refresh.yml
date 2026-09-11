@@ -217,18 +217,36 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -u
-          previous=$(gh run list --workflow matchday-refresh.yml --status success \
-            --limit 1 --json databaseId --jq '.[0].databaseId // empty')
-          if [ -z "$previous" ]; then
-            echo "No previous successful run. This run establishes the baseline."
+          # The newest run that actually has state, whatever its conclusion.
+          #
+          # This used to take the newest *successful* run, and a degraded run
+          # exits non-zero — so during the Football-Data outage the pin froze
+          # on 2026-09-05 for nine consecutive runs. The card archive is not in
+          # git, so that frozen chain IS the out-of-sample ledger: the green
+          # run's artifact holds 50 cards and the run that published the
+          # 8-selection card of 2026-09-07 holds 51, and the restore could not
+          # reach it. Every card issued during an outage was dropped from the
+          # only forward record this project has, and because the scoreboard
+          # scores each selection at the FIRST price a card offered it, a
+          # dropped selection that reappears later is silently re-anchored to
+          # the later date and the later price.
+          #
+          # A run that was degraded but still built a card is exactly the state
+          # the next run needs.
+          mkdir -p data
+          restored=""
+          for candidate in $(gh run list --workflow matchday-refresh.yml \
+            --limit 10 --json databaseId --jq '.[].databaseId'); do
+            if gh run download "$candidate" --name matchday-state --dir data 2>/dev/null; then
+              restored="$candidate"
+              break
+            fi
+          done
+          if [ -z "$restored" ]; then
+            echo "No previous run carried state. This run establishes the baseline."
             exit 0
           fi
-          mkdir -p data
-          gh run download "$previous" --name matchday-state --dir data || {
-            echo "No state on run $previous; continuing without it."
-            exit 0
-          }
-          echo "Restored state from run $previous."
+          echo "Restored state from run $restored."
           find data/outputs/archive/automated_cards -name '*.json' 2>/dev/null \
             | wc -l | xargs echo "Archived card runs restored:"
 
@@ -245,10 +263,22 @@ jobs:
         run: |
           set -u
           : > run_degraded.txt
-          previous=$(gh run list --workflow matchday-refresh.yml \
-            --status success --limit 5 --json createdAt \
-            --jq '.[].createdAt' | tr '\n' ' ')
+          # Every run, whatever its conclusion. "Did the cron fire" and "did
+          # the run succeed" are different questions, and this used to ask the
+          # first with the answer to the second (`--status success`). While
+          # Football-Data was down every matchday run was red by design, so the
+          # check saw no run at all and put "at least one run did not happen,
+          # check that the workflow is still enabled" at the top of every card
+          # while 19 of 19 crons had fired. It also latched: that sentence
+          # alone made the run degraded, a degraded run exits non-zero, and a
+          # non-zero run is not a success — so the gap could never close, even
+          # after the feed recovered.
+          runs=$(gh run list --workflow matchday-refresh.yml \
+            --limit 10 --json createdAt,conclusion)
+          previous=$(printf '%s' "$runs" | jq -r '.[].createdAt' | tr '\n' ' ')
+          conclusions=$(printf '%s' "$runs" | jq -r '.[].conclusion // ""' | tr '\n' ' ')
           python scripts/check_schedule_health.py $previous \
+            --conclusions $conclusions \
             --append-to run_degraded.txt
 
       - name: Check the provider credential

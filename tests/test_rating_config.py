@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from epl_betting_lab.models.poisson_goals import PoissonGoalsModel, RatingConfig
+from epl_betting_lab.models.poisson_goals import UnratedTeam, PoissonGoalsModel, RatingConfig
 
 
 def _matches(rows, start="2026-01-01"):
@@ -82,9 +82,15 @@ def test_time_decay_makes_recent_form_count_for_more():
 def test_a_team_with_no_history_is_shrunk_to_average_not_ignored():
     df = _round_robin({"A": 1.3, "B": 0.8}, rounds=6)
     model = PoissonGoalsModel().fit(df, config=RatingConfig(opponent_adjusted=True))
-    # Unknown team falls back to average — same contract as the legacy path.
-    home_xg, away_xg = model.expected_goals("A", "Promoted")
+    # The prior is still available and still the same contract — it is now
+    # asked for out loud, because the model cannot tell a promoted club (this
+    # competition, no history yet) from a club in another competition entirely,
+    # and the second is where an average-side substitution goes badly wrong.
+    home_xg, away_xg = model.expected_goals("A", "Promoted", allow_unrated=True)
     assert home_xg > 0 and away_xg > 0
+
+    with pytest.raises(UnratedTeam):
+        model.expected_goals("A", "Promoted")
 
 
 def test_expected_goals_stay_in_a_sane_range():
@@ -102,3 +108,62 @@ def test_more_prior_matches_means_more_shrinkage():
     loose = PoissonGoalsModel().fit(df, config=RatingConfig(opponent_adjusted=True, prior_matches=1)).team_strengths
     tight = PoissonGoalsModel().fit(df, config=RatingConfig(opponent_adjusted=True, prior_matches=40)).team_strengths
     assert abs(tight["A"].attack - 1) < abs(loose["A"].attack - 1)
+
+
+class TestAModelWillNotPriceATeamItHasNeverSeen:
+    """Fitted on the Premier League and asked for a League Two side, the model
+    used to substitute `TeamStrength(1.0, 1.0)` — an exactly average club — and
+    say nothing. Measured on the real data, it priced AFC Wimbledon to beat
+    Liverpool at 27.0% and Grimsby to beat Man City at 11.5%: fair prices of
+    +271 and +770 against a market nearer +1200. It would have read the gap as
+    several hundred points of edge and staked it, on exactly the fixtures a cup
+    competition is made of.
+
+    The model cannot tell that from a promoted club, which is a member of this
+    competition with no history in it yet and turns up one to three times every
+    August. It sees a training frame, not a league. So the caller has to say,
+    and refusing by default means adding a competition fails loudly instead of
+    pricing confidently.
+    """
+
+    def _league(self) -> PoissonGoalsModel:
+        df = _round_robin({"A": 1.6, "B": 1.0, "C": 0.7}, rounds=8)
+        return PoissonGoalsModel().fit(df, config=RatingConfig(opponent_adjusted=True))
+
+    def test_an_unseen_team_is_refused(self) -> None:
+        with pytest.raises(UnratedTeam, match="no fitted rating"):
+            self._league().match_probabilities("A", "Grimsby")
+
+    def test_it_is_refused_from_either_side_of_the_fixture(self) -> None:
+        model = self._league()
+        with pytest.raises(UnratedTeam):
+            model.match_probabilities("Grimsby", "A")
+
+    def test_the_message_names_the_team_and_the_pool(self) -> None:
+        """A refusal that does not say which team stalls whoever reads it."""
+        try:
+            self._league().expected_goals("A", "Grimsby")
+        except UnratedTeam as exc:
+            assert "Grimsby" in str(exc)
+            assert "3 teams" in str(exc)
+        else:
+            raise AssertionError("expected a refusal")
+
+    def test_a_fixture_between_two_rated_teams_is_untouched(self) -> None:
+        """The guard must not refuse the ordinary case — this project has found
+        several that did, and they pass their own tests while making the
+        feature unusable."""
+        probabilities = self._league().match_probabilities("A", "B")
+        assert 0.0 < probabilities["home_win"] < 1.0
+
+    def test_the_prior_is_still_available_when_asked_for(self) -> None:
+        """A promoted club's league-average prior is reasonable and every
+        season needs it. It is the silence that was wrong, not the number."""
+        probabilities = self._league().match_probabilities(
+            "A", "Promoted", allow_unrated=True
+        )
+        assert 0.0 < probabilities["home_win"] < 1.0
+
+    def test_it_is_a_key_error_so_existing_handlers_still_catch_it(self) -> None:
+        with pytest.raises(KeyError):
+            self._league().expected_goals("A", "Grimsby")

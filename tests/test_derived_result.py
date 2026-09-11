@@ -90,7 +90,9 @@ class TestTheGroupingIsRight:
         model = PoissonGoalsModel()
         model.avg_home_goals = 0.0
         model.avg_away_goals = 0.0
-        p = model.match_probabilities("A", "B")
+        # A hand-built model with no fitted teams at all: the prior is the
+        # whole point of the fixture, so it is asked for explicitly.
+        p = model.match_probabilities("A", "B", allow_unrated=True)
 
         assert p["draw_no_bet_home"] == 0.0
         assert p["draw_no_bet_away"] == 0.0

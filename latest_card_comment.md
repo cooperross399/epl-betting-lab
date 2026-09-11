@@ -1,14 +1,8 @@
-## Thursday 10 September, 12:56 UTC — scheduled run
+## Friday 11 September, 07:34 UTC — scheduled run
 
-Something went wrong in this run.
+Selections changed: 1 added, 2 dropped, 1 moved section.
 
-### What went wrong
-
-- The previous run was 119 hours ago. The schedule should never leave more than 4 days, so at least one run did not happen. Check that the workflow is still enabled.
-
-The card below was still built, from whatever evidence was available. Treat it with that in mind.
-
-Provider quota: 1115999 (about 17999 more runs)
+Provider quota: 1115835 (about 17997 more runs)
 
 Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
 
@@ -16,14 +10,14 @@ Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_tot
 
 | Match | Market | Selection | Tier | Edge | Price | Book | Units |
 |:------|:-------|:----------|:-----|-----:|------:|:-----|------:|
-| Chelsea v Hull | `btts` | yes | C | +6.4% | -107 | Caesars | 0.1 |
+| Chelsea v Hull | `btts` | yes | C | +6.6% | -106 | Caesars | 0.1 |
+| Sunderland v Arsenal | `corners_total_9_5` | under | C | +5.9% | -104 | FanDuel | 0.1 |
 | Chelsea v Hull | `corners_total_9_5` | over | C | +5.1% | +102 | FanDuel | 0.1 |
+| Bournemouth v Brentford | `corners_1x2` | home | C | +3.8% | -155 | FanDuel | 0.1 |
+| Bournemouth v Brentford | `draw_no_bet` | away | C | +4.8% | +103 | BetOnline.ag | 0.1 |
 | Liverpool v Fulham | `draw_no_bet` | away | C | +6.0% | +440 | FanDuel | 0.1 |
-| Bournemouth v Brentford | `draw_no_bet` | away | C | +4.6% | +102 | Bovada | 0.1 |
-| Sunderland v Arsenal | `corners_total_9_5` | under | C | +3.7% | -114 | FanDuel | 0.1 |
 | Chelsea v Hull | `corners_total_10_5` | over | C | +5.0% | +168 | FanDuel | 0.1 |
-| Liverpool v Fulham | `double_chance` | draw_or_away | C | +4.9% | +175 | FanDuel | 0.1 |
-| Tottenham v Everton | `draw_no_bet` | away | C | +4.5% | +167 | Bovada | 0.1 |
+| Liverpool v Fulham | `double_chance` | draw_or_away | C | +4.9% | +175 | BetRivers | 0.1 |
 
 ### Leans
 
@@ -31,67 +25,17 @@ _None._
 
 ### What changed
 
-- **Added:** Aston Villa v Nott'm Forest corners_1x2 home
-- **Added:** Aston Villa v Nott'm Forest draw_no_bet home
-- **Added:** Bournemouth v Brentford corners_1x2 home
-- **Added:** Bournemouth v Brentford corners_total_10_5 over
-- **Added:** Bournemouth v Brentford double_chance draw_or_away
-- **Added:** Bournemouth v Brentford draw_no_bet away
-- **Added:** Chelsea v Hull btts yes
-- **Added:** Chelsea v Hull corners_1x2 draw
-- **Added:** Chelsea v Hull corners_total_10_5 over
-- **Added:** Chelsea v Hull corners_total_9_5 over
-- **Added:** Chelsea v Hull double_chance draw_or_away
-- **Added:** Chelsea v Hull draw_no_bet away
-- **Added:** Crystal Palace v Ipswich corners_1x2 home
-- **Added:** Crystal Palace v Ipswich double_chance home_or_draw
-- **Added:** Crystal Palace v Ipswich draw_no_bet home
-- **Added:** Leeds v Newcastle btts yes
-- **Added:** Leeds v Newcastle corners_total_10_5 under
-- **Added:** Leeds v Newcastle corners_total_9_5 under
-- **Added:** Leeds v Newcastle double_chance draw_or_away
-- **Added:** Liverpool v Fulham corners_1x2 home
-- **Added:** Liverpool v Fulham double_chance draw_or_away
-- **Added:** Liverpool v Fulham draw_no_bet away
-- **Added:** Man United v Man City double_chance draw_or_away
-- **Added:** Sunderland v Arsenal btts yes
-- **Added:** Sunderland v Arsenal corners_total_10_5 under
-- **Added:** Sunderland v Arsenal corners_total_9_5 under
-- **Added:** Tottenham v Everton corners_1x2 home
-- **Added:** Tottenham v Everton corners_total_10_5 over
-- **Added:** Tottenham v Everton corners_total_9_5 over
-- **Added:** Tottenham v Everton double_chance draw_or_away
-- **Added:** Tottenham v Everton draw_no_bet away
-- **Dropped:** Arsenal v Chelsea corners_1x2 away
-- **Dropped:** Arsenal v Chelsea draw_no_bet home
-- **Dropped:** Brentford v Sunderland corners_1x2 away
-- **Dropped:** Brentford v Sunderland corners_total_10_5 under
-- **Dropped:** Brentford v Sunderland corners_total_9_5 under
-- **Dropped:** Brighton v Leeds corners_1x2 away
-- **Dropped:** Brighton v Leeds corners_1x2 draw
-- **Dropped:** Brighton v Leeds corners_total_10_5 under
-- **Dropped:** Brighton v Leeds corners_total_9_5 under
-- **Dropped:** Everton v Man United corners_1x2 home
-- **Dropped:** Everton v Man United corners_total_10_5 over
-- **Dropped:** Everton v Man United corners_total_9_5 over
-- **Dropped:** Fulham v Crystal Palace draw_no_bet away
-- **Dropped:** Hull v Aston Villa corners_1x2 home
-- **Dropped:** Hull v Aston Villa double_chance home_or_draw
-- **Dropped:** Hull v Aston Villa draw_no_bet home
-- **Dropped:** Man City v Coventry corners_1x2 away
-- **Dropped:** Man City v Coventry double_chance home_or_away
-- **Dropped:** Man City v Coventry draw_no_bet home
-- **Dropped:** Nott'm Forest v Tottenham corners_1x2 away
-- **Dropped:** Nott'm Forest v Tottenham corners_total_10_5 over
-- **Dropped:** Nott'm Forest v Tottenham corners_total_9_5 over
-- **Dropped:** Nott'm Forest v Tottenham draw_no_bet home
+- **Added:** Aston Villa v Nott'm Forest corners_total_10_5 over
+- **Dropped:** Bournemouth v Brentford corners_total_10_5 over
+- **Dropped:** Tottenham v Everton draw_no_bet away
+- **Moved section:** Bournemouth v Brentford corners_1x2 home
 
 ### How the recommendations have done
 
 - Settled: **50** selections, 20 won
 - Staked: 7.85 units
 - Profit: **-0.85 units** (-10.8% on turnover)
-- Still pending: 8
+- Still pending: 9
 
 - Stake returned (void): 1
 
@@ -105,4 +49,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/34479389889)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/34574882911)

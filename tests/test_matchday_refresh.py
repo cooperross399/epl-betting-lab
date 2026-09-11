@@ -1316,3 +1316,35 @@ def test_every_report_the_refresh_produces_is_uploaded() -> None:
         if step not in step_names:
             continue
         assert f"data/outputs/{filename}" in upload, f"{step} produces {filename}, not uploaded"
+
+
+def test_the_xg_history_survives_a_bad_day_at_understat() -> None:
+    """Two reasons the xG file belongs in the persisted state.
+
+    It is re-fetched from scratch on every run and kept nowhere, so a run that
+    cannot reach Understat has no xG at all. The fetch step is
+    `continue-on-error` precisely so that degrades the ratings rather than the
+    card — but with nothing on disk to fall back to, it degrades the whole
+    series rather than a day of it, exactly as a missing match dataset would.
+
+    And a measurement nobody can check is one nobody should act on. The claim
+    that Understat's xG runs about +0.16 goals a match above actual goals —
+    +0.31 this season, which would push P(over 2.5) up by roughly 4.5 points —
+    could not be verified from anything this repository keeps. Understat's
+    robots.txt is `Disallow: /`, so re-fetching it to check is not an option
+    this project takes. Keeping the file the pipeline already downloaded makes
+    the question answerable without asking Understat again.
+    """
+    text = _workflow()
+    block = text.split("- name: Upload the state for the next run", 1)[1]
+    block = block.split("- name:", 1)[0]
+
+    assert "data/processed/understat_team_xg.csv" in block
+    # Beside the two it already keeps, not instead of them.
+    assert "data/processed/epl_historical_matches.csv" in block
+    assert "data/outputs/archive/automated_cards" in block
+
+    # The fetch must stay soft, or persisting it buys nothing: a hard failure
+    # would end the run before the restored copy could be used.
+    xg_block = text.split("- name: Fetch team xG", 1)[1].split("- name:", 1)[0]
+    assert "continue-on-error: true" in xg_block

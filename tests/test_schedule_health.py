@@ -8,7 +8,11 @@ design cannot otherwise see.
 
 from __future__ import annotations
 
+import os
+import subprocess
+import sys
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 
 import pytest
 
@@ -237,3 +241,92 @@ class TestADegradedStreakIsItsOwnAlarm:
         put the same sentence in the card twice."""
         streaking, _ = degraded_streak_report([])
         assert not streaking
+
+
+class TestTheStreakSignalCannotLatch:
+    """The fix for the latch reintroduced the latch, and this is the test that
+    would have caught it.
+
+    The first draft appended the streak sentence to `run_degraded.txt`. That
+    sets degraded=true, which makes "Report the outcome" exit 1, which makes the
+    run's conclusion `failure` — and that failure sits inside the window the
+    next run's streak check reads. Simulated forward from the real nine-failure
+    history with the upstream fault cleared, it never returned to green: the
+    runs it counted were the runs it caused.
+    """
+
+    def test_a_streak_fed_its_own_output_converges(self) -> None:
+        """The property that matters, stated directly: once the real fault is
+        gone, the signal must let go. Any reporting path that fails the run it
+        is counting breaks this."""
+        history = ["failure"] * 9  # the real 2026-09-06..09-10 stretch
+        for _ in range(10):
+            streaking, _ = degraded_streak_report(history)
+            # The streak is reported by a watchdog on another schedule, so it
+            # cannot set this run's conclusion. Only a real fault can.
+            other_faults = False
+            conclusion = "failure" if other_faults else "success"
+            history = [conclusion] + history
+            if not streaking and conclusion == "success":
+                break
+        assert history[0] == "success"
+        streaking, _ = degraded_streak_report(history)
+        assert not streaking, "the streak must let go once real faults stop"
+
+    def test_the_same_loop_latches_if_the_streak_can_fail_the_run(self) -> None:
+        """Pins why the wiring is the way it is. If the streak were allowed to
+        degrade the run, this is what would happen — so if someone rewires it,
+        the reason is recorded here rather than rediscovered in production."""
+        history = ["failure"] * 9
+        for _ in range(10):
+            streaking, _ = degraded_streak_report(history)
+            degraded = streaking  # the first draft's wiring
+            history = ["failure" if degraded else "success"] + history
+        assert all(c == "failure" for c in history[:10]), (
+            "this is the latch, preserved as the reason the streak is reported "
+            "from a separate schedule"
+        )
+
+
+class TestTheStreakIsStructurallyKeptOutOfTheDegradationFile:
+    def test_the_script_refuses_to_append_a_streak(self) -> None:
+        """A convention would be enough if anyone reread it. This is a refusal
+        because the failure it prevents is self-sustaining and invisible."""
+        result = subprocess.run(
+            [
+                sys.executable,
+                str(PROJECT_ROOT / "scripts" / "check_schedule_health.py"),
+                "2026-09-10T12:00:00Z",
+                "--conclusions",
+                "failure",
+                "--append-to",
+                "/tmp/should_never_be_written.txt",
+            ],
+            capture_output=True,
+            text=True,
+            env={**os.environ, "PYTHONPATH": str(PROJECT_ROOT / "src")},
+        )
+        assert result.returncode != 0
+        assert "cannot be combined" in result.stderr
+        assert not Path("/tmp/should_never_be_written.txt").exists()
+
+    def test_the_matchday_run_never_asks_for_the_streak(self) -> None:
+        text = (PROJECT_ROOT / ".github" / "workflows" / "matchday-refresh.yml").read_text(
+            encoding="utf-8"
+        )
+        for line in text.splitlines():
+            stripped = line.strip()
+            if stripped.startswith("#"):
+                continue
+            assert "--conclusions" not in stripped, (
+                "the streak cannot be reported from the run it counts"
+            )
+
+    def test_the_weekly_watchdog_does_ask_for_it(self) -> None:
+        """Removing it from the matchday run is only half the fix; the
+        condition still has to be watched somewhere."""
+        text = (PROJECT_ROOT / ".github" / "workflows" / "weekly-lab-check.yml").read_text(
+            encoding="utf-8"
+        )
+        assert "--conclusions" in text
+        assert "--fail-when-streaking" in text

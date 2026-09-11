@@ -86,6 +86,32 @@ jobs:
             --jq '.[].createdAt' | tr '\n' ' ')
           python scripts/check_schedule_health.py $previous --fail-when-stale
 
+      - name: Watch for a run of matchday failures
+        # "Did the cron fire" and "is it succeeding" are different questions.
+        # The gap check above asks the first. This asks the second, and it has
+        # to be asked from here rather than from the matchday run itself: a
+        # streak reported into that run's degradation list would make the run
+        # fail, and the failure it caused would be inside the window the next
+        # run counts. It would never let go. This watchdog is on its own cron
+        # and its own conclusion is not what it is counting, so it can say so
+        # and go red without feeding itself.
+        #
+        # The condition is real and went unescalated once already: from
+        # 2026-09-06 the refresh failed on a Football-Data outage and produced
+        # eight blocked cards over two days. Every run reported its own fault
+        # and nothing counted them.
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PYTHONPATH: src
+        run: |
+          set -u
+          conclusions=$(gh run list --workflow matchday-refresh.yml \
+            --limit 10 --json conclusion \
+            --jq '.[].conclusion // "pending"' | tr '\n' ' ')
+          python scripts/check_schedule_health.py \
+            --conclusions $conclusions --fail-when-streaking
+
       - name: Watch that the closing snapshot is still running
         # Added 2026-09-02 with the price feed, because that feed is the only
         # forward evidence the corner markets will ever have and it fails

@@ -37,6 +37,12 @@ def main() -> int:
         "the closing snapshot runs on match days only, so it needs a wider one.",
     )
     parser.add_argument(
+        "--fail-when-streaking",
+        action="store_true",
+        help="Exit non-zero when too many runs in a row have failed. Only safe "
+        "on a watchdog whose own conclusion is not what it is counting.",
+    )
+    parser.add_argument(
         "--fail-when-stale",
         action="store_true",
         help="Exit non-zero when a run is missing, so a watchdog goes red.",
@@ -52,12 +58,33 @@ def main() -> int:
     )
     args = parser.parse_args()
 
+    # The streak must never reach the degradation file, and this is a hard
+    # refusal rather than a convention because the failure is self-sustaining
+    # and invisible.
+    #
+    # A sentence in run_degraded.txt sets degraded=true, which makes "Report
+    # the outcome" exit 1, which makes the run's conclusion `failure` — and
+    # that failure is inside the window the NEXT run's streak check reads. So a
+    # streak that ever fires keeps itself firing: the runs it counts are the
+    # runs it caused. Simulated forward from the real nine-failure history with
+    # the upstream fault cleared, it never returns to green.
+    #
+    # That is precisely the latch this whole change exists to remove, and the
+    # first draft of the fix reintroduced it. The streak belongs to a watchdog
+    # on a different schedule, whose own conclusion is not what it measures.
+    if args.conclusions is not None and args.append_to:
+        parser.error(
+            "--conclusions cannot be combined with --append-to. A degraded-run "
+            "streak written into the degradation file makes the run degraded, "
+            "which makes it fail, which feeds the streak. Report the streak "
+            "from a watchdog on a separate schedule instead."
+        )
+
     if args.conclusions is not None:
         streaking, streak_sentence = degraded_streak_report(args.conclusions)
         print(streak_sentence)
-        if streaking and args.append_to:
-            with open(args.append_to, "a", encoding="utf-8") as handle:
-                handle.write(streak_sentence + "\n")
+        if streaking and args.fail_when_streaking:
+            return 1
 
     previous = most_recent(args.timestamps)
     if args.max_days:

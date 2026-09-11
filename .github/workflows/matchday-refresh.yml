@@ -273,12 +273,17 @@ jobs:
           # alone made the run degraded, a degraded run exits non-zero, and a
           # non-zero run is not a success — so the gap could never close, even
           # after the feed recovered.
-          runs=$(gh run list --workflow matchday-refresh.yml \
-            --limit 10 --json createdAt,conclusion)
-          previous=$(printf '%s' "$runs" | jq -r '.[].createdAt' | tr '\n' ' ')
-          conclusions=$(printf '%s' "$runs" | jq -r '.[].conclusion // ""' | tr '\n' ' ')
+          #
+          # The gap only. A run of consecutive failures is also worth knowing,
+          # but it cannot be reported from here: a sentence in run_degraded.txt
+          # makes this run degraded, degraded exits 1, and that failure is in
+          # the window the next run's streak would count — the streak would
+          # keep itself alive forever. The weekly watchdog asks it instead,
+          # from a schedule whose own conclusion is not what it is counting.
+          previous=$(gh run list --workflow matchday-refresh.yml \
+            --limit 10 --json createdAt \
+            --jq '.[].createdAt' | tr '\n' ' ')
           python scripts/check_schedule_health.py $previous \
-            --conclusions $conclusions \
             --append-to run_degraded.txt
 
       - name: Check the provider credential

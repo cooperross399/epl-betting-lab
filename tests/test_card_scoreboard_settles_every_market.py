@@ -108,7 +108,8 @@ def test_a_result_missing_corner_counts_is_unsettleable_not_pending():
 
 def test_a_fixture_with_no_result_is_still_pending():
     board = build_scoreboard([_card("btts", "yes")], pd.DataFrame())
-    assert board.pending == 1 and board.unsettleable == 0
+    assert board.kickoff_unknown == 1  # no kick-off recorded: counted, not guessed
+    assert board.pending == 0 and board.unsettleable == 0
 
 
 def test_a_draw_no_bet_push_is_void_not_pending_and_not_unsettleable():

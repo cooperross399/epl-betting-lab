@@ -120,7 +120,12 @@ class TestTheResultMustFollowTheCard:
 
         board = build_scoreboard(cards, results)
 
-        assert board.pending == 1
+        # The pick carries no kick-off time, so whether it has been played
+        # cannot be told from the card — counted, not guessed. The claim this
+        # test makes is unchanged and now more specific: an earlier season's
+        # result must not settle it.
+        assert board.kickoff_unknown == 1
+        assert board.pending == 0
         assert board.settled == []
 
     def test_a_result_after_the_card_settles_it(self) -> None:
@@ -185,7 +190,12 @@ class TestReport:
         text = " ".join(render_scoreboard(board))
 
         assert "Nothing settled yet" in text
-        assert "1 selection(s) are waiting" in text
+        # The count is what this guards — that an empty record names how many
+        # selections are outstanding rather than printing a zero ROI. Which
+        # state they are outstanding in is now said too, and that wording
+        # depends on the state, so the assertion pins the count.
+        assert "1 selection(s)" in text
+        assert "0 selection(s)" not in text
 
     def test_it_says_how_long_this_will_take_to_mean_anything(self) -> None:
         """A running total invites over-reading. It should say so itself."""
@@ -198,3 +208,103 @@ class TestReport:
 
     def test_an_empty_board_renders_nothing(self) -> None:
         assert render_scoreboard(build_scoreboard([], pd.DataFrame())) == []
+
+
+class TestAMissingResultIsThreeDifferentFacts:
+    """"No result on file" was one bucket, and calling it `pending` told the
+    reader the record was still accumulating when it was simply blind.
+
+    Reproduced from the real 2026-09-10 card: results frozen at 2026-08-31 by
+    the Football-Data outage, a full round played since. The card printed
+    "Settled: 33 ... Still pending: 26". Eighteen of those 26 had been played.
+
+    The module already learned this lesson one bucket over — `unsettleable`
+    exists because the corner markets "sat in the pending queue and the record
+    looked like it was accumulating when it was not".
+    """
+
+    def _card(self, *, kickoff: str | None, home: str = "Arsenal") -> dict:
+        pick = {
+            "home_team": home,
+            "away_team": "Chelsea",
+            "market": "total_2_5",
+            "selection": "over",
+            "american_odds": 110,
+            "suggested_units": 0.1,
+            "status": "BETTABLE",
+            "first_seen": "2026-09-01T00:00:00Z",
+        }
+        if kickoff is not None:
+            pick["kickoff_time"] = kickoff
+        return {"card_generated": True, "best_bets": [pick], "generated_at": "2026-09-01T00:00:00Z"}
+
+    def _empty_results(self) -> pd.DataFrame:
+        return pd.DataFrame(
+            {
+                "date": pd.to_datetime(["2026-08-31"]),
+                "home_team": ["Everton"],
+                "away_team": ["Fulham"],
+                "home_goals": [1],
+                "away_goals": [1],
+            }
+        )
+
+    def test_a_fixture_that_has_not_kicked_off_is_pending(self) -> None:
+        board = build_scoreboard(
+            [self._card(kickoff="2026-09-20T14:00:00Z")],
+            self._empty_results(),
+            now=pd.Timestamp("2026-09-08T12:00:00Z"),
+        )
+        assert board.pending == 1
+        assert board.awaiting_results == 0
+
+    def test_a_played_fixture_with_no_result_is_not_pending(self) -> None:
+        """It resolves by a feed catching up, not by football being played, and
+        only one of those is anybody's problem."""
+        board = build_scoreboard(
+            [self._card(kickoff="2026-09-05T14:00:00Z")],
+            self._empty_results(),
+            now=pd.Timestamp("2026-09-08T12:00:00Z"),
+        )
+        assert board.awaiting_results == 1
+        assert board.pending == 0
+
+    def test_a_card_with_no_kickoff_recorded_is_counted_not_guessed(self) -> None:
+        board = build_scoreboard(
+            [self._card(kickoff=None)],
+            self._empty_results(),
+            now=pd.Timestamp("2026-09-08T12:00:00Z"),
+        )
+        assert board.kickoff_unknown == 1
+        assert board.pending == 0
+        assert board.awaiting_results == 0
+
+    def test_the_clock_is_actually_read(self) -> None:
+        """`now` was a declared-and-unused parameter on this function since it
+        was written. Telling a fixture that has not kicked off from one whose
+        result is missing is the one question that needs a clock."""
+        card = self._card(kickoff="2026-09-05T14:00:00Z")
+        before = build_scoreboard([card], self._empty_results(), now=pd.Timestamp("2026-09-01T00:00:00Z"))
+        after = build_scoreboard([card], self._empty_results(), now=pd.Timestamp("2026-09-08T12:00:00Z"))
+        assert before.pending == 1 and before.awaiting_results == 0
+        assert after.awaiting_results == 1 and after.pending == 0
+
+    def test_the_card_says_which_it_is(self) -> None:
+        board = build_scoreboard(
+            [self._card(kickoff="2026-09-05T14:00:00Z")],
+            self._empty_results(),
+            now=pd.Timestamp("2026-09-08T12:00:00Z"),
+        )
+        report = "\n".join(render_scoreboard(board))
+        assert "waiting on results data" in report
+
+    def test_a_record_that_is_entirely_awaiting_results_still_renders(self) -> None:
+        """The early return keyed on `settled or pending`. A record made
+        entirely of played-but-unrecorded selections would have rendered as
+        nothing at all — silence, from the exact condition worth reporting."""
+        board = build_scoreboard(
+            [self._card(kickoff="2026-09-05T14:00:00Z")],
+            self._empty_results(),
+            now=pd.Timestamp("2026-09-08T12:00:00Z"),
+        )
+        assert render_scoreboard(board) != []

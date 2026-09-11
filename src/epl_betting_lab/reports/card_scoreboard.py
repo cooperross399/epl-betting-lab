@@ -98,6 +98,18 @@ class Scoreboard:
     #: three weeks the corner markets sat in the pending queue and the record
     #: looked like it was accumulating when it was not.
     unsettleable: int = 0
+    #: Played, but the results feed has not caught up. The same lesson as
+    #: `unsettleable`, one bucket over: during the Football-Data outage of
+    #: 2026-09-06 an entire settled matchweek — 18 of 26 "still pending"
+    #: selections, carrying 2.40 units against a 5.55-unit settled sample —
+    #: read as "waiting on kick-off" because the result simply was not on file.
+    #: It resolves with time like `pending`, but it is waiting on a feed rather
+    #: than on football, and only one of those is anybody's problem.
+    awaiting_results: int = 0
+    #: No result, and the card did not record a kick-off time, so which of the
+    #: two above applies cannot be known. Cards archived before kick-offs were
+    #: recorded land here. Counted rather than guessed.
+    kickoff_unknown: int = 0
 
     @property
     def settled(self) -> list[ScoredSelection]:
@@ -252,6 +264,13 @@ def build_scoreboard(
     if not cards:
         return board
 
+    # Declared since this function was written and never read. Telling a
+    # fixture that has not kicked off from one whose result is missing is the
+    # one question that needs a clock, which is presumably why it was put here.
+    moment = pd.Timestamp(now) if now is not None else pd.Timestamp.now(tz="UTC")
+    if moment.tzinfo is None:
+        moment = moment.tz_localize("UTC")
+
     # Fixture -> every result for that pairing, with its date. The pairing
     # alone is not an identity: it recurs every season.
     # Corner counts ride along with the scoreline: HC/AC are Football-Data's
@@ -306,7 +325,16 @@ def build_scoreboard(
             if pd.isna(issued) or item[0].tz_localize("UTC") >= issued.normalize()
         ]
         if not candidates:
-            board.pending += 1
+            # "No result on file" is three different facts, and calling them
+            # all `pending` tells the reader the record is still accumulating
+            # when it may simply be blind.
+            kickoff = pd.to_datetime(row.get("kickoff_time"), errors="coerce", utc=True)
+            if pd.isna(kickoff):
+                board.kickoff_unknown += 1
+            elif kickoff > moment:
+                board.pending += 1
+            else:
+                board.awaiting_results += 1
             board.scored.append(entry)
             continue
         # The first result after the card was issued is the one it meant.
@@ -343,14 +371,29 @@ def build_scoreboard(
 def render_scoreboard(board: Scoreboard) -> list[str]:
     """Markdown lines for the run summary and the emailed card."""
     settled = board.settled
-    if not settled and not board.pending:
+    # Every unsettled state, or a record made entirely of one of them
+    # renders as silence — from the exact condition worth reporting.
+    if not settled and not (
+        board.pending or board.awaiting_results or board.kickoff_unknown
+    ):
         return []
     lines = ["### How the recommendations have done", ""]
     if not settled:
+        # Only the states that actually have a count. Leading with "0
+        # selection(s) are waiting on kick-off" is the zero this sentence
+        # exists to avoid printing.
+        parts = [
+            (board.pending, "are waiting on kick-off"),
+            (board.awaiting_results, "have been played and are waiting on results data"),
+            (board.kickoff_unknown, "were archived without a kick-off time"),
+            (board.unsettleable, "cannot be settled"),
+        ]
+        said = [f"{count} selection(s) {label}" for count, label in parts if count]
+        if len(said) > 1:
+            said[-1] = "and " + said[-1]
         lines += [
-            f"Nothing settled yet. {board.pending} selection(s) are waiting on "
-            "results"
-            + (f", and {board.unsettleable} cannot be settled" if board.unsettleable else "")
+            "Nothing settled yet. "
+            + (", ".join(said) if said else "Nothing is on file")
             + ".",
             "",
         ]
@@ -365,6 +408,24 @@ def render_scoreboard(board: Scoreboard) -> list[str]:
         f"- Still pending: {board.pending}",
         "",
     ]
+    if board.awaiting_results:
+        # Named separately because it is not the reader's problem to wait out.
+        # Pending resolves by playing football; this resolves by a feed
+        # catching up, and while it does not, the settled sample above is
+        # smaller than the evidence that actually exists.
+        lines.insert(
+            -1,
+            f"- Played, waiting on results data: **{board.awaiting_results}** — "
+            "these are settled matches the results feed has not caught up with, "
+            "so the record above is behind rather than still accumulating.",
+        )
+    if board.kickoff_unknown:
+        lines.insert(
+            -1,
+            f"- Kick-off unknown: {board.kickoff_unknown} — archived before "
+            "kick-off times were recorded, so whether they have been played "
+            "cannot be told from the card.",
+        )
     if board.void:
         lines.append(f"- Stake returned (void): {board.void}")
     if board.unsettleable:

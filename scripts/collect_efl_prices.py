@@ -10,11 +10,22 @@ selection, publishes no card, and recommends no bet.
 Football-Data's own closing prices returned -2.0% to -2.9% at the best price
 across the panel, and the one card market it could measure there (`total_2_5`)
 came back decisively negative. That is the answer for the three markets
-Football-Data quotes. It is not an answer for the four it does not: both teams
-to score, double chance, and all three corner markets have no free price history
-in any division, ever. Corners are three of the seven markets the card stakes.
-For those, a forward CLV record is not the cheapest evidence available — it is
-the only evidence that can ever exist.
+Football-Data quotes; it is not an answer for the five it does not.
+
+**And the first live run narrowed that considerably.** The case made for this
+collection was corners: three of the seven markets the card stakes, with no free
+price history in any division, ever. The provider does not carry them for the
+EFL. Asked for all eight in the same run that returned all eight for the Premier
+League, the EFL answered with `1x2`, `btts` and `total_2_5` — no corners, no
+double chance, no draw-no-bet.
+
+What survives of the case is one market. `btts` has no free historical price in
+any division, so a forward record is the only evidence it can ever have, and the
+EFL now contributes one. `total_2_5` and `1x2` were already available free from
+Football-Data. Corners cannot be evidenced forward here either.
+
+That is a much smaller reason than the one this file was written for, and it is
+recorded here rather than left in a commit message nobody re-reads.
 
 **It is deliberately kept away from the card.** Three separations, each of which
 would be a real fault if it were missing:
@@ -72,6 +83,20 @@ SPORT_KEYS = {
     "E3": "soccer_england_league2",
 }
 
+#: What the card bets and this collection therefore asks for. Compared against
+#: what actually comes back, so a market the provider does not carry cannot be
+#: mistaken for one nobody requested.
+EXPECTED_MARKETS = (
+    "1x2",
+    "btts",
+    "double_chance",
+    "draw_no_bet",
+    "total_2_5",
+    "corners_1x2",
+    "corners_total_9_5",
+    "corners_total_10_5",
+)
+
 DEFAULT_FEED = PROCESSED_DIR / "price_feed_efl.csv"
 
 #: The feed's own columns plus the one thing the project has never carried.
@@ -123,10 +148,27 @@ def collect_division(
         )
     rows = rows.copy()
     rows["competition"] = division
-    return rows[list(EFL_FEED_COLUMNS)], (
+    note = (
         f"{division} ({DIVISION_NAMES[division]}): {len(rows):,} observations "
-        f"across {rows.groupby(['home_team', 'away_team']).ngroups} fixtures."
+        f"across {rows.groupby(['home_team', 'away_team']).ngroups} fixtures — "
+        f"{', '.join(sorted(rows['market'].unique()))}."
     )
+    absent = sorted(set(EXPECTED_MARKETS) - set(rows["market"].unique()))
+    if absent:
+        # The whole case for collecting the EFL rested on corners, which no
+        # source retains historically. The first live run returned 1x2, btts
+        # and total_2_5 and nothing else, and that was discovered by diffing
+        # this feed against the Premier League one rather than being told.
+        #
+        # A market the provider does not carry looks exactly like a market
+        # nobody asked for, so the difference between what was requested and
+        # what came back is said out loud every run.
+        note += (
+            f"\n  {division}: requested but not returned — {', '.join(absent)}. "
+            "The provider carries these for the Premier League and not here, so "
+            "they cannot be evidenced forward in this competition either."
+        )
+    return rows[list(EFL_FEED_COLUMNS)], note
 
 
 def main() -> int:

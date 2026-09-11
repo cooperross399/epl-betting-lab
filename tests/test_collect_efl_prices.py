@@ -302,3 +302,61 @@ class TestRestoringAFeedCannotDestroyIt:
             "- name: Append the observation to the price feed", 1
         )[1].split("- name:", 1)[0]
         assert "git show" not in block
+
+
+class TestAMarketTheProviderDoesNotCarryIsSaidOutLoud:
+    """The case for collecting the EFL rested on corners — three of the seven
+    markets the card stakes, with no free price history in any division. The
+    provider does not carry them here.
+
+    Asked for all eight in the same run that returned all eight for the Premier
+    League, the EFL answered with 1x2, btts and total_2_5. That was found by
+    diffing this feed against the Premier League one, which is not a thing
+    anybody will do again. A market the provider does not carry looks exactly
+    like a market nobody asked for.
+    """
+
+    def test_what_was_asked_for_is_written_down(self) -> None:
+        module = _module()
+        for market in ("corners_1x2", "corners_total_9_5", "corners_total_10_5",
+                       "btts", "double_chance", "draw_no_bet", "total_2_5"):
+            assert market in module.EXPECTED_MARKETS, market
+
+    def test_the_note_names_the_markets_that_did_not_come_back(self, monkeypatch) -> None:
+        module = _module()
+        monkeypatch.setenv(API_KEY_ENV, SECRET)
+        monkeypatch.setattr(
+            "epl_betting_lab.providers.odds_api_staging_provider._default_requester",
+            lambda url, **kwargs: _MockResponse(_payload("Leeds", "Hull")),
+        )
+        rows, note = module.collect_division("E1")
+
+        # The stub carries h2h and totals only, so the rest are absent.
+        assert "requested but not returned" in note
+        assert "corners_1x2" in note
+        assert "1x2" in note  # and what did arrive is named too
+
+    def test_a_full_house_says_nothing_about_absences(self, monkeypatch) -> None:
+        """The report must not cry about a gap that is not there — a warning
+        that always fires carries no information."""
+        module = _module()
+        monkeypatch.setenv(API_KEY_ENV, SECRET)
+        monkeypatch.setattr(
+            "epl_betting_lab.providers.odds_api_staging_provider._default_requester",
+            lambda url, **kwargs: _MockResponse(_payload("Leeds", "Hull")),
+        )
+        rows, _ = module.collect_division("E1")
+        monkeypatch.setattr(module, "EXPECTED_MARKETS", tuple(rows["market"].unique()))
+        _, note = module.collect_division("E1")
+        assert "requested but not returned" not in note
+
+    def test_the_docstring_no_longer_claims_corners(self) -> None:
+        """It was written arguing corners were the whole point. They are not
+        available, and a file that still says so would mislead the next reader
+        into re-making a case the data already answered."""
+        source = (PROJECT_ROOT / "scripts" / "collect_efl_prices.py").read_text(encoding="utf-8")
+        # Whitespace-normalised: the sentences wrap, and a test that breaks on
+        # a line break is testing the formatter rather than the claim.
+        docstring = " ".join(source.split('"""')[1].split())
+        assert "does not carry them for the EFL" in docstring
+        assert "What survives of the case is one market" in docstring

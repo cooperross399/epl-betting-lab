@@ -729,6 +729,19 @@ jobs:
         # The card archive and the match dataset together are the only link
         # between one matchweek and the next, which is why they outlive the
         # reports.
+        #
+        # The xG file joins them, for two reasons. A run that cannot reach
+        # Understat currently has no xG at all and fits the ratings on goals —
+        # reported, but the history is re-fetched from scratch every single run
+        # and survives nowhere, so a bad day at Understat costs the whole
+        # series rather than a day of it. And a measurement that cannot be
+        # checked is a measurement nobody should act on: the claim that
+        # Understat's xG runs about +0.16 goals a match above actual goals, and
+        # +0.31 in the current season, could not be verified from anything this
+        # repository keeps. Understat's robots.txt is `Disallow: /`, so
+        # re-fetching it to check is not an option this project takes. Keeping
+        # the file the pipeline already downloaded makes the question
+        # answerable without asking Understat again.
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -736,6 +749,7 @@ jobs:
           path: |
             data/outputs/archive/automated_cards
             data/processed/epl_historical_matches.csv
+            data/processed/understat_team_xg.csv
           if-no-files-found: warn
           retention-days: 90
 

@@ -13,6 +13,14 @@ class TeamStrength:
     defense: float
 
 
+class UnratedTeam(KeyError):
+    """Asked to price a team this fit never saw.
+
+    A `KeyError` subclass, so a caller already catching one keeps working
+    rather than dying on an exception type it has never heard of.
+    """
+
+
 @dataclass(frozen=True)
 class RatingConfig:
     """How team attack and defence are estimated from past results.
@@ -276,9 +284,45 @@ class PoissonGoalsModel:
         }
         return self
 
-    def expected_goals(self, home_team: str, away_team: str) -> tuple[float, float]:
+    def expected_goals(
+        self, home_team: str, away_team: str, *, allow_unrated: bool = False
+    ) -> tuple[float, float]:
+        """Expected goals for a fixture, refusing teams this fit never saw.
+
+        A team with no fitted rating used to be substituted with
+        `TeamStrength(1.0, 1.0)` — an exactly average side — and nothing said
+        so. That is defensible for a promoted club, which is a member of this
+        competition with no history in it yet, and every season opens with one
+        to three of them.
+
+        It is catastrophic for a team from another competition. Fitted on the
+        Premier League and asked for a League Two side it has never seen, the
+        model priced AFC Wimbledon to beat Liverpool at 27.0% and Grimsby to
+        beat Man City at 11.5% — fair prices of +271 and +770 against a market
+        nearer +1200. It would have read the difference as several hundred
+        points of edge and staked it, confidently, on exactly the fixtures a
+        cup competition is made of.
+
+        The model cannot tell those two cases apart: it sees a training frame,
+        not a league. The caller can, so the caller has to say. Refusing by
+        default means adding a competition produces a loud failure rather than
+        a confident wrong price, and the one legitimate use — a promoted club's
+        league-average prior — is now asked for out loud.
+        """
         if self.avg_home_goals is None or self.avg_away_goals is None:
             raise RuntimeError("Model is not fit yet.")
+
+        unrated = [t for t in (home_team, away_team) if t not in self.team_strengths]
+        if unrated and not allow_unrated:
+            raise UnratedTeam(
+                f"{' and '.join(repr(t) for t in unrated)} "
+                f"{'has' if len(unrated) == 1 else 'have'} no fitted rating in a "
+                f"pool of {len(self.team_strengths)} teams. Substituting a "
+                "league-average side would price a fixture the model has no "
+                "evidence about. Pass allow_unrated=True to ask for that prior "
+                "deliberately — it is reasonable for a promoted club and wrong "
+                "for a team from another competition."
+            )
 
         home = self.team_strengths.get(home_team, TeamStrength(1.0, 1.0))
         away = self.team_strengths.get(away_team, TeamStrength(1.0, 1.0))
@@ -287,8 +331,12 @@ class PoissonGoalsModel:
         away_xg = self.avg_away_goals * away.attack * home.defense
         return round(float(home_xg), 3), round(float(away_xg), 3)
 
-    def score_matrix(self, home_team: str, away_team: str) -> pd.DataFrame:
-        home_xg, away_xg = self.expected_goals(home_team, away_team)
+    def score_matrix(
+        self, home_team: str, away_team: str, *, allow_unrated: bool = False
+    ) -> pd.DataFrame:
+        home_xg, away_xg = self.expected_goals(
+            home_team, away_team, allow_unrated=allow_unrated
+        )
         rows = []
         for hg in range(self.max_goals + 1):
             for ag in range(self.max_goals + 1):
@@ -296,8 +344,10 @@ class PoissonGoalsModel:
                 rows.append({"home_goals": hg, "away_goals": ag, "prob": prob})
         return pd.DataFrame(rows)
 
-    def match_probabilities(self, home_team: str, away_team: str) -> dict:
-        mat = self.score_matrix(home_team, away_team)
+    def match_probabilities(
+        self, home_team: str, away_team: str, *, allow_unrated: bool = False
+    ) -> dict:
+        mat = self.score_matrix(home_team, away_team, allow_unrated=allow_unrated)
         home_win = mat.loc[mat.home_goals > mat.away_goals, "prob"].sum()
         draw = mat.loc[mat.home_goals == mat.away_goals, "prob"].sum()
         away_win = mat.loc[mat.home_goals < mat.away_goals, "prob"].sum()
@@ -321,7 +371,9 @@ class PoissonGoalsModel:
         else:
             dnb_home = dnb_away = 0.0
 
-        home_xg, away_xg = self.expected_goals(home_team, away_team)
+        home_xg, away_xg = self.expected_goals(
+            home_team, away_team, allow_unrated=allow_unrated
+        )
         top_scores = mat.sort_values("prob", ascending=False).head(5).copy()
         top_scores["score"] = top_scores["home_goals"].astype(str) + "-" + top_scores["away_goals"].astype(str)
 

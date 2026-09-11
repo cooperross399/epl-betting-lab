@@ -1,8 +1,8 @@
-## Friday 11 September, 07:34 UTC — scheduled run
+## Friday 11 September, 09:04 UTC — scheduled run
 
-Selections changed: 1 added, 2 dropped, 1 moved section.
+Selections changed: 1 added.
 
-Provider quota: 1115835 (about 17997 more runs)
+Provider quota: 1115713 (about 17995 more runs)
 
 Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
 
@@ -25,10 +25,7 @@ _None._
 
 ### What changed
 
-- **Added:** Aston Villa v Nott'm Forest corners_total_10_5 over
-- **Dropped:** Bournemouth v Brentford corners_total_10_5 over
-- **Dropped:** Tottenham v Everton draw_no_bet away
-- **Moved section:** Bournemouth v Brentford corners_1x2 home
+- **Added:** Man United v Man City corners_total_9_5 over
 
 ### How the recommendations have done
 
@@ -49,4 +46,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/34574882911)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/34582175126)

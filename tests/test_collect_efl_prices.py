@@ -243,3 +243,62 @@ class TestTheWorkflowWiring:
             if "efl" in p.name.lower()
         ]
         assert efl_workflows == [], efl_workflows
+
+
+class TestRestoringAFeedCannotDestroyIt:
+    """`>` truncates its target before the command on the left runs.
+
+        git show ...:price_feed_efl.csv > data/processed/price_feed_efl.csv
+
+    emptied the file whenever the branch did not carry that path — and on the
+    first run it never does. The 2026-09-11 dispatch collected 1,203 EFL
+    observations across 38 fixtures, printed "Added 1,203 new observation(s)",
+    and the publish step blanked them a moment later and skipped the empty
+    file. A step that succeeded, a number that was true when it was printed,
+    and nothing on the branch.
+
+    The same line also meant the feed could never accumulate: every run began
+    from whatever the restore left behind, which was nothing.
+    """
+
+    def _snapshot(self) -> str:
+        return (
+            PROJECT_ROOT / ".github" / "workflows" / "closing-snapshot.yml"
+        ).read_text(encoding="utf-8")
+
+    def test_no_feed_is_restored_by_redirecting_onto_itself(self) -> None:
+        text = self._snapshot()
+        for line in text.splitlines():
+            stripped = line.strip()
+            if stripped.startswith("#"):
+                continue
+            if "git show" in stripped and "price_feed" in stripped:
+                assert "> data/processed/" not in stripped, (
+                    f"truncating restore: {stripped}"
+                )
+
+    def test_the_restore_goes_through_a_temporary_file(self) -> None:
+        block = self._snapshot().split(
+            "- name: Restore the price feeds before collecting into them", 1
+        )[1].split("- name:", 1)[0]
+        assert "mktemp" in block
+        # Replaced only by content that actually arrived.
+        assert '[ -s "$TMP" ]' in block
+        assert "mv " in block
+
+    def test_the_feeds_are_restored_before_anything_collects_into_them(self) -> None:
+        text = self._snapshot()
+        assert text.index("- name: Restore the price feeds before collecting into them") < text.index(
+            "- name: Observe EFL prices"
+        )
+        assert text.index("- name: Observe EFL prices") < text.index(
+            "- name: Append the observation to the price feed"
+        )
+
+    def test_the_publish_does_not_restore_a_second_time(self) -> None:
+        """Restoring again after collection would overwrite this run's own
+        observations with the branch's older copy."""
+        block = self._snapshot().split(
+            "- name: Append the observation to the price feed", 1
+        )[1].split("- name:", 1)[0]
+        assert "git show" not in block

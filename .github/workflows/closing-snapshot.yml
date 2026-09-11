@@ -105,6 +105,44 @@ jobs:
           python scripts/run_provider_shadow_verification.py \
             --provider odds_api --live --overwrite-staging --include-event-markets
 
+      - name: Restore the price feeds before collecting into them
+        # `>` truncates its target before the command on the left runs. So
+        #
+        #     git show ...:price_feed_efl.csv > data/processed/price_feed_efl.csv
+        #
+        # emptied the file whenever the branch did not have that path yet — and
+        # on the first run it never does. The EFL collection had already
+        # written 1,203 observations there, reported "Added 1,203 new
+        # observation(s)", and the publish step blanked them a moment later and
+        # then skipped the empty file. A step that succeeded, a number that was
+        # true when printed, and nothing on the branch.
+        #
+        # The same line also meant the EFL feed could never accumulate: every
+        # run began from whatever the restore left, which was nothing.
+        #
+        # Restoring through a temporary file fixes both. A feed is replaced only
+        # by content that actually arrived.
+        if: always()
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -u
+          REMOTE="https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}"
+          mkdir -p data/processed
+          if git fetch "$REMOTE" +refs/heads/price-feed:refs/price-feed-tip 2>/dev/null; then
+            for FEED in price_feed.csv price_feed_efl.csv; do
+              TMP=$(mktemp)
+              if git show "refs/price-feed-tip:$FEED" > "$TMP" 2>/dev/null && [ -s "$TMP" ]; then
+                mv "$TMP" "data/processed/$FEED"
+                wc -l < "data/processed/$FEED" | xargs echo "restored $FEED rows:"
+              else
+                rm -f "$TMP"
+                echo "no $FEED on the branch yet; starting one."
+              fi
+            done
+          fi
+
       - name: Observe EFL prices
         # Separate from the Premier League fetch in every way that matters.
         #
@@ -149,9 +187,11 @@ jobs:
           PARENT=""
           if git fetch "$REMOTE" +refs/heads/price-feed:refs/price-feed-tip 2>/dev/null; then
             PARENT=$(git rev-parse refs/price-feed-tip)
-            git show refs/price-feed-tip:price_feed.csv > data/processed/price_feed.csv 2>/dev/null || true
-            git show refs/price-feed-tip:price_feed_efl.csv > data/processed/price_feed_efl.csv 2>/dev/null || true
           fi
+          # The feeds were restored above, before anything collected into them.
+          # Restoring again here would overwrite this run's own observations —
+          # and `>` would empty the file outright for any path the branch does
+          # not carry yet.
           python scripts/append_price_snapshot.py --feed data/processed/price_feed.csv
           # Two feeds on one branch, never one file holding two competitions.
           # Nothing in this project carries a competition on a row — every

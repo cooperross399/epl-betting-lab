@@ -1,8 +1,8 @@
-## Saturday 12 September, 12:37 UTC — scheduled run
+## Saturday 12 September, 13:41 UTC — scheduled run
 
-Selections changed: 2 added, 5 dropped, 1 moved section.
+Selections changed: 3 added, 4 dropped, 2 moved section.
 
-Provider quota: 1114615 (about 17977 more runs)
+Provider quota: 1114493 (about 17975 more runs)
 
 Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
 
@@ -10,14 +10,14 @@ Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_tot
 
 | Match | Market | Selection | Tier | Edge | Price | Book | Units |
 |:------|:-------|:----------|:-----|-----:|------:|:-----|------:|
-| Chelsea v Hull | `btts` | yes | C | +6.2% | -108 | BetMGM | 0.1 |
-| Liverpool v Fulham | `double_chance` | draw_or_away | C | +6.7% | +165 | Fanatics | 0.1 |
+| Bournemouth v Brentford | `double_chance` | draw_or_away | C | +7.2% | -152 | BetOnline.ag | 0.1 |
+| Chelsea v Hull | `corners_total_9_5` | over | C | +5.7% | -112 | FanDuel | 0.1 |
 | Bournemouth v Brentford | `corners_1x2` | home | C | +4.5% | -150 | FanDuel | 0.1 |
-| Tottenham v Everton | `draw_no_bet` | away | C | +6.1% | +180 | FanDuel | 0.1 |
-| Chelsea v Hull | `corners_total_9_5` | over | C | +4.4% | -118 | FanDuel | 0.1 |
-| Bournemouth v Brentford | `draw_no_bet` | away | C | +5.2% | +106 | BetOnline.ag | 0.1 |
-| Aston Villa v Nott'm Forest | `corners_total_9_5` | over | C | +4.1% | -121 | BetRivers | 0.1 |
-| Man United v Man City | `corners_total_9_5` | over | C | +4.0% | -122 | FanDuel | 0.1 |
+| Liverpool v Fulham | `double_chance` | draw_or_away | C | +6.1% | +160 | Fanatics | 0.1 |
+| Chelsea v Hull | `btts` | yes | C | +4.6% | -102 | BetMGM | 0.1 |
+| Crystal Palace v Ipswich | `corners_1x2` | home | C | +4.2% | -137 | BetRivers | 0.1 |
+| Aston Villa v Nott'm Forest | `corners_total_9_5` | over | C | +4.3% | -120 | BetRivers | 0.1 |
+| Chelsea v Hull | `corners_total_10_5` | over | C | +5.4% | +148 | FanDuel | 0.1 |
 
 ### Leans
 
@@ -25,21 +25,22 @@ _None._
 
 ### What changed
 
-- **Added:** Man United v Man City corners_total_10_5 over
-- **Added:** Tottenham v Everton corners_total_9_5 over
-- **Dropped:** Chelsea v Hull corners_total_10_5 over
-- **Dropped:** Crystal Palace v Ipswich btts yes
-- **Dropped:** Liverpool v Fulham corners_total_9_5 under
-- **Dropped:** Sunderland v Arsenal corners_total_10_5 under
-- **Dropped:** Sunderland v Arsenal corners_total_9_5 under
-- **Moved section:** Man United v Man City corners_total_9_5 over
+- **Added:** Bournemouth v Brentford corners_total_10_5 over
+- **Added:** Bournemouth v Brentford corners_total_9_5 over
+- **Added:** Chelsea v Hull corners_total_10_5 over
+- **Dropped:** Bournemouth v Brentford draw_no_bet away
+- **Dropped:** Crystal Palace v Ipswich draw_no_bet home
+- **Dropped:** Man United v Man City corners_total_9_5 over
+- **Dropped:** Tottenham v Everton draw_no_bet away
+- **Moved section:** Bournemouth v Brentford double_chance draw_or_away
+- **Moved section:** Crystal Palace v Ipswich corners_1x2 home
 
 ### How the recommendations have done
 
 - Settled: **50** selections, 20 won
 - Staked: 7.85 units
 - Profit: **-0.85 units** (-10.8% on turnover)
-- Still pending: 12
+- Still pending: 14
 
 - Stake returned (void): 1
 
@@ -53,4 +54,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/34694123942)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/34697036272)

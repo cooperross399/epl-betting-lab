@@ -1,10 +1,10 @@
-## Sunday 13 September, 13:43 UTC — scheduled run
+## Sunday 13 September, 14:38 UTC — scheduled run
 
-Selections changed: 8 dropped.
+Selections changed: 6 added, 5 dropped.
 
-Provider quota: 1113152 (about 17954 more runs)
+Provider quota: 1113012 (about 17951 more runs)
 
-Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
+Markets: **btts, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2, total_2_5, double_chance, draw_no_bet)
 
 ### Best bets
 
@@ -16,14 +16,17 @@ _None._
 
 ### What changed
 
-- **Dropped:** Coventry v Brighton corners_1x2 draw
-- **Dropped:** Coventry v Brighton corners_1x2 home
-- **Dropped:** Coventry v Brighton corners_total_10_5 over
-- **Dropped:** Coventry v Brighton corners_total_9_5 over
-- **Dropped:** Coventry v Brighton double_chance draw_or_away
-- **Dropped:** Coventry v Brighton double_chance home_or_away
-- **Dropped:** Coventry v Brighton draw_no_bet away
-- **Dropped:** Man United v Man City double_chance home_or_away
+- **Added:** Leeds v Newcastle btts no
+- **Added:** Leeds v Newcastle corners_1x2 away
+- **Added:** Leeds v Newcastle corners_1x2 home
+- **Added:** Man United v Man City btts no
+- **Added:** Man United v Man City btts yes
+- **Added:** Man United v Man City corners_1x2 draw
+- **Dropped:** Leeds v Newcastle double_chance draw_or_away
+- **Dropped:** Leeds v Newcastle draw_no_bet away
+- **Dropped:** Leeds v Newcastle total_2_5 over
+- **Dropped:** Man United v Man City double_chance draw_or_away
+- **Dropped:** Man United v Man City draw_no_bet away
 
 ### How the recommendations have done
 
@@ -45,4 +48,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/34760563505)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/34763157452)

@@ -1,8 +1,8 @@
-## Sunday 13 September, 09:41 UTC — scheduled run
+## Sunday 13 September, 13:43 UTC — scheduled run
 
-Selections changed: 2 added.
+Selections changed: 8 dropped.
 
-Provider quota: 1113800 (about 17964 more runs)
+Provider quota: 1113152 (about 17954 more runs)
 
 Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
 
@@ -16,8 +16,14 @@ _None._
 
 ### What changed
 
-- **Added:** Coventry v Brighton corners_total_10_5 over
-- **Added:** Coventry v Brighton corners_total_9_5 over
+- **Dropped:** Coventry v Brighton corners_1x2 draw
+- **Dropped:** Coventry v Brighton corners_1x2 home
+- **Dropped:** Coventry v Brighton corners_total_10_5 over
+- **Dropped:** Coventry v Brighton corners_total_9_5 over
+- **Dropped:** Coventry v Brighton double_chance draw_or_away
+- **Dropped:** Coventry v Brighton double_chance home_or_away
+- **Dropped:** Coventry v Brighton draw_no_bet away
+- **Dropped:** Man United v Man City double_chance home_or_away
 
 ### How the recommendations have done
 
@@ -39,4 +45,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/34749953455)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/34760563505)

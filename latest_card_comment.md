@@ -1,8 +1,8 @@
-## Monday 14 September, 10:05 UTC — scheduled run
+## Monday 14 September, 15:51 UTC — scheduled run
 
-Selections changed: 1 moved section.
+Selections changed: 1 dropped, 2 moved section.
 
-Provider quota: 1112414 (about 17942 more runs)
+Provider quota: 1112245 (about 17939 more runs)
 
 Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
 
@@ -10,7 +10,8 @@ Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_tot
 
 | Match | Market | Selection | Tier | Edge | Price | Book | Units |
 |:------|:-------|:----------|:-----|-----:|------:|:-----|------:|
-| Leeds v Newcastle | `double_chance` | draw_or_away | C | +5.5% | -150 | Fanatics | 0.1 |
+| Leeds v Newcastle | `double_chance` | draw_or_away | C | +7.3% | -160 | Fanatics | 0.1 |
+| Leeds v Newcastle | `corners_total_10_5` | under | C | +3.6% | -120 | BetRivers | 0.1 |
 
 ### Leans
 
@@ -18,14 +19,16 @@ _None._
 
 ### What changed
 
-- **Moved section:** Leeds v Newcastle total_2_5 over
+- **Dropped:** Leeds v Newcastle draw_no_bet home
+- **Moved section:** Leeds v Newcastle btts yes
+- **Moved section:** Leeds v Newcastle corners_total_10_5 under
 
 ### How the recommendations have done
 
 - Settled: **50** selections, 20 won
 - Staked: 7.85 units
 - Profit: **-0.85 units** (-10.8% on turnover)
-- Still pending: 1
+- Still pending: 2
 - Played, waiting on results data: **14** — these are settled matches the results feed has not caught up with, so the record above is behind rather than still accumulating.
 
 - Stake returned (void): 1
@@ -40,4 +43,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/34831225649)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/34864707907)

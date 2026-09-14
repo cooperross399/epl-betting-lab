@@ -1,14 +1,16 @@
-## Sunday 13 September, 14:38 UTC — scheduled run
+## Monday 14 September, 08:32 UTC — scheduled run
 
-Selections changed: 6 added, 5 dropped.
+Selections changed: 9 added, 6 dropped.
 
-Provider quota: 1113012 (about 17951 more runs)
+Provider quota: 1112524 (about 17943 more runs)
 
-Markets: **btts, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2, total_2_5, double_chance, draw_no_bet)
+Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
 
 ### Best bets
 
-_None._
+| Match | Market | Selection | Tier | Edge | Price | Book | Units |
+|:------|:-------|:----------|:-----|-----:|------:|:-----|------:|
+| Leeds v Newcastle | `double_chance` | draw_or_away | C | +4.9% | -157 | Bovada | 0.1 |
 
 ### Leans
 
@@ -16,17 +18,21 @@ _None._
 
 ### What changed
 
-- **Added:** Leeds v Newcastle btts no
-- **Added:** Leeds v Newcastle corners_1x2 away
-- **Added:** Leeds v Newcastle corners_1x2 home
-- **Added:** Man United v Man City btts no
-- **Added:** Man United v Man City btts yes
-- **Added:** Man United v Man City corners_1x2 draw
-- **Dropped:** Leeds v Newcastle double_chance draw_or_away
-- **Dropped:** Leeds v Newcastle draw_no_bet away
-- **Dropped:** Leeds v Newcastle total_2_5 over
-- **Dropped:** Man United v Man City double_chance draw_or_away
-- **Dropped:** Man United v Man City draw_no_bet away
+- **Added:** Leeds v Newcastle corners_total_10_5 over
+- **Added:** Leeds v Newcastle corners_total_9_5 over
+- **Added:** Leeds v Newcastle double_chance draw_or_away
+- **Added:** Leeds v Newcastle double_chance home_or_away
+- **Added:** Leeds v Newcastle double_chance home_or_draw
+- **Added:** Leeds v Newcastle draw_no_bet away
+- **Added:** Leeds v Newcastle draw_no_bet home
+- **Added:** Leeds v Newcastle total_2_5 over
+- **Added:** Leeds v Newcastle total_2_5 under
+- **Dropped:** Man United v Man City btts no
+- **Dropped:** Man United v Man City btts yes
+- **Dropped:** Man United v Man City corners_1x2 away
+- **Dropped:** Man United v Man City corners_1x2 draw
+- **Dropped:** Man United v Man City corners_total_10_5 over
+- **Dropped:** Man United v Man City corners_total_9_5 over
 
 ### How the recommendations have done
 
@@ -34,7 +40,7 @@ _None._
 - Staked: 7.85 units
 - Profit: **-0.85 units** (-10.8% on turnover)
 - Still pending: 1
-- Played, waiting on results data: **13** — these are settled matches the results feed has not caught up with, so the record above is behind rather than still accumulating.
+- Played, waiting on results data: **14** — these are settled matches the results feed has not caught up with, so the record above is behind rather than still accumulating.
 
 - Stake returned (void): 1
 
@@ -48,4 +54,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/34763157452)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/34823079550)

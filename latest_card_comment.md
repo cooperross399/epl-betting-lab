@@ -1,8 +1,8 @@
-## Monday 14 September, 15:51 UTC — scheduled run
+## Monday 14 September, 16:30 UTC — scheduled run
 
-Selections changed: 1 dropped, 2 moved section.
+Selections changed: 1 moved section.
 
-Provider quota: 1112245 (about 17939 more runs)
+Provider quota: 1112117 (about 17937 more runs)
 
 Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
 
@@ -10,8 +10,7 @@ Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_tot
 
 | Match | Market | Selection | Tier | Edge | Price | Book | Units |
 |:------|:-------|:----------|:-----|-----:|------:|:-----|------:|
-| Leeds v Newcastle | `double_chance` | draw_or_away | C | +7.3% | -160 | Fanatics | 0.1 |
-| Leeds v Newcastle | `corners_total_10_5` | under | C | +3.6% | -120 | BetRivers | 0.1 |
+| Leeds v Newcastle | `double_chance` | draw_or_away | C | +7.4% | -159 | BetRivers | 0.1 |
 
 ### Leans
 
@@ -19,8 +18,6 @@ _None._
 
 ### What changed
 
-- **Dropped:** Leeds v Newcastle draw_no_bet home
-- **Moved section:** Leeds v Newcastle btts yes
 - **Moved section:** Leeds v Newcastle corners_total_10_5 under
 
 ### How the recommendations have done
@@ -43,4 +40,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/34864707907)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/34868843252)

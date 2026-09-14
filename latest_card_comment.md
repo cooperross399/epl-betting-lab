@@ -1,8 +1,8 @@
-## Monday 14 September, 08:32 UTC — scheduled run
+## Monday 14 September, 10:05 UTC — scheduled run
 
-Selections changed: 9 added, 6 dropped.
+Selections changed: 1 moved section.
 
-Provider quota: 1112524 (about 17943 more runs)
+Provider quota: 1112414 (about 17942 more runs)
 
 Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
 
@@ -10,7 +10,7 @@ Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_tot
 
 | Match | Market | Selection | Tier | Edge | Price | Book | Units |
 |:------|:-------|:----------|:-----|-----:|------:|:-----|------:|
-| Leeds v Newcastle | `double_chance` | draw_or_away | C | +4.9% | -157 | Bovada | 0.1 |
+| Leeds v Newcastle | `double_chance` | draw_or_away | C | +5.5% | -150 | Fanatics | 0.1 |
 
 ### Leans
 
@@ -18,21 +18,7 @@ _None._
 
 ### What changed
 
-- **Added:** Leeds v Newcastle corners_total_10_5 over
-- **Added:** Leeds v Newcastle corners_total_9_5 over
-- **Added:** Leeds v Newcastle double_chance draw_or_away
-- **Added:** Leeds v Newcastle double_chance home_or_away
-- **Added:** Leeds v Newcastle double_chance home_or_draw
-- **Added:** Leeds v Newcastle draw_no_bet away
-- **Added:** Leeds v Newcastle draw_no_bet home
-- **Added:** Leeds v Newcastle total_2_5 over
-- **Added:** Leeds v Newcastle total_2_5 under
-- **Dropped:** Man United v Man City btts no
-- **Dropped:** Man United v Man City btts yes
-- **Dropped:** Man United v Man City corners_1x2 away
-- **Dropped:** Man United v Man City corners_1x2 draw
-- **Dropped:** Man United v Man City corners_total_10_5 over
-- **Dropped:** Man United v Man City corners_total_9_5 over
+- **Moved section:** Leeds v Newcastle total_2_5 over
 
 ### How the recommendations have done
 
@@ -54,4 +40,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/34823079550)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/34831225649)

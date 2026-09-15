@@ -9,7 +9,16 @@ from __future__ import annotations
 
 import argparse
 
-from epl_betting_lab.config import DEFAULT_SEASONS, DIVISION_NAMES, LEAGUE_CODE
+from epl_betting_lab.config import (
+    DEFAULT_SEASONS,
+    DIVISION_NAMES,
+    EUROPEAN_LEAGUE_NAMES,
+    LEAGUE_CODE,
+)
+
+#: Every code this script can build: the English pyramid plus the European
+#: top divisions. Named separately in config so the two purposes stay legible.
+BUILDABLE = {**DIVISION_NAMES, **EUROPEAN_LEAGUE_NAMES}
 from epl_betting_lab.data.fetch_football_data import (
     fetch_and_build_dataset,
     processed_path_for,
@@ -30,10 +39,11 @@ def main() -> None:
         "--divisions",
         nargs="+",
         default=[LEAGUE_CODE],
-        choices=sorted(DIVISION_NAMES),
+        choices=sorted(BUILDABLE),
         help=(
-            "Division codes to build, each into its own file. "
-            "E0 Premier League, E1 Championship, E2 League One, E3 League Two."
+            "Codes to build, each into its own file. E0-E3 are the English "
+            "pyramid; SP1, D1, I1, F1, N1, P1, B1, T1, G1 and SC0 are European "
+            "top divisions, needed to rate clubs outside England."
         ),
     )
     parser.add_argument(
@@ -51,7 +61,7 @@ def main() -> None:
             # One division failing must not discard the ones that worked. A
             # partial build is reported and exits non-zero; it is not silently
             # rounded up to success.
-            print(f"{division} ({DIVISION_NAMES[division]}) could not be built: {exc}")
+            print(f"{division} ({BUILDABLE[division]}) could not be built: {exc}")
             failed.append(division)
             continue
         # Report the seasons actually in the data, not the ones asked for. The
@@ -59,7 +69,7 @@ def main() -> None:
         # would misreport what the model is fitted on.
         included = [str(season) for season in sorted(df["season"].unique())]
         print(
-            f"{division} ({DIVISION_NAMES[division]}): {len(df):,} matches across "
+            f"{division} ({BUILDABLE[division]}): {len(df):,} matches across "
             f"seasons {', '.join(included)} -> {processed_path_for(division)}"
         )
 

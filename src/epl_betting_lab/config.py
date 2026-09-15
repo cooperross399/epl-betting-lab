@@ -70,6 +70,50 @@ DIVISION_NAMES = {
 #: The three EFL divisions, i.e. everything below the Premier League.
 EFL_DIVISIONS = ("E1", "E2", "E3")
 
+#: The top division of each country Football-Data publishes that appears in the
+#: Champions League. Together with the European results these are what make a
+#: club outside England rateable at all: without a domestic league to fit on,
+#: Real Madrid has no rating, and without the European ties there is nothing to
+#: put a Spanish rating and an English one on the same scale.
+#:
+#: Eleven countries covers 83% of Champions League club-appearances over the
+#: seven seasons on file. The rest — Ukraine, Austria, Czechia, Denmark and
+#: twenty more — have no Football-Data feed, and their clubs stay unrated and
+#: therefore unpriceable rather than guessed at.
+EUROPEAN_LEAGUE_NAMES = {
+    "E0": "England — Premier League",
+    "SP1": "Spain — La Liga",
+    "D1": "Germany — Bundesliga",
+    "I1": "Italy — Serie A",
+    "F1": "France — Ligue 1",
+    "N1": "Netherlands — Eredivisie",
+    "P1": "Portugal — Primeira Liga",
+    "B1": "Belgium — Pro League",
+    "T1": "Turkey — Süper Lig",
+    "G1": "Greece — Super League",
+    "SC0": "Scotland — Premiership",
+}
+
+#: Country code as openfootball writes it -> Football-Data top-division code.
+#: A club from a country absent here cannot be rated.
+COUNTRY_TO_LEAGUE = {
+    "ENG": "E0",
+    "ESP": "SP1",
+    "GER": "D1",
+    "ITA": "I1",
+    "FRA": "F1",
+    "NED": "N1",
+    "POR": "P1",
+    "BEL": "B1",
+    "TUR": "T1",
+    "GRE": "G1",
+    "SCO": "SC0",
+    # Monaco is a sovereign state and plays in the French league. openfootball
+    # tags it by country, so without this its 20 European appearances resolve
+    # to nothing and a Ligue 1 club sits unrated.
+    "MCO": "F1",
+}
+
 # User preference baked in: avoid laying heavy juice unless manually approved.
 MAX_DEFAULT_JUICE = -160
 

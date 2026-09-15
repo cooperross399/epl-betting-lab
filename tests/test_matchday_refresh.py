@@ -1348,3 +1348,43 @@ def test_the_xg_history_survives_a_bad_day_at_understat() -> None:
     # would end the run before the restored copy could be used.
     xg_block = text.split("- name: Fetch team xG", 1)[1].split("- name:", 1)[0]
     assert "continue-on-error: true" in xg_block
+
+
+def test_the_delivery_title_is_written_in_exactly_one_place() -> None:
+    """The workflow matches the title EXACTLY against open issues and creates
+    one when nothing matches, so a copy of the name that drifts does not fail —
+    it starts a fresh thread and leaves every previous card in the old one.
+
+    There were three copies. `ISSUE_TITLE` in the module, `card_title.txt`
+    written from it, and `TITLE_FOR_LOOKUP` hardcoded in the workflow directly
+    beneath a comment promising the title came from the module so the two could
+    not drift apart. The hardcoded one would have been the copy left saying
+    "EPL Card" after the rename, quietly looking up an issue nobody posts to.
+    """
+    text = _workflow()
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("#"):
+            continue  # the note recording why
+        assert 'TITLE_FOR_LOOKUP="' not in stripped, (
+            "the workflow is carrying its own copy of the delivery title"
+        )
+    assert "post_card_to_issue.py --title-only" in text
+
+
+def test_the_lookup_and_the_post_agree_on_the_issue() -> None:
+    """One matched a prefix and the other matched exactly, so a second issue
+    whose title merely started with the same words would have been read for the
+    last-sent time while the card was posted somewhere else."""
+    block = _workflow().split("- name: Email the card", 1)[1].split("- name:", 1)[0]
+    assert "startswith($t)" not in block
+    assert block.count('select(.title == $t)') >= 2
+
+
+def test_the_card_is_not_named_for_one_competition() -> None:
+    """It carries the EFL Cup, the Champions League and the Europa League
+    beside the Premier League."""
+    from epl_betting_lab.reports.card_notification import ISSUE_TITLE
+
+    assert "EPL" not in ISSUE_TITLE
+    assert ISSUE_TITLE.startswith("Soccer Card")

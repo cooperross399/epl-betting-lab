@@ -45,7 +45,18 @@ def main() -> None:
         help="Write the delivery issue title here, so the workflow and this "
         "module cannot disagree about which issue to post to",
     )
+    parser.add_argument(
+        "--title-only",
+        action="store_true",
+        help="Print the delivery issue title and exit. The workflow needs it "
+        "before it can decide anything, and hardcoding it there is how a third "
+        "copy of the name appeared and drifted.",
+    )
     args = parser.parse_args()
+
+    if args.title_only:
+        print(ISSUE_TITLE)
+        return
 
     result = build_notification(
         run_url=args.run_url,

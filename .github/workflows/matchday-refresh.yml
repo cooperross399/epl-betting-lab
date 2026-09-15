@@ -606,8 +606,27 @@ jobs:
             echo "Nothing to publish."
             exit 0
           fi
+          REPLACING="price_feed.csv"
+          # Start from whatever the branch already holds and replace only the
+          # files this run produced. `git mktree` builds a tree from exactly
+          # the entries it is given, so a tree built from one file IS a commit
+          # that deletes every other file on the branch.
+          #
+          # Two workflows write this branch. Matchday Refresh published a
+          # single-file tree four times a day, which deleted
+          # `price_feed_efl.csv` on every run: the Closing Snapshot of
+          # 2026-09-13 18:08 published 1,428 EFL observations, four Matchday
+          # Refresh pushes followed on 2026-09-14, and the next snapshot
+          # reported "no price_feed_efl.csv on the branch yet" and started
+          # again from zero. Seven successful collections over a weekend left
+          # 978 rows.
+          KEEP=""
+          if [ -n "$PARENT" ]; then
+            KEEP=$(git ls-tree "$PARENT" | grep -vE "	($REPLACING)$" || true)
+          fi
           BLOB=$(git hash-object -w data/processed/price_feed.csv)
-          TREE=$(printf '100644 blob %s\tprice_feed.csv' "$BLOB" | git mktree)
+          ENTRIES=$(printf '100644 blob %s\tprice_feed.csv' "$BLOB")
+          TREE=$(printf '%s\n%s\n' "$KEEP" "$ENTRIES" | grep -v '^$' | git mktree)
           if [ -n "$PARENT" ] && [ "$(git rev-parse "$PARENT^{tree}")" = "$TREE" ]; then
             echo "Feed unchanged; nothing to commit."
             exit 0

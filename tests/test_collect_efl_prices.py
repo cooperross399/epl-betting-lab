@@ -360,3 +360,53 @@ class TestAMarketTheProviderDoesNotCarryIsSaidOutLoud:
         docstring = " ".join(source.split('"""')[1].split())
         assert "does not carry them for the EFL" in docstring
         assert "What survives of the case is one market" in docstring
+
+
+class TestNeitherPublisherDeletesTheOthersFeed:
+    """`git mktree` builds a tree from exactly the entries it is given, so a
+    tree built from one file IS a commit that deletes every other file on the
+    branch.
+
+    Two workflows write `price-feed`. Matchday Refresh published a single-file
+    tree four times a day. The Closing Snapshot of 2026-09-13 18:08 published
+    1,428 EFL observations; four Matchday Refresh pushes followed on 09-14; the
+    next snapshot reported "no price_feed_efl.csv on the branch yet" and started
+    from zero. Seven successful collections over a weekend left 978 rows, and
+    every individual run logged success.
+
+    A writer that assumes it is the only writer.
+    """
+
+    def _workflow(self, name: str) -> str:
+        return (PROJECT_ROOT / ".github" / "workflows" / name).read_text(encoding="utf-8")
+
+    @pytest.mark.parametrize(
+        "workflow", ["matchday-refresh.yml", "closing-snapshot.yml"]
+    )
+    def test_the_published_tree_starts_from_what_the_branch_already_holds(
+        self, workflow: str
+    ) -> None:
+        text = self._workflow(workflow)
+        # Anchored on the pipe into the command, not the bare words: the
+        # comment explaining this bug says "git mktree" too, and splitting on
+        # that matched the prose instead of the code.
+        block = text.split("| git mktree", 1)[0]
+        assert "git ls-tree" in block, (
+            f"{workflow} builds a tree without reading the branch first, so it "
+            "deletes every file it does not itself write"
+        )
+
+    @pytest.mark.parametrize(
+        "workflow", ["matchday-refresh.yml", "closing-snapshot.yml"]
+    )
+    def test_it_replaces_only_the_files_it_names(self, workflow: str) -> None:
+        text = self._workflow(workflow)
+        assert "REPLACING=" in text
+        # The kept entries are everything the branch has minus what is being
+        # replaced — not a hardcoded list, which would go stale the moment a
+        # third file appears.
+        assert 'grep -vE "\t($REPLACING)$"' in text
+
+    def test_the_matchday_refresh_no_longer_builds_a_single_file_tree(self) -> None:
+        text = self._workflow("matchday-refresh.yml")
+        assert "printf '100644 blob %s\\tprice_feed.csv' \"$BLOB\" | git mktree" not in text

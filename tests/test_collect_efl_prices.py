@@ -84,7 +84,19 @@ class _MockResponse:
 class TestTheSportKeysAreWrittenOutNotDerived:
     def test_every_efl_division_has_one(self) -> None:
         module = _module()
-        assert set(module.SPORT_KEYS) == set(EFL_DIVISIONS)
+        assert set(EFL_DIVISIONS) <= set(module.SPORT_KEYS)
+
+    def test_the_cup_and_european_competitions_are_named_too(self) -> None:
+        module = _module()
+        assert module.SPORT_KEYS["EFLC"] == "soccer_england_efl_cup"
+        assert module.SPORT_KEYS["UCL"] == "soccer_uefa_champs_league"
+
+    def test_every_key_has_a_readable_name(self) -> None:
+        """A report that prints a bare key at a reader is a report nobody can
+        act on, and `DIVISION_NAMES` only covers the four English divisions."""
+        module = _module()
+        for key in module.SPORT_KEYS:
+            assert key in module.COMPETITION_NAMES, key
 
     def test_the_premier_league_is_not_among_them(self) -> None:
         """This collector exists to stay away from the card's competition."""

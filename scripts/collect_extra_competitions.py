@@ -76,7 +76,6 @@ from epl_betting_lab.providers.base import ProviderRunRequest
 from epl_betting_lab.reports.price_feed import (
     FEED_COLUMNS,
     append_snapshot,
-    load_feed,
     save_feed,
     snapshot_rows,
 )
@@ -112,17 +111,18 @@ SPORT_KEYS = {
     # be settled from a free source. Closing-line value needs no result and
     # remains possible; profit does not.
     "UCL": "soccer_uefa_champs_league",
+    # Restored for the cup card. Every club in it is English and therefore
+    # rateable on the unified scale — unlike the Champions League, where not
+    # one foreign club has a rating because none has ever played in E0-E3.
+    "EFLC": "soccer_england_efl_cup",
 }
 
-#: Collected once, then stopped. `soccer_england_efl_cup` returned `1x2`,
-#: `btts` and `total_2_5` and nothing else — the same thin three the EFL gives,
-#: from a competition with no free results source and no model that can price
-#: it. It duplicated what E1/E2/E3 already provide at additional cost.
-#:
-#: Its 236 observations stay in the feed under `competition = EFLC`. They are
-#: real prices, honestly collected, and removing them would be tidying away
-#: evidence rather than correcting anything.
-WITHDRAWN_KEYS = {"EFLC": "soccer_england_efl_cup"}
+#: Nothing is withdrawn at the moment. The EFL Cup was collected once and
+#: stopped on 2026-09-15 because it returned only `1x2`, `btts` and
+#: `total_2_5`, then restored when Cooper asked for cup selections on the card:
+#: those three are enough to price something, and the unified English ratings
+#: can now rate every club in the competition.
+WITHDRAWN_KEYS: dict[str, str] = {}
 
 #: What the card bets and this collection therefore asks for. Compared against
 #: what actually comes back, so a market the provider does not carry cannot be
@@ -146,6 +146,31 @@ DEFAULT_FEED = PROCESSED_DIR / "price_feed_extra.csv"
 
 #: The feed's own columns plus the one thing the project has never carried.
 EFL_FEED_COLUMNS = ("competition",) + tuple(FEED_COLUMNS)
+
+
+def load_feed(path: Path) -> pd.DataFrame:
+    """Read this feed without throwing away the column that identifies it.
+
+    `reports.price_feed.load_feed` returns `frame[FEED_COLUMNS]`, and
+    `competition` is not one of them — it belongs to this feed and not to the
+    card's. Using the shared loader here stripped the tag off every restored
+    row on every run and then re-added it blank: 3,135 of 5,061 observations
+    ended up unattributable, including every EFL Cup row ever collected, while
+    each run reported a correct-looking count.
+
+    The column was added so that a file could be moved and the row would still
+    say what it was. A loader that predates it was quietly undoing that.
+    """
+    if not path.is_file():
+        return pd.DataFrame(columns=list(EFL_FEED_COLUMNS))
+    try:
+        frame = pd.read_csv(path)
+    except (OSError, UnicodeError, pd.errors.EmptyDataError, pd.errors.ParserError):
+        return pd.DataFrame(columns=list(EFL_FEED_COLUMNS))
+    for column in EFL_FEED_COLUMNS:
+        if column not in frame.columns:
+            frame[column] = pd.NA
+    return frame[list(EFL_FEED_COLUMNS)]
 
 
 def collect_division(
@@ -242,9 +267,6 @@ def main() -> int:
         return 0
 
     feed = load_feed(args.feed)
-    if "competition" not in feed.columns:
-        feed["competition"] = pd.NA
-    feed = feed.reindex(columns=list(EFL_FEED_COLUMNS))
 
     before = len(feed)
     failures: list[str] = []

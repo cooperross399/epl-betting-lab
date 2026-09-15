@@ -94,19 +94,20 @@ class TestTheSportKeysAreWrittenOutNotDerived:
         module = _module()
         assert module.SPORT_KEYS["UCL"] == "soccer_uefa_champs_league"
 
-    def test_the_carabao_cup_is_not_collected_any_more(self) -> None:
-        """It returned 1x2, btts and total_2_5 and nothing else — the same thin
-        three the EFL gives, from a competition with no free results source and
-        no model that can price it. It duplicated E1/E2/E3 at extra cost."""
+    def test_the_carabao_cup_is_collected_again(self) -> None:
+        """Dropped on 2026-09-15 for returning only 1x2, btts and total_2_5 —
+        the same thin three the EFL gives — then restored when Cooper asked for
+        cup selections on the card. Those three are enough to price something,
+        and the unified English ratings can rate every club in the competition,
+        which is not true of the Champions League."""
         module = _module()
-        assert "EFLC" not in module.SPORT_KEYS
-        assert "soccer_england_efl_cup" not in set(module.SPORT_KEYS.values())
+        assert module.SPORT_KEYS["EFLC"] == "soccer_england_efl_cup"
 
-    def test_the_withdrawn_key_is_recorded_rather_than_deleted(self) -> None:
-        """So the next person to think of adding it finds out it was tried and
-        what came back, instead of re-running the experiment."""
+    def test_nothing_is_withdrawn_at_the_moment(self) -> None:
+        """The register stays, so a competition that gets dropped again records
+        what it returned rather than leaving the next person to re-run it."""
         module = _module()
-        assert module.WITHDRAWN_KEYS["EFLC"] == "soccer_england_efl_cup"
+        assert module.WITHDRAWN_KEYS == {}
 
     def test_rows_already_collected_keep_their_name(self) -> None:
         """236 real observations sit in the feed under `EFLC`. Removing them
@@ -490,3 +491,74 @@ class TestTheRenameDoesNotStrandTheFeed:
     def test_the_old_script_is_gone(self) -> None:
         assert not (PROJECT_ROOT / "scripts" / "collect_efl_prices.py").exists()
         assert (PROJECT_ROOT / "scripts" / "collect_extra_competitions.py").exists()
+
+
+class TestTheCompetitionSurvivesARoundTrip:
+    """The column was added so that a file could be moved and the row would
+    still say what it was. A loader that predates it was quietly undoing that.
+
+    `reports.price_feed.load_feed` returns `frame[FEED_COLUMNS]`, and
+    `competition` is not one of them — it belongs to this feed, not the card's.
+    Using the shared loader stripped the tag off every restored row on every
+    run and re-added it blank: 3,135 of 5,061 observations ended up
+    unattributable, including every EFL Cup row ever collected, while each run
+    reported a correct-looking count.
+    """
+
+    def test_a_saved_feed_reads_back_with_its_competitions(self, tmp_path) -> None:
+        module = _module()
+        path = tmp_path / "feed.csv"
+        pd.DataFrame(
+            {
+                "competition": ["EFLC", "UCL", "E1"],
+                "observed_at": ["2026-09-15T10:00:00Z"] * 3,
+                "provider_event_id": ["a", "b", "c"],
+                "date": ["2026-09-16"] * 3,
+                "home_team": ["H1", "H2", "H3"],
+                "away_team": ["A1", "A2", "A3"],
+                "market": ["btts"] * 3,
+                "selection": ["yes"] * 3,
+                "book": ["X"] * 3,
+                "american_odds": [110, -120, 100],
+            }
+        ).to_csv(path, index=False)
+
+        back = module.load_feed(path)
+        assert list(back["competition"]) == ["EFLC", "UCL", "E1"]
+
+    def test_it_is_not_the_cards_loader(self) -> None:
+        """The card's feed has no competition column and its loader enforces
+        that. Sharing it here is what caused the loss."""
+        from epl_betting_lab.reports.price_feed import FEED_COLUMNS
+
+        module = _module()
+        assert "competition" not in FEED_COLUMNS
+        assert "competition" in module.EFL_FEED_COLUMNS
+        source = (PROJECT_ROOT / "scripts" / "collect_extra_competitions.py").read_text(
+            encoding="utf-8"
+        )
+        assert "load_feed,\n" not in source, (
+            "the shared loader strips the competition; this feed needs its own"
+        )
+
+    def test_a_feed_missing_the_column_still_loads(self, tmp_path) -> None:
+        """Rows collected before the column existed must not break the read —
+        they are unattributable, which is a fact to carry rather than an error."""
+        module = _module()
+        path = tmp_path / "old.csv"
+        pd.DataFrame(
+            {
+                "observed_at": ["2026-09-01T10:00:00Z"],
+                "provider_event_id": ["a"],
+                "date": ["2026-09-02"],
+                "home_team": ["H"],
+                "away_team": ["A"],
+                "market": ["btts"],
+                "selection": ["yes"],
+                "book": ["X"],
+                "american_odds": [110],
+            }
+        ).to_csv(path, index=False)
+        back = module.load_feed(path)
+        assert len(back) == 1
+        assert back["competition"].isna().all()

@@ -36,8 +36,27 @@ from epl_betting_lab.data.european_clubs import domestic_name
 
 SOURCE_URL = (
     "https://raw.githubusercontent.com/openfootball/champions-league/master/"
-    "{season}/cl.txt"
+    "{season}/{file}.txt"
 )
+
+#: Every European competition openfootball publishes in that repository, and
+#: what each is worth here.
+#:
+#: All three are bridges: a match with a result between clubs from two
+#: different domestic pools, which is the only thing that puts one country's
+#: ratings on the same scale as another's. More bridges is a better-calibrated
+#: scale, and the Conference League earns its place on that alone — it is used
+#: to fit and never bet, so it improves the ratings at no exposure.
+#:
+#: The qualifying rounds (`clq`, `elq`, `confq`) are deliberately left out.
+#: They are played in July against opposition from outside these eleven
+#: leagues, so most of their ties have an unrateable side and the ones that do
+#: not are between clubs whose seasons have not started.
+COMPETITION_FILES = {
+    "UCL": "cl",
+    "UEL": "el",
+    "UECL": "conf",
+}
 
 #: Seasons openfootball publishes. 2026-27 is not up yet; asking for it returns
 #: a 404 rather than an empty file, which `fetch_season` reports as absence
@@ -83,7 +102,7 @@ class ParsedSeason:
     unresolved: list[tuple[str, str]]
 
 
-def parse_season(text: str, season: str) -> ParsedSeason:
+def parse_season(text: str, season: str, competition: str = "UCL") -> ParsedSeason:
     """Every tie in one season's file, with both clubs resolved where possible."""
     rows: list[dict[str, object]] = []
     unresolved: list[tuple[str, str]] = []
@@ -121,7 +140,7 @@ def parse_season(text: str, season: str) -> ParsedSeason:
                 "away_team": resolved[1],
                 "home_goals": int(home_goals),
                 "away_goals": int(away_goals),
-                "competition": "UCL",
+                "competition": competition,
                 "season": season,
             }
         )
@@ -131,9 +150,9 @@ def parse_season(text: str, season: str) -> ParsedSeason:
     return ParsedSeason(frame, unresolved)
 
 
-def fetch_season(season: str, *, timeout: int = 30) -> str:
-    """One season's file as text."""
-    url = SOURCE_URL.format(season=season)
+def fetch_season(season: str, competition: str = "UCL", *, timeout: int = 30) -> str:
+    """One season's file for one competition, as text."""
+    url = SOURCE_URL.format(season=season, file=COMPETITION_FILES[competition])
     try:
         response = requests.get(url, timeout=timeout)
     except requests.RequestException as exc:
@@ -151,21 +170,25 @@ def fetch_season(season: str, *, timeout: int = 30) -> str:
 
 
 def load_european_ties(
-    seasons: tuple[str, ...] = SEASONS, *, fetcher=fetch_season
+    seasons: tuple[str, ...] = SEASONS,
+    competitions: tuple[str, ...] = tuple(COMPETITION_FILES),
+    *,
+    fetcher=fetch_season,
 ) -> ParsedSeason:
-    """Every resolvable European tie across the seasons on file."""
+    """Every resolvable European tie across the seasons and competitions on file."""
     frames: list[pd.DataFrame] = []
     unresolved: list[tuple[str, str]] = []
     for season in seasons:
-        try:
-            parsed = parse_season(fetcher(season), season)
-        except EuropeanResultsUnavailable as exc:
-            # One season missing costs its bridges and not the rest. A season
-            # that simply is not published yet is the ordinary case.
-            print(f"{season}: {exc}")
-            continue
-        frames.append(parsed.matches)
-        unresolved.extend(parsed.unresolved)
+        for competition in competitions:
+            try:
+                parsed = parse_season(fetcher(season, competition), season, competition)
+            except EuropeanResultsUnavailable as exc:
+                # One file missing costs its own bridges and not the rest. A
+                # season not yet published is the ordinary case.
+                print(f"{season}/{competition}: {exc}")
+                continue
+            frames.append(parsed.matches)
+            unresolved.extend(parsed.unresolved)
     if not frames:
         raise EuropeanResultsUnavailable(
             "No European season could be read, so no country can be linked to "

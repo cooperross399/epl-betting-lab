@@ -61,6 +61,14 @@ from pathlib import Path
 import pandas as pd
 
 from epl_betting_lab.config import DIVISION_NAMES, EFL_DIVISIONS, PROCESSED_DIR
+
+#: Names for the competitions that are not Football-Data divisions, so a report
+#: does not have to print a bare key at a reader.
+COMPETITION_NAMES = {
+    **DIVISION_NAMES,
+    "EFLC": "EFL Cup (Carabao)",
+    "UCL": "UEFA Champions League",
+}
 from epl_betting_lab.providers import create_provider
 from epl_betting_lab.providers.base import ProviderRunRequest
 from epl_betting_lab.reports.price_feed import (
@@ -81,6 +89,19 @@ SPORT_KEYS = {
     "E1": "soccer_efl_champ",
     "E2": "soccer_england_league1",
     "E3": "soccer_england_league2",
+    # Not divisions, and deliberately not modelled. The ratings refuse a club
+    # they have never seen (`UnratedTeam`), and a cup tie is two clubs from
+    # pools with no common scale — which is the whole reason nothing here makes
+    # a selection. Prices are collected because they cannot be recovered later
+    # and a rule can always be re-run over them; a rule that could price these
+    # fixtures does not exist yet and may never.
+    #
+    # Worth knowing before reading anything into what arrives: Football-Data
+    # publishes no cup or UEFA competition at all, so nothing collected here
+    # can ever be settled from a free source. Closing-line value needs no
+    # result and remains possible; profit does not.
+    "EFLC": "soccer_england_efl_cup",
+    "UCL": "soccer_uefa_champs_league",
 }
 
 #: What the card bets and this collection therefore asks for. Compared against
@@ -149,7 +170,7 @@ def collect_division(
     rows = rows.copy()
     rows["competition"] = division
     note = (
-        f"{division} ({DIVISION_NAMES[division]}): {len(rows):,} observations "
+        f"{division} ({COMPETITION_NAMES[division]}): {len(rows):,} observations "
         f"across {rows.groupby(['home_team', 'away_team']).ngroups} fixtures — "
         f"{', '.join(sorted(rows['market'].unique()))}."
     )
@@ -174,7 +195,10 @@ def collect_division(
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "--divisions", nargs="+", default=list(EFL_DIVISIONS), choices=sorted(SPORT_KEYS)
+        "--divisions",
+        nargs="+",
+        default=sorted(SPORT_KEYS),
+        choices=sorted(SPORT_KEYS),
     )
     parser.add_argument("--feed", type=Path, default=DEFAULT_FEED)
     parser.add_argument("--regions", default="us")

@@ -110,7 +110,7 @@ class TestOnlyWhatTheRulesPass:
     def test_a_negative_edge_never_reaches_the_table(self) -> None:
         """The first run offered a -39.5% draw-no-bet as a selection, in the
         same table and the same format as a real one."""
-        card = ExtraCard(self._selections(["BETTABLE"], [0.05]))
+        card = ExtraCard(self._selections(["BETTABLE"], [0.05]), priced=1)
         report = "\n".join(render_extra_card({"UCL": card}))
         assert "+5.0%" in report
         assert "-39" not in report
@@ -130,7 +130,11 @@ class TestOnlyWhatTheRulesPass:
 
 class TestItDeclinesRatherThanGuesses:
     def test_an_empty_card_says_so_and_says_why(self) -> None:
-        card = ExtraCard(pd.DataFrame(), notes=["No UEFA Champions League price on file."])
+        card = ExtraCard(
+            pd.DataFrame(),
+            notes=["No UEFA Champions League price on file."],
+            priced=1,
+        )
         report = "\n".join(render_extra_card({"UCL": card}))
         assert "_No selection this run._" in report
         assert "No UEFA Champions League price on file." in report
@@ -139,7 +143,7 @@ class TestItDeclinesRatherThanGuesses:
         """A table of selections with no note reads as a recommendation. The
         EFL Cup was measured and the measurement was negative; that belongs
         next to the prices, not in a file nobody opens."""
-        card = ExtraCard(pd.DataFrame())
+        card = ExtraCard(pd.DataFrame(), priced=1)
         report = "\n".join(render_extra_card({"EFLC": card, "UCL": card}))
         assert "has been shown not to" in report
         assert "does **not** survive a division change" in report
@@ -241,3 +245,64 @@ class TestItIsWiredWithoutPuttingTheCardAtRisk:
         finally:
             sys.argv = old
         assert not (tmp_path / "out.md").exists()
+
+
+class TestACompetitionEarnsItsSection:
+    """The Conference League priced none of its eighteen fixtures: its clubs
+    play in Cyprus, Lithuania, Gibraltar and Andorra, and Football-Data
+    publishes none of those. Printing its heading above eighteen lines of
+    declines every run teaches the reader to skip the section that also carries
+    the competitions that do have something to say.
+
+    Stated as a condition rather than a list, so a competition returns on its
+    own the run its coverage improves and nobody has to remember to check.
+    """
+
+    def _card(self, priced: int, unrated: int) -> ExtraCard:
+        return ExtraCard(
+            pd.DataFrame(),
+            priced=priced,
+            unrated=[f"A{i} v B{i}" for i in range(unrated)],
+        )
+
+    def test_a_competition_that_prices_nothing_is_not_carded(self) -> None:
+        assert not self._card(priced=0, unrated=18).carded
+
+    def test_one_priceable_fixture_is_enough(self) -> None:
+        """Not a threshold anybody chose. A competition that can price
+        something has something to say; one that cannot, cannot."""
+        assert self._card(priced=1, unrated=17).carded
+
+    def test_the_fixture_count_is_priced_plus_declined(self) -> None:
+        """`0 of 0` says the competition had no fixtures. `0 of 18` says none
+        of its eighteen could be rated. A quiet week and a coverage wall, told
+        apart by the one number that distinguishes them — and the early return
+        dropped the declined list, so it read 0 of 0."""
+        assert self._card(priced=0, unrated=18).fixtures == 18
+        assert self._card(priced=3, unrated=15).fixtures == 18
+
+    def test_a_fitted_competition_is_named_not_silently_absent(self) -> None:
+        report = "\n".join(
+            render_extra_card({"UECL": self._card(priced=0, unrated=18)})
+        )
+        assert "Fitted but not bet" in report
+        assert "0 of 18 fixtures rateable" in report
+        assert "bridge the countries" in report
+        # And its heading does not appear, which is the point.
+        assert "### UEFA Europa Conference League" not in report
+
+    def test_a_carded_competition_still_gets_its_heading(self) -> None:
+        """The guard must not hide a competition that can price fixtures but
+        happened to find no selection this run — that is a quiet week, and the
+        reader should see the heading and the reason."""
+        card = ExtraCard(pd.DataFrame(), notes=["No selection cleared the rules."], priced=5)
+        report = "\n".join(render_extra_card({"UCL": card}))
+        assert "### UEFA Champions League" in report
+        assert "_No selection this run._" in report
+
+    def test_the_conference_league_is_still_fitted(self) -> None:
+        """Not carding it must not stop it bridging the countries, which is
+        most of what it is for."""
+        from epl_betting_lab.data.european_results import COMPETITION_FILES
+
+        assert "UECL" in COMPETITION_FILES

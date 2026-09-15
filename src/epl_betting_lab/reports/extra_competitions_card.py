@@ -155,6 +155,28 @@ class ExtraCard:
     priced: int = 0
     unrated: list[str] = field(default_factory=list)
 
+    @property
+    def fixtures(self) -> int:
+        """Every fixture with a price, whether or not it could be rated."""
+        return self.priced + len(self.unrated)
+
+    @property
+    def carded(self) -> bool:
+        """Is there anything here to show?
+
+        A competition appears on the card when it can price at least one
+        fixture. Not a threshold anybody chose: a competition that can price
+        nothing has nothing to say, and printing its heading above eighteen
+        lines of declines every run teaches the reader to skip the section that
+        also carries the ones that do.
+
+        Stated as a condition rather than a list, so a competition cards itself
+        the moment its coverage improves and stops when it stops — the
+        Conference League needs domestic feeds for Cyprus, Lithuania, Gibraltar
+        and Andorra before it can say anything, and nobody has to remember to
+        check."""
+        return self.priced > 0
+
 
 def latest_prices(feed: pd.DataFrame, competition: str) -> pd.DataFrame:
     """Best price per selection at the most recent observation.
@@ -227,7 +249,17 @@ def build_extra_card(
             f"the pool: {', '.join(sorted(unrated))}."
         )
     if not records:
-        return ExtraCard(pd.DataFrame(), notes + [f"No {spec.name} fixture could be priced."])
+        # `unrated` travels with the early return. Without it the summary line
+        # reads "0 of 0 fixtures rateable", which says the competition had no
+        # fixtures rather than that none of its eighteen could be rated — a
+        # quiet week and a coverage wall, told apart by the one number that
+        # distinguishes them.
+        return ExtraCard(
+            pd.DataFrame(),
+            notes + [f"No {spec.name} fixture could be priced."],
+            priced=0,
+            unrated=unrated,
+        )
 
     projections = pd.DataFrame(records)
     frames = [
@@ -291,7 +323,14 @@ def render_extra_card(cards: dict[str, ExtraCard]) -> list[str]:
         "`data/outputs/unified_ratings.md` and `data/outputs/european_ratings.md`.",
         "",
     ]
+    fitted_only = [
+        (COMPETITIONS[key].name, card)
+        for key, card in cards.items()
+        if not card.carded
+    ]
     for key, card in cards.items():
+        if not card.carded:
+            continue
         spec = COMPETITIONS[key]
         lines += [f"### {spec.name}", "", spec.note, ""]
         if card.selections.empty:
@@ -312,4 +351,19 @@ def render_extra_card(cards: dict[str, ExtraCard]) -> list[str]:
             )
         lines.append("")
         lines += [f"- {note}" for note in card.notes] + [""]
+
+    if fitted_only:
+        # Named rather than silently absent: a competition that quietly stops
+        # appearing looks exactly like a week with no fixtures in it.
+        described = ", ".join(
+            f"{name} ({card.priced} of {card.fixtures} fixtures rateable)"
+            for name, card in fitted_only
+        )
+        lines += [
+            f"_Fitted but not bet: {described}. Their results still bridge the "
+            "countries in the rating pool — which is most of their value — and "
+            "they return to the card on their own the run they can price "
+            "something._",
+            "",
+        ]
     return lines

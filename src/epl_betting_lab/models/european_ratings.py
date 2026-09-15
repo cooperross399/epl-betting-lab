@@ -62,7 +62,7 @@ import numpy as np
 import pandas as pd
 
 from epl_betting_lab.config import COUNTRY_TO_LEAGUE
-from epl_betting_lab.data.european_results import load_european_ties
+from epl_betting_lab.data.european_results import COMPETITION_FILES, load_european_ties
 from epl_betting_lab.data.fetch_football_data import processed_path_for
 from epl_betting_lab.models.poisson_goals import PoissonGoalsModel, RatingConfig
 
@@ -195,7 +195,10 @@ def measure_bridge(
     is what shows the bridged scale carries club-level information rather than
     only a league-level one, which a market already has.
     """
-    ties = pool.matches[pool.matches["competition"] == "UCL"]
+    # Every European competition in the pool, not only the Champions League.
+    # Scoring one and carding another would validate a rule on fixtures it does
+    # not bet — and the Europa League now reaches the card.
+    ties = pool.matches[pool.matches["competition"].isin(COMPETITION_FILES)]
     if ties.empty:
         return BridgeResult(float("nan"), float("nan"), 0)
     ties = ties.merge(

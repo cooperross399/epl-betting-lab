@@ -114,21 +114,45 @@ class TestAFailedFetchIsNotAnEmptySeason:
         """An empty frame would remove every bridge and leave the countries
         unlinked, which looks exactly like a season nobody played."""
 
-        def broken(season: str) -> str:
-            raise EuropeanResultsUnavailable(f"{season} is not there")
+        def broken(season: str, competition: str = "UCL") -> str:
+            raise EuropeanResultsUnavailable(f"{season}/{competition} is not there")
 
         with pytest.raises(EuropeanResultsUnavailable, match="no country can be linked"):
-            load_european_ties(("2023-24",), fetcher=broken)
+            load_european_ties(("2023-24",), ("UCL",), fetcher=broken)
 
     def test_one_season_failing_costs_only_its_own_bridges(self) -> None:
-        def sometimes(season: str) -> str:
+        def sometimes(season: str, competition: str = "UCL") -> str:
             if season == "2024-25":
                 raise EuropeanResultsUnavailable("not published yet")
             return SEASON_TEXT
 
-        parsed = load_european_ties(("2023-24", "2024-25"), fetcher=sometimes)
+        parsed = load_european_ties(("2023-24", "2024-25"), ("UCL",), fetcher=sometimes)
         assert not parsed.matches.empty
         assert set(parsed.matches["season"]) == {"2023-24"}
+
+    def test_one_competition_failing_costs_only_its_own(self) -> None:
+        """The Europa League file does not exist for every season openfootball
+        publishes a Champions League one. A competition missing must cost its
+        own bridges and not the season's."""
+        def partial(season: str, competition: str = "UCL") -> str:
+            if competition == "UEL":
+                raise EuropeanResultsUnavailable("no el.txt this season")
+            return SEASON_TEXT
+
+        parsed = load_european_ties(("2023-24",), ("UCL", "UEL"), fetcher=partial)
+        assert set(parsed.matches["competition"]) == {"UCL"}
+
+    def test_each_competition_is_tagged_with_its_own_name(self) -> None:
+        """All three are bridges in one pool, and a tie that forgot which
+        competition it was would make the validation unable to say what it
+        tested."""
+        from epl_betting_lab.data.european_results import COMPETITION_FILES
+
+        assert set(COMPETITION_FILES) == {"UCL", "UEL", "UECL"}
+        parsed = load_european_ties(
+            ("2023-24",), ("UEL",), fetcher=lambda s, c="UCL": SEASON_TEXT
+        )
+        assert set(parsed.matches["competition"]) == {"UEL"}
 
 
 class TestTheBridgeInterval:

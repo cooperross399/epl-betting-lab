@@ -67,6 +67,8 @@ from epl_betting_lab.config import DIVISION_NAMES, EFL_DIVISIONS, PROCESSED_DIR
 COMPETITION_NAMES = {
     **DIVISION_NAMES,
     "UCL": "UEFA Champions League",
+    "UEL": "UEFA Europa League",
+    "UECL": "UEFA Europa Conference League",
     # No longer collected, kept so the rows already in the feed still render
     # with a name rather than a bare key.
     "EFLC": "EFL Cup (Carabao)",
@@ -111,6 +113,13 @@ SPORT_KEYS = {
     # be settled from a free source. Closing-line value needs no result and
     # remains possible; profit does not.
     "UCL": "soccer_uefa_champs_league",
+    # The other two UEFA competitions. Their results are bridges in the rating
+    # pool already; these are the prices to bet them on. Coverage is thinner
+    # than the Champions League in both directions — fewer markets quoted, and
+    # more clubs from countries with no domestic feed, so more fixtures are
+    # declined as unrateable.
+    "UEL": "soccer_uefa_europa_league",
+    "UECL": "soccer_uefa_europa_conference_league",
     # Restored for the cup card. Every club in it is English and therefore
     # rateable on the unified scale — unlike the Champions League, where not
     # one foreign club has a rating because none has ever played in E0-E3.

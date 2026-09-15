@@ -122,6 +122,29 @@ COMPETITIONS: dict[str, CompetitionSpec] = {
             "value."
         ),
     ),
+    "UEL": CompetitionSpec(
+        key="UEL",
+        name="UEFA Europa League",
+        pool="european",
+        note=(
+            "Same European ratings as the Champions League, and **thinner in "
+            "both directions**: more clubs come from countries with no domestic "
+            "feed, so more fixtures are declined, and the ones that are priced "
+            "rest on a scale calibrated mostly by Champions League ties."
+        ),
+    ),
+    "UECL": CompetitionSpec(
+        key="UECL",
+        name="UEFA Europa Conference League",
+        pool="european",
+        note=(
+            "The thinnest of the three. Only 24 Conference League ties survive "
+            "club resolution across five seasons, against 701 for the Champions "
+            "League, so this competition contributes almost nothing to the scale "
+            "it is priced on and most of its fixtures involve a club the pool "
+            "cannot rate at all."
+        ),
+    ),
 }
 
 

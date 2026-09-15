@@ -149,3 +149,53 @@ def domestic_name(club: str, country: str) -> str | None:
     # Some names already agree — "Juventus", "Porto", "Celtic" in some seasons.
     # Those need no entry, and inventing one for them would be noise.
     return club
+
+
+#: The odds provider's name -> Football-Data's name.
+#:
+#: A second map, because a third source names the same clubs a third way. The
+#: provider writes "Paris Saint Germain" where openfootball writes "Paris
+#: Saint-Germain FC" and Football-Data writes "Paris SG"; "Inter Milan" where
+#: the others write "FC Internazionale Milano" and "Inter".
+#:
+#: Without it, 12 of 18 Champions League fixtures were declined as unrateable
+#: while every club in them was sitting in the pool — the refusal working
+#: correctly on a name that had simply never been written down.
+PROVIDER_CLUB_NAMES: dict[str, str] = {
+    "AS Roma": "Roma",
+    "Atlético Madrid": "Ath Madrid",
+    "Atletico Madrid": "Ath Madrid",
+    "Athletic Bilbao": "Ath Bilbao",
+    "Borussia Dortmund": "Dortmund",
+    "Borussia Monchengladbach": "M'gladbach",
+    "Inter Milan": "Inter",
+    "Paris Saint Germain": "Paris SG",
+    "Paris Saint-Germain": "Paris SG",
+    "RC Lens": "Lens",
+    "Real Betis": "Betis",
+    "Sporting Lisbon": "Sp Lisbon",
+    "Sporting CP": "Sp Lisbon",
+    "VfB Stuttgart": "Stuttgart",
+    "AEK Athens": "AEK",
+    "Bayern Munich": "Bayern Munich",
+    "Eintracht Frankfurt": "Ein Frankfurt",
+    "Bayer Leverkusen": "Leverkusen",
+    "PSV": "PSV Eindhoven",
+    "Olympique Marseille": "Marseille",
+    "Olympique Lyonnais": "Lyon",
+    "Real Sociedad": "Sociedad",
+    "Sporting Braga": "Sp Braga",
+    "Union Saint-Gilloise": "St. Gilloise",
+    "Royale Union Saint-Gilloise": "St. Gilloise",
+    "Olympiacos": "Olympiakos",
+    "Olympiacos Piraeus": "Olympiakos",
+}
+
+
+def provider_name(club: str) -> str:
+    """Football-Data's name for a club as the odds provider writes it.
+
+    Unmapped names pass through unchanged, so a club whose name already agrees
+    needs no entry and a club that is genuinely unrateable stays visibly so.
+    """
+    return PROVIDER_CLUB_NAMES.get(club, club)

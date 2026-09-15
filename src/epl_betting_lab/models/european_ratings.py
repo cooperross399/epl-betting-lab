@@ -98,6 +98,11 @@ def build_european_pool(
     country_of: dict[str, str] = {}
     frames: list[pd.DataFrame] = []
     columns = ["date", "home_team", "away_team", "home_goals", "away_goals", "competition"]
+    # Corner counts ride along where the source has them — every European league
+    # carries HC/AC on 100% of rows. Dropping them here left `fit_count_models`
+    # with nothing to fit and the corner markets silently absent from a card
+    # that could have priced them.
+    counts = ["HC", "AC"]
 
     first_country_for: dict[str, str] = {}
     for country, code in mapping.items():
@@ -114,7 +119,10 @@ def build_european_pool(
         frame["date"] = pd.to_datetime(frame["date"], errors="coerce")
         frame["competition"] = code
         frame = frame.dropna(subset=["date"])
-        frames.append(frame[columns])
+        for column in counts:
+            if column not in frame.columns:
+                frame[column] = pd.NA
+        frames.append(frame[columns + counts])
         for club in set(frame["home_team"]) | set(frame["away_team"]):
             country_of[club] = first_country_for[code]
 
@@ -127,7 +135,12 @@ def build_european_pool(
         unresolved = []
     ties = ties[ties["home_team"].isin(country_of) & ties["away_team"].isin(country_of)]
 
-    pool = pd.concat([domestic, ties[columns]], ignore_index=True)
+    # A European tie has no corner count in openfootball, which publishes
+    # scores only. They join as blanks rather than zeros: a blank is missing,
+    # a zero is a match where nobody won a corner.
+    for column in counts:
+        ties = ties.assign(**{column: pd.NA}) if column not in ties.columns else ties
+    pool = pd.concat([domestic, ties[columns + counts]], ignore_index=True)
     return EuropeanPool(
         matches=pool.sort_values("date").reset_index(drop=True),
         country_of=country_of,

@@ -304,6 +304,21 @@ def build_notification(
         if root:
             lines += [f"**Start here:** {root}", ""]
 
+    # Competitions beyond the Premier League, written by
+    # `scripts/build_extra_card.py` before the reports are rebuilt. Read from a
+    # file rather than built here, so the card never depends on fourteen league
+    # datasets and a results repository being reachable.
+    extra = outputs / "extra_competitions_card.md"
+    try:
+        if extra.is_file():
+            section = extra.read_text(encoding="utf-8").strip()
+            if section:
+                lines += ["", section, ""]
+    except OSError as exc:
+        # Named rather than swallowed: a section that silently stops appearing
+        # looks exactly like a week with no cup fixtures.
+        lines += ["", f"_The cup and European section could not be read: {exc}._", ""]
+
     try:
         # OUTPUTS_DIR is imported at module scope. Importing it here as well
         # made it local to this whole function, so the very first line that

@@ -488,13 +488,46 @@ jobs:
           REMOTE="https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}"
           mkdir -p data/processed
           if git fetch "$REMOTE" +refs/heads/price-feed:refs/price-feed-tip 2>/dev/null; then
-            git show refs/price-feed-tip:price_feed.csv > data/processed/price_feed.csv 2>/dev/null || true
+            # Through a temporary file: `>` truncates its target before the
+            # command on its left runs, so a path the branch does not carry
+            # empties the file instead of leaving it alone. That emptied 1,203
+            # freshly collected observations once already.
+            for FEED in price_feed.csv price_feed_extra.csv; do
+              TMP=$(mktemp)
+              if git show "refs/price-feed-tip:$FEED" > "$TMP" 2>/dev/null && [ -s "$TMP" ]; then
+                mv "$TMP" "data/processed/$FEED"
+              else
+                rm -f "$TMP"
+              fi
+            done
           fi
           if [ -s data/processed/price_feed.csv ]; then
             wc -l < data/processed/price_feed.csv | xargs echo "price feed rows restored:"
           else
             echo "No price feed yet; live CLV will report zero coverage, which is true."
           fi
+
+      - name: Build the cup and European section
+        # Competitions beyond the Premier League. Soft in every direction: the
+        # card reads a file this writes, so a league that cannot be fetched or
+        # a pool that will not build costs the section and never the card.
+        #
+        # Fourteen free CSV feeds and a public-domain results repository, no
+        # provider quota. The English pyramid rates the EFL Cup; the eleven
+        # European top divisions plus the Champions League ties rate the
+        # Champions League, because clubs never move between countries and
+        # those ties are the only thing that puts the leagues on one scale.
+        if: always()
+        continue-on-error: true
+        timeout-minutes: 8
+        env:
+          PYTHONPATH: src
+        run: |
+          set -u
+          python scripts/fetch_data.py --divisions \
+            E1 E2 E3 SP1 D1 I1 F1 N1 P1 B1 T1 G1 SC0 || \
+            echo "Some divisions could not be built; the section will say what it could price."
+          python scripts/build_extra_card.py
 
       - name: Rebuild every report
         # Soft: refresh_all_reports already continues past a failed step and

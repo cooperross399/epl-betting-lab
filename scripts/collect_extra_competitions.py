@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Observe EFL prices, so closing-line value for the EFL can start existing.
+"""Observe prices in the competitions the card does not bet.
 
 Prices are the one input that cannot be recovered later. A model can be refitted
 and a rule re-run over stored prices at any time, but a price nobody wrote down
@@ -38,8 +38,8 @@ explicit `repository_root` in a temporary directory, which is a supported path
 through its own guard rather than a way around one, so the real `data/staging/`
 is never touched.
 
-*It writes its own feed.* EFL rows go to `price_feed_efl.csv`, not the feed the
-live card's CLV is measured from. Nothing in this project carries a competition
+*It writes its own feed.* These rows go to `price_feed_extra.csv`, not the feed
+the live card's CLV is measured from. Nothing in this project carries a competition
 on a row — every identity is `(date, home_team, away_team)` — so two
 competitions in one file would be distinguishable only by club name. A separate
 file cannot be got wrong. The `competition` column is written anyway, because a
@@ -138,7 +138,11 @@ EXPECTED_MARKETS = (
     "corners_total_10_5",
 )
 
-DEFAULT_FEED = PROCESSED_DIR / "price_feed_efl.csv"
+#: Renamed from `price_feed_efl.csv` once it began carrying the Champions
+#: League as well, because a file named for one competition while holding
+#: another is a trap for whoever reads it next. The restore migrates the old
+#: name across on first sight and then stops publishing it.
+DEFAULT_FEED = PROCESSED_DIR / "price_feed_extra.csv"
 
 #: The feed's own columns plus the one thing the project has never carried.
 EFL_FEED_COLUMNS = ("competition",) + tuple(FEED_COLUMNS)
@@ -167,8 +171,8 @@ def collect_division(
                 dry_run=False,
                 overwrite_staging=True,
                 repository_root=root,
-                generated_by="scripts/collect_efl_prices.py",
-                notes=f"EFL price observation for {division} ({sport_key}).",
+                generated_by="scripts/collect_extra_competitions.py",
+                notes=f"Price observation for {division} ({sport_key}).",
             )
         )
         staged = root / "data" / "staging" / "current_odds_staging.csv"

@@ -28,7 +28,8 @@ RUN_AT = datetime(2026, 9, 12, 11, 0, tzinfo=timezone.utc)
 
 def _module():
     spec = importlib.util.spec_from_file_location(
-        "collect_efl_prices", PROJECT_ROOT / "scripts" / "collect_efl_prices.py"
+        "collect_extra_competitions",
+        PROJECT_ROOT / "scripts" / "collect_extra_competitions.py",
     )
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -212,7 +213,7 @@ class TestItSpendsNothingUntilTold:
         monkeypatch.setattr(
             "epl_betting_lab.providers.odds_api_staging_provider._default_requester", explode
         )
-        monkeypatch.setattr("sys.argv", ["collect_efl_prices.py"])
+        monkeypatch.setattr("sys.argv", ["collect_extra_competitions.py"])
         assert module.main() == 0
         assert "no quota spent" in capsys.readouterr().out
 
@@ -223,7 +224,7 @@ class TestTheEflFeedIsItsOwnFile:
         competitions in one feed would be distinguishable only by club name."""
         module = _module()
         assert module.DEFAULT_FEED.name != "price_feed.csv"
-        assert "efl" in module.DEFAULT_FEED.name
+        assert module.DEFAULT_FEED.name == "price_feed_extra.csv"
 
 
 class TestTheWorkflowWiring:
@@ -239,7 +240,7 @@ class TestTheWorkflowWiring:
         output path is not parameterisable."""
         text = self._snapshot()
         block = text.split("- name: Observe EFL prices", 1)[1].split("- name:", 1)[0]
-        assert "collect_efl_prices.py" in block
+        assert "collect_extra_competitions.py" in block
         assert "run_provider_shadow_verification" not in block
         assert "--overwrite-staging" not in block
 
@@ -253,7 +254,7 @@ class TestTheWorkflowWiring:
         text = self._snapshot()
         block = text.split("- name: Append the observation to the price feed", 1)[1]
         block = block.split("- name:", 1)[0]
-        assert "price_feed_efl.csv" in block
+        assert "price_feed_extra.csv" in block
         assert "price_feed.csv" in block
         # Built from whichever feeds have content, rather than exiting early on
         # one of them: an EFL collection that failed must not withhold the EPL
@@ -389,7 +390,7 @@ class TestAMarketTheProviderDoesNotCarryIsSaidOutLoud:
         """It was written arguing corners were the whole point. They are not
         available, and a file that still says so would mislead the next reader
         into re-making a case the data already answered."""
-        source = (PROJECT_ROOT / "scripts" / "collect_efl_prices.py").read_text(encoding="utf-8")
+        source = (PROJECT_ROOT / "scripts" / "collect_extra_competitions.py").read_text(encoding="utf-8")
         # Whitespace-normalised: the sentences wrap, and a test that breaks on
         # a line break is testing the formatter rather than the claim.
         docstring = " ".join(source.split('"""')[1].split())
@@ -445,3 +446,47 @@ class TestNeitherPublisherDeletesTheOthersFeed:
     def test_the_matchday_refresh_no_longer_builds_a_single_file_tree(self) -> None:
         text = self._workflow("matchday-refresh.yml")
         assert "printf '100644 blob %s\\tprice_feed.csv' \"$BLOB\" | git mktree" not in text
+
+
+class TestTheRenameDoesNotStrandTheFeed:
+    """`price_feed_efl.csv` held Champions League rows, which is a trap for
+    whoever reads it next. Renaming it is only safe if the 3,136 observations
+    already on the branch come with it — this feed has been destroyed twice
+    already, once by a truncating restore and once by a single-file tree, and a
+    rename is a third way to lose it."""
+
+    def _snapshot(self) -> str:
+        return (
+            PROJECT_ROOT / ".github" / "workflows" / "closing-snapshot.yml"
+        ).read_text(encoding="utf-8")
+
+    def test_the_restore_still_knows_the_old_name(self) -> None:
+        block = self._snapshot().split(
+            "- name: Restore the price feeds before collecting into them", 1
+        )[1].split("- name:", 1)[0]
+        assert "restore_feed price_feed_extra.csv price_feed_extra.csv price_feed_efl.csv" in block
+
+    def test_the_old_name_is_retired_from_the_branch_once_migrated(self) -> None:
+        """Left in the tree it would sit there forever, a stale copy that looks
+        like a second feed."""
+        text = self._snapshot()
+        assert "price_feed_efl.csv" in text.split("REPLACING=", 1)[1].split("\n", 1)[0]
+
+    def test_the_publish_writes_only_the_new_name(self) -> None:
+        block = self._snapshot().split(
+            "- name: Append the observation to the price feed", 1
+        )[1].split("- name:", 1)[0]
+        assert "for FEED in price_feed.csv price_feed_extra.csv; do" in block
+
+    def test_nothing_still_calls_the_old_script(self) -> None:
+        for workflow in (PROJECT_ROOT / ".github" / "workflows").glob("*.yml"):
+            text = workflow.read_text(encoding="utf-8")
+            for line in text.splitlines():
+                stripped = line.strip()
+                if stripped.startswith("#"):
+                    continue  # comments recording the history are fine
+                assert "collect_efl_prices.py" not in stripped, workflow.name
+
+    def test_the_old_script_is_gone(self) -> None:
+        assert not (PROJECT_ROOT / "scripts" / "collect_efl_prices.py").exists()
+        assert (PROJECT_ROOT / "scripts" / "collect_extra_competitions.py").exists()

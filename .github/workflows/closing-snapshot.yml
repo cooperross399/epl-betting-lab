@@ -130,17 +130,31 @@ jobs:
           set -u
           REMOTE="https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}"
           mkdir -p data/processed
-          if git fetch "$REMOTE" +refs/heads/price-feed:refs/price-feed-tip 2>/dev/null; then
-            for FEED in price_feed.csv price_feed_efl.csv; do
+          # Restore one feed, trying each name it has ever had. The second
+          # name carries the pre-rename file across on first sight; after that
+          # the publish stops writing it and it leaves the branch.
+          restore_feed() {
+            DEST="$1"
+            shift
+            for NAME in "$@"; do
               TMP=$(mktemp)
-              if git show "refs/price-feed-tip:$FEED" > "$TMP" 2>/dev/null && [ -s "$TMP" ]; then
-                mv "$TMP" "data/processed/$FEED"
-                wc -l < "data/processed/$FEED" | xargs echo "restored $FEED rows:"
-              else
-                rm -f "$TMP"
-                echo "no $FEED on the branch yet; starting one."
+              if git show "refs/price-feed-tip:$NAME" > "$TMP" 2>/dev/null && [ -s "$TMP" ]; then
+                mv "$TMP" "data/processed/$DEST"
+                if [ "$NAME" = "$DEST" ]; then
+                  wc -l < "data/processed/$DEST" | xargs echo "restored $DEST rows:"
+                else
+                  wc -l < "data/processed/$DEST" | xargs echo "migrated $NAME -> $DEST, rows:"
+                fi
+                return 0
               fi
+              rm -f "$TMP"
             done
+            echo "no $DEST on the branch yet; starting one."
+          }
+
+          if git fetch "$REMOTE" +refs/heads/price-feed:refs/price-feed-tip 2>/dev/null; then
+            restore_feed price_feed.csv price_feed.csv
+            restore_feed price_feed_extra.csv price_feed_extra.csv price_feed_efl.csv
           fi
 
       - name: Observe EFL prices
@@ -155,7 +169,7 @@ jobs:
         # price nobody wrote down on the day cannot be recovered later, and a
         # rule can always be re-run over stored prices.
         #
-        # `collect_efl_prices.py` gives the provider an explicit repository
+        # `collect_extra_competitions.py` gives the provider an explicit repository
         # root in a temporary directory, so it cannot write `data/staging/` —
         # the bundle the Premier League card is built from. A test compares
         # that directory byte for byte across a collection.
@@ -167,8 +181,8 @@ jobs:
           PYTHONPATH: src
         run: |
           set -u
-          python scripts/collect_efl_prices.py --live \
-            --feed data/processed/price_feed_efl.csv
+          python scripts/collect_extra_competitions.py --live \
+            --feed data/processed/price_feed_extra.csv
 
       - name: Append the observation to the price feed
         # Plumbing commit, and append-only. The prior feed is read from the
@@ -202,7 +216,9 @@ jobs:
           # Built from whichever feeds actually have content, so an EFL
           # collection that failed cannot withhold the Premier League feed, and
           # a first EFL run cannot be mistaken for "nothing to publish".
-          REPLACING="price_feed.csv|price_feed_efl.csv"
+          # The retired name is listed so the old file leaves the branch once its
+          # rows have been migrated into the new one.
+          REPLACING="price_feed.csv|price_feed_extra.csv|price_feed_efl.csv"
           # Start from whatever the branch already holds and replace only the
           # files this run produced. `git mktree` builds a tree from exactly
           # the entries it is given, so a tree built from one file IS a commit
@@ -221,7 +237,7 @@ jobs:
             KEEP=$(git ls-tree "$PARENT" | grep -vE "	($REPLACING)$" || true)
           fi
           ENTRIES=""
-          for FEED in price_feed.csv price_feed_efl.csv; do
+          for FEED in price_feed.csv price_feed_extra.csv; do
             if [ -s "data/processed/$FEED" ]; then
               B=$(git hash-object -w "data/processed/$FEED")
               ENTRIES="${ENTRIES}100644 blob ${B}\t${FEED}\n"
@@ -245,8 +261,8 @@ jobs:
           fi
           git push "$REMOTE" "$COMMIT:refs/heads/price-feed"
           wc -l < data/processed/price_feed.csv | xargs echo "price-feed rows:"
-          if [ -s data/processed/price_feed_efl.csv ]; then
-            wc -l < data/processed/price_feed_efl.csv | xargs echo "efl-feed rows:"
+          if [ -s data/processed/price_feed_extra.csv ]; then
+            wc -l < data/processed/price_feed_extra.csv | xargs echo "extra-feed rows:"
           fi
 
       - name: Report the outcome

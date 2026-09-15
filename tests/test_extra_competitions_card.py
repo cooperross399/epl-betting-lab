@@ -157,3 +157,87 @@ class TestEachCompetitionUsesThePoolThatCanSeeIt:
     def test_every_competition_has_a_note(self) -> None:
         for spec in COMPETITIONS.values():
             assert spec.note.strip()
+
+
+class TestItIsWiredWithoutPuttingTheCardAtRisk:
+    """The Premier League card must not depend on fourteen league datasets and
+    a public-domain results repository being reachable. A run where the cup
+    section cannot be built loses the section and keeps the card."""
+
+    def _workflow(self) -> str:
+        from epl_betting_lab.config import PROJECT_ROOT
+
+        return (
+            PROJECT_ROOT / ".github" / "workflows" / "matchday-refresh.yml"
+        ).read_text(encoding="utf-8")
+
+    def test_the_section_is_built_before_the_reports(self) -> None:
+        text = self._workflow()
+        assert text.index("- name: Build the cup and European section") < text.index(
+            "- name: Rebuild every report"
+        )
+
+    def test_the_observation_feed_is_restored_first(self) -> None:
+        """It holds the prices the section is built from, and it lives on the
+        price-feed branch rather than in the repository."""
+        text = self._workflow()
+        assert text.index("- name: Restore the price feed") < text.index(
+            "- name: Build the cup and European section"
+        )
+        block = text.split("- name: Restore the price feed", 1)[1].split("- name:", 1)[0]
+        assert "price_feed_extra.csv" in block
+
+    def test_the_restore_cannot_empty_a_feed_it_fails_to_find(self) -> None:
+        """`>` truncates its target before the command on its left runs. That
+        emptied 1,203 freshly collected observations once already."""
+        block = self._workflow().split("- name: Restore the price feed", 1)[1]
+        block = block.split("- name:", 1)[0]
+        assert "mktemp" in block
+        for line in block.splitlines():
+            stripped = line.strip()
+            if stripped.startswith("#"):
+                continue
+            if "git show" in stripped:
+                assert "> data/processed/" not in stripped, stripped
+
+    def test_building_the_section_cannot_fail_the_run(self) -> None:
+        block = self._workflow().split(
+            "- name: Build the cup and European section", 1
+        )[1].split("- name:", 1)[0]
+        assert "continue-on-error: true" in block
+        # A bounded step: fourteen feeds on a bad day must not eat the job's
+        # twenty minutes and take the card down with them.
+        assert "timeout-minutes:" in block
+
+    def test_it_spends_no_provider_quota(self) -> None:
+        """Prices come from the observation feed the Closing Snapshot already
+        collected; every rating input is a free CSV."""
+        block = self._workflow().split(
+            "- name: Build the cup and European section", 1
+        )[1].split("- name:", 1)[0]
+        assert "ODDS_API_KEY" not in block
+        assert "secrets." not in block
+        assert "--live" not in block
+
+    def test_a_missing_section_is_simply_absent_not_fatal(self, tmp_path) -> None:
+        """The card reads a file. No file, no section, no error."""
+        import importlib.util
+
+        from epl_betting_lab.config import PROJECT_ROOT
+
+        spec = importlib.util.spec_from_file_location(
+            "build_extra_card", PROJECT_ROOT / "scripts" / "build_extra_card.py"
+        )
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        import sys
+
+        argv = ["build_extra_card.py", "--feed", str(tmp_path / "absent.csv"),
+                "--out", str(tmp_path / "out.md")]
+        old = sys.argv
+        try:
+            sys.argv = argv
+            assert module.main() == 0
+        finally:
+            sys.argv = old
+        assert not (tmp_path / "out.md").exists()

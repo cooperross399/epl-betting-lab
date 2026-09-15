@@ -86,10 +86,33 @@ class TestTheSportKeysAreWrittenOutNotDerived:
         module = _module()
         assert set(EFL_DIVISIONS) <= set(module.SPORT_KEYS)
 
-    def test_the_cup_and_european_competitions_are_named_too(self) -> None:
+    def test_the_champions_league_is_collected(self) -> None:
+        """The only competition outside the Premier League that returned all
+        eight card markets, corners included — and corners have no historical
+        prices anywhere, so this is the only place they can be watched."""
         module = _module()
-        assert module.SPORT_KEYS["EFLC"] == "soccer_england_efl_cup"
         assert module.SPORT_KEYS["UCL"] == "soccer_uefa_champs_league"
+
+    def test_the_carabao_cup_is_not_collected_any_more(self) -> None:
+        """It returned 1x2, btts and total_2_5 and nothing else — the same thin
+        three the EFL gives, from a competition with no free results source and
+        no model that can price it. It duplicated E1/E2/E3 at extra cost."""
+        module = _module()
+        assert "EFLC" not in module.SPORT_KEYS
+        assert "soccer_england_efl_cup" not in set(module.SPORT_KEYS.values())
+
+    def test_the_withdrawn_key_is_recorded_rather_than_deleted(self) -> None:
+        """So the next person to think of adding it finds out it was tried and
+        what came back, instead of re-running the experiment."""
+        module = _module()
+        assert module.WITHDRAWN_KEYS["EFLC"] == "soccer_england_efl_cup"
+
+    def test_rows_already_collected_keep_their_name(self) -> None:
+        """236 real observations sit in the feed under `EFLC`. Removing them
+        would be tidying away evidence, so they stay — and a report that prints
+        a bare key at a reader is one nobody can act on."""
+        module = _module()
+        assert module.COMPETITION_NAMES["EFLC"] == "EFL Cup (Carabao)"
 
     def test_every_key_has_a_readable_name(self) -> None:
         """A report that prints a bare key at a reader is a report nobody can

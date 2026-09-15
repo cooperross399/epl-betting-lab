@@ -66,8 +66,10 @@ from epl_betting_lab.config import DIVISION_NAMES, EFL_DIVISIONS, PROCESSED_DIR
 #: does not have to print a bare key at a reader.
 COMPETITION_NAMES = {
     **DIVISION_NAMES,
-    "EFLC": "EFL Cup (Carabao)",
     "UCL": "UEFA Champions League",
+    # No longer collected, kept so the rows already in the feed still render
+    # with a name rather than a bare key.
+    "EFLC": "EFL Cup (Carabao)",
 }
 from epl_betting_lab.providers import create_provider
 from epl_betting_lab.providers.base import ProviderRunRequest
@@ -89,20 +91,38 @@ SPORT_KEYS = {
     "E1": "soccer_efl_champ",
     "E2": "soccer_england_league1",
     "E3": "soccer_england_league2",
-    # Not divisions, and deliberately not modelled. The ratings refuse a club
-    # they have never seen (`UnratedTeam`), and a cup tie is two clubs from
-    # pools with no common scale — which is the whole reason nothing here makes
-    # a selection. Prices are collected because they cannot be recovered later
-    # and a rule can always be re-run over them; a rule that could price these
-    # fixtures does not exist yet and may never.
+    # Not a division, and deliberately not modelled. The ratings refuse a club
+    # they have never seen (`UnratedTeam`), and a Champions League tie is two
+    # clubs from pools with no common scale — which is the whole reason nothing
+    # here makes a selection. Prices are collected because they cannot be
+    # recovered later and a rule can always be re-run over them; a rule that
+    # could price these fixtures does not exist yet and may never.
+    #
+    # It earns its place on coverage. Asked for all eight card markets, the
+    # Champions League returned all eight — 945 observations across 18
+    # league-phase fixtures, including every corner market. It is the only
+    # competition outside the Premier League that does. Corners are three of
+    # the seven markets the card stakes and no source retains their prices
+    # historically, so this is the only place they can be watched at all
+    # outside the EPL. Thin, though: those corner prices came from a single
+    # book, so there is no cross-book dispersion in them to read.
     #
     # Worth knowing before reading anything into what arrives: Football-Data
-    # publishes no cup or UEFA competition at all, so nothing collected here
-    # can ever be settled from a free source. Closing-line value needs no
-    # result and remains possible; profit does not.
-    "EFLC": "soccer_england_efl_cup",
+    # publishes no UEFA competition at all, so nothing collected here can ever
+    # be settled from a free source. Closing-line value needs no result and
+    # remains possible; profit does not.
     "UCL": "soccer_uefa_champs_league",
 }
+
+#: Collected once, then stopped. `soccer_england_efl_cup` returned `1x2`,
+#: `btts` and `total_2_5` and nothing else — the same thin three the EFL gives,
+#: from a competition with no free results source and no model that can price
+#: it. It duplicated what E1/E2/E3 already provide at additional cost.
+#:
+#: Its 236 observations stay in the feed under `competition = EFLC`. They are
+#: real prices, honestly collected, and removing them would be tidying away
+#: evidence rather than correcting anything.
+WITHDRAWN_KEYS = {"EFLC": "soccer_england_efl_cup"}
 
 #: What the card bets and this collection therefore asks for. Compared against
 #: what actually comes back, so a market the provider does not carry cannot be

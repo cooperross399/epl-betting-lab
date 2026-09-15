@@ -577,10 +577,15 @@ jobs:
           set -u
           RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           # When a message was last sent, so at most one card a day goes out.
-          TITLE_FOR_LOOKUP="EPL Card"
+          #
+          # The title comes from the module. It used to be hardcoded here as
+          # well — a third copy of a name the comment below already promised
+          # could not drift, and it would have been the copy left saying "EPL
+          # Card" after the rename, quietly looking up an issue nobody posts to.
+          TITLE_FOR_LOOKUP=$(python scripts/post_card_to_issue.py --title-only)
           LAST_SENT=$(gh issue list --state open --limit 200 --json number,title \
             | jq -r --arg t "$TITLE_FOR_LOOKUP" \
-              '[.[] | select(.title | startswith($t))] | .[0].number // empty' \
+              '[.[] | select(.title == $t)] | .[0].number // empty' \
             | xargs -r -I{} gh issue view {} --json comments \
               --jq '[.comments[].createdAt] | max // empty')
           DECISION=$(python scripts/post_card_to_issue.py \

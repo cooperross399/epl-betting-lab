@@ -31,7 +31,17 @@ from epl_betting_lab.reports.pick_display import (
 )
 
 
-ISSUE_TITLE = "EPL Card — this week's picks"
+#: The delivery issue's title, and the only place it is written.
+#:
+#: Renamed from "EPL Card" on 2026-09-15: the card carries the EFL Cup, the
+#: Champions League and the Europa League alongside the Premier League.
+#:
+#: Changing this string moves the card to a different issue. The workflow
+#: matches it EXACTLY against open issues and creates one when nothing matches,
+#: so a rename without renaming the issue itself starts a fresh thread and
+#: leaves every previous card behind in the old one. Issue #162 was renamed in
+#: the same change.
+ISSUE_TITLE = "Soccer Card — this week's picks"
 
 #: Deliberately nobody.
 #:

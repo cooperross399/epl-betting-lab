@@ -20,7 +20,16 @@ from epl_betting_lab.reports.schedule_health import parse_run_time as read_run_t
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--out", required=True, help="Where to write the comment body")
+    # Not `required=True`. `--title-only` prints a name and exits without
+    # writing anything, and argparse enforces a required argument before any
+    # code here runs: every `--title-only` call died with exit 2 and a usage
+    # message. The workflow calls it as the FIRST command of the "Email the
+    # card" step under `bash -e`, so the step aborted before it rendered
+    # anything, and `continue-on-error: true` reported that as success.
+    parser.add_argument(
+        "--out",
+        help="Where to write the comment body. Required unless --title-only.",
+    )
     parser.add_argument("--run-url", default="", help="Link back to the run")
     parser.add_argument(
         "--last-sent",
@@ -57,6 +66,9 @@ def main() -> None:
     if args.title_only:
         print(ISSUE_TITLE)
         return
+
+    if not args.out:
+        parser.error("--out is required unless --title-only is given")
 
     result = build_notification(
         run_url=args.run_url,

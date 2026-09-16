@@ -22,6 +22,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+from epl_betting_lab.reports.scheduled_task_bridge import CARD_TASK_JSON
 from epl_betting_lab.config import OUTPUTS_DIR
 from epl_betting_lab.reports.run_summary import _quota_line
 from epl_betting_lab.reports.pick_display import (
@@ -185,7 +186,7 @@ def build_notification(
     last_sent: datetime | None = None,
 ) -> dict[str, Any]:
     outputs = OUTPUTS_DIR if output_dir is None else Path(output_dir)
-    card = _read(outputs / "soccer_card_task.json")
+    card = _read(outputs / CARD_TASK_JSON)
     generated = _read(outputs / "automated_card.json")
     comparison = _read(outputs / "automated_card_comparison.json")
 

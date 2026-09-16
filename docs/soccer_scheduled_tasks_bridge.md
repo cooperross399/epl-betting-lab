@@ -1,4 +1,4 @@
-# EPL Scheduled Tasks Bridge
+# Soccer Scheduled Tasks Bridge
 
 > **API-first mode.** Odds come from The Odds API, not from a hand-filled
 > template. `data/manual/current_odds.csv` is no longer the active source and

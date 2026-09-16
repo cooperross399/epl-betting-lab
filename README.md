@@ -11,7 +11,7 @@
 > Current state: The Odds API allowlisted for `1x2` and `btts` only;
 > `total_2_5` excluded for data availability; odds come from the
 > provider-derived automated input, so **manual odds entry is not required**;
-> EPL SETTLE is preview-only; no bets are ever placed.
+> SOCCER SETTLE is preview-only; no bets are ever placed.
 
 ## Current workflow
 
@@ -28,9 +28,9 @@ PYTHONPATH=src .venv/bin/python scripts/run_provider_shadow_verification.py \
     --provider odds_api --live --overwrite-staging --include-event-markets
 
 # The three scheduled-routine bridges
-PYTHONPATH=src .venv/bin/python scripts/run_epl_model_task.py
-PYTHONPATH=src .venv/bin/python scripts/run_epl_card_task.py
-PYTHONPATH=src .venv/bin/python scripts/run_epl_settle_preview_task.py
+PYTHONPATH=src .venv/bin/python scripts/run_soccer_watch_task.py
+PYTHONPATH=src .venv/bin/python scripts/run_soccer_card_task.py
+PYTHONPATH=src .venv/bin/python scripts/run_soccer_settle_preview_task.py
 ```
 
 ## Legacy sections below

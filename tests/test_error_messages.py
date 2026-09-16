@@ -10,8 +10,8 @@ from epl_betting_lab.reports.scheduled_task_bridge import (
     BLOCKER_NEEDS_ODDS,
     BLOCKER_PROVIDER_NOT_TRUSTED,
     BLOCKER_REMEDIES,
-    build_epl_card_task,
-    build_epl_model_task,
+    build_soccer_card_task,
+    build_soccer_watch_task,
 )
 
 
@@ -95,7 +95,7 @@ def test_card_next_action_includes_the_remedy(tmp_path: Path) -> None:
          "missing_odds_count": 140, "slate_warnings": []},
     )
 
-    summary = build_epl_card_task(output_dir=tmp_path)
+    summary = build_soccer_card_task(output_dir=tmp_path)
 
     assert summary["blockers"]
     first = summary["blockers"][0]
@@ -110,7 +110,7 @@ def test_model_next_action_includes_the_remedy(tmp_path: Path) -> None:
          "missing_odds_count": 140, "slate_warnings": []},
     )
 
-    summary = build_epl_model_task(output_dir=tmp_path)
+    summary = build_soccer_watch_task(output_dir=tmp_path)
 
     assert summary["blockers"]
     assert "Start with" in summary["next_action"]

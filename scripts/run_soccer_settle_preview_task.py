@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""EPL SETTLE (IGNORE) scheduled-task bridge.
+"""SOCCER SETTLE (IGNORE) scheduled-task bridge.
 
 Preview only. This command reads `bet_ledger.csv` and reports what is open. It
 has no flag and no code path that applies settlement, edits the ledger, uses
@@ -12,7 +12,7 @@ import argparse
 from pathlib import Path
 
 from epl_betting_lab.reports.scheduled_task_bridge import (
-    save_epl_settle_preview_task,
+    save_soccer_settle_preview_task,
 )
 
 
@@ -33,12 +33,12 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
-    print("EPL Betting Lab - EPL Settle Preview Task (IGNORE)")
+    print("EPL Betting Lab - Soccer Settle Preview Task (IGNORE)")
     print(
         "Preview only: never applies settlement, never edits bet_ledger.csv, "
         "never uses force mode, never places bets."
     )
-    result = save_epl_settle_preview_task(
+    result = save_soccer_settle_preview_task(
         output_dir=args.output_dir,
         ledger_path=args.ledger_path,
     )

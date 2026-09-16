@@ -13,12 +13,12 @@ from epl_betting_lab.reports.scheduled_task_bridge import (
     BLOCKER_NEEDS_ODDS,
     BLOCKER_NEEDS_VALIDATION,
     BLOCKER_PROVIDER_NOT_TRUSTED,
-    build_epl_card_task,
-    build_epl_model_task,
-    build_epl_settle_preview_task,
-    save_epl_card_task,
-    save_epl_model_task,
-    save_epl_settle_preview_task,
+    build_soccer_card_task,
+    build_soccer_watch_task,
+    build_soccer_settle_preview_task,
+    save_soccer_card_task,
+    save_soccer_watch_task,
+    save_soccer_settle_preview_task,
 )
 
 
@@ -77,12 +77,12 @@ def _all_green(output_dir: Path) -> None:
     _write_shadow(output_dir)
 
 
-# --- EPL Model -------------------------------------------------------------
+# --- SOCCER WATCH -------------------------------------------------------------
 
 
 def test_model_task_reports_ready_when_every_gate_passes(tmp_path: Path) -> None:
     _all_green(tmp_path)
-    summary = build_epl_model_task(output_dir=tmp_path, now=NOW)
+    summary = build_soccer_watch_task(output_dir=tmp_path, now=NOW)
 
     assert summary["model_readiness"] == "Ready"
     assert summary["blockers"] == []
@@ -91,7 +91,7 @@ def test_model_task_reports_ready_when_every_gate_passes(tmp_path: Path) -> None
 
 def test_model_task_reports_every_required_field(tmp_path: Path) -> None:
     _all_green(tmp_path)
-    summary = build_epl_model_task(output_dir=tmp_path, now=NOW)
+    summary = build_soccer_watch_task(output_dir=tmp_path, now=NOW)
 
     for field in (
         "model_readiness",
@@ -112,7 +112,7 @@ def test_model_task_blocks_on_missing_odds(tmp_path: Path) -> None:
     _write_readiness(tmp_path, odds_completeness_percentage=0.0, missing_odds_count=140)
     _write_shadow(tmp_path)
 
-    summary = build_epl_model_task(output_dir=tmp_path, now=NOW)
+    summary = build_soccer_watch_task(output_dir=tmp_path, now=NOW)
 
     assert BLOCKER_NEEDS_ODDS in summary["blockers"]
     assert summary["epl_card_ready"] is False
@@ -130,7 +130,7 @@ def test_model_task_blocks_on_mapping_and_btts(tmp_path: Path) -> None:
         btts_availability={"status": "Unavailable", "btts_row_count": 0},
     )
 
-    summary = build_epl_model_task(output_dir=tmp_path, now=NOW)
+    summary = build_soccer_watch_task(output_dir=tmp_path, now=NOW)
 
     assert BLOCKER_NEEDS_MAPPING in summary["blockers"]
     assert BLOCKER_NEEDS_BTTS in summary["blockers"]
@@ -141,7 +141,7 @@ def test_model_task_treats_missing_evidence_as_blocked_not_ready(
     tmp_path: Path,
 ) -> None:
     # No reports at all: absence must never be read as "nothing wrong".
-    summary = build_epl_model_task(output_dir=tmp_path, now=NOW)
+    summary = build_soccer_watch_task(output_dir=tmp_path, now=NOW)
 
     assert summary["epl_card_ready"] is False
     assert BLOCKER_NEEDS_VALIDATION in summary["blockers"]
@@ -152,22 +152,22 @@ def test_model_task_accepts_decorated_fresh_fixture_status(tmp_path: Path) -> No
     _write_readiness(tmp_path, fixture_status="Fresh (10 upcoming match(es))")
     _write_shadow(tmp_path)
 
-    summary = build_epl_model_task(output_dir=tmp_path, now=NOW)
+    summary = build_soccer_watch_task(output_dir=tmp_path, now=NOW)
 
     assert "Needs fixtures" not in summary["blockers"]
 
 
 def test_model_task_writes_both_outputs(tmp_path: Path) -> None:
     _all_green(tmp_path)
-    result = save_epl_model_task(output_dir=tmp_path, now=NOW)
+    result = save_soccer_watch_task(output_dir=tmp_path, now=NOW)
 
     assert Path(result["json"]).is_file()
     assert Path(result["markdown"]).is_file()
-    assert Path(result["json"]).name == "epl_model_task.json"
-    assert Path(result["markdown"]).name == "epl_model_task.md"
+    assert Path(result["json"]).name == "soccer_watch_task.json"
+    assert Path(result["markdown"]).name == "soccer_watch_task.md"
 
 
-# --- EPL CARD --------------------------------------------------------------
+# --- SOCCER CARD --------------------------------------------------------------
 
 
 def test_card_withholds_every_selection_when_handoff_ineligible(
@@ -180,7 +180,7 @@ def test_card_withholds_every_selection_when_handoff_ineligible(
         provider_policy={"provider_allowed": False},
     )
 
-    summary = build_epl_card_task(output_dir=tmp_path, now=NOW)
+    summary = build_soccer_card_task(output_dir=tmp_path, now=NOW)
 
     assert summary["card_status"] == "Blocked"
     assert summary["card_ready"] is False
@@ -208,7 +208,7 @@ def test_card_reports_named_blockers(tmp_path: Path) -> None:
         btts_availability={"status": "Unavailable", "btts_row_count": 0},
     )
 
-    blockers = build_epl_card_task(output_dir=tmp_path, now=NOW)["blockers"]
+    blockers = build_soccer_card_task(output_dir=tmp_path, now=NOW)["blockers"]
 
     assert BLOCKER_NEEDS_ODDS in blockers
     assert BLOCKER_NEEDS_MAPPING in blockers
@@ -223,7 +223,7 @@ def test_card_source_is_untrusted_until_the_provider_is_allowlisted(
     _write_readiness(tmp_path)
     _write_shadow(tmp_path, provider_policy={"provider_allowed": False})
 
-    summary = build_epl_card_task(output_dir=tmp_path, now=NOW)
+    summary = build_soccer_card_task(output_dir=tmp_path, now=NOW)
 
     assert summary["provider_source"]["trusted"] is False
     assert BLOCKER_PROVIDER_NOT_TRUSTED in summary["blockers"]
@@ -231,7 +231,7 @@ def test_card_source_is_untrusted_until_the_provider_is_allowlisted(
 
 def test_card_source_becomes_trusted_only_via_the_allowlist(tmp_path: Path) -> None:
     _all_green(tmp_path)
-    summary = build_epl_card_task(output_dir=tmp_path, now=NOW)
+    summary = build_soccer_card_task(output_dir=tmp_path, now=NOW)
 
     # Trust follows the reviewed allowlist, never market eligibility alone.
     assert summary["provider_source"]["trusted"] is True
@@ -244,7 +244,7 @@ def test_card_markdown_says_withheld_not_none_found(tmp_path: Path) -> None:
         staging_validation={"verdict": "Needs fixes", "handoff_eligible": False},
         provider_policy={"provider_allowed": False},
     )
-    result = save_epl_card_task(output_dir=tmp_path, now=NOW)
+    result = save_soccer_card_task(output_dir=tmp_path, now=NOW)
     text = Path(result["markdown"]).read_text(encoding="utf-8")
 
     assert "withheld" in text
@@ -261,13 +261,13 @@ def test_card_blocked_when_provider_untrusted_even_if_odds_complete(
         provider_policy={"provider_allowed": False},
     )
 
-    summary = build_epl_card_task(output_dir=tmp_path, now=NOW)
+    summary = build_soccer_card_task(output_dir=tmp_path, now=NOW)
 
     assert summary["card_ready"] is False
     assert BLOCKER_PROVIDER_NOT_TRUSTED in summary["blockers"]
 
 
-# --- EPL SETTLE (IGNORE) ---------------------------------------------------
+# --- SOCCER SETTLE (IGNORE) ---------------------------------------------------
 
 
 def _ledger(tmp_path: Path, rows: list[dict[str, str]]) -> Path:
@@ -286,7 +286,7 @@ def test_settle_preview_never_modifies_the_ledger(tmp_path: Path) -> None:
     )
     before = ledger.read_bytes()
 
-    build_epl_settle_preview_task(
+    build_soccer_settle_preview_task(
         output_dir=tmp_path, ledger_path=ledger, now=NOW
     )
 
@@ -297,7 +297,7 @@ def test_settle_preview_save_also_never_modifies_the_ledger(tmp_path: Path) -> N
     ledger = _ledger(tmp_path, [{"bet_id": "1", "match": "A vs B", "result": ""}])
     before = ledger.read_bytes()
 
-    save_epl_settle_preview_task(output_dir=tmp_path, ledger_path=ledger, now=NOW)
+    save_soccer_settle_preview_task(output_dir=tmp_path, ledger_path=ledger, now=NOW)
 
     assert ledger.read_bytes() == before
 
@@ -314,7 +314,7 @@ def test_settle_preview_counts_open_and_settled_without_settling(
         ],
     )
 
-    summary = build_epl_settle_preview_task(
+    summary = build_soccer_settle_preview_task(
         output_dir=tmp_path, ledger_path=ledger, now=NOW
     )
 
@@ -327,7 +327,7 @@ def test_settle_preview_counts_open_and_settled_without_settling(
 def test_settle_preview_safety_flags_are_all_false(tmp_path: Path) -> None:
     ledger = _ledger(tmp_path, [{"bet_id": "1", "match": "A vs B", "result": ""}])
 
-    safety = build_epl_settle_preview_task(
+    safety = build_soccer_settle_preview_task(
         output_dir=tmp_path, ledger_path=ledger, now=NOW
     )["safety"]
 
@@ -342,13 +342,13 @@ def test_settle_preview_exposes_no_apply_or_force_parameter() -> None:
     # A settle-capable parameter must not exist at all, not merely default off.
     import inspect
 
-    signature = inspect.signature(build_epl_settle_preview_task)
+    signature = inspect.signature(build_soccer_settle_preview_task)
     forbidden = {"apply", "force", "settle", "apply_settlement", "write"}
     assert forbidden.isdisjoint(signature.parameters)
 
 
 def test_settle_preview_handles_missing_ledger_as_blocker(tmp_path: Path) -> None:
-    summary = build_epl_settle_preview_task(
+    summary = build_soccer_settle_preview_task(
         output_dir=tmp_path, ledger_path=tmp_path / "absent.csv", now=NOW
     )
 
@@ -358,12 +358,12 @@ def test_settle_preview_handles_missing_ledger_as_blocker(tmp_path: Path) -> Non
 
 def test_settle_preview_writes_both_outputs(tmp_path: Path) -> None:
     ledger = _ledger(tmp_path, [{"bet_id": "1", "match": "A vs B", "result": ""}])
-    result = save_epl_settle_preview_task(
+    result = save_soccer_settle_preview_task(
         output_dir=tmp_path, ledger_path=ledger, now=NOW
     )
 
-    assert Path(result["json"]).name == "epl_settle_preview_task.json"
-    assert Path(result["markdown"]).name == "epl_settle_preview_task.md"
+    assert Path(result["json"]).name == "soccer_settle_preview_task.json"
+    assert Path(result["markdown"]).name == "soccer_settle_preview_task.md"
     assert "never applies settlement" in Path(result["markdown"]).read_text(
         encoding="utf-8"
     ).lower() or "preview only" in Path(result["markdown"]).read_text(

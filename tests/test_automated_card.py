@@ -13,7 +13,7 @@ from epl_betting_lab.reports.automated_card import (
     render_automated_card,
     save_automated_card,
 )
-from epl_betting_lab.reports.scheduled_task_bridge import build_epl_card_task
+from epl_betting_lab.reports.scheduled_task_bridge import build_soccer_card_task
 
 
 def _write(outputs: Path, name: str, payload: dict) -> None:
@@ -223,7 +223,7 @@ def _bridge_evidence(outputs: Path, *, card_generated: bool) -> None:
 def test_bridge_carries_picks_only_when_a_card_was_generated(tmp_path: Path) -> None:
     _bridge_evidence(tmp_path, card_generated=True)
 
-    summary = build_epl_card_task(output_dir=tmp_path)
+    summary = build_soccer_card_task(output_dir=tmp_path)
 
     assert summary["card_ready"] is True
     assert summary["automated_card_generated"] is True
@@ -234,7 +234,7 @@ def test_bridge_carries_picks_only_when_a_card_was_generated(tmp_path: Path) -> 
 def test_bridge_withholds_picks_when_no_card_was_generated(tmp_path: Path) -> None:
     _bridge_evidence(tmp_path, card_generated=False)
 
-    summary = build_epl_card_task(output_dir=tmp_path)
+    summary = build_soccer_card_task(output_dir=tmp_path)
 
     assert summary["automated_card_generated"] is False
     assert summary["best_bets"] == []
@@ -255,7 +255,7 @@ def test_bridge_withholds_picks_when_gates_fail_even_if_card_exists(
         },
     )
 
-    summary = build_epl_card_task(output_dir=tmp_path)
+    summary = build_soccer_card_task(output_dir=tmp_path)
 
     assert summary["card_ready"] is False
     assert summary["best_bets"] == []
@@ -552,7 +552,7 @@ def test_bridge_carries_the_already_started_list(tmp_path: Path) -> None:
         },
     )
 
-    summary = build_epl_card_task(output_dir=tmp_path)
+    summary = build_soccer_card_task(output_dir=tmp_path)
 
     assert summary["best_bets"] == []
     assert len(summary["already_started"]) == 1

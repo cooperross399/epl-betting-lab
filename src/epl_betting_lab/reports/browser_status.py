@@ -26,6 +26,11 @@ import json
 from pathlib import Path
 from typing import Any
 
+from epl_betting_lab.reports.scheduled_task_bridge import (
+    CARD_TASK_JSON,
+    SETTLE_TASK_JSON,
+    WATCH_TASK_JSON,
+)
 from epl_betting_lab.config import OUTPUTS_DIR
 from epl_betting_lab.reports.pick_display import (
     NOT_STAKEABLE_LABEL,
@@ -37,10 +42,16 @@ from epl_betting_lab.reports.pick_display import (
 
 STATUS_HTML_FILENAME = "status.html"
 
+#: Imported rather than re-typed. These filenames existed as independent string
+#: literals in six places, and reverting the constant alone left the whole suite
+#: green while the card vanished from this page, the run summary, the
+#: notification and the artifact upload. The repository already learned this for
+#: the delivery title — `test_the_delivery_title_is_written_in_exactly_one_place`
+#: forbids a second copy of it — and the rule belongs here too.
 REPORT_FILES = {
-    "model": "epl_model_task.json",
-    "card": "epl_card_task.json",
-    "settle": "epl_settle_preview_task.json",
+    "model": WATCH_TASK_JSON,
+    "card": CARD_TASK_JSON,
+    "settle": SETTLE_TASK_JSON,
     "automated_card": "automated_card.json",
     "comparison": "automated_card_comparison.json",
 }

@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-"""EPL Model scheduled-task bridge.
+"""SOCCER WATCH scheduled-task bridge.
 
 Reads existing repository evidence and reports whether the model is ready and
-whether EPL CARD may run. Generates no picks, runs no provider, edits no
+whether SOCCER CARD may run. Generates no picks, runs no provider, edits no
 protected file.
 """
 
@@ -11,7 +11,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from epl_betting_lab.reports.scheduled_task_bridge import save_epl_model_task
+from epl_betting_lab.reports.scheduled_task_bridge import save_soccer_watch_task
 
 
 def parse_args() -> argparse.Namespace:
@@ -26,12 +26,12 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
-    print("EPL Betting Lab - EPL Model Task")
+    print("EPL Betting Lab - Soccer Watch Task")
     print(
         "Read-only status bridge: no picks, no provider run, no protected file "
         "edits, no settlement, no cron."
     )
-    result = save_epl_model_task(output_dir=args.output_dir)
+    result = save_soccer_watch_task(output_dir=args.output_dir)
     summary = result["summary"]
 
     print(f"Model readiness: {summary['model_readiness']}")
@@ -67,7 +67,7 @@ def main() -> int:
     )
     for blocker in summary["blockers"]:
         print(f"BLOCKED: {blocker}")
-    print(f"EPL CARD ready: {'Yes' if summary['epl_card_ready'] else 'No'}")
+    print(f"SOCCER CARD ready: {'Yes' if summary['epl_card_ready'] else 'No'}")
     print(f"Next action: {summary['next_action']}")
     print(f"Markdown: {result['markdown']}")
     print(f"JSON: {result['json']}")

@@ -20,6 +20,11 @@ from typing import Any
 
 from collections.abc import Sequence as _Sequence
 
+from epl_betting_lab.reports.scheduled_task_bridge import (
+    CARD_TASK_JSON,
+    SETTLE_TASK_JSON,
+    WATCH_TASK_JSON,
+)
 from epl_betting_lab.config import OUTPUTS_DIR
 from epl_betting_lab.reports.pick_display import (
     NOT_STAKEABLE_LABEL,
@@ -123,9 +128,9 @@ def build_run_summary(
     degraded: _Sequence[str] = (),
 ) -> str:
     outputs = OUTPUTS_DIR if output_dir is None else Path(output_dir)
-    model = _read(outputs / "epl_model_task.json")
-    card = _read(outputs / "epl_card_task.json")
-    settle = _read(outputs / "epl_settle_preview_task.json")
+    model = _read(outputs / WATCH_TASK_JSON)
+    card = _read(outputs / CARD_TASK_JSON)
+    settle = _read(outputs / SETTLE_TASK_JSON)
     generated = _read(outputs / "automated_card.json")
     comparison = _read(outputs / "automated_card_comparison.json")
     shadow = _read(outputs / "provider_shadow_verification.json")

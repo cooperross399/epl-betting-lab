@@ -22,6 +22,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+from epl_betting_lab.reports.scheduled_task_bridge import CARD_TASK_JSON
 from epl_betting_lab.config import OUTPUTS_DIR
 from epl_betting_lab.reports.run_summary import _quota_line
 from epl_betting_lab.reports.pick_display import (
@@ -48,7 +49,7 @@ ISSUE_TITLE = "Soccer Card — this week's picks"
 #: This comment used to open "@cooperross399 —", because an @mention notifies
 #: whatever the watch settings say and the issue was the delivery mechanism.
 #: Delivery has moved: the card is published to the `card-feed` branch and the
-#: EPL CARD routine reads it there and presents it in Claude. The comment stays
+#: SOCCER CARD routine reads it there and presents it in Claude. The comment stays
 #: as the written record, and the mention would now do nothing except force an
 #: email that was asked to stop — a mention overrides an ignored subscription,
 #: so silencing notifications without removing this would not have worked.
@@ -185,7 +186,7 @@ def build_notification(
     last_sent: datetime | None = None,
 ) -> dict[str, Any]:
     outputs = OUTPUTS_DIR if output_dir is None else Path(output_dir)
-    card = _read(outputs / "epl_card_task.json")
+    card = _read(outputs / CARD_TASK_JSON)
     generated = _read(outputs / "automated_card.json")
     comparison = _read(outputs / "automated_card_comparison.json")
 

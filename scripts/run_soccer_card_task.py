@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""EPL CARD scheduled-task bridge.
+"""SOCCER CARD scheduled-task bridge.
 
 Reports whether the card is allowed to run. While any gate is unmet the card
 withholds every selection rather than inventing one.
@@ -10,7 +10,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from epl_betting_lab.reports.scheduled_task_bridge import save_epl_card_task
+from epl_betting_lab.reports.scheduled_task_bridge import save_soccer_card_task
 
 
 def parse_args() -> argparse.Namespace:
@@ -25,12 +25,12 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
-    print("EPL Betting Lab - EPL Card Task")
+    print("EPL Betting Lab - Soccer Card Task")
     print(
         "Read-only status bridge: picks are withheld unless every gate passes. "
         "No provider run, no protected file edits, no bets."
     )
-    result = save_epl_card_task(output_dir=args.output_dir)
+    result = save_soccer_card_task(output_dir=args.output_dir)
     summary = result["summary"]
 
     print(f"Card status: {summary['card_status']}")

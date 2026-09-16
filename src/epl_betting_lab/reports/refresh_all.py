@@ -67,9 +67,9 @@ def _steps() -> list[tuple[str, str, Callable[[Path], Any]]]:
         save_card_comparison,
     )
     from epl_betting_lab.reports.scheduled_task_bridge import (
-        save_epl_card_task,
-        save_epl_model_task,
-        save_epl_settle_preview_task,
+        save_soccer_card_task,
+        save_soccer_watch_task,
+        save_soccer_settle_preview_task,
     )
 
     return [
@@ -108,19 +108,19 @@ def _steps() -> list[tuple[str, str, Callable[[Path], Any]]]:
             lambda outputs: save_card_comparison(output_dir=outputs),
         ),
         (
-            "epl_model_task",
-            "Refresh the EPL Model routine report",
-            lambda outputs: save_epl_model_task(output_dir=outputs),
+            "soccer_watch_task",
+            "Refresh the SOCCER WATCH routine report",
+            lambda outputs: save_soccer_watch_task(output_dir=outputs),
         ),
         (
-            "epl_card_task",
-            "Refresh the EPL CARD routine report",
-            lambda outputs: save_epl_card_task(output_dir=outputs),
+            "soccer_card_task",
+            "Refresh the SOCCER CARD routine report",
+            lambda outputs: save_soccer_card_task(output_dir=outputs),
         ),
         (
-            "epl_settle_preview_task",
-            "Refresh the EPL SETTLE preview report",
-            lambda outputs: save_epl_settle_preview_task(output_dir=outputs),
+            "soccer_settle_preview_task",
+            "Refresh the SOCCER SETTLE preview report",
+            lambda outputs: save_soccer_settle_preview_task(output_dir=outputs),
         ),
         (
             "status_page",

@@ -54,8 +54,8 @@ def _ready(outputs: Path, **overrides) -> None:
         "next_action": "Review the card.",
     }
     card.update(overrides)
-    _write(outputs, "epl_card_task.json", card)
-    _write(outputs, "epl_model_task.json", {"epl_card_ready": True, "blockers": []})
+    _write(outputs, "soccer_card_task.json", card)
+    _write(outputs, "soccer_watch_task.json", {"epl_card_ready": True, "blockers": []})
     _write(
         outputs,
         "automated_card.json",
@@ -74,7 +74,7 @@ def _ready(outputs: Path, **overrides) -> None:
     )
     _write(
         outputs,
-        "epl_settle_preview_task.json",
+        "soccer_settle_preview_task.json",
         {
             "mode": "Preview only",
             "open_bet_count": 0,
@@ -135,7 +135,7 @@ def test_report_values_are_escaped_not_injected(tmp_path: Path) -> None:
     _ready(tmp_path)
     _write(
         tmp_path,
-        "epl_card_task.json",
+        "soccer_card_task.json",
         {
             "card_ready": True,
             "manual_odds_entry_required": False,
@@ -164,7 +164,7 @@ def test_a_blocked_card_is_not_shown_as_a_card_with_no_value(
     _ready(tmp_path)
     _write(
         tmp_path,
-        "epl_card_task.json",
+        "soccer_card_task.json",
         {
             "card_ready": False,
             "blockers": ["Provider not trusted"],
@@ -220,7 +220,7 @@ def test_missing_reports_render_a_blocked_page_not_a_crash(tmp_path: Path) -> No
 
 
 def test_unreadable_report_is_survived(tmp_path: Path) -> None:
-    (tmp_path / "epl_card_task.json").write_text("{not json", encoding="utf-8")
+    (tmp_path / "soccer_card_task.json").write_text("{not json", encoding="utf-8")
 
     html = build_status_html(output_dir=tmp_path, now=NOW)
 

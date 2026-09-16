@@ -31,7 +31,7 @@ def test_the_order_puts_inputs_before_the_things_that_read_them() -> None:
     names = [name for name, _, _ in _steps()]
 
     assert names.index("card_input") < names.index("automated_card")
-    assert names.index("automated_card") < names.index("epl_card_task")
+    assert names.index("automated_card") < names.index("soccer_card_task")
     assert names.index("automated_card") < names.index("archive_card")
     assert names.index("archive_card") < names.index("card_comparison")
     assert names.index("status_page") == len(names) - 1

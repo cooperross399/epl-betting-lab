@@ -18,8 +18,9 @@ every report, and renders the card on the run page. It needs no laptop, no
 terminal, and no Claude routine. Read it at Actions → Matchday Refresh → latest
 run.
 
-The Claude routines — two are live, **EPL CARD** and **EPL WATCH** (formerly
-EPL Model) — are optional and read the **`card-feed` branch**, not email and
+The Claude routines — two are live, **SOCCER CARD** and **SOCCER WATCH**
+(named EPL CARD and EPL WATCH until 2026-09-16, and EPL Model before that) —
+are optional and read the **`card-feed` branch**, not email and
 not the filesystem. Every run publishes `latest_card_comment.md` and
 `latest_status.json` there, and the routine presents the card in Claude with a
 PushNotification. A routine that did not run is not the card failing; the two
@@ -32,8 +33,8 @@ prior conversation and no ChatGPT is needed to operate this repo.
 1. `CLAUDE.md` (this file) — hard rules, which override everything.
 2. `docs/claude_autonomy_operating_model.md` — how Claude works autonomously,
    what a hard stop means, and how to problem-solve instead of giving up.
-3. `docs/epl_scheduled_tasks_bridge.md` — the Claude routines (EPL CARD and
-   EPL WATCH), and why they are a reading layer rather than how the card is
+3. `docs/soccer_scheduled_tasks_bridge.md` — the Claude routines (SOCCER CARD and
+   SOCCER WATCH), and why they are a reading layer rather than how the card is
    made.
 4. `docs/no_terminal_operations.md` — doing things from a browser.
 5. `README.md` — full command reference.
@@ -322,8 +323,8 @@ Use the repo, the reports, and GitHub.
 - The active odds source is the **provider-derived automated card input**.
   Manual odds entry is not required.
 - `data/manual/current_odds.csv` is **legacy** and must not become active again.
-- **EPL CARD is live**, generated from eligible trusted markets only.
-- **EPL SETTLE (IGNORE) is preview-only, permanently.**
+- **SOCCER CARD is live**, generated from eligible trusted markets only.
+- **SOCCER SETTLE (IGNORE) is preview-only, permanently.**
 - Production credential is the GitHub secret `EPL_ODDS_API_KEY`. `.env` is
   local-only and optional.
 
@@ -335,9 +336,9 @@ PYTHONPATH=src .venv/bin/python scripts/run_api_first_card_workflow.py
 PYTHONPATH=src .venv/bin/python scripts/run_automated_card.py
 
 # Scheduled-routine bridges
-PYTHONPATH=src .venv/bin/python scripts/run_epl_model_task.py
-PYTHONPATH=src .venv/bin/python scripts/run_epl_card_task.py
-PYTHONPATH=src .venv/bin/python scripts/run_epl_settle_preview_task.py
+PYTHONPATH=src .venv/bin/python scripts/run_soccer_watch_task.py
+PYTHONPATH=src .venv/bin/python scripts/run_soccer_card_task.py
+PYTHONPATH=src .venv/bin/python scripts/run_soccer_settle_preview_task.py
 
 # Legacy weekly command (manual-odds era; kept for reference)
 python scripts/run_epl_weekly_pipeline.py

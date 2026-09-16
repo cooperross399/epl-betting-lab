@@ -2,9 +2,9 @@
 
 Three routines consume this repository:
 
-* **EPL Model** — is the model ready, and is the card allowed to run?
-* **EPL CARD** — the card itself, which must refuse to invent picks.
-* **EPL SETTLE (IGNORE)** — preview only; never settles anything.
+* **SOCCER WATCH** — is the model ready, and is the card allowed to run?
+* **SOCCER CARD** — the card itself, which must refuse to invent picks.
+* **SOCCER SETTLE (IGNORE)** — preview only; never settles anything.
 
 Each builder reads existing report JSON produced by the other commands and
 returns a single status object the routine can act on. Nothing here re-runs a
@@ -29,12 +29,12 @@ from epl_betting_lab.config import MANUAL_DIR, OUTPUTS_DIR, PROJECT_ROOT
 from epl_betting_lab.reports.pick_display import format_market_list
 
 
-MODEL_TASK_JSON = "epl_model_task.json"
-MODEL_TASK_MARKDOWN = "epl_model_task.md"
-CARD_TASK_JSON = "epl_card_task.json"
-CARD_TASK_MARKDOWN = "epl_card_task.md"
-SETTLE_TASK_JSON = "epl_settle_preview_task.json"
-SETTLE_TASK_MARKDOWN = "epl_settle_preview_task.md"
+WATCH_TASK_JSON = "soccer_watch_task.json"
+WATCH_TASK_MARKDOWN = "soccer_watch_task.md"
+CARD_TASK_JSON = "soccer_card_task.json"
+CARD_TASK_MARKDOWN = "soccer_card_task.md"
+SETTLE_TASK_JSON = "soccer_settle_preview_task.json"
+SETTLE_TASK_MARKDOWN = "soccer_settle_preview_task.md"
 
 #: What to do about each named blocker. The vocabulary is deliberately terse so
 #: it reads well in a status line, which leaves the label alone saying nothing
@@ -341,12 +341,12 @@ def _collect_blockers(
     return list(dict.fromkeys(blockers))
 
 
-def build_epl_model_task(
+def build_soccer_watch_task(
     *,
     output_dir: Path | None = None,
     now: datetime | None = None,
 ) -> dict[str, Any]:
-    """EPL Model routine status: is the model ready and may the card run?"""
+    """SOCCER WATCH routine status: is the model ready and may the card run?"""
     outputs = OUTPUTS_DIR if output_dir is None else Path(output_dir)
     evidence = _gather_evidence(outputs)
     readiness = evidence["week1_readiness"]
@@ -363,17 +363,17 @@ def build_epl_model_task(
 
     if blockers:
         next_action = (
-            "Clear the listed blockers before running EPL CARD. Start with "
+            "Clear the listed blockers before running SOCCER CARD. Start with "
             f"`{blockers[0]}`: {BLOCKER_REMEDIES.get(blockers[0], 'see the reports for detail.')}"
         )
     else:
         next_action = (
-            "All tracked gates pass. Review the evidence manually, then EPL CARD "
+            "All tracked gates pass. Review the evidence manually, then SOCCER CARD "
             "may run."
         )
 
     summary: dict[str, Any] = {
-        "report": "EPL Model Task",
+        "report": "Soccer Watch Task",
         "generated_at": _now(now),
         "model_readiness": model_readiness,
         "fixture_freshness": odds["fixture_status"],
@@ -426,7 +426,7 @@ def build_epl_model_task(
     return summary
 
 
-def render_epl_model_task(summary: Mapping[str, Any]) -> str:
+def render_soccer_watch_task(summary: Mapping[str, Any]) -> str:
     slate = summary["selected_slate"]
     odds = summary["odds_status"]
     provider = summary["provider_status"]
@@ -436,10 +436,10 @@ def render_epl_model_task(summary: Mapping[str, Any]) -> str:
     investigation = summary["market_investigation"]
     blockers = [f"- {item}" for item in summary["blockers"]] or ["- None."]
     lines = [
-        "# EPL Model Task",
+        "# Soccer Watch Task",
         "",
         (
-            "Status feed for the **EPL Model** scheduled routine. This report "
+            "Status feed for the **SOCCER WATCH** scheduled routine. This report "
             "reads existing evidence only. It generates no picks, runs no "
             "provider, and edits no protected file."
         ),
@@ -448,7 +448,7 @@ def render_epl_model_task(summary: Mapping[str, Any]) -> str:
         "",
         f"- Model readiness: **{summary['model_readiness']}**",
         f"- Fixture freshness: **{summary['fixture_freshness']}**",
-        f"- EPL CARD ready: **{'Yes' if summary['epl_card_ready'] else 'No'}**",
+        f"- SOCCER CARD ready: **{'Yes' if summary['epl_card_ready'] else 'No'}**",
         "",
         "## Selected slate",
         "",
@@ -550,29 +550,29 @@ def render_epl_model_task(summary: Mapping[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def save_epl_model_task(
+def save_soccer_watch_task(
     *,
     output_dir: Path | None = None,
     now: datetime | None = None,
 ) -> dict[str, Any]:
     outputs = OUTPUTS_DIR if output_dir is None else Path(output_dir)
-    summary = build_epl_model_task(output_dir=outputs, now=now)
+    summary = build_soccer_watch_task(output_dir=outputs, now=now)
     paths = _write_pair(
         summary,
-        render_epl_model_task(summary),
+        render_soccer_watch_task(summary),
         outputs,
-        json_name=MODEL_TASK_JSON,
-        markdown_name=MODEL_TASK_MARKDOWN,
+        json_name=WATCH_TASK_JSON,
+        markdown_name=WATCH_TASK_MARKDOWN,
     )
     return {"summary": summary, **paths}
 
 
-def build_epl_card_task(
+def build_soccer_card_task(
     *,
     output_dir: Path | None = None,
     now: datetime | None = None,
 ) -> dict[str, Any]:
-    """EPL CARD routine status. Refuses to produce picks unless truly ready."""
+    """SOCCER CARD routine status. Refuses to produce picks unless truly ready."""
     outputs = OUTPUTS_DIR if output_dir is None else Path(output_dir)
     evidence = _gather_evidence(outputs)
     readiness = evidence["week1_readiness"]
@@ -625,7 +625,7 @@ def build_epl_card_task(
         )
 
     return {
-        "report": "EPL Card Task",
+        "report": "Soccer Card Task",
         "generated_at": _now(now),
         "card_status": card_status,
         "card_ready": card_ready,
@@ -719,15 +719,15 @@ def build_epl_card_task(
     }
 
 
-def render_epl_card_task(summary: Mapping[str, Any]) -> str:
+def render_soccer_card_task(summary: Mapping[str, Any]) -> str:
     completeness = summary["odds_completeness"]
     provider = summary["provider_source"]
     blockers = [f"- {item}" for item in summary["blockers"]] or ["- None."]
     lines = [
-        "# EPL Card Task",
+        "# Soccer Card Task",
         "",
         (
-            "Status feed for the **EPL CARD** scheduled routine. The card only "
+            "Status feed for the **SOCCER CARD** scheduled routine. The card only "
             "carries selections when every gate passes; while blocked it returns "
             "empty lists rather than placeholder picks."
         ),
@@ -829,16 +829,16 @@ def render_epl_card_task(summary: Mapping[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def save_epl_card_task(
+def save_soccer_card_task(
     *,
     output_dir: Path | None = None,
     now: datetime | None = None,
 ) -> dict[str, Any]:
     outputs = OUTPUTS_DIR if output_dir is None else Path(output_dir)
-    summary = build_epl_card_task(output_dir=outputs, now=now)
+    summary = build_soccer_card_task(output_dir=outputs, now=now)
     paths = _write_pair(
         summary,
-        render_epl_card_task(summary),
+        render_soccer_card_task(summary),
         outputs,
         json_name=CARD_TASK_JSON,
         markdown_name=CARD_TASK_MARKDOWN,
@@ -846,13 +846,13 @@ def save_epl_card_task(
     return {"summary": summary, **paths}
 
 
-def build_epl_settle_preview_task(
+def build_soccer_settle_preview_task(
     *,
     output_dir: Path | None = None,
     ledger_path: Path | None = None,
     now: datetime | None = None,
 ) -> dict[str, Any]:
-    """EPL SETTLE (IGNORE) routine: preview only, never settles.
+    """SOCCER SETTLE (IGNORE) routine: preview only, never settles.
 
     The ledger is opened read-only. This function has no write path to it at
     all — there is deliberately no `apply`, `force`, or `settle` parameter.
@@ -881,7 +881,7 @@ def build_epl_settle_preview_task(
         settled_rows = 0
 
     return {
-        "report": "EPL Settle Preview Task",
+        "report": "Soccer Settle Preview Task",
         "generated_at": _now(now),
         "mode": "Preview only",
         "ledger_path": _relative(ledger),
@@ -910,13 +910,13 @@ def build_epl_settle_preview_task(
     }
 
 
-def render_epl_settle_preview_task(summary: Mapping[str, Any]) -> str:
+def render_soccer_settle_preview_task(summary: Mapping[str, Any]) -> str:
     safety = summary["safety"]
     lines = [
-        "# EPL Settle Preview Task",
+        "# Soccer Settle Preview Task",
         "",
         (
-            "Status feed for the **EPL SETTLE (IGNORE)** scheduled routine. This "
+            "Status feed for the **SOCCER SETTLE (IGNORE)** scheduled routine. This "
             "is preview only. It has no code path that writes the ledger."
         ),
         "",
@@ -950,19 +950,19 @@ def render_epl_settle_preview_task(summary: Mapping[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def save_epl_settle_preview_task(
+def save_soccer_settle_preview_task(
     *,
     output_dir: Path | None = None,
     ledger_path: Path | None = None,
     now: datetime | None = None,
 ) -> dict[str, Any]:
     outputs = OUTPUTS_DIR if output_dir is None else Path(output_dir)
-    summary = build_epl_settle_preview_task(
+    summary = build_soccer_settle_preview_task(
         output_dir=outputs, ledger_path=ledger_path, now=now
     )
     paths = _write_pair(
         summary,
-        render_epl_settle_preview_task(summary),
+        render_soccer_settle_preview_task(summary),
         outputs,
         json_name=SETTLE_TASK_JSON,
         markdown_name=SETTLE_TASK_MARKDOWN,

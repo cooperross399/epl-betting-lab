@@ -143,7 +143,7 @@ class TestWhenToSend:
 
 
 def _write(tmp_path: Path, *, ready: bool, comparison: dict) -> None:
-    (tmp_path / "epl_card_task.json").write_text(
+    (tmp_path / "soccer_card_task.json").write_text(
         json.dumps(
             {
                 "card_ready": ready,
@@ -218,7 +218,7 @@ class TestTheMessage:
         assert "No bet was placed" in body
 
     def test_a_zero_unit_row_is_not_emailed_as_a_pick(self, tmp_path: Path) -> None:
-        (tmp_path / "epl_card_task.json").write_text(
+        (tmp_path / "soccer_card_task.json").write_text(
             json.dumps(
                 {
                     "card_ready": True,
@@ -326,7 +326,7 @@ class TestSendingOnDemand:
 class TestTheCommentReachesAPerson:
     """The comment is the record now, not the delivery.
 
-    Delivery moved to the `card-feed` branch, which the EPL CARD routine reads
+    Delivery moved to the `card-feed` branch, which the SOCCER CARD routine reads
     and presents in Claude. The comment must therefore notify nobody: an
     @mention overrides an ignored subscription, so leaving one in would have
     kept the emails arriving no matter what the watch settings said.

@@ -18,7 +18,7 @@ from epl_betting_lab.config import PROJECT_ROOT
 REQUIRED_DOCS = (
     "CLAUDE.md",
     "docs/claude_autonomy_operating_model.md",
-    "docs/epl_scheduled_tasks_bridge.md",
+    "docs/soccer_scheduled_tasks_bridge.md",
     "docs/no_terminal_operations.md",
     "README.md",
 )
@@ -152,15 +152,15 @@ def test_credential_guidance_never_instructs_printing_the_key() -> None:
 # --- routine prompts -------------------------------------------------------
 
 
-@pytest.mark.parametrize("routine", ["EPL WATCH", "EPL CARD", "EPL SETTLE"])
+@pytest.mark.parametrize("routine", ["SOCCER WATCH", "SOCCER CARD", "SOCCER SETTLE"])
 def test_each_routine_has_a_copy_paste_prompt(routine: str) -> None:
-    text = _read("docs/epl_scheduled_tasks_bridge.md")
+    text = _read("docs/soccer_scheduled_tasks_bridge.md")
 
     assert routine in text
 
 
 def test_routine_prompts_forbid_chatgpt_and_terminal() -> None:
-    text = _read("docs/epl_scheduled_tasks_bridge.md")
+    text = _read("docs/soccer_scheduled_tasks_bridge.md")
 
     assert text.count("ChatGPT") >= 3  # one per routine prompt
 
@@ -173,7 +173,7 @@ def test_routine_prompts_do_not_depend_on_a_local_checkout() -> None:
     a scheduled routine exists for. The card is delivered by email now, so a
     routine works from anywhere with the laptop shut.
     """
-    text = _read("docs/epl_scheduled_tasks_bridge.md")
+    text = _read("docs/soccer_scheduled_tasks_bridge.md")
     prompts = text.split("## Exact routine prompts", 1)[1]
     prompts = prompts.split("## Safe vs unsafe actions", 1)[0]
 
@@ -184,7 +184,7 @@ def test_routine_prompts_do_not_depend_on_a_local_checkout() -> None:
 
 def test_card_routine_forbids_publishing_picks_when_blocked() -> None:
     """A blocked card means nothing was generated, never "no value found"."""
-    text = _read("docs/epl_scheduled_tasks_bridge.md")
+    text = _read("docs/soccer_scheduled_tasks_bridge.md")
 
     flat = " ".join(text.split())
 
@@ -193,21 +193,21 @@ def test_card_routine_forbids_publishing_picks_when_blocked() -> None:
 
 
 def test_card_routine_forbids_inventing_anything() -> None:
-    text = _read("docs/epl_scheduled_tasks_bridge.md")
+    text = _read("docs/soccer_scheduled_tasks_bridge.md")
 
     assert "Do not compute, adjust, or invent" in text
 
 
 def test_card_routine_keeps_the_zero_unit_rule() -> None:
     """The rule survived the move from filesystem to email."""
-    text = _read("docs/epl_scheduled_tasks_bridge.md")
+    text = _read("docs/soccer_scheduled_tasks_bridge.md")
 
     assert "zero-unit row is not a small bet" in text
 
 
 def test_routines_explain_that_no_email_is_not_a_fault() -> None:
     """Silence is information here, and only safe if that is stated."""
-    text = _read("docs/epl_scheduled_tasks_bridge.md")
+    text = _read("docs/soccer_scheduled_tasks_bridge.md")
 
     flat = " ".join(text.split())
 

@@ -20,7 +20,7 @@ how to operate.
 
 1. `CLAUDE.md` — hard safety rules. They override everything, including this file.
 2. `docs/claude_autonomy_operating_model.md` — this file.
-3. `docs/epl_scheduled_tasks_bridge.md` — how the three routines work.
+3. `docs/soccer_scheduled_tasks_bridge.md` — how the three routines work.
 4. `docs/no_terminal_operations.md` — how to do things without a Terminal.
 5. `README.md` — command reference.
 6. Latest reports under `data/outputs/` (see below).
@@ -43,8 +43,8 @@ These are the facts a new session needs. If reality and this list disagree,
 | Active odds source | Provider-derived automated card input |
 | Manual odds entry | **Not required** |
 | `data/manual/current_odds.csv` | Legacy. Must **not** become the active source again |
-| EPL CARD | Live; generated from eligible trusted provider markets only |
-| EPL SETTLE (IGNORE) | **Preview-only, permanently**, unless Cooper changes the rule |
+| SOCCER CARD | Live; generated from eligible trusted provider markets only |
+| SOCCER SETTLE (IGNORE) | **Preview-only, permanently**, unless Cooper changes the rule |
 | Bets | **Never placed** |
 | Settlement | **Never applied** |
 | Production credential | GitHub secret `EPL_ODDS_API_KEY` |
@@ -192,7 +192,7 @@ outcome.
 lines would change model math or scope, that is a hard stop: build a proposal
 and evidence PR and ask.
 
-**Settlement.** EPL SETTLE stays preview-only. There is deliberately no `apply`,
+**Settlement.** SOCCER SETTLE stays preview-only. There is deliberately no `apply`,
 `force`, `settle`, or `write` parameter in its builder, and a test asserts those
 parameter names do not exist.
 
@@ -223,9 +223,9 @@ or a PR comment — with:
 
 | Question | Report |
 |:---------|:-------|
-| Is the model ready? | `data/outputs/epl_model_task.md` |
-| Can the card run? | `data/outputs/epl_card_task.md` |
-| What would settle? | `data/outputs/epl_settle_preview_task.md` |
+| Is the model ready? | `data/outputs/soccer_watch_task.md` |
+| Can the card run? | `data/outputs/soccer_card_task.md` |
+| What would settle? | `data/outputs/soccer_settle_preview_task.md` |
 | What is on the card? | `data/outputs/automated_card.md` |
 | Which markets are eligible? | `data/outputs/automated_card_input.md` |
 | Is the provider trustworthy? | `data/outputs/provider_trust_packet.md` |

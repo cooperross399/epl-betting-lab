@@ -6,15 +6,15 @@
 > [API-first odds workflow](#api-first-odds-workflow) below.
 
 This document connects the Claude scheduled tasks/routines to concrete
-repository outputs. Two routines are live — **EPL CARD** and **EPL WATCH**
-(the routine formerly named EPL Model; scripts and outputs keep the old
-name):
+repository outputs. Two routines are live — **SOCCER CARD** and **SOCCER WATCH**
+(named EPL CARD and EPL WATCH until 2026-09-16, and the watch routine was
+EPL Model before that; the scripts and outputs carry the current names):
 
 | Routine | Command | Outputs |
 |:--------|:--------|:--------|
-| **EPL WATCH** (formerly EPL Model) | `scripts/run_epl_model_task.py` | `data/outputs/epl_model_task.{md,json}` |
-| **EPL CARD** | `scripts/run_epl_card_task.py` | `data/outputs/epl_card_task.{md,json}` |
-| **EPL SETTLE (IGNORE)** — not currently deployed | `scripts/run_epl_settle_preview_task.py` | `data/outputs/epl_settle_preview_task.{md,json}` |
+| **SOCCER WATCH** (formerly EPL WATCH, and EPL Model before that) | `scripts/run_soccer_watch_task.py` | `data/outputs/soccer_watch_task.{md,json}` |
+| **SOCCER CARD** | `scripts/run_soccer_card_task.py` | `data/outputs/soccer_card_task.{md,json}` |
+| **SOCCER SETTLE (IGNORE)** — not currently deployed | `scripts/run_soccer_settle_preview_task.py` | `data/outputs/soccer_settle_preview_task.{md,json}` |
 
 All three are **read-only status bridges**. They read report JSON that other
 commands already produced. None of them fetches odds, runs a provider, edits a
@@ -29,9 +29,9 @@ protected manual file, places a bet, applies settlement, or enables cron.
 ## Running them
 
 ```bash
-PYTHONPATH=src .venv/bin/python scripts/run_epl_model_task.py
-PYTHONPATH=src .venv/bin/python scripts/run_epl_card_task.py
-PYTHONPATH=src .venv/bin/python scripts/run_epl_settle_preview_task.py
+PYTHONPATH=src .venv/bin/python scripts/run_soccer_watch_task.py
+PYTHONPATH=src .venv/bin/python scripts/run_soccer_card_task.py
+PYTHONPATH=src .venv/bin/python scripts/run_soccer_settle_preview_task.py
 ```
 
 Exit codes: `0` = ready / no blockers, `2` = blocked (this is the normal state
@@ -50,9 +50,9 @@ passed.
 
 ---
 
-## EPL WATCH (formerly EPL Model)
+## SOCCER WATCH (formerly EPL WATCH)
 
-**Question it answers:** is the model ready, and may EPL CARD run?
+**Question it answers:** is the model ready, and may SOCCER CARD run?
 
 Reads `week1_launch_readiness.json` and `provider_shadow_verification.json`.
 
@@ -67,13 +67,13 @@ Reports:
 - market coverage — core 1X2/totals **separately** from BTTS
 - blockers
 - exact next action
-- whether EPL CARD is ready
+- whether SOCCER CARD is ready
 
-`epl_card_ready` is the field the EPL CARD routine should gate on.
+`epl_card_ready` is the field the SOCCER CARD routine should gate on.
 
 ---
 
-## EPL CARD
+## SOCCER CARD
 
 **Question it answers:** may the card publish selections?
 
@@ -94,12 +94,12 @@ vocabulary:
 - `Provider not trusted`
 - `Needs fixtures`
 
-**EPL CARD only pushes picks when validation passes.** There is no override
+**SOCCER CARD only pushes picks when validation passes.** There is no override
 flag, and provider output is never used as a pick source while it is shadow-only.
 
 ---
 
-## EPL SETTLE (IGNORE)
+## SOCCER SETTLE (IGNORE)
 
 **Preview only.** It reads `data/manual/bet_ledger.csv` and reports row counts,
 open bets, and settled bets. `would_settle_count` is always `0`.
@@ -111,7 +111,7 @@ It never:
 - uses force mode
 - places bets
 
-This is enforced structurally, not by a default: `build_epl_settle_preview_task`
+This is enforced structurally, not by a default: `build_soccer_settle_preview_task`
 has **no** `apply`, `force`, `settle`, or `write` parameter, and a test asserts
 those parameter names do not exist. The ledger is opened read-only.
 
@@ -196,7 +196,7 @@ broken by counting failure notifications that were all someone testing.
 
 ---
 
-### EPL CARD
+### SOCCER CARD
 
 ```text
 Read the card from the `card-feed` branch of cooperross399/epl-betting-lab.
@@ -293,7 +293,7 @@ broken. The final message already arrived.
 
 ---
 
-### EPL WATCH (formerly EPL Model)
+### SOCCER WATCH (formerly EPL WATCH)
 
 ```text
 You are running a weekly health check on the EPL betting model pipeline for
@@ -382,7 +382,7 @@ the inbox alone.
 
 ---
 
-### EPL SETTLE (IGNORE) — not currently deployed
+### SOCCER SETTLE (IGNORE) — not currently deployed
 
 > Left as written, and still email-shaped. Nothing runs it, so it was not worth
 > rewriting for the card feed; if it is ever deployed it needs the same change
@@ -462,7 +462,7 @@ A completed provider run is not approval. The sequence is:
    `the_odds_api`. No script does this for you.
 4. Only then can `handoff_eligible` become true and the card use provider data.
 
-Until step 3, `epl_card_task.json` reports
+Until step 3, `soccer_card_task.json` reports
 `provider_source.source_used: "none (provider output is shadow-only and
 untrusted)"` and `trusted: false`.
 

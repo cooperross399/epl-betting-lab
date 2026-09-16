@@ -123,9 +123,9 @@ def build_run_summary(
     degraded: _Sequence[str] = (),
 ) -> str:
     outputs = OUTPUTS_DIR if output_dir is None else Path(output_dir)
-    model = _read(outputs / "epl_model_task.json")
-    card = _read(outputs / "epl_card_task.json")
-    settle = _read(outputs / "epl_settle_preview_task.json")
+    model = _read(outputs / "soccer_watch_task.json")
+    card = _read(outputs / "soccer_card_task.json")
+    settle = _read(outputs / "soccer_settle_preview_task.json")
     generated = _read(outputs / "automated_card.json")
     comparison = _read(outputs / "automated_card_comparison.json")
     shadow = _read(outputs / "provider_shadow_verification.json")

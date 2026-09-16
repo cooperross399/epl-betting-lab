@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Build the single-page browser status report.
 
-Renders the EPL Model, EPL CARD, and EPL SETTLE reports into one self-contained
+Renders the SOCCER WATCH, SOCCER CARD, and SOCCER SETTLE reports into one self-contained
 HTML file that opens with a double click. Reads existing reports only: it runs
 no provider, generates no picks, places no bets, applies no settlement, and
 writes no credential.

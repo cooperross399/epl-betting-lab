@@ -289,7 +289,7 @@ def test_a_dispatch_can_skip_the_refetch() -> None:
 def test_summary_shows_the_card_when_one_was_produced(tmp_path: Path) -> None:
     _write(
         tmp_path,
-        "epl_card_task.json",
+        "soccer_card_task.json",
         {
             "card_ready": True,
             "included_markets": ["1x2", "btts"],
@@ -321,7 +321,7 @@ def test_summary_shows_the_card_when_one_was_produced(tmp_path: Path) -> None:
 def test_summary_calls_a_blocked_card_blocked(tmp_path: Path) -> None:
     _write(
         tmp_path,
-        "epl_card_task.json",
+        "soccer_card_task.json",
         {"card_ready": False, "blockers": ["Provider not trusted"]},
     )
 
@@ -368,7 +368,7 @@ def test_routine_prompts_do_the_work_rather_than_asking_cooper_to() -> None:
     the routines read rather than execute. The property being protected is the
     same one: a routine must never hand a task back to Cooper.
     """
-    text = (PROJECT_ROOT / "docs" / "epl_scheduled_tasks_bridge.md").read_text(
+    text = (PROJECT_ROOT / "docs" / "soccer_scheduled_tasks_bridge.md").read_text(
         encoding="utf-8"
     )
     prompts = text.split("## Exact routine prompts", 1)[1]
@@ -390,7 +390,7 @@ def test_routine_prompts_carry_the_totals_history() -> None:
     re-investigate" is what let that stand unchallenged; telling it only the
     new answer would invite the old investigation again. It gets both.
     """
-    text = (PROJECT_ROOT / "docs" / "epl_scheduled_tasks_bridge.md").read_text(
+    text = (PROJECT_ROOT / "docs" / "soccer_scheduled_tasks_bridge.md").read_text(
         encoding="utf-8"
     )
 
@@ -475,7 +475,7 @@ def test_a_blocked_summary_leads_with_the_root_cause(tmp_path: Path) -> None:
     """The routine feeds carry terse labels that name no fix."""
     _write(
         tmp_path,
-        "epl_card_task.json",
+        "soccer_card_task.json",
         {"card_ready": False, "blockers": ["Needs odds", "Provider not trusted"]},
     )
     _write(
@@ -502,7 +502,7 @@ def test_a_blocked_summary_leads_with_the_root_cause(tmp_path: Path) -> None:
 def test_a_blocked_summary_counts_the_blockers_that_may_clear(
     tmp_path: Path,
 ) -> None:
-    _write(tmp_path, "epl_card_task.json", {"card_ready": False})
+    _write(tmp_path, "soccer_card_task.json", {"card_ready": False})
     _write(
         tmp_path,
         "automated_card.json",
@@ -527,7 +527,7 @@ def test_terse_blockers_are_still_shown_when_there_is_no_better_source(
     """Falling back is better than showing nothing."""
     _write(
         tmp_path,
-        "epl_card_task.json",
+        "soccer_card_task.json",
         {"card_ready": False, "blockers": ["Needs odds"]},
     )
 
@@ -727,7 +727,7 @@ def test_the_card_routine_prompt_matches_how_leans_are_staked() -> None:
     that is always zero, which is exactly the confusion the change was meant
     to end.
     """
-    text = (PROJECT_ROOT / "docs" / "epl_scheduled_tasks_bridge.md").read_text(
+    text = (PROJECT_ROOT / "docs" / "soccer_scheduled_tasks_bridge.md").read_text(
         encoding="utf-8"
     )
     flat = " ".join(text.split())
@@ -738,7 +738,7 @@ def test_the_card_routine_prompt_matches_how_leans_are_staked() -> None:
 
 def test_the_routine_prompt_carries_the_honest_headline() -> None:
     """Asked whether it works, a routine should not guess."""
-    text = (PROJECT_ROOT / "docs" / "epl_scheduled_tasks_bridge.md").read_text(
+    text = (PROJECT_ROOT / "docs" / "soccer_scheduled_tasks_bridge.md").read_text(
         encoding="utf-8"
     )
     flat = " ".join(text.split())
@@ -748,7 +748,7 @@ def test_the_routine_prompt_carries_the_honest_headline() -> None:
 
 def test_the_prompts_tell_a_card_apart_from_a_failure() -> None:
     """One publish can be either, and they read very differently."""
-    text = (PROJECT_ROOT / "docs" / "epl_scheduled_tasks_bridge.md").read_text(
+    text = (PROJECT_ROOT / "docs" / "soccer_scheduled_tasks_bridge.md").read_text(
         encoding="utf-8"
     )
     flat = " ".join(text.split())
@@ -767,7 +767,7 @@ def test_the_prompts_use_the_same_staleness_window_as_the_watchdog() -> None:
     """
     from epl_betting_lab.reports.schedule_health import MAX_EXPECTED_GAP
 
-    text = (PROJECT_ROOT / "docs" / "epl_scheduled_tasks_bridge.md").read_text(
+    text = (PROJECT_ROOT / "docs" / "soccer_scheduled_tasks_bridge.md").read_text(
         encoding="utf-8"
     )
 
@@ -777,7 +777,7 @@ def test_the_prompts_use_the_same_staleness_window_as_the_watchdog() -> None:
 
 def test_the_prompts_name_the_delivery_issue() -> None:
     """Searching by number is exact; searching by title is not."""
-    text = (PROJECT_ROOT / "docs" / "epl_scheduled_tasks_bridge.md").read_text(
+    text = (PROJECT_ROOT / "docs" / "soccer_scheduled_tasks_bridge.md").read_text(
         encoding="utf-8"
     )
 
@@ -786,7 +786,7 @@ def test_the_prompts_name_the_delivery_issue() -> None:
 
 def test_the_prompts_carry_the_longshot_cap() -> None:
     """So a routine can explain a missing big price instead of guessing."""
-    text = (PROJECT_ROOT / "docs" / "epl_scheduled_tasks_bridge.md").read_text(
+    text = (PROJECT_ROOT / "docs" / "soccer_scheduled_tasks_bridge.md").read_text(
         encoding="utf-8"
     )
     flat = " ".join(text.split())
@@ -803,7 +803,7 @@ def test_the_model_prompt_refuses_to_propose_market_scope_changes() -> None:
     and it carries both the measurement evidence and the decision made
     against its recommendation.
     """
-    text = (PROJECT_ROOT / "docs" / "epl_scheduled_tasks_bridge.md").read_text(
+    text = (PROJECT_ROOT / "docs" / "soccer_scheduled_tasks_bridge.md").read_text(
         encoding="utf-8"
     )
     flat = " ".join(text.split())
@@ -815,7 +815,7 @@ def test_the_model_prompt_refuses_to_propose_market_scope_changes() -> None:
 
 def test_the_settle_routine_checks_the_schedule_is_alive() -> None:
     """It used to only look for failures, which a dead schedule never produces."""
-    text = (PROJECT_ROOT / "docs" / "epl_scheduled_tasks_bridge.md").read_text(
+    text = (PROJECT_ROOT / "docs" / "soccer_scheduled_tasks_bridge.md").read_text(
         encoding="utf-8"
     )
     flat = " ".join(text.split())
@@ -831,7 +831,7 @@ def test_the_prompts_check_the_feed_is_todays() -> None:
     answers, and it answers with whatever the last run left, so the date is the
     only thing that separates a fresh card from a stale one.
     """
-    text = (PROJECT_ROOT / "docs" / "epl_scheduled_tasks_bridge.md").read_text(
+    text = (PROJECT_ROOT / "docs" / "soccer_scheduled_tasks_bridge.md").read_text(
         encoding="utf-8"
     )
     flat = " ".join(text.split())
@@ -843,7 +843,7 @@ def test_the_prompts_check_the_feed_is_todays() -> None:
 
 def test_the_prompts_require_stating_what_was_read() -> None:
     """A stale answer should be visible as one."""
-    text = (PROJECT_ROOT / "docs" / "epl_scheduled_tasks_bridge.md").read_text(
+    text = (PROJECT_ROOT / "docs" / "soccer_scheduled_tasks_bridge.md").read_text(
         encoding="utf-8"
     )
     flat = " ".join(text.split())
@@ -858,7 +858,7 @@ def test_a_degraded_publish_is_not_reported_as_no_card() -> None:
     Reading `degraded` as "there is nothing here" would throw away a real card
     on exactly the days something already went wrong.
     """
-    text = (PROJECT_ROOT / "docs" / "epl_scheduled_tasks_bridge.md").read_text(
+    text = (PROJECT_ROOT / "docs" / "soccer_scheduled_tasks_bridge.md").read_text(
         encoding="utf-8"
     )
     flat = " ".join(text.split())
@@ -868,7 +868,7 @@ def test_a_degraded_publish_is_not_reported_as_no_card() -> None:
 
 
 def test_the_prompts_know_about_manual_runs() -> None:
-    text = (PROJECT_ROOT / "docs" / "epl_scheduled_tasks_bridge.md").read_text(
+    text = (PROJECT_ROOT / "docs" / "soccer_scheduled_tasks_bridge.md").read_text(
         encoding="utf-8"
     )
     flat = " ".join(text.split())
@@ -886,7 +886,7 @@ def test_the_card_routine_delivers_in_its_own_final_message() -> None:
     has no such tool, so the run reported delivery as broken while its own
     message — the thing that actually appears in Claude — carried nothing.
     """
-    text = (PROJECT_ROOT / "docs" / "epl_scheduled_tasks_bridge.md").read_text(
+    text = (PROJECT_ROOT / "docs" / "soccer_scheduled_tasks_bridge.md").read_text(
         encoding="utf-8"
     )
     flat = " ".join(text.split())
@@ -904,7 +904,7 @@ def test_the_card_routine_knows_where_the_files_actually_are() -> None:
     repo can only refuse. It read as an access problem and was a branch
     problem.
     """
-    text = (PROJECT_ROOT / "docs" / "epl_scheduled_tasks_bridge.md").read_text(
+    text = (PROJECT_ROOT / "docs" / "soccer_scheduled_tasks_bridge.md").read_text(
         encoding="utf-8"
     )
     flat = " ".join(text.split())
@@ -934,7 +934,7 @@ def test_the_prompts_judge_health_from_labelled_messages_only() -> None:
     Every failure this project has recorded was a manual dispatch, and two
     health checks in a row concluded the pipeline was broken by counting them.
     """
-    text = (PROJECT_ROOT / "docs" / "epl_scheduled_tasks_bridge.md").read_text(
+    text = (PROJECT_ROOT / "docs" / "soccer_scheduled_tasks_bridge.md").read_text(
         encoding="utf-8"
     )
     flat = " ".join(text.split())
@@ -944,7 +944,7 @@ def test_the_prompts_judge_health_from_labelled_messages_only() -> None:
 
 
 def test_the_prompts_say_what_only_manual_failures_mean() -> None:
-    text = (PROJECT_ROOT / "docs" / "epl_scheduled_tasks_bridge.md").read_text(
+    text = (PROJECT_ROOT / "docs" / "soccer_scheduled_tasks_bridge.md").read_text(
         encoding="utf-8"
     )
     flat = " ".join(text.split())
@@ -955,7 +955,7 @@ def test_the_prompts_say_what_only_manual_failures_mean() -> None:
 
 def test_the_prompts_prefer_saying_they_cannot_tell() -> None:
     """Better than assuming a failure was scheduled."""
-    text = (PROJECT_ROOT / "docs" / "epl_scheduled_tasks_bridge.md").read_text(
+    text = (PROJECT_ROOT / "docs" / "soccer_scheduled_tasks_bridge.md").read_text(
         encoding="utf-8"
     )
     flat = " ".join(text.split())
@@ -1297,9 +1297,9 @@ def test_every_report_the_refresh_produces_is_uploaded() -> None:
         "card_input": "automated_card_input.md",
         "automated_card": "automated_card.md",
         "card_comparison": "automated_card_comparison.md",
-        "epl_model_task": "epl_model_task.md",
-        "epl_card_task": "epl_card_task.md",
-        "epl_settle_preview_task": "epl_settle_preview_task.md",
+        "soccer_watch_task": "soccer_watch_task.md",
+        "soccer_card_task": "soccer_card_task.md",
+        "soccer_settle_preview_task": "soccer_settle_preview_task.md",
         "count_calibration": "count_calibration.md",
         "live_clv": "live_clv_report.md",
     }

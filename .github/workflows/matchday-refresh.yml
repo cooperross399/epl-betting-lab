@@ -160,7 +160,7 @@ on:
 
 permissions:
   # Write, for exactly one ref: the card-feed branch, where each run publishes
-  # the rendered card so the EPL CARD routine can read it over plain git and
+  # the rendered card so the SOCCER CARD routine can read it over plain git and
   # present it in Claude. Nothing in this workflow pushes anywhere else, and
   # main only changes through pull requests.
   contents: write
@@ -694,7 +694,7 @@ jobs:
           git push "$REMOTE" "$COMMIT:refs/heads/price-feed"
 
       - name: Publish the card to the card-feed branch
-        # This is the delivery now. The EPL CARD routine reads today's card
+        # This is the delivery now. The SOCCER CARD routine reads today's card
         # from this branch with the plain git credential a cloud session
         # already holds for the repository — no API call, no extra token, no
         # inbox. Every run publishes here, including runs that decide not to
@@ -806,9 +806,9 @@ jobs:
             data/outputs/automated_card_input.md
             data/outputs/automated_card.md
             data/outputs/automated_card_comparison.md
-            data/outputs/epl_model_task.md
-            data/outputs/epl_card_task.md
-            data/outputs/epl_settle_preview_task.md
+            data/outputs/soccer_watch_task.md
+            data/outputs/soccer_card_task.md
+            data/outputs/soccer_settle_preview_task.md
             # Both of these are produced by every run and were not being
             # uploaded, so they existed only inside the runner and vanished
             # with it. A measurement nobody can read is not a measurement.

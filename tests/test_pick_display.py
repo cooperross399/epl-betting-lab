@@ -110,7 +110,7 @@ class TestStakeableSplit:
 
 
 def _write_card(tmp_path: Path, best_bets: list[dict[str, object]]) -> None:
-    (tmp_path / "epl_card_task.json").write_text(
+    (tmp_path / "soccer_card_task.json").write_text(
         json.dumps(
             {
                 "card_ready": True,
@@ -447,7 +447,7 @@ class TestABlockedRunDoesNotReportRemovedPicks:
     """`Removed: 27` on a blocked run reads as a judgement. It is not one."""
 
     def _summary(self, tmp_path: Path, *, card_ready: bool) -> str:
-        (tmp_path / "epl_card_task.json").write_text(
+        (tmp_path / "soccer_card_task.json").write_text(
             json.dumps({"card_ready": card_ready, "best_bets": [], "leans": []}),
             encoding="utf-8",
         )

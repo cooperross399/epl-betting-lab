@@ -38,9 +38,9 @@ from epl_betting_lab.reports.pick_display import (
 STATUS_HTML_FILENAME = "status.html"
 
 REPORT_FILES = {
-    "model": "epl_model_task.json",
-    "card": "epl_card_task.json",
-    "settle": "epl_settle_preview_task.json",
+    "model": "soccer_watch_task.json",
+    "card": "soccer_card_task.json",
+    "settle": "soccer_settle_preview_task.json",
     "automated_card": "automated_card.json",
     "comparison": "automated_card_comparison.json",
 }

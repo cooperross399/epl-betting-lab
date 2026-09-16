@@ -15,10 +15,10 @@ the project.
 |:-----|:------|:----|
 | Approve a provider allowlist PR | GitHub UI | Paste the approval block into a PR review or comment |
 | See everything at a glance | Browser | Open `data/outputs/status.html` |
-| See card status | GitHub / report | `data/outputs/epl_card_task.md` or the routine output |
+| See card status | GitHub / report | `data/outputs/soccer_card_task.md` or the routine output |
 | See what changed since last run | Report | `data/outputs/automated_card_comparison.md` |
 | Ask what markets a provider offers | GitHub Actions | Run **Provider Market Discovery** &rarr; *Run workflow* |
-| See model readiness | GitHub / report | `data/outputs/epl_model_task.md` |
+| See model readiness | GitHub / report | `data/outputs/soccer_watch_task.md` |
 | Check the API credential | GitHub Actions | Run **Provider Credential Check** → *Run workflow* |
 | See what changed | GitHub | PR list and Actions runs |
 | Track the project | GitHub Issues | “EPL Betting Lab — Claude Operating Home” |
@@ -138,7 +138,7 @@ Some things stay manual because automating them would remove a judgement that
 should be human:
 
 - **Placing bets.** Never automated. The card is a recommendation.
-- **Applying settlement.** EPL SETTLE is preview-only and has no write path.
+- **Applying settlement.** SOCCER SETTLE is preview-only and has no write path.
 - **Allowlisting a provider.** Requires a real GitHub approval from Cooper.
 - **Adding a market.** Scope changes are reviewed, never inferred from data.
 - **Scheduled execution of wagers.** Not enabled, and not to be enabled.

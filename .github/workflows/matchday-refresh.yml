@@ -588,11 +588,26 @@ jobs:
               '[.[] | select(.title == $t)] | .[0].number // empty' \
             | xargs -r -I{} gh issue view {} --json comments \
               --jq '[.comments[].createdAt] | max // empty')
-          DECISION=$(python scripts/post_card_to_issue.py \
+          # Read through a file rather than `... | tail -1`, and checked. A
+          # pipe reports the exit status of `tail`, which succeeds on empty
+          # input: on 2026-09-15 the renderer exited 2 before writing anything,
+          # DECISION came back empty, and the branch below read that as "the
+          # selections did not change" — so a crashed renderer and a quiet
+          # matchday were the same observable outcome, and the quiet one is the
+          # one this step reports. Not `set -o pipefail` for the whole step:
+          # the LAST_SENT lookup above is a pipeline too, and it is allowed to
+          # come back empty when `gh` has a bad minute. That one degrades to
+          # "send anyway"; this one must not degrade at all.
+          if ! python scripts/post_card_to_issue.py \
             --out card_comment.md --title-out card_title.txt \
             --degraded-file run_degraded.txt --run-url "$RUN_URL" \
             --trigger "${{ github.event_name }}" \
-            --last-sent "$LAST_SENT" | tail -1)
+            --last-sent "$LAST_SENT" > card_decision.txt; then
+            echo "::error::The card renderer failed, so there is no card this run."
+            cat card_decision.txt || true
+            exit 1
+          fi
+          DECISION=$(tail -1 card_decision.txt)
           if [ "${{ inputs.force_email }}" = "true" ]; then
             echo "Forced: sending the current card regardless of changes."
             DECISION=post
@@ -687,11 +702,17 @@ jobs:
         # not finish, which is exactly what the routine should speak up about.
         #
         # ONE EXCEPTION, and it protects that promise rather than weakening it:
-        # a degraded run never replaces a good card from the same day. The feed
-        # holds two files and the last writer wins, so a run that produces
-        # nothing would otherwise overwrite a card that had already been built
-        # and delivered — and the day's later triggers are exactly the ones most
-        # likely to arrive after a deadline. Today's commit is already on the
+        # a run with nothing better to say never replaces a good card from the
+        # same day. "Nothing better to say" is two cases, and for a while this
+        # only handled the first: the run is degraded, OR the run rendered no
+        # card at all. On 2026-09-15 a healthy run whose renderer had crashed
+        # reported `degraded: false`, walked past a check that asked only about
+        # degradation, and replaced a full card with the one-line placeholder.
+        # The question is whether THIS run has a card, not how it feels about
+        # itself. The feed holds two files and the last writer wins, so a run
+        # that produces nothing would otherwise overwrite a card that had
+        # already been built and delivered — and the day's later triggers are
+        # exactly the ones most likely to arrive after a deadline. Today's commit is already on the
         # branch when this skip fires, so "no commit today" still means "the run
         # did not finish". The blocked run is still recorded: it finishes red,
         # its summary says what broke, and the issue comment carries it.
@@ -713,7 +734,12 @@ jobs:
           REMOTE="https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}"
           DAY=$(TZ=America/New_York date +%F)
           RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          if [ ! -f card_comment.md ]; then
+          # Whether THIS run has a real card, decided before the placeholder
+          # is written — afterwards the file always exists and the answer is
+          # lost. This is the fact the protection below turns on.
+          HAVE_CARD=true
+          if [ ! -s card_comment.md ]; then
+            HAVE_CARD=false
             echo "No card was rendered this run." > card_comment.md
           fi
           jq -n \
@@ -721,8 +747,9 @@ jobs:
             --arg degraded "${{ steps.health.outputs.degraded || 'unknown' }}" \
             --arg trigger "${{ github.event_name }}" \
             --arg run_url "$RUN_URL" \
+            --arg card "$([ "$HAVE_CARD" = true ] && echo rendered || echo missing)" \
             '{date: $date, degraded: $degraded, trigger: $trigger,
-              run_url: $run_url}' > card_status.json
+              run_url: $run_url, card: $card}' > card_status.json
           BLOB_MD=$(git hash-object -w card_comment.md)
           BLOB_JSON=$(git hash-object -w card_status.json)
           TREE=$(printf '100644 blob %s\tlatest_card_comment.md\n100644 blob %s\tlatest_status.json' \
@@ -735,12 +762,20 @@ jobs:
           # counts as degraded here: a run that cannot say whether it went
           # wrong is not evidence good enough to discard a card that worked.
           DEGRADED="${{ steps.health.outputs.degraded || 'unknown' }}"
-          if [ -n "$PARENT" ] && [ "$DEGRADED" != "false" ]; then
+          if [ -n "$PARENT" ] && { [ "$DEGRADED" != "false" ] || [ "$HAVE_CARD" != "true" ]; }; then
             PREV=$(git show "$PARENT:latest_status.json" 2>/dev/null || echo "{}")
             PREV_DAY=$(printf '%s' "$PREV" | jq -r '.date // ""')
             PREV_DEGRADED=$(printf '%s' "$PREV" | jq -r '.degraded // ""')
-            if [ "$PREV_DAY" = "$DAY" ] && [ "$PREV_DEGRADED" = "false" ]; then
-              echo "card-feed left alone: $DAY already holds a good card and this run is degraded ($DEGRADED)."
+            # What is already on the branch has to be a real card for
+            # declining to replace it to be the right move. A placeholder from
+            # an earlier crash the same day reports `degraded: false` too, and
+            # protecting one of those would pin the feed to it for the rest of
+            # the day. Entries written before this field existed are read as
+            # rendered, which is what they were.
+            PREV_CARD=$(printf '%s' "$PREV" | jq -r '.card // "rendered"')
+            if [ "$PREV_DAY" = "$DAY" ] && [ "$PREV_DEGRADED" = "false" ] \
+               && [ "$PREV_CARD" = "rendered" ]; then
+              echo "card-feed left alone: $DAY already holds a good card; this run is degraded=$DEGRADED, card=$HAVE_CARD."
               echo "The blocked card is in this run's summary and in the issue comment."
               exit 0
             fi

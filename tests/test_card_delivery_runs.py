@@ -21,7 +21,9 @@ Both tests were true sentences about text. These run the code.
 
 from __future__ import annotations
 
+import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -107,7 +109,27 @@ def _publish_step() -> str:
     script = script.replace("${{ github.repository }}", "test/repo")
     script = script.replace("${{ github.run_id }}", "1")
     assert "${{" not in script, "an unsubstituted expression would run as literal text"
+    _refuse_swallowed_yaml(script, "publish step")
     return script
+
+
+def _refuse_swallowed_yaml(script: str, step: str) -> None:
+    """An extractor that runs past its step turns YAML into shell.
+
+    The end anchors are literal step names. Insert a step between this one and
+    the anchor and the extracted script grows a tail of `- name:` / `if:` /
+    `run: |` lines. They are not indented by ten spaces, so the dedent leaves
+    them verbatim and they run as commands. `assert "${{" not in script` does
+    not catch it — an inserted step need not contain an expression.
+    """
+    for line in script.splitlines():
+        assert not re.match(r"^\s*- name:", line), (
+            f"the {step} extractor ran past the end of its step and swallowed "
+            f"YAML as shell: {line!r}"
+        )
+        assert not re.match(
+            r"^\s{1,9}(if|run|env|id|uses|with|timeout-minutes):", line
+        ), f"the {step} extractor swallowed a YAML key as shell: {line!r}"
 
 
 class Feed:
@@ -131,8 +153,12 @@ class Feed:
             (self.work / stale).unlink(missing_ok=True)
         if card is not None:
             (self.work / "card_comment.md").write_text(card, encoding="utf-8")
+        # `bash -e`, because that is the shell GitHub gives a `run:` block —
+        # the workflow sets no `shell:` anywhere. Replaying the step under
+        # plain `bash` leaves the harness blind to a command that aborts the
+        # step on the runner, which is half of what went wrong on 2026-09-15.
         done = subprocess.run(
-            ["bash", str(self.script)],
+            ["bash", "-e", str(self.script)],
             cwd=self.work,
             capture_output=True,
             text=True,
@@ -147,7 +173,19 @@ class Feed:
                 "GIT_COMMITTER_EMAIL": "t@t",
             },
         )
+        assert done.returncode == 0, (
+            "the publish step aborted:\n" + done.stdout + done.stderr
+        )
         return done.stdout + done.stderr
+
+    def status(self) -> dict:
+        shown = subprocess.run(
+            ["git", "show", "card-feed:latest_status.json"],
+            cwd=self.remote,
+            capture_output=True,
+            text=True,
+        ).stdout
+        return json.loads(shown or "{}")
 
     def published(self) -> str:
         return subprocess.run(
@@ -175,6 +213,30 @@ def test_a_healthy_run_that_rendered_nothing_does_not_replace_a_good_card(
 
     assert feed.published() == "the real card", (
         "a run with no card replaced one that had a card"
+    )
+
+
+def test_an_empty_card_file_is_not_a_card(tmp_path: Path) -> None:
+    """The file existing is not the same as a card being in it.
+
+    The test is `[ ! -s card_comment.md ]`, not `[ ! -f ... ]`, and nothing
+    else in this file tells the two apart: every other case either writes a
+    real card or no file at all, and on a missing file the two tests agree.
+    A render killed between opening the file and writing it — a job timeout, a
+    cancelled runner — leaves nought bytes behind, and under `-f` that is
+    published as the day's card and stamped `card: rendered`, which the guard
+    below then protects for the rest of the day.
+    """
+    feed = Feed(tmp_path)
+    feed.run(card="the real card")
+
+    feed.run(card="", degraded="false")
+
+    assert feed.published() == "the real card", (
+        "an empty card file was published over a real card"
+    )
+    assert feed.status().get("card") == "rendered", (
+        "the branch entry was restamped from a run that had no card"
     )
 
 
@@ -258,6 +320,7 @@ def _email_step() -> str:
     script = script.replace("${{ github.run_id }}", "1")
     script = script.replace("${{ inputs.force_email }}", "false")
     assert "${{" not in script, "an unsubstituted expression would run as literal text"
+    _refuse_swallowed_yaml(script, "email step")
     return script
 
 

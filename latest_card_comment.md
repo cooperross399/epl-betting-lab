@@ -1,8 +1,8 @@
-## Friday 18 September, 09:11 UTC — scheduled run
+## Friday 18 September, 13:33 UTC — scheduled run
 
 Selections changed: 1 added, 1 moved section.
 
-Provider quota: 1109660 (about 17897 more runs)
+Provider quota: 1109538 (about 17895 more runs)
 
 Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
 
@@ -11,12 +11,12 @@ Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_tot
 | Match | Market | Selection | Tier | Edge | Price | Book | Units |
 |:------|:-------|:----------|:-----|-----:|------:|:-----|------:|
 | Tottenham v Aston Villa | `double_chance` | draw_or_away | C | +6.3% | -120 | Fanatics | 0.1 |
+| Brentford v Chelsea | `draw_no_bet` | home | C | +6.1% | -106 | Caesars | 0.1 |
+| Leeds v Crystal Palace | `double_chance` | draw_or_away | C | +6.6% | +114 | BetOnline.ag | 0.1 |
 | Fulham v Man United | `corners_1x2` | home | C | +6.0% | +105 | BetMGM | 0.1 |
 | Man City v Sunderland | `corners_total_10_5` | under | C | +4.8% | -108 | Caesars | 0.1 |
-| Brentford v Chelsea | `draw_no_bet` | home | C | +5.7% | +110 | Caesars | 0.1 |
 | Fulham v Man United | `corners_total_9_5` | over | C | +4.2% | -141 | Caesars | 0.1 |
-| Leeds v Crystal Palace | `double_chance` | draw_or_away | C | +4.8% | +105 | BetOnline.ag | 0.1 |
-| Leeds v Crystal Palace | `draw_no_bet` | away | C | +5.2% | +250 | FanDuel | 0.1 |
+| Leeds v Crystal Palace | `draw_no_bet` | away | C | +5.6% | +260 | BetOnline.ag | 0.1 |
 | Man City v Sunderland | `corners_total_9_5` | under | C | +4.7% | +155 | Bovada | 0.1 |
 
 ### Leans
@@ -25,8 +25,8 @@ _None._
 
 ### What changed
 
-- **Added:** Nott'm Forest v Coventry corners_1x2 away
-- **Moved section:** Tottenham v Aston Villa corners_total_9_5 over
+- **Added:** Newcastle v Hull corners_1x2 draw
+- **Moved section:** Everton v Ipswich corners_total_10_5 over
 
 
 ## Beyond the Premier League
@@ -91,4 +91,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/35327948271)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/35350570745)

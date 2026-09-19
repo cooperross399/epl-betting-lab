@@ -1,21 +1,20 @@
-## Saturday 19 September, 12:54 UTC — scheduled run
+## Saturday 19 September, 14:00 UTC — scheduled run
 
-Selections changed: 5 added, 8 dropped, 3 moved section.
+Selections changed: 4 added, 13 dropped, 1 moved section.
 
-Provider quota: 1108774 (about 17883 more runs)
+Provider quota: 1108659 (about 17881 more runs)
 
-Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_total_9_5, corners_total_10_5** (excluded: 1x2, corners_1x2)
+Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
 
 ### Best bets
 
 | Match | Market | Selection | Tier | Edge | Price | Book | Units |
 |:------|:-------|:----------|:-----|-----:|------:|:-----|------:|
-| Leeds v Crystal Palace | `double_chance` | draw_or_away | C | +7.0% | +116 | BetOnline.ag | 0.1 |
+| Fulham v Man United | `corners_1x2` | home | C | +6.0% | +105 | Bovada | 0.1 |
 | Man City v Sunderland | `corners_total_10_5` | under | C | +4.8% | -108 | Caesars | 0.1 |
-| Leeds v Crystal Palace | `corners_total_10_5` | under | C | +4.3% | -157 | BetRivers | 0.1 |
 | Leeds v Crystal Palace | `draw_no_bet` | away | C | +6.4% | +280 | FanDuel | 0.1 |
 | Fulham v Man United | `corners_total_9_5` | over | C | +3.7% | -144 | FanDuel | 0.1 |
-| Everton v Ipswich | `corners_total_9_5` | over | C | +3.5% | -112 | Bovada | 0.1 |
+| Leeds v Crystal Palace | `double_chance` | draw_or_away | C | +4.5% | +118 | BetOnline.ag | 0.1 |
 | Man City v Sunderland | `corners_total_9_5` | under | C | +4.7% | +155 | Bovada | 0.1 |
 
 ### Leans
@@ -24,21 +23,23 @@ _None._
 
 ### What changed
 
-- **Added:** Bournemouth v Liverpool btts no
-- **Added:** Bournemouth v Liverpool corners_total_10_5 over
-- **Added:** Brighton v Arsenal draw_no_bet home
-- **Added:** Nott'm Forest v Coventry btts yes
-- **Added:** Nott'm Forest v Coventry draw_no_bet home
-- **Dropped:** Fulham v Man United corners_1x2 home
-- **Dropped:** Leeds v Crystal Palace corners_total_9_5 under
-- **Dropped:** Man City v Sunderland corners_1x2 home
-- **Dropped:** Newcastle v Hull corners_1x2 draw
-- **Dropped:** Nott'm Forest v Coventry corners_1x2 away
-- **Dropped:** Tottenham v Aston Villa corners_total_10_5 over
-- **Dropped:** Tottenham v Aston Villa corners_total_9_5 over
-- **Dropped:** Tottenham v Aston Villa double_chance draw_or_away
-- **Moved section:** Everton v Ipswich corners_total_10_5 over
-- **Moved section:** Everton v Ipswich corners_total_9_5 over
+- **Added:** Fulham v Man United corners_1x2 home
+- **Added:** Leeds v Crystal Palace corners_total_9_5 under
+- **Added:** Man City v Sunderland corners_1x2 home
+- **Added:** Nott'm Forest v Coventry corners_1x2 away
+- **Dropped:** Bournemouth v Liverpool btts no
+- **Dropped:** Bournemouth v Liverpool corners_total_10_5 over
+- **Dropped:** Bournemouth v Liverpool corners_total_9_5 over
+- **Dropped:** Brighton v Arsenal draw_no_bet home
+- **Dropped:** Everton v Ipswich corners_total_10_5 over
+- **Dropped:** Everton v Ipswich corners_total_9_5 over
+- **Dropped:** Everton v Ipswich double_chance home_or_away
+- **Dropped:** Everton v Ipswich double_chance home_or_draw
+- **Dropped:** Everton v Ipswich draw_no_bet home
+- **Dropped:** Newcastle v Hull double_chance draw_or_away
+- **Dropped:** Newcastle v Hull draw_no_bet away
+- **Dropped:** Nott'm Forest v Coventry btts yes
+- **Dropped:** Nott'm Forest v Coventry draw_no_bet home
 - **Moved section:** Leeds v Crystal Palace corners_total_10_5 under
 
 
@@ -90,8 +91,8 @@ _Fitted but not bet: UEFA Europa Conference League (0 of 18 fixtures rateable). 
 - Settled: **63** selections, 30 won
 - Staked: 9.15 units
 - Profit: **-0.16 units** (-1.7% on turnover)
-- Still pending: 12
-- Played, waiting on results data: **5** — these are settled matches the results feed has not caught up with, so the record above is behind rather than still accumulating.
+- Still pending: 9
+- Played, waiting on results data: **8** — these are settled matches the results feed has not caught up with, so the record above is behind rather than still accumulating.
 
 - Stake returned (void): 4
 
@@ -105,4 +106,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/35444031551)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/35447252289)

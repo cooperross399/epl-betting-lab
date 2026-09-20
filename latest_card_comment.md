@@ -1,8 +1,8 @@
-## Sunday 20 September, 08:30 UTC — scheduled run
+## Sunday 20 September, 09:27 UTC — scheduled run
 
-Selections changed: 8 added, 4 dropped, 5 moved section.
+Selections changed: 3 added, 3 dropped.
 
-Provider quota: 1107677 (about 17865 more runs)
+Provider quota: 1107531 (about 17863 more runs)
 
 Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
 
@@ -11,9 +11,9 @@ Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_tot
 | Match | Market | Selection | Tier | Edge | Price | Book | Units |
 |:------|:-------|:----------|:-----|-----:|------:|:-----|------:|
 | Fulham v Man United | `corners_total_9_5` | over | C | +4.7% | -138 | FanDuel | 0.1 |
+| Man City v Sunderland | `corners_total_10_5` | under | C | +4.8% | -108 | FanDuel | 0.1 |
 | Leeds v Crystal Palace | `draw_no_bet` | away | C | +6.4% | +280 | FanDuel | 0.1 |
-| Fulham v Man United | `corners_total_10_5` | over | C | +5.1% | +122 | FanDuel | 0.1 |
-| Man City v Sunderland | `corners_total_10_5` | under | C | +3.9% | -112 | BetMGM | 0.1 |
+| Fulham v Man United | `corners_total_10_5` | over | C | +4.8% | +120 | FanDuel | 0.1 |
 | Leeds v Crystal Palace | `double_chance` | draw_or_away | C | +4.5% | +118 | BetRivers | 0.1 |
 
 ### Leans
@@ -22,23 +22,12 @@ _None._
 
 ### What changed
 
-- **Added:** Bournemouth v Liverpool corners_1x2 away
-- **Added:** Bournemouth v Liverpool corners_total_10_5 over
-- **Added:** Bournemouth v Liverpool corners_total_9_5 over
-- **Added:** Fulham v Man United total_2_5 under
-- **Added:** Leeds v Crystal Palace corners_1x2 draw
-- **Added:** Man City v Sunderland double_chance home_or_draw
-- **Added:** Man City v Sunderland draw_no_bet home
-- **Added:** Man City v Sunderland total_2_5 under
-- **Dropped:** Nott'm Forest v Coventry corners_1x2 away
-- **Dropped:** Nott'm Forest v Coventry corners_total_10_5 over
-- **Dropped:** Nott'm Forest v Coventry double_chance home_or_away
-- **Dropped:** Nott'm Forest v Coventry double_chance home_or_draw
-- **Moved section:** Fulham v Man United corners_1x2 home
-- **Moved section:** Fulham v Man United corners_total_10_5 over
-- **Moved section:** Leeds v Crystal Palace corners_total_9_5 under
-- **Moved section:** Man City v Sunderland btts yes
-- **Moved section:** Man City v Sunderland corners_total_9_5 under
+- **Added:** Bournemouth v Liverpool btts no
+- **Added:** Bournemouth v Liverpool draw_no_bet away
+- **Added:** Leeds v Crystal Palace corners_1x2 away
+- **Dropped:** Leeds v Crystal Palace corners_1x2 draw
+- **Dropped:** Man City v Sunderland double_chance home_or_draw
+- **Dropped:** Man City v Sunderland total_2_5 under
 
 
 ## Beyond the Premier League
@@ -64,7 +53,7 @@ Priced on the European ratings, where 701 European ties bridge eleven leagues on
 | Match | Market | Selection | Edge | Price | Book | Units |
 |:--|:--|:--|--:|--:|:--|--:|
 | Arsenal v Lille | `total_2_5` | under | +8.5% | +160 | BetRivers | 0.1 |
-| Roma v Real Madrid | `double_chance` | home_or_draw | +7.4% | -120 | DraftKings | 0.1 |
+| Roma v Real Madrid | `double_chance` | home_or_draw | +7.4% | -120 | FanDuel | 0.1 |
 | Arsenal v Lille | `corners_total_10_5` | under | +7.1% | -120 | BetRivers | 0.1 |
 | Ath Madrid v Man United | `draw_no_bet` | home | +7.0% | -128 | FanDuel | 0.1 |
 
@@ -104,4 +93,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/35499611430)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/35502201484)

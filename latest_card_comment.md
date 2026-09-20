@@ -1,8 +1,8 @@
-## Saturday 19 September, 14:00 UTC — scheduled run
+## Sunday 20 September, 08:30 UTC — scheduled run
 
-Selections changed: 4 added, 13 dropped, 1 moved section.
+Selections changed: 8 added, 4 dropped, 5 moved section.
 
-Provider quota: 1108659 (about 17881 more runs)
+Provider quota: 1107677 (about 17865 more runs)
 
 Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
 
@@ -10,12 +10,11 @@ Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_tot
 
 | Match | Market | Selection | Tier | Edge | Price | Book | Units |
 |:------|:-------|:----------|:-----|-----:|------:|:-----|------:|
-| Fulham v Man United | `corners_1x2` | home | C | +6.0% | +105 | Bovada | 0.1 |
-| Man City v Sunderland | `corners_total_10_5` | under | C | +4.8% | -108 | Caesars | 0.1 |
+| Fulham v Man United | `corners_total_9_5` | over | C | +4.7% | -138 | FanDuel | 0.1 |
 | Leeds v Crystal Palace | `draw_no_bet` | away | C | +6.4% | +280 | FanDuel | 0.1 |
-| Fulham v Man United | `corners_total_9_5` | over | C | +3.7% | -144 | FanDuel | 0.1 |
-| Leeds v Crystal Palace | `double_chance` | draw_or_away | C | +4.5% | +118 | BetOnline.ag | 0.1 |
-| Man City v Sunderland | `corners_total_9_5` | under | C | +4.7% | +155 | Bovada | 0.1 |
+| Fulham v Man United | `corners_total_10_5` | over | C | +5.1% | +122 | FanDuel | 0.1 |
+| Man City v Sunderland | `corners_total_10_5` | under | C | +3.9% | -112 | BetMGM | 0.1 |
+| Leeds v Crystal Palace | `double_chance` | draw_or_away | C | +4.5% | +118 | BetRivers | 0.1 |
 
 ### Leans
 
@@ -23,24 +22,23 @@ _None._
 
 ### What changed
 
-- **Added:** Fulham v Man United corners_1x2 home
-- **Added:** Leeds v Crystal Palace corners_total_9_5 under
-- **Added:** Man City v Sunderland corners_1x2 home
-- **Added:** Nott'm Forest v Coventry corners_1x2 away
-- **Dropped:** Bournemouth v Liverpool btts no
-- **Dropped:** Bournemouth v Liverpool corners_total_10_5 over
-- **Dropped:** Bournemouth v Liverpool corners_total_9_5 over
-- **Dropped:** Brighton v Arsenal draw_no_bet home
-- **Dropped:** Everton v Ipswich corners_total_10_5 over
-- **Dropped:** Everton v Ipswich corners_total_9_5 over
-- **Dropped:** Everton v Ipswich double_chance home_or_away
-- **Dropped:** Everton v Ipswich double_chance home_or_draw
-- **Dropped:** Everton v Ipswich draw_no_bet home
-- **Dropped:** Newcastle v Hull double_chance draw_or_away
-- **Dropped:** Newcastle v Hull draw_no_bet away
-- **Dropped:** Nott'm Forest v Coventry btts yes
-- **Dropped:** Nott'm Forest v Coventry draw_no_bet home
-- **Moved section:** Leeds v Crystal Palace corners_total_10_5 under
+- **Added:** Bournemouth v Liverpool corners_1x2 away
+- **Added:** Bournemouth v Liverpool corners_total_10_5 over
+- **Added:** Bournemouth v Liverpool corners_total_9_5 over
+- **Added:** Fulham v Man United total_2_5 under
+- **Added:** Leeds v Crystal Palace corners_1x2 draw
+- **Added:** Man City v Sunderland double_chance home_or_draw
+- **Added:** Man City v Sunderland draw_no_bet home
+- **Added:** Man City v Sunderland total_2_5 under
+- **Dropped:** Nott'm Forest v Coventry corners_1x2 away
+- **Dropped:** Nott'm Forest v Coventry corners_total_10_5 over
+- **Dropped:** Nott'm Forest v Coventry double_chance home_or_away
+- **Dropped:** Nott'm Forest v Coventry double_chance home_or_draw
+- **Moved section:** Fulham v Man United corners_1x2 home
+- **Moved section:** Fulham v Man United corners_total_10_5 over
+- **Moved section:** Leeds v Crystal Palace corners_total_9_5 under
+- **Moved section:** Man City v Sunderland btts yes
+- **Moved section:** Man City v Sunderland corners_total_9_5 under
 
 
 ## Beyond the Premier League
@@ -66,9 +64,9 @@ Priced on the European ratings, where 701 European ties bridge eleven leagues on
 | Match | Market | Selection | Edge | Price | Book | Units |
 |:--|:--|:--|--:|--:|:--|--:|
 | Arsenal v Lille | `total_2_5` | under | +8.5% | +160 | BetRivers | 0.1 |
+| Roma v Real Madrid | `double_chance` | home_or_draw | +7.4% | -120 | DraftKings | 0.1 |
 | Arsenal v Lille | `corners_total_10_5` | under | +7.1% | -120 | BetRivers | 0.1 |
 | Ath Madrid v Man United | `draw_no_bet` | home | +7.0% | -128 | FanDuel | 0.1 |
-| Roma v Real Madrid | `total_2_5` | under | +6.7% | +210 | FanDuel | 0.1 |
 
 - 6 fixture(s) left out because a club has no rating in the pool: Bodø/Glimt v Dortmund, LASK v Liverpool, Sabah FK v Slavia Praha, Shakhtar Donetsk v AEK, Viking FK v Bayern Munich, ŠK Slovan Bratislava v Stuttgart.
 
@@ -82,7 +80,7 @@ Same European ratings as the Champions League, and **thinner in both directions*
 | Anderlecht v Lyon | `draw_no_bet` | home | +5.7% | +144 | FanDuel | 0.1 |
 | Sunderland v AZ Alkmaar | `total_2_5` | under | +3.8% | +123 | BetRivers | 0.1 |
 
-- 15 fixture(s) left out because a club has no rating in the pool: AC Milan v Benfica, Besiktas JK v Marseille, Celtic v Ferencváros TC, Crystal Palace v Lech Poznań, FC Ararat-Armenia v Sparta Prague, Hapoel Be'er Sheva v Dinamo Zagreb, Juventus v NEC Nijmegen, Leverkusen v NK Celje, Lillestrom v Torreense, OFI Crete v TSG Hoffenheim, Olympiakos Piraeus v Jagiellonia Białystok, Omonoia FC v Celta Vigo, PFC Levski Sofia v Salzburg, SK Sturm Graz v Rennes, Viktoria Plzeň v St. Gilloise.
+- 16 fixture(s) left out because a club has no rating in the pool: AC Milan v Benfica, Besiktas JK v Marseille, Celtic v Ferencváros TC, Crystal Palace v Lech Poznań, FC Ararat-Armenia v Sparta Prague, Hapoel Be'er Sheva v Dinamo Zagreb, Juventus v NEC Nijmegen, Leverkusen v NK Celje, Lillestrom v Torreense, OFI Crete v TSG Hoffenheim, Olympiakos Piraeus v Jagiellonia Białystok, Omonoia FC v Celta Vigo, PFC Levski Sofia v Salzburg, SK Sturm Graz v Rennes, Torreense v Sunderland, Viktoria Plzeň v St. Gilloise.
 
 _Fitted but not bet: UEFA Europa Conference League (0 of 18 fixtures rateable). Their results still bridge the countries in the rating pool — which is most of their value — and they return to the card on their own the run they can price something._
 
@@ -91,8 +89,8 @@ _Fitted but not bet: UEFA Europa Conference League (0 of 18 fixtures rateable). 
 - Settled: **63** selections, 30 won
 - Staked: 9.15 units
 - Profit: **-0.16 units** (-1.7% on turnover)
-- Still pending: 9
-- Played, waiting on results data: **8** — these are settled matches the results feed has not caught up with, so the record above is behind rather than still accumulating.
+- Still pending: 8
+- Played, waiting on results data: **9** — these are settled matches the results feed has not caught up with, so the record above is behind rather than still accumulating.
 
 - Stake returned (void): 4
 
@@ -106,4 +104,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/35447252289)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/35499611430)

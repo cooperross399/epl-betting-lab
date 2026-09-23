@@ -86,6 +86,26 @@ WANTED: tuple[WantedCompetition, ...] = (
         ),
     ),
     WantedCompetition(
+        code="GOLD",
+        name="CONCACAF Gold Cup",
+        pattern=r"concacaf gold cup",
+        status=(
+            "Sold, and out of season — played June and July. Measured "
+            "2026-09-23 and the verdict is COLLECT, DO NOT CARD. The tail "
+            "screen it has to pass, it passes better than the Nations League: "
+            "the strongest favourite the model produces over 175 matches is "
+            "0.847, so nothing above 90%. What blocks it is the venue. 78% of "
+            "its matches are neutral and the feed does not say which, so the "
+            "card would shift the home side +9.4 points and the away side -8.8 "
+            "on every one of them — 2.5x its own 3.5% edge threshold, one "
+            "direction, undetectable. Passing neutral=True is not the fix "
+            "either: realised home advantage on its neutral matches is +0.522 "
+            "goals against the pool's +0.13, because 167 of 175 were played in "
+            "the United States. Wire it for collection when it comes into "
+            "season; do not add it to the card without a venue flag."
+        ),
+    ),
+    WantedCompetition(
         code="CNLQ",
         name="CONCACAF Nations League qualification",
         pattern=r"concacaf.*nations league.*qualif",

@@ -13,11 +13,22 @@ from __future__ import annotations
 
 import argparse
 import json
+import urllib.error
 import urllib.request
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
-UA = "maverick-hightower-site/1.0 (+https://maverickhightower.com)"
+#: NO custom User-Agent, deliberately, and this is the opposite of the rule the
+#: NHL lab pins for api-web.nhle.com. That host refuses urllib's default and
+#: accepts any string; site.api.espn.com is in front of a WAF that does the
+#: reverse -- it answers `Python-urllib/3.x` with 200 and returns 403 Access
+#: Denied for a descriptive agent AND for a Chrome string alike. Measured
+#: 2026-09-23, three trials, both sports, stable.
+#:
+#: So a polite, identifying agent is exactly what breaks this, which is the
+#: wrong way round from every other fetch in these repositories and is why it
+#: is written down rather than left to whoever reads the next 403.
+#: `test_the_settlement_fetch_sends_no_custom_user_agent` holds it.
 ESPN = {
     "epl": "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard?dates={d}&limit=100",
     "cbb": "https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/scoreboard?dates={d}&groups=50&limit=400",
@@ -25,7 +36,7 @@ ESPN = {
 
 
 def fetch(url):
-    req = urllib.request.Request(url, headers={"User-Agent": UA})
+    req = urllib.request.Request(url)
     with urllib.request.urlopen(req, timeout=30) as r:  # noqa: S310
         return json.load(r)
 
@@ -137,7 +148,27 @@ def main(argv=None) -> int:
         print("nothing to settle")
         return 0
     board = json.loads(frozen[0].read_text(encoding="utf-8"))
-    fin = finals(args.sport, day)
+    try:
+        fin = finals(args.sport, day)
+    except (urllib.error.URLError, json.JSONDecodeError, TimeoutError) as exc:
+        # Yesterday's settlement is not today's board. This step runs after the
+        # board is built, and an unhandled raise here took the whole publish
+        # down with it -- the 403 above did exactly that on 2026-09-23, so the
+        # site served nothing rather than serving a board with one section
+        # unavailable.
+        #
+        # The failure is written into results.json instead of swallowed,
+        # because a settlement that quietly stops is indistinguishable from a
+        # day with no games, and this page's whole claim is that the record is
+        # settled from what was published.
+        base.update(
+            season=board.get("season", ""),
+            notice=f"Yesterday's results could not be settled: the scoreboard feed answered {type(exc).__name__} ({exc}). The board above is unaffected; settlement is retried on the next build.",
+            summary={},
+        )
+        (data / "results.json").write_text(json.dumps(base, indent=1), encoding="utf-8")
+        print(f"settlement skipped: {type(exc).__name__}: {exc}")
+        return 0
     games, picks, su, ats, tots = [], {"w": 0, "l": 0, "p": 0}, {"w": 0, "l": 0}, {"w": 0, "l": 0, "p": 0}, {"w": 0, "l": 0, "p": 0}
     for g in board.get("games", []):
         f = fin.get(str(g.get("id")))

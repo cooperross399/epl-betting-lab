@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <title>Results — Maverick Hightower</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    html, body { margin: 0; padding: 0; background: #f4f2ee; color: #14151a; font-family: "IBM Plex Sans", Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+    * { box-sizing: border-box; }
+    a { color: #14151a; text-decoration: none; }
+    a:hover { color: #2a2d3a; text-decoration: underline; text-underline-offset: 3px; }
+  </style>
+</helmet>
+<div data-screen-label="Results" style="min-height:100vh;background:#f4f2ee;color:#14151a;">
+  <div style="max-width:1240px;margin:0 auto;padding:0 clamp(16px,3vw,24px) 80px;">
+    <header style="border-top:4px solid #14151a;border-bottom:1px solid #14151a;padding:14px 0 12px;display:flex;align-items:center;justify-content:space-between;gap:12px 16px;flex-wrap:wrap;">
+      <a href="https://maverickhightower.com/" style="display:flex;align-items:center;gap:12px;">
+        <span style="width:36px;height:36px;background:#14151a;color:#f4f2ee;display:grid;place-items:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:18px;letter-spacing:.04em;">MH</span>
+        <span style="display:flex;flex-direction:column;line-height:1.1;">
+          <span style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#6b6e7a;">Maverick Hightower</span>
+          <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;letter-spacing:.02em;text-transform:uppercase;">{{ sportLong }}</span>
+        </span>
+      </a>
+      <nav style="display:flex;gap:14px 22px;font-size:13px;letter-spacing:.1em;text-transform:uppercase;font-weight:500;flex-wrap:wrap;">
+        <a href="Board.dc.html">Board</a>
+        <a href="Results.dc.html" style="border-bottom:2px solid #14151a;padding-bottom:2px;">Results</a>
+        <a href="Archive.dc.html">Archive</a>
+        <a href="Graphic.dc.html">Graphic</a>
+        <sc-for list="{{ otherSports }}" as="s" hint-placeholder-count="2"><a href="{{ s.href }}" style="{{ s.style }}">{{ s.name }}</a></sc-for>
+      </nav>
+    </header>
+
+    <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:24px 40px;align-items:end;padding:40px 0 28px;border-bottom:1px solid #14151a;">
+      <div style="min-width:0;grid-column:1 / -1;">
+        <div style="font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#6b6e7a;margin-bottom:10px;">{{ kicker }}</div>
+        <h1 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:clamp(56px,9vw,112px);line-height:.9;letter-spacing:-.01em;text-transform:uppercase;">Settled.</h1>
+        <p style="margin:18px 0 0;max-width:560px;font-size:17px;line-height:1.5;color:#2a2d3a;text-wrap:pretty;">Every projection from the last board against the final score. Hits and misses, nothing hidden, nothing recomputed after the fact.</p>
+      </div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.7;color:#6b6e7a;display:flex;flex-wrap:wrap;gap:4px 24px;align-items:baseline;">
+        <span style="text-transform:uppercase;letter-spacing:.1em;">Settled</span><span style="color:#14151a;">{{ updated }}</span>
+        <sc-if value="{{ stale }}" hint-placeholder-val="{{ false }}"><span style="background:#b0341f;color:#f4f2ee;padding:2px 8px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;font-size:11px;">{{ staleLabel }}</span></sc-if>
+      </div>
+    </section>
+
+    <sc-if value="{{ hasFeedNotice }}" hint-placeholder-val="{{ false }}">
+      <div style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:20px;align-items:start;padding:18px 0;border-bottom:1px solid #14151a;">
+        <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase;border:1px solid #14151a;padding:4px 9px;">Sample data</span>
+        <p style="margin:0;font-size:15px;line-height:1.5;color:#2a2d3a;max-width:760px;">{{ feedNotice }}</p>
+      </div>
+    </sc-if>
+
+    <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:0 24px;border-bottom:1px solid #14151a;">
+      <sc-for list="{{ strip }}" as="c" hint-placeholder-count="3">
+        <div style="padding:22px 0;border-bottom:1px solid #d6d3cc;">
+          <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#6b6e7a;">{{ c.label }}</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:44px;line-height:1;margin-top:8px;">{{ c.value }}</div>
+        </div>
+      </sc-for>
+    </section>
+
+    <section style="padding-top:44px;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;border-bottom:3px solid #14151a;padding-bottom:10px;">
+        <h2 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:34px;line-height:1;text-transform:uppercase;letter-spacing:.01em;">{{ dateShort }}</h2>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#6b6e7a;">{{ count }} settled · {{ vsLabel }}</div>
+      </div>
+      <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+        <div style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:20px;align-items:start;padding:22px 0;border-bottom:1px solid #d6d3cc;">
+          <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase;background:#14151a;color:#f4f2ee;padding:5px 9px;">Nothing to settle</span>
+          <p style="margin:0;font-size:15px;line-height:1.5;color:#2a2d3a;max-width:760px;text-wrap:pretty;">{{ notice }}</p>
+        </div>
+      </sc-if>
+      <sc-for list="{{ games }}" as="g" hint-placeholder-count="4">
+        <article style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:18px 28px;padding:20px 0;border-bottom:1px solid #d6d3cc;align-items:start;">
+          <div style="display:flex;flex-direction:column;gap:10px;min-width:0;">
+            <sc-for list="{{ g.sides }}" as="s" hint-placeholder-count="2">
+              <div style="display:flex;align-items:center;gap:12px;">
+                <span style="width:38px;height:38px;border-radius:50%;flex:none;display:grid;place-items:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:13px;background:{{ s.color }};color:{{ s.fg }};">{{ s.abbr }}</span>
+                <span style="flex:1;font-weight:600;font-size:16px;min-width:0;">{{ s.name }}</span>
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#6b6e7a;text-align:right;">proj {{ s.proj }}</span>
+                <span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:34px;line-height:1;width:44px;text-align:right;color:{{ s.scoreColor }};">{{ s.final }}</span>
+              </div>
+            </sc-for>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#6b6e7a;">Final{{ g.finishLabel }}</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:14px 18px;">
+            <sc-for list="{{ g.cells }}" as="c" hint-placeholder-count="2">
+              <div style="border-top:2px solid #14151a;padding-top:8px;">
+                <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#6b6e7a;">{{ c.title }}</div>
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;line-height:1.7;margin-top:6px;">
+                  <sc-for list="{{ c.rows }}" as="r" hint-placeholder-count="2">
+                    <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;"><span style="color:#6b6e7a;">{{ r.label }}</span><span style="margin-left:auto;font-weight:{{ r.weight }};color:{{ r.color }};">{{ r.value }}</span></div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-for>
+            <sc-if value="{{ g.hasPick }}" hint-placeholder-val="{{ true }}">
+              <div style="border-top:2px solid #14151a;padding-top:8px;">
+                <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#6b6e7a;">Model pick</div>
+                <div style="margin-top:8px;display:flex;align-items:stretch;">
+                  <div style="flex:1;background:#14151a;color:#f4f2ee;padding:8px 10px;min-width:0;">
+                    <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:20px;line-height:1;text-transform:uppercase;">{{ g.pick.label }}</div>
+                    <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;margin-top:5px;color:#c9c7c0;">{{ g.pick.market }}</div>
+                  </div>
+                  <div style="width:64px;flex:none;display:grid;place-items:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:18px;letter-spacing:.06em;text-transform:uppercase;border:2px solid #14151a;color:{{ g.pick.color }};background:{{ g.pick.bg }};">{{ g.pick.result }}</div>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+        </article>
+      </sc-for>
+    </section>
+
+    <footer style="margin-top:56px;border-top:1px solid #14151a;padding-top:16px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#6b6e7a;">
+      <span>© 2026 Maverick Hightower</span>
+      <a href="Archive.dc.html">Every past board, as published →</a>
+    </footer>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;sport&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;nhl&quot;,&quot;epl&quot;,&quot;cbb&quot;],&quot;default&quot;:&quot;nhl&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Preview&quot;}}">
+class Component extends DCLogic {
+  state = { vm: null, feedNotice: null, loadedFor: null };
+  async load() {
+    const want = this.props.sport || "nhl";
+    if (this.state.loadedFor === want) return;
+    this.setState({ loadedFor: want });
+    const S = await import("./lib/sports.js");
+    const { sport, deployed } = await S.detectSport(want);
+    const cfg = S.SPORTS[sport];
+    let data, feedNotice = null;
+    try { const r = await fetch(deployed ? "./data/results.json" : cfg.sampleResults, { cache: "no-store" }); if (!r.ok) throw new Error(`HTTP ${r.status}`); data = await r.json(); }
+    catch (e) { data = await fetch(cfg.sampleResults).then((r) => r.json()); feedNotice = `The live feed is not reachable (${e.message}). Showing sample results.`; }
+    const vm = S.ADAPTERS[sport].results(data);
+    vm.otherSports = S.ORDER.filter((k) => k !== sport).map((k, i) => ({ name: S.SPORTS[k].name, href: S.SPORTS[k].host, style: i === 0 ? "margin-left:10px;padding-left:22px;border-left:1px solid #d6d3cc;" : "" }));
+    this.setState({ vm, feedNotice });
+  }
+  componentDidMount() { this.load(); }
+  componentDidUpdate() { this.load(); }
+  renderVals() {
+    const vm = this.state.vm;
+    if (!vm) return { games: [], strip: [], otherSports: [] };
+    const games = vm.games.map((g) => ({ ...g, cells: g.cells.map((c) => ({ ...c, rows: c.rows.map((r) => ({ ...r, weight: r.bold ? 600 : 400, color: r.bold && r.value === "Miss" ? "#b0341f" : "#14151a" })) })) }));
+    return { ...vm, games, sportLong: vm.sport.longName, hasFeedNotice: !!this.state.feedNotice, feedNotice: this.state.feedNotice || "" };
+  }
+}
+</script>
+</body>
+</html>

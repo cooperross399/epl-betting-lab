@@ -1,0 +1,361 @@
+{
+ "generatedAt": "2026-09-22T09:00:00Z",
+ "season": "2026–27",
+ "resultsDate": "2026-09-21",
+ "windowLabel": "Sat 19 – Sun 21 September",
+ "notice": null,
+ "summary": {
+  "picks": {
+   "w": 2,
+   "l": 1,
+   "p": 0
+  },
+  "result": {
+   "w": 5,
+   "l": 3
+  },
+  "totals": {
+   "w": 4,
+   "l": 4
+  }
+ },
+ "teams": {
+  "ARS": {
+   "name": "Arsenal",
+   "short": "Arsenal",
+   "color": "#EF0107",
+   "fg": "#fff"
+  },
+  "EVE": {
+   "name": "Everton",
+   "short": "Everton",
+   "color": "#003399",
+   "fg": "#fff"
+  },
+  "LIV": {
+   "name": "Liverpool",
+   "short": "Liverpool",
+   "color": "#C8102E",
+   "fg": "#fff"
+  },
+  "CRY": {
+   "name": "Crystal Palace",
+   "short": "Crystal Palace",
+   "color": "#1B458F",
+   "fg": "#fff"
+  },
+  "BOU": {
+   "name": "Bournemouth",
+   "short": "Bournemouth",
+   "color": "#DA291C",
+   "fg": "#fff"
+  },
+  "FUL": {
+   "name": "Fulham",
+   "short": "Fulham",
+   "color": "#111111",
+   "fg": "#fff"
+  },
+  "MCI": {
+   "name": "Man City",
+   "short": "Man City",
+   "color": "#6CABDD",
+   "fg": "#000"
+  },
+  "BUR": {
+   "name": "Burnley",
+   "short": "Burnley",
+   "color": "#6C1D45",
+   "fg": "#fff"
+  },
+  "NEW": {
+   "name": "Newcastle",
+   "short": "Newcastle",
+   "color": "#241F20",
+   "fg": "#fff"
+  },
+  "WOL": {
+   "name": "Wolves",
+   "short": "Wolves",
+   "color": "#FDB913",
+   "fg": "#000"
+  },
+  "CHE": {
+   "name": "Chelsea",
+   "short": "Chelsea",
+   "color": "#034694",
+   "fg": "#fff"
+  },
+  "BHA": {
+   "name": "Brighton",
+   "short": "Brighton",
+   "color": "#0057B8",
+   "fg": "#fff"
+  },
+  "BRE": {
+   "name": "Brentford",
+   "short": "Brentford",
+   "color": "#E30613",
+   "fg": "#fff"
+  },
+  "TOT": {
+   "name": "Tottenham",
+   "short": "Tottenham",
+   "color": "#132257",
+   "fg": "#fff"
+  },
+  "AVL": {
+   "name": "Aston Villa",
+   "short": "Aston Villa",
+   "color": "#670E36",
+   "fg": "#fff"
+  },
+  "WHU": {
+   "name": "West Ham",
+   "short": "West Ham",
+   "color": "#7A263A",
+   "fg": "#fff"
+  },
+  "LEE": {
+   "name": "Leeds",
+   "short": "Leeds",
+   "color": "#FFCD00",
+   "fg": "#000"
+  },
+  "SUN": {
+   "name": "Sunderland",
+   "short": "Sunderland",
+   "color": "#EB172B",
+   "fg": "#fff"
+  },
+  "MUN": {
+   "name": "Man United",
+   "short": "Man United",
+   "color": "#DA291C",
+   "fg": "#fff"
+  },
+  "NFO": {
+   "name": "Nott'm Forest",
+   "short": "Nott'm Forest",
+   "color": "#DD0000",
+   "fg": "#fff"
+  }
+ },
+ "games": [
+  {
+   "id": "LIVEVE",
+   "kickoff": "2026-09-20T14:00:00Z",
+   "home": {
+    "abbr": "LIV",
+    "projGoals": 2,
+    "final": 2
+   },
+   "away": {
+    "abbr": "EVE",
+    "projGoals": 0.9,
+    "final": 1
+   },
+   "projResult": "home",
+   "markets": {
+    "total": {
+     "line": 2.5,
+     "overProb": 0.52
+    },
+    "btts": {
+     "yesProb": 0.5
+    }
+   },
+   "pick": {
+    "market": "Both teams to score",
+    "label": "Both teams score",
+    "price": -105,
+    "result": "win"
+   }
+  },
+  {
+   "id": "BHATOT",
+   "kickoff": "2026-09-20T14:00:00Z",
+   "home": {
+    "abbr": "BHA",
+    "projGoals": 1.3,
+    "final": 2
+   },
+   "away": {
+    "abbr": "TOT",
+    "projGoals": 1.5,
+    "final": 2
+   },
+   "projResult": "away",
+   "markets": {
+    "total": {
+     "line": 2.5,
+     "overProb": 0.55
+    },
+    "btts": {
+     "yesProb": 0.56
+    }
+   },
+   "pick": {
+    "market": "Total 2.5",
+    "label": "Over 2.5",
+    "price": -110,
+    "result": "win"
+   }
+  },
+  {
+   "id": "BURNFO",
+   "kickoff": "2026-09-20T14:00:00Z",
+   "home": {
+    "abbr": "BUR",
+    "projGoals": 1,
+    "final": 1
+   },
+   "away": {
+    "abbr": "NFO",
+    "projGoals": 1.4,
+    "final": 1
+   },
+   "projResult": "away",
+   "markets": {
+    "total": {
+     "line": 2.5,
+     "overProb": 0.47
+    },
+    "btts": {
+     "yesProb": 0.49
+    }
+   },
+   "pick": null
+  },
+  {
+   "id": "WHUCRY",
+   "kickoff": "2026-09-20T14:00:00Z",
+   "home": {
+    "abbr": "WHU",
+    "projGoals": 1.2,
+    "final": 1
+   },
+   "away": {
+    "abbr": "CRY",
+    "projGoals": 1.3,
+    "final": 2
+   },
+   "projResult": "draw",
+   "markets": {
+    "total": {
+     "line": 2.5,
+     "overProb": 0.5
+    },
+    "btts": {
+     "yesProb": 0.53
+    }
+   },
+   "pick": {
+    "market": "Draw no bet",
+    "label": "West Ham draw no bet",
+    "price": 120,
+    "result": "loss"
+   }
+  },
+  {
+   "id": "WOLLEE",
+   "kickoff": "2026-09-20T14:00:00Z",
+   "home": {
+    "abbr": "WOL",
+    "projGoals": 1.1,
+    "final": 1
+   },
+   "away": {
+    "abbr": "LEE",
+    "projGoals": 1.2,
+    "final": 3
+   },
+   "projResult": "home",
+   "markets": {
+    "total": {
+     "line": 2.5,
+     "overProb": 0.46
+    },
+    "btts": {
+     "yesProb": 0.51
+    }
+   },
+   "pick": null
+  },
+  {
+   "id": "MUNCHE",
+   "kickoff": "2026-09-20T14:00:00Z",
+   "home": {
+    "abbr": "MUN",
+    "projGoals": 1.4,
+    "final": 2
+   },
+   "away": {
+    "abbr": "CHE",
+    "projGoals": 1.5,
+    "final": 1
+   },
+   "projResult": "away",
+   "markets": {
+    "total": {
+     "line": 2.5,
+     "overProb": 0.54
+    },
+    "btts": {
+     "yesProb": 0.57
+    }
+   },
+   "pick": null
+  },
+  {
+   "id": "FULBRE",
+   "kickoff": "2026-09-20T14:00:00Z",
+   "home": {
+    "abbr": "FUL",
+    "projGoals": 1.5,
+    "final": 3
+   },
+   "away": {
+    "abbr": "BRE",
+    "projGoals": 1.3,
+    "final": 1
+   },
+   "projResult": "home",
+   "markets": {
+    "total": {
+     "line": 2.5,
+     "overProb": 0.56
+    },
+    "btts": {
+     "yesProb": 0.58
+    }
+   },
+   "pick": null
+  },
+  {
+   "id": "SUNAVL",
+   "kickoff": "2026-09-20T14:00:00Z",
+   "home": {
+    "abbr": "SUN",
+    "projGoals": 1,
+    "final": 1
+   },
+   "away": {
+    "abbr": "AVL",
+    "projGoals": 1.6,
+    "final": 1
+   },
+   "projResult": "away",
+   "markets": {
+    "total": {
+     "line": 2.5,
+     "overProb": 0.5
+    },
+    "btts": {
+     "yesProb": 0.5
+    }
+   },
+   "pick": null
+  }
+ ]
+}

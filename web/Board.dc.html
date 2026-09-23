@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <title>Board — Maverick Hightower</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    html, body { margin: 0; padding: 0; background: #f4f2ee; color: #14151a; font-family: "IBM Plex Sans", Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+    * { box-sizing: border-box; }
+    a { color: #14151a; text-decoration: none; }
+    a:hover { color: #2a2d3a; text-decoration: underline; text-underline-offset: 3px; }
+  </style>
+</helmet>
+<div data-screen-label="Board" style="min-height:100vh;background:#f4f2ee;color:#14151a;">
+  <div style="max-width:1240px;margin:0 auto;padding:0 clamp(16px,3vw,24px) 80px;">
+
+    <header style="border-top:4px solid #14151a;border-bottom:1px solid #14151a;padding:14px 0 12px;display:flex;align-items:center;justify-content:space-between;gap:12px 16px;flex-wrap:wrap;">
+      <a href="https://maverickhightower.com/" style="display:flex;align-items:center;gap:12px;">
+        <span style="width:36px;height:36px;background:#14151a;color:#f4f2ee;display:grid;place-items:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:18px;letter-spacing:.04em;">MH</span>
+        <span style="display:flex;flex-direction:column;line-height:1.1;">
+          <span style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#6b6e7a;">Maverick Hightower</span>
+          <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;letter-spacing:.02em;text-transform:uppercase;">{{ sportLong }}</span>
+        </span>
+      </a>
+      <nav style="display:flex;gap:14px 22px;font-size:13px;letter-spacing:.1em;text-transform:uppercase;font-weight:500;flex-wrap:wrap;">
+        <a href="{{ links.board }}" style="border-bottom:2px solid #14151a;padding-bottom:2px;">Board</a>
+        <a href="{{ links.results }}">Results</a>
+        <a href="{{ links.archive }}">Archive</a>
+        <a href="{{ links.graphic }}">Graphic</a>
+        <sc-for list="{{ otherSports }}" as="s" hint-placeholder-count="2">
+          <a href="{{ s.href }}" style="{{ s.style }}">{{ s.name }}</a>
+        </sc-for>
+      </nav>
+    </header>
+
+    <sc-if value="{{ isArchived }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:12px 0;border-bottom:1px solid #14151a;font-family:'IBM Plex Mono',monospace;font-size:12px;">
+        <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase;background:#14151a;color:#f4f2ee;padding:5px 9px;">Archived board</span>
+        <span>{{ archivedLabel }}</span>
+        <a href="{{ links.board }}" style="margin-left:auto;">Back to the current board →</a>
+      </div>
+    </sc-if>
+
+    <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:24px 40px;align-items:end;padding:40px 0 28px;border-bottom:1px solid #14151a;">
+      <div style="min-width:0;grid-column:1 / -1;">
+        <div style="font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#6b6e7a;margin-bottom:10px;">{{ kicker }}</div>
+        <h1 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:clamp(56px,9vw,112px);line-height:.9;letter-spacing:-.01em;text-transform:uppercase;">{{ title1 }}<br>{{ title2 }}</h1>
+        <p style="margin:18px 0 0;max-width:560px;font-size:17px;line-height:1.5;color:#2a2d3a;text-wrap:pretty;">{{ blurb }}</p>
+      </div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.7;color:#6b6e7a;display:flex;flex-wrap:wrap;gap:4px 24px;align-items:baseline;">
+        <span style="text-transform:uppercase;letter-spacing:.1em;white-space:nowrap;">Updated</span>
+        <span style="color:#14151a;white-space:nowrap;">{{ updated }}</span>
+        <span style="white-space:nowrap;">Times in {{ tz }}</span>
+        <sc-if value="{{ stale }}" hint-placeholder-val="{{ false }}">
+          <span style="background:#b0341f;color:#f4f2ee;padding:2px 8px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;font-size:11px;white-space:nowrap;">{{ staleLabel }}</span>
+        </sc-if>
+      </div>
+    </section>
+
+    <sc-if value="{{ hasNotice }}" hint-placeholder-val="{{ false }}">
+      <div style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:20px;align-items:start;padding:18px 0;border-bottom:1px solid #14151a;">
+        <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase;background:#14151a;color:#f4f2ee;padding:5px 9px;">Note</span>
+        <p style="margin:0;font-size:15px;line-height:1.5;color:#2a2d3a;max-width:760px;text-wrap:pretty;">{{ notice }}</p>
+      </div>
+    </sc-if>
+    <sc-if value="{{ hasFeedNotice }}" hint-placeholder-val="{{ false }}">
+      <div style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:20px;align-items:start;padding:18px 0;border-bottom:1px solid #14151a;">
+        <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase;border:1px solid #14151a;padding:4px 9px;">Sample data</span>
+        <p style="margin:0;font-size:15px;line-height:1.5;color:#2a2d3a;max-width:760px;text-wrap:pretty;">{{ feedNotice }}</p>
+      </div>
+    </sc-if>
+
+    <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:0 24px;border-bottom:1px solid #14151a;">
+      <sc-for list="{{ strip }}" as="c" hint-placeholder-count="4">
+        <div style="padding:22px 0;border-bottom:1px solid #d6d3cc;">
+          <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#6b6e7a;">{{ c.label }}</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:44px;line-height:1;margin-top:8px;">{{ c.value }}</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#2a2d3a;margin-top:6px;">{{ c.sub }}</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#6b6e7a;margin-top:4px;text-transform:uppercase;letter-spacing:.08em;">{{ c.fine }}</div>
+        </div>
+      </sc-for>
+    </section>
+
+    <section style="padding-top:44px;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;border-bottom:3px solid #14151a;padding-bottom:10px;">
+        <h2 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:34px;line-height:1;text-transform:uppercase;letter-spacing:.01em;">Model projections</h2>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#6b6e7a;">{{ summary }}</div>
+      </div>
+
+      <sc-for list="{{ groups }}" as="day" hint-placeholder-count="1">
+        <div style="display:flex;align-items:baseline;gap:14px;padding:26px 0 10px;border-bottom:1px solid #14151a;">
+          <h3 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:26px;text-transform:uppercase;letter-spacing:.02em;">{{ day.label }}</h3>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#6b6e7a;">{{ day.countLabel }}</span>
+        </div>
+
+        <sc-for list="{{ day.games }}" as="g" hint-placeholder-count="4">
+          <article style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:18px 28px;padding:20px 0;border-bottom:1px solid #d6d3cc;align-items:start;opacity:{{ g.opacity }};">
+            <div style="display:flex;flex-direction:column;gap:10px;min-width:0;">
+              <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#6b6e7a;line-height:1.5;">
+                <span style="flex:none;white-space:nowrap;"><span style="color:#14151a;font-weight:600;font-size:15px;">{{ g.time }}</span> · {{ g.tv }}</span>
+                <span style="flex:1;min-width:0;font-size:11px;text-align:right;">{{ g.venue }} · {{ g.city }}</span>
+              </div>
+              <sc-for list="{{ g.sides }}" as="s" hint-placeholder-count="2">
+                <div style="display:flex;align-items:center;gap:12px;">
+                  <span style="width:38px;height:38px;border-radius:50%;flex:none;display:grid;place-items:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:13px;letter-spacing:.02em;background:{{ s.color }};color:{{ s.fg }};">{{ s.abbr }}</span>
+                  <div style="flex:1;min-width:0;">
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                      <span style="font-weight:600;font-size:16px;">{{ s.name }}</span>
+                      <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#6b6e7a;">{{ s.record }}</span>
+                      <sc-if value="{{ s.flag }}" hint-placeholder-val="{{ false }}"><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;border:1px solid #14151a;padding:1px 5px;">{{ s.flag }}</span></sc-if>
+                    </div>
+                    <div style="font-size:12px;color:#6b6e7a;">{{ s.role }} <span style="font-family:'IBM Plex Mono',monospace;">{{ s.note }}</span></div>
+                  </div>
+                  <div style="text-align:right;flex:none;">
+                    <div style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:22px;line-height:1;">{{ s.proj }}</div>
+                    <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#6b6e7a;margin-top:3px;">{{ s.win }}</div>
+                  </div>
+                </div>
+              </sc-for>
+              <sc-if value="{{ g.hasBar }}" hint-placeholder-val="{{ true }}">
+                <div style="height:4px;display:flex;background:#d6d3cc;margin-top:2px;">
+                  <sc-for list="{{ g.bar }}" as="b" hint-placeholder-count="1"><div style="width:{{ b.width }};background:{{ b.color }};"></div></sc-for>
+                  <div style="flex:1;background:{{ g.barTail }};"></div>
+                </div>
+              </sc-if>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#6b6e7a;">{{ g.barNote }}</div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,128px),1fr));gap:14px 18px;min-width:0;">
+              <sc-for list="{{ g.cells }}" as="c" hint-placeholder-count="3">
+                <div style="border-top:2px solid #14151a;padding-top:8px;">
+                  <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#6b6e7a;">{{ c.title }}</div>
+                  <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;line-height:1.7;margin-top:6px;">
+                    <sc-for list="{{ c.rows }}" as="r" hint-placeholder-count="3">
+                      <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;"><span style="color:#6b6e7a;">{{ r.label }}</span><span style="white-space:nowrap;margin-left:auto;font-weight:{{ r.weight }};">{{ r.value }}</span></div>
+                    </sc-for>
+                  </div>
+                  <sc-if value="{{ c.spark }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex;align-items:center;gap:8px;margin-top:6px;font-family:'IBM Plex Mono',monospace;font-size:10px;color:#6b6e7a;">
+                      <svg width="72" height="18" viewBox="0 0 72 18" style="flex:none;overflow:visible;"><polyline sc-camel-points="{{ c.spark.points }}" fill="none" stroke="#14151a" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"></polyline></svg>
+                      <span>{{ c.spark.note }}</span>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ c.note }}" hint-placeholder-val="{{ false }}"><div style="font-size:10px;color:#6b6e7a;margin-top:4px;">{{ c.note }}</div></sc-if>
+                </div>
+              </sc-for>
+
+              <div style="border-top:2px solid #14151a;padding-top:8px;grid-column:1 / -1;">
+                <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#6b6e7a;">{{ g.pick.heading }}</div>
+                <sc-if value="{{ g.pick.isBet }}" hint-placeholder-val="{{ true }}">
+                  <div style="margin-top:8px;background:#14151a;color:#f4f2ee;padding:8px 10px;">
+                    <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:20px;line-height:1;text-transform:uppercase;letter-spacing:.02em;">{{ g.pick.label }}</div>
+                    <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;margin-top:5px;color:#c9c7c0;">{{ g.pick.sub }}</div>
+                    <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;margin-top:2px;color:#c9c7c0;">{{ g.pick.extra }}</div>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ g.pick.isLean }}" hint-placeholder-val="{{ false }}">
+                  <div style="margin-top:8px;border:1px dashed #14151a;padding:8px 10px;">
+                    <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:20px;line-height:1;text-transform:uppercase;letter-spacing:.02em;">{{ g.pick.label }}</div>
+                    <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;margin-top:5px;color:#6b6e7a;">{{ g.pick.sub }}</div>
+                    <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;margin-top:2px;color:#6b6e7a;">{{ g.pick.extra }}</div>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ g.pick.isPass }}" hint-placeholder-val="{{ false }}">
+                  <div style="margin-top:8px;border:1px solid #d6d3cc;padding:8px 10px;font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1.5;color:#6b6e7a;">Pass · {{ g.pick.label }} at {{ g.pick.price }}, edge {{ g.pick.edge }}</div>
+                </sc-if>
+                <sc-if value="{{ g.pick.isNone }}" hint-placeholder-val="{{ false }}">
+                  <div style="margin-top:8px;border:1px dashed #6b6e7a;padding:8px 10px;font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1.5;color:#6b6e7a;">{{ g.pick.label }}</div>
+                </sc-if>
+                <sc-if value="{{ g.started }}" hint-placeholder-val="{{ false }}">
+                  <div style="margin-top:6px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#6b6e7a;text-transform:uppercase;letter-spacing:.08em;">Already started · stake removed · not a play</div>
+                </sc-if>
+              </div>
+            </div>
+          </article>
+        </sc-for>
+      </sc-for>
+    </section>
+
+    <section style="margin-top:56px;border-top:3px solid #14151a;padding-top:10px;">
+      <h2 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:26px;line-height:1;text-transform:uppercase;letter-spacing:.01em;">How to read this board</h2>
+      <dl style="margin:18px 0 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:14px 32px;">
+        <sc-for list="{{ howToRead }}" as="h" hint-placeholder-count="4">
+          <div style="border-top:1px solid #d6d3cc;padding-top:8px;">
+            <dt style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;">{{ h.term }}</dt>
+            <dd style="margin:4px 0 0;font-size:14px;line-height:1.5;color:#2a2d3a;text-wrap:pretty;">{{ h.def }}</dd>
+          </div>
+        </sc-for>
+      </dl>
+    </section>
+
+    <footer style="margin-top:56px;border-top:1px solid #14151a;padding-top:16px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#6b6e7a;">
+      <span>© 2026 Maverick Hightower</span>
+      <span>Every number is a model projection. No edge here is a demonstrated edge, and no bet is ever placed.</span>
+    </footer>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;sport&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;nhl&quot;,&quot;epl&quot;,&quot;cbb&quot;],&quot;default&quot;:&quot;nhl&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Preview&quot;,&quot;description&quot;:&quot;Ignored when deployed: the subdomain decides.&quot;},&quot;scenario&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Normal&quot;,&quot;Leans only&quot;,&quot;Empty&quot;],&quot;default&quot;:&quot;Normal&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Preview&quot;}}">
+class Component extends DCLogic {
+  state = { vm: null, feedNotice: null, loadedFor: null, sportKey: null, deployed: false };
+  async load() {
+    const want = (this.props.sport || "nhl") + "|" + (this.props.scenario || "") + "|" + location.search;
+    if (this.state.loadedFor === want) return;
+    this.setState({ loadedFor: want });
+    const S = await import("./lib/sports.js");
+    const { sport, deployed } = await S.detectSport(this.props.sport || "nhl");
+    const cfg = S.SPORTS[sport];
+    const q = new URLSearchParams(location.search);
+    const date = q.get("date");
+    const base = deployed ? "./data/" : cfg.sample.replace(/board\.json$/, "");
+    let url = deployed ? "./data/board.json" : cfg.sample;
+    if (this.props.scenario === "Leans only" || this.props.scenario === "Empty") url = cfg.sample.replace("board.json", this.props.scenario === "Leans only" ? "board_leans.json" : "board_empty.json");
+    let data = null, feedNotice = null, archived = null;
+    if (date) {
+      try {
+        const idx = await fetch(`${base}history/index.json`, { cache: "no-store" }).then((r) => r.json());
+        const hit = (idx.dates || []).find((d) => d.date === date || d.file === date);
+        if (hit) { data = await fetch(`${base}history/${hit.file}`).then((r) => r.json()); archived = hit; }
+        else feedNotice = `No archived board for ${date}.`;
+      } catch (e) { feedNotice = `Archive unavailable (${e.message}).`; }
+    }
+    if (!data) {
+      try { const r = await fetch(url, { cache: "no-store" }); if (!r.ok) throw new Error(`HTTP ${r.status}`); data = await r.json(); }
+      catch (e) { data = await fetch(cfg.sample).then((r) => r.json()); feedNotice = `The live feed is not reachable (${e.message}). Showing a sample board so the layout can be reviewed; nothing on it is a current projection.`; }
+    }
+    if (archived) data.__archived = archived;
+    const vm = S.ADAPTERS[sport].board(data);
+    vm.howToRead = S.HOW_TO_READ.map(([term, def]) => ({ term, def }));
+    vm.otherSports = S.ORDER.filter((k) => k !== sport).map((k, i) => ({ name: S.SPORTS[k].name, href: S.SPORTS[k].host, style: i === 0 ? "margin-left:10px;padding-left:22px;border-left:1px solid #d6d3cc;" : "" }));
+    this.setState({ vm, feedNotice, sportKey: sport, deployed });
+  }
+  componentDidMount() { this.load(); }
+  componentDidUpdate() { this.load(); }
+  renderVals() {
+    const vm = this.state.vm;
+    const links = { board: "Board.dc.html", results: "Results.dc.html", archive: "Archive.dc.html", graphic: "Graphic.dc.html" };
+    if (!vm) return { links, groups: [], strip: [], howToRead: [], otherSports: [], title1: "Tonight's", title2: "Board." };
+    const groups = vm.groups.map((d) => ({ ...d, games: d.games.map((g) => ({ ...g, hasBar: g.bar.length > 0,
+      cells: g.cells.map((c) => ({ ...c, rows: c.rows.map((r) => ({ ...r, weight: r.bold ? 600 : 400 })) })),
+      pick: { ...g.pick, isBet: g.pick.kind === "bet", isLean: g.pick.kind === "lean", isPass: g.pick.kind === "pass", isNone: g.pick.kind === "none" } })) }));
+    return { ...vm, links, groups, sportLong: vm.sport.longName, title1: vm.title[0], title2: vm.title[1],
+      hasNotice: !!vm.notice, hasFeedNotice: !!this.state.feedNotice, feedNotice: this.state.feedNotice || "",
+      isArchived: !!vm.archived, archivedLabel: vm.archived ? `As published for ${vm.archived.date}${vm.archived.slot ? ` (${vm.archived.slot} card)` : ""} · built ${vm.updated}` : "" };
+  }
+}
+</script>
+</body>
+</html>

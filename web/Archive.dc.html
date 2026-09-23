@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <title>Archive — Maverick Hightower</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    html, body { margin: 0; padding: 0; background: #f4f2ee; color: #14151a; font-family: "IBM Plex Sans", Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+    * { box-sizing: border-box; }
+    a { color: #14151a; text-decoration: none; }
+    a:hover { color: #2a2d3a; text-decoration: underline; text-underline-offset: 3px; }
+  </style>
+</helmet>
+<div data-screen-label="Archive" style="min-height:100vh;background:#f4f2ee;color:#14151a;">
+  <div style="max-width:1240px;margin:0 auto;padding:0 clamp(16px,3vw,24px) 80px;">
+    <header style="border-top:4px solid #14151a;border-bottom:1px solid #14151a;padding:14px 0 12px;display:flex;align-items:center;justify-content:space-between;gap:12px 16px;flex-wrap:wrap;">
+      <a href="https://maverickhightower.com/" style="display:flex;align-items:center;gap:12px;">
+        <span style="width:36px;height:36px;background:#14151a;color:#f4f2ee;display:grid;place-items:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:18px;letter-spacing:.04em;">MH</span>
+        <span style="display:flex;flex-direction:column;line-height:1.1;">
+          <span style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#6b6e7a;">Maverick Hightower</span>
+          <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;letter-spacing:.02em;text-transform:uppercase;">{{ sportLong }}</span>
+        </span>
+      </a>
+      <nav style="display:flex;gap:14px 22px;font-size:13px;letter-spacing:.1em;text-transform:uppercase;font-weight:500;flex-wrap:wrap;">
+        <a href="Board.dc.html">Board</a>
+        <a href="Results.dc.html">Results</a>
+        <a href="Archive.dc.html" style="border-bottom:2px solid #14151a;padding-bottom:2px;">Archive</a>
+        <a href="Graphic.dc.html">Graphic</a>
+        <sc-for list="{{ otherSports }}" as="s" hint-placeholder-count="2"><a href="{{ s.href }}" style="{{ s.style }}">{{ s.name }}</a></sc-for>
+      </nav>
+    </header>
+
+    <section style="padding:40px 0 28px;border-bottom:1px solid #14151a;">
+      <div style="font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#6b6e7a;margin-bottom:10px;">{{ sportName }} · every board, frozen at publication</div>
+      <h1 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:clamp(56px,9vw,112px);line-height:.9;letter-spacing:-.01em;text-transform:uppercase;">The<br>Record.</h1>
+      <p style="margin:18px 0 0;max-width:560px;font-size:17px;line-height:1.5;color:#2a2d3a;text-wrap:pretty;">Each day's board is frozen the moment it is first published and never edited. Open any date to see exactly what was said before the games were played.</p>
+    </section>
+
+    <sc-if value="{{ hasFeedNotice }}" hint-placeholder-val="{{ false }}">
+      <div style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:20px;align-items:start;padding:18px 0;border-bottom:1px solid #14151a;">
+        <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase;border:1px solid #14151a;padding:4px 9px;">Sample data</span>
+        <p style="margin:0;font-size:15px;line-height:1.5;color:#2a2d3a;max-width:760px;">{{ feedNotice }}</p>
+      </div>
+    </sc-if>
+
+    <section style="padding-top:44px;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;border-bottom:3px solid #14151a;padding-bottom:10px;">
+        <h2 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:34px;line-height:1;text-transform:uppercase;letter-spacing:.01em;">Published boards</h2>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#6b6e7a;">{{ count }} boards · newest first</div>
+      </div>
+      <sc-for list="{{ months }}" as="m" hint-placeholder-count="1">
+        <div style="display:flex;align-items:baseline;gap:14px;padding:26px 0 10px;border-bottom:1px solid #14151a;">
+          <h3 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:26px;text-transform:uppercase;letter-spacing:.02em;">{{ m.label }}</h3>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#6b6e7a;">{{ m.countLabel }}</span>
+        </div>
+        <sc-for list="{{ m.items }}" as="d" hint-placeholder-count="5">
+          <a href="{{ d.href }}" style="display:grid;grid-template-columns:minmax(0,1.4fr) repeat(auto-fit,minmax(110px,1fr));gap:8px 24px;align-items:baseline;padding:14px 0;border-bottom:1px solid #d6d3cc;">
+            <span style="font-weight:600;font-size:16px;">{{ d.label }}<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#6b6e7a;font-weight:400;margin-left:10px;">{{ d.slot }}</span></span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#2a2d3a;">{{ d.games }}</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#2a2d3a;">{{ d.bets }}</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#6b6e7a;text-align:right;">Open →</span>
+          </a>
+        </sc-for>
+      </sc-for>
+      <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+        <p style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#6b6e7a;padding:22px 0;">No boards have been published yet. The first one is frozen the morning it goes up.</p>
+      </sc-if>
+    </section>
+
+    <footer style="margin-top:56px;border-top:1px solid #14151a;padding-top:16px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#6b6e7a;">
+      <span>© 2026 Maverick Hightower</span>
+      <span>Frozen copies are the ones the record is settled from.</span>
+    </footer>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;sport&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;nhl&quot;,&quot;epl&quot;,&quot;cbb&quot;],&quot;default&quot;:&quot;nhl&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Preview&quot;}}">
+class Component extends DCLogic {
+  state = { months: [], count: 0, feedNotice: null, loadedFor: null, sport: null, otherSports: [] };
+  async load() {
+    const want = this.props.sport || "nhl";
+    if (this.state.loadedFor === want) return;
+    this.setState({ loadedFor: want });
+    const S = await import("./lib/sports.js"), F = await import("./lib/format.js");
+    const { sport, deployed } = await S.detectSport(want);
+    const cfg = S.SPORTS[sport];
+    const base = deployed ? "./data/" : cfg.sample.replace(/board\.json$/, "");
+    let idx = { dates: [] }, feedNotice = null;
+    try { const r = await fetch(`${base}history/index.json`, { cache: "no-store" }); if (!r.ok) throw new Error(`HTTP ${r.status}`); idx = await r.json(); }
+    catch (e) { feedNotice = `The archive index is not reachable (${e.message}).`; }
+    const dates = [...(idx.dates || [])].sort((a, b) => (a.date < b.date ? 1 : -1));
+    const mf = new Intl.DateTimeFormat(undefined, { month: "long", year: "numeric" });
+    const by = new Map();
+    for (const d of dates) {
+      const [y, m, dd] = d.date.split("-").map(Number), dt = new Date(y, m - 1, dd), k = `${y}-${m}`;
+      if (!by.has(k)) by.set(k, { label: mf.format(dt), items: [] });
+      by.get(k).items.push({ href: `Board.dc.html?date=${encodeURIComponent(d.file || d.date)}`, label: F.fmtDateOnly(d.date), slot: d.slot ? `${d.slot} card` : d.note || "",
+        games: typeof d.games === "number" ? `${d.games} ${sport === "epl" ? "fixtures" : "games"}` : "", bets: typeof d.bets === "number" ? `${d.bets} best bet${d.bets === 1 ? "" : "s"}` : "" });
+    }
+    const months = [...by.values()].map((m) => ({ ...m, countLabel: `${m.items.length} board${m.items.length === 1 ? "" : "s"}` }));
+    const otherSports = S.ORDER.filter((k) => k !== sport).map((k, i) => ({ name: S.SPORTS[k].name, href: S.SPORTS[k].host, style: i === 0 ? "margin-left:10px;padding-left:22px;border-left:1px solid #d6d3cc;" : "" }));
+    this.setState({ months, count: dates.length, feedNotice, sport: cfg, otherSports });
+  }
+  componentDidMount() { this.load(); }
+  componentDidUpdate() { this.load(); }
+  renderVals() {
+    const s = this.state;
+    return { months: s.months, count: s.count, isEmpty: s.loadedFor && s.count === 0, hasFeedNotice: !!s.feedNotice, feedNotice: s.feedNotice || "", otherSports: s.otherSports,
+      sportLong: s.sport ? s.sport.longName : "", sportName: s.sport ? s.sport.name : "" };
+  }
+}
+</script>
+</body>
+</html>

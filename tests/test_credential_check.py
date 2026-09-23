@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -227,3 +228,103 @@ def test_workflow_never_echoes_the_credential() -> None:
     assert "echo $EPL_ODDS_API_KEY" not in text
     assert "echo ${EPL_ODDS_API_KEY}" not in text
     assert "print(os.environ[" not in text
+
+
+# --- what the key is entitled to price -------------------------------------
+#
+# Adding a competition means writing a sport key into the collector, and a
+# wrong key does not raise: the provider returns nothing for it and the feed
+# stays empty, quietly, until somebody notices months later. The sports list
+# was already being fetched here and discarded, so reporting it costs no quota
+# and no extra call.
+
+
+class _SportsResponse(_Response):
+    def __init__(self, body, status: int = 200) -> None:
+        super().__init__(status)
+        self._body = body
+
+    def json(self):
+        if isinstance(self._body, Exception):
+            raise self._body
+        return self._body
+
+
+def _check_with_body(body, status: int = 200):
+    return check_provider_credential(
+        {API_KEY_ENV: FAKE_KEY},
+        requester=lambda url, **kw: _SportsResponse(body, status),
+        now=NOW,
+    )
+
+
+SPORTS_BODY = [
+    {"key": "soccer_epl", "title": "Premier League", "active": True},
+    {"key": "soccer_uefa_nations_league", "title": "UEFA Nations League", "active": False},
+    {"key": "basketball_nba", "title": "NBA", "active": True},
+]
+
+
+def test_the_soccer_competitions_are_reported() -> None:
+    report = _check_with_body(SPORTS_BODY)
+
+    keys = [entry["key"] for entry in report["soccer_sports"]]
+    assert keys == ["soccer_epl", "soccer_uefa_nations_league"]
+    assert report["soccer_sports"][1]["active"] is False
+
+
+def test_other_sports_are_not_reported() -> None:
+    """This project prices football. A basketball key in the list is noise in
+    the one report someone reads to find out what a competition is called."""
+    report = _check_with_body(SPORTS_BODY)
+
+    assert all(entry["key"].startswith("soccer") for entry in report["soccer_sports"])
+
+
+def test_the_listing_appears_in_the_printed_lines() -> None:
+    lines = render_credential_check(_check_with_body(SPORTS_BODY))
+    text = "\n".join(lines)
+
+    assert "soccer_uefa_nations_league" in text
+    assert "UEFA Nations League" in text
+    assert "out of season" in text, (
+        "a competition between tournaments still has a key worth knowing, and "
+        "reporting it without saying it is dormant reads as a broken feed"
+    )
+
+
+def test_the_listing_never_carries_the_credential() -> None:
+    """The one rule this module exists to keep."""
+    report = _check_with_body(SPORTS_BODY)
+
+    assert FAKE_KEY not in json.dumps(report)
+    assert FAKE_KEY not in "\n".join(render_credential_check(report))
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        ValueError("not json"),
+        {"message": "an object, not a list"},
+        ["a bare string", 7, None],
+        [],
+    ],
+    ids=["unparseable", "not-a-list", "junk-entries", "empty"],
+)
+def test_a_body_that_is_not_a_sports_list_does_not_break_the_check(body) -> None:
+    """Diagnostics riding along on a credential check must never be the reason
+    the credential check fails. The question being answered is "does the key
+    work", and it still has an answer when the body is unexpected."""
+    report = _check_with_body(body)
+
+    assert report["authenticated"] is True
+    assert report["soccer_sports"] == []
+
+
+def test_a_rejected_credential_claims_no_competitions() -> None:
+    """A 401 body is an error document. Reading competitions out of it would
+    report an entitlement the key does not have."""
+    report = _check_with_body(SPORTS_BODY, status=401)
+
+    assert report["authenticated"] is False
+    assert not report.get("soccer_sports")

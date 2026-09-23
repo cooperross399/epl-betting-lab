@@ -1,0 +1,63 @@
+name: Find Competition Fixtures
+
+# Manual only, like the credential check it is modelled on. This asks the
+# provider "do you carry a fixture between these teams, under ANY competition",
+# which the sports list cannot answer: a competition can be filed under a
+# generic key, bundled into another feed, or simply absent, and all three look
+# the same from a name.
+#
+# It reads `/v4/sports/{sport}/events`, which returns fixtures WITHOUT odds and
+# costs no quota. No odds are requested, no selection is made, no bet is
+# placed, and nothing is written to the repository.
+on:
+  workflow_dispatch:
+    inputs:
+      all_sports:
+        description: "Search competitions that are out of season too"
+        type: boolean
+        required: false
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  find-fixtures:
+    name: Find Competition Fixtures
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install project
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install -e .
+
+      - name: Search for fixtures
+        # The secret is passed as an environment variable and never echoed.
+        env:
+          EPL_ODDS_API_KEY: ${{ secrets.EPL_ODDS_API_KEY }}
+          PYTHONPATH: src
+        run: |
+          ARGS=""
+          if [ "${{ inputs.all_sports }}" = "true" ]; then ARGS="--all-sports"; fi
+          python scripts/find_competition_fixtures.py $ARGS
+
+      - name: Scope reminder
+        if: always()
+        run: |
+          echo "This job lists fixtures only. It requested no odds, consumed no"
+          echo "quota, made no selection, and placed no bet."

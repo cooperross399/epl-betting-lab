@@ -264,3 +264,86 @@ class TestThePoolSaysHowStaleItIs:
 
         assert pool.days_behind(latest) == 0
         assert pool.days_behind(latest + pd.Timedelta(days=28)) == 28
+
+
+class TestEachCompetitionGetsItsOwnBaseline:
+    """Pooling the baselines across competitions was the same error as pooling
+    them across venues, one level deeper. Real-venue matches since 2014: the
+    pool shows +0.656 goals of home advantage, the UEFA Nations League +0.346,
+    friendlies +0.767. Pricing a Nations League fixture with the pool's number
+    applies nearly double the home advantage the competition has, on every
+    fixture, in one direction — on the live feed the model called the home side
+    0.614 in draw-no-bet where the de-vigged market said 0.563.
+    """
+
+    @staticmethod
+    def _mixed_pool():
+        """Two competitions with deliberately different home advantages."""
+        rows = [
+            f"20{15 + i // 12:02d}-{1 + i % 12:02d}-05,Spain,France,{hg},{ag},"
+            f"{tournament},Town,Country,{neutral}"
+            for tournament, hg, ag, neutral, count in (
+                ("UEFA Nations League", 2, 2, "FALSE", 260),
+                ("Friendly", 4, 0, "FALSE", 260),
+                ("UEFA Nations League", 1, 1, "TRUE", 260),
+            )
+            for i in range(count)
+        ]
+        return build_international_pool(results=parse_archive(_archive(*rows)))
+
+    def test_a_competition_with_enough_matches_gets_its_own(self) -> None:
+        model = fit_international_model(self._mixed_pool())
+
+        unl = model.competition_baselines[("UNL", False)]
+        friendly = model.competition_baselines[("FRIENDLY", False)]
+
+        assert unl == pytest.approx((2.0, 2.0))
+        assert friendly == pytest.approx((4.0, 0.0))
+        assert unl != friendly, "both competitions got the same pooled number"
+
+    def test_the_venue_and_neutral_baselines_stay_separate(self) -> None:
+        """Keyed on (competition, neutral). Collapsing the key would price a
+        real-venue fixture off neutral matches, which is the original bug in a
+        new place."""
+        model = fit_international_model(self._mixed_pool())
+
+        assert model.competition_baselines[("UNL", False)] == pytest.approx((2.0, 2.0))
+        assert model.competition_baselines[("UNL", True)] == pytest.approx((1.0, 1.0))
+
+    def test_a_thin_competition_falls_back_to_the_pool(self) -> None:
+        """A mean over a handful of matches is noise wearing the shape of a
+        correction, so below the threshold the competition gets no entry and
+        `expected_goals` uses the pool's."""
+        rows = (
+            [
+                f"20{15 + i // 12:02d}-{1 + i % 12:02d}-05,Spain,France,2,2,"
+                "UEFA Nations League,Town,Country,FALSE"
+                for i in range(260)
+            ]
+            + [
+                f"20{15 + i // 12:02d}-{1 + i % 12:02d}-05,Spain,France,5,0,"
+                "Gold Cup,Town,Country,FALSE"
+                for i in range(10)
+            ]
+            + [
+                f"20{15 + i // 12:02d}-{1 + i % 12:02d}-05,Italy,Germany,1,1,"
+                "UEFA Nations League,Town,Country,TRUE"
+                for i in range(260)
+            ]
+        )
+        model = fit_international_model(
+            build_international_pool(results=parse_archive(_archive(*rows)))
+        )
+
+        assert ("GOLD", False) not in model.competition_baselines
+        assert ("UNL", False) in model.competition_baselines
+
+    def test_expected_goals_uses_the_competition_when_told(self) -> None:
+        model = fit_international_model(self._mixed_pool())
+
+        pooled = model.expected_goals("Spain", "France", neutral=False)
+        as_unl = model.expected_goals("Spain", "France", neutral=False, competition="UNL")
+
+        assert pooled != as_unl, (
+            "naming the competition changed nothing, so the baseline is not used"
+        )

@@ -57,6 +57,7 @@ from epl_betting_lab.data.international_teams import archive_name
 from epl_betting_lab.models.international_ratings import (
     INTERNATIONAL_RATINGS,
     build_international_pool,
+    fit_international_model,
 )
 from epl_betting_lab.models.european_ratings import (
     EUROPEAN_RATINGS,
@@ -93,6 +94,28 @@ EXCLUDED_MARKETS = ("1x2",)
 MAX_EXTRA_BETS = 4
 
 
+#: Markets a pool may not bet, beyond the card-wide exclusions.
+#:
+#: The international pool does not bet the goals LEVEL. Measured against the
+#: de-vigged market on 45 live Nations League fixtures, the model put P(over
+#: 2.5) at 0.418 where the market said 0.499 — 8 points low, the same direction
+#: on every fixture, so every "under" and every "BTTS no" it produced was that
+#: gap rather than anything about the fixture. Three of the first four
+#: selections it ever made were low-scoring bets.
+#:
+#: A competition-specific baseline did not fix it and is not meant to: it fixes
+#: the strength DIFFERENCE, closing the draw-no-bet gap from +0.051 to +0.021.
+#: On the level it moves the wrong way, because this competition's own mean
+#: total (2.53) is below the pool's (2.72) while the market prices above both
+#: at about 2.69. Three defensible baselines span 0.36 goals, the market sits
+#: outside all of them, and no free archive carries international prices — so
+#: nothing can adjudicate it. The honest response is to bet the markets the
+#: model can price and not the ones it cannot.
+POOL_EXCLUDED_MARKETS: dict[str, frozenset[str]] = {
+    "international": frozenset({"total_2_5", "btts"}),
+}
+
+
 @dataclass(frozen=True)
 class CompetitionSpec:
     key: str
@@ -112,30 +135,24 @@ COMPETITIONS: dict[str, CompetitionSpec] = {
             "National teams, on a pool that shares no information with the club "
             "ratings — a country has never played any club in them, so nothing "
             "bridges the two and this is a second model. It **cannot be "
-            "backtested**: the free results archive carries no prices, and "
-            "Football-Data ships closing odds beside every club result, which is "
-            "how the EFL got a 10,000-bet answer in a weekend. This one can only "
-            "be judged forward, at roughly 80 matches a year. Two expected "
-            "problems measured out **not** to apply here — the seeding keeps "
-            "League A away from League D, so 0.3% of fixtures have a favourite "
-            "above 90% and none above 95%, and a team's rating survives squad "
-            "turnover (r = +0.82 across seven years). One applies and cannot be "
-            "fixed: **5.2% of these matches are at neutral venues and the price "
-            "feed does not say which**, so those are priced with a home "
-            "advantage worth about half a goal that one side does not have. "
-            "The provider quotes all eight card markets here — the only "
-            "competition outside the Champions League that does — but the "
-            "results archive carries no corner counts, so **the three corner "
-            "markets are priced by nobody and cannot be bet**. And treat a "
-            "large edge here as a large model error first. The raw model made "
-            "Liechtenstein v Lithuania under 2.5 a +18.9% edge, calling it "
-            "76.6% against a market at 57.6%, when only 47.3% of "
-            "Liechtenstein's 110 matches since 2014 went under; calibration cut "
-            "that to the +8.0% the card carried. This card selects on the "
-            "biggest disagreements, which is where a model is most often simply "
-            "wrong — and where the largest correction is applied, so the number "
-            "shown has already been pulled toward the market."
-        ),
+            "backtested**: no free archive carries international prices, so it "
+            "can only be judged forward, at roughly 80 matches a year. "
+            "**Only the result markets are bet here.** Measured against the "
+            "de-vigged market across 45 live fixtures, the model put the chance "
+            "of over 2.5 goals at 0.418 where the market said 0.499 — eight "
+            "points low, the same way on every fixture — so `total_2_5` and "
+            "`btts` are priced by a standing gap rather than by the fixture, and "
+            "are withheld. Three of the first four selections this section ever "
+            "made were low-scoring bets off that gap. The baselines are now "
+            "this competition's own rather than the pool's, which halved a "
+            "separate bias: it was applying +0.656 goals of home advantage "
+            "where the Nations League's own is +0.346. Two expected problems "
+            "measured out **not** to apply — seeding keeps League A away from "
+            "League D, so 0.3% of fixtures have a favourite above 90% and none "
+            "above 95%, and a rating survives squad turnover (r = +0.82 across "
+            "seven years). One remains and cannot be fixed from the feed: 5.2% "
+            "of these matches are at neutral venues and the price feed does not "
+            "say which, so those carry a home advantage one side does not have."),
     ),
     "EFLC": CompetitionSpec(
         key="EFLC",
@@ -251,6 +268,18 @@ def latest_prices(feed: pd.DataFrame, competition: str) -> pd.DataFrame:
 
 
 def _pool_for(spec: CompetitionSpec):
+    """Matches, rating config, and a baseline override where one is needed.
+
+    The override exists because `PoissonGoalsModel` takes its two baselines
+    from the mean of whatever frame it is fitted on. For a domestic league that
+    is right: every row is one competition, played at a real venue. For the
+    international pool it is neither — the frame mixes competitions whose home
+    advantage ranges from +0.35 goals to +0.77, and mixes real-venue rows with
+    neutral ones. Fitted on that frame the model priced every Nations League
+    fixture with the pool's +0.656 when the competition's own is +0.346, and on
+    the live feed called the home side 0.614 in draw-no-bet where the de-vigged
+    market said 0.563.
+    """
     if spec.pool == "international":
         # Priced as a home fixture, which is right for 94.8% of Nations League
         # matches and wrong for the rest. `InternationalModel.expected_goals`
@@ -260,12 +289,18 @@ def _pool_for(spec: CompetitionSpec):
         # home/away path as every other competition and the note says what that
         # costs. The pool's own baselines still come out of a venue-aware fit.
         pool = build_international_pool()
-        return pool.matches, INTERNATIONAL_RATINGS
+        fitted = fit_international_model(pool)
+        # Priced as a real-venue fixture: the feed carries no venue and 94.8%
+        # of Nations League matches are played at one. `expected_goals` refuses
+        # to guess a venue; this layer has to choose one, and it says so on the
+        # card rather than in a comment.
+        baseline = fitted.competition_baselines.get((spec.key, False))
+        return pool.matches, INTERNATIONAL_RATINGS, baseline
     if spec.pool == "english":
         matches = build_pool()
-        return matches, UNIFIED_RATINGS
+        return matches, UNIFIED_RATINGS, None
     pool = build_european_pool()
-    return pool.matches, EUROPEAN_RATINGS
+    return pool.matches, EUROPEAN_RATINGS, None
 
 
 def build_extra_card(
@@ -280,10 +315,21 @@ def build_extra_card(
     if prices.empty:
         return ExtraCard(pd.DataFrame(), [f"No {spec.name} price on file."])
 
-    matches, config = _pool_for(spec)
+    matches, config, baseline = _pool_for(spec)
     model = PoissonGoalsModel().fit(matches, config=config)
+    if baseline is not None:
+        # Every market the card prices comes off the score matrix, which comes
+        # off these two numbers, so correcting them corrects totals, BTTS,
+        # double chance and draw-no-bet at once.
+        model.avg_home_goals, model.avg_away_goals = baseline
 
     notes: list[str] = []
+    for market in sorted(POOL_EXCLUDED_MARKETS.get(spec.pool, ())):
+        notes.append(
+            f"`{market}` is not bet here: the model sits about 8 points below "
+            "the market on the goals level for every fixture, so a selection in "
+            "that market would be the gap rather than the fixture."
+        )
     if spec.pool == "international":
         # The results archive behind this pool runs about a month behind, so by
         # a window's third matchday the fit has not seen the first two. Said out
@@ -364,7 +410,8 @@ def build_extra_card(
         )
 
     selections = pd.concat(frames, ignore_index=True)
-    selections = selections[~selections["market"].isin(EXCLUDED_MARKETS)].copy()
+    barred = set(EXCLUDED_MARKETS) | set(POOL_EXCLUDED_MARKETS.get(spec.pool, ()))
+    selections = selections[~selections["market"].isin(barred)].copy()
     if selections.empty:
         return ExtraCard(
             pd.DataFrame(),

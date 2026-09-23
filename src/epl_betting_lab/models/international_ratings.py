@@ -162,6 +162,14 @@ def build_international_pool(
     )
 
 
+#: A competition needs this many matches of a venue type before it gets its own
+#: baseline. Below it the competition falls back to the pool's, because a mean
+#: taken over a handful of matches is noise wearing the shape of a correction.
+#: The UEFA Nations League clears it on real venues (624) and does not on
+#: neutral ones (34), which is exactly the split this threshold is for.
+MIN_BASELINE_MATCHES = 200
+
+
 @dataclass
 class InternationalModel:
     """A fitted pool that knows the difference between a venue and a field.
@@ -177,15 +185,39 @@ class InternationalModel:
     neutral_home: float
     neutral_away: float
     rateable: set[str]
+    #: (competition, neutral) -> (home, away) baseline, where the competition
+    #: has enough matches of that venue type to support one.
+    #:
+    #: Pooling the baselines across competitions was wrong in the same way
+    #: pooling them across venues was, one level deeper. Real-venue matches
+    #: since 2014: the pool shows +0.656 goals of home advantage, the UEFA
+    #: Nations League +0.346, the CONCACAF Nations League +0.498, friendlies
+    #: +0.767, regional cups +0.710. Pricing a Nations League fixture with the
+    #: pool's number applies nearly double the home advantage the competition
+    #: actually has, on every fixture, in one direction — and on the live feed
+    #: that showed up as the model calling the home side 0.614 in draw-no-bet
+    #: where the de-vigged market said 0.563.
+    competition_baselines: dict[tuple[str, bool], tuple[float, float]] = field(
+        default_factory=dict
+    )
 
     def expected_goals(
-        self, home_team: str, away_team: str, *, neutral: bool
+        self,
+        home_team: str,
+        away_team: str,
+        *,
+        neutral: bool,
+        competition: str | None = None,
     ) -> tuple[float, float]:
-        """Expected goals, with the baseline the venue calls for.
+        """Expected goals, with the baseline the venue and competition call for.
 
         `neutral` has no default on purpose. A third of these fixtures are on
         neutral ground and the wrong baseline is worth half a goal, so a caller
         that has not thought about it should not compile.
+
+        `competition` does default, because a caller that does not know which
+        competition it is pricing is better served by the pooled baseline than
+        by an error — but passing it is what makes the price right.
         """
         for team in (home_team, away_team):
             if team not in self.rateable:
@@ -194,8 +226,12 @@ class InternationalModel:
                     "so it has no rating. Pricing it would invent one."
                 )
         strengths = self.model.team_strengths
-        base_home = self.neutral_home if neutral else self.venue_home
-        base_away = self.neutral_away if neutral else self.venue_away
+        specific = self.competition_baselines.get((competition, neutral))
+        if specific is not None:
+            base_home, base_away = specific
+        else:
+            base_home = self.neutral_home if neutral else self.venue_home
+            base_away = self.neutral_away if neutral else self.venue_away
         home = base_home * strengths[home_team].attack * strengths[away_team].defense
         away = base_away * strengths[away_team].attack * strengths[home_team].defense
         return float(home), float(away)
@@ -219,6 +255,15 @@ def fit_international_model(
             "The pool has no matches of one venue type, so one of the two "
             "baselines would be fitted on nothing and silently equal the other."
         )
+    competition_baselines: dict[tuple[str, bool], tuple[float, float]] = {}
+    for (competition, is_neutral), rows in frame.groupby(["competition", "neutral"]):
+        if len(rows) < MIN_BASELINE_MATCHES:
+            continue
+        competition_baselines[(str(competition), bool(is_neutral))] = (
+            float(rows["home_goals"].mean()),
+            float(rows["away_goals"].mean()),
+        )
+
     return InternationalModel(
         model=model,
         venue_home=float(venue["home_goals"].mean()),
@@ -226,4 +271,5 @@ def fit_international_model(
         neutral_home=float(neutral["home_goals"].mean()),
         neutral_away=float(neutral["away_goals"].mean()),
         rateable=pool.rateable,
+        competition_baselines=competition_baselines,
     )

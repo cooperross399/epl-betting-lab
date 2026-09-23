@@ -328,3 +328,21 @@ def test_a_rejected_credential_claims_no_competitions() -> None:
 
     assert report["authenticated"] is False
     assert not report.get("soccer_sports")
+
+
+def test_the_listing_asks_for_dormant_competitions_too() -> None:
+    """Without `all=true` the endpoint returns only what is in season.
+
+    Asked without it in September 2026 it returned 43 soccer competitions,
+    every one active — so a competition between tournaments is indistinguishable
+    from one the key cannot price at all. The listing exists to answer "what is
+    the sport key for X", and under the default that answer is silently wrong
+    for every competition not currently being played.
+    """
+    _, calls = _check(200)
+
+    assert calls[0]["params"].get("all") == "true", (
+        "the sports listing is in-season-only without this, so a dormant "
+        "competition reads as an unavailable one"
+    )
+    assert calls[0]["params"]["apiKey"] == FAKE_KEY

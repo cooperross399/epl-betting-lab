@@ -100,7 +100,15 @@ def check_provider_credential(
     try:
         response = request(
             report["endpoint"],
-            params={"apiKey": api_key},
+            # `all=true` because the default response is IN-SEASON ONLY. Asked
+            # without it in September 2026 the endpoint returned 43 soccer
+            # competitions, every one of them active — a list that cannot tell
+            # "this key cannot price that competition" from "that competition
+            # is between tournaments this week". Since the listing exists to
+            # answer "what sport key do I write for X", an absence that means
+            # two different things is the wrong answer half the time. Still the
+            # free endpoint; `all` does not cost quota.
+            params={"apiKey": api_key, "all": "true"},
             timeout=timeout_seconds,
         )
     except Exception as exc:  # message may quote the URL, so scrub it

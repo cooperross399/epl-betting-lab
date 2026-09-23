@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+<x-dc>
+<helmet>
+  <title>EPL Projections — Maverick Hightower</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    html, body { margin: 0; padding: 0; background: #f4f2ee; color: #14151a; font-family: "IBM Plex Sans", Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+    * { box-sizing: border-box; }
+    a { color: #14151a; text-decoration: none; }
+    a:hover { color: #2a2d3a; text-decoration: underline; text-underline-offset: 3px; }
+  </style>
+</helmet>
+<div data-screen-label="EPL Board" style="min-height:100vh;background:#f4f2ee;color:#14151a;">
+  <div style="max-width:1240px;margin:0 auto;padding:0 24px 80px;">
+
+    <header style="border-top:4px solid #14151a;border-bottom:1px solid #14151a;padding:14px 0 12px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+      <a href="https://maverickhightower.com/" style="display:flex;align-items:center;gap:12px;">
+        <span style="width:36px;height:36px;background:#14151a;color:#f4f2ee;display:grid;place-items:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:18px;letter-spacing:.04em;">MH</span>
+        <span style="display:flex;flex-direction:column;line-height:1.1;">
+          <span style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#6b6e7a;">Maverick Hightower</span>
+          <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;letter-spacing:.02em;text-transform:uppercase;">EPL Projections</span>
+        </span>
+      </a>
+      <nav style="display:flex;gap:22px;font-size:13px;letter-spacing:.1em;text-transform:uppercase;font-weight:500;">
+        <a href="https://nhl.maverickhightower.com/">NHL</a>
+        <a href="https://epl.maverickhightower.com/" style="border-bottom:2px solid #14151a;padding-bottom:2px;">EPL</a>
+        <a href="https://cbb.maverickhightower.com/">CBB</a>
+      </nav>
+    </header>
+
+    <section style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px 40px;align-items:end;padding:40px 0 28px;border-bottom:1px solid #14151a;">
+      <div style="min-width:0;">
+        <div style="font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#6b6e7a;margin-bottom:10px;">{{ season }} Premier League · <span hint-placeholder="Matchday window">{{ windowLabel }}</span></div>
+        <h1 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:clamp(56px,9vw,112px);line-height:.9;letter-spacing:-.01em;text-transform:uppercase;">This week's<br>Board.</h1>
+        <p style="margin:18px 0 0;max-width:560px;font-size:17px;line-height:1.5;color:#2a2d3a;text-wrap:pretty;">Model-projected goals, outcome probabilities and market context for every Premier League fixture in this card's window. Match result is not on the card; the model's fair price is shown for reference only.</p>
+      </div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.7;color:#6b6e7a;text-align:right;">
+        <div style="text-transform:uppercase;letter-spacing:.1em;">Updated</div>
+        <div style="color:#14151a;">{{ updatedLabel }}</div>
+        <div>Kickoffs shown in {{ tz }}</div>
+      </div>
+    </section>
+
+    <sc-if value="{{ hasNotice }}" hint-placeholder-val="{{ false }}">
+      <div style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:20px;align-items:start;padding:18px 0;border-bottom:1px solid #14151a;">
+        <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase;background:#14151a;color:#f4f2ee;padding:5px 9px;">Quiet week</span>
+        <p style="margin:0;font-size:15px;line-height:1.5;color:#2a2d3a;max-width:760px;text-wrap:pretty;">{{ notice }}</p>
+      </div>
+    </sc-if>
+
+    <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));border-bottom:1px solid #14151a;">
+      <div style="padding:22px 24px 22px 0;border-right:1px solid #d6d3cc;">
+        <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#6b6e7a;">Settled selections</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:44px;line-height:1;margin-top:8px;">{{ rec.settled }}</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#2a2d3a;margin-top:6px;">{{ rec.won }} won · {{ rec.pending }} pending · {{ rec.void }} void</div>
+      </div>
+      <div style="padding:22px 24px;border-right:1px solid #d6d3cc;">
+        <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#6b6e7a;">Profit on turnover</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:44px;line-height:1;margin-top:8px;">{{ rec.roi }}</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#2a2d3a;margin-top:6px;">{{ rec.profit }} units on {{ rec.staked }} staked</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#6b6e7a;margin-top:4px;text-transform:uppercase;letter-spacing:.08em;">no demonstrated edge</div>
+      </div>
+      <div style="padding:22px 24px;border-right:1px solid #d6d3cc;">
+        <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#6b6e7a;">Awaiting results feed</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:44px;line-height:1;margin-top:8px;">{{ rec.awaiting }}</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#2a2d3a;margin-top:6px;">played, not yet settled · record is behind, not accumulating</div>
+      </div>
+      <div style="padding:22px 0 22px 24px;">
+        <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#6b6e7a;">Time to an answer</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:44px;line-height:1;margin-top:8px;">~{{ rec.toAnswer }}</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#2a2d3a;margin-top:6px;">settled bets to separate a real 5% edge from zero</div>
+      </div>
+    </section>
+
+    <sc-if value="{{ hasFeedNotice }}" hint-placeholder-val="{{ false }}">
+      <div style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:20px;align-items:start;padding:18px 0;border-bottom:1px solid #14151a;">
+        <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase;border:1px solid #14151a;color:#14151a;padding:4px 9px;">Sample data</span>
+        <p style="margin:0;font-size:15px;line-height:1.5;color:#2a2d3a;max-width:760px;text-wrap:pretty;">{{ feedNotice }}</p>
+      </div>
+    </sc-if>
+
+    <section style="padding-top:44px;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;border-bottom:3px solid #14151a;padding-bottom:10px;">
+        <h2 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:34px;line-height:1;text-transform:uppercase;letter-spacing:.01em;">Model projections</h2>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#6b6e7a;">Showing {{ gameCount }} fixtures · {{ betsCount }} best bets · {{ leansCount }} leans · a unit is ${{ unit }} · American prices</div>
+      </div>
+
+      <sc-for list="{{ days }}" as="day" hint-placeholder-count="1">
+        <div style="display:flex;align-items:baseline;gap:14px;padding:26px 0 10px;border-bottom:1px solid #14151a;">
+          <h3 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:26px;text-transform:uppercase;letter-spacing:.02em;">{{ day.label }}</h3>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#6b6e7a;">{{ day.countLabel }}</span>
+        </div>
+
+        <sc-for list="{{ day.games }}" as="g" hint-placeholder-count="4">
+          <article style="display:grid;grid-template-columns:120px minmax(280px,1.4fr) minmax(0,2fr);gap:0 28px;padding:20px 0;border-bottom:1px solid #d6d3cc;align-items:start;opacity:{{ g.opacity }};">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.6;color:#6b6e7a;">
+              <div style="color:#14151a;font-weight:600;font-size:15px;">{{ g.time }}</div>
+              <div>{{ g.tv }}</div>
+              <div style="margin-top:8px;font-size:11px;">{{ g.venue }}</div>
+              <div style="font-size:11px;">{{ g.city }}</div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:10px;min-width:0;">
+              <div style="display:flex;align-items:center;gap:12px;">
+                <span style="width:38px;height:38px;border-radius:50%;flex:none;display:grid;place-items:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:15px;letter-spacing:.02em;background:{{ g.home.color }};color:{{ g.home.fg }};">{{ g.home.abbr }}</span>
+                <div style="flex:1;min-width:0;">
+                  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                    <span style="font-weight:600;font-size:16px;">{{ g.home.name }}</span>
+                    <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#6b6e7a;">{{ g.home.record }}</span>
+                  </div>
+                  <div style="font-size:12px;color:#6b6e7a;">Home</div>
+                </div>
+                <div style="text-align:right;flex:none;">
+                  <div style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:22px;line-height:1;">{{ g.home.proj }}</div>
+                  <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#6b6e7a;margin-top:3px;">{{ g.home.win }}</div>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:12px;">
+                <span style="width:38px;height:38px;border-radius:50%;flex:none;display:grid;place-items:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:15px;letter-spacing:.02em;background:{{ g.away.color }};color:{{ g.away.fg }};">{{ g.away.abbr }}</span>
+                <div style="flex:1;min-width:0;">
+                  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                    <span style="font-weight:600;font-size:16px;">{{ g.away.name }}</span>
+                    <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#6b6e7a;">{{ g.away.record }}</span>
+                  </div>
+                  <div style="font-size:12px;color:#6b6e7a;">Away</div>
+                </div>
+                <div style="text-align:right;flex:none;">
+                  <div style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:22px;line-height:1;">{{ g.away.proj }}</div>
+                  <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#6b6e7a;margin-top:3px;">{{ g.away.win }}</div>
+                </div>
+              </div>
+              <div style="height:4px;display:flex;background:#d6d3cc;margin-top:2px;">
+                <div style="width:{{ g.home.winWidth }};background:{{ g.home.color }};"></div>
+                <div style="width:{{ g.drawWidth }};background:#c9c7c0;"></div>
+                <div style="flex:1;background:{{ g.away.color }};"></div>
+              </div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#6b6e7a;">Draw {{ g.draw }}</div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:14px 18px;min-width:0;">
+              <div style="border-top:2px solid #14151a;padding-top:8px;">
+                <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#6b6e7a;">Match result · fair<div style="font-size:10px;color:#6b6e7a;margin-top:4px;">not on the card</div></div>
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;line-height:1.7;margin-top:6px;">
+                  <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;"><span style="color:#6b6e7a;">Home</span><span style="white-space:nowrap;margin-left:auto;">{{ g.fairHome }}</span></div>
+                  <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;"><span style="color:#6b6e7a;">Draw</span><span style="white-space:nowrap;margin-left:auto;">{{ g.fairDraw }}</span></div>
+                  <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;"><span style="color:#6b6e7a;">Away</span><span style="white-space:nowrap;margin-left:auto;">{{ g.fairAway }}</span></div>
+                </div>
+              </div>
+              <div style="border-top:2px solid #14151a;padding-top:8px;">
+                <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#6b6e7a;">Total 2.5</div>
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;line-height:1.7;margin-top:6px;">
+                  <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;"><span style="color:#6b6e7a;">Over</span><span style="white-space:nowrap;margin-left:auto;">{{ g.totOver }}</span></div>
+                  <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;"><span style="color:#6b6e7a;">Under</span><span style="white-space:nowrap;margin-left:auto;">{{ g.totUnder }}</span></div>
+                  <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;"><span style="color:#6b6e7a;">Model over</span><span style="white-space:nowrap;margin-left:auto;font-weight:600;">{{ g.totProb }}</span></div>
+                </div>
+              </div>
+              <div style="border-top:2px solid #14151a;padding-top:8px;">
+                <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#6b6e7a;">Both teams to score</div>
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;line-height:1.7;margin-top:6px;">
+                  <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;"><span style="color:#6b6e7a;">Yes</span><span style="white-space:nowrap;margin-left:auto;">{{ g.bttsYes }}</span></div>
+                  <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;"><span style="color:#6b6e7a;">No</span><span style="white-space:nowrap;margin-left:auto;">{{ g.bttsNo }}</span></div>
+                  <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;"><span style="color:#6b6e7a;">Model yes</span><span style="white-space:nowrap;margin-left:auto;font-weight:600;">{{ g.bttsProb }}</span></div>
+                </div>
+              </div>
+              <div style="border-top:2px solid #14151a;padding-top:8px;">
+                <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#6b6e7a;">Draw no bet</div>
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;line-height:1.7;margin-top:6px;">
+                  <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;"><span style="color:#6b6e7a;">Home</span><span style="white-space:nowrap;margin-left:auto;">{{ g.dnbHome }}</span></div>
+                  <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;"><span style="color:#6b6e7a;">Away</span><span style="white-space:nowrap;margin-left:auto;">{{ g.dnbAway }}</span></div>
+                  <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;"><span style="color:#6b6e7a;">Model home</span><span style="white-space:nowrap;margin-left:auto;font-weight:600;">{{ g.dnbProb }}</span></div>
+                </div>
+              </div>
+              <div style="border-top:2px solid #14151a;padding-top:8px;grid-column:1 / -1;">
+                <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#6b6e7a;">{{ g.pickHeading }}</div>
+                <sc-if value="{{ g.isBet }}" hint-placeholder-val="{{ true }}">
+                  <div style="margin-top:8px;background:#14151a;color:#f4f2ee;padding:8px 10px;">
+                    <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:20px;line-height:1;text-transform:uppercase;letter-spacing:.02em;">{{ g.pickLabel }}</div>
+                    <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;margin-top:5px;color:#c9c7c0;">{{ g.pickSub }}</div>
+                    <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;margin-top:2px;color:#c9c7c0;">Tier {{ g.tier }} · {{ g.stake }}</div>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ g.isLean }}" hint-placeholder-val="{{ false }}">
+                  <div style="margin-top:8px;border:1px dashed #14151a;padding:8px 10px;">
+                    <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:20px;line-height:1;text-transform:uppercase;letter-spacing:.02em;">{{ g.pickLabel }}</div>
+                    <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;margin-top:5px;color:#6b6e7a;">{{ g.pickSub }}</div>
+                    <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;margin-top:2px;color:#6b6e7a;">Lean · recorded, not staked</div>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ g.isPass }}" hint-placeholder-val="{{ false }}">
+                  <div style="margin-top:8px;border:1px solid #d6d3cc;padding:8px 10px;font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1.5;color:#6b6e7a;">Pass · {{ g.pickLabel }} at {{ g.pickPrice }}, edge {{ g.pickEdge }}</div>
+                </sc-if>
+                <sc-if value="{{ g.noPick }}" hint-placeholder-val="{{ false }}">
+                  <div style="margin-top:8px;border:1px dashed #6b6e7a;padding:8px 10px;font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1.5;color:#6b6e7a;">No market clears the edge bar</div>
+                </sc-if>
+                <sc-if value="{{ g.started }}" hint-placeholder-val="{{ false }}">
+                  <div style="margin-top:6px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#6b6e7a;text-transform:uppercase;letter-spacing:.08em;">Already started · stake removed · not a play</div>
+                </sc-if>
+              </div>
+            </div>
+          </article>
+        </sc-for>
+      </sc-for>
+    </section>
+
+    <footer style="margin-top:56px;border-top:1px solid #14151a;padding-top:16px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#6b6e7a;">
+      <span>© 2026 Maverick Hightower</span>
+      <span>Every number is a model projection. No edge here is a demonstrated edge, and no bet is ever placed.</span>
+    </footer>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;scenario&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Live feed&quot;,&quot;Sample week&quot;,&quot;Leans only&quot;,&quot;Empty week&quot;],&quot;default&quot;:&quot;Live feed&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Preview&quot;},&quot;dataUrl&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Data&quot;}}">
+class Component extends DCLogic {
+  state = { data: null, fmt: null, feed: null, feedNotice: null, loadedFor: null };
+  live = "./data/board.json";
+  sources = { "Sample week": "./data/sample/board.json", "Leans only": "./data/sample/board_leans.json", "Empty week": "./data/sample/board_empty.json" };
+  async load() {
+    const scenario = this.props.scenario ?? "Live feed";
+    const key = (this.props.dataUrl || "") + "|" + scenario;
+    if (this.state.loadedFor === key) return;
+    this.setState({ loadedFor: key });
+    const [F, feed] = await Promise.all([this.state.fmt || import("./lib/format.js"), import("./lib/feed.js")]);
+    const res = await feed.loadBoard({ liveUrl: this.props.dataUrl || this.live, sampleUrl: this.sources["Sample week"], scenario, sources: this.sources });
+    this.setState({ data: res.data, fmt: F, feed: res.feed, feedNotice: res.feedNotice });
+  }
+  componentDidMount() { this.load(); }
+  componentDidUpdate() { this.load(); }
+  renderVals() {
+    const { data, fmt: F } = this.state;
+    if (!data || !F) return { days: [], rec: {} };
+    const T = data.teams || {}, dash = "—";
+    const odds = (n) => (n == null ? dash : F.fmtOdds(Number(n)));
+    const p = (x) => (x == null ? dash : F.pct(x));
+    const team = (s) => {
+      const t = T[s.abbr] || {};
+      return { abbr: s.abbr, name: t.short || s.abbr, record: s.record || "", color: t.color || "#14151a", fg: t.fg || "#fff",
+        proj: s.projGoals != null ? s.projGoals.toFixed(1) : dash, win: s.winProb != null ? `${F.pct(s.winProb)} win` : "", winWidth: `${Math.round((s.winProb || 0) * 100)}%` };
+    };
+    const MK = { total_2_5: "Total 2.5", btts: "Both teams to score", double_chance: "Double chance", draw_no_bet: "Draw no bet", corners_1x2: "Corners 1x2", corners_total_9_5: "Corners 9.5", corners_total_10_5: "Corners 10.5", "1x2": "Match result" };
+    const unit = data.unitDollars ?? 25;
+    const byDay = new Map();
+    let bets = 0, leans = 0;
+    for (const g of data.games || []) {
+      const key = F.localDayKey(g.kickoff);
+      if (!byDay.has(key)) byDay.set(key, { label: F.fmtDayLong(g.kickoff), games: [] });
+      const pk = g.pick, kind = pk ? pk.kind : null;
+      if (kind === "bet" && !g.started) bets++;
+      if (kind === "lean" && !g.started) leans++;
+      const fair = (g.result && g.result.fair) || {}, tot = g.total || {}, bt = g.btts || {}, dnb = g.drawNoBet || {};
+      byDay.get(key).games.push({
+        time: F.fmtTime(g.kickoff), tv: g.tv || "", venue: g.venue || "", city: g.city || "",
+        home: team(g.home), away: team(g.away), draw: p(g.drawProb), drawWidth: `${Math.round((g.drawProb || 0) * 100)}%`,
+        fairHome: odds(fair.home), fairDraw: odds(fair.draw), fairAway: odds(fair.away),
+        totOver: odds(tot.over), totUnder: odds(tot.under), totProb: p(tot.overProb),
+        bttsYes: odds(bt.yes), bttsNo: odds(bt.no), bttsProb: p(bt.yesProb),
+        dnbHome: odds(dnb.home), dnbAway: odds(dnb.away), dnbProb: p(dnb.homeProb),
+        started: !!g.started, opacity: g.started ? "0.55" : "1",
+        pickHeading: kind === "bet" ? "Best bet" : kind === "lean" ? "Lean" : "Model pick",
+        isBet: kind === "bet", isLean: kind === "lean", isPass: kind === "pass", noPick: !kind,
+        pickLabel: pk ? pk.label : "", pickPrice: pk ? odds(pk.price) : "", pickEdge: pk && pk.edgePct != null ? `${F.fmtSigned(pk.edgePct)}%` : "",
+        pickSub: pk ? `${MK[pk.market] || pk.market} · ${odds(pk.price)} at ${pk.book || dash} · model ${p(pk.modelProb)} · edge ${pk.edgePct != null ? F.fmtSigned(pk.edgePct) + "%" : dash}` : "",
+        tier: pk && pk.tier ? pk.tier : "", stake: pk && pk.units != null ? `${pk.units} units · $${(pk.units * unit).toFixed(2)}` : "",
+      });
+    }
+    const days = [...byDay.values()].map((d) => ({ ...d, countLabel: `${d.games.length} fixture${d.games.length === 1 ? "" : "s"}` }));
+    const r = data.record || {};
+    const rec = { settled: r.settled ?? 0, won: r.won ?? 0, pending: r.pending ?? 0, void: r.void ?? 0, awaiting: r.awaitingResults ?? 0,
+      roi: r.roiPct != null ? `${F.fmtSigned(r.roiPct)}%` : dash, profit: r.profitUnits != null ? F.fmtSigned(r.profitUnits, 2) : dash, staked: r.stakedUnits != null ? r.stakedUnits.toFixed(2) : dash,
+      toAnswer: (r.betsToAnswer ?? 1500).toLocaleString() };
+    return {
+      season: data.season, windowLabel: data.windowLabel || "", updatedLabel: F.fmtUpdated(data.generatedAt), tz: F.tzName(),
+      hasNotice: !!data.notice, notice: data.notice || "", hasFeedNotice: !!this.state.feedNotice, feedNotice: this.state.feedNotice || "",
+      rec, days, gameCount: (data.games || []).length, betsCount: bets, leansCount: leans, unit,
+    };
+  }
+}
+</script>
+</body>
+</html>

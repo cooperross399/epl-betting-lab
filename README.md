@@ -33,6 +33,39 @@ PYTHONPATH=src .venv/bin/python scripts/run_soccer_card_task.py
 PYTHONPATH=src .venv/bin/python scripts/run_soccer_settle_preview_task.py
 ```
 
+## Publish the public board
+
+`Publish Board` (`.github/workflows/publish-board.yml`) builds
+`data/board.json` and deploys it to this repository's own GitHub Pages, where
+the projections site hosted from `nhl-betting-lab` reads it by URL in the
+browser. There is no cross-repository token anywhere in that chain.
+
+```bash
+# Build the same file the workflow builds, without deploying anything
+PYTHONPATH=src .venv/bin/python web/build_board_json.py --lab . --out dist/data
+```
+
+What it publishes: the coming round's fixtures from ESPN's keyless scoreboard,
+projected goals and fair 1X2 prices from the same `PoissonGoalsModel` fits the
+card runs on (`CARD_RATINGS` for the result, `TOTALS_RATINGS` for over 2.5 and
+BTTS), the provider prices already on the card input, the card's own pick per
+fixture, and the settled record from `reports/card_scoreboard.py`.
+
+What it does not do: it fetches no odds, spends no credit, writes to no branch
+— it holds `contents: read` — and touches no policy file.
+No bet is ever placed by it, and nothing it publishes is an instruction to
+place one. It runs after every `Matchday Refresh` and on its own daily cron
+so a dark day still refreshes the slate, and it restores that run's
+`matchday-state` and `matchday-reports` artifacts rather than re-running
+anything.
+
+Two limits are worth knowing, because the published board says so itself
+rather than hiding them. `data/outputs/automated_card.json` is in neither
+artifact, so the card is read from the archived copy in `matchday-state`; and
+`data/staging/` is git-ignored and uploaded by nothing, so the provider prices
+come off the card's own rows on a published run. `board.json` carries
+`cardSource` and `priceSource` saying which was used.
+
 ## Legacy sections below
 
 Much of this README documents the **manual-odds era**, when prices were typed

@@ -132,13 +132,26 @@ jobs:
           cards=$(ls -1 data/outputs/archive/automated_cards/*/*/automated_card.json 2>/dev/null | wc -l | tr -d ' ')
           echo "archived cards restored: $cards"
 
+      - name: Assemble the site
+        # This subdomain now serves the BOARD, not just its feed. web/ holds
+        # the page, support.js, lib/ and the bundled sample data; the build
+        # step below drops the real board.json in beside them, so the page
+        # fetches ./data/board.json same-origin and no CORS question arises.
+        #
+        # build_board_json.py is removed from dist because publishing the
+        # generator alongside what it generated invites someone to read the
+        # published copy as the one that ran.
+        run: |
+          mkdir -p dist
+          cp -R web/. dist/
+          rm -f dist/build_board_json.py
+          touch dist/.nojekyll
+
       - name: Build the board
         env:
           PYTHONPATH: src
         run: |
           python web/build_board_json.py --lab . --out dist/data
-          touch dist/.nojekyll
-          printf '<!doctype html><meta charset="utf-8"><title>EPL board data</title><p>Data feed for <a href="https://cooperross399.github.io/nhl-betting-lab/">Maverick Hightower projections</a>: <a href="data/board.json">data/board.json</a>' > dist/index.html
 
       - name: Keep the history
         uses: actions/upload-artifact@v4

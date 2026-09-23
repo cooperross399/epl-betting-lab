@@ -21,6 +21,7 @@ from epl_betting_lab.reports.extra_competitions_card import (
     COMPETITIONS,
     build_extra_card,
     render_extra_card,
+    save_extra_card_record,
 )
 
 
@@ -55,8 +56,15 @@ def main() -> int:
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text("\n".join(render_extra_card(cards)), encoding="utf-8")
+    # The markdown is for a reader; this is the record something can score.
+    # Until it existed these selections were rendered to a comment and nowhere
+    # else, so closing-line value could never be computed for any of them —
+    # and for the international section, which cannot be backtested at all,
+    # that is the only evidence there will ever be.
+    record = save_extra_card_record(cards, output_dir=args.out.parent)
     total = sum(len(c.selections) for c in cards.values())
     print(f"Wrote {args.out} — {total} selection(s) across {len(cards)} competition(s).")
+    print(f"Recorded {len(record['selections'])} selection(s) for later scoring.")
     return 0
 
 

@@ -500,3 +500,74 @@ class TestTheIntroDoesNotGoStaleWhenACompetitionIsAdded:
                 f"the introduction names {spec.name}, which has to be revisited "
                 "whenever that competition is removed or renamed"
             )
+
+
+class TestTheInternationalCardSaysHowStaleItsRatingsAre:
+    """The results archive behind the international pool runs about a month
+    behind, so by a window's third matchday the fit has not seen the first two.
+    A card that does not say so reads as current: on 2026-09-23 the archive
+    ended 2026-08-26 while this card was pricing that day's fixtures.
+    """
+
+    @staticmethod
+    def _feed() -> pd.DataFrame:
+        return pd.DataFrame(
+            [
+                {
+                    "competition": "UNL",
+                    "home_team": "Spain",
+                    "away_team": "France",
+                    "market": "btts",
+                    "selection": selection,
+                    "american_odds": -110,
+                    "book": "Book",
+                    "observed_at": "2026-09-22T12:00:00Z",
+                }
+                for selection in ("yes", "no")
+            ]
+        )
+
+    def test_the_cut_off_date_is_on_the_card(self, monkeypatch) -> None:
+        _stub_international_pool(monkeypatch)
+
+        card = build_extra_card(self._feed(), "UNL")
+
+        stale = [note for note in card.notes if "no result after" in note]
+        assert stale, "the card does not say how old its ratings are"
+        assert "archive runs about a month behind" in stale[0]
+
+    def test_a_club_competition_does_not_claim_a_stale_archive(
+        self, monkeypatch
+    ) -> None:
+        """The note belongs to the international pool. The European pools are
+        rebuilt from Football-Data every run and are not a month behind.
+
+        `_pool_for` is stubbed rather than passing an empty feed: an empty feed
+        returns before the notes are built at all, so the first version of this
+        test passed with the condition replaced by `if True` — it never reached
+        the branch it names.
+        """
+        from epl_betting_lab.data.international_results import parse_archive
+        from epl_betting_lab.models import international_ratings
+
+        header = (
+            "date,home_team,away_team,home_score,away_score,tournament,city,"
+            "country,neutral"
+        )
+        rows = [
+            f"2024-{1 + i % 12:02d}-05,Spain,France,2,1,UEFA Nations League,"
+            f"Town,Country,FALSE"
+            for i in range(20)
+        ]
+        matches = parse_archive("\n".join([header, *rows]) + "\n").matches
+        monkeypatch.setattr(
+            "epl_betting_lab.reports.extra_competitions_card._pool_for",
+            lambda spec: (matches, international_ratings.INTERNATIONAL_RATINGS),
+        )
+
+        card = build_extra_card(
+            self._feed().assign(competition="UCL"), "UCL"
+        )
+
+        assert card.priced, "the stub did not price anything, so no note was reachable"
+        assert not [note for note in card.notes if "no result after" in note]

@@ -284,6 +284,19 @@ def build_extra_card(
     model = PoissonGoalsModel().fit(matches, config=config)
 
     notes: list[str] = []
+    if spec.pool == "international":
+        # The results archive behind this pool runs about a month behind, so by
+        # a window's third matchday the fit has not seen the first two. Said out
+        # loud because the alternative is a card that looks current: read on
+        # 2026-09-23 the archive ended 2026-08-26 and held no September results
+        # at all, including matches this card was pricing that day.
+        latest = pd.to_datetime(matches["date"]).max()
+        if pd.notna(latest):
+            notes.append(
+                f"Ratings include no result after {latest.date()}; the results "
+                "archive runs about a month behind, so the current "
+                "international window is not in the fit."
+            )
     records: list[dict[str, object]] = []
     unrated: list[str] = []
     for _, fixture in prices[["home_team", "away_team"]].drop_duplicates().iterrows():

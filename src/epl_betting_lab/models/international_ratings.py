@@ -107,6 +107,27 @@ class InternationalPool:
     def rateable(self) -> set[str]:
         return {t for t, n in self.appearances.items() if n >= MIN_MATCHES}
 
+    @property
+    def latest_result(self) -> pd.Timestamp | None:
+        """The most recent match in the fit.
+
+        Exposed because the source archive runs about a month behind, so a
+        rating is always missing the current window and a card built on it
+        should say so rather than imply it is current. Returns None for an
+        empty pool instead of a date nothing supports.
+        """
+        if self.matches.empty:
+            return None
+        return pd.to_datetime(self.matches["date"]).max()
+
+    def days_behind(self, today: pd.Timestamp | None = None) -> int | None:
+        """How stale the fit is, in days, or None if the pool is empty."""
+        latest = self.latest_result
+        if latest is None:
+            return None
+        moment = pd.Timestamp.utcnow().tz_localize(None) if today is None else today
+        return int((moment.normalize() - latest.normalize()).days)
+
 
 def build_international_pool(
     *,

@@ -29,6 +29,23 @@ the weight they carry is a decision someone made on purpose.
 and its squad turns over completely every few years. Ratings fitted here rest on
 far less evidence per team than any club rating in this project.
 
+**The archive runs about a month behind, and that is load-bearing.** Read on
+2026-09-23 it ended 2026-08-26 and held no September fixtures of any kind — not
+even the UEFA Nations League matches this project was pricing 45 of that day. Two
+consequences, and the second is the one that bites.
+
+The obvious one: ratings never include the current international window, so by a
+window's third matchday the model has not seen the first two.
+
+The one that already caused a wrong answer: **absence here is not evidence a
+competition is dormant.** Asked whether the CONCACAF Nations League was still
+being played, this module's silence was read as "no", when it could not have
+shown a September fixture either way. `providers/competition_watch.py` carries
+that correction.
+
+`InternationalPool.latest_result` exposes the cut-off so a caller can say how
+stale it is rather than implying it is current.
+
 Source: the `martj42/international_results` archive, which publishes every
 international since the first one in 1872 as a single CSV — date, both teams,
 both scores, the tournament, the city and country, and whether the venue was

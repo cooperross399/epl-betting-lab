@@ -31,6 +31,8 @@ from epl_betting_lab.providers.odds_api_staging_provider import (
 
 
 #: Free endpoint: listing sports costs no quota.
+from epl_betting_lab.providers.competition_watch import find_wanted, render_watch
+
 SPORTS_PATH = "/v4/sports"
 
 #: Anything matching these is scrubbed before a message is returned.
@@ -192,6 +194,12 @@ def render_credential_check(report: Mapping[str, Any]) -> list[str]:
     for name, value in sorted(report["usage_headers"].items()):
         lines.append(f"Usage header {name}: {value}")
     sports = report.get("soccer_sports") or []
+    # Asked-for competitions, checked against the listing already in hand. A
+    # competition can be absent because it is not carried, because it is
+    # between editions, or because it was cancelled, and one reading cannot
+    # tell those apart — but a competition that appears is unambiguous, and
+    # this is the run that would notice.
+    lines += render_watch(find_wanted(sports))
     if sports:
         active = [s for s in sports if s["active"]]
         lines.append(

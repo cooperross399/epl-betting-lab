@@ -100,7 +100,15 @@ def check_provider_credential(
     try:
         response = request(
             report["endpoint"],
-            params={"apiKey": api_key},
+            # `all=true` because the default response is IN-SEASON ONLY. Asked
+            # without it in September 2026 the endpoint returned 43 soccer
+            # competitions, every one of them active — a list that cannot tell
+            # "this key cannot price that competition" from "that competition
+            # is between tournaments this week". Since the listing exists to
+            # answer "what sport key do I write for X", an absence that means
+            # two different things is the wrong answer half the time. Still the
+            # free endpoint; `all` does not cost quota.
+            params={"apiKey": api_key, "all": "true"},
             timeout=timeout_seconds,
         )
     except Exception as exc:  # message may quote the URL, so scrub it
@@ -121,6 +129,13 @@ def check_provider_credential(
     if status == 200:
         report["authenticated"] = True
         report["outcome"] = "The provider accepted the credential."
+        # The sports list is already in hand and was being thrown away. It is
+        # the answer to "what is this key entitled to price?", which otherwise
+        # gets guessed: adding a competition means writing a sport key into
+        # `collect_extra_competitions.py`, and a wrong one does not raise — it
+        # collects nothing, quietly, for as long as nobody checks. Keys only;
+        # the credential is not involved in any of this.
+        report["soccer_sports"] = _soccer_sports(response)
     elif status in {401, 403}:
         report["outcome"] = (
             f"The provider rejected the credential (HTTP {status}). If the key "
@@ -131,6 +146,36 @@ def check_provider_credential(
             f"Unexpected provider response (HTTP {status or 'unknown'})."
         )
     return report
+
+
+def _soccer_sports(response: Any) -> list[dict[str, Any]]:
+    """Every soccer competition the key may price, as key/title/active.
+
+    Returns an empty list rather than raising if the body is not what was
+    expected: this is diagnostics riding along on a credential check, and it
+    must never be the reason the check itself fails.
+    """
+    try:
+        body = response.json()
+    except Exception:
+        return []
+    if not isinstance(body, list):
+        return []
+    found = []
+    for entry in body:
+        if not isinstance(entry, dict):
+            continue
+        key = str(entry.get("key", ""))
+        if not key.startswith("soccer"):
+            continue
+        found.append(
+            {
+                "key": key,
+                "title": str(entry.get("title", "")),
+                "active": bool(entry.get("active", False)),
+            }
+        )
+    return sorted(found, key=lambda item: item["key"])
 
 
 def render_credential_check(report: Mapping[str, Any]) -> list[str]:
@@ -146,6 +191,15 @@ def render_credential_check(report: Mapping[str, Any]) -> list[str]:
     ]
     for name, value in sorted(report["usage_headers"].items()):
         lines.append(f"Usage header {name}: {value}")
+    sports = report.get("soccer_sports") or []
+    if sports:
+        active = [s for s in sports if s["active"]]
+        lines.append(
+            f"Soccer competitions available: {len(sports)} ({len(active)} in season)"
+        )
+        for entry in sports:
+            mark = "in season" if entry["active"] else "out of season"
+            lines.append(f"  {entry['key']}  --  {entry['title']} ({mark})")
     lines.append(
         "Safety: the credential was not printed, written, logged, or compared."
     )

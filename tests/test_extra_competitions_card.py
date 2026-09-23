@@ -324,13 +324,33 @@ def _stub_international_pool(monkeypatch) -> None:
     )
     rows = [
         f"20{15 + i // 12:02d}-{1 + i % 12:02d}-05,{home},{away},{hg},{ag},"
-        f"UEFA Nations League,Town,Country,{neutral}"
-        for home, away, hg, ag, neutral in (
-            ("Spain", "France", 3, 1, "FALSE"),
-            ("Italy", "Germany", 1, 1, "TRUE"),
-            ("Portugal", "Spain", 2, 2, "FALSE"),
+        f"{tournament},Town,Country,{neutral}"
+        # Deliberately close sides. An earlier version had Spain beating France
+        # 3-1 twenty times, which put draw-no-bet home at 0.857 — a probability
+        # the shrinkage treats as an extreme claim, cutting a 57-point raw edge
+        # to 2.9. Tests then measured the shrinkage rather than the thing they
+        # named. Real fixtures are nearer even than that.
+        # More than one competition on purpose. With only Nations League rows
+        # the competition's baseline IS the pool's, the override becomes a
+        # no-op, and every test of it passes whether or not the card applies
+        # it. The friendlies below are high-scoring and home-heavy, which is
+        # what they are in the real archive (+0.767 goals of home advantage
+        # against the Nations League's +0.346).
+        for home, away, hg, ag, neutral, tournament in (
+            ("Spain", "France", 2, 1, "FALSE", "UEFA Nations League"),
+            ("France", "Spain", 1, 1, "FALSE", "UEFA Nations League"),
+            ("Italy", "Germany", 1, 1, "TRUE", "UEFA Nations League"),
+            ("Portugal", "Spain", 1, 1, "FALSE", "UEFA Nations League"),
+            ("Spain", "Portugal", 1, 2, "FALSE", "UEFA Nations League"),
+            ("Spain", "France", 4, 0, "FALSE", "Friendly"),
+            ("Portugal", "Spain", 3, 1, "FALSE", "Friendly"),
+            ("France", "Portugal", 3, 0, "FALSE", "Friendly"),
+            ("Germany", "Italy", 4, 1, "FALSE", "Friendly"),
         )
-        for i in range(20)
+        # Enough rows per (competition, venue) to clear MIN_BASELINE_MATCHES.
+        # At twenty the stub had no competition baselines at all, so every test
+        # of the override ran against a None and proved nothing.
+        for i in range(60)
     ]
     results = parse_archive("\n".join([header, *rows]) + "\n")
     monkeypatch.setattr(
@@ -562,7 +582,7 @@ class TestTheInternationalCardSaysHowStaleItsRatingsAre:
         matches = parse_archive("\n".join([header, *rows]) + "\n").matches
         monkeypatch.setattr(
             "epl_betting_lab.reports.extra_competitions_card._pool_for",
-            lambda spec: (matches, international_ratings.INTERNATIONAL_RATINGS),
+            lambda spec: (matches, international_ratings.INTERNATIONAL_RATINGS, None),
         )
 
         card = build_extra_card(
@@ -571,3 +591,300 @@ class TestTheInternationalCardSaysHowStaleItsRatingsAre:
 
         assert card.priced, "the stub did not price anything, so no note was reachable"
         assert not [note for note in card.notes if "no result after" in note]
+
+
+class TestTheInternationalPoolDoesNotBetTheGoalsLevel:
+    """Measured against the de-vigged market across 45 live Nations League
+    fixtures, the model put P(over 2.5) at 0.418 where the market said 0.499 —
+    eight points low, the same direction on every fixture. Every "under" and
+    every "BTTS no" it produced was that standing gap rather than anything
+    about the fixture, and three of the first four selections this section ever
+    made were low-scoring bets.
+
+    The result markets survive because they turn on the strength difference
+    rather than the level, and a competition-specific baseline closed most of
+    the separate bias there (draw-no-bet +0.051 -> +0.021).
+    """
+
+    @staticmethod
+    def _feed(market: str, selections) -> pd.DataFrame:
+        return pd.DataFrame(
+            [
+                {
+                    "competition": "UNL",
+                    "home_team": "Spain",
+                    "away_team": "France",
+                    "market": market,
+                    "selection": selection,
+                    "american_odds": 250,
+                    "book": "Book",
+                    "observed_at": "2026-09-22T12:00:00Z",
+                }
+                for selection in selections
+            ]
+        )
+
+    @staticmethod
+    def _bettable(market: str, selection: str):
+        """A stand-in evaluator that returns one selection the card would take.
+
+        The evaluators are patched rather than fed a clever price, because on a
+        small fixture they cannot produce a selection at all: the anchored
+        totals rule needs a market probability it cannot derive from one book
+        and returns no rows, and the BTTS shrinkage cuts even a 30-point raw
+        edge to 1.5 points, below every threshold. Both facts made the first
+        version of this test pass on a feed that could never have produced a
+        selection — so it stayed green with the exclusion deleted.
+
+        On the real feed these markets do clear: the first international card
+        ever built took an under 2.5 and two BTTS-no.
+        """
+
+        def evaluator(projections, odds, *args, **kwargs):
+            return pd.DataFrame(
+                [
+                    {
+                        "home_team": "Spain",
+                        "away_team": "France",
+                        "market": market,
+                        "selection": selection,
+                        "american_odds": 120,
+                        "book": "Book",
+                        "status": "BETTABLE",
+                        "calibrated_edge": 0.09,
+                        "raw_edge": 0.09,
+                    }
+                ]
+            )
+
+        return evaluator
+
+    @pytest.mark.parametrize(
+        "market, selection, target",
+        [
+            ("total_2_5", "under", "evaluate_total_25_anchored"),
+            ("btts", "no", "evaluate_btts"),
+        ],
+    )
+    def test_a_goals_level_market_produces_no_selection(
+        self, market, selection, target, monkeypatch
+    ) -> None:
+        _stub_international_pool(monkeypatch)
+        monkeypatch.setattr(
+            f"epl_betting_lab.reports.extra_competitions_card.{target}",
+            self._bettable(market, selection),
+        )
+
+        card = build_extra_card(self._feed(market, (selection,)), "UNL")
+
+        assert card.selections.empty, (
+            f"{market} reached the card; it is priced by a standing eight-point "
+            "gap against the market, not by the fixture"
+        )
+
+    @pytest.mark.parametrize(
+        "market, selection, target",
+        [
+            ("total_2_5", "under", "evaluate_total_25_anchored"),
+            ("btts", "no", "evaluate_btts"),
+        ],
+    )
+    def test_the_same_selection_survives_when_the_market_is_allowed(
+        self, market, selection, target, monkeypatch
+    ) -> None:
+        """The control, and the reason the test above means anything. Without
+        it the exclusion could be deleted with the suite still green."""
+        _stub_international_pool(monkeypatch)
+        monkeypatch.setattr(
+            f"epl_betting_lab.reports.extra_competitions_card.{target}",
+            self._bettable(market, selection),
+        )
+        monkeypatch.setattr(
+            "epl_betting_lab.reports.extra_competitions_card.POOL_EXCLUDED_MARKETS",
+            {},
+        )
+
+        card = build_extra_card(self._feed(market, (selection,)), "UNL")
+
+        assert set(card.selections["market"]) == {market}, (
+            "the selection could not survive even with the exclusion removed, "
+            "so the test above guards nothing"
+        )
+
+    def test_the_card_says_which_markets_it_withheld(self, monkeypatch) -> None:
+        """Withholding silently would read as the provider not quoting them."""
+        _stub_international_pool(monkeypatch)
+
+        card = build_extra_card(self._feed("total_2_5", ("over", "under")), "UNL")
+
+        assert any("total_2_5" in note and "not bet here" in note for note in card.notes)
+
+    def test_a_result_market_is_still_bet(self, monkeypatch) -> None:
+        """The exclusion must be the two goals-level markets, not the section.
+
+        The price is derived from the model rather than written down. A fixed
+        long price made this test pass for the wrong reason at first: it implied
+        a 57-point raw edge, which the shrinkage correctly cut to 2.9 points and
+        graded LEAN, so the section produced nothing and the test read that as
+        the exclusion being too wide. A modest edge is what a real card sees.
+        """
+        _stub_international_pool(monkeypatch)
+        from epl_betting_lab.reports.extra_competitions_card import _pool_for
+        from epl_betting_lab.models.poisson_goals import PoissonGoalsModel
+
+        matches, config, baseline = _pool_for(COMPETITIONS["UNL"])
+        model = PoissonGoalsModel().fit(matches, config=config)
+        if baseline is not None:
+            model.avg_home_goals, model.avg_away_goals = baseline
+        probability = model.match_probabilities("Spain", "France")["draw_no_bet_home"]
+        # A price implying twelve points less than the model says.
+        implied = max(probability - 0.12, 0.05)
+        american = int(round(100 * (1 - implied) / implied))
+
+        feed = self._feed("draw_no_bet", ("home", "away"))
+        feed.loc[feed["selection"] == "home", "american_odds"] = american
+
+        card = build_extra_card(feed, "UNL")
+
+        assert not card.selections.empty, (
+            "barring the goals markets also silenced the result markets"
+        )
+        assert set(card.selections["market"]) == {"draw_no_bet"}
+
+    def test_a_club_competition_still_bets_the_goals_markets(self) -> None:
+        """The bar belongs to the international pool. The Champions League has
+        a measured European scale behind its totals."""
+        from epl_betting_lab.reports.extra_competitions_card import (
+            POOL_EXCLUDED_MARKETS,
+        )
+
+        assert POOL_EXCLUDED_MARKETS.get("european") is None
+        assert POOL_EXCLUDED_MARKETS.get("english") is None
+        assert POOL_EXCLUDED_MARKETS["international"] == frozenset({"total_2_5", "btts"})
+
+
+class TestTheCardPricesWithTheCompetitionsOwnBaseline:
+    """`PoissonGoalsModel` takes its baselines from the mean of the frame it is
+    fitted on. For a domestic league that is right — every row is one
+    competition at a real venue. For the international pool it is neither: the
+    frame mixes competitions whose home advantage runs from +0.35 to +0.77 and
+    mixes real-venue rows with neutral ones.
+    """
+
+    def test_the_override_is_the_competitions_real_venue_baseline(self) -> None:
+        from epl_betting_lab.models.international_ratings import (
+            build_international_pool,
+            fit_international_model,
+        )
+        from epl_betting_lab.reports.extra_competitions_card import _pool_for
+
+        matches, _config, baseline = _pool_for(COMPETITIONS["UNL"])
+        fitted = fit_international_model(build_international_pool())
+
+        assert baseline is not None, "the card is still pricing off the pooled mean"
+        assert baseline == fitted.competition_baselines[("UNL", False)]
+        assert baseline != fitted.competition_baselines.get(("UNL", True)), (
+            "the neutral baseline is being used for a fixture priced at a venue"
+        )
+        pooled = (fitted.venue_home, fitted.venue_away)
+        assert baseline != pooled, (
+            "the competition's baseline equals the pool's, so nothing is corrected"
+        )
+
+    def test_a_club_competition_has_no_override(self, monkeypatch) -> None:
+        """The club pools are built from fetched datasets that do not exist on
+        a clean checkout, so they are stubbed. The assertion is about the
+        branch, not about the data: a club competition must come back with no
+        baseline override, because its frame really is one competition at real
+        venues and the fitted mean is the right number for it.
+        """
+        from types import SimpleNamespace
+
+        from epl_betting_lab.reports.extra_competitions_card import _pool_for
+
+        frame = pd.DataFrame(
+            {
+                "date": pd.to_datetime(["2024-01-01"]),
+                "home_team": ["A"],
+                "away_team": ["B"],
+                "home_goals": [1],
+                "away_goals": [1],
+            }
+        )
+        monkeypatch.setattr(
+            "epl_betting_lab.reports.extra_competitions_card.build_european_pool",
+            lambda: SimpleNamespace(matches=frame),
+        )
+        monkeypatch.setattr(
+            "epl_betting_lab.reports.extra_competitions_card.build_pool",
+            lambda: frame,
+        )
+
+        for key in ("UCL", "EFLC"):
+            _matches, _config, baseline = _pool_for(COMPETITIONS[key])
+            assert baseline is None, f"{key} is being handed an override it should not get"
+
+
+class TestTheCardActuallyAppliesTheBaseline:
+    """`_pool_for` returning the right number and the card using it are two
+    different facts, and only the first was tested — so deleting the line that
+    applies it left the whole suite green. The same producer/consumer gap that
+    let a task filename be renamed on one side only.
+    """
+
+    @staticmethod
+    def _capture(store: dict):
+        def evaluator(projections, odds, *args, **kwargs):
+            store["projections"] = projections.copy()
+            return pd.DataFrame()
+
+        return evaluator
+
+    def test_the_priced_expected_goals_come_from_the_competition_baseline(
+        self, monkeypatch
+    ) -> None:
+        from epl_betting_lab.models.poisson_goals import PoissonGoalsModel
+        from epl_betting_lab.reports.extra_competitions_card import _pool_for
+
+        _stub_international_pool(monkeypatch)
+        matches, config, baseline = _pool_for(COMPETITIONS["UNL"])
+        assert baseline is not None
+
+        without = PoissonGoalsModel().fit(matches, config=config)
+        pooled_xg = without.expected_goals("Spain", "France")[0]
+        with_override = PoissonGoalsModel().fit(matches, config=config)
+        with_override.avg_home_goals, with_override.avg_away_goals = baseline
+        corrected_xg = with_override.expected_goals("Spain", "France")[0]
+        assert pooled_xg != pytest.approx(corrected_xg), (
+            "the stub pool cannot tell the two baselines apart, so this test "
+            "would pass either way"
+        )
+
+        store: dict = {}
+        monkeypatch.setattr(
+            "epl_betting_lab.reports.extra_competitions_card.evaluate_draw_no_bet",
+            self._capture(store),
+        )
+        build_extra_card(
+            pd.DataFrame(
+                [
+                    {
+                        "competition": "UNL",
+                        "home_team": "Spain",
+                        "away_team": "France",
+                        "market": "draw_no_bet",
+                        "selection": selection,
+                        "american_odds": 120,
+                        "book": "Book",
+                        "observed_at": "2026-09-22T12:00:00Z",
+                    }
+                    for selection in ("home", "away")
+                ]
+            ),
+            "UNL",
+        )
+
+        priced = store["projections"].iloc[0]["home_xg"]
+        assert priced == pytest.approx(corrected_xg), (
+            "the card priced off the pooled baseline, not the competition's"
+        )

@@ -1,0 +1,166 @@
+name: Publish Board
+
+# Builds this lab's public board.json and deploys it to this repository's
+# GitHub Pages. The projections site (hosted from nhl-betting-lab) reads it
+# by URL in the browser, so no cross-repository token exists anywhere.
+#
+# Runs after every Matchday Refresh and on its own clock, so a dark day still
+# refreshes the slate. Read-only on repository contents (see permissions),
+# pushes to no branch, fetches no odds, spends no credit, edits no policy,
+# and places no bet.
+on:
+  schedule:
+    - cron: "30 8 * * *"   # 08:30 UTC daily, before the card
+  workflow_run:
+    workflows: ["Matchday Refresh"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+  pages: write
+  id-token: write
+
+concurrency:
+  # Not cancel-in-progress: a cancelled `deploy-pages` leaves the Pages
+  # deployment half-made, and this job is cheap enough to let finish.
+  group: publish-board
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish Board
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          # The same exact minor every other workflow here pins, and the one
+          # the suite is green on. A board built on an interpreter nothing
+          # else in this repository uses would be the only place a 3.12-only
+          # behaviour could first appear, in public.
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install project
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install -e .
+
+      - name: Restore the lab's latest run and the board's history
+        # Allowed to find nothing: before the first card the board is schedule-only and says so.
+        #
+        # WHAT EACH ARTIFACT ACTUALLY CONTAINS, read off the `upload-artifact`
+        # steps in matchday-refresh.yml rather than assumed. upload-artifact@v4
+        # roots the archive at the least common ancestor of the paths it is
+        # given, so the `--dir` below has to be that ancestor or the files land
+        # one level deep and the build silently sees none of them:
+        #
+        #   matchday-state   paths data/outputs/archive/automated_cards,
+        #                    data/processed/epl_historical_matches.csv,
+        #                    data/processed/understat_team_xg.csv
+        #                    -> ancestor `data`, so `--dir data`.
+        #   matchday-reports paths data/outputs/*.md and status.html
+        #                    -> ancestor `data/outputs`, so `--dir data/outputs`.
+        #
+        # `data/outputs/automated_card.json` is in NEITHER artifact — the
+        # reports artifact carries `automated_card.md`, which is prose. The
+        # card the board reads therefore comes from the archived copy inside
+        # matchday-state (`data/outputs/archive/automated_cards/<date>/<time>/
+        # automated_card.json`), which is also what `card_scoreboard` reads for
+        # the settled record. `build_board_json.py` falls back to it by design.
+        # Adding the JSON to the reports artifact would mean editing a workflow
+        # that spends provider credits, which this change does not do.
+        #
+        # `data/staging/` is in .gitignore and is uploaded by nothing, so the
+        # provider price file cannot be restored at all; the build reads the
+        # prices off the card's own rows and the board says which it used.
+        #
+        # `--status completed`, never `--status success`: a matchday run is red
+        # by design while an upstream feed is down, and both uploads above are
+        # `if: always()`, so the artifacts of a red run are exactly the state
+        # this needs. Pinning the equivalent restore to green runs once froze
+        # the card archive for nine runs — see the note on "Restore the
+        # previous state" in matchday-refresh.yml and
+        # tests/test_schedule_health.py.
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -u
+          previous=$(gh run list --workflow matchday-refresh.yml --status completed \
+            --limit 1 --json databaseId --jq '.[0].databaseId // empty')
+          if [ -n "$previous" ]; then
+            mkdir -p data
+            gh run download "$previous" --name matchday-state --dir data || echo "No matchday-state artifact on run $previous."
+            mkdir -p data/outputs
+            gh run download "$previous" --name matchday-reports --dir data/outputs || echo "No matchday-reports artifact on run $previous."
+          else
+            echo "No completed Matchday Refresh yet; building schedule-only."
+          fi
+          last=$(gh run list --workflow publish-board.yml --status completed \
+            --limit 1 --json databaseId --jq '.[0].databaseId // empty')
+          mkdir -p dist/data/history
+          if [ -n "$last" ]; then
+            gh run download "$last" --name board-history --dir dist/data/history || echo "No board-history artifact on run $last."
+          else
+            echo "No previous publish; the history starts today."
+          fi
+
+      - name: Say what the restore actually found
+        # A board that quietly publishes the schedule and nothing else looks
+        # the same as one whose restore failed. This prints the difference.
+        if: always()
+        run: |
+          set -u
+          for f in data/processed/epl_historical_matches.csv \
+                   data/processed/understat_team_xg.csv; do
+            [ -f "$f" ] && echo "restored: $f" || echo "ABSENT: $f"
+          done
+          cards=$(ls -1 data/outputs/archive/automated_cards/*/*/automated_card.json 2>/dev/null | wc -l | tr -d ' ')
+          echo "archived cards restored: $cards"
+
+      - name: Build the board
+        env:
+          PYTHONPATH: src
+        run: |
+          python web/build_board_json.py --lab . --out dist/data
+          touch dist/.nojekyll
+          printf '<!doctype html><meta charset="utf-8"><title>EPL board data</title><p>Data feed for <a href="https://cooperross399.github.io/nhl-betting-lab/">Maverick Hightower projections</a>: <a href="data/board.json">data/board.json</a>' > dist/index.html
+
+      - name: Keep the history
+        uses: actions/upload-artifact@v4
+        with:
+          name: board-history
+          path: dist/data/history
+          if-no-files-found: warn
+          retention-days: 400
+
+      - name: Upload the site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Report the outcome
+        if: always()
+        run: |
+          echo "This job built the public EPL board from the schedule and the lab's outputs."
+          echo "It fetched no odds, spent no credit, pushed no branch, and edited no policy."
+          echo "The board is a projection and a record; no bet is ever placed, here or by"
+          echo "anything it publishes."

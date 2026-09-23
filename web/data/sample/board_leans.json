@@ -1,0 +1,689 @@
+{
+ "generatedAt": "2026-09-25T14:05:00Z",
+ "season": "2026–27",
+ "windowLabel": "Sat 26 – Mon 28 September",
+ "windowStart": "2026-09-26",
+ "windowEnd": "2026-09-28",
+ "notice": null,
+ "unitDollars": 25,
+ "includedMarkets": [
+  "total_2_5",
+  "btts",
+  "double_chance",
+  "draw_no_bet",
+  "corners_1x2",
+  "corners_total_9_5",
+  "corners_total_10_5"
+ ],
+ "excludedMarkets": [
+  "1x2"
+ ],
+ "record": {
+  "settled": 63,
+  "won": 30,
+  "stakedUnits": 9.15,
+  "profitUnits": -0.16,
+  "roiPct": -1.7,
+  "pending": 9,
+  "awaitingResults": 17,
+  "void": 4,
+  "clvPct": null,
+  "betsToAnswer": 1500
+ },
+ "teams": {
+  "ARS": {
+   "name": "Arsenal",
+   "short": "Arsenal",
+   "color": "#EF0107",
+   "fg": "#fff"
+  },
+  "EVE": {
+   "name": "Everton",
+   "short": "Everton",
+   "color": "#003399",
+   "fg": "#fff"
+  },
+  "LIV": {
+   "name": "Liverpool",
+   "short": "Liverpool",
+   "color": "#C8102E",
+   "fg": "#fff"
+  },
+  "CRY": {
+   "name": "Crystal Palace",
+   "short": "Crystal Palace",
+   "color": "#1B458F",
+   "fg": "#fff"
+  },
+  "BOU": {
+   "name": "Bournemouth",
+   "short": "Bournemouth",
+   "color": "#DA291C",
+   "fg": "#fff"
+  },
+  "FUL": {
+   "name": "Fulham",
+   "short": "Fulham",
+   "color": "#111111",
+   "fg": "#fff"
+  },
+  "MCI": {
+   "name": "Man City",
+   "short": "Man City",
+   "color": "#6CABDD",
+   "fg": "#000"
+  },
+  "BUR": {
+   "name": "Burnley",
+   "short": "Burnley",
+   "color": "#6C1D45",
+   "fg": "#fff"
+  },
+  "NEW": {
+   "name": "Newcastle",
+   "short": "Newcastle",
+   "color": "#241F20",
+   "fg": "#fff"
+  },
+  "WOL": {
+   "name": "Wolves",
+   "short": "Wolves",
+   "color": "#FDB913",
+   "fg": "#000"
+  },
+  "CHE": {
+   "name": "Chelsea",
+   "short": "Chelsea",
+   "color": "#034694",
+   "fg": "#fff"
+  },
+  "BHA": {
+   "name": "Brighton",
+   "short": "Brighton",
+   "color": "#0057B8",
+   "fg": "#fff"
+  },
+  "BRE": {
+   "name": "Brentford",
+   "short": "Brentford",
+   "color": "#E30613",
+   "fg": "#fff"
+  },
+  "TOT": {
+   "name": "Tottenham",
+   "short": "Tottenham",
+   "color": "#132257",
+   "fg": "#fff"
+  },
+  "AVL": {
+   "name": "Aston Villa",
+   "short": "Aston Villa",
+   "color": "#670E36",
+   "fg": "#fff"
+  },
+  "WHU": {
+   "name": "West Ham",
+   "short": "West Ham",
+   "color": "#7A263A",
+   "fg": "#fff"
+  },
+  "LEE": {
+   "name": "Leeds",
+   "short": "Leeds",
+   "color": "#FFCD00",
+   "fg": "#000"
+  },
+  "SUN": {
+   "name": "Sunderland",
+   "short": "Sunderland",
+   "color": "#EB172B",
+   "fg": "#fff"
+  },
+  "MUN": {
+   "name": "Man United",
+   "short": "Man United",
+   "color": "#DA291C",
+   "fg": "#fff"
+  },
+  "NFO": {
+   "name": "Nott'm Forest",
+   "short": "Nott'm Forest",
+   "color": "#DD0000",
+   "fg": "#fff"
+  }
+ },
+ "games": [
+  {
+   "id": "1",
+   "kickoff": "2026-09-26T11:30:00Z",
+   "venue": "Gtech Community Stadium",
+   "city": "London",
+   "tv": "USA Network",
+   "started": false,
+   "home": {
+    "abbr": "BRE",
+    "record": "W2 D1 L2",
+    "projGoals": 1.5,
+    "winProb": 0.38
+   },
+   "away": {
+    "abbr": "TOT",
+    "record": "W3 D1 L1",
+    "projGoals": 1.4,
+    "winProb": 0.35
+   },
+   "drawProb": 0.27,
+   "result": {
+    "fair": {
+     "home": 163,
+     "draw": 270,
+     "away": 186
+    },
+    "excluded": true
+   },
+   "total": {
+    "line": 2.5,
+    "over": -115,
+    "under": -105,
+    "overProb": 0.56
+   },
+   "btts": {
+    "yes": -139,
+    "no": 110,
+    "yesProb": 0.58
+   },
+   "drawNoBet": {
+    "home": 105,
+    "away": -125,
+    "homeProb": 0.52
+   },
+   "pick": {
+    "kind": "lean",
+    "market": "corners_total_10_5",
+    "label": "Under 10.5 corners",
+    "price": -141,
+    "book": "BetRivers",
+    "edgePct": 5.3,
+    "modelProb": 0.6
+   }
+  },
+  {
+   "id": "2",
+   "kickoff": "2026-09-26T14:00:00Z",
+   "venue": "Emirates Stadium",
+   "city": "London",
+   "tv": "Peacock",
+   "started": false,
+   "home": {
+    "abbr": "ARS",
+    "record": "W4 D1 L0",
+    "projGoals": 2.1,
+    "winProb": 0.62
+   },
+   "away": {
+    "abbr": "EVE",
+    "record": "W1 D2 L2",
+    "projGoals": 0.8,
+    "winProb": 0.16
+   },
+   "drawProb": 0.22,
+   "result": {
+    "fair": {
+     "home": -163,
+     "draw": 355,
+     "away": 525
+    },
+    "excluded": true
+   },
+   "total": {
+    "line": 2.5,
+    "over": -110,
+    "under": -110,
+    "overProb": 0.55
+   },
+   "btts": {
+    "yes": 105,
+    "no": -125,
+    "yesProb": 0.49
+   },
+   "drawNoBet": {
+    "home": -260,
+    "away": 210,
+    "homeProb": 0.74
+   },
+   "pick": {
+    "kind": "lean",
+    "market": "total_2_5",
+    "label": "Under 2.5",
+    "price": 102,
+    "book": "BetRivers",
+    "edgePct": 4.2,
+    "modelProb": 0.53
+   }
+  },
+  {
+   "id": "3",
+   "kickoff": "2026-09-26T14:00:00Z",
+   "venue": "Elland Road",
+   "city": "Leeds",
+   "tv": "Peacock",
+   "started": false,
+   "home": {
+    "abbr": "LEE",
+    "record": "W1 D2 L2",
+    "projGoals": 1.4,
+    "winProb": 0.42
+   },
+   "away": {
+    "abbr": "SUN",
+    "record": "W2 D1 L2",
+    "projGoals": 1.2,
+    "winProb": 0.3
+   },
+   "drawProb": 0.28,
+   "result": {
+    "fair": {
+     "home": 138,
+     "draw": 257,
+     "away": 233
+    },
+    "excluded": true
+   },
+   "total": {
+    "line": 2.5,
+    "over": 100,
+    "under": -120,
+    "overProb": 0.5
+   },
+   "btts": {
+    "yes": -110,
+    "no": -110,
+    "yesProb": 0.52
+   },
+   "drawNoBet": {
+    "home": -125,
+    "away": 105,
+    "homeProb": 0.58
+   },
+   "pick": null
+  },
+  {
+   "id": "4",
+   "kickoff": "2026-09-26T14:00:00Z",
+   "venue": "Old Trafford",
+   "city": "Manchester",
+   "tv": "Peacock",
+   "started": false,
+   "home": {
+    "abbr": "MUN",
+    "record": "W2 D1 L2",
+    "projGoals": 1.6,
+    "winProb": 0.49
+   },
+   "away": {
+    "abbr": "NFO",
+    "record": "W2 D2 L1",
+    "projGoals": 1.1,
+    "winProb": 0.25
+   },
+   "drawProb": 0.26,
+   "result": {
+    "fair": {
+     "home": 104,
+     "draw": 285,
+     "away": 300
+    },
+    "excluded": true
+   },
+   "total": {
+    "line": 2.5,
+    "over": -105,
+    "under": -115,
+    "overProb": 0.52
+   },
+   "btts": {
+    "yes": -115,
+    "no": -105,
+    "yesProb": 0.54
+   },
+   "drawNoBet": {
+    "home": -150,
+    "away": 125,
+    "homeProb": 0.66
+   },
+   "pick": {
+    "kind": "pass",
+    "market": "btts",
+    "label": "Both teams score",
+    "price": -115,
+    "book": "FanDuel",
+    "edgePct": 0.9,
+    "modelProb": 0.54
+   }
+  },
+  {
+   "id": "5",
+   "kickoff": "2026-09-26T16:00:00Z",
+   "venue": "Anfield",
+   "city": "Liverpool",
+   "tv": "NBC",
+   "started": false,
+   "home": {
+    "abbr": "LIV",
+    "record": "W5 D0 L0",
+    "projGoals": 2.2,
+    "winProb": 0.66
+   },
+   "away": {
+    "abbr": "CRY",
+    "record": "W2 D2 L1",
+    "projGoals": 0.9,
+    "winProb": 0.14
+   },
+   "drawProb": 0.2,
+   "result": {
+    "fair": {
+     "home": -194,
+     "draw": 400,
+     "away": 614
+    },
+    "excluded": true
+   },
+   "total": {
+    "line": 2.5,
+    "over": -135,
+    "under": 115,
+    "overProb": 0.6
+   },
+   "btts": {
+    "yes": -110,
+    "no": -110,
+    "yesProb": 0.52
+   },
+   "drawNoBet": {
+    "home": -300,
+    "away": 240,
+    "homeProb": 0.82
+   },
+   "pick": {
+    "kind": "pass",
+    "market": "total_2_5",
+    "label": "Over 2.5",
+    "price": -135,
+    "book": "DraftKings",
+    "edgePct": -1.8,
+    "modelProb": 0.56
+   }
+  },
+  {
+   "id": "6",
+   "kickoff": "2026-09-27T13:00:00Z",
+   "venue": "Vitality Stadium",
+   "city": "Bournemouth",
+   "tv": "USA Network",
+   "started": false,
+   "home": {
+    "abbr": "BOU",
+    "record": "W3 D1 L1",
+    "projGoals": 1.7,
+    "winProb": 0.47
+   },
+   "away": {
+    "abbr": "FUL",
+    "record": "W2 D1 L2",
+    "projGoals": 1.3,
+    "winProb": 0.27
+   },
+   "drawProb": 0.26,
+   "result": {
+    "fair": {
+     "home": 113,
+     "draw": 285,
+     "away": 270
+    },
+    "excluded": true
+   },
+   "total": {
+    "line": 2.5,
+    "over": -120,
+    "under": 100,
+    "overProb": 0.58
+   },
+   "btts": {
+    "yes": -115,
+    "no": -105,
+    "yesProb": 0.58
+   },
+   "drawNoBet": {
+    "home": -140,
+    "away": 115,
+    "homeProb": 0.64
+   },
+   "pick": {
+    "kind": "lean",
+    "market": "btts",
+    "label": "Both teams score",
+    "price": -105,
+    "book": "Fanatics",
+    "edgePct": 4.1,
+    "modelProb": 0.58
+   }
+  },
+  {
+   "id": "7",
+   "kickoff": "2026-09-27T13:00:00Z",
+   "venue": "Etihad Stadium",
+   "city": "Manchester",
+   "tv": "Peacock",
+   "started": false,
+   "home": {
+    "abbr": "MCI",
+    "record": "W4 D0 L1",
+    "projGoals": 2.6,
+    "winProb": 0.78
+   },
+   "away": {
+    "abbr": "BUR",
+    "record": "W1 D1 L3",
+    "projGoals": 0.6,
+    "winProb": 0.08
+   },
+   "drawProb": 0.14,
+   "result": {
+    "fair": {
+     "home": -355,
+     "draw": 614,
+     "away": 1150
+    },
+    "excluded": true
+   },
+   "total": {
+    "line": 2.5,
+    "over": -170,
+    "under": 140,
+    "overProb": 0.65
+   },
+   "btts": {
+    "yes": 130,
+    "no": -160,
+    "yesProb": 0.4
+   },
+   "drawNoBet": {
+    "home": -800,
+    "away": 500,
+    "homeProb": 0.91
+   },
+   "pick": {
+    "kind": "pass",
+    "market": "btts",
+    "label": "Not both to score",
+    "price": -160,
+    "book": "Fanatics",
+    "edgePct": 0.6,
+    "modelProb": 0.6
+   }
+  },
+  {
+   "id": "8",
+   "kickoff": "2026-09-27T13:00:00Z",
+   "venue": "Villa Park",
+   "city": "Birmingham",
+   "tv": "Peacock",
+   "started": false,
+   "home": {
+    "abbr": "AVL",
+    "record": "W2 D2 L1",
+    "projGoals": 1.8,
+    "winProb": 0.54
+   },
+   "away": {
+    "abbr": "WHU",
+    "record": "W1 D1 L3",
+    "projGoals": 1,
+    "winProb": 0.21
+   },
+   "drawProb": 0.25,
+   "result": {
+    "fair": {
+     "home": -117,
+     "draw": 300,
+     "away": 376
+    },
+    "excluded": true
+   },
+   "total": {
+    "line": 2.5,
+    "over": 100,
+    "under": -120,
+    "overProb": 0.51
+   },
+   "btts": {
+    "yes": -105,
+    "no": -115,
+    "yesProb": 0.51
+   },
+   "drawNoBet": {
+    "home": -200,
+    "away": 165,
+    "homeProb": 0.72
+   },
+   "pick": {
+    "kind": "lean",
+    "market": "corners_1x2",
+    "label": "Aston Villa most corners",
+    "price": -140,
+    "book": "Fanatics",
+    "edgePct": 2.9,
+    "modelProb": 0.61
+   }
+  },
+  {
+   "id": "9",
+   "kickoff": "2026-09-27T15:30:00Z",
+   "venue": "St James' Park",
+   "city": "Newcastle",
+   "tv": "NBC",
+   "started": false,
+   "home": {
+    "abbr": "NEW",
+    "record": "W2 D2 L1",
+    "projGoals": 1.9,
+    "winProb": 0.57
+   },
+   "away": {
+    "abbr": "WOL",
+    "record": "W0 D2 L3",
+    "projGoals": 0.9,
+    "winProb": 0.17
+   },
+   "drawProb": 0.26,
+   "result": {
+    "fair": {
+     "home": -133,
+     "draw": 285,
+     "away": 488
+    },
+    "excluded": true
+   },
+   "total": {
+    "line": 2.5,
+    "over": -110,
+    "under": -110,
+    "overProb": 0.54
+   },
+   "btts": {
+    "yes": 100,
+    "no": -120,
+    "yesProb": 0.49
+   },
+   "drawNoBet": {
+    "home": -240,
+    "away": 195,
+    "homeProb": 0.77
+   },
+   "pick": {
+    "kind": "lean",
+    "market": "draw_no_bet",
+    "label": "Newcastle draw no bet",
+    "price": -240,
+    "book": "FanDuel",
+    "edgePct": 2.4,
+    "modelProb": 0.77
+   }
+  },
+  {
+   "id": "10",
+   "kickoff": "2026-09-28T19:00:00Z",
+   "venue": "Stamford Bridge",
+   "city": "London",
+   "tv": "USA Network",
+   "started": false,
+   "home": {
+    "abbr": "CHE",
+    "record": "W3 D1 L1",
+    "projGoals": 1.7,
+    "winProb": 0.49
+   },
+   "away": {
+    "abbr": "BHA",
+    "record": "W2 D2 L1",
+    "projGoals": 1.2,
+    "winProb": 0.25
+   },
+   "drawProb": 0.26,
+   "result": {
+    "fair": {
+     "home": 104,
+     "draw": 285,
+     "away": 300
+    },
+    "excluded": true
+   },
+   "total": {
+    "line": 2.5,
+    "over": -105,
+    "under": -115,
+    "overProb": 0.55
+   },
+   "btts": {
+    "yes": -125,
+    "no": 105,
+    "yesProb": 0.55
+   },
+   "drawNoBet": {
+    "home": -150,
+    "away": 125,
+    "homeProb": 0.66
+   },
+   "pick": {
+    "kind": "pass",
+    "market": "total_2_5",
+    "label": "Over 2.5",
+    "price": -105,
+    "book": "BetRivers",
+    "edgePct": 1.1,
+    "modelProb": 0.55
+   }
+  }
+ ]
+}

@@ -840,6 +840,12 @@ jobs:
           name: matchday-state
           path: |
             data/outputs/archive/automated_cards
+            # The Beyond-the-Premier-League selections. Restored at the top of
+            # each run like the card archive beside it: without this the record
+            # is one run deep, which is the same as no record — a closing-line
+            # figure needs the pick and the later price, and the pick is the
+            # half that cannot be recovered afterwards.
+            data/outputs/archive/extra_cards
             data/processed/epl_historical_matches.csv
             data/processed/understat_team_xg.csv
           if-no-files-found: warn

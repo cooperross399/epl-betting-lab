@@ -47,11 +47,15 @@ uninterpretable.
 
 from __future__ import annotations
 
+import json
+from datetime import datetime, timezone
+from pathlib import Path
+
 from dataclasses import dataclass, field
 
 import pandas as pd
 
-from epl_betting_lab.config import MAX_DEFAULT_JUICE, PROCESSED_DIR
+from epl_betting_lab.config import OUTPUTS_DIR, MAX_DEFAULT_JUICE, PROCESSED_DIR
 from epl_betting_lab.data.european_clubs import provider_name
 from epl_betting_lab.data.international_teams import archive_name
 from epl_betting_lab.models.international_ratings import (
@@ -505,3 +509,90 @@ def render_extra_card(cards: dict[str, ExtraCard]) -> list[str]:
             "",
         ]
     return lines
+
+
+#: Where the machine-readable record of this section lives, mirroring
+#: `card_history.ARCHIVE_ROOT` for the Premier League card.
+EXTRA_CARD_JSON_FILENAME = "extra_competitions_card.json"
+EXTRA_ARCHIVE_ROOT = Path("archive") / "extra_cards"
+
+
+def extra_card_record(
+    cards: dict[str, ExtraCard], *, now: datetime | None = None
+) -> dict[str, object]:
+    """What this section recommended, in a form something can score later.
+
+    Until this existed the section's picks were rendered to markdown and posted
+    in an issue comment, and nowhere else. Prices for these competitions have
+    been collected since the EFL feed started — `price_feed_extra.csv` — but
+    there was no record of what was SELECTED, so closing-line value could never
+    be computed for any of it, forwards or backwards.
+
+    That matters most for the competition that needs it most. The international
+    section cannot be backtested at all: no free archive carries international
+    prices. Forward CLV is its only possible evidence, so without this record it
+    could never be shown to be good or bad, in either direction, ever.
+
+    Written for every run including empty ones. A run that selected nothing is a
+    fact about that day worth keeping — the alternative is a gap that cannot be
+    told apart from a run that did not happen.
+    """
+    moment = (now or datetime.now(timezone.utc)).astimezone(timezone.utc)
+    rows: list[dict[str, object]] = []
+    for key, card in cards.items():
+        spec = COMPETITIONS[key]
+        for row in card.selections.to_dict("records"):
+            rows.append(
+                {
+                    "competition": key,
+                    "competition_name": spec.name,
+                    "pool": spec.pool,
+                    "home_team": row.get("home_team"),
+                    "away_team": row.get("away_team"),
+                    "market": row.get("market"),
+                    "selection": row.get("selection"),
+                    "american_odds": row.get("american_odds"),
+                    "book": row.get("book"),
+                    "calibrated_edge": row.get("calibrated_edge"),
+                    "raw_edge": row.get("raw_edge"),
+                    "suggested_units": row.get("suggested_units"),
+                }
+            )
+    return {
+        "generated_at": moment.isoformat(),
+        "selections": rows,
+        "competitions": {
+            key: {
+                "priced": card.priced,
+                "declined": list(card.unrated),
+                "selections": int(len(card.selections)),
+            }
+            for key, card in cards.items()
+        },
+    }
+
+
+def save_extra_card_record(
+    cards: dict[str, ExtraCard],
+    *,
+    output_dir: Path | None = None,
+    now: datetime | None = None,
+) -> dict[str, object]:
+    """Write the record and archive a timestamped copy of it."""
+    outputs = OUTPUTS_DIR if output_dir is None else Path(output_dir)
+    outputs.mkdir(parents=True, exist_ok=True)
+    record = extra_card_record(cards, now=now)
+
+    body = json.dumps(record, indent=2, sort_keys=True, default=str) + "\n"
+    (outputs / EXTRA_CARD_JSON_FILENAME).write_text(body, encoding="utf-8")
+
+    moment = (now or datetime.now(timezone.utc)).astimezone(timezone.utc)
+    directory = (
+        outputs
+        / EXTRA_ARCHIVE_ROOT
+        / moment.strftime("%Y-%m-%d")
+        / moment.strftime("%H%M%S")
+    )
+    directory.mkdir(parents=True, exist_ok=True)
+    (directory / EXTRA_CARD_JSON_FILENAME).write_text(body, encoding="utf-8")
+    return record

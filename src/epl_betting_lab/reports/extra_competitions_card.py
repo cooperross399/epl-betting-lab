@@ -122,7 +122,17 @@ COMPETITIONS: dict[str, CompetitionSpec] = {
             "turnover (r = +0.82 across seven years). One applies and cannot be "
             "fixed: **5.2% of these matches are at neutral venues and the price "
             "feed does not say which**, so those are priced with a home "
-            "advantage worth about half a goal that one side does not have."
+            "advantage worth about half a goal that one side does not have. "
+            "The provider quotes all eight card markets here — the only "
+            "competition outside the Champions League that does — but the "
+            "results archive carries no corner counts, so **the three corner "
+            "markets are priced by nobody and cannot be bet**. And treat a "
+            "large edge here as a large model error first: the first run "
+            "offered Liechtenstein v Lithuania under 2.5 at +18.9%, calling it "
+            "76.6% against a market at 57.6%, when only 47.3% of "
+            "Liechtenstein's 110 matches since 2014 went under. This card "
+            "selects on the biggest disagreements, which is where a model is "
+            "most often simply wrong."
         ),
     ),
     "EFLC": CompetitionSpec(

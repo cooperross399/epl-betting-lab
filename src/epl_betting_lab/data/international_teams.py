@@ -10,13 +10,18 @@ vocabularies in one dictionary, and this project has already had a word mean
 two things in two tables and grade a third of a month's bets for the wrong
 side. No club here is called "Spain", but nothing would stop one being added.
 
-**Deliberately seeded empty.** The archive spells these "Czech Republic",
-"Republic of Ireland", "Turkey", "Bosnia and Herzegovina". A provider may spell
-them "Czechia", "Ireland", "Türkiye" — or may not. Writing a guess here does
-not fail loudly: it silently maps a real fixture onto the wrong country's
-rating, which is worse than declining it. So entries are added only from names
-actually observed in the price feed, and until then an unmatched spelling is
-reported by the card as an unrateable fixture, naming the exact string the
+**Every entry was observed, none was guessed.** The guesses would have been
+wrong in both directions. The archive spells them "Czech Republic", "Republic
+of Ireland", "Turkey" and "North Macedonia", and a plausible guess was that the
+provider says "Czechia", "Ireland" or "Türkiye" — it does not, it agrees on all
+four. The one name it spells differently is the one nobody would have picked.
+Of 52 national teams quoted for the 2026-27 Nations League, 51 matched the
+archive unaided.
+
+A wrong entry here does not fail loudly: it maps a real fixture onto another
+country's rating, which is worse than declining it. So this file is written
+from names seen in `price_feed_extra.csv`, and an unmatched spelling is
+reported by the card as an unrateable fixture naming the exact string the
 provider sent. That report is the input to this file.
 """
 
@@ -25,7 +30,12 @@ from __future__ import annotations
 #: Provider spelling -> the spelling used by the results archive.
 #:
 #: Every entry must be justified by a name seen in `price_feed_extra.csv`.
-PROVIDER_TEAM_NAMES: dict[str, str] = {}
+PROVIDER_TEAM_NAMES: dict[str, str] = {
+    # Observed 2026-09-22 across 1,162 Nations League price observations: the
+    # provider writes an ampersand where the archive writes "and". The only
+    # disagreement in 52 teams.
+    "Bosnia & Herzegovina": "Bosnia and Herzegovina",
+}
 
 
 def archive_name(team: str) -> str:

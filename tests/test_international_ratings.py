@@ -208,12 +208,19 @@ class TestTheProviderSpellsCountriesItsOwnWay:
     def test_an_unmapped_name_falls_through_unchanged(self) -> None:
         assert archive_name("Spain") == "Spain"
 
-    def test_the_map_is_seeded_empty_so_no_spelling_is_guessed(self) -> None:
-        """A wrong entry does not fail — it maps a real fixture onto another
-        country's rating, which is worse than declining it. Entries are added
-        from names actually seen in the feed; this test is the reminder, and it
-        is expected to be deleted by the first commit that adds a real one."""
-        assert PROVIDER_TEAM_NAMES == {}
+    def test_the_one_name_the_provider_spells_differently(self) -> None:
+        """Observed across 1,162 Nations League price observations, not
+        guessed. The guessable ones — Czechia, Ireland, Türkiye — would all
+        have been wrong: the provider agrees with the archive on every one of
+        them, and disagrees only here."""
+        assert archive_name("Bosnia & Herzegovina") == "Bosnia and Herzegovina"
+
+    def test_the_names_that_look_risky_need_no_entry(self) -> None:
+        """Guarding against a future well-meaning addition. Mapping these would
+        point a real fixture at a country the pool does not have."""
+        for name in ("Czech Republic", "Republic of Ireland", "Turkey", "North Macedonia"):
+            assert archive_name(name) == name
+            assert name not in PROVIDER_TEAM_NAMES
 
     def test_national_teams_do_not_share_the_club_name_map(self) -> None:
         """Two vocabularies in one dictionary is how a word came to mean the

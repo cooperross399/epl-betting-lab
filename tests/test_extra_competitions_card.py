@@ -435,3 +435,68 @@ class TestEveryReturnCarriesTheDeclinedFixtures:
 
         assert priced_nothing.priced == 0 and priced_nothing.unrated
         assert priced_one.priced == 1 and not priced_one.unrated
+
+
+# --- the intro must not count its own sections ------------------------------
+
+
+class TestTheIntroDoesNotGoStaleWhenACompetitionIsAdded:
+    """It read "Neither competition below has been shown to beat a price" and
+    was written when there were two. The Europa League, the Conference League
+    and the Nations League were added underneath it, and it went out on a card
+    carrying five sections telling the reader there were two.
+
+    Asserted behaviourally rather than by grepping for counting words. A list
+    of banned spellings misses the one nobody thought of; rendering the same
+    card with a different number of sections and requiring the intro not to
+    move catches any wording that depends on the count, however it is phrased.
+    """
+
+    @staticmethod
+    def _intro(cards: dict) -> list[str]:
+        rendered = render_extra_card(cards)
+        return rendered[: rendered.index("### " + COMPETITIONS[next(iter(cards))].name)]
+
+    @staticmethod
+    def _card() -> ExtraCard:
+        return ExtraCard(
+            pd.DataFrame(
+                [
+                    {
+                        "home_team": "A",
+                        "away_team": "B",
+                        "market": "btts",
+                        "selection": "yes",
+                        "american_odds": 100,
+                        "book": "Book",
+                        "calibrated_edge": 0.05,
+                        "suggested_units": 0.1,
+                    }
+                ]
+            ),
+            [],
+            priced=1,
+        )
+
+    def test_the_intro_is_the_same_for_one_section_as_for_every_section(self) -> None:
+        keys = list(COMPETITIONS)
+        assert len(keys) >= 2, "this test needs at least two competitions to compare"
+
+        one = self._intro({keys[0]: self._card()})
+        many = self._intro({key: self._card() for key in keys})
+
+        assert one == many, (
+            "the introduction changes with the number of sections, so it is "
+            "carrying a count that goes stale the next time one is added"
+        )
+
+    def test_the_intro_names_no_competition(self) -> None:
+        """Naming one rots the same way a count does — the sentence outlives
+        the competition it mentions."""
+        intro = "\n".join(self._intro({key: self._card() for key in COMPETITIONS}))
+
+        for spec in COMPETITIONS.values():
+            assert spec.name not in intro, (
+                f"the introduction names {spec.name}, which has to be revisited "
+                "whenever that competition is removed or renamed"
+            )

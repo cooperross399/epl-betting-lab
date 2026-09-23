@@ -127,12 +127,14 @@ COMPETITIONS: dict[str, CompetitionSpec] = {
             "competition outside the Champions League that does — but the "
             "results archive carries no corner counts, so **the three corner "
             "markets are priced by nobody and cannot be bet**. And treat a "
-            "large edge here as a large model error first: the first run "
-            "offered Liechtenstein v Lithuania under 2.5 at +18.9%, calling it "
+            "large edge here as a large model error first. The raw model made "
+            "Liechtenstein v Lithuania under 2.5 a +18.9% edge, calling it "
             "76.6% against a market at 57.6%, when only 47.3% of "
-            "Liechtenstein's 110 matches since 2014 went under. This card "
-            "selects on the biggest disagreements, which is where a model is "
-            "most often simply wrong."
+            "Liechtenstein's 110 matches since 2014 went under; calibration cut "
+            "that to the +8.0% the card carried. This card selects on the "
+            "biggest disagreements, which is where a model is most often simply "
+            "wrong — and where the largest correction is applied, so the number "
+            "shown has already been pulled toward the market."
         ),
     ),
     "EFLC": CompetitionSpec(
@@ -383,11 +385,20 @@ def build_extra_card(
 def render_extra_card(cards: dict[str, ExtraCard]) -> list[str]:
     """Markdown for the competitions beyond the Premier League."""
     lines: list[str] = ["## Beyond the Premier League", ""]
+    # Deliberately count-free. This read "Neither competition below" and was
+    # written when there were two; it survived the Europa League, the
+    # Conference League and the Nations League being added and went out on a
+    # card carrying five, telling the reader there were two. A sentence that
+    # counts its own sections has to be revisited every time one is added, and
+    # is revisited only when somebody notices. The per-competition notes carry
+    # the specifics, and those are edited in the same commit as the section
+    # they describe.
     lines += [
-        "Neither competition below has been shown to beat a price, and the EFL "
-        "Cup has been shown not to. They are staked at "
-        f"{EXTRA_UNITS} units for that reason. See "
-        "`data/outputs/unified_ratings.md` and `data/outputs/european_ratings.md`.",
+        "Nothing below has been shown to beat a price. Some of it has been "
+        "shown not to, and some of it cannot be tested at all. Each section "
+        f"says which. They are staked at {EXTRA_UNITS} units for that reason. "
+        "See `data/outputs/unified_ratings.md` and "
+        "`data/outputs/european_ratings.md`.",
         "",
     ]
     fitted_only = [

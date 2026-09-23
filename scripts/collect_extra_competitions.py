@@ -69,6 +69,7 @@ COMPETITION_NAMES = {
     "UCL": "UEFA Champions League",
     "UEL": "UEFA Europa League",
     "UECL": "UEFA Europa Conference League",
+    "UNL": "UEFA Nations League",
     # No longer collected, kept so the rows already in the feed still render
     # with a name rather than a bare key.
     "EFLC": "EFL Cup (Carabao)",
@@ -113,6 +114,24 @@ SPORT_KEYS = {
     # be settled from a free source. Closing-line value needs no result and
     # remains possible; profit does not.
     "UCL": "soccer_uefa_champs_league",
+    # National teams, and the only international competition this provider
+    # sells. The key list was read rather than guessed: `/v4/sports?all=true`
+    # returns 67 soccer competitions, and CONCACAF's Nations League is not one
+    # of them — the provider carries that confederation's Gold Cup and Leagues
+    # Cup and nothing else. Asked without `all=true` the same endpoint returns
+    # 43, all in season, which is how a dormant competition comes to look like
+    # one the key cannot price.
+    #
+    # Everything else international it does sell is a tournament or a
+    # qualifying round, and every one of them was out of season when this was
+    # written: the Euro and its qualifiers, the World Cup and its European and
+    # South American qualifiers, Copa America, AFCON, the Gold Cup. They are
+    # deliberately left out of this mapping rather than added dormant. A
+    # qualifying round is a different fixture population from a seeded league —
+    # 7.2% of Euro qualifiers have a favourite above 90% against 0.3% of
+    # Nations League matches — so adding one is a modelling decision that needs
+    # its own measurement, not a key.
+    "UNL": "soccer_uefa_nations_league",
     # The other two UEFA competitions. Their results are bridges in the rating
     # pool already; these are the prices to bet them on. Coverage is thinner
     # than the Champions League in both directions — fewer markets quoted, and

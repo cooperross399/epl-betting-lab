@@ -53,6 +53,11 @@ import pandas as pd
 
 from epl_betting_lab.config import MAX_DEFAULT_JUICE, PROCESSED_DIR
 from epl_betting_lab.data.european_clubs import provider_name
+from epl_betting_lab.data.international_teams import archive_name
+from epl_betting_lab.models.international_ratings import (
+    INTERNATIONAL_RATINGS,
+    build_international_pool,
+)
 from epl_betting_lab.models.european_ratings import (
     EUROPEAN_RATINGS,
     build_european_pool,
@@ -99,6 +104,37 @@ class CompetitionSpec:
 
 
 COMPETITIONS: dict[str, CompetitionSpec] = {
+    "UNL": CompetitionSpec(
+        key="UNL",
+        name="UEFA Nations League",
+        pool="international",
+        note=(
+            "National teams, on a pool that shares no information with the club "
+            "ratings — a country has never played any club in them, so nothing "
+            "bridges the two and this is a second model. It **cannot be "
+            "backtested**: the free results archive carries no prices, and "
+            "Football-Data ships closing odds beside every club result, which is "
+            "how the EFL got a 10,000-bet answer in a weekend. This one can only "
+            "be judged forward, at roughly 80 matches a year. Two expected "
+            "problems measured out **not** to apply here — the seeding keeps "
+            "League A away from League D, so 0.3% of fixtures have a favourite "
+            "above 90% and none above 95%, and a team's rating survives squad "
+            "turnover (r = +0.82 across seven years). One applies and cannot be "
+            "fixed: **5.2% of these matches are at neutral venues and the price "
+            "feed does not say which**, so those are priced with a home "
+            "advantage worth about half a goal that one side does not have. "
+            "The provider quotes all eight card markets here — the only "
+            "competition outside the Champions League that does — but the "
+            "results archive carries no corner counts, so **the three corner "
+            "markets are priced by nobody and cannot be bet**. And treat a "
+            "large edge here as a large model error first: the first run "
+            "offered Liechtenstein v Lithuania under 2.5 at +18.9%, calling it "
+            "76.6% against a market at 57.6%, when only 47.3% of "
+            "Liechtenstein's 110 matches since 2014 went under. This card "
+            "selects on the biggest disagreements, which is where a model is "
+            "most often simply wrong."
+        ),
+    ),
     "EFLC": CompetitionSpec(
         key="EFLC",
         name="EFL Cup (Carabao)",
@@ -194,8 +230,12 @@ def latest_prices(feed: pd.DataFrame, competition: str) -> pd.DataFrame:
     # The provider names clubs its own way — "Paris Saint Germain" where
     # Football-Data says "Paris SG". Without this, a fixture is declined as
     # unrateable while both its clubs sit in the pool.
-    rows["home_team"] = rows["home_team"].map(provider_name)
-    rows["away_team"] = rows["away_team"].map(provider_name)
+    # Clubs and national teams have separate name maps. One dictionary for both
+    # would be two vocabularies sharing a key space, which is how "home" came to
+    # mean the provider in one table and the results feed in another.
+    rename = archive_name if COMPETITIONS[competition].pool == "international" else provider_name
+    rows["home_team"] = rows["home_team"].map(rename)
+    rows["away_team"] = rows["away_team"].map(rename)
     rows["observed"] = pd.to_datetime(rows["observed_at"], errors="coerce", utc=True)
     rows["american_odds"] = pd.to_numeric(rows["american_odds"], errors="coerce")
     rows = rows.dropna(subset=["observed", "american_odds"])
@@ -209,6 +249,16 @@ def latest_prices(feed: pd.DataFrame, competition: str) -> pd.DataFrame:
 
 
 def _pool_for(spec: CompetitionSpec):
+    if spec.pool == "international":
+        # Priced as a home fixture, which is right for 94.8% of Nations League
+        # matches and wrong for the rest. `InternationalModel.expected_goals`
+        # can take the venue and refuses to guess it; the price feed simply
+        # does not carry one, and the provider does not say. Rather than pass a
+        # neutral flag this layer would have to invent, the card uses the same
+        # home/away path as every other competition and the note says what that
+        # costs. The pool's own baselines still come out of a venue-aware fit.
+        pool = build_international_pool()
+        return pool.matches, INTERNATIONAL_RATINGS
     if spec.pool == "english":
         matches = build_pool()
         return matches, UNIFIED_RATINGS
@@ -285,12 +335,28 @@ def build_extra_card(
 
     frames = [f for f in frames if f is not None and not f.empty]
     if not frames:
-        return ExtraCard(pd.DataFrame(), notes + ["No selection cleared the rules."], priced=len(records))
+        # `unrated` travels with every return, not just the early one. It was
+        # added to the coverage-wall return and missed on the three below, so a
+        # competition where nothing cleared reported "N of N fixtures rateable"
+        # while several had in fact been declined — the same "0 of 0" fault the
+        # early return exists to prevent, surviving on the paths a quiet week
+        # actually takes.
+        return ExtraCard(
+            pd.DataFrame(),
+            notes + ["No selection cleared the rules."],
+            priced=len(records),
+            unrated=unrated,
+        )
 
     selections = pd.concat(frames, ignore_index=True)
     selections = selections[~selections["market"].isin(EXCLUDED_MARKETS)].copy()
     if selections.empty:
-        return ExtraCard(pd.DataFrame(), notes + ["No selection cleared the rules."], priced=len(records))
+        return ExtraCard(
+            pd.DataFrame(),
+            notes + ["No selection cleared the rules."],
+            priced=len(records),
+            unrated=unrated,
+        )
 
     # Only what the rules actually pass. Without this every evaluated row is
     # printed, negative edges included: the first run of this module offered a
@@ -303,6 +369,7 @@ def build_extra_card(
             pd.DataFrame(),
             notes + [f"None of {before} priced selections cleared the rules."],
             priced=len(records),
+            unrated=unrated,
         )
     edge = selections.get("calibrated_edge", selections.get("raw_edge"))
     selections = selections.assign(_edge=pd.to_numeric(edge, errors="coerce"))

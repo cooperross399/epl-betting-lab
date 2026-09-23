@@ -1,10 +1,10 @@
-## Wednesday 23 September, 19:15 UTC — manual run
+## Wednesday 23 September, 19:34 UTC — manual run
 
-Selections changed: 1 dropped, 1 moved section.
+Already sent today; same selections (0 price move(s)).
 
 _This run was started by hand, not by the schedule. If you did not start it, someone was testing._
 
-Provider quota: 1104460 (about 17813 more runs)
+Provider quota: 1104338 (about 17811 more runs)
 
 Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
 
@@ -24,11 +24,6 @@ Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_tot
 ### Leans
 
 _None._
-
-### What changed
-
-- **Dropped:** Arsenal v Leeds double_chance draw_or_away
-- **Moved section:** Arsenal v Leeds btts yes
 
 
 ## Beyond the Premier League
@@ -110,4 +105,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/35907709897)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/35909861209)

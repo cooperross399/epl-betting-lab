@@ -1,10 +1,10 @@
-## Wednesday 23 September, 05:54 UTC — manual run
+## Wednesday 23 September, 19:15 UTC — manual run
 
-Selections changed: 5 added, 6 dropped, 1 moved section.
+Selections changed: 1 dropped, 1 moved section.
 
 _This run was started by hand, not by the schedule. If you did not start it, someone was testing._
 
-Provider quota: 1104582 (about 17815 more runs)
+Provider quota: 1104460 (about 17813 more runs)
 
 Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
 
@@ -27,35 +27,28 @@ _None._
 
 ### What changed
 
-- **Added:** Arsenal v Leeds corners_total_9_5 under
-- **Added:** Arsenal v Leeds double_chance draw_or_away
-- **Added:** Arsenal v Leeds draw_no_bet away
-- **Added:** Aston Villa v Brentford draw_no_bet away
-- **Added:** Coventry v Newcastle double_chance home_or_away
-- **Dropped:** Aston Villa v Brentford total_2_5 over
-- **Dropped:** Coventry v Newcastle corners_1x2 home
-- **Dropped:** Coventry v Newcastle corners_total_9_5 over
-- **Dropped:** Crystal Palace v Nott'm Forest btts yes
-- **Dropped:** Hull v Everton double_chance home_or_draw
-- **Dropped:** Ipswich v Fulham double_chance home_or_away
-- **Moved section:** Hull v Everton draw_no_bet home
+- **Dropped:** Arsenal v Leeds double_chance draw_or_away
+- **Moved section:** Arsenal v Leeds btts yes
 
 
 ## Beyond the Premier League
 
-Neither competition below has been shown to beat a price, and the EFL Cup has been shown not to. They are staked at 0.1 units for that reason. See `data/outputs/unified_ratings.md` and `data/outputs/european_ratings.md`.
+Nothing below has been shown to beat a price. Some of it has been shown not to, and some of it cannot be tested at all. Each section says which. They are staked at 0.1 units for that reason. See `data/outputs/unified_ratings.md` and `data/outputs/european_ratings.md`.
 
 ### UEFA Nations League
 
-National teams, on a pool that shares no information with the club ratings — a country has never played any club in them, so nothing bridges the two and this is a second model. It **cannot be backtested**: the free results archive carries no prices, and Football-Data ships closing odds beside every club result, which is how the EFL got a 10,000-bet answer in a weekend. This one can only be judged forward, at roughly 80 matches a year. Two expected problems measured out **not** to apply here — the seeding keeps League A away from League D, so 0.3% of fixtures have a favourite above 90% and none above 95%, and a team's rating survives squad turnover (r = +0.82 across seven years). One applies and cannot be fixed: **5.2% of these matches are at neutral venues and the price feed does not say which**, so those are priced with a home advantage worth about half a goal that one side does not have. The provider quotes all eight card markets here — the only competition outside the Champions League that does — but the results archive carries no corner counts, so **the three corner markets are priced by nobody and cannot be bet**. And treat a large edge here as a large model error first: the first run offered Liechtenstein v Lithuania under 2.5 at +18.9%, calling it 76.6% against a market at 57.6%, when only 47.3% of Liechtenstein's 110 matches since 2014 went under. This card selects on the biggest disagreements, which is where a model is most often simply wrong.
+National teams, on a pool that shares no information with the club ratings — a country has never played any club in them, so nothing bridges the two and this is a second model. It **cannot be backtested**: no free archive carries international prices, so it can only be judged forward, at roughly 80 matches a year. **Only the result markets are bet here.** Measured against the de-vigged market across 45 live fixtures, the model put the chance of over 2.5 goals at 0.418 where the market said 0.499 — eight points low, the same way on every fixture — so `total_2_5` and `btts` are priced by a standing gap rather than by the fixture, and are withheld. Three of the first four selections this section ever made were low-scoring bets off that gap. The baselines are now this competition's own rather than the pool's, which halved a separate bias: it was applying +0.656 goals of home advantage where the Nations League's own is +0.346. Two expected problems measured out **not** to apply — seeding keeps League A away from League D, so 0.3% of fixtures have a favourite above 90% and none above 95%, and a rating survives squad turnover (r = +0.82 across seven years). One remains and cannot be fixed from the feed: 5.2% of these matches are at neutral venues and the price feed does not say which, so those carry a home advantage one side does not have.
 
 | Match | Market | Selection | Edge | Price | Book | Units |
 |:--|:--|:--|--:|--:|:--|--:|
-| Liechtenstein v Lithuania | `total_2_5` | under | +8.0% | -136 | BetRivers | 0.1 |
-| England v Spain | `btts` | no | +6.7% | +110 | BetRivers | 0.1 |
-| Turkey v France | `double_chance` | home_or_draw | +6.5% | +150 | BetRivers | 0.1 |
-| Romania v Bosnia and Herzegovina | `btts` | no | +6.3% | -107 | BetRivers | 0.1 |
+| Italy v Belgium | `draw_no_bet` | away | +6.7% | +135 | BetRivers | 0.1 |
+| North Macedonia v Switzerland | `draw_no_bet` | home | +6.6% | +440 | BetRivers | 0.1 |
+| Sweden v Romania | `double_chance` | draw_or_away | +5.9% | +163 | BetRivers | 0.1 |
+| Turkey v France | `draw_no_bet` | home | +5.9% | +350 | BetRivers | 0.1 |
 
+- `btts` is not bet here: the model sits about 8 points below the market on the goals level for every fixture, so a selection in that market would be the gap rather than the fixture.
+- `total_2_5` is not bet here: the model sits about 8 points below the market on the goals level for every fixture, so a selection in that market would be the gap rather than the fixture.
+- Ratings include no result after 2026-08-26; the results archive runs about a month behind, so the current international window is not in the fit.
 - No corner model: the pool carries no corner counts.
 
 ### EFL Cup (Carabao)
@@ -117,4 +110,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/35824171667)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/35907709897)

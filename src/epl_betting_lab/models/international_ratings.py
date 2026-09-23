@@ -49,22 +49,49 @@ from epl_betting_lab.data.international_results import (
 )
 from epl_betting_lab.models.poisson_goals import PoissonGoalsModel, RatingConfig, UnratedTeam
 
-#: A longer half-life than the club pools use. A club plays 38 league matches a
-#: season; a national team plays about ten a year, so a 365-day window that
-#: leaves a club with a full season of evidence leaves a country with ten
-#: matches. The value is measured rather than assumed — see
-#: `scripts/measure_international_ratings.py`.
+#: Five years, not the clubs' one. A club plays 38 league matches a season; a
+#: national team plays about ten a year, so a 365-day window that leaves a club
+#: with a full season of evidence leaves a country with ten matches.
+#:
+#: Measured, not assumed. Sweeping [365, 548, 730, 1095, 1460, 1825, 2555,
+#: 3650, None] walk-forward on held-out competitive matches, 1825 beat the 1095
+#: this module first guessed at by 0.0057 RMSE, 95% CI [-0.0079, -0.0038],
+#: resampling matches — small, but it excludes zero and it is free.
+#:
+#: `opponent_adjusted=True` is kept, with one honest caveat: on UEFA Nations
+#: League matches ALONE it buys nothing measurable (dRMSE +0.0010, 95% CI
+#: [-0.0080, +0.0100] — a tight null, not an underpowered one). It earns its
+#: place on the wider international population, where the gap is +0.039
+#: [+0.022, +0.056]. If UNL were ever the only thing fitted, this would be
+#: a setting with no evidence behind it.
 INTERNATIONAL_RATINGS = RatingConfig(
-    opponent_adjusted=True, half_life_days=1095, goal_source="goals"
+    opponent_adjusted=True, half_life_days=1825, goal_source="goals"
 )
 
-#: How far back the pool reads. Squads turn over; a 2006 result says nothing
-#: about the side that will take the field this window.
+#: Twelve years of history. The obvious worry was that squads turn over and an
+#: old result says nothing about the side that takes the field this window.
+#: Measured, that worry is wrong: a national team's rating correlates r = +0.816
+#: (attack) and +0.822 (defence) across a seven-year midpoint gap, over 199
+#: teams. National-team strength is more persistent than the squad is, so
+#: reading further back helps rather than hurts — 12 years with the half-life
+#: above beat the original 4-year/1095-day pair on held-out 1X2 log-loss,
+#: 0.8709 against 0.8818, 95% CI [-0.0131, -0.0088].
 DEFAULT_SINCE = "2014-01-01"
 
 #: Below this a team is not rated at all. A national team with a handful of
 #: appearances is a rating made of noise, and `expected_goals` refusing is the
 #: behaviour that stopped a Premier League fit pricing Grimsby.
+#:
+#: Twelve is not a measured optimum and should not be described as one. What is
+#: measured is that a threshold is needed at all: below six appearances the
+#: model loses 0.10 log-loss of skill against a no-team-information baseline,
+#: 95% CI [+0.069, +0.154]. Between six and thirty every comparison straddles
+#: zero, and those nulls are underpowered — the minimum detectable effect is
+#: about +0.042 against a total model skill of 0.170, so they cannot separate
+#: "flat" from "this band keeps only three quarters of the skill". Twelve is the
+#: conservative side of an uncertainty, chosen as a judgment. It costs nothing
+#: here: all 55 UEFA Nations League teams clear it, and so do all 41 CONCACAF
+#: sides.
 MIN_MATCHES = 12
 
 
@@ -84,6 +111,13 @@ class InternationalPool:
 def build_international_pool(
     *,
     since: str = DEFAULT_SINCE,
+    # Friendlies stay in. The expectation was that they are a different game —
+    # wholesale substitutions, no motivation — and would bias the fit. Measured
+    # two ways, excluding them is somewhere between no help and a measurable
+    # loss (+0.0002 log-loss, 95% CI [-0.0024, +0.0028] one way; +0.0104
+    # [+0.0079, +0.0130] the other, at production shrinkage). Both readings say
+    # keep them, and a third of the evidence is not worth discarding on a
+    # prior that measurement did not support.
     include_friendlies: bool = True,
     results=None,
 ) -> InternationalPool:

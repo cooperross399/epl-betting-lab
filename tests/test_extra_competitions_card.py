@@ -22,6 +22,7 @@ from epl_betting_lab.reports.extra_competitions_card import (
     EXTRA_UNITS,
     MAX_EXTRA_BETS,
     ExtraCard,
+    build_extra_card,
     latest_prices,
     render_extra_card,
 )
@@ -306,3 +307,131 @@ class TestACompetitionEarnsItsSection:
         from epl_betting_lab.data.european_results import COMPETITION_FILES
 
         assert "UECL" in COMPETITION_FILES
+
+
+def _stub_international_pool(monkeypatch) -> None:
+    """A tiny offline pool, so no test reaches the network.
+
+    `build_international_pool` fetches an archive over HTTP. A test that did
+    that would be slow, would fail on a laptop with no connection, and would be
+    measuring GitHub's availability rather than this module.
+    """
+    from epl_betting_lab.data.international_results import parse_archive
+    from epl_betting_lab.models import international_ratings
+
+    header = (
+        "date,home_team,away_team,home_score,away_score,tournament,city,country,neutral"
+    )
+    rows = [
+        f"20{15 + i // 12:02d}-{1 + i % 12:02d}-05,{home},{away},{hg},{ag},"
+        f"UEFA Nations League,Town,Country,{neutral}"
+        for home, away, hg, ag, neutral in (
+            ("Spain", "France", 3, 1, "FALSE"),
+            ("Italy", "Germany", 1, 1, "TRUE"),
+            ("Portugal", "Spain", 2, 2, "FALSE"),
+        )
+        for i in range(20)
+    ]
+    results = parse_archive("\n".join([header, *rows]) + "\n")
+    monkeypatch.setattr(
+        international_ratings,
+        "load_international_results",
+        lambda **kwargs: results,
+    )
+    monkeypatch.setattr(
+        "epl_betting_lab.reports.extra_competitions_card.build_international_pool",
+        lambda **kwargs: international_ratings.build_international_pool(results=results),
+    )
+
+
+# --- the declined fixtures have to reach the card ---------------------------
+
+
+class TestEveryReturnCarriesTheDeclinedFixtures:
+    """`unrated` was added to the coverage-wall return and missed on three
+    others, so a competition where nothing cleared reported every priced
+    fixture and none of the declined ones — the same "0 of 0 fixtures rateable"
+    fault the early return exists to prevent, surviving on the paths a quiet
+    week actually takes. Of the five returns in `build_extra_card`, two had it.
+    """
+
+    @staticmethod
+    def _feed(*fixtures, odds: int = -110) -> pd.DataFrame:
+        return pd.DataFrame(
+            [
+                {
+                    "competition": "UNL",
+                    "home_team": home,
+                    "away_team": away,
+                    "market": "btts",
+                    "selection": selection,
+                    "american_odds": odds,
+                    "book": "Book",
+                    "observed_at": "2026-09-22T12:00:00Z",
+                }
+                for home, away in fixtures
+                for selection in ("yes", "no")
+            ]
+        )
+
+    def test_a_declined_fixture_is_reported_when_nothing_clears(
+        self, monkeypatch
+    ) -> None:
+        """The common case. A price at -110 both ways clears no rule, and that
+        return is one of the three that used to drop the count."""
+        _stub_international_pool(monkeypatch)
+
+        # Priced so short that no edge can clear, which is what forces the
+        # "nothing cleared" return rather than the final one. At -110 this
+        # fixture does clear, and the test then exercises a path that always
+        # carried `unrated` and proves nothing.
+        card = build_extra_card(
+            self._feed(("Spain", "France"), ("Atlantis", "Portugal"), odds=-5000),
+            "UNL",
+        )
+
+        assert card.selections.empty, "the fixture was meant to clear nothing"
+        assert any("cleared the rules" in note for note in card.notes), (
+            "this test only guards the return it names if it reaches it"
+        )
+        assert card.unrated == ["Atlantis v Portugal"], (
+            "the declined fixture vanished from a card that priced one of two"
+        )
+
+    def test_a_declined_fixture_survives_a_competition_with_no_bettable_market(
+        self, monkeypatch
+    ) -> None:
+        """The other return, and the one a new competition is most likely to
+        take. A provider that quotes a competition but not the markets this
+        card bets leaves every evaluator empty, and that return is reached
+        before any selection exists to be filtered. Its message differs from
+        the "none of N cleared" one, which is why a test matching only the
+        shared words passes without ever reaching here.
+        """
+        _stub_international_pool(monkeypatch)
+        feed = self._feed(("Spain", "France"), ("Atlantis", "Portugal"))
+        # `1x2` is excluded from this card, so nothing evaluates it.
+        feed["market"] = "1x2"
+        feed["selection"] = "home"
+
+        card = build_extra_card(feed, "UNL")
+
+        assert card.notes[-1] == "No selection cleared the rules.", (
+            "this test guards the plain return; it reached a different one"
+        )
+        assert card.unrated == ["Atlantis v Portugal"]
+
+    def test_the_count_distinguishes_a_quiet_week_from_a_coverage_wall(
+        self, monkeypatch
+    ) -> None:
+        _stub_international_pool(monkeypatch)
+
+        priced_nothing = build_extra_card(
+            self._feed(("Atlantis", "Utopia"), odds=-5000), "UNL"
+        )
+        priced_one = build_extra_card(
+            self._feed(("Spain", "France"), odds=-5000), "UNL"
+        )
+
+        assert priced_nothing.priced == 0 and priced_nothing.unrated
+        assert priced_one.priced == 1 and not priced_one.unrated

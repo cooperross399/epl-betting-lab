@@ -49,12 +49,22 @@ def _collector():
     return module
 
 
+def _only(*codes: str):
+    """The register entries under test, so a test does not fail merely because
+    another competition was registered. Pinning the whole register made three
+    tests fail the moment a third entry was added, which is a test asserting
+    the roster rather than the behaviour it names.
+    """
+    return tuple(want for want in WANTED if want.code in codes)
+
+
 class TestNoticingThatSomethingArrived:
     def test_an_absent_competition_is_reported_with_the_reason(self) -> None:
-        found = find_wanted([UNL])
+        found = find_wanted([UNL], wanted=_only("CNL", "CNLQ"))
 
         assert [item["code"] for item in found["absent"]] == ["CNL", "CNLQ"]
         assert not found["available"]
+        assert all(item["status"] for item in found["absent"])
 
     def test_an_arrival_is_announced_with_the_key_to_wire(self) -> None:
         """The whole point. The report has to carry the sport key, because the
@@ -82,13 +92,13 @@ class TestTheQualifyingRoundIsNotTheCompetition:
         Qualification" as happily as the competition itself. A want-first loop
         announced the main competition the moment its qualifying round was
         listed — which is the one thing this register exists to get right."""
-        found = find_wanted([CNLQ])
+        found = find_wanted([CNLQ], wanted=_only("CNL", "CNLQ"))
 
         assert [item["code"] for item in found["available"]] == ["CNLQ"]
         assert [item["code"] for item in found["absent"]] == ["CNL"]
 
     def test_both_listed_resolve_to_one_entry_each(self) -> None:
-        found = find_wanted([CNLQ, CNL])
+        found = find_wanted([CNLQ, CNL], wanted=_only("CNL", "CNLQ"))
 
         assert sorted(item["code"] for item in found["available"]) == ["CNL", "CNLQ"]
         assert not found["absent"]
@@ -188,3 +198,46 @@ class TestMatchingIsByNameBecauseTheKeyIsUnknowable:
         found = find_wanted([UNL, CNL], wanted=nonsense)
 
         assert [item["code"] for item in found["absent"]] == ["XXX"]
+
+
+class TestTheGoldCupCarriesItsMeasuredVerdict:
+    """It is the one registered entry the provider actually sells. Measured
+    2026-09-23: the tail screen passes better than the Nations League's, and
+    the venue blocks it — 78% of its matches are neutral, the feed does not say
+    which, and the card would shift the home side +9.4 points on every one.
+    """
+
+    @staticmethod
+    def _entry():
+        return next(want for want in WANTED if want.code == "GOLD")
+
+    def test_it_is_registered_rather_than_wired(self) -> None:
+        """Registered means the watch says when it comes into season; wired
+        would mean collecting it. It is out of season either way."""
+        assert self._entry() is not None
+        keys = _collector().SPORT_KEYS.values()
+        assert "soccer_concacaf_gold_cup" not in keys
+
+    def test_the_status_says_collect_and_not_card(self) -> None:
+        """A register entry whose status does not carry the verdict sends the
+        next reader back to re-measure it."""
+        status = self._entry().status.lower()
+
+        assert "do not card" in status
+        assert "neutral" in status, "the reason it is not carded is missing"
+
+    def test_it_is_found_when_the_provider_lists_it(self) -> None:
+        listing = [
+            {
+                "key": "soccer_concacaf_gold_cup",
+                "title": "CONCACAF Gold Cup",
+                "active": False,
+            }
+        ]
+
+        found = find_wanted(listing, wanted=_only("GOLD"))
+
+        assert [item["key"] for item in found["available"]] == [
+            "soccer_concacaf_gold_cup"
+        ]
+        assert found["available"][0]["active"] is False

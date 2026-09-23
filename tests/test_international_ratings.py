@@ -228,3 +228,39 @@ class TestTheProviderSpellsCountriesItsOwnWay:
         from epl_betting_lab.data import european_clubs
 
         assert PROVIDER_TEAM_NAMES is not european_clubs.PROVIDER_CLUB_NAMES
+
+
+class TestThePoolSaysHowStaleItIs:
+    """The source archive runs about a month behind. Read on 2026-09-23 it
+    ended 2026-08-26 and held no September fixtures at all — not even the
+    matches the card was pricing that day. Two things followed: the ratings
+    never include the current window, and an absence in the archive was read as
+    evidence a competition had stopped being played, which it cannot support.
+    """
+
+    @staticmethod
+    def _pool():
+        rows = _many("Spain", "France", 20, home_goals=3) + _many(
+            "Italy", "Germany", 20, neutral="TRUE"
+        )
+        return build_international_pool(results=parse_archive(_archive(*rows)))
+
+    def test_the_pool_reports_its_most_recent_result(self) -> None:
+        pool = self._pool()
+
+        assert pool.latest_result is not None
+        assert pool.latest_result == pool.matches["date"].max()
+
+    def test_an_empty_pool_reports_no_date_rather_than_today(self) -> None:
+        """A pool with nothing in it is not a pool that is up to date."""
+        empty = build_international_pool(results=parse_archive(_archive()))
+
+        assert empty.latest_result is None
+        assert empty.days_behind() is None
+
+    def test_days_behind_counts_from_the_last_result(self) -> None:
+        pool = self._pool()
+        latest = pool.latest_result
+
+        assert pool.days_behind(latest) == 0
+        assert pool.days_behind(latest + pd.Timedelta(days=28)) == 28

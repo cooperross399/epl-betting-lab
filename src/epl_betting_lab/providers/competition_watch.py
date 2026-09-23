@@ -1,11 +1,25 @@
 """Competitions this project would price, and whether the provider has them yet.
 
-Written after asking for the CONCACAF Nations League and concluding, from one
-reading of the provider's sports list, that it "is not sold at all". That was
-overstated. The competition has not been played since March 2025 — the 2026
-World Cup, hosted across CONCACAF, took the calendar — so there were no
-fixtures to sell. A listing answers "is there coverage today", and absence in it
-has at least three causes that look identical:
+Written after asking for the CONCACAF Nations League, and then corrected twice,
+which is the whole lesson.
+
+The first claim was that it "is not sold at all", from one reading of the
+provider's sports list. The second was that it "has not been played since March
+2025", from the results archive having no rows for it — and that one was an
+absence-of-evidence error. The archive runs about a month behind (see
+`data/international_results.py`): read on 2026-09-23 it ended 2026-08-26 and
+contained no September fixtures of any kind, including the UEFA Nations League
+matches this project was pricing 45 of that same day. It could not have shown a
+September CONCACAF fixture whether or not one was played.
+
+What is actually established is narrower: the provider does not list the
+competition. Checked on 2026-09-22 and again on 2026-09-23, 67 soccer
+competitions with `all=true`, no CONCACAF Nations League; a second free source
+listing 190 competitions does not carry it either. Whether it is being played is
+a question neither of those can answer.
+
+A listing answers "is there coverage today", and absence in it has at least
+three causes that look identical:
 
     the provider does not carry this competition, ever
     the competition is between editions and will return
@@ -62,17 +76,24 @@ WANTED: tuple[WantedCompetition, ...] = (
         name="CONCACAF Nations League",
         pattern=r"concacaf.*nations league",
         status=(
-            "Asked for on 2026-09-23. Not in the provider's list, and not "
-            "played since March 2025 — CONCACAF's calendar went to the 2026 "
-            "World Cup it hosted. The rating pool already covers all 41 of its "
-            "teams, so this needs prices and nothing else."
+            "Asked for on 2026-09-23. Not in the provider's list — checked "
+            "twice that day, 67 competitions with all=true, and a second free "
+            "source listing 190 does not carry it either. Whether it is "
+            "currently being played is NOT established: the results archive "
+            "runs about a month behind and showed no September fixtures at "
+            "all. The rating pool already covers all 41 of its teams, so this "
+            "needs prices and nothing else."
         ),
     ),
     WantedCompetition(
         code="CNLQ",
         name="CONCACAF Nations League qualification",
         pattern=r"concacaf.*nations league.*qualif",
-        status="Same as the Nations League itself; last played March 2019.",
+        status=(
+            "Same as the Nations League itself: absent from the provider's "
+            "list, and the archive is too far behind to say whether it is "
+            "being played."
+        ),
     ),
 )
 

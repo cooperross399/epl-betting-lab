@@ -294,6 +294,9 @@ export function hubLine(sport, board, results) {
   if (results && results.games && results.games.length) {
     const p = (results.summary || {}).picks;
     detail = p ? `Yesterday's picks ${F.recStr(p)}` : `${results.games.length} settled yesterday`;
-  } else if (results && results.notice) detail = results.notice.split(". ")[0] + ".";
+  // First sentence only, with any trailing period stripped before one is
+  // added back: a notice whose first sentence IS the whole notice already
+  // ends in "." and printed "…settles them.." on the hub.
+  } else if (results && results.notice) detail = results.notice.split(". ")[0].replace(/\.*$/, "") + ".";
   return { sport: s, headline, detail, stale: vm.stale, updated: vm.updated };
 }

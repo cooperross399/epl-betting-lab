@@ -1,10 +1,8 @@
-## Wednesday 23 September, 19:34 UTC — manual run
+## Thursday 24 September, 09:20 UTC — scheduled run
 
-Already sent today; same selections (0 price move(s)).
+Selections changed: 2 added, 1 moved section.
 
-_This run was started by hand, not by the schedule. If you did not start it, someone was testing._
-
-Provider quota: 1104338 (about 17811 more runs)
+Provider quota: 1104216 (about 17809 more runs)
 
 Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
 
@@ -13,17 +11,23 @@ Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_tot
 | Match | Market | Selection | Tier | Edge | Price | Book | Units |
 |:------|:-------|:----------|:-----|-----:|------:|:-----|------:|
 | Aston Villa v Brentford | `corners_1x2` | home | C | +6.9% | -140 | Fanatics | 0.1 |
-| Sunderland v Brighton | `corners_total_10_5` | under | C | +5.7% | -148 | BetRivers | 0.1 |
 | Arsenal v Leeds | `corners_total_10_5` | under | C | +5.5% | -141 | BetRivers | 0.1 |
-| Hull v Everton | `corners_total_10_5` | over | C | +6.8% | +165 | BetRivers | 0.1 |
-| Hull v Everton | `corners_total_9_5` | over | C | +4.9% | +105 | BetRivers | 0.1 |
-| Man United v Tottenham | `corners_1x2` | away | C | +5.5% | +210 | Fanatics | 0.1 |
+| Sunderland v Brighton | `corners_total_10_5` | under | C | +5.1% | -152 | BetRivers | 0.1 |
+| Hull v Everton | `corners_total_10_5` | over | C | +6.1% | +160 | BetRivers | 0.1 |
 | Arsenal v Leeds | `corners_total_9_5` | under | C | +4.9% | +115 | Fanatics | 0.1 |
+| Hull v Everton | `corners_total_9_5` | over | C | +4.5% | +102 | BetRivers | 0.1 |
 | Sunderland v Brighton | `corners_total_9_5` | under | C | +4.2% | +105 | BetRivers | 0.1 |
+| Man United v Tottenham | `corners_1x2` | away | C | +4.6% | +200 | Fanatics | 0.1 |
 
 ### Leans
 
 _None._
+
+### What changed
+
+- **Added:** Arsenal v Leeds double_chance draw_or_away
+- **Added:** Crystal Palace v Nott'm Forest btts yes
+- **Moved section:** Arsenal v Leeds btts yes
 
 
 ## Beyond the Premier League
@@ -105,4 +109,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/35909861209)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/35980304734)

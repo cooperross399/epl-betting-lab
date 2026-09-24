@@ -1,8 +1,8 @@
-## Thursday 24 September, 10:35 UTC — scheduled run
+## Thursday 24 September, 13:36 UTC — scheduled run
 
-Selections changed: 1 added, 1 dropped.
+Already sent today; same selections (0 price move(s)).
 
-Provider quota: 1104094 (about 17807 more runs)
+Provider quota: 1103931 (about 17805 more runs)
 
 Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
 
@@ -22,11 +22,6 @@ Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_tot
 ### Leans
 
 _None._
-
-### What changed
-
-- **Added:** Man United v Tottenham btts no
-- **Dropped:** Coventry v Newcastle double_chance draw_or_away
 
 
 ## Beyond the Premier League
@@ -108,4 +103,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/35987714106)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/36006333642)

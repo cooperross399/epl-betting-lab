@@ -1,8 +1,8 @@
-## Thursday 24 September, 09:20 UTC — scheduled run
+## Thursday 24 September, 10:35 UTC — scheduled run
 
-Selections changed: 2 added, 1 moved section.
+Selections changed: 1 added, 1 dropped.
 
-Provider quota: 1104216 (about 17809 more runs)
+Provider quota: 1104094 (about 17807 more runs)
 
 Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
 
@@ -25,9 +25,8 @@ _None._
 
 ### What changed
 
-- **Added:** Arsenal v Leeds double_chance draw_or_away
-- **Added:** Crystal Palace v Nott'm Forest btts yes
-- **Moved section:** Arsenal v Leeds btts yes
+- **Added:** Man United v Tottenham btts no
+- **Dropped:** Coventry v Newcastle double_chance draw_or_away
 
 
 ## Beyond the Premier League
@@ -109,4 +108,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/35980304734)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/35987714106)

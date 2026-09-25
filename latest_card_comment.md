@@ -1,8 +1,8 @@
-## Friday 25 September, 09:47 UTC — scheduled run
+## Friday 25 September, 14:32 UTC — scheduled run
 
-Selections changed: 1 dropped, 1 moved section.
+Selections changed: 1 added, 2 moved section.
 
-Provider quota: 1103687 (about 17801 more runs)
+Provider quota: 1103565 (about 17799 more runs)
 
 Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
 
@@ -11,12 +11,12 @@ Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_tot
 | Match | Market | Selection | Tier | Edge | Price | Book | Units |
 |:------|:-------|:----------|:-----|-----:|------:|:-----|------:|
 | Arsenal v Leeds | `corners_total_10_5` | under | C | +5.5% | -141 | BetRivers | 0.1 |
-| Sunderland v Brighton | `corners_total_10_5` | under | C | +4.7% | -155 | BetRivers | 0.1 |
-| Hull v Everton | `corners_total_10_5` | over | C | +6.1% | +160 | BetRivers | 0.1 |
-| Man United v Tottenham | `corners_1x2` | away | C | +5.5% | +210 | Fanatics | 0.1 |
-| Hull v Everton | `corners_total_9_5` | over | C | +4.5% | +102 | BetRivers | 0.1 |
-| Arsenal v Leeds | `corners_total_9_5` | under | C | +4.3% | +112 | BetRivers | 0.1 |
-| Coventry v Newcastle | `corners_1x2` | home | C | +3.8% | +125 | Fanatics | 0.1 |
+| Sunderland v Brighton | `corners_total_10_5` | under | C | +5.1% | -152 | BetRivers | 0.1 |
+| Chelsea v Bournemouth | `corners_total_9_5` | over | C | +5.1% | -155 | Fanatics | 0.1 |
+| Hull v Everton | `corners_total_10_5` | over | C | +6.8% | +165 | BetRivers | 0.1 |
+| Hull v Everton | `corners_total_9_5` | over | C | +4.9% | +105 | BetRivers | 0.1 |
+| Man United v Tottenham | `corners_1x2` | away | C | +4.6% | +200 | Fanatics | 0.1 |
+| Arsenal v Leeds | `corners_total_9_5` | under | C | +3.9% | +110 | BetRivers | 0.1 |
 | Sunderland v Brighton | `corners_total_9_5` | under | C | +3.5% | +102 | BetRivers | 0.1 |
 
 ### Leans
@@ -25,7 +25,8 @@ _None._
 
 ### What changed
 
-- **Dropped:** Crystal Palace v Nott'm Forest total_2_5 over
+- **Added:** Ipswich v Fulham draw_no_bet away
+- **Moved section:** Chelsea v Bournemouth corners_total_9_5 over
 - **Moved section:** Coventry v Newcastle corners_1x2 home
 
 
@@ -94,7 +95,7 @@ _Fitted but not bet: UEFA Europa Conference League (0 of 18 fixtures rateable). 
 - Settled: **79** selections, 40 won
 - Staked: 10.75 units
 - Profit: **+0.53 units** (+5.0% on turnover)
-- Still pending: 9
+- Still pending: 10
 
 - Stake returned (void): 5
 
@@ -108,4 +109,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/36120137065)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/36147850967)

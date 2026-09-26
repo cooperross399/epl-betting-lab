@@ -1,8 +1,8 @@
-## Saturday 26 September, 09:28 UTC — scheduled run
+## Saturday 26 September, 13:39 UTC — scheduled run
 
-Already sent today; same selections (0 price move(s)).
+Selections changed: 1 dropped.
 
-Provider quota: 1102677 (about 17785 more runs)
+Provider quota: 1102555 (about 17783 more runs)
 
 Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
 
@@ -22,6 +22,10 @@ Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_tot
 ### Leans
 
 _None._
+
+### What changed
+
+- **Dropped:** Chelsea v Bournemouth draw_no_bet away
 
 
 ## Beyond the Premier League
@@ -103,4 +107,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/36232747615)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/36245690003)

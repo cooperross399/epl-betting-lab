@@ -1,8 +1,8 @@
-## Friday 25 September, 15:25 UTC — scheduled run
+## Saturday 26 September, 08:04 UTC — scheduled run
 
-Selections changed: 1 added, 1 dropped.
+First card of the day; the selections are unchanged.
 
-Provider quota: 1103443 (about 17797 more runs)
+Provider quota: 1102799 (about 17787 more runs)
 
 Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
 
@@ -23,11 +23,6 @@ Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_tot
 
 _None._
 
-### What changed
-
-- **Added:** Coventry v Newcastle double_chance draw_or_away
-- **Dropped:** Liverpool v Man City double_chance draw_or_away
-
 
 ## Beyond the Premier League
 
@@ -39,10 +34,10 @@ National teams, on a pool that shares no information with the club ratings — a
 
 | Match | Market | Selection | Edge | Price | Book | Units |
 |:--|:--|:--|--:|--:|:--|--:|
+| Norway v Portugal | `draw_no_bet` | away | +7.5% | -114 | BetRivers | 0.1 |
 | Italy v Belgium | `draw_no_bet` | away | +6.7% | +135 | BetRivers | 0.1 |
 | North Macedonia v Switzerland | `draw_no_bet` | home | +6.6% | +440 | BetRivers | 0.1 |
-| Sweden v Romania | `double_chance` | draw_or_away | +5.9% | +163 | BetRivers | 0.1 |
-| Turkey v France | `draw_no_bet` | home | +5.9% | +350 | BetRivers | 0.1 |
+| Denmark v Wales | `double_chance` | draw_or_away | +6.2% | +175 | BetRivers | 0.1 |
 
 - `btts` is not bet here: the model sits about 8 points below the market on the goals level for every fixture, so a selection in that market would be the gap rather than the fixture.
 - `total_2_5` is not bet here: the model sits about 8 points below the market on the goals level for every fixture, so a selection in that market would be the gap rather than the fixture.
@@ -67,10 +62,10 @@ Priced on the European ratings, where 701 European ties bridge eleven leagues on
 
 | Match | Market | Selection | Edge | Price | Book | Units |
 |:--|:--|:--|--:|--:|:--|--:|
-| Arsenal v Lille | `total_2_5` | under | +7.0% | +150 | BetRivers | 0.1 |
-| Arsenal v Lille | `corners_total_10_5` | under | +6.9% | -122 | BetRivers | 0.1 |
+| Arsenal v Lille | `corners_total_10_5` | under | +7.0% | -121 | BetRivers | 0.1 |
+| Arsenal v Lille | `total_2_5` | under | +6.8% | +148 | BetRivers | 0.1 |
 | Inter v Club Brugge | `corners_1x2` | away | +6.5% | +480 | BetRivers | 0.1 |
-| Roma v Real Madrid | `total_2_5` | under | +6.4% | +210 | FanDuel | 0.1 |
+| Roma v Real Madrid | `total_2_5` | under | +6.3% | +210 | FanDuel | 0.1 |
 
 - 6 fixture(s) left out because a club has no rating in the pool: Bodø/Glimt v Dortmund, LASK v Liverpool, Sabah FK v Slavia Praha, Shakhtar Donetsk v AEK, Viking FK v Bayern Munich, ŠK Slovan Bratislava v Stuttgart.
 
@@ -80,7 +75,7 @@ Same European ratings as the Champions League, and **thinner in both directions*
 
 | Match | Market | Selection | Edge | Price | Book | Units |
 |:--|:--|:--|--:|--:|:--|--:|
-| Rennes v OFI Crete | `double_chance` | draw_or_away | +5.9% | +210 | FanDuel | 0.1 |
+| Rennes v OFI Crete | `double_chance` | draw_or_away | +6.4% | +220 | FanDuel | 0.1 |
 | Benfica v Celtic | `btts` | yes | +5.7% | -106 | FanDuel | 0.1 |
 | Anderlecht v Lyon | `double_chance` | home_or_draw | +5.6% | -135 | DraftKings | 0.1 |
 | Anderlecht v Lyon | `draw_no_bet` | home | +5.6% | +144 | FanDuel | 0.1 |
@@ -108,4 +103,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/36153586971)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/36228519330)

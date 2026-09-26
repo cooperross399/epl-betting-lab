@@ -144,13 +144,36 @@ def _best_quote(rows: pd.DataFrame) -> pd.Series | None:
     return best_row
 
 
+def _entry_is_complete_approval(entry: Mapping[str, object]) -> bool:
+    """Whether one provider entry is a finished human approval.
+
+    Every condition, not any of them. `required_markets` is only a reviewed
+    decision when the envelope around it says a human made one: a status of
+    `allowed`, a reviewer, and the id of the receipt they signed.
+
+    Reading the market list without reading that envelope is what made
+    `allowlist_status` and `evidence_receipt_id` decorative. It meant a
+    `proposed` entry's markets went live the moment the entry was merged, and
+    — worse — that setting the status to `revoked` disabled nothing, because
+    the only load-bearing field was the market list itself.
+    """
+    if str(entry.get("allowlist_status", "")).strip().lower() != "allowed":
+        return False
+    if not str(entry.get("reviewer_name", "")).strip():
+        return False
+    if not str(entry.get("evidence_receipt_id", "")).strip():
+        return False
+    return True
+
+
 def _provider_entry_disabled_markets(payload: Mapping[str, object]) -> list[str]:
     """Markets outside the reviewed per-provider allowlist.
 
     `required_markets` under a provider entry is a reviewed human decision, so
-    it can stand in for a missing top-level allowlist. If no entry names any
-    market, every market is treated as unapproved rather than as approved —
-    a gate that cannot find its rules must close, not open.
+    it can stand in for a missing top-level allowlist. Only entries that are
+    complete approvals are counted; see `_entry_is_complete_approval`. If no
+    such entry names any market, every market is treated as unapproved rather
+    than as approved — a gate that cannot find its rules must close, not open.
     """
     entries = payload.get("provider_allowlist_entries")
     if not isinstance(entries, Mapping):
@@ -158,6 +181,8 @@ def _provider_entry_disabled_markets(payload: Mapping[str, object]) -> list[str]
     approved: set[str] = set()
     for entry in entries.values():
         if not isinstance(entry, Mapping):
+            continue
+        if not _entry_is_complete_approval(entry):
             continue
         markets = entry.get("required_markets")
         if isinstance(markets, list):

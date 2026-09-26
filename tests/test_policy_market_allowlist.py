@@ -241,6 +241,23 @@ def _payload(tmp_path: Path, payload: dict) -> Path:
     return path
 
 
+def _approved(markets: list[str], **overrides) -> dict:
+    """A provider entry that is a complete approval covering `markets`.
+
+    The envelope matters as much as the market list: an entry without a
+    status of `allowed`, a reviewer and a receipt id is not an approval, and
+    `_provider_entry_disabled_markets` declines to read its markets.
+    """
+    entry = {
+        "allowlist_status": "allowed",
+        "reviewer_name": "cooperross399",
+        "evidence_receipt_id": "odds_api-20260821T114655-0400-20ffa5677988",
+        "required_markets": markets,
+    }
+    entry.update(overrides)
+    return entry
+
+
 def test_a_missing_allowlist_falls_back_to_the_reviewed_provider_entry(
     tmp_path: Path,
 ) -> None:
@@ -250,7 +267,7 @@ def test_a_missing_allowlist_falls_back_to_the_reviewed_provider_entry(
         tmp_path,
         {
             "provider_allowlist_entries": {
-                "the_odds_api": {"required_markets": ["1x2", "btts"]}
+                "the_odds_api": _approved(["1x2", "btts"])
             }
         },
     )
@@ -300,8 +317,8 @@ def test_several_providers_contribute_their_reviewed_markets(
         tmp_path,
         {
             "provider_allowlist_entries": {
-                "the_odds_api": {"required_markets": ["1x2"]},
-                "manual_reviewed": {"required_markets": ["btts"]},
+                "the_odds_api": _approved(["1x2"]),
+                "manual_reviewed": _approved(["btts"]),
             }
         },
     )
@@ -324,3 +341,115 @@ def test_the_shipped_policy_approves_only_the_reviewed_markets() -> None:
     disabled = set(_policy_disabled_markets(None))
 
     assert disabled == set()
+
+
+def test_a_revoked_entry_disables_the_markets_it_used_to_approve(
+    tmp_path: Path,
+) -> None:
+    """Revocation has to actually revoke.
+
+    Before the envelope was read, `allowlist_status` was decorative: setting
+    it to `revoked` left every market live, because the only load-bearing
+    field was the market list. Turning an approval off would have required
+    deleting the markets by hand, which is not what anyone would expect
+    "revoked" to mean.
+    """
+    from epl_betting_lab.market_eligibility import MARKET_SELECTIONS
+
+    path = _payload(
+        tmp_path,
+        {
+            "provider_allowlist_entries": {
+                "the_odds_api": _approved(
+                    ["1x2", "btts"], allowlist_status="revoked"
+                )
+            }
+        },
+    )
+
+    assert set(_policy_disabled_markets(path)) == set(MARKET_SELECTIONS)
+
+
+def test_a_proposed_entry_approves_nothing_even_once_merged(
+    tmp_path: Path,
+) -> None:
+    """An allowlist proposal is inert until it is signed.
+
+    This is the shape of an open allowlist PR: the markets are named so the
+    proposal can be reviewed, but the status is `proposed` and the reviewer
+    and receipt id are empty. Merging it must not enable anything.
+    """
+    from epl_betting_lab.market_eligibility import MARKET_SELECTIONS
+
+    path = _payload(
+        tmp_path,
+        {
+            "provider_allowlist_entries": {
+                "the_odds_api": _approved(
+                    ["1x2", "btts"],
+                    allowlist_status="proposed",
+                    reviewer_name="",
+                    evidence_receipt_id="",
+                )
+            }
+        },
+    )
+
+    assert set(_policy_disabled_markets(path)) == set(MARKET_SELECTIONS)
+
+
+def test_an_entry_missing_only_its_reviewer_approves_nothing(
+    tmp_path: Path,
+) -> None:
+    """Every condition, not any of them."""
+    from epl_betting_lab.market_eligibility import MARKET_SELECTIONS
+
+    path = _payload(
+        tmp_path,
+        {
+            "provider_allowlist_entries": {
+                "the_odds_api": _approved(["1x2"], reviewer_name="   ")
+            }
+        },
+    )
+
+    assert set(_policy_disabled_markets(path)) == set(MARKET_SELECTIONS)
+
+
+def test_an_entry_missing_only_its_receipt_id_approves_nothing(
+    tmp_path: Path,
+) -> None:
+    """A market list with no receipt behind it is not a reviewed decision."""
+    from epl_betting_lab.market_eligibility import MARKET_SELECTIONS
+
+    path = _payload(
+        tmp_path,
+        {
+            "provider_allowlist_entries": {
+                "the_odds_api": _approved(["1x2"], evidence_receipt_id="")
+            }
+        },
+    )
+
+    assert set(_policy_disabled_markets(path)) == set(MARKET_SELECTIONS)
+
+
+def test_an_incomplete_entry_cannot_widen_a_complete_one(tmp_path: Path) -> None:
+    """Approved markets are unioned across entries, so an unsigned entry
+    sitting beside a signed one must contribute nothing of its own."""
+    path = _payload(
+        tmp_path,
+        {
+            "provider_allowlist_entries": {
+                "the_odds_api": _approved(["1x2"]),
+                "manual_reviewed": _approved(
+                    ["btts"], allowlist_status="proposed"
+                ),
+            }
+        },
+    )
+
+    disabled = set(_policy_disabled_markets(path))
+
+    assert "1x2" not in disabled
+    assert "btts" in disabled

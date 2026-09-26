@@ -10,9 +10,20 @@ from epl_betting_lab.providers.provider_registry import (
     create_provider,
 )
 from epl_betting_lab.reports.provider_human_acceptance_receipt import (
+    APPROVAL_DECISION,
     SUPPORTED_DECISIONS,
     ProviderHumanAcceptanceReceiptError,
     process_provider_human_acceptance_receipt,
+)
+
+#: Decisions this command may record. The approval decision is deliberately
+#: absent: it used to be available here with `--reviewer-name`, which meant the
+#: strongest claim in the repository -- "Cooper approved this" -- was a string
+#: whoever ran the command typed. An approval now comes only from
+#: `scripts/create_receipt_from_github_approval.py`, which fetches the pull
+#: request from GitHub and reads the approving account off the API response.
+TERMINAL_DECISIONS = tuple(
+    decision for decision in SUPPORTED_DECISIONS if decision != APPROVAL_DECISION
 )
 
 
@@ -36,8 +47,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--decision",
         required=True,
-        choices=SUPPORTED_DECISIONS,
-        help="Human review decision to document.",
+        choices=TERMINAL_DECISIONS,
+        help=(
+            "Human review decision to document. An approval is not available "
+            "here; use scripts/create_receipt_from_github_approval.py, which "
+            "takes the reviewer identity from GitHub rather than from a flag."
+        ),
     )
     parser.add_argument(
         "--notes",

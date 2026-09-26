@@ -217,9 +217,11 @@ decision receipt from Terminal:
 python scripts/create_provider_human_acceptance_receipt.py \
   --provider odds_api \
   --reviewer-name "Cooper Ross" \
-  --decision approved_for_allowlist_pr \
+  --decision rejected \
   --notes "Reviewed the checklist and its shadow archives."
 ```
+
+**The approval decision is no longer available from Terminal.** `--reviewer-name` is a string whoever runs the command types, and an approval receipt is the strongest claim in this repository, so the two cannot meet. Approve in the GitHub UI and run `scripts/create_receipt_from_github_approval.py`, which fetches the pull request itself and reads the approving account off GitHub's API response. This command still records `rejected` and `needs_more_shadow_runs`, which grant nothing.
 
 Nothing is written during preview. Read the evidence paths, checksums, verdict,
 and warnings in Terminal. If they match what you reviewed, rerun the exact

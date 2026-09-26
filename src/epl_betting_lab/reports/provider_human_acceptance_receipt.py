@@ -15,6 +15,7 @@ from epl_betting_lab.config import (
     STAGING_PROVIDER_POLICY_PATH,
 )
 from epl_betting_lab.providers.base import atomic_write_report, file_sha256
+from epl_betting_lab.reports.approval_grant import ApprovalGrant
 from epl_betting_lab.reports.provider_acceptance_checklist import (
     ACCEPTANCE_JSON_FILENAME,
 )
@@ -409,20 +410,49 @@ def build_provider_human_acceptance_receipt(
     reviewer_name: str,
     decision: str,
     *,
+    approval_grant: ApprovalGrant | None = None,
     notes: str = "",
     output_dir: Path | None = None,
     policy_path: Path | None = None,
     allow_not_ready_approval: bool = False,
     run_at: datetime | None = None,
 ) -> dict[str, object]:
-    reviewer = _clean(reviewer_name)
-    if not reviewer:
-        raise ProviderHumanAcceptanceReceiptError("Reviewer name is required.")
+    """Build a human acceptance receipt.
+
+    An APPROVAL receipt requires `approval_grant`: proof that a real GitHub
+    approval was fetched and verified in this process. `reviewer_name` is
+    ignored for an approval and the reviewer is taken from the grant, because
+    a reviewer identity that arrives as a string argument is a reviewer
+    identity anyone can type. The other decisions grant nothing, so they still
+    take a plain name.
+    """
     if decision not in SUPPORTED_DECISIONS:
         allowed = ", ".join(SUPPORTED_DECISIONS)
         raise ProviderHumanAcceptanceReceiptError(
             f"Unsupported decision `{decision}`. Choose one of: {allowed}."
         )
+    if decision == APPROVAL_DECISION:
+        if not isinstance(approval_grant, ApprovalGrant):
+            raise ProviderHumanAcceptanceReceiptError(
+                "An approval receipt needs a verified GitHub approval. Run "
+                "`scripts/create_receipt_from_github_approval.py`, which "
+                "fetches the pull request from GitHub and verifies the "
+                "approval block itself. A reviewer name typed on a command "
+                "line is not an approval."
+            )
+        # The provider the approval binds to is checked inside the verifier
+        # (the block must declare `provider:` and it must match). Re-checking
+        # it here would compare a provider KEY (`odds_api`) against a provider
+        # NAME (`the_odds_api`) and refuse every real approval.
+        reviewer = _clean(approval_grant.reviewer_github_login)
+    else:
+        if approval_grant is not None:
+            raise ProviderHumanAcceptanceReceiptError(
+                f"A verified GitHub approval cannot record decision `{decision}`."
+            )
+        reviewer = _clean(reviewer_name)
+    if not reviewer:
+        raise ProviderHumanAcceptanceReceiptError("Reviewer name is required.")
 
     evidence, warnings = load_provider_human_acceptance_evidence(
         provider_name,
@@ -746,6 +776,7 @@ def process_provider_human_acceptance_receipt(
     reviewer_name: str,
     decision: str,
     *,
+    approval_grant: ApprovalGrant | None = None,
     notes: str = "",
     output_dir: Path | None = None,
     policy_path: Path | None = None,
@@ -758,6 +789,7 @@ def process_provider_human_acceptance_receipt(
         provider_name,
         reviewer_name,
         decision,
+        approval_grant=approval_grant,
         notes=notes,
         output_dir=output_dir,
         policy_path=policy_path,

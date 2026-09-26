@@ -52,6 +52,9 @@ from epl_betting_lab.market_eligibility import (
     evaluate_market_eligibility,
 )
 from epl_betting_lab.books import BETTABLE_BOOKS, bettable_only, is_bettable, unknown_books
+from epl_betting_lab.reports.github_approval import (
+    approved_markets_from_receipt,
+)
 from epl_betting_lab.reports.pick_display import format_market_list
 from epl_betting_lab.selected_slate import (
     filter_to_selected_window,
@@ -207,6 +210,91 @@ def _policy_disabled_markets(policy_path: Path | None) -> list[str]:
     return [
         market for market in MARKET_SELECTIONS if market not in allowed_keys
     ]
+
+
+def _policy_receipt_expectations(policy_path: Path | None) -> tuple[str, str]:
+    """The receipt id and provider the policy says its allowlist rests on.
+
+    Returns blanks when the policy names none, which is not by itself a pass:
+    the receipt still has to verify on its own terms.
+    """
+    path = (
+        MANUAL_DIR / "staging_provider_policy.json"
+        if policy_path is None
+        else Path(policy_path)
+    )
+    if not path.is_file():
+        return "", ""
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError):
+        return "", ""
+    if not isinstance(payload, Mapping):
+        return "", ""
+    entries = payload.get("provider_allowlist_entries")
+    if not isinstance(entries, Mapping):
+        return "", ""
+    receipt_ids: set[str] = set()
+    providers: set[str] = set()
+    for entry in entries.values():
+        if not isinstance(entry, Mapping):
+            continue
+        receipt_id = str(entry.get("evidence_receipt_id") or "").strip()
+        provider = str(entry.get("provider_name") or "").strip()
+        if receipt_id:
+            receipt_ids.add(receipt_id)
+        if provider:
+            providers.add(provider)
+    receipt_id = receipt_ids.pop() if len(receipt_ids) == 1 else ""
+    provider = providers.pop() if len(providers) == 1 else ""
+    return receipt_id, provider
+
+
+def _receipt_unbacked_markets(
+    policy_path: Path | None, output_dir: Path
+) -> tuple[list[str], list[str]]:
+    """Markets the policy grants that no verified receipt actually backs.
+
+    The policy file is a committed record of a decision; it is not the
+    decision. Reading it and stopping there is what let a hand-edited entry
+    beside a forged receipt put a market on the card, because nothing on this
+    path ever opened the receipt: not to check who approved, not to check which
+    markets were approved, not to re-check one checksum it printed.
+
+    So the receipt is parsed and verified here, every time the card is built,
+    and a market the receipt does not name is disabled however loudly the
+    policy claims it. Returns `(disabled, notes)`.
+    """
+    policy_allowed = [
+        market
+        for market in MARKET_SELECTIONS
+        if market not in set(_policy_disabled_markets(policy_path))
+    ]
+    if not policy_allowed:
+        # The policy grants nothing; there is nothing for a receipt to back.
+        return [], []
+
+    receipt_id, provider = _policy_receipt_expectations(policy_path)
+    granted, problems = approved_markets_from_receipt(
+        output_dir,
+        expected_receipt_id=receipt_id,
+        expected_provider_name=provider,
+    )
+    if problems:
+        return list(policy_allowed), [
+            "No verified human acceptance receipt backs the provider policy, "
+            "so every market it allows is disabled: "
+            + "; ".join(problems)
+            + "."
+        ]
+    unbacked = [market for market in policy_allowed if market not in granted]
+    if unbacked:
+        return unbacked, [
+            "The provider policy allows "
+            f"{unbacked}, which the verified human acceptance receipt does not "
+            "approve. A policy edit is not an approval."
+        ]
+    return [], []
 
 
 def build_automated_card_input(
@@ -465,8 +553,15 @@ def save_automated_card_input(
     # that later becomes complete cannot join the card without a deliberate
     # policy change. An absent `allowed_markets` means no market restriction.
     policy_disabled = _policy_disabled_markets(policy_path)
+    # ...and a policy claim that no verified receipt backs is not a decision.
+    receipt_disabled, receipt_notes = _receipt_unbacked_markets(
+        policy_path, outputs
+    )
+    blockers.extend(receipt_notes)
     effective_disabled = tuple(
-        dict.fromkeys(list(disabled_markets) + policy_disabled)
+        dict.fromkeys(
+            list(disabled_markets) + policy_disabled + receipt_disabled
+        )
     )
 
     # The window is the round the fixtures are about, not a fixed pair of

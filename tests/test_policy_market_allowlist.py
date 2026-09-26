@@ -13,6 +13,8 @@ from epl_betting_lab.reports.automated_card_input import (
 )
 from epl_betting_lab.staging_provider_policy import load_staging_provider_policy
 
+from approval_grants import write_receipt_file
+
 
 FIXTURES = [
     ("2026-08-21", "Arsenal", "Coventry"),
@@ -156,6 +158,7 @@ def test_card_input_excludes_a_market_the_policy_does_not_allow(
     """Totals complete in the data but absent from the policy: still excluded."""
     odds, fixtures = _staging(tmp_path, ("1x2", "total_2_5", "btts"))
     policy = _policy(tmp_path, allowed_markets=["1x2", "btts"])
+    write_receipt_file(tmp_path, markets=("1x2", "btts"))
 
     result = save_automated_card_input(
         staging_odds_path=odds,
@@ -185,6 +188,7 @@ def test_card_input_excludes_a_market_the_policy_does_not_allow(
 def test_policy_allowlist_admits_the_markets_it_lists(tmp_path: Path) -> None:
     odds, fixtures = _staging(tmp_path, ("1x2", "btts"))
     policy = _policy(tmp_path, allowed_markets=["1x2", "btts"])
+    write_receipt_file(tmp_path, markets=("1x2", "btts"))
 
     result = save_automated_card_input(
         staging_odds_path=odds,
@@ -207,6 +211,7 @@ def test_an_unlisted_market_cannot_join_by_becoming_complete(
     """The point of per-market allowlisting: completeness alone is not consent."""
     odds, fixtures = _staging(tmp_path, ("1x2", "total_2_5", "btts"))
     policy = _policy(tmp_path, allowed_markets=["1x2"])
+    write_receipt_file(tmp_path, markets=("1x2", "btts"))
 
     result = save_automated_card_input(
         staging_odds_path=odds,

@@ -9,6 +9,10 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
+from epl_betting_lab.market_eligibility import MARKET_SELECTIONS
+
+from approval_grants import write_receipt_file
+
 from epl_betting_lab.market_eligibility import (
     DEFAULT_DISABLED_MARKETS,
     DISABLED,
@@ -267,6 +271,9 @@ def test_save_writes_outside_manual_and_reports_no_manual_entry(
     staging_fixtures = tmp_path / "fixtures.csv"
     _odds(WINDOW_FIXTURES, markets=("total_2_5",)).to_csv(staging_odds, index=False)
     _fixtures(WINDOW_FIXTURES).to_csv(staging_fixtures, index=False)
+    # The card refuses a market no verified receipt approves, so a run
+    # against the shipped policy needs the receipt beside it.
+    write_receipt_file(tmp_path, markets=tuple(MARKET_SELECTIONS))
 
     result = save_automated_card_input(
         staging_odds_path=staging_odds,
@@ -302,6 +309,9 @@ def test_the_card_does_not_stake_1x2_even_with_full_coverage(tmp_path: Path) -> 
     staging_fixtures = tmp_path / "fixtures.csv"
     _odds(WINDOW_FIXTURES, markets=("1x2", "total_2_5")).to_csv(staging_odds, index=False)
     _fixtures(WINDOW_FIXTURES).to_csv(staging_fixtures, index=False)
+    # The card refuses a market no verified receipt approves, so a run
+    # against the shipped policy needs the receipt beside it.
+    write_receipt_file(tmp_path, markets=tuple(MARKET_SELECTIONS))
     summary = save_automated_card_input(
         staging_odds_path=staging_odds, staging_fixtures_path=staging_fixtures,
         output_dir=tmp_path, card_input_path=tmp_path / "card_input.csv",
@@ -318,6 +328,9 @@ def test_no_manual_odds_file_is_required_anywhere_in_the_flow(tmp_path: Path) ->
     staging_fixtures = tmp_path / "fixtures.csv"
     _odds(WINDOW_FIXTURES, markets=("total_2_5",)).to_csv(staging_odds, index=False)
     _fixtures(WINDOW_FIXTURES).to_csv(staging_fixtures, index=False)
+    # The card refuses a market no verified receipt approves, so a run
+    # against the shipped policy needs the receipt beside it.
+    write_receipt_file(tmp_path, markets=tuple(MARKET_SELECTIONS))
 
     assert not (tmp_path / "current_odds.csv").exists()
 

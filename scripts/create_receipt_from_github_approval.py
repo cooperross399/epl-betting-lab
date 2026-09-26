@@ -26,7 +26,9 @@ from epl_betting_lab.reports.github_approval import (
     EXPECTED_PROVIDER,
     GitHubApprovalError,
     approval_template,
-    fetch_pr_activity,
+    resolve_gh,
+    trusted_subprocess_env,
+    verified_approval_for_pr,
     verify_github_approval,
 )
 from epl_betting_lab.reports.provider_human_acceptance_receipt import (
@@ -34,6 +36,26 @@ from epl_betting_lab.reports.provider_human_acceptance_receipt import (
     build_provider_human_acceptance_receipt,
     save_provider_human_acceptance_receipt,
 )
+
+
+def _freshness_window(value: str) -> float:
+    """A freshness window argparse will not let past the module ceiling.
+
+    `--max-age-hours` was an unbounded float, and 999999 transcribed a
+    five-hundred-hour-old approval into a fresh receipt.
+    """
+    try:
+        hours = float(value)
+    except ValueError:
+        raise argparse.ArgumentTypeError("must be a number of hours") from None
+    if hours <= 0:
+        raise argparse.ArgumentTypeError("must be positive")
+    if hours > DEFAULT_MAX_APPROVAL_AGE_HOURS:
+        raise argparse.ArgumentTypeError(
+            f"must not exceed {DEFAULT_MAX_APPROVAL_AGE_HOURS:g}, the freshness "
+            "window this flow allows"
+        )
+    return hours
 
 
 def parse_args() -> argparse.Namespace:
@@ -57,14 +79,21 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--max-age-hours",
-        type=float,
+        type=_freshness_window,
         default=DEFAULT_MAX_APPROVAL_AGE_HOURS,
-        help="Reject approvals older than this.",
+        help=(
+            "Reject approvals older than this. May be shortened, never "
+            f"lengthened past {DEFAULT_MAX_APPROVAL_AGE_HOURS:g}h."
+        ),
     )
     parser.add_argument(
         "--activity-json",
         type=Path,
-        help="Read PR activity from a file instead of calling GitHub (offline).",
+        help=(
+            "Verify a saved PR activity file offline. Cannot be combined with "
+            "--write-receipt: a receipt is only ever written from activity "
+            "this command fetched from GitHub itself."
+        ),
     )
     parser.add_argument("--output-dir", type=Path, help="Defaults to data/outputs.")
     parser.add_argument(
@@ -127,10 +156,22 @@ def _repository(explicit: str) -> str:
         return explicit
     import subprocess
 
+    # Resolved at a trusted absolute location, never through PATH: a fake `gh`
+    # ahead of the real one on PATH could name a repository it controls.
     result = subprocess.run(
-        ["gh", "repo", "view", "--json", "nameWithOwner", "-q", ".nameWithOwner"],
+        [
+            resolve_gh(),
+            "repo",
+            "view",
+            "--json",
+            "nameWithOwner",
+            "-q",
+            ".nameWithOwner",
+        ],
         capture_output=True,
         text=True,
+        env=trusted_subprocess_env(),
+        timeout=120,
     )
     return result.stdout.strip() if result.returncode == 0 else ""
 
@@ -149,32 +190,52 @@ def main() -> int:
         "This command verifies it and cannot author it."
     )
 
-    if args.activity_json:
-        try:
-            activity = json.loads(args.activity_json.read_text(encoding="utf-8"))
-        except (OSError, UnicodeError, json.JSONDecodeError) as exc:
-            print(f"BLOCKED: activity file unreadable: {type(exc).__name__}.")
-            return 2
-    else:
-        repository = _repository(args.repository)
-        if not repository:
-            print("BLOCKED: could not determine the repository. Pass --repository.")
-            return 2
-        try:
-            activity = fetch_pr_activity(args.pr, repository=repository)
-        except GitHubApprovalError as exc:
-            print(f"BLOCKED: {exc}")
-            return 2
-
-    try:
-        approval = verify_github_approval(
-            activity,
-            pr_number=args.pr,
-            provider_name=args.provider_name,
-            expected_markets=markets,
-            output_dir=args.output_dir,
-            max_age_hours=args.max_age_hours,
+    # A receipt is only ever written from activity this command fetched from
+    # GitHub itself. A supplied activity file is indistinguishable from a
+    # fetched one -- that is the whole point of a file -- so it may be used to
+    # rehearse the rules and never to mint the receipt.
+    if args.activity_json and args.write_receipt:
+        print(
+            "BLOCKED: --activity-json verifies offline and cannot write a "
+            "receipt. A receipt is written only from a live GitHub fetch."
         )
+        return 2
+
+    grant = None
+    try:
+        if args.activity_json:
+            try:
+                activity = json.loads(
+                    args.activity_json.read_text(encoding="utf-8")
+                )
+            except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+                print(f"BLOCKED: activity file unreadable: {type(exc).__name__}.")
+                return 2
+            approval = verify_github_approval(
+                activity,
+                pr_number=args.pr,
+                provider_name=args.provider_name,
+                expected_markets=markets,
+                output_dir=args.output_dir,
+                max_age_hours=args.max_age_hours,
+            )
+        else:
+            repository = _repository(args.repository)
+            if not repository:
+                print(
+                    "BLOCKED: could not determine the repository. Pass "
+                    "--repository."
+                )
+                return 2
+            grant = verified_approval_for_pr(
+                args.pr,
+                repository=repository,
+                provider_name=args.provider_name,
+                expected_markets=markets,
+                output_dir=args.output_dir,
+                max_age_hours=args.max_age_hours,
+            )
+            approval = dict(grant.details)
     except GitHubApprovalError as exc:
         print(f"BLOCKED: {exc}")
         print()
@@ -209,6 +270,15 @@ def main() -> int:
             )
             return 0
 
+    if grant is None:
+        print()
+        print(
+            "Offline verification only. The approval block is well formed, but "
+            "no receipt is written from a supplied activity file: re-run "
+            "without --activity-json so the approval is fetched from GitHub."
+        )
+        return 0
+
     notes = (
         f"Approved in GitHub UI on PR #{approval['pr_number']} by "
         f"{approval['reviewer_github_login']} via {approval['source_kind']} "
@@ -220,8 +290,9 @@ def main() -> int:
     try:
         receipt = build_provider_human_acceptance_receipt(
             args.provider,
-            approval["reviewer_github_login"],
+            "",
             approval["decision"],
+            approval_grant=grant,
             notes=notes,
             output_dir=args.output_dir,
         )

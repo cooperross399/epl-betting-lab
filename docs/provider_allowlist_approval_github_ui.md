@@ -84,16 +84,69 @@ Every one of these fails closed and produces **no receipt**:
 | `markets:` missing | Refused |
 | `markets:` naming a market the project cannot price | Refused |
 | Market scope narrower or wider than the PR's proposed `required_markets` | Refused |
+| `pr:` missing | Refused |
 | `pr:` naming a different PR | Refused |
+| A review in state DISMISSED, CHANGES_REQUESTED, PENDING or COMMENTED | Refused, by name |
+| A review with no state at all | Refused |
+| A later `REVOKED_FOR_ALLOWLIST_PR` from you | Refused |
+| The approval block appearing only inside a `>` quotation | Refused |
 | Approval older than 72 hours | Refused |
+| A caller asking for a window longer than 72 hours | Refused |
 | Approval timestamp in the future | Refused |
 | Evidence regenerated *after* you approved | Refused |
+| Any expected evidence artifact absent or unreadable | Refused |
 | Review approved a commit that has since been superseded | Refused |
 | No evidence artifacts to bind to | Refused |
+| No `gh` at a trusted absolute location | Refused |
 
-The last two matter most in practice. Approving and then pushing a new commit,
-or approving and then re-running the provider verification, both invalidate the
-approval — you approved a specific state, and the state changed.
+Approving and then pushing a new commit, or approving and then re-running the
+provider verification, both invalidate the approval — you approved a specific
+state, and the state changed.
+
+`pr:` is required rather than optional. Without it the block bound to whichever
+pull request the verifier was pointed at, so one approval could be spent on a
+pull request nobody had read.
+
+An expected evidence artifact that is missing is a refusal, not a narrower
+binding. Deleting two of the four used to produce an approval bound to two,
+with nothing saying so.
+
+---
+
+## Withdrawing an approval
+
+Leave a comment or review containing:
+
+```
+REVOKED_FOR_ALLOWLIST_PR
+```
+
+A revocation from an allowed reviewer that is newer than — or the same age as —
+the approval refuses the approval outright. Before this token existed, only the
+newest comment *carrying the approval phrase* was read, so a plain-English
+withdrawal was invisible and the withdrawn approval kept verifying until it
+aged out.
+
+Do not quote the approval block while withdrawing it. A quoted block is not
+read at all now, which is the fix for the worse version of the same problem: a
+comment reading "REVOKED. Ignore this: > APPROVED_FOR_ALLOWLIST_PR …" used to
+parse as a brand new approval, because `> ` was stripped like a bullet marker.
+
+---
+
+## What the card checks when it builds
+
+The provider policy file is a committed record of a decision. It is not the
+decision. Every card build re-reads
+`data/outputs/provider_human_acceptance_receipt.json` and refuses any market
+the receipt does not actually approve — checking the reviewer against the
+allow-list in the source, the receipt id the policy names, the recorded review
+state, that every expected artifact is bound, and that
+`provider_acceptance_checklist.json` still hashes to what the receipt printed.
+
+A market the policy claims and the receipt does not is disabled, and the reason
+is printed in the card input report. Editing the policy is not approving
+anything.
 
 ---
 
@@ -119,12 +172,13 @@ The original command still exists and is unchanged:
 ```bash
 PYTHONPATH=src .venv/bin/python scripts/create_provider_human_acceptance_receipt.py \
     --provider odds_api --reviewer-name "Your Name" \
-    --decision approved_for_allowlist_pr --write-receipt
+    --decision rejected --write-receipt
 ```
 
-The GitHub flow is the better attestation of the two: `--reviewer-name` is
-typed by whoever runs the command, while a GitHub review is authenticated as
-you.
+The GitHub flow is not merely the better attestation of the two; it is now the
+only one. `--reviewer-name` is typed by whoever runs the command, while a
+GitHub review is authenticated as you, so the Terminal command no longer offers
+`--decision approved_for_allowlist_pr` at all.
 
 ---
 
@@ -143,3 +197,9 @@ PYTHONPATH=src .venv/bin/python scripts/create_receipt_from_github_approval.py \
 ```
 
 Neither writes anything without `--write-receipt`.
+
+`--activity-json` replays a saved API response through the rules offline. It
+cannot be combined with `--write-receipt`: a saved file is indistinguishable
+from a fetched one, so a receipt is only ever written from activity this command
+fetched from GitHub itself, through a `gh` resolved at a trusted absolute
+location rather than through `PATH`.

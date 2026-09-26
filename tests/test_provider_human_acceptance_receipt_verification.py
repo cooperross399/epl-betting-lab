@@ -13,6 +13,7 @@ from epl_betting_lab.reports.provider_human_acceptance_receipt import (
     RECEIPT_JSON_FILENAME,
     process_provider_human_acceptance_receipt,
 )
+from approval_grants import grant
 from epl_betting_lab.reports.provider_human_acceptance_receipt_verification import (
     VERDICTS,
     VERIFICATION_STATUSES,
@@ -119,17 +120,24 @@ def _prepare_receipt(
                 "allowed_provider_types": ["manual_upload"],
             },
         )
-    receipt = process_provider_human_acceptance_receipt(
-        "odds_api",
-        "Cooper Ross",
-        decision,
-        notes="Reviewed the exact archived evidence.",
-        output_dir=outputs,
-        policy_path=policy,
-        allow_not_ready_approval=allow_override,
-        write_receipt=True,
-        run_at=RUN_AT,
-    )
+    # An approval receipt needs the grant a verified GitHub approval issues;
+    # a reviewer name is only enough for the decisions that grant nothing.
+    with pytest.MonkeyPatch.context() as patching:
+        approval_grant = (
+            grant(patching, outputs) if decision == APPROVAL_DECISION else None
+        )
+        receipt = process_provider_human_acceptance_receipt(
+            "odds_api",
+            "" if approval_grant is not None else "Cooper Ross",
+            decision,
+            approval_grant=approval_grant,
+            notes="Reviewed the exact archived evidence.",
+            output_dir=outputs,
+            policy_path=policy,
+            allow_not_ready_approval=allow_override,
+            write_receipt=True,
+            run_at=RUN_AT,
+        )
     return outputs, policy, Path(receipt["json"])
 
 
@@ -165,7 +173,9 @@ def test_ready_approval_receipt_verifies_all_bound_evidence(tmp_path: Path) -> N
 
     assert summary["verdict"] == "Verified for allowlist PR review"
     assert set(checks["status"]) == {"Verified"}
-    assert summary["reviewer_name"] == "Cooper Ross"
+    # The reviewer on an approval is the GitHub account that approved, read
+    # off the API response. It is no longer a name anyone can type.
+    assert summary["reviewer_name"] == "cooperross399"
     assert summary["decision"] == APPROVAL_DECISION
     assert summary["safety"]["provider_policy_edited"] is False
     assert (

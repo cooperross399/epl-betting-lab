@@ -10,6 +10,8 @@ import pytest
 
 from epl_betting_lab.reports.github_approval import (
     APPROVAL_PHRASE,
+    EVIDENCE_ARTIFACTS,
+    REVOCATION_PHRASE,
     GitHubApprovalError,
     approval_template,
     evidence_checksums,
@@ -78,12 +80,9 @@ def _activity(
 
 
 def _evidence(tmp_path: Path, *, generated_at: datetime | None = None) -> Path:
+    """Every expected artifact. An approval binds to all of them or to none."""
     stamp = (generated_at or (APPROVED_AT - timedelta(hours=1))).isoformat()
-    for name in (
-        "provider_acceptance_checklist.json",
-        "provider_shadow_verification.json",
-        "automated_card_input.json",
-    ):
+    for name in EVIDENCE_ARTIFACTS:
         (tmp_path / name).write_text(
             json.dumps({"generated_at": stamp, "name": name}), encoding="utf-8"
         )
@@ -360,11 +359,16 @@ def test_no_activity_at_all_is_refused(tmp_path: Path) -> None:
 def test_phrase_inside_a_quoted_block_by_wrong_author_is_refused(
     tmp_path: Path,
 ) -> None:
-    """Someone quoting the phrase must not approve on the reviewer's behalf."""
+    """Someone quoting the phrase must not approve on the reviewer's behalf.
+
+    A quoted phrase is not seen at all now, so the refusal names the missing
+    phrase rather than the wrong author. Refused either way, and refused
+    earlier.
+    """
     _evidence(tmp_path)
     activity = _activity(author="bot-account", body="> " + _body())
 
-    with pytest.raises(GitHubApprovalError, match="allowed reviewer"):
+    with pytest.raises(GitHubApprovalError, match=APPROVAL_PHRASE):
         _verify(activity, tmp_path)
 
 
@@ -381,13 +385,29 @@ def test_parse_approval_block_reads_declared_fields() -> None:
 
 def test_parse_tolerates_markdown_bullets_and_case() -> None:
     body = "\n".join(
-        [APPROVAL_PHRASE, "- PR: 115", "* Provider: The_Odds_API", "> markets: 1X2; BTTS"]
+        [APPROVAL_PHRASE, "- PR: 115", "* Provider: The_Odds_API", "markets: 1X2; BTTS"]
     )
     parsed = parse_approval_block(body)
 
     assert parsed["pr"] == 115
     assert parsed["provider"] == "the_odds_api"
     assert parsed["markets"] == ["1x2", "btts"]
+
+
+def test_parse_ignores_quoted_lines() -> None:
+    """`> ` is GitHub quoting someone else, and used to be stripped like a
+    bullet. A block that lives entirely inside a quotation declares nothing."""
+    body = "\n".join(
+        [
+            APPROVAL_PHRASE,
+            "pr: 115",
+            "provider: the_odds_api",
+            "markets: 1x2",
+            "> markets: 1x2, btts, total_2_5",
+        ]
+    )
+
+    assert parse_approval_block(body)["markets"] == ["1x2"]
 
 
 def test_template_contains_everything_the_verifier_requires() -> None:

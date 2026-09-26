@@ -19,6 +19,8 @@ from epl_betting_lab.reports.provider_human_acceptance_receipt import (
     process_provider_human_acceptance_receipt,
 )
 
+from approval_grants import grant
+
 
 RUN_AT = datetime(2026, 8, 7, 14, 30, tzinfo=timezone.utc)
 
@@ -126,13 +128,15 @@ def test_supported_human_decisions_are_explicit() -> None:
 
 def test_preview_binds_exact_evidence_without_writing_receipt_files(
     tmp_path: Path,
+    monkeypatch,
 ) -> None:
     outputs, policy = _prepare_evidence(tmp_path)
 
     result = process_provider_human_acceptance_receipt(
         "odds_api",
-        "Cooper Ross",
+        "",
         APPROVAL_DECISION,
+        approval_grant=grant(monkeypatch, outputs),
         notes="Reviewed stable live evidence.",
         output_dir=outputs,
         policy_path=policy,
@@ -158,6 +162,7 @@ def test_preview_binds_exact_evidence_without_writing_receipt_files(
 
 def test_write_receipt_creates_latest_reports_and_unique_archives(
     tmp_path: Path,
+    monkeypatch,
 ) -> None:
     outputs, policy = _prepare_evidence(tmp_path)
     kwargs = {
@@ -170,14 +175,16 @@ def test_write_receipt_creates_latest_reports_and_unique_archives(
 
     first = process_provider_human_acceptance_receipt(
         "odds_api",
-        "Cooper Ross",
+        "",
         APPROVAL_DECISION,
+        approval_grant=grant(monkeypatch, outputs),
         **kwargs,
     )
     second = process_provider_human_acceptance_receipt(
         "odds_api",
-        "Cooper Ross",
+        "",
         APPROVAL_DECISION,
+        approval_grant=grant(monkeypatch, outputs),
         **kwargs,
     )
 
@@ -211,6 +218,7 @@ def test_write_receipt_creates_latest_reports_and_unique_archives(
 
 def test_non_ready_approval_is_blocked_without_terminal_override(
     tmp_path: Path,
+    monkeypatch,
 ) -> None:
     outputs, policy = _prepare_evidence(
         tmp_path,
@@ -223,8 +231,9 @@ def test_non_ready_approval_is_blocked_without_terminal_override(
     ):
         process_provider_human_acceptance_receipt(
             "odds_api",
-            "Cooper Ross",
+            "",
             APPROVAL_DECISION,
+            approval_grant=grant(monkeypatch, outputs),
             output_dir=outputs,
             policy_path=policy,
             run_at=RUN_AT,
@@ -235,6 +244,7 @@ def test_non_ready_approval_is_blocked_without_terminal_override(
 
 def test_non_ready_approval_override_is_prominently_recorded(
     tmp_path: Path,
+    monkeypatch,
 ) -> None:
     outputs, policy = _prepare_evidence(
         tmp_path,
@@ -243,8 +253,9 @@ def test_non_ready_approval_override_is_prominently_recorded(
 
     result = process_provider_human_acceptance_receipt(
         "odds_api",
-        "Cooper Ross",
+        "",
         APPROVAL_DECISION,
+        approval_grant=grant(monkeypatch, outputs),
         output_dir=outputs,
         policy_path=policy,
         allow_not_ready_approval=True,
@@ -321,7 +332,7 @@ def test_receipt_checksum_binding_reflects_archive_content(
     assert first["receipt_id"] != second["receipt_id"]
 
 
-def test_approval_blocks_archive_changed_after_checklist(tmp_path: Path) -> None:
+def test_approval_blocks_archive_changed_after_checklist(tmp_path: Path, monkeypatch) -> None:
     outputs, policy = _prepare_evidence(tmp_path)
     evidence_file = (
         outputs
@@ -336,15 +347,16 @@ def test_approval_blocks_archive_changed_after_checklist(tmp_path: Path) -> None
     ):
         process_provider_human_acceptance_receipt(
             "odds_api",
-            "Cooper Ross",
+            "",
             APPROVAL_DECISION,
+            approval_grant=grant(monkeypatch, outputs),
             output_dir=outputs,
             policy_path=policy,
             run_at=RUN_AT,
         )
 
 
-def test_approval_blocks_newer_live_archive_than_checklist(tmp_path: Path) -> None:
+def test_approval_blocks_newer_live_archive_than_checklist(tmp_path: Path, monkeypatch) -> None:
     outputs, policy = _prepare_evidence(tmp_path)
     relative = Path("archive/provider_shadow_runs/2026-08-07/140000_odds_api")
     archive = outputs / relative
@@ -382,8 +394,9 @@ def test_approval_blocks_newer_live_archive_than_checklist(tmp_path: Path) -> No
     ):
         process_provider_human_acceptance_receipt(
             "odds_api",
-            "Cooper Ross",
+            "",
             APPROVAL_DECISION,
+            approval_grant=grant(monkeypatch, outputs),
             output_dir=outputs,
             policy_path=policy,
             run_at=RUN_AT,

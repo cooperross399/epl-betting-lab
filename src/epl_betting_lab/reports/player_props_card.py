@@ -35,6 +35,7 @@ from pathlib import Path
 
 import pandas as pd
 
+from epl_betting_lab.staging_provider_policy import entry_is_complete_approval
 from epl_betting_lab.config import (
     OUTPUTS_DIR,
     PROCESSED_DIR,
@@ -109,7 +110,10 @@ def approved_prop_markets(policy_path: Path | None = None) -> list[str]:
         return []
     approved: set[str] = set()
     for entry in entries.values():
-        if not isinstance(entry, Mapping):
+        # The same envelope the match card reads: a market list under a
+        # `proposed` or `revoked` entry, or one with no reviewer or receipt,
+        # approves nothing here either.
+        if not entry_is_complete_approval(entry):
             continue
         markets = entry.get("required_markets")
         if isinstance(markets, list):

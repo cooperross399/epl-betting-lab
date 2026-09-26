@@ -68,7 +68,15 @@ def _policy(path: Path, markets: list[str]) -> Path:
         json.dumps(
             {
                 "provider_allowlist_entries": {
-                    "the_odds_api": {"required_markets": markets}
+                    # A complete approval: the props card reads the same
+                    # envelope as the match card, so a bare market list
+                    # approves nothing.
+                    "the_odds_api": {
+                        "allowlist_status": "allowed",
+                        "reviewer_name": "cooperross399",
+                        "evidence_receipt_id": "odds_api-20260821T114655-0400-20ffa5677988",
+                        "required_markets": markets,
+                    }
                 }
             }
         ),

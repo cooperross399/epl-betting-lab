@@ -453,3 +453,84 @@ def test_an_incomplete_entry_cannot_widen_a_complete_one(tmp_path: Path) -> None
 
     assert "1x2" not in disabled
     assert "btts" in disabled
+
+
+def test_a_null_reviewer_or_receipt_id_is_absent_not_present(tmp_path: Path) -> None:
+    """JSON null must not stringify to "None" and pass as a name."""
+    from epl_betting_lab.market_eligibility import MARKET_SELECTIONS
+
+    path = _payload(
+        tmp_path,
+        {
+            "provider_allowlist_entries": {
+                "the_odds_api": _approved(
+                    ["1x2"], reviewer_name=None, evidence_receipt_id=None
+                )
+            }
+        },
+    )
+
+    assert set(_policy_disabled_markets(path)) == set(MARKET_SELECTIONS)
+
+
+def test_the_bare_legacy_entry_shape_approves_nothing(tmp_path: Path) -> None:
+    """An entry with only `required_markets` and no envelope at all - the
+    shape the old reader accepted - is not an approval."""
+    from epl_betting_lab.market_eligibility import MARKET_SELECTIONS
+
+    path = _payload(
+        tmp_path,
+        {"provider_allowlist_entries": {"the_odds_api": {"required_markets": ["1x2", "btts"]}}},
+    )
+
+    assert set(_policy_disabled_markets(path)) == set(MARKET_SELECTIONS)
+
+
+def test_the_status_is_matched_without_regard_to_case(tmp_path: Path) -> None:
+    """The gate tooling writes `Allowed`; the preview writes `allowed`."""
+    path = _payload(
+        tmp_path,
+        {"provider_allowlist_entries": {"the_odds_api": _approved(["1x2"], allowlist_status="Allowed")}},
+    )
+
+    assert "1x2" not in _policy_disabled_markets(path)
+
+
+def test_a_non_string_status_is_not_allowed(tmp_path: Path) -> None:
+    from epl_betting_lab.market_eligibility import MARKET_SELECTIONS
+
+    path = _payload(
+        tmp_path,
+        {"provider_allowlist_entries": {"the_odds_api": _approved(["1x2"], allowlist_status=True)}},
+    )
+
+    assert set(_policy_disabled_markets(path)) == set(MARKET_SELECTIONS)
+
+
+def test_the_props_card_reads_the_same_envelope(tmp_path: Path) -> None:
+    """A proposed entry naming a prop market approves it for no card."""
+    from epl_betting_lab.reports.player_props_card import (
+        PROP_EVENT_MARKETS,
+        approved_prop_markets,
+    )
+
+    market = PROP_EVENT_MARKETS[0]
+    (tmp_path / "signed").mkdir()
+    (tmp_path / "proposed").mkdir()
+    signed = _payload(
+        tmp_path / "signed",
+        {"provider_allowlist_entries": {"the_odds_api": _approved([market])}},
+    )
+    proposed = _payload(
+        tmp_path / "proposed",
+        {
+            "provider_allowlist_entries": {
+                "the_odds_api": _approved(
+                    [market], allowlist_status="proposed", reviewer_name="", evidence_receipt_id=""
+                )
+            }
+        },
+    )
+
+    assert approved_prop_markets(signed) == [market]
+    assert approved_prop_markets(proposed) == []

@@ -30,6 +30,7 @@ from pathlib import Path
 import pandas as pd
 
 from epl_betting_lab.config import MANUAL_DIR, OUTPUTS_DIR, PROJECT_ROOT, STAGING_DIR
+from epl_betting_lab.staging_provider_policy import entry_is_complete_approval
 #: Markets the CARD does not stake, on evidence, whatever the provider covers.
 #:
 #: Distinct from `market_eligibility.DEFAULT_DISABLED_MARKETS`, which stays
@@ -144,34 +145,13 @@ def _best_quote(rows: pd.DataFrame) -> pd.Series | None:
     return best_row
 
 
-def _entry_is_complete_approval(entry: Mapping[str, object]) -> bool:
-    """Whether one provider entry is a finished human approval.
-
-    Every condition, not any of them. `required_markets` is only a reviewed
-    decision when the envelope around it says a human made one: a status of
-    `allowed`, a reviewer, and the id of the receipt they signed.
-
-    Reading the market list without reading that envelope is what made
-    `allowlist_status` and `evidence_receipt_id` decorative. It meant a
-    `proposed` entry's markets went live the moment the entry was merged, and
-    — worse — that setting the status to `revoked` disabled nothing, because
-    the only load-bearing field was the market list itself.
-    """
-    if str(entry.get("allowlist_status", "")).strip().lower() != "allowed":
-        return False
-    if not str(entry.get("reviewer_name", "")).strip():
-        return False
-    if not str(entry.get("evidence_receipt_id", "")).strip():
-        return False
-    return True
-
-
 def _provider_entry_disabled_markets(payload: Mapping[str, object]) -> list[str]:
     """Markets outside the reviewed per-provider allowlist.
 
     `required_markets` under a provider entry is a reviewed human decision, so
     it can stand in for a missing top-level allowlist. Only entries that are
-    complete approvals are counted; see `_entry_is_complete_approval`. If no
+    complete approvals are counted; see `entry_is_complete_approval` in
+    `staging_provider_policy`. If no
     such entry names any market, every market is treated as unapproved rather
     than as approved — a gate that cannot find its rules must close, not open.
     """
@@ -182,7 +162,7 @@ def _provider_entry_disabled_markets(payload: Mapping[str, object]) -> list[str]
     for entry in entries.values():
         if not isinstance(entry, Mapping):
             continue
-        if not _entry_is_complete_approval(entry):
+        if not entry_is_complete_approval(entry):
             continue
         markets = entry.get("required_markets")
         if isinstance(markets, list):
@@ -197,9 +177,11 @@ def _provider_entry_disabled_markets(payload: Mapping[str, object]) -> list[str]
 def _policy_disabled_markets(policy_path: Path | None) -> list[str]:
     """Markets excluded by the reviewed provider policy allowlist.
 
-    Returns the supported markets NOT present in `allowed_markets`. An absent
-    or unreadable `allowed_markets` means no market restriction, which keeps
-    every pre-existing policy file working unchanged.
+    Returns the supported markets NOT present in a top-level `allowed_markets`
+    list when the file has one. When it does not - the shipped policy does
+    not - the reviewed per-provider entries decide, and only entries that are
+    complete approvals count. A policy that cannot be read, or that approves
+    nothing, disables every market: the gate closes, it does not open.
     """
     path = (
         MANUAL_DIR / "staging_provider_policy.json"

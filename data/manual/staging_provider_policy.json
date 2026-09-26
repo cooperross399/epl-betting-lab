@@ -24,7 +24,10 @@
       },
       "evidence_receipt_id": "odds_api-20260821T114655-0400-20ffa5677988",
       "known_limitations": [
-        "Allowlisting does not bypass staging validation, freshness, completeness, checksum, receipt, or Thursday cutoff gates."
+        "Allowlisting does not bypass staging validation, freshness, completeness, checksum, receipt, or Thursday cutoff gates.",
+        "Every market here was measured against real prices and NOT ONE interval excludes zero. `double_chance` is negative and `draw_no_bet`'s positive number rests on thirteen bets. `corners_1x2` can never be measured historically because the provider does not retain it. The 2026-08-21 approval was made against the measurement's own recommendation, which was to enable nothing.",
+        "`cards_total_3_5` and `cards_total_4_5` are allowlisted in this policy at the owner's direction on 2026-09-25, so they are pre-approved the day a book quotes them. They are NOT registered in market_eligibility.MARKET_SELECTIONS and the card cannot stake them, for two reasons that are defects rather than choices: reports/card_scoreboard.settle() has no card path and returns None, so a staked cards bet could never be scored and would enter the forward ledger unsettleable; and no provider source maps to a cards market, so fetching one would mean inventing a provider market key the provider does not serve. Football-Data already ships HY/AY and HR/AR in the same file as the scorelines, so the settlement half is buildable when a price appears. A live probe found no book offering cards in the `us` region. NOTE: this repository has been wrong about exactly such a claim before -- `total_2_5` was excluded on a coverage check that examined only the bulk `totals` market while the line sat in `alternate_totals`. Run Provider Market Discovery -> line_coverage per bookmaker before treating cards as settled unreachable.",
+        "`1x2` is allowlisted here but excluded at the card layer by CARD_DISABLED_MARKETS on out-of-sample evidence (docs/no_edge_out_of_sample.md). The policy does not govern that exclusion."
       ],
       "max_provider_run_age_hours": 12.0,
       "provider_key": "odds_api",
@@ -38,7 +41,9 @@
         "draw_no_bet",
         "corners_1x2",
         "corners_total_9_5",
-        "corners_total_10_5"
+        "corners_total_10_5",
+        "cards_total_3_5",
+        "cards_total_4_5"
       ],
       "reviewed_at": "2026-08-21T11:47:03-04:00",
       "reviewer_name": "cooperross399",

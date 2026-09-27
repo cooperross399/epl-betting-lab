@@ -1,8 +1,8 @@
-## Sunday 27 September, 10:11 UTC — scheduled run
+## Sunday 27 September, 14:38 UTC — scheduled run
 
-Already sent today; same selections (3 price move(s)).
+Already sent today; same selections (2 price move(s)).
 
-Provider quota: 1100745 (about 17753 more runs)
+Provider quota: 1100080 (about 17743 more runs)
 
 Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
 
@@ -14,9 +14,9 @@ Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_tot
 | Sunderland v Brighton | `corners_total_10_5` | under | C | +5.1% | -152 | BetRivers | 0.1 |
 | Hull v Everton | `corners_total_10_5` | over | C | +6.8% | +165 | BetRivers | 0.1 |
 | Hull v Everton | `corners_total_9_5` | over | C | +4.9% | +105 | BetRivers | 0.1 |
-| Chelsea v Bournemouth | `draw_no_bet` | away | C | +4.9% | +260 | FanDuel | 0.1 |
 | Man United v Tottenham | `corners_1x2` | away | C | +4.6% | +200 | Fanatics | 0.1 |
 | Arsenal v Leeds | `corners_total_9_5` | under | C | +3.9% | +110 | BetRivers | 0.1 |
+| Chelsea v Bournemouth | `draw_no_bet` | away | C | +4.5% | +250 | FanDuel | 0.1 |
 | Sunderland v Brighton | `corners_total_9_5` | under | C | +3.5% | +102 | BetRivers | 0.1 |
 
 ### Leans
@@ -103,4 +103,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/36311561087)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/36326461522)

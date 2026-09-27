@@ -1,8 +1,8 @@
-## Sunday 27 September, 09:10 UTC — scheduled run
+## Sunday 27 September, 10:11 UTC — scheduled run
 
-Selections changed: 4 added, 3 dropped.
+Already sent today; same selections (3 price move(s)).
 
-Provider quota: 1100867 (about 17755 more runs)
+Provider quota: 1100745 (about 17753 more runs)
 
 Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
 
@@ -13,8 +13,8 @@ Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_tot
 | Arsenal v Leeds | `corners_total_10_5` | under | C | +5.5% | -141 | BetRivers | 0.1 |
 | Sunderland v Brighton | `corners_total_10_5` | under | C | +5.1% | -152 | BetRivers | 0.1 |
 | Hull v Everton | `corners_total_10_5` | over | C | +6.8% | +165 | BetRivers | 0.1 |
-| Chelsea v Bournemouth | `draw_no_bet` | away | C | +7.0% | +245 | FanDuel | 0.1 |
 | Hull v Everton | `corners_total_9_5` | over | C | +4.9% | +105 | BetRivers | 0.1 |
+| Chelsea v Bournemouth | `draw_no_bet` | away | C | +4.9% | +260 | FanDuel | 0.1 |
 | Man United v Tottenham | `corners_1x2` | away | C | +4.6% | +200 | Fanatics | 0.1 |
 | Arsenal v Leeds | `corners_total_9_5` | under | C | +3.9% | +110 | BetRivers | 0.1 |
 | Sunderland v Brighton | `corners_total_9_5` | under | C | +3.5% | +102 | BetRivers | 0.1 |
@@ -22,16 +22,6 @@ Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_tot
 ### Leans
 
 _None._
-
-### What changed
-
-- **Added:** Chelsea v Bournemouth double_chance draw_or_away
-- **Added:** Chelsea v Bournemouth draw_no_bet away
-- **Added:** Crystal Palace v Nott'm Forest corners_1x2 home
-- **Added:** Liverpool v Man City draw_no_bet away
-- **Dropped:** Arsenal v Leeds double_chance draw_or_away
-- **Dropped:** Arsenal v Leeds draw_no_bet away
-- **Dropped:** Chelsea v Bournemouth corners_total_9_5 over
 
 
 ## Beyond the Premier League
@@ -113,4 +103,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/36308329568)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/36311561087)

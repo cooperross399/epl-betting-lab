@@ -1,0 +1,149 @@
+competition,observed_at,provider_event_id,date,home_team,away_team,market,selection,book,american_odds
+EFLC,2026-09-15T13:08:26+00:00,event-01,2026-09-16,Fleetwood Town,Sheffield United,1x2,away,BetMGM,-155
+EFLC,2026-09-15T13:08:26+00:00,event-01,2026-09-16,Fleetwood Town,Sheffield United,1x2,draw,BetMGM,320
+EFLC,2026-09-15T13:08:26+00:00,event-01,2026-09-16,Fleetwood Town,Sheffield United,1x2,home,BetMGM,375
+EFLC,2026-09-15T13:08:26+00:00,event-01,2026-09-16,Fleetwood Town,Sheffield United,btts,no,BetMGM,105
+EFLC,2026-09-15T13:08:26+00:00,event-01,2026-09-16,Fleetwood Town,Sheffield United,btts,yes,BetMGM,-145
+EFLC,2026-09-15T13:08:26+00:00,event-01,2026-09-16,Fleetwood Town,Sheffield United,total_2_5,over,BetMGM,-155
+EFLC,2026-09-15T13:08:26+00:00,event-01,2026-09-16,Fleetwood Town,Sheffield United,total_2_5,under,BetMGM,110
+EFLC,2026-09-15T13:08:26+00:00,event-02,2026-09-16,Everton,Wolves,1x2,away,BetMGM,400
+EFLC,2026-09-15T13:08:26+00:00,event-02,2026-09-16,Everton,Wolves,1x2,draw,BetMGM,320
+EFLC,2026-09-15T13:08:26+00:00,event-02,2026-09-16,Everton,Wolves,1x2,home,BetMGM,-165
+EFLC,2026-09-15T13:08:26+00:00,event-02,2026-09-16,Everton,Wolves,btts,no,BetMGM,-115
+EFLC,2026-09-15T13:08:26+00:00,event-02,2026-09-16,Everton,Wolves,btts,yes,BetMGM,-125
+EFLC,2026-09-15T13:08:26+00:00,event-02,2026-09-16,Everton,Wolves,total_2_5,over,BetMGM,-135
+EFLC,2026-09-15T13:08:26+00:00,event-02,2026-09-16,Everton,Wolves,total_2_5,under,BetMGM,-102
+EFLC,2026-09-15T13:08:26+00:00,event-03,2026-09-15,Ipswich,Arsenal,1x2,away,BetMGM,-325
+EFLC,2026-09-15T13:08:26+00:00,event-03,2026-09-15,Ipswich,Arsenal,1x2,draw,BetMGM,475
+EFLC,2026-09-15T13:08:26+00:00,event-03,2026-09-15,Ipswich,Arsenal,1x2,home,BetMGM,800
+EFLC,2026-09-15T13:08:26+00:00,event-03,2026-09-15,Ipswich,Arsenal,btts,no,BetMGM,-135
+EFLC,2026-09-15T13:08:26+00:00,event-03,2026-09-15,Ipswich,Arsenal,btts,yes,BetMGM,-105
+EFLC,2026-09-15T13:08:26+00:00,event-03,2026-09-15,Ipswich,Arsenal,total_2_5,over,BetMGM,-190
+EFLC,2026-09-15T13:08:26+00:00,event-03,2026-09-15,Ipswich,Arsenal,total_2_5,under,BetMGM,130
+EFLC,2026-09-15T13:08:26+00:00,event-04,2026-09-15,Peterborough United,Barnsley,1x2,away,BetMGM,190
+EFLC,2026-09-15T13:08:26+00:00,event-04,2026-09-15,Peterborough United,Barnsley,1x2,draw,BetMGM,270
+EFLC,2026-09-15T13:08:26+00:00,event-04,2026-09-15,Peterborough United,Barnsley,1x2,home,BetMGM,125
+EFLC,2026-09-15T13:08:26+00:00,event-04,2026-09-15,Peterborough United,Barnsley,btts,no,BetMGM,145
+EFLC,2026-09-15T13:08:26+00:00,event-04,2026-09-15,Peterborough United,Barnsley,btts,yes,BetMGM,-210
+EFLC,2026-09-15T13:08:26+00:00,event-04,2026-09-15,Peterborough United,Barnsley,total_2_5,over,BetMGM,-185
+EFLC,2026-09-15T13:08:26+00:00,event-04,2026-09-15,Peterborough United,Barnsley,total_2_5,under,BetMGM,125
+EFLC,2026-09-18T21:15:01+00:00,event-05,2026-10-27,Bradford City,Peterborough United,1x2,away,FanDuel,310
+EFLC,2026-09-18T21:15:01+00:00,event-05,2026-10-27,Bradford City,Peterborough United,1x2,draw,FanDuel,250
+EFLC,2026-09-18T21:15:01+00:00,event-05,2026-10-27,Bradford City,Peterborough United,1x2,home,FanDuel,-120
+UEL,2026-09-15T13:53:42+00:00,event-06,2026-09-16,Anderlecht,Lyon,1x2,away,BetMGM,110
+UEL,2026-09-15T13:53:42+00:00,event-06,2026-09-16,Anderlecht,Lyon,1x2,draw,BetMGM,270
+UEL,2026-09-15T13:53:42+00:00,event-06,2026-09-16,Anderlecht,Lyon,1x2,home,BetMGM,220
+UEL,2026-09-15T13:53:42+00:00,event-06,2026-09-16,Anderlecht,Lyon,btts,no,BetMGM,130
+UEL,2026-09-15T13:53:42+00:00,event-06,2026-09-16,Anderlecht,Lyon,btts,yes,BetMGM,-190
+UEL,2026-09-15T13:53:42+00:00,event-06,2026-09-16,Anderlecht,Lyon,corners_1x2,away,DraftKings,100
+UEL,2026-09-15T13:53:42+00:00,event-06,2026-09-16,Anderlecht,Lyon,corners_1x2,draw,DraftKings,550
+UEL,2026-09-15T13:53:42+00:00,event-06,2026-09-16,Anderlecht,Lyon,corners_1x2,home,DraftKings,120
+UEL,2026-09-15T13:53:42+00:00,event-06,2026-09-16,Anderlecht,Lyon,corners_total_10_5,over,DraftKings,130
+UEL,2026-09-15T13:53:42+00:00,event-06,2026-09-16,Anderlecht,Lyon,corners_total_10_5,under,DraftKings,-180
+UEL,2026-09-15T13:53:42+00:00,event-06,2026-09-16,Anderlecht,Lyon,corners_total_9_5,over,DraftKings,-125
+UEL,2026-09-15T13:53:42+00:00,event-06,2026-09-16,Anderlecht,Lyon,corners_total_9_5,under,DraftKings,-110
+UEL,2026-09-15T13:53:42+00:00,event-06,2026-09-16,Anderlecht,Lyon,double_chance,draw_or_away,DraftKings,-300
+UEL,2026-09-15T13:53:42+00:00,event-06,2026-09-16,Anderlecht,Lyon,double_chance,home_or_away,DraftKings,-360
+UEL,2026-09-15T13:53:42+00:00,event-06,2026-09-16,Anderlecht,Lyon,double_chance,home_or_draw,DraftKings,-135
+UEL,2026-09-15T13:53:42+00:00,event-06,2026-09-16,Anderlecht,Lyon,draw_no_bet,away,DraftKings,-180
+UEL,2026-09-15T13:53:42+00:00,event-06,2026-09-16,Anderlecht,Lyon,draw_no_bet,home,DraftKings,140
+UEL,2026-09-15T13:53:42+00:00,event-06,2026-09-16,Anderlecht,Lyon,total_2_5,over,BetMGM,-160
+UEL,2026-09-15T13:53:42+00:00,event-06,2026-09-16,Anderlecht,Lyon,total_2_5,under,BetMGM,115
+UEL,2026-09-23T01:06:19+00:00,event-07,2026-10-15,Rennes,OFI Crete,1x2,away,BetUS,719
+UEL,2026-09-23T01:06:19+00:00,event-07,2026-10-15,Rennes,OFI Crete,1x2,draw,BetUS,438
+UEL,2026-09-23T01:06:19+00:00,event-07,2026-10-15,Rennes,OFI Crete,1x2,home,BetUS,-299
+UEL,2026-09-23T01:06:19+00:00,event-07,2026-10-15,Rennes,OFI Crete,btts,no,FanDuel,-110
+UEL,2026-09-23T01:06:19+00:00,event-07,2026-10-15,Rennes,OFI Crete,btts,yes,FanDuel,-116
+UEL,2026-09-23T01:06:19+00:00,event-07,2026-10-15,Rennes,OFI Crete,double_chance,draw_or_away,FanDuel,210
+UEL,2026-09-23T01:06:19+00:00,event-07,2026-10-15,Rennes,OFI Crete,double_chance,home_or_away,FanDuel,-600
+UEL,2026-09-23T01:06:19+00:00,event-07,2026-10-15,Rennes,OFI Crete,double_chance,home_or_draw,FanDuel,-1250
+UEL,2026-09-23T01:06:19+00:00,event-07,2026-10-15,Rennes,OFI Crete,draw_no_bet,away,FanDuel,600
+UEL,2026-09-23T01:06:19+00:00,event-07,2026-10-15,Rennes,OFI Crete,draw_no_bet,home,FanDuel,-850
+UEL,2026-09-23T01:06:19+00:00,event-07,2026-10-15,Rennes,OFI Crete,total_2_5,over,FanDuel,-174
+UEL,2026-09-23T01:06:19+00:00,event-07,2026-10-15,Rennes,OFI Crete,total_2_5,under,FanDuel,136
+UEL,2026-09-23T01:06:19+00:00,event-08,2026-10-15,Benfica,Celtic,1x2,away,BetUS,1023
+UEL,2026-09-23T01:06:19+00:00,event-08,2026-10-15,Benfica,Celtic,1x2,draw,BetUS,541
+UEL,2026-09-23T01:06:19+00:00,event-08,2026-10-15,Benfica,Celtic,1x2,home,BetUS,-429
+UEL,2026-09-23T01:06:19+00:00,event-08,2026-10-15,Benfica,Celtic,btts,no,FanDuel,-118
+UEL,2026-09-23T01:06:19+00:00,event-08,2026-10-15,Benfica,Celtic,btts,yes,FanDuel,-106
+UEL,2026-09-23T01:06:19+00:00,event-08,2026-10-15,Benfica,Celtic,double_chance,draw_or_away,FanDuel,300
+UEL,2026-09-23T01:06:19+00:00,event-08,2026-10-15,Benfica,Celtic,double_chance,home_or_away,FanDuel,-750
+UEL,2026-09-23T01:06:19+00:00,event-08,2026-10-15,Benfica,Celtic,double_chance,home_or_draw,FanDuel,-2000
+UEL,2026-09-23T01:06:19+00:00,event-08,2026-10-15,Benfica,Celtic,draw_no_bet,away,FanDuel,960
+UEL,2026-09-23T01:06:19+00:00,event-08,2026-10-15,Benfica,Celtic,draw_no_bet,home,FanDuel,-1500
+UEL,2026-09-23T01:06:19+00:00,event-08,2026-10-15,Benfica,Celtic,total_2_5,over,FanDuel,-220
+UEL,2026-09-23T01:06:19+00:00,event-08,2026-10-15,Benfica,Celtic,total_2_5,under,FanDuel,168
+UNL,2026-09-23T01:06:23+00:00,event-09,2026-09-26,England,Spain,1x2,away,BetRivers,140
+UNL,2026-09-23T01:06:23+00:00,event-09,2026-09-26,England,Spain,1x2,draw,BetRivers,235
+UNL,2026-09-23T01:06:23+00:00,event-09,2026-09-26,England,Spain,1x2,home,BetRivers,170
+UNL,2026-09-23T01:06:23+00:00,event-09,2026-09-26,England,Spain,btts,no,BetRivers,110
+UNL,2026-09-23T01:06:23+00:00,event-09,2026-09-26,England,Spain,btts,yes,BetRivers,-152
+UNL,2026-09-23T01:06:23+00:00,event-09,2026-09-26,England,Spain,corners_1x2,away,BetRivers,-107
+UNL,2026-09-23T01:06:23+00:00,event-09,2026-09-26,England,Spain,corners_1x2,draw,BetRivers,600
+UNL,2026-09-23T01:06:23+00:00,event-09,2026-09-26,England,Spain,corners_1x2,home,BetRivers,110
+UNL,2026-09-23T01:06:23+00:00,event-09,2026-09-26,England,Spain,corners_total_10_5,over,BetRivers,163
+UNL,2026-09-23T01:06:23+00:00,event-09,2026-09-26,England,Spain,corners_total_10_5,under,BetRivers,-245
+UNL,2026-09-23T01:06:23+00:00,event-09,2026-09-26,England,Spain,corners_total_9_5,over,BetRivers,104
+UNL,2026-09-23T01:06:23+00:00,event-09,2026-09-26,England,Spain,corners_total_9_5,under,BetRivers,-148
+UNL,2026-09-23T01:06:23+00:00,event-09,2026-09-26,England,Spain,double_chance,draw_or_away,BetRivers,-235
+UNL,2026-09-23T01:06:23+00:00,event-09,2026-09-26,England,Spain,double_chance,home_or_away,BetRivers,-335
+UNL,2026-09-23T01:06:23+00:00,event-09,2026-09-26,England,Spain,double_chance,home_or_draw,BetRivers,-186
+UNL,2026-09-23T01:06:23+00:00,event-09,2026-09-26,England,Spain,draw_no_bet,away,BetRivers,-137
+UNL,2026-09-23T01:06:23+00:00,event-09,2026-09-26,England,Spain,draw_no_bet,home,BetRivers,-106
+UNL,2026-09-23T01:06:23+00:00,event-09,2026-09-26,England,Spain,total_2_5,over,BetRivers,-120
+UNL,2026-09-23T01:06:23+00:00,event-09,2026-09-26,England,Spain,total_2_5,under,BetRivers,-112
+UNL,2026-09-23T01:06:23+00:00,event-10,2026-09-25,Italy,Belgium,1x2,away,BetRivers,230
+UNL,2026-09-23T01:06:23+00:00,event-10,2026-09-25,Italy,Belgium,1x2,draw,BetRivers,250
+UNL,2026-09-23T01:06:23+00:00,event-10,2026-09-25,Italy,Belgium,1x2,home,BetRivers,108
+UNL,2026-09-23T01:06:23+00:00,event-10,2026-09-25,Italy,Belgium,btts,no,BetRivers,110
+UNL,2026-09-23T01:06:23+00:00,event-10,2026-09-25,Italy,Belgium,btts,yes,BetRivers,-162
+UNL,2026-09-23T01:06:23+00:00,event-10,2026-09-25,Italy,Belgium,corners_1x2,away,BetRivers,128
+UNL,2026-09-23T01:06:23+00:00,event-10,2026-09-25,Italy,Belgium,corners_1x2,draw,BetRivers,540
+UNL,2026-09-23T01:06:23+00:00,event-10,2026-09-25,Italy,Belgium,corners_1x2,home,BetRivers,-139
+UNL,2026-09-23T01:06:23+00:00,event-10,2026-09-25,Italy,Belgium,corners_total_10_5,over,BetRivers,143
+UNL,2026-09-23T01:06:23+00:00,event-10,2026-09-25,Italy,Belgium,corners_total_10_5,under,BetRivers,-210
+UNL,2026-09-23T01:06:23+00:00,event-10,2026-09-25,Italy,Belgium,corners_total_9_5,over,BetRivers,-112
+UNL,2026-09-23T01:06:23+00:00,event-10,2026-09-25,Italy,Belgium,corners_total_9_5,under,BetRivers,-130
+UNL,2026-09-23T01:06:23+00:00,event-10,2026-09-25,Italy,Belgium,double_chance,draw_or_away,BetRivers,-152
+UNL,2026-09-23T01:06:23+00:00,event-10,2026-09-25,Italy,Belgium,double_chance,home_or_away,BetRivers,-400
+UNL,2026-09-23T01:06:23+00:00,event-10,2026-09-25,Italy,Belgium,double_chance,home_or_draw,BetRivers,-360
+UNL,2026-09-23T01:06:23+00:00,event-10,2026-09-25,Italy,Belgium,draw_no_bet,away,BetRivers,135
+UNL,2026-09-23T01:06:23+00:00,event-10,2026-09-25,Italy,Belgium,draw_no_bet,home,BetRivers,-200
+UNL,2026-09-23T01:06:23+00:00,event-10,2026-09-25,Italy,Belgium,total_2_5,over,BetRivers,-136
+UNL,2026-09-23T01:06:23+00:00,event-10,2026-09-25,Italy,Belgium,total_2_5,under,BetRivers,-107
+UNL,2026-09-23T01:06:23+00:00,event-11,2026-09-27,Gibraltar,Andorra,1x2,away,BetRivers,143
+UNL,2026-09-23T01:06:23+00:00,event-11,2026-09-27,Gibraltar,Andorra,1x2,draw,BetRivers,180
+UNL,2026-09-23T01:06:23+00:00,event-11,2026-09-27,Gibraltar,Andorra,1x2,home,BetRivers,230
+UNL,2026-09-23T01:06:23+00:00,event-11,2026-09-27,Gibraltar,Andorra,btts,no,BetRivers,-186
+UNL,2026-09-23T01:06:23+00:00,event-11,2026-09-27,Gibraltar,Andorra,btts,yes,BetRivers,128
+UNL,2026-09-23T01:06:23+00:00,event-11,2026-09-27,Gibraltar,Andorra,corners_1x2,away,BetRivers,-143
+UNL,2026-09-23T01:06:23+00:00,event-11,2026-09-27,Gibraltar,Andorra,corners_1x2,draw,BetRivers,430
+UNL,2026-09-23T01:06:23+00:00,event-11,2026-09-27,Gibraltar,Andorra,corners_1x2,home,BetRivers,112
+UNL,2026-09-23T01:06:23+00:00,event-11,2026-09-27,Gibraltar,Andorra,corners_total_9_5,over,BetRivers,175
+UNL,2026-09-23T01:06:23+00:00,event-11,2026-09-27,Gibraltar,Andorra,corners_total_9_5,under,BetRivers,-275
+UNL,2026-09-23T01:06:23+00:00,event-11,2026-09-27,Gibraltar,Andorra,double_chance,draw_or_away,BetRivers,-360
+UNL,2026-09-23T01:06:23+00:00,event-11,2026-09-27,Gibraltar,Andorra,double_chance,home_or_away,BetRivers,-275
+UNL,2026-09-23T01:06:23+00:00,event-11,2026-09-27,Gibraltar,Andorra,double_chance,home_or_draw,BetRivers,-210
+UNL,2026-09-23T01:06:23+00:00,event-11,2026-09-27,Gibraltar,Andorra,draw_no_bet,away,BetRivers,-167
+UNL,2026-09-23T01:06:23+00:00,event-11,2026-09-27,Gibraltar,Andorra,draw_no_bet,home,BetRivers,114
+UNL,2026-09-23T01:06:23+00:00,event-11,2026-09-27,Gibraltar,Andorra,total_2_5,over,BetRivers,200
+UNL,2026-09-23T01:06:23+00:00,event-11,2026-09-27,Gibraltar,Andorra,total_2_5,under,BetRivers,-278
+UNL,2026-09-25T21:49:50+00:00,event-12,2026-10-01,Wales,Norway,1x2,away,FanDuel,-105
+UNL,2026-09-25T21:49:50+00:00,event-12,2026-10-01,Wales,Norway,1x2,draw,FanDuel,270
+UNL,2026-09-25T21:49:50+00:00,event-12,2026-10-01,Wales,Norway,1x2,home,FanDuel,250
+UNL,2026-09-27T17:17:03+00:00,event-12,2026-10-01,Wales,Norway,btts,no,BetRivers,118
+UNL,2026-09-27T17:17:03+00:00,event-12,2026-10-01,Wales,Norway,btts,yes,BetRivers,-175
+UNL,2026-09-27T17:17:03+00:00,event-12,2026-10-01,Wales,Norway,corners_1x2,away,BetRivers,-200
+UNL,2026-09-27T17:17:03+00:00,event-12,2026-10-01,Wales,Norway,corners_1x2,draw,BetRivers,475
+UNL,2026-09-27T17:17:03+00:00,event-12,2026-10-01,Wales,Norway,corners_1x2,home,BetRivers,145
+UNL,2026-09-27T17:17:03+00:00,event-12,2026-10-01,Wales,Norway,corners_total_10_5,over,BetRivers,148
+UNL,2026-09-27T17:17:03+00:00,event-12,2026-10-01,Wales,Norway,corners_total_10_5,under,BetRivers,-225
+UNL,2026-09-27T17:17:03+00:00,event-12,2026-10-01,Wales,Norway,corners_total_9_5,over,BetRivers,-106
+UNL,2026-09-27T17:17:03+00:00,event-12,2026-10-01,Wales,Norway,corners_total_9_5,under,BetRivers,-137
+UNL,2026-09-27T17:17:03+00:00,event-12,2026-10-01,Wales,Norway,double_chance,draw_or_away,BetRivers,-500
+UNL,2026-09-27T17:17:03+00:00,event-12,2026-10-01,Wales,Norway,double_chance,home_or_away,BetRivers,-435
+UNL,2026-09-27T17:17:03+00:00,event-12,2026-10-01,Wales,Norway,double_chance,home_or_draw,BetRivers,-114
+UNL,2026-09-27T17:17:03+00:00,event-12,2026-10-01,Wales,Norway,draw_no_bet,away,BetRivers,-286
+UNL,2026-09-27T17:17:03+00:00,event-12,2026-10-01,Wales,Norway,draw_no_bet,home,BetRivers,185
+UNL,2026-09-27T17:17:03+00:00,event-12,2026-10-01,Wales,Norway,total_2_5,over,BetRivers,-148
+UNL,2026-09-27T17:17:03+00:00,event-12,2026-10-01,Wales,Norway,total_2_5,under,BetRivers,112

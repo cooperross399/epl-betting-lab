@@ -309,6 +309,14 @@ class TestACompetitionEarnsItsSection:
         assert "UECL" in COMPETITION_FILES
 
 
+#: A kickoff far enough ahead that the freshness gate is a no-op. The tests in
+#: this file are about pools, markets and baselines, not about staleness — but a
+#: feed row with no kickoff cannot be cleared by the gate, and before the gate
+#: existed these fixtures carried none. `test_extra_card_freshness.py` is where
+#: the gate itself is tested, on real rows.
+NOT_YET_PLAYED = "2099-01-01T12:00:00Z"
+
+
 def _stub_international_pool(monkeypatch) -> None:
     """A tiny offline pool, so no test reaches the network.
 
@@ -388,6 +396,7 @@ class TestEveryReturnCarriesTheDeclinedFixtures:
                     "american_odds": odds,
                     "book": "Book",
                     "observed_at": "2026-09-22T12:00:00Z",
+                    "commence_time": NOT_YET_PLAYED,
                 }
                 for home, away in fixtures
                 for selection in ("yes", "no")
@@ -542,6 +551,7 @@ class TestTheInternationalCardSaysHowStaleItsRatingsAre:
                     "american_odds": -110,
                     "book": "Book",
                     "observed_at": "2026-09-22T12:00:00Z",
+                    "commence_time": NOT_YET_PLAYED,
                 }
                 for selection in ("yes", "no")
             ]
@@ -619,6 +629,7 @@ class TestTheInternationalPoolDoesNotBetTheGoalsLevel:
                     "american_odds": 250,
                     "book": "Book",
                     "observed_at": "2026-09-22T12:00:00Z",
+                    "commence_time": NOT_YET_PLAYED,
                 }
                 for selection in selections
             ]
@@ -877,6 +888,7 @@ class TestTheCardActuallyAppliesTheBaseline:
                         "american_odds": 120,
                         "book": "Book",
                         "observed_at": "2026-09-22T12:00:00Z",
+                    "commence_time": NOT_YET_PLAYED,
                     }
                     for selection in ("home", "away")
                 ]

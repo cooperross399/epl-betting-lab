@@ -125,3 +125,38 @@ def test_the_rendered_record_names_unsettleable_rows_separately():
     board.unsettleable = 1  # as if a corner result arrived without counts
     text = "\n".join(render_scoreboard(board))
     assert "Cannot be settled" in text and "never resolve" in text
+
+
+def test_card_totals_settle_on_the_combined_yellow_count():
+    from epl_betting_lab.reports.card_scoreboard import CARD_MARKETS
+
+    assert settle("cards_total_3_5", "over", 0, 0, home_cards=2, away_cards=2) is True
+    assert settle("cards_total_3_5", "under", 0, 0, home_cards=2, away_cards=1) is True
+    assert settle("cards_total_4_5", "over", 0, 0, home_cards=2, away_cards=2) is False
+    for market, line in CARD_MARKETS.items():
+        total = int(line + 0.5)
+        over = settle(market, "over", 0, 0, home_cards=total, away_cards=0)
+        under = settle(market, "under", 0, 0, home_cards=total, away_cards=0)
+        assert over is not under
+
+
+def test_card_markets_settle_on_the_columns_the_model_prices():
+    """The record must score the number the card priced, not a neighbour of it."""
+    from epl_betting_lab.models.poisson_counts import COUNT_EVENTS
+    from epl_betting_lab.reports.card_scoreboard import CARD_MARKETS
+    from epl_betting_lab.strategies.count_markets import COUNT_MARKETS
+
+    assert COUNT_EVENTS["cards"] == ("HY", "AY")
+    assert set(CARD_MARKETS) == {m for m, (event, _, _) in COUNT_MARKETS.items() if event == "cards"}
+
+
+def test_a_card_market_without_counts_settles_nothing_rather_than_guessing():
+    assert settle("cards_total_3_5", "over", 3, 0) is None
+    board = build_scoreboard([_card("cards_total_3_5", "over")], _results())
+    assert board.unsettleable == 1 and not board.settled
+
+
+def test_a_card_bet_settles_from_the_results_frame():
+    results = _results().assign(HY=3, AY=2)
+    board = build_scoreboard([_card("cards_total_4_5", "over")], results)
+    assert len(board.settled) == 1 and board.settled[0].won is True

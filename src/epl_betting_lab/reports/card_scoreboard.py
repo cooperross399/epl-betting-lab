@@ -66,6 +66,17 @@ CORNER_MARKETS: dict[str, float | None] = {
     "corners_total_10_5": 10.5,
 }
 
+#: Card markets and their lines. Settled on Football-Data's yellow counts
+#: (HY/AY) because that is exactly what `PoissonCountModel` predicts
+#: (`poisson_counts` counts cards as ("HY", "AY")): the record then scores the
+#: number the card actually priced. Books differ on how a red card counts, so
+#: a book's own settlement can disagree on a match with a sending-off; that is
+#: a known gap, not a guess made silently.
+CARD_MARKETS: dict[str, float] = {
+    "cards_total_3_5": 3.5,
+    "cards_total_4_5": 4.5,
+}
+
 
 @dataclass
 class ScoredSelection:
@@ -188,6 +199,8 @@ def settle(
     *,
     home_corners: int | None = None,
     away_corners: int | None = None,
+    home_cards: int | None = None,
+    away_cards: int | None = None,
 ) -> bool | None:
     """Did this selection win?
 
@@ -235,6 +248,13 @@ def settle(
         total = home_corners + away_corners
         # The lines are halves, so a push is impossible by construction.
         return {"over": total > line, "under": total < line}.get(selection)
+    if market in CARD_MARKETS:
+        # Same rule as corners: a result without the counts settles nothing.
+        if home_cards is None or away_cards is None:
+            return None
+        total = home_cards + away_cards
+        line = CARD_MARKETS[market]
+        return {"over": total > line, "under": total < line}.get(selection)
     return None
 
 
@@ -242,6 +262,7 @@ def settleable_markets() -> frozenset[str]:
     """Markets `settle` has a rule for, whatever the result data turns out to be."""
     return frozenset(
         {"1x2", "btts", "total_2_5", "double_chance", "draw_no_bet"} | set(CORNER_MARKETS)
+        | set(CARD_MARKETS)
     )
 
 
@@ -276,7 +297,11 @@ def build_scoreboard(
     # Corner counts ride along with the scoreline: HC/AC are Football-Data's
     # columns and are present on every row of the processed dataset, so the
     # corner markets are settleable from exactly the same results frame.
-    played: dict[tuple[str, str], list[tuple[pd.Timestamp, int, int, int | None, int | None]]] = {}
+    # Card counts (HY/AY) ride along the same way, for the card markets.
+    played: dict[
+        tuple[str, str],
+        list[tuple[pd.Timestamp, int, int, int | None, int | None, int | None, int | None]],
+    ] = {}
     if not results.empty:
         for _, row in results.iterrows():
             if pd.isna(row.get("home_goals")) or pd.isna(row.get("away_goals")):
@@ -290,7 +315,7 @@ def build_scoreboard(
             )
             corners = tuple(
                 None if pd.isna(row.get(column)) else int(row.get(column))
-                for column in ("HC", "AC")
+                for column in ("HC", "AC", "HY", "AY")
             )
             played.setdefault(key, []).append(
                 (when, int(row["home_goals"]), int(row["away_goals"]), *corners)
@@ -338,7 +363,7 @@ def build_scoreboard(
             board.scored.append(entry)
             continue
         # The first result after the card was issued is the one it meant.
-        when, home_goals, away_goals, home_corners, away_corners = min(
+        when, home_goals, away_goals, home_corners, away_corners, home_cards, away_cards = min(
             candidates, key=lambda item: item[0]
         )
         entry.fixture_date = when.strftime("%Y-%m-%d")
@@ -349,6 +374,8 @@ def build_scoreboard(
             away_goals,
             home_corners=home_corners,
             away_corners=away_corners,
+            home_cards=home_cards,
+            away_cards=away_cards,
         )
         if won is None:
             # Three different facts, counted apart. A push is over; a market
@@ -357,6 +384,8 @@ def build_scoreboard(
             if market not in settleable_markets():
                 board.unsettleable += 1
             elif market in CORNER_MARKETS and (home_corners is None or away_corners is None):
+                board.unsettleable += 1
+            elif market in CARD_MARKETS and (home_cards is None or away_cards is None):
                 board.unsettleable += 1
             else:
                 board.void += 1

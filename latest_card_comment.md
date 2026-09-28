@@ -1,8 +1,8 @@
-## Sunday 27 September, 15:18 UTC — scheduled run
+## Monday 28 September, 09:22 UTC — scheduled run
 
-Already sent today; same selections (0 price move(s)).
+Selections changed: 4 added, 4 dropped.
 
-Provider quota: 1099958 (about 17741 more runs)
+Provider quota: 1098828 (about 17723 more runs)
 
 Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
 
@@ -14,14 +14,24 @@ Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_tot
 | Sunderland v Brighton | `corners_total_10_5` | under | C | +5.1% | -152 | BetRivers | 0.1 |
 | Hull v Everton | `corners_total_10_5` | over | C | +6.8% | +165 | BetRivers | 0.1 |
 | Hull v Everton | `corners_total_9_5` | over | C | +4.9% | +105 | BetRivers | 0.1 |
-| Man United v Tottenham | `corners_1x2` | away | C | +4.6% | +200 | Fanatics | 0.1 |
+| Sunderland v Brighton | `corners_total_9_5` | under | C | +4.2% | +105 | BetRivers | 0.1 |
 | Arsenal v Leeds | `corners_total_9_5` | under | C | +3.9% | +110 | BetRivers | 0.1 |
 | Chelsea v Bournemouth | `draw_no_bet` | away | C | +4.5% | +250 | FanDuel | 0.1 |
-| Sunderland v Brighton | `corners_total_9_5` | under | C | +3.5% | +102 | BetRivers | 0.1 |
 
 ### Leans
 
 _None._
+
+### What changed
+
+- **Added:** Arsenal v Leeds draw_no_bet away
+- **Added:** Aston Villa v Brentford corners_1x2 home
+- **Added:** Chelsea v Bournemouth corners_total_9_5 over
+- **Added:** Crystal Palace v Nott'm Forest total_2_5 over
+- **Dropped:** Crystal Palace v Nott'm Forest corners_1x2 home
+- **Dropped:** Liverpool v Man City draw_no_bet away
+- **Dropped:** Man United v Tottenham btts no
+- **Dropped:** Man United v Tottenham corners_1x2 away
 
 
 ## Beyond the Premier League
@@ -35,9 +45,9 @@ National teams, on a pool that shares no information with the club ratings — a
 | Match | Market | Selection | Edge | Price | Book | Units |
 |:--|:--|:--|--:|--:|:--|--:|
 | England v Spain | `double_chance` | home_or_draw | +6.9% | -121 | BetRivers | 0.1 |
-| Norway v Portugal | `draw_no_bet` | away | +6.9% | -117 | BetRivers | 0.1 |
-| Spain v Croatia | `double_chance` | draw_or_away | +6.9% | +240 | BetRivers | 0.1 |
 | Italy v Belgium | `draw_no_bet` | away | +6.7% | +135 | BetRivers | 0.1 |
+| Wales v Norway | `double_chance` | home_or_draw | +6.3% | +100 | BetRivers | 0.1 |
+| Gibraltar v Andorra | `draw_no_bet` | home | +6.1% | +128 | BetRivers | 0.1 |
 
 - `btts` is not bet here: the model sits about 8 points below the market on the goals level for every fixture, so a selection in that market would be the gap rather than the fixture.
 - `total_2_5` is not bet here: the model sits about 8 points below the market on the goals level for every fixture, so a selection in that market would be the gap rather than the fixture.
@@ -50,7 +60,7 @@ Priced on the unified English ratings. Measured out of sample, a club's rating d
 
 | Match | Market | Selection | Edge | Price | Book | Units |
 |:--|:--|:--|--:|--:|:--|--:|
-| Fleetwood Town v Sheffield United | `total_2_5` | under | +2.8% | +120 | BetRivers | 0.1 |
+| Fleetwood Town v Sheffield United | `total_2_5` | under | +2.7% | +120 | BetRivers | 0.1 |
 | Everton v Wolves | `total_2_5` | under | +2.4% | +102 | BetRivers | 0.1 |
 | Ipswich v Arsenal | `total_2_5` | under | +0.6% | +130 | BetMGM | 0.1 |
 
@@ -64,8 +74,8 @@ Priced on the European ratings, where 701 European ties bridge eleven leagues on
 |:--|:--|:--|--:|--:|:--|--:|
 | Arsenal v Lille | `corners_total_10_5` | under | +7.0% | -121 | BetRivers | 0.1 |
 | Arsenal v Lille | `total_2_5` | under | +6.8% | +148 | BetRivers | 0.1 |
+| Ath Madrid v Man United | `draw_no_bet` | home | +6.5% | -136 | FanDuel | 0.1 |
 | Inter v Club Brugge | `corners_1x2` | away | +6.5% | +480 | BetRivers | 0.1 |
-| RB Leipzig v PSV Eindhoven | `double_chance` | draw_or_away | +6.3% | -135 | FanDuel | 0.1 |
 
 - 6 fixture(s) left out because a club has no rating in the pool: Bodø/Glimt v Dortmund, LASK v Liverpool, Sabah FK v Slavia Praha, Shakhtar Donetsk v AEK, Viking FK v Bayern Munich, ŠK Slovan Bratislava v Stuttgart.
 
@@ -103,4 +113,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/36328840384)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/36402700677)

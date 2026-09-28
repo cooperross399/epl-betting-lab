@@ -657,6 +657,16 @@ def build_extra_card(
     selections = selections.drop(columns=["_edge"])
     selections["competition"] = competition
     selections["suggested_units"] = EXTRA_UNITS
+    # Carried from the gate, which already resolved every fixture's kickoff.
+    # Recomputing it here would be a second implementation of the same
+    # question, and the two could disagree.
+    kickoffs = _fixture_kickoffs(gate.kept)
+    selections["kickoff_time"] = [
+        kickoffs.get(
+            (str(home).strip().casefold(), str(away).strip().casefold())
+        )
+        for home, away in zip(selections["home_team"], selections["away_team"])
+    ]
     return ExtraCard(selections, notes, priced=len(records), unrated=unrated, gate=gate)
 
 
@@ -731,6 +741,12 @@ EXTRA_CARD_JSON_FILENAME = "extra_competitions_card.json"
 EXTRA_ARCHIVE_ROOT = Path("archive") / "extra_cards"
 
 
+def _kickoff_text(value: object) -> str | None:
+    """An ISO kickoff, or None where there is none to record."""
+    stamp = pd.to_datetime(value, errors="coerce", utc=True)
+    return None if pd.isna(stamp) else stamp.isoformat()
+
+
 def extra_card_record(
     cards: dict[str, ExtraCard], *, now: datetime | None = None
 ) -> dict[str, object]:
@@ -767,6 +783,11 @@ def extra_card_record(
                     "selection": row.get("selection"),
                     "american_odds": row.get("american_odds"),
                     "book": row.get("book"),
+                    # The kickoff, so the record can be audited against the
+                    # moment it was written. Without it a stale selection is
+                    # only visible by going back to the price feed and hoping
+                    # the fixture is still in it.
+                    "kickoff_time": _kickoff_text(row.get("kickoff_time")),
                     "calibrated_edge": row.get("calibrated_edge"),
                     "raw_edge": row.get("raw_edge"),
                     "suggested_units": row.get("suggested_units"),

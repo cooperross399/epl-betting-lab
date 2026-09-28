@@ -429,3 +429,21 @@ class TestTheBuildScriptRuns:
         assert "dropped" in printed, (
             "the run output does not report what the gate dropped per competition"
         )
+
+
+def test_the_fixture_file_carries_no_key_shaped_value() -> None:
+    """The provider's event ids are 32 hex characters, which the repository's
+    secrets guard cannot tell from a credential — and it is right not to try.
+    They are replaced with short synthetic ids; the gate never reads that column.
+
+    This is here because the guard scans TRACKED files, so the suite passed
+    locally while the file was still untracked and only went red in CI once it
+    was committed. A test beside the file itself fails in either place.
+    """
+    import re
+
+    body = FIXTURE.read_text(encoding="utf-8")
+
+    assert not re.search(r"[0-9a-f]{32}", body), (
+        "the fixture file contains a key-shaped value"
+    )

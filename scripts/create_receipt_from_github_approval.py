@@ -64,7 +64,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--activity-json",
         type=Path,
-        help="Read PR activity from a file instead of calling GitHub (offline).",
+        help=(
+            "Read PR activity from a file instead of calling GitHub (offline). "
+            "Verification only: an approval read from a file cannot write a "
+            "receipt, because nothing about a local file shows GitHub saw it."
+        ),
     )
     parser.add_argument("--output-dir", type=Path, help="Defaults to data/outputs.")
     parser.add_argument(
@@ -149,6 +153,16 @@ def main() -> int:
         "This command verifies it and cannot author it."
     )
 
+    if args.activity_json and args.write_receipt:
+        # A file is whatever whoever wrote it says. A receipt minted from one
+        # would read "Approved in GitHub UI ... by <login>" exactly like one
+        # minted from GitHub, and nothing downstream could tell them apart.
+        print(
+            "BLOCKED: --activity-json is verification only. A receipt is "
+            "written only from activity fetched from GitHub."
+        )
+        return 2
+
     if args.activity_json:
         try:
             activity = json.loads(args.activity_json.read_text(encoding="utf-8"))
@@ -230,9 +244,13 @@ def main() -> int:
         return 2
 
     # Bind the GitHub approval into the receipt so the audit trail records where
-    # the human act happened, not merely that one was claimed.
+    # the human act happened, not merely that one was claimed - and where this
+    # command read it from, so a reader can tell GitHub from a file.
     receipt = dict(receipt)
-    receipt["github_approval"] = approval
+    receipt["github_approval"] = {
+        **approval,
+        "activity_source": "file" if args.activity_json else "github_api",
+    }
 
     if not args.write_receipt:
         print()

@@ -89,3 +89,24 @@ def test_missing_or_unbound_receipts_do_not_match(tmp_path: Path) -> None:
     path = tmp_path / "provider_human_acceptance_receipt.json"
     path.write_text(json.dumps({"receipt_id": "no-binding"}), encoding="utf-8")
     assert module._existing_receipt_for(_approval(), tmp_path) is None
+
+
+def test_an_offline_activity_file_cannot_write_a_receipt(tmp_path: Path, monkeypatch, capsys) -> None:
+    """A file is whatever whoever wrote it says. Offline stays verification-only."""
+    activity = tmp_path / "activity.json"
+    activity.write_text("{}", encoding="utf-8")
+    monkeypatch.setattr(
+        "sys.argv",
+        [
+            "create_receipt_from_github_approval.py",
+            "--pr", "1",
+            "--activity-json", str(activity),
+            "--output-dir", str(tmp_path / "out"),
+            "--write-receipt",
+        ],
+    )
+
+    assert _module().main() == 2
+    assert "verification only" in capsys.readouterr().out
+    assert not (tmp_path / "out").exists()
+

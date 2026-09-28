@@ -213,6 +213,10 @@ class ExtraCard:
     notes: list[str] = field(default_factory=list)
     priced: int = 0
     unrated: list[str] = field(default_factory=list)
+    #: What the freshness gate withheld. Carried on the card rather than logged,
+    #: because a section that quietly dropped half its fixtures and one that was
+    #: quoted half as many look identical to a reader.
+    gate: "SlateGate | None" = None
 
     @property
     def fixtures(self) -> int:
@@ -271,6 +275,159 @@ def latest_prices(feed: pd.DataFrame, competition: str) -> pd.DataFrame:
     return best[columns].reset_index(drop=True)
 
 
+#: A fixture whose kickoff cannot be established from the feed. Same word the
+#: Premier League card uses for the same state, because it is the same state:
+#: `automated_card.KICKOFF_UNCONFIRMED_STATUS`.
+KICKOFF_UNCONFIRMED = "kickoff unconfirmed"
+
+#: How far apart two fixtures can be and still belong to the same round.
+#:
+#: Measured on the feed as it stood on 2026-09-28. WITHIN a round the widest
+#: spread is 5 days (a Nations League window, 28 September to 2 October); the
+#: EFL Cup's fourth round spans 3 days and a Champions League matchday 2.
+#: BETWEEN rounds the narrowest gap is 28 days (Europa League matchday 1 on
+#: 16-17 September, matchday 2 on 15 October); the EFL Cup's third and fourth
+#: rounds are 41 days apart. Seven sits between the two with room on both
+#: sides.
+ROUND_GAP_DAYS = 7
+
+
+@dataclass(frozen=True)
+class SlateGate:
+    """What survived the freshness gate, and what it cost.
+
+    The counts are reported rather than kept internally. A section that quietly
+    drops half its fixtures and one that was quoted half as many fixtures look
+    identical on the card, and this project has been caught by that shape more
+    than once.
+    """
+
+    kept: pd.DataFrame
+    played: list[str] = field(default_factory=list)
+    unconfirmed: list[str] = field(default_factory=list)
+    held_back: list[str] = field(default_factory=list)
+    rounds: int = 0
+
+    @property
+    def dropped(self) -> int:
+        return len(self.played) + len(self.unconfirmed) + len(self.held_back)
+
+
+def _fixture_kickoffs(rows: pd.DataFrame) -> dict[tuple[str, str], pd.Timestamp | None]:
+    """(home, away) -> kickoff, or None where it cannot be established.
+
+    `commence_time` is the provider's own timestamp and is preferred. Rows
+    collected before it was carried have only `date`, a day with no clock, and
+    a day cannot show that a fixture has not started yet — so a dated-only
+    fixture resolves to the START of its day.
+
+    That direction matters and the first version of this had it backwards.
+    Stamping the END of the day makes a kickoff look later than it was, so a
+    fixture that kicked off at 16:00 survived an 18:17 gate — admitting a
+    finished game, which is the fault being fixed. Stamping the start withholds
+    any same-day dated-only fixture instead. Withholding a fixture that was
+    still to come costs one bet; admitting one that has finished is the bug.
+
+    A pair quoted with two different kickoffs resolves to None, the same way
+    the Premier League card treats a conflicting pair: an ambiguous identity is
+    worse than none.
+    """
+    kickoffs: dict[tuple[str, str], pd.Timestamp | None] = {}
+    seen_conflict: set[tuple[str, str]] = set()
+    has_commence = "commence_time" in rows.columns
+    for row in rows.itertuples():
+        key = (str(row.home_team).strip().casefold(), str(row.away_team).strip().casefold())
+        if key in seen_conflict:
+            continue
+        stamp = pd.NaT
+        if has_commence:
+            stamp = pd.to_datetime(getattr(row, "commence_time", None), errors="coerce", utc=True)
+        if pd.isna(stamp):
+            day = pd.to_datetime(getattr(row, "date", None), errors="coerce", utc=True)
+            # Start of the fixture's day. Anything later flatters a stale
+            # fixture into surviving the gate.
+            stamp = day.normalize() if not pd.isna(day) else pd.NaT
+        resolved = None if pd.isna(stamp) else stamp
+        if key in kickoffs and kickoffs[key] != resolved:
+            seen_conflict.add(key)
+            kickoffs[key] = None
+            continue
+        kickoffs[key] = resolved
+    return kickoffs
+
+
+def gate_slate(rows: pd.DataFrame, *, now: pd.Timestamp) -> SlateGate:
+    """Drop fixtures that have kicked off, and hold back a later round.
+
+    The feed is append-only and nothing ever left it. `latest_prices` returns
+    the newest OBSERVATION per fixture, which for a fixture that stopped being
+    quoted is its last observation — so a fixture remained eligible to be
+    priced for as long as the feed existed. On 2026-09-28 that put an EFL Cup
+    third-round tie played on 16 September, a Europa League matchday-1 tie from
+    the same date, and three Nations League fixtures from 25-27 September onto
+    a card generated on the 28th.
+
+    Two separate faults, and both are closed here. The first is staleness: a
+    game that has kicked off is not a play. The second is that the pool spanned
+    rounds — the EFL Cup feed held the third round and the fourth at once, which
+    is why one club appeared in two fixtures — so only the earliest surviving
+    round is priced and a later one is named rather than silently included.
+    """
+    columns = list(rows.columns)
+    if rows.empty:
+        return SlateGate(kept=pd.DataFrame(columns=columns))
+
+    kickoffs = _fixture_kickoffs(rows)
+    played: list[str] = []
+    unconfirmed: list[str] = []
+    keep: set[tuple[str, str]] = set()
+    labels: dict[tuple[str, str], str] = {}
+    for row in rows.itertuples():
+        key = (str(row.home_team).strip().casefold(), str(row.away_team).strip().casefold())
+        labels.setdefault(key, f"{row.home_team} v {row.away_team}")
+    for key, kickoff in kickoffs.items():
+        if kickoff is None:
+            unconfirmed.append(labels[key])
+        elif kickoff <= now:
+            played.append(labels[key])
+        else:
+            keep.add(key)
+
+    # One round. Distinct surviving days, split where the gap exceeds
+    # ROUND_GAP_DAYS; the earliest group is the current or next round.
+    days = sorted({kickoffs[key].normalize() for key in keep})
+    rounds = 1 if days else 0
+    cutoff = days[-1] if days else None
+    if days:
+        for earlier, later in zip(days, days[1:]):
+            if (later - earlier).days > ROUND_GAP_DAYS:
+                rounds += 1
+                if cutoff == days[-1]:
+                    cutoff = earlier
+    held_back: list[str] = []
+    if cutoff is not None and rounds > 1:
+        for key in sorted(keep):
+            if kickoffs[key].normalize() > cutoff:
+                held_back.append(labels[key])
+        keep = {key for key in keep if kickoffs[key].normalize() <= cutoff}
+
+    mask = rows.apply(
+        lambda row: (
+            str(row["home_team"]).strip().casefold(),
+            str(row["away_team"]).strip().casefold(),
+        )
+        in keep,
+        axis=1,
+    )
+    return SlateGate(
+        kept=rows[mask].copy(),
+        played=sorted(played),
+        unconfirmed=sorted(unconfirmed),
+        held_back=sorted(held_back),
+        rounds=rounds,
+    )
+
+
 def _pool_for(spec: CompetitionSpec):
     """Matches, rating config, and a baseline override where one is needed.
 
@@ -307,17 +464,70 @@ def _pool_for(spec: CompetitionSpec):
     return pool.matches, EUROPEAN_RATINGS, None
 
 
+#: How many fixture names a drop note prints before summarising. The first
+#: version printed all of them and a Nations League run dropped 42, which is a
+#: paragraph of names where a count was wanted. The count is always exact.
+NAMED_IN_A_NOTE = 6
+
+
+def _some(names: list[str]) -> str:
+    """The first few names, then how many more."""
+    if len(names) <= NAMED_IN_A_NOTE:
+        return ", ".join(names)
+    shown = ", ".join(names[:NAMED_IN_A_NOTE])
+    return f"{shown}, and {len(names) - NAMED_IN_A_NOTE} more"
+
+
+def _gate_notes(gate: SlateGate, spec: CompetitionSpec) -> list[str]:
+    """What the gate withheld, in the card's own voice."""
+    notes: list[str] = []
+    if gate.played:
+        notes.append(
+            f"{len(gate.played)} fixture(s) dropped as already kicked off: "
+            f"{_some(gate.played)}."
+        )
+    if gate.unconfirmed:
+        notes.append(
+            f"{len(gate.unconfirmed)} fixture(s) dropped because their kickoff "
+            f"could not be confirmed from the feed: {_some(gate.unconfirmed)}."
+        )
+    if gate.held_back:
+        notes.append(
+            f"The {spec.name} pool spanned {gate.rounds} rounds. Only the "
+            f"earliest is priced; {len(gate.held_back)} fixture(s) from a later "
+            f"round were held back: {_some(gate.held_back)}."
+        )
+    return notes
+
+
 def build_extra_card(
     feed: pd.DataFrame,
     competition: str,
     *,
     min_edge: float = 0.035,
+    now: pd.Timestamp | None = None,
 ) -> ExtraCard:
-    """Score one competition's fixtures against the prices on file."""
+    """Score one competition's fixtures against the prices on file.
+
+    `now` is the card's generation time and defaults to the present. Every
+    fixture whose kickoff is at or before it is dropped before anything is
+    priced — see `gate_slate` for why that was needed.
+    """
     spec = COMPETITIONS[competition]
-    prices = latest_prices(feed, competition)
+    moment = pd.Timestamp.now("UTC") if now is None else pd.Timestamp(now)
+    if moment.tzinfo is None:
+        moment = moment.tz_localize("UTC")
+
+    rows = feed[feed["competition"] == competition] if "competition" in feed.columns else feed.iloc[0:0]
+    gate = gate_slate(rows, now=moment)
+    prices = latest_prices(gate.kept, competition)
+    gate_notes = _gate_notes(gate, spec)
     if prices.empty:
-        return ExtraCard(pd.DataFrame(), [f"No {spec.name} price on file."])
+        return ExtraCard(
+            pd.DataFrame(),
+            gate_notes + [f"No {spec.name} price on file."],
+            gate=gate,
+        )
 
     matches, config, baseline = _pool_for(spec)
     model = PoissonGoalsModel().fit(matches, config=config)
@@ -327,7 +537,7 @@ def build_extra_card(
         # double chance and draw-no-bet at once.
         model.avg_home_goals, model.avg_away_goals = baseline
 
-    notes: list[str] = []
+    notes: list[str] = list(gate_notes)
     for market in sorted(POOL_EXCLUDED_MARKETS.get(spec.pool, ())):
         notes.append(
             f"`{market}` is not bet here: the model sits about 8 points below "
@@ -374,6 +584,7 @@ def build_extra_card(
             notes + [f"No {spec.name} fixture could be priced."],
             priced=0,
             unrated=unrated,
+            gate=gate,
         )
 
     projections = pd.DataFrame(records)
@@ -411,6 +622,7 @@ def build_extra_card(
             notes + ["No selection cleared the rules."],
             priced=len(records),
             unrated=unrated,
+            gate=gate,
         )
 
     selections = pd.concat(frames, ignore_index=True)
@@ -422,6 +634,7 @@ def build_extra_card(
             notes + ["No selection cleared the rules."],
             priced=len(records),
             unrated=unrated,
+            gate=gate,
         )
 
     # Only what the rules actually pass. Without this every evaluated row is
@@ -436,6 +649,7 @@ def build_extra_card(
             notes + [f"None of {before} priced selections cleared the rules."],
             priced=len(records),
             unrated=unrated,
+            gate=gate,
         )
     edge = selections.get("calibrated_edge", selections.get("raw_edge"))
     selections = selections.assign(_edge=pd.to_numeric(edge, errors="coerce"))
@@ -443,7 +657,7 @@ def build_extra_card(
     selections = selections.drop(columns=["_edge"])
     selections["competition"] = competition
     selections["suggested_units"] = EXTRA_UNITS
-    return ExtraCard(selections, notes, priced=len(records), unrated=unrated)
+    return ExtraCard(selections, notes, priced=len(records), unrated=unrated, gate=gate)
 
 
 def render_extra_card(cards: dict[str, ExtraCard]) -> list[str]:

@@ -173,7 +173,13 @@ EXPECTED_MARKETS = (
 DEFAULT_FEED = PROCESSED_DIR / "price_feed_extra.csv"
 
 #: The feed's own columns plus the one thing the project has never carried.
-EFL_FEED_COLUMNS = ("competition",) + tuple(FEED_COLUMNS)
+#: `commence_time` is the provider's own kickoff timestamp. `FEED_COLUMNS`
+#: keeps only `date`, the day with no clock, and a day cannot establish that a
+#: fixture has not started yet — so the card's freshness gate had to withhold
+#: every same-day fixture rather than price the ones still to come. The
+#: provider validates this field before staging it, it costs nothing to carry,
+#: and rows collected before this existed simply have it blank.
+EFL_FEED_COLUMNS = ("competition", "commence_time") + tuple(FEED_COLUMNS)
 
 
 def load_feed(path: Path) -> pd.DataFrame:
@@ -199,6 +205,54 @@ def load_feed(path: Path) -> pd.DataFrame:
         if column not in frame.columns:
             frame[column] = pd.NA
     return frame[list(EFL_FEED_COLUMNS)]
+
+
+def _with_commence_time(rows: pd.DataFrame, staged: pd.DataFrame) -> pd.DataFrame:
+    """Carry the provider's kickoff timestamp onto each feed row.
+
+    `snapshot_rows` returns `frame[FEED_COLUMNS]`, which drops `commence_time`
+    — so the timestamp the provider had already validated was thrown away at
+    the feed boundary, and the card was left comparing a date to a time.
+
+    A fixture pair staged with two different kickoffs gets none, the same
+    convention `automated_card._load_fixture_facts` uses for the Premier
+    League: an ambiguous kickoff cannot show a game has not started, and the
+    gate treats a missing one as unconfirmed rather than assuming the best.
+    """
+    if rows.empty:
+        rows = rows.copy()
+        rows["commence_time"] = pd.NA
+        return rows
+    rows = rows.copy()
+    rows["commence_time"] = pd.NA
+    if not {"home_team", "away_team", "commence_time"}.issubset(staged.columns):
+        return rows
+
+    kickoffs: dict[tuple[str, str], str] = {}
+    conflicting: set[tuple[str, str]] = set()
+    for row in staged.itertuples():
+        key = (str(row.home_team).strip().casefold(), str(row.away_team).strip().casefold())
+        value = str(getattr(row, "commence_time", "") or "").strip()
+        if not value:
+            conflicting.add(key)
+            continue
+        seen = kickoffs.get(key)
+        if seen is not None and seen != value:
+            conflicting.add(key)
+            continue
+        kickoffs[key] = value
+    for key in conflicting:
+        kickoffs.pop(key, None)
+
+    keys = rows.apply(
+        lambda row: (
+            str(row["home_team"]).strip().casefold(),
+            str(row["away_team"]).strip().casefold(),
+        ),
+        axis=1,
+    )
+    rows["commence_time"] = keys.map(lambda key: kickoffs.get(key, pd.NA))
+    return rows
 
 
 def collect_division(
@@ -238,6 +292,7 @@ def collect_division(
         provenance = json.loads(provenance_path.read_text(encoding="utf-8"))
 
     rows = snapshot_rows(odds, provenance)
+    rows = _with_commence_time(rows, odds)
     if rows.empty:
         # An empty answer and a failed one are different facts, and this is the
         # empty one: the request worked and the provider had nothing priced.

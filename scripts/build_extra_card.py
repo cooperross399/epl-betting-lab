@@ -43,9 +43,14 @@ def main() -> int:
         return 0
 
     cards = {}
+    # One moment for the whole run. The freshness gate's cutoff and the
+    # record's `generated_at` have to be the same instant, or an audit asking
+    # "did any selection kick off before the card that priced it" compares a
+    # bet to a clock that moved between them.
+    generated_at = pd.Timestamp.now("UTC")
     for key in COMPETITIONS:
         try:
-            cards[key] = build_extra_card(feed, key)
+            cards[key] = build_extra_card(feed, key, now=generated_at)
         except Exception as exc:
             # One competition failing must not cost the other. A pool that
             # could not be built is a missing section, not a broken card.
@@ -61,10 +66,25 @@ def main() -> int:
     # else, so closing-line value could never be computed for any of them —
     # and for the international section, which cannot be backtested at all,
     # that is the only evidence there will ever be.
-    record = save_extra_card_record(cards, output_dir=args.out.parent)
+    record = save_extra_card_record(
+        cards, output_dir=args.out.parent, now=generated_at
+    )
     total = sum(len(c.selections) for c in cards.values())
     print(f"Wrote {args.out} — {total} selection(s) across {len(cards)} competition(s).")
     print(f"Recorded {len(record['selections'])} selection(s) for later scoring.")
+    # Per competition, out loud. A section that silently dropped most of its
+    # fixtures and one that was quoted few look the same in a count of
+    # selections.
+    for key, card in cards.items():
+        if card.gate is None:
+            continue
+        print(
+            f"  {key}: dropped {card.gate.dropped} fixture(s) "
+            f"({len(card.gate.played)} already kicked off, "
+            f"{len(card.gate.unconfirmed)} kickoff unconfirmed, "
+            f"{len(card.gate.held_back)} held back from a later round); "
+            f"{card.gate.rounds} round(s) in the surviving pool."
+        )
     return 0
 
 

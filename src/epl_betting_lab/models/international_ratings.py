@@ -125,7 +125,11 @@ class InternationalPool:
         latest = self.latest_result
         if latest is None:
             return None
-        moment = pd.Timestamp.utcnow().tz_localize(None) if today is None else today
+        # `Timestamp.now("UTC")` rather than the deprecated `utcnow`, then
+        # dropped to naive to match the archive's naive dates.
+        moment = (
+            pd.Timestamp.now("UTC").tz_localize(None) if today is None else today
+        )
         return int((moment.normalize() - latest.normalize()).days)
 
 

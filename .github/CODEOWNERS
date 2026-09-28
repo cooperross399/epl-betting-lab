@@ -1,0 +1,8 @@
+# What allowlists a market, and what checks it. With "Require review from
+# Code Owners" on in the main ruleset, nothing here merges without Cooper's
+# review. The PR gate verifies the paperwork; this is what verifies the human.
+data/manual/staging_provider_policy.json              @cooperross399
+data/outputs/provider_human_acceptance_receipt*        @cooperross399
+data/outputs/archive/provider_acceptance_receipts/     @cooperross399
+.github/workflows/                                     @cooperross399
+.github/CODEOWNERS                                     @cooperross399

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from collections.abc import Mapping
+
 import hashlib
 import json
 import os
@@ -936,3 +938,33 @@ def evaluate_staging_provider_policy(
     result["warnings"] = list(dict.fromkeys(warnings))
     result["allowed"] = not blockers
     return result
+
+
+def _field(entry: Mapping[str, object], name: str) -> str:
+    """A string field, with JSON null (and anything else that is not a
+    string) reading as absent. `str(None).strip()` is "None", which is
+    exactly the kind of value that must not pass as a reviewer's name."""
+    value = entry.get(name)
+    return value.strip() if isinstance(value, str) else ""
+
+
+def entry_is_complete_approval(entry: Mapping[str, object]) -> bool:
+    """Whether one provider allowlist entry is a finished human approval.
+
+    Every condition, not any of them: a status of `allowed` (any case), a
+    reviewer, and the id of the receipt they signed. `required_markets` is
+    only a reviewed decision when this envelope says a human made one.
+
+    This is the one place the question is answered. Reading the market list
+    without reading the envelope is what made `allowlist_status` and
+    `evidence_receipt_id` decorative: a `proposed` entry's markets went live
+    the moment it merged, and setting the status to `revoked` disabled
+    nothing.
+    """
+    if not isinstance(entry, Mapping):
+        return False
+    return (
+        _field(entry, "allowlist_status").lower() == "allowed"
+        and bool(_field(entry, "reviewer_name"))
+        and bool(_field(entry, "evidence_receipt_id"))
+    )

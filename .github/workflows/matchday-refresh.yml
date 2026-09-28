@@ -552,6 +552,23 @@ jobs:
         run: |
           python scripts/run_props_card_refresh.py
 
+      - name: Check no selection kicked off before the card
+        # Asks from the output side what the two kickoff gates are supposed to
+        # have answered. Deliberately not the gates' own counts: a broken gate
+        # reports dropping nothing, which looks exactly like a gate with nothing
+        # to drop. On 2026-09-28 eight already-played fixtures shipped.
+        #
+        # continue-on-error so a stale selection cannot discard a card that was
+        # otherwise built. The count is published on the feed and the summary
+        # says it, which is what makes it visible rather than fatal.
+        if: always()
+        continue-on-error: true
+        env:
+          PYTHONPATH: src
+        run: |
+          set -u
+          python scripts/check_card_freshness.py
+
       - name: Write the card to the run summary
         if: always()
         env:
@@ -748,8 +765,11 @@ jobs:
             --arg trigger "${{ github.event_name }}" \
             --arg run_url "$RUN_URL" \
             --arg card "$([ "$HAVE_CARD" = true ] && echo rendered || echo missing)" \
+            --argjson freshness "$(jq -c '{checked, unchecked, faults, clean}' \
+              data/outputs/card_freshness.json 2>/dev/null \
+              || echo '{"checked":0,"unchecked":0,"faults":0,"clean":null}')" \
             '{date: $date, degraded: $degraded, trigger: $trigger,
-              run_url: $run_url, card: $card}' > card_status.json
+              run_url: $run_url, card: $card, freshness: $freshness}' > card_status.json
           BLOB_MD=$(git hash-object -w card_comment.md)
           BLOB_JSON=$(git hash-object -w card_status.json)
           TREE=$(printf '100644 blob %s\tlatest_card_comment.md\n100644 blob %s\tlatest_status.json' \

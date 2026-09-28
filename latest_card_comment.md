@@ -1,8 +1,10 @@
-## Monday 28 September, 18:17 UTC — scheduled run
+## Monday 28 September, 23:41 UTC — manual run
 
-Already sent today; same selections (0 price move(s)).
+Already sent today; same selections (1 price move(s)).
 
-Provider quota: 1098420 (about 17716 more runs)
+_This run was started by hand, not by the schedule. If you did not start it, someone was testing._
+
+Provider quota: 19540 (about 315 more runs)
 
 Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
 
@@ -33,11 +35,12 @@ National teams, on a pool that shares no information with the club ratings — a
 
 | Match | Market | Selection | Edge | Price | Book | Units |
 |:--|:--|:--|--:|--:|:--|--:|
-| England v Spain | `double_chance` | home_or_draw | +6.9% | -121 | BetRivers | 0.1 |
-| Italy v Belgium | `draw_no_bet` | away | +6.7% | +135 | BetRivers | 0.1 |
-| Wales v Norway | `double_chance` | home_or_draw | +6.3% | +100 | BetRivers | 0.1 |
-| Gibraltar v Andorra | `draw_no_bet` | home | +6.1% | +128 | BetRivers | 0.1 |
+| Scotland v Switzerland | `double_chance` | home_or_draw | +6.8% | -104 | BetRivers | 0.1 |
+| Czech Republic v England | `draw_no_bet` | home | +6.5% | +510 | BetRivers | 0.1 |
+| Germany v Serbia | `double_chance` | draw_or_away | +6.1% | +285 | BetRivers | 0.1 |
+| Latvia v Montenegro | `double_chance` | home_or_draw | +5.9% | -109 | BetRivers | 0.1 |
 
+- 42 fixture(s) dropped as already kicked off: Albania v Belarus, Andorra v Malta, Armenia v Latvia, Armenia v Montenegro, Austria v Israel, Austria v Kosovo, and 36 more.
 - `btts` is not bet here: the model sits about 8 points below the market on the goals level for every fixture, so a selection in that market would be the gap rather than the fixture.
 - `total_2_5` is not bet here: the model sits about 8 points below the market on the goals level for every fixture, so a selection in that market would be the gap rather than the fixture.
 - Ratings include no result after 2026-08-26; the results archive runs about a month behind, so the current international window is not in the fit.
@@ -47,13 +50,11 @@ National teams, on a pool that shares no information with the club ratings — a
 
 Priced on the unified English ratings. Measured out of sample, a club's rating does **not** survive a division change — carrying it across is worse than calling the club average for its new division. What transfers is the division, which the market also knows.
 
-| Match | Market | Selection | Edge | Price | Book | Units |
-|:--|:--|:--|--:|--:|:--|--:|
-| Fleetwood Town v Sheffield United | `total_2_5` | under | +2.7% | +120 | BetRivers | 0.1 |
-| Everton v Wolves | `total_2_5` | under | +2.4% | +102 | BetRivers | 0.1 |
-| Ipswich v Arsenal | `total_2_5` | under | +0.6% | +130 | BetMGM | 0.1 |
+_No selection this run._
 
-- 2 fixture(s) left out because a club has no rating in the pool: Bradford City v Peterborough United, Peterborough United v Barnsley.
+- 10 fixture(s) dropped as already kicked off: Coventry v Aston Villa, Everton v Wolves, Fleetwood Town v Sheffield United, Ipswich v Arsenal, Liverpool v Tottenham, Man City v Norwich, and 4 more.
+- 1 fixture(s) left out because a club has no rating in the pool: Bradford City v Peterborough United.
+- No selection cleared the rules.
 
 ### UEFA Champions League
 
@@ -61,10 +62,10 @@ Priced on the European ratings, where 701 European ties bridge eleven leagues on
 
 | Match | Market | Selection | Edge | Price | Book | Units |
 |:--|:--|:--|--:|--:|:--|--:|
-| Arsenal v Lille | `corners_total_10_5` | under | +7.0% | -121 | BetRivers | 0.1 |
-| Arsenal v Lille | `total_2_5` | under | +6.8% | +148 | BetRivers | 0.1 |
+| Roma v Real Madrid | `corners_total_9_5` | under | +7.6% | -105 | BetRivers | 0.1 |
+| Arsenal v Lille | `total_2_5` | under | +7.0% | +150 | BetRivers | 0.1 |
+| Arsenal v Lille | `corners_total_10_5` | under | +6.9% | -122 | BetRivers | 0.1 |
 | Ath Madrid v Man United | `draw_no_bet` | home | +6.5% | -136 | FanDuel | 0.1 |
-| Inter v Club Brugge | `corners_1x2` | away | +6.5% | +480 | BetRivers | 0.1 |
 
 - 6 fixture(s) left out because a club has no rating in the pool: Bodø/Glimt v Dortmund, LASK v Liverpool, Sabah FK v Slavia Praha, Shakhtar Donetsk v AEK, Viking FK v Bayern Munich, ŠK Slovan Bratislava v Stuttgart.
 
@@ -76,10 +77,11 @@ Same European ratings as the Champions League, and **thinner in both directions*
 |:--|:--|:--|--:|--:|:--|--:|
 | Rennes v OFI Crete | `double_chance` | draw_or_away | +6.4% | +220 | FanDuel | 0.1 |
 | Benfica v Celtic | `btts` | yes | +5.7% | -106 | FanDuel | 0.1 |
-| Anderlecht v Lyon | `double_chance` | home_or_draw | +5.6% | -135 | DraftKings | 0.1 |
-| Anderlecht v Lyon | `draw_no_bet` | home | +5.6% | +144 | FanDuel | 0.1 |
+| Rennes v OFI Crete | `btts` | yes | +5.0% | -112 | FanDuel | 0.1 |
+| St. Gilloise v Sociedad | `btts` | no | +4.8% | +130 | FanDuel | 0.1 |
 
-- 29 fixture(s) left out because a club has no rating in the pool: AC Milan v Benfica, AZ Alkmaar v Hapoel Be'er Sheva, Besiktas JK v Marseille, Bournemouth v SK Sturm Graz, Celta Vigo v Juventus, Celtic v Ferencváros TC, Crystal Palace v Lech Poznań, Dinamo Zagreb v Anderlecht, FC Ararat-Armenia v Sparta Prague, Ferencváros TC v Viktoria Plzeň, Hapoel Be'er Sheva v Dinamo Zagreb, Jagiellonia Białystok v FC Ararat-Armenia, Juventus v NEC Nijmegen, Lech Poznań v Leverkusen, Leverkusen v NK Celje, Lillestrom v Torreense, Marseille v Olympiakos Piraeus, NEC Nijmegen v PFC Levski Sofia, NK Celje v Omonoia FC, OFI Crete v TSG Hoffenheim, Olympiakos Piraeus v Jagiellonia Białystok, Omonoia FC v Celta Vigo, PFC Levski Sofia v Salzburg, SK Sturm Graz v Rennes, Salzburg v AC Milan, Sparta Prague v Lillestrom, TSG Hoffenheim v Besiktas JK, Torreense v Sunderland, Viktoria Plzeň v St. Gilloise.
+- 18 fixture(s) dropped as already kicked off: AC Milan v Benfica, Anderlecht v Lyon, Bayer Leverkusen v NK Celje, Besiktas JK v Marseille, Celtic v Ferencváros TC, Crystal Palace v Lech Poznań, and 12 more.
+- 14 fixture(s) left out because a club has no rating in the pool: AZ Alkmaar v Hapoel Be'er Sheva, Bournemouth v SK Sturm Graz, Celta Vigo v Juventus, Dinamo Zagreb v Anderlecht, Ferencváros TC v Viktoria Plzeň, Jagiellonia Białystok v FC Ararat-Armenia, Lech Poznań v Leverkusen, Marseille v Olympiakos Piraeus, NEC Nijmegen v PFC Levski Sofia, NK Celje v Omonoia FC, Salzburg v AC Milan, Sparta Prague v Lillestrom, TSG Hoffenheim v Besiktas JK, Torreense v Sunderland.
 
 _Fitted but not bet: UEFA Europa Conference League (0 of 18 fixtures rateable). Their results still bridge the countries in the rating pool — which is most of their value — and they return to the card on their own the run they can price something._
 
@@ -102,4 +104,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/36463722825)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/36499017823)

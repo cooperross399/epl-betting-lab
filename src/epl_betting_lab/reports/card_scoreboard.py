@@ -89,11 +89,23 @@ class ScoredSelection:
     stake_units: float
     first_seen: str
     won: bool | None = None
+    #: Stake returned. Neither a win nor a loss, and a BET: it is over, the
+    #: money was down, and it returned nothing. `derived_market_backtest`
+    #: learned this the hard way — dropping pushes removed 33 of 115
+    #: draw-no-bet selections and reported +7.1% for a rule that returned
+    #: +5.1% — and CLAUDE.md records the rule as "**A push is a bet.**"
+    #:
+    #: The live scoreboard kept doing it. A push was counted in `void` and
+    #: left with `won=None`, so `settled` excluded it and it reached neither
+    #: `staked_units` nor `profit_units`: the published ROI divided by a
+    #: denominator with the pushes taken out, which is the inflation the
+    #: backtest was fixed to stop, in its sibling.
+    pushed: bool = False
     profit_units: float = 0.0
 
     @property
     def settled(self) -> bool:
-        return self.won is not None
+        return self.won is not None or self.pushed
 
 
 @dataclass
@@ -389,6 +401,12 @@ def build_scoreboard(
                 board.unsettleable += 1
             else:
                 board.void += 1
+                # A push is a bet: staked, resolved, returned nothing. The
+                # two branches above are NOT — an unsettleable market never
+                # resolves and a missing count is a gap in the data, so
+                # neither belongs in a denominator.
+                entry.pushed = True
+                entry.profit_units = 0.0
             board.scored.append(entry)
             continue
         entry.won = won
@@ -452,9 +470,11 @@ def render_scoreboard(
         ]
         return lines
     wins = sum(1 for s in settled if s.won)
+    pushes = sum(1 for s in settled if s.pushed)
     roi = board.roi
     lines += [
-        f"- Settled: **{len(settled)}** selections, {wins} won",
+        f"- Settled: **{len(settled)}** selections, {wins} won"
+        + (f", {pushes} returned the stake" if pushes else ""),
         f"- Staked: {board.staked_units:.2f} units",
         f"- Profit: **{board.profit_units:+.2f} units**"
         + (f" ({roi:+.1%} on turnover)" if roi is not None else ""),
@@ -480,7 +500,10 @@ def render_scoreboard(
             "cannot be told from the card.",
         )
     if board.void:
-        lines.append(f"- Stake returned (void): {board.void}")
+        lines.append(
+            f"- Stake returned (void): {board.void} — counted in the "
+            "settled total above at zero profit, because a push is a bet"
+        )
     if board.unsettleable:
         lines.append(
             f"- Cannot be settled: **{board.unsettleable}** — no settlement rule, "

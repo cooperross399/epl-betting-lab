@@ -291,7 +291,19 @@ def _bet_down_to(row: pd.Series) -> float | str:
     probability = _float_value(row, "calibrated_model_prob", _float_value(row, "model_prob"))
     if not probability or not 0 < probability < 1:
         return ""
-    floor = min_calibrated_edge(market, selection, MIN_EDGE)
+    if market == "total_2_5":
+        # The anchored rule replaced the lift floor for this market. What
+        # governs whether it is staked is the edge against the POSTED price
+        # — `_confidence_tier` returns Pass/Avoid at edge <= 0 — so the
+        # limit is where that edge reaches zero, which is fair odds.
+        #
+        # Using the lift floor here printed a limit the row's own price had
+        # already passed: at p = 0.58 the card recommended the bet at −130
+        # and said "bet down to −108" in the same row. A reader following
+        # that instruction would decline a bet the card had just made.
+        floor = 0.0
+    else:
+        floor = min_calibrated_edge(market, selection, MIN_EDGE)
     # A stake is only advised while edge >= floor, so implied must not exceed
     # probability - floor. Above that the price has stopped paying for the risk.
     limit = probability - floor

@@ -177,7 +177,14 @@ def main(argv=None) -> int:
         hf, af = f["home"], f["away"]
         pick = g.get("pick")
         res = grade_pick(args.sport, pick, g, hf, af, board.get("teams") or {})
-        if res in picks:
+        # `res` is "win"/"loss"/"push"/"void"/None; `picks` is keyed
+        # "w"/"l"/"p". `if res in picks` tested the grade against the KEYS,
+        # so it was never true and the tally never ran: every results.json
+        # this script has written carries picks 0-0-0, and the public
+        # Results page prints "Model picks 0–0–0" in its headline strip on
+        # the same screen that prints Win beside each individual pick.
+        # The mapping dict on the next line shows what the guard meant.
+        if res in ("win", "loss", "push"):
             picks[{"win": "w", "loss": "l", "push": "p"}[res]] += 1
         row = {"id": g["id"], "home": {"abbr": g["home"]["abbr"], "final": hf}, "away": {"abbr": g["away"]["abbr"], "final": af}, "finish": f["finish"],
                "pick": {**pick, "result": res} if pick and res else None}

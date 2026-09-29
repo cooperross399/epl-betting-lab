@@ -345,10 +345,14 @@ FACTS ABOUT THE MARKETS — state these rather than guessing:
   corners_total_10_5. Cooper approved the scope on PR #224, bound to human
   acceptance receipt odds_api-20260821T114655-0400-20ffa5677988. A card
   carrying all eight markets is the normal card, not a test.
-- Every market has been measured against real historical prices. Not one
-  interval excludes zero. double_chance measured negative; draw_no_bet's
-  positive number rests on thirteen bets; corners_1x2 can never be measured
-  because the provider does not retain it historically.
+- Every market has been measured against real historical prices, at books
+  that can really be bet. Not one interval excludes zero. Three point
+  estimates are negative: corners_total_10_5 −18.82%, total_2_5 −10.8% and
+  double_chance −6.47%. draw_no_bet is +8.24% on 68 bets. Only corners_1x2
+  can never be measured, because the provider does not retain it
+  historically. Every figure here comes from
+  `data/outputs/derived_market_backtest.md`; quote that file, not a
+  remembered number.
 - The measurement recommended enabling nothing new. Cooper reviewed that
   evidence and enabled all eight anyway; both the evidence and the decision
   are on the record, and if he asks whether the picks rest on a demonstrated

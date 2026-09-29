@@ -151,6 +151,10 @@ UNMEASURABLE = "corners_1x2"
 #: time somebody phrases a correction differently.
 RETRACTED = ("Correction, ", "when this was written", "until 2026-")
 
+#: The same markers, plus the forms a prose retraction uses inline.
+RETIRED_MARKERS = RETRACTED + ("This line said", "This paragraph",
+                               "this paragraph read", "This sentence read")
+
 
 def test_cannot_be_profit_backtested_is_only_ever_said_of_one_market() -> None:
     """It was said of the whole card, of BTTS, and of every corner rule.
@@ -299,3 +303,158 @@ def test_the_control_the_retraction_may_still_quote_the_old_claim() -> None:
     assert "thirteen bets" in text, (
         "the retraction should name the figure it retires, not silently drop it"
     )
+
+
+#: Everywhere a figure from these tables gets restated in prose. The bridge
+#: doc holds the SOCCER WATCH routine prompt, under a heading telling the
+#: routine to state these facts rather than guess — so a stale number there
+#: is read aloud to Cooper weekly, and it was outside every earlier scan.
+PROSE = (
+    PROJECT_ROOT / "docs" / "every_market_measured.md",
+    PROJECT_ROOT / "docs" / "what_we_can_and_cannot_claim.md",
+    PROJECT_ROOT / "docs" / "soccer_scheduled_tasks_bridge.md",
+    PROJECT_ROOT / "CLAUDE.md",
+)
+
+
+def _paragraphs(text: str) -> list[str]:
+    return _ascii(text).split("\n\n")
+
+
+def _superseded() -> dict[str, dict[str, float]]:
+    """The harvest figures, read from the section that labels them dead."""
+    measured = _ascii(MEASURED.read_text(encoding="utf-8"))
+    harvest = measured.split("### What the best-price-across-books harvest said")
+    assert len(harvest) == 2, "the superseded table is gone; re-pin this file"
+    # Four columns — Market | Bets | ROI | now — not the five of the main
+    # table, so `_doc_rows` skipped every row of it and the ban below had
+    # nothing to ban.
+    rows: dict[str, dict[str, float]] = {}
+    for line in harvest[1].splitlines():
+        cells = [c.strip() for c in line.split("|")[1:-1]]
+        if len(cells) != 4 or not cells[0].startswith("`"):
+            continue
+        try:
+            rows[cells[0].strip("`")] = {
+                "bets": float(cells[1]),
+                "roi": float(cells[2].rstrip("%")),
+            }
+        except ValueError:
+            continue
+    return rows
+
+
+def test_no_superseded_figure_is_restated_as_current() -> None:
+    """The guard was indifferent between the truth and the retracted figure.
+
+    It pinned `draw_no_bet` spelled one way, and required each NEGATIVE
+    market to be named. `corners_total_9_5` is positive, so no assertion
+    read its prose at all — and the doc went on saying "+14.0% on 33 bets"
+    (the harvest) against a table reading +7.6% on 74, in the paragraph
+    recommending where to spend next. Mutating that prose to "+99.9% on 4
+    bets" also passed.
+
+    Every superseded pair is now read out of the harvest table the file
+    itself labels dead, and banned as a current claim. Exempted by
+    PARAGRAPH, not by file: a retraction must quote what it retracts, and
+    it sits directly beside the sentence it corrects.
+    """
+    superseded = _superseded()
+    current = _generated()
+    offenders = []
+
+    for path in PROSE:
+        for para in _paragraphs(path.read_text(encoding="utf-8")):
+            if para.lstrip().startswith("|"):
+                continue  # the tables themselves, including the harvest one
+            if any(marker in para for marker in RETRACTED):
+                continue
+            for market, row in superseded.items():
+                if market not in current:
+                    continue
+                if row["roi"] == current[market]["roi"]:
+                    continue
+                stale = f"{row['roi']}% on {int(row['bets'])} bets"
+                if stale in para:
+                    offenders.append(f"{path.name}: {stale} ({market})")
+
+    assert not offenders, (
+        "superseded best-price-across-books figures stated as current: "
+        f"{offenders}"
+    )
+
+
+def test_the_control_the_superseded_table_still_holds_those_figures() -> None:
+    """If the harvest table were deleted the ban above would pass vacuously."""
+    superseded = _superseded()
+    current = _generated()
+
+    assert set(superseded) == set(BOUGHT)
+    differing = [m for m in BOUGHT if superseded[m]["roi"] != current[m]["roi"]]
+    assert len(differing) == len(BOUGHT), (
+        "every bought market's harvest figure should differ from its measured "
+        f"one; these match: {set(BOUGHT) - set(differing)}"
+    )
+
+
+def test_the_routine_prompt_quotes_the_generated_report() -> None:
+    """It tells the routine to state these facts rather than guess.
+
+    So the facts have to be the measured ones, and the prompt has to say
+    where they come from — a remembered number is exactly what produced
+    "draw_no_bet's positive number rests on thirteen bets" being read out
+    weekly after the figure was retracted.
+    """
+    bridge = _ascii(
+        (PROJECT_ROOT / "docs" / "soccer_scheduled_tasks_bridge.md").read_text(
+            encoding="utf-8"
+        )
+    )
+    dnb = _generated()["draw_no_bet"]
+
+    assert f"{dnb['roi']}% on {int(dnb['bets'])} bets" in bridge
+    assert "derived_market_backtest.md" in bridge, (
+        "the prompt does not say which file its figures come from"
+    )
+
+
+#: Figures the repo retired that are written in WORDS, so the numeric ban
+#: above cannot see them. Kept as an explicit list rather than a pattern:
+#: each entry is a specific sentence this project got wrong and corrected,
+#: and the list only grows when that happens again.
+RETIRED_SPELLINGS = ("thirteen bets",)
+
+
+def test_no_retired_figure_survives_in_words() -> None:
+    """"+13.0% on 49 bets" and "rests on thirteen bets" are the same claim.
+
+    The superseded-pair ban compares numbers, so reverting a paragraph to
+    the spelled-out form passed it. That form is the one the prose actually
+    uses — CLAUDE.md, the market doc and the SOCCER WATCH routine prompt all
+    carried "rests on thirteen bets", and the routine reads it out weekly.
+    """
+    offenders = []
+    for path in PROSE:
+        for para in _paragraphs(path.read_text(encoding="utf-8")):
+            if any(marker in para for marker in RETIRED_MARKERS):
+                continue
+            for phrase in RETIRED_SPELLINGS:
+                if phrase in para:
+                    offenders.append(f"{path.name}: {phrase!r}")
+
+    assert not offenders, (
+        f"retired figures stated as current: {offenders}"
+    )
+
+
+def test_the_control_the_retractions_still_name_what_they_retired() -> None:
+    """A ban that passes because every mention vanished records nothing."""
+    everywhere = " ".join(
+        _ascii(p.read_text(encoding="utf-8")) for p in PROSE
+    )
+
+    for phrase in RETIRED_SPELLINGS:
+        assert phrase in everywhere, (
+            f"{phrase!r} is gone entirely; the correction should name the "
+            "figure it retired"
+        )

@@ -70,10 +70,16 @@ prices around −400 and the project refuses anything worse than −160, so what
 survives is the underdog side, and that side returned −13.4%. This market is
 being asked to do the opposite of what it is for.
 
-**Corners over 9.5 is the most interesting of them**, at +14.0% on 33 bets, and
+**Corners over 9.5 is the most interesting of them**, at +7.6% on 74 bets, and
 it is also the corner market with the best calibration after shrinkage — 1.6%
 worst-band gap against 9.0% for the 10.5 line. Two independent measurements
-agreeing is worth more than either alone, and it is still 33 bets.
+agreeing is worth more than either alone, and the interval is −12.5% to
++28.6%, which contains zero.
+
+*Correction, 2026-09-29: this paragraph read "+14.0% on 33 bets ... and it is
+still 33 bets" — the best-price-across-books figures, listed as superseded in
+this file's own table above. Nearly double the measured ROI on under half the
+sample, in the paragraph recommending where to spend next.*
 
 **Corners 1X2 cannot be measured at any price.** The provider offers it live
 and does not retain it historically: a probe returned `alternate_totals_corners`
@@ -87,8 +93,15 @@ I previously recommended enabling double chance and draw-no-bet on the grounds
 that they were arithmetic on the 1X2 distribution and therefore trusted no more
 than 1X2 already is. That argument was sound and incomplete: being derived from
 a sound distribution does not make a market profitable once its own prices and
-its own juice limit are applied. Measured, one is negative and the other rests
-on thirteen bets.
+its own juice limit are applied. Measured on bettable books, double chance is
+−6.47% on 52 bets and draw-no-bet +8.24% on 68, both with intervals
+containing zero.
+
+*Correction, 2026-09-29: this read "one is negative and the other rests on
+thirteen bets" — the harvest figures again. Kept as its own paragraph rather
+than appended to the sentence it corrects, so a guard can tell the claim from
+the record of it: a retraction sharing a paragraph with the claim exempts
+both, and a regression pasted back in reads as part of the correction.*
 
 The honest recommendation is now to enable nothing new on this evidence.
 
@@ -98,8 +111,15 @@ Every sample here is one partial season. The cheapest way to make these numbers
 mean something is more of them: about 10 credits per market per fixture, so a
 second season of one market is roughly 4,000 credits. The samples that most
 deserve it are corners over 9.5 and draw-no-bet, in that order — the first
-because two independent measurements agree, the second because its result hangs
-on a subsample small enough to be an accident.
+because two independent measurements agree, the second because its result
+hangs on a subsample small enough to be an accident.
+
+*Correction, 2026-09-29: this recommendation was written when corners over
+9.5 read +14.0% on 33 bets. On bettable books it is +7.6% on 74, an interval
+of −12.5% to +28.6%. The ordering survives — the calibration agreement is
+what it rests on, not the ROI — but the case is weaker than it read, and
+4,000 credits is a fifth of the current monthly allowance rather than a
+rounding error against the old plan.*
 
 None of that changes the arithmetic in `what_we_can_and_cannot_claim.md`:
 separating a true 5% edge from zero takes about 1,537 bets, and no market here

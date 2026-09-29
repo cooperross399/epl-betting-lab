@@ -334,11 +334,29 @@ class TestRestoringAFeedCannotDestroyIt:
 
     def test_the_publish_does_not_restore_a_second_time(self) -> None:
         """Restoring again after collection would overwrite this run's own
-        observations with the branch's older copy."""
+        observations with the branch's older copy.
+
+        The hazard is WRITING the branch's copy over the working file, not
+        reading it. This banned `git show` outright, which was a fine proxy
+        until the step needed to compare its row count against the parent's
+        to refuse a shrinking feed — a read piped to `wc -l` that touches no
+        file. Banning the redirect names the actual hazard.
+        """
         block = self._snapshot().split(
             "- name: Append the observation to the price feed", 1
         )[1].split("- name:", 1)[0]
-        assert "git show" not in block
+
+        for line in block.splitlines():
+            if "git show" not in line or line.strip().startswith("#"):
+                continue
+            # `2>/dev/null` discards stderr and writes nothing, so it is not
+            # the redirect being banned. Only a redirect that lands in a file
+            # can overwrite this run's observations.
+            tail = line.split("git show", 1)[1].replace("2>/dev/null", "")
+            assert ">" not in tail, (
+                f"the publish step writes the branch's copy to a file: {line.strip()}"
+            )
+            assert "data/processed" not in tail, line.strip()
 
 
 class TestAMarketTheProviderDoesNotCarryIsSaidOutLoud:

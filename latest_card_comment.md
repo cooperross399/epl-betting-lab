@@ -1,10 +1,10 @@
-## Monday 28 September, 23:41 UTC — manual run
+## Tuesday 29 September, 00:06 UTC — manual run
 
-Already sent today; same selections (1 price move(s)).
+First card of the day; the selections are unchanged.
 
 _This run was started by hand, not by the schedule. If you did not start it, someone was testing._
 
-Provider quota: 19540 (about 315 more runs)
+Provider quota: 19418 (about 313 more runs)
 
 Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
 
@@ -35,12 +35,12 @@ National teams, on a pool that shares no information with the club ratings — a
 
 | Match | Market | Selection | Edge | Price | Book | Units |
 |:--|:--|:--|--:|--:|:--|--:|
-| Scotland v Switzerland | `double_chance` | home_or_draw | +6.8% | -104 | BetRivers | 0.1 |
-| Czech Republic v England | `draw_no_bet` | home | +6.5% | +510 | BetRivers | 0.1 |
 | Germany v Serbia | `double_chance` | draw_or_away | +6.1% | +285 | BetRivers | 0.1 |
 | Latvia v Montenegro | `double_chance` | home_or_draw | +5.9% | -109 | BetRivers | 0.1 |
+| Germany v Serbia | `draw_no_bet` | away | +5.3% | +600 | BetRivers | 0.1 |
+| Denmark v Portugal | `double_chance` | home_or_draw | +5.0% | -134 | BetRivers | 0.1 |
 
-- 42 fixture(s) dropped as already kicked off: Albania v Belarus, Andorra v Malta, Armenia v Latvia, Armenia v Montenegro, Austria v Israel, Austria v Kosovo, and 36 more.
+- 52 fixture(s) dropped as already kicked off: Albania v Belarus, Andorra v Malta, Armenia v Latvia, Armenia v Montenegro, Austria v Israel, Austria v Kosovo, and 46 more.
 - `btts` is not bet here: the model sits about 8 points below the market on the goals level for every fixture, so a selection in that market would be the gap rather than the fixture.
 - `total_2_5` is not bet here: the model sits about 8 points below the market on the goals level for every fixture, so a selection in that market would be the gap rather than the fixture.
 - Ratings include no result after 2026-08-26; the results archive runs about a month behind, so the current international window is not in the fit.
@@ -104,4 +104,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/36499017823)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/36501074903)

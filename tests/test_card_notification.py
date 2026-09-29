@@ -602,10 +602,12 @@ class TestTheEmailCarriesQuota:
         return build_notification(output_dir=tmp_path, now=NOW)["body"]
 
     def test_the_card_states_the_quota(self, tmp_path: Path) -> None:
-        assert "Provider quota:" in self._body(tmp_path, "5000")
+        assert "Provider quota:" in self._body(tmp_path, "19174")
 
-    def test_it_says_how_many_runs_that_buys(self, tmp_path: Path) -> None:
-        assert "about 80 more runs" in self._body(tmp_path, "5000")
+    def test_it_says_how_long_that_lasts(self, tmp_path: Path) -> None:
+        assert "about 19 days at the observed burn" in self._body(
+            tmp_path, "19174"
+        )
 
     def test_a_low_quota_warns_in_the_email_too(self, tmp_path: Path) -> None:
         assert "Top this up" in self._body(tmp_path, "500")

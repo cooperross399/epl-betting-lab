@@ -272,13 +272,19 @@ commit is needed. Worth knowing precisely, because it would otherwise look like
 the season needs periodic manual commits to stay alive. If the repository is
 ever made public, this becomes real.
 
-**The request allowance is monthly, and the cadence fits inside it.** The plan
-is 20,000 credits per month and it resets monthly. A run costs 62 credits -
-measured from the counter across live runs, not derived from the request
-pattern. Ten triggers a week is roughly 2,700 a month, comfortably inside the
-allowance. The run summary prints what is left and how many runs that buys, and
-says plainly when the schedule is about to stop - that figure is a health
-signal, not a budget to manage.
+**The request allowance is monthly, and the cadence does not currently fit
+inside it.** The plan is 20,000 credits per month and it resets monthly. A
+matchday run costs about 122 credits and a closing snapshot about 500, both
+measured from the counter across live runs rather than derived from the request
+pattern. Fifteen refreshes and seven snapshots a week is about 23,200 a month,
+and the counter itself - which also sees manual and local runs - says about
+1,000 a day, or 30,000 a month.
+
+That is an open decision, not a solved problem: cutting the snapshot to five a
+week brings the scheduled figure inside the allowance at the cost of CLV
+coverage. The run summary prints what is left and how many days of the observed
+burn that buys, and says plainly when the schedule is about to stop. Treat it
+as a date, not a percentage.
 
 **GitHub Actions minutes are not a constraint.** A run takes about 50 seconds,
 so roughly 22 minutes a month against the 2,000 included with a private

@@ -67,12 +67,20 @@ on:
     # email only fires when the selections change — so a duplicate run is
     # invisible unless it has something new to say.
     #
-    # Fifteen runs a week, and with the Closing Snapshot's seven the whole
-    # schedule is about 18,300 requests a month against an allowance of 20,000 —
-    # roughly a quarter of the allowance. Measured from consecutive runs: the counter moves
-    # about 62 a run with every market fetched. Two earlier notes here were
-    # wrong in both directions, 1,050 and 4,600, each computed rather than
-    # measured.
+    # COST. Fifteen runs a week at about 122 requests each, measured from the
+    # counter across consecutive runs. With the Closing Snapshot's seven at
+    # about 500 each, the two scheduled workflows come to about 23,200 a month
+    # against an allowance of 20,000 — over the plan. Cutting the snapshot to
+    # five a week brings it inside; that trades CLV coverage for card
+    # frequency and is an operator's decision, not a scheduling one.
+    #
+    # The counter itself says about 1,000 a day, roughly 30,000 a month, so
+    # even 23,200 is a floor: manual dispatches and runs from a laptop spend
+    # from the same account and no model of this file will ever see them.
+    #
+    # Every figure above is measured. Earlier notes here were wrong in both
+    # directions — 1,050, 4,600, 62 a run, 18,300 a month — each computed
+    # rather than read off the counter.
     # Thursday is the one day with a deadline in front of it. The provider
     # policy refuses a Thursday receipt made after 10:00 America/New_York —
     # 14:00 UTC in summer — so a Thursday run has a window, not just a time,

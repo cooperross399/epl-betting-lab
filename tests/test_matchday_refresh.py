@@ -3,10 +3,21 @@
 from __future__ import annotations
 
 import json
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 
+import pytest
+
 from epl_betting_lab.config import PROJECT_ROOT
+from epl_betting_lab.providers.request_budget import (
+    CLOSING_SNAPSHOTS_PER_WEEK,
+    MATCHDAY_RUNS_PER_WEEK,
+    MONTHLY_REQUEST_ALLOWANCE as PLAN_ALLOWANCE,
+    REQUESTS_PER_CLOSING_SNAPSHOT,
+    REQUESTS_PER_MATCHDAY_RUN,
+    WEEKS_PER_MONTH as BUDGET_WEEKS_PER_MONTH,
+)
 from epl_betting_lab.reports.run_summary import build_run_summary
 
 
@@ -172,28 +183,14 @@ def test_a_duplicate_run_cannot_collide_with_the_first() -> None:
     assert "cancel-in-progress: false" in text
 
 
-#: Measured, not estimated.
+#: The costs come from `request_budget` now, not from a copy kept here.
 #:
-#: 122, from four consecutive live runs on 2026-09-28/29: the published cards
-#: reported 19,540, 19,418, 19,296 and 19,174 remaining — exactly 122 apart each
-#: time.
-#:
-#: It was 62, and 62 was right when it was written. The competitions added since
-#: — the Nations League most recently, at eight markets across 23 fixtures —
-#: roughly doubled the per-run cost, and the constant did not move with them.
-#: This is the second time that has happened; `test_the_stated_credit_cost_
-#: matches_the_schedule` exists because the figure was once four times too low
-#: for the same reason. Re-measure it from the card's own quota line whenever a
-#: competition or a market is added.
-MEASURED_REQUESTS_PER_RUN = 122
-
-#: What one Closing Snapshot costs, measured the same way: the counter fell 460
-#: across a snapshot and one refresh on 2026-09-28, and a refresh is 122.
-#:
-#: Counted here because the budget guard did not count it at all. It compared
-#: only Matchday Refresh crons against the allowance, so a schedule sitting at
-#: 102% of the plan passed — the snapshot is the larger half of the bill.
-MEASURED_REQUESTS_PER_SNAPSHOT = 338
+#: This file held 122 while the card's renderer held 62 for the same quantity,
+#: so correcting the guard left the card telling its reader the account had
+#: five times the runway it had. Two copies of a measured number is the defect,
+#: not the value either copy happens to hold.
+MEASURED_REQUESTS_PER_RUN = REQUESTS_PER_MATCHDAY_RUN
+MEASURED_REQUESTS_PER_SNAPSHOT = REQUESTS_PER_CLOSING_SNAPSHOT
 
 
 def _snapshot_crons() -> int:
@@ -211,39 +208,89 @@ def _monthly_requests() -> float:
         + _snapshot_crons() * MEASURED_REQUESTS_PER_SNAPSHOT
     )
 
+def test_the_cost_model_matches_the_schedule_it_models() -> None:
+    """`request_budget` describes a schedule. It has to be this one.
+
+    The card quotes a runway out of that module without reading a workflow
+    file, which is only honest while the firing counts in it are the real
+    ones. Change a cron and this fails until the module is changed too —
+    the alternative is a runway figure computed from a schedule that has not
+    existed for months, which is how the per-run cost went stale twice.
+    """
+    assert MATCHDAY_RUNS_PER_WEEK == _workflow().count("- cron:"), (
+        "Matchday Refresh fires a different number of times than "
+        "request_budget.MATCHDAY_RUNS_PER_WEEK claims."
+    )
+    assert CLOSING_SNAPSHOTS_PER_WEEK == _snapshot_crons(), (
+        "Closing Snapshot fires a different number of times than "
+        "request_budget.CLOSING_SNAPSHOTS_PER_WEEK claims."
+    )
+
+
+def test_the_shared_cost_model_and_the_guard_agree() -> None:
+    """One arithmetic, not two that drift."""
+    from epl_betting_lab.providers.request_budget import scheduled_monthly_requests
+
+    assert scheduled_monthly_requests() == pytest.approx(_monthly_requests())
+
+
 #: Each extra per-event market costs one request per fixture.
 REQUESTS_PER_EXTRA_MARKET_PER_RUN = 10
 
-#: The plan in use. Raised from 500 once the schedule needed to cover every
-#: matchday and price every market; at 500 those two were mutually exclusive.
-MONTHLY_REQUEST_ALLOWANCE = 20_000
+#: The plan in use, from `request_budget` for the same reason as the costs.
+MONTHLY_REQUEST_ALLOWANCE = PLAN_ALLOWANCE
 #: 10:00 America/New_York in summer, the Thursday automation cutoff.
 THURSDAY_CUTOFF_UTC = 14.0
 #: Midnight America/New_York in summer: earlier is still Wednesday there.
 NEW_YORK_MIDNIGHT_UTC = 4.0
-WEEKS_PER_MONTH = 4.35
+WEEKS_PER_MONTH = BUDGET_WEEKS_PER_MONTH
 
 
-def test_the_cadence_stays_inside_the_request_allowance() -> None:
-    """Every workflow that spends the allowance, not just this one.
+def test_the_scheduled_workflows_alone_are_over_the_allowance() -> None:
+    """Recorded because it is true, not asserted because it is wanted.
 
-    Counting Matchday Refresh alone, the schedule reported 5,124 a month
-    against 20,000 while actually costing 20,375 — over the plan — because the
-    Closing Snapshot draws on the same account and was not in the sum. A budget
-    guard that measures part of the spend is not a budget guard.
+    This guard used to read `<` and pass. It passed on two errors that both
+    pointed the same way: the Closing Snapshot was not in the sum at all, and
+    when it was added it went in at 338 a firing against a measured 481 to 522.
+    338 is the one value in that neighbourhood that made the schedule look
+    affordable.
+
+    Corrected, the two scheduled workflows cost about 23,200 a month against a
+    20,000 plan. Nothing here fixes that, because the fix is a choice between
+    things this repository is not entitled to trade off on its own — how often
+    closing prices are captured for CLV, against how often a card refreshes.
+    Cutting the snapshot from seven firings a week to five brings the scheduled
+    figure inside the allowance.
+
+    If someone makes that choice, this test fails. That is the point: the
+    finding stops being true and the record of it has to be retired by hand,
+    rather than quietly surviving as a stale warning.
     """
-    assert _monthly_requests() < MONTHLY_REQUEST_ALLOWANCE, (
-        f"the schedule costs ~{_monthly_requests():.0f} against an allowance of "
-        f"{MONTHLY_REQUEST_ALLOWANCE:,}"
+    assert _monthly_requests() > MONTHLY_REQUEST_ALLOWANCE, (
+        f"the scheduled workflows now cost ~{_monthly_requests():.0f} against "
+        f"{MONTHLY_REQUEST_ALLOWANCE:,} — if this was resolved deliberately, "
+        "retire this test and restore the `<` guard with the new figures"
     )
 
 
-def test_the_cadence_leaves_room_for_manual_dispatches() -> None:
-    """A schedule that exactly fills the allowance cannot be run by hand."""
-    spare = MONTHLY_REQUEST_ALLOWANCE - _monthly_requests()
-    spare_runs = spare / MEASURED_REQUESTS_PER_RUN
+def test_the_model_is_a_floor_not_the_bill() -> None:
+    """The counter spends more than the model can explain, and always will.
 
-    assert spare_runs >= 5, f"only {spare_runs:.0f} manual run(s) of headroom"
+    A model multiplies named consumers by their costs, so it can only ever
+    miss things: a workflow nobody added to it, a dispatch run by hand, a
+    script run from a laptop. Over 16.45 days the counter fell 16,439 — about
+    a thousand a day — while the scheduled model accounts for roughly 760.
+
+    The card quotes the counter for exactly this reason. This holds the gap
+    open so that nobody closes it by assuming the model is complete.
+    """
+    from epl_betting_lab.providers.request_budget import (
+        observed_monthly_requests,
+        scheduled_monthly_requests,
+    )
+
+    assert observed_monthly_requests() > scheduled_monthly_requests()
+    assert observed_monthly_requests() > MONTHLY_REQUEST_ALLOWANCE
 
 
 def test_the_allowance_covers_every_market_the_project_knows() -> None:
@@ -686,6 +733,41 @@ def test_the_provider_report_is_uploaded_when_a_fetch_fails() -> None:
     assert "data/outputs/staging_input_validation.md" in text
 
 
+def test_the_snapshot_states_its_own_cost_and_states_it_right() -> None:
+    """The matchday comment was guarded and this one was not.
+
+    A mutation putting 80 a run back into `closing-snapshot.yml` — the figure
+    that was there for months, never measured, and wrong by a factor of six —
+    passed the whole suite. The guard covered the file it was written beside
+    and stopped at its edge, which is how the wrong number survived being
+    looked at.
+
+    Both figures below are generated from the constants rather than typed, so
+    the comment cannot drift from them by being rewritten.
+    """
+    text = _unwrapped_comments(
+        (PROJECT_ROOT / ".github" / "workflows" / "closing-snapshot.yml")
+        .read_text(encoding="utf-8")
+    )
+    monthly = (
+        CLOSING_SNAPSHOTS_PER_WEEK
+        * REQUESTS_PER_CLOSING_SNAPSHOT
+        * WEEKS_PER_MONTH
+    )
+
+    assert f"about {REQUESTS_PER_CLOSING_SNAPSHOT} requests a run" in text
+    assert f"roughly {monthly:,.0f} a month" in text
+    assert "five firings a week" in text.lower(), (
+        "the remedy has to be stated where the cost is, or the figure is a "
+        "complaint rather than a decision someone can take"
+    )
+
+
+def _unwrapped_comments(text: str) -> str:
+    """Comment blocks as continuous prose, so a rewrap cannot hide a figure."""
+    return re.sub(r"\n\s*#\s?", " ", text)
+
+
 def test_the_stated_credit_cost_matches_the_schedule() -> None:
     """A cost written in a comment drifts away from the schedule beside it.
 
@@ -693,14 +775,21 @@ def test_the_stated_credit_cost_matches_the_schedule() -> None:
     that predated the extra markets — the sort of error that only matters when
     someone relies on it to decide the cadence is affordable.
     """
-    text = _workflow()
+    # Unwrapped first. The previous version of this test looked for the phrase
+    # in the raw file and a line break fell in the middle of it, so the guard
+    # searched for a string the comment could not contain however correct it
+    # was. Comments get rewrapped; a guard that reads them has to unwrap them.
+    text = _unwrapped_comments(_workflow())
     monthly = _monthly_requests()
 
     # The comment should state a figure within a reasonable distance of truth,
     # and it has to be the WHOLE bill — the snapshot spends the same allowance.
-    assert "18,300 requests a month" in text
-    assert 17_000 < monthly < 19_500, f"schedule now costs ~{monthly:.0f}"
-    assert monthly < MONTHLY_REQUEST_ALLOWANCE
+    assert "about 23,200 a month against an allowance of 20,000" in text
+    assert "five a week" in text, (
+        "the comment has to say what would bring it inside the plan, or the "
+        "figure is a complaint rather than a decision someone can take"
+    )
+    assert 22_000 < monthly < 24_500, f"schedule now costs ~{monthly:.0f}"
 
 
 def _thursday_trigger_hours() -> list[float]:

@@ -9,12 +9,21 @@ the conclusion and it would be easy to read only the numbers.
 | Market | Bets | Profit | ROI | 95% interval on ROI |
 |:-------|-----:|-------:|----:|:--------------------|
 | 1X2 (after the longshot cap) | 500 | +26.7u | +5.3% | −3.4% .. +14.1% |
-| BTTS (291 fixtures, bought) | 51 | +7.7u | +15.0% | −12.4% .. +42.5% |
+| BTTS (bought, bettable books) | 31 | +0.2u | +0.66% | −34.2% .. +34.7% |
+| Every bought market together | 273 | −0.96u | −0.35% | −14.7% .. +15.6% |
 
-Both point estimates are positive. **Neither interval excludes zero.**
+The BTTS row read 51 bets at +15.0% until 2026-09-29. That was the first
+harvest, priced at the best price across books — a maximum over books Cooper
+cannot bet, optimistic by construction, and ruled unusable when the bettable
+filter went in. The generated report dropped those rows and this table did
+not follow, so the most flattering number in the project was also its most
+quoted one.
 
-Nothing here demonstrates an edge. Both results are equally consistent with a
-small real edge and with a model that is breaking even and got a good run.
+One point estimate is positive and small, one is negative. **No interval
+excludes zero.**
+
+Nothing here demonstrates an edge. The results are equally consistent with a
+small real edge and with a model that is breaking even.
 
 ## How much data would settle it
 
@@ -76,11 +85,17 @@ improves the estimate a lot as a reason for suspicion rather than enthusiasm.
 
 ## What cannot be measured at all
 
-Corners, double chance and draw-no-bet have no historical prices anywhere —
-not in Football-Data, and the provider's per-event historical endpoint would
-have to be bought fixture by fixture for each of them as BTTS was. They have
-been checked for calibration only, which rules a model out and cannot rule one
-in.
+`corners_1x2`. The provider does not retain a historical corner match-result
+price and no free archive carries one, so it can be checked for calibration
+only — which rules a model out and cannot rule one in.
+
+That is the whole list now. This section used to name corners, double chance
+and draw-no-bet as well, saying they "have no historical prices anywhere" and
+"have been checked for calibration only". All of them were subsequently
+bought fixture by fixture, exactly as it said BTTS had been, and they are in
+the table above with bets and intervals — measured, and in two cases measured
+negative. A section describing what cannot be known is the last place that
+should lag the thing it describes.
 
 ## The one thing that is certain
 

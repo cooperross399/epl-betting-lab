@@ -44,7 +44,7 @@ def _feed(competition: str = "UCL") -> pd.DataFrame:
             "away_team": ["Inter Milan"] * 4,
             "market": ["btts"] * 4,
             "selection": ["yes"] * 4,
-            "book": ["A", "B", "A", "B"],
+            "book": ["DraftKings", "FanDuel", "DraftKings", "FanDuel"],
             "american_odds": [100, 120, 105, 150],
         }
     )
@@ -100,7 +100,7 @@ class TestOnlyWhatTheRulesPass:
                 "market": ["btts"] * len(statuses),
                 "selection": ["yes"] * len(statuses),
                 "american_odds": [110] * len(statuses),
-                "book": ["X"] * len(statuses),
+                "book": ["DraftKings"] * len(statuses),
                 "status": statuses,
                 "calibrated_edge": edges,
                 "competition": ["UCL"] * len(statuses),
@@ -394,7 +394,7 @@ class TestEveryReturnCarriesTheDeclinedFixtures:
                     "market": "btts",
                     "selection": selection,
                     "american_odds": odds,
-                    "book": "Book",
+                    "book": "DraftKings",
                     "observed_at": "2026-09-22T12:00:00Z",
                     "commence_time": NOT_YET_PLAYED,
                 }
@@ -497,7 +497,7 @@ class TestTheIntroDoesNotGoStaleWhenACompetitionIsAdded:
                         "market": "btts",
                         "selection": "yes",
                         "american_odds": 100,
-                        "book": "Book",
+                        "book": "DraftKings",
                         "calibrated_edge": 0.05,
                         "suggested_units": 0.1,
                     }
@@ -549,7 +549,7 @@ class TestTheInternationalCardSaysHowStaleItsRatingsAre:
                     "market": "btts",
                     "selection": selection,
                     "american_odds": -110,
-                    "book": "Book",
+                    "book": "DraftKings",
                     "observed_at": "2026-09-22T12:00:00Z",
                     "commence_time": NOT_YET_PLAYED,
                 }
@@ -627,7 +627,7 @@ class TestTheInternationalPoolDoesNotBetTheGoalsLevel:
                     "market": market,
                     "selection": selection,
                     "american_odds": 250,
-                    "book": "Book",
+                    "book": "DraftKings",
                     "observed_at": "2026-09-22T12:00:00Z",
                     "commence_time": NOT_YET_PLAYED,
                 }
@@ -660,7 +660,7 @@ class TestTheInternationalPoolDoesNotBetTheGoalsLevel:
                         "market": market,
                         "selection": selection,
                         "american_odds": 120,
-                        "book": "Book",
+                        "book": "DraftKings",
                         "status": "BETTABLE",
                         "calibrated_edge": 0.09,
                         "raw_edge": 0.09,
@@ -886,7 +886,7 @@ class TestTheCardActuallyAppliesTheBaseline:
                         "market": "draw_no_bet",
                         "selection": selection,
                         "american_odds": 120,
-                        "book": "Book",
+                        "book": "DraftKings",
                         "observed_at": "2026-09-22T12:00:00Z",
                     "commence_time": NOT_YET_PLAYED,
                     }

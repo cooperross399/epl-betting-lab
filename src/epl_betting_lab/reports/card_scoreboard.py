@@ -397,7 +397,31 @@ def build_scoreboard(
     return board
 
 
-def render_scoreboard(board: Scoreboard) -> list[str]:
+@dataclass(frozen=True)
+class UncountedSection:
+    """A staked section of the card that this record does not cover.
+
+    The record's exclusion rule is stated BY STAKE — "a lean carries no stake
+    and is not a recommendation" — and that sentence is only true while
+    everything staked is in the denominator. The emailed card appends the
+    Beyond the Premier League table, whose every row carries 0.1u in a Units
+    column, three screen-lengths above a record built from the Premier League
+    archive alone. A reader totalling the card's staked recommendations and
+    the record's `Settled` gets two different numbers and no sentence anywhere
+    explaining the gap.
+
+    Naming the section and its count is the smallest honest fix. Scoring those
+    rows is the real one, and it is not this: nothing settles international
+    fixtures reliably yet.
+    """
+
+    name: str
+    staked: int
+
+
+def render_scoreboard(
+    board: Scoreboard, *, uncounted: Sequence[UncountedSection] = ()
+) -> list[str]:
     """Markdown lines for the run summary and the emailed card."""
     settled = board.settled
     # Every unsettled state, or a record made entirely of one of them
@@ -470,6 +494,19 @@ def render_scoreboard(board: Scoreboard) -> list[str]:
         "only rows the card staked are counted — a lean carries no stake and is "
         "not a recommendation.",
         "",
+    ]
+    for section in uncounted:
+        if section.staked <= 0:
+            continue
+        lines += [
+            f"**{section.name} is not in these numbers.** "
+            f"{section.staked} staked selection(s) from that section are "
+            "recorded and not yet scored — nothing settles them. The rule "
+            "above is stated by stake, so without this line the only way to "
+            "notice would be to total the card by hand.",
+            "",
+        ]
+    lines += [
         "This is the only out-of-sample evidence this project has. It will take "
         "a long time to mean anything: separating a real 5% edge from zero needs "
         "roughly 1,500 settled bets.",

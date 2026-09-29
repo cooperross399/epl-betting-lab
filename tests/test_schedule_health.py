@@ -8,7 +8,10 @@ design cannot otherwise see.
 
 from __future__ import annotations
 
+import json
 import os
+import re
+import shutil
 import subprocess
 import sys
 from datetime import datetime, timedelta, timezone
@@ -125,6 +128,27 @@ class TestTheTwoWatchesAreIndependent:
 
         assert "Check the schedule has not gone quiet" in text
         assert "check_schedule_health.py" in text
+
+    def test_the_matchday_run_does_not_count_itself(self) -> None:
+        """`gh run list` includes the run doing the asking, newest first. Read
+        unfiltered, the previous run was always this one and the gap was
+        always zero, so a missed cron could never be seen from here."""
+        jq = shutil.which("jq")
+        if jq is None:
+            pytest.skip("jq is not installed")
+        text = self._workflow("matchday-refresh.yml")
+        step = text.split("Check the schedule has not gone quiet", 1)[1].split("- name:", 1)[0]
+        expression = re.search(r"--jq '([^']+)'", step).group(1)
+        expression = expression.replace("${{ github.run_id }}", "42")
+        listing = [
+            {"databaseId": 42, "createdAt": "2026-10-03T09:00:00Z"},
+            {"databaseId": 41, "createdAt": "2026-09-27T09:00:00Z"},
+        ]
+        result = subprocess.run(
+            [jq, "-r", expression], input=json.dumps(listing),
+            capture_output=True, text=True, check=True,
+        )
+        assert result.stdout.split() == ["2026-09-27T09:00:00Z"]
 
     def test_a_missed_run_degrades_the_matchday_run(self) -> None:
         """A degraded run always emails, so the news travels."""

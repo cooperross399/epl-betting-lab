@@ -380,7 +380,7 @@ class TestTheCardRecordsTheKickoffItLookedUp:
             ]
         )
         monkeypatch.setattr(
-            card_module, "_pool_for", lambda spec: (history, EUROPEAN_RATINGS, None)
+            card_module, "_pool_for", lambda spec: (history, EUROPEAN_RATINGS, None, None)
         )
         monkeypatch.setattr(
             card_module,

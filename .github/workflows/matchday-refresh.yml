@@ -306,9 +306,14 @@ jobs:
           # the window the next run's streak would count — the streak would
           # keep itself alive forever. The weekly watchdog asks it instead,
           # from a schedule whose own conclusion is not what it is counting.
+          #
+          # Not this run. `gh run list` includes the run doing the asking,
+          # newest first, so the "previous" run was always this one and the
+          # gap was always zero: every run logged "The previous run was 0
+          # hours ago" and a missed cron could never be seen from here.
           previous=$(gh run list --workflow matchday-refresh.yml \
-            --limit 10 --json createdAt \
-            --jq '.[].createdAt' | tr '\n' ' ')
+            --limit 10 --json databaseId,createdAt \
+            --jq '.[] | select(.databaseId != ${{ github.run_id }}) | .createdAt' | tr '\n' ' ')
           python scripts/check_schedule_health.py $previous \
             --append-to run_degraded.txt
 

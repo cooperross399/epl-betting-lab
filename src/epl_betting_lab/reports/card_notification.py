@@ -23,7 +23,7 @@ from pathlib import Path
 from typing import Any
 
 from epl_betting_lab.reports.scheduled_task_bridge import CARD_TASK_JSON
-from epl_betting_lab.config import OUTPUTS_DIR
+from epl_betting_lab.config import AUTOMATED_CARD_JSON, OUTPUTS_DIR, PROPS_CARD_JSON
 from epl_betting_lab.reports.run_summary import _quota_line
 from epl_betting_lab.reports.pick_display import (
     format_american_odds,
@@ -187,7 +187,7 @@ def build_notification(
 ) -> dict[str, Any]:
     outputs = OUTPUTS_DIR if output_dir is None else Path(output_dir)
     card = _read(outputs / CARD_TASK_JSON)
-    generated = _read(outputs / "automated_card.json")
+    generated = _read(outputs / AUTOMATED_CARD_JSON)
     comparison = _read(outputs / "automated_card_comparison.json")
 
     should_post, reason = decide(
@@ -268,7 +268,7 @@ def build_notification(
         # them and a pick cleared their deliberately high bar. No section
         # means props are held by policy or found nothing — never a signal
         # either way.
-        props = _read(outputs / "player_props_card.json")
+        props = _read(outputs / PROPS_CARD_JSON)
         prop_picks = props.get("picks") or []
         if prop_picks:
             lines += ["### Player props", ""]

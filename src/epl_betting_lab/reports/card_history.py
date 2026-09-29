@@ -23,10 +23,10 @@ import json
 from pathlib import Path
 from typing import Any
 
-from epl_betting_lab.config import OUTPUTS_DIR
+from epl_betting_lab.config import AUTOMATED_CARD_JSON, OUTPUTS_DIR
 
 
-CARD_JSON_FILENAME = "automated_card.json"
+CARD_JSON_FILENAME = AUTOMATED_CARD_JSON
 ARCHIVE_ROOT = Path("archive") / "automated_cards"
 COMPARISON_JSON_FILENAME = "automated_card_comparison.json"
 COMPARISON_MARKDOWN_FILENAME = "automated_card_comparison.md"

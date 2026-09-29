@@ -25,7 +25,7 @@ from typing import Any
 
 import pandas as pd
 
-from epl_betting_lab.config import MANUAL_DIR, OUTPUTS_DIR, PROJECT_ROOT
+from epl_betting_lab.config import AUTOMATED_CARD_JSON, MANUAL_DIR, OUTPUTS_DIR, PROJECT_ROOT
 from epl_betting_lab.reports.pick_display import format_market_list
 
 
@@ -144,7 +144,7 @@ def _gather_evidence(output_dir: Path) -> dict[str, Any]:
     discovery, discovery_error = _read_json(
         output_dir / "provider_market_discovery.json"
     )
-    card, card_error = _read_json(output_dir / "automated_card.json")
+    card, card_error = _read_json(output_dir / AUTOMATED_CARD_JSON)
     return {
         "automated_card": card,
         "automated_card_error": card_error,

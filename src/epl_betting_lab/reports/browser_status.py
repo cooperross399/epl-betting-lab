@@ -31,7 +31,7 @@ from epl_betting_lab.reports.scheduled_task_bridge import (
     SETTLE_TASK_JSON,
     WATCH_TASK_JSON,
 )
-from epl_betting_lab.config import OUTPUTS_DIR
+from epl_betting_lab.config import AUTOMATED_CARD_JSON, OUTPUTS_DIR
 from epl_betting_lab.reports.pick_display import (
     NOT_STAKEABLE_LABEL,
     NOT_STAKEABLE_PLAIN_NOTE,
@@ -52,7 +52,7 @@ REPORT_FILES = {
     "model": WATCH_TASK_JSON,
     "card": CARD_TASK_JSON,
     "settle": SETTLE_TASK_JSON,
-    "automated_card": "automated_card.json",
+    "automated_card": AUTOMATED_CARD_JSON,
     "comparison": "automated_card_comparison.json",
 }
 

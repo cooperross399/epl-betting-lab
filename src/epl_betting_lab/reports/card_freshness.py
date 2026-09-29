@@ -27,15 +27,17 @@ from typing import Any, Mapping, Sequence
 
 import pandas as pd
 
+from epl_betting_lab.config import AUTOMATED_CARD_JSON, EXTRA_CARD_JSON as CONFIG_EXTRA_CARD_JSON, PROPS_CARD_JSON as CONFIG_PROPS_CARD_JSON
+
 #: Where each card writes what it recommended.
-CARD_JSON = "automated_card.json"
-EXTRA_CARD_JSON = "extra_competitions_card.json"
+CARD_JSON = AUTOMATED_CARD_JSON
+EXTRA_CARD_JSON = CONFIG_EXTRA_CARD_JSON
 #: Props is the third section the card publishes and it was in no audit's
 #: population, so `faults: 0, clean: true` was a verdict about two thirds of
 #: the card. `_audit` already reads `kickoff_time` or `commence_time` — it was
 #: written expecting this column — and `audit_card_freshness` simply never
 #: opened the file.
-PROPS_CARD_JSON = "player_props_card.json"
+PROPS_CARD_JSON = CONFIG_PROPS_CARD_JSON
 
 #: Sections of the Premier League card that are recommendations. `quarantined`
 #: and `already_started` are deliberately excluded: those are the rows a gate

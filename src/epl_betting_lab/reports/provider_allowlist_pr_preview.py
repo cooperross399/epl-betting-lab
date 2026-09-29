@@ -11,6 +11,7 @@ import re
 import pandas as pd
 
 from epl_betting_lab.config import (
+    PROPS_CARD_JSON,
     OUTPUTS_DIR,
     PROJECT_ROOT,
     STAGING_PROVIDER_POLICY_PATH,
@@ -174,7 +175,7 @@ def _staged_prop_markets_from_evidence(
     binds to. No props evidence, no proposed prop scope.
     """
     outputs = OUTPUTS_DIR if output_dir is None else Path(output_dir)
-    path = outputs / "player_props_card.json"
+    path = outputs / PROPS_CARD_JSON
     if not path.is_file():
         return []
     try:

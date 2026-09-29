@@ -56,7 +56,7 @@ from dataclasses import dataclass, field
 import pandas as pd
 
 from epl_betting_lab.books import bettable_only, is_bettable
-from epl_betting_lab.config import OUTPUTS_DIR, MAX_DEFAULT_JUICE, PROCESSED_DIR
+from epl_betting_lab.config import EXTRA_CARD_JSON, MAX_DEFAULT_JUICE, OUTPUTS_DIR, PROCESSED_DIR
 from epl_betting_lab.data.european_clubs import provider_name
 from epl_betting_lab.data.international_teams import archive_name
 from epl_betting_lab.models.international_ratings import (
@@ -851,7 +851,7 @@ def render_extra_card(cards: dict[str, ExtraCard]) -> list[str]:
 
 #: Where the machine-readable record of this section lives, mirroring
 #: `card_history.ARCHIVE_ROOT` for the Premier League card.
-EXTRA_CARD_JSON_FILENAME = "extra_competitions_card.json"
+EXTRA_CARD_JSON_FILENAME = EXTRA_CARD_JSON
 
 #: What this section is called wherever it is referred to from outside it.
 #: The scoreboard has to name it to say it is not counted, and a second

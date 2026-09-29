@@ -37,6 +37,7 @@ import pandas as pd
 
 from epl_betting_lab.staging_provider_policy import entry_is_complete_approval
 from epl_betting_lab.config import (
+    PROPS_CARD_JSON,
     OUTPUTS_DIR,
     PROCESSED_DIR,
     PROJECT_ROOT,
@@ -57,7 +58,7 @@ from epl_betting_lab.reports.player_props_backtest import (
 )
 
 
-CARD_JSON_FILENAME = "player_props_card.json"
+CARD_JSON_FILENAME = PROPS_CARD_JSON
 CARD_MARKDOWN_FILENAME = "player_props_card.md"
 
 HELD_STATUS = "Held by policy"

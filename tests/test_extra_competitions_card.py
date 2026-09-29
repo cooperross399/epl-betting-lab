@@ -592,7 +592,7 @@ class TestTheInternationalCardSaysHowStaleItsRatingsAre:
         matches = parse_archive("\n".join([header, *rows]) + "\n").matches
         monkeypatch.setattr(
             "epl_betting_lab.reports.extra_competitions_card._pool_for",
-            lambda spec: (matches, international_ratings.INTERNATIONAL_RATINGS, None),
+            lambda spec: (matches, international_ratings.INTERNATIONAL_RATINGS, None, None),
         )
 
         card = build_extra_card(
@@ -743,7 +743,7 @@ class TestTheInternationalPoolDoesNotBetTheGoalsLevel:
         from epl_betting_lab.reports.extra_competitions_card import _pool_for
         from epl_betting_lab.models.poisson_goals import PoissonGoalsModel
 
-        matches, config, baseline = _pool_for(COMPETITIONS["UNL"])
+        matches, config, baseline, _rateable = _pool_for(COMPETITIONS["UNL"])
         model = PoissonGoalsModel().fit(matches, config=config)
         if baseline is not None:
             model.avg_home_goals, model.avg_away_goals = baseline
@@ -789,7 +789,7 @@ class TestTheCardPricesWithTheCompetitionsOwnBaseline:
         )
         from epl_betting_lab.reports.extra_competitions_card import _pool_for
 
-        matches, _config, baseline = _pool_for(COMPETITIONS["UNL"])
+        matches, _config, baseline, _rateable = _pool_for(COMPETITIONS["UNL"])
         fitted = fit_international_model(build_international_pool())
 
         assert baseline is not None, "the card is still pricing off the pooled mean"
@@ -832,7 +832,7 @@ class TestTheCardPricesWithTheCompetitionsOwnBaseline:
         )
 
         for key in ("UCL", "EFLC"):
-            _matches, _config, baseline = _pool_for(COMPETITIONS[key])
+            _matches, _config, baseline, _rateable = _pool_for(COMPETITIONS[key])
             assert baseline is None, f"{key} is being handed an override it should not get"
 
 
@@ -858,7 +858,7 @@ class TestTheCardActuallyAppliesTheBaseline:
         from epl_betting_lab.reports.extra_competitions_card import _pool_for
 
         _stub_international_pool(monkeypatch)
-        matches, config, baseline = _pool_for(COMPETITIONS["UNL"])
+        matches, config, baseline, _rateable = _pool_for(COMPETITIONS["UNL"])
         assert baseline is not None
 
         without = PoissonGoalsModel().fit(matches, config=config)

@@ -60,6 +60,7 @@ from epl_betting_lab.config import OUTPUTS_DIR, MAX_DEFAULT_JUICE, PROCESSED_DIR
 from epl_betting_lab.data.european_clubs import provider_name
 from epl_betting_lab.data.international_teams import archive_name
 from epl_betting_lab.models.international_ratings import (
+    MIN_MATCHES,
     INTERNATIONAL_RATINGS,
     build_international_pool,
     fit_international_model,
@@ -524,12 +525,18 @@ def _pool_for(spec: CompetitionSpec):
         # to guess a venue; this layer has to choose one, and it says so on the
         # card rather than in a comment.
         baseline = fitted.competition_baselines.get((spec.key, False))
-        return pool.matches, INTERNATIONAL_RATINGS, baseline
+        # `rateable` travels with the baseline now. It was computed on the same
+        # line and dropped: this function fitted the whole InternationalModel,
+        # read one number out of it, and returned three values that did not
+        # include the appearance floor. `InternationalModel.expected_goals` is
+        # the only place MIN_MATCHES is enforced and it is called from nowhere
+        # in src/ or scripts/, so the floor was a measurement with no effect.
+        return pool.matches, INTERNATIONAL_RATINGS, baseline, fitted.rateable
     if spec.pool == "english":
         matches = build_pool()
-        return matches, UNIFIED_RATINGS, None
+        return matches, UNIFIED_RATINGS, None, None
     pool = build_european_pool()
-    return pool.matches, EUROPEAN_RATINGS, None
+    return pool.matches, EUROPEAN_RATINGS, None, None
 
 
 #: How many fixture names a drop note prints before summarising. The first
@@ -597,7 +604,7 @@ def build_extra_card(
             gate=gate,
         )
 
-    matches, config, baseline = _pool_for(spec)
+    matches, config, baseline, rateable = _pool_for(spec)
     model = PoissonGoalsModel().fit(matches, config=config)
     if baseline is not None:
         # Every market the card prices comes off the score matrix, which comes
@@ -635,8 +642,23 @@ def build_extra_card(
             )
     records: list[dict[str, object]] = []
     unrated: list[str] = []
+    thin: list[str] = []
     for _, fixture in prices[["home_team", "away_team"]].drop_duplicates().iterrows():
         home, away = fixture["home_team"], fixture["away_team"]
+        # The appearance floor, applied. `PoissonGoalsModel.fit` puts every
+        # team in `matches` into `team_strengths` whatever its appearance
+        # count, so its only guard is "absent from the pool" — a side with
+        # three matches on file is rated off three matches and priced like any
+        # other. MIN_MATCHES exists because under six appearances the model
+        # loses 0.10 log-loss of skill against knowing nothing about the teams.
+        #
+        # Nothing changes today: all 55 UEFA Nations League sides clear twelve
+        # and so do all 41 CONCACAF ones. It binds when a lightly-played
+        # national team reaches a registered competition, or when an archive
+        # spelling splits one side's history in two.
+        if rateable is not None and (home not in rateable or away not in rateable):
+            thin.append(f"{home} v {away}")
+            continue
         try:
             # allow_unrated stays off. A club the pool has never seen is refused,
             # not priced as an average side — the fault that made a League Two
@@ -644,6 +666,16 @@ def build_extra_card(
             records.append(model.match_probabilities(home, away))
         except UnratedTeam:
             unrated.append(f"{home} v {away}")
+    if thin:
+        notes.append(
+            f"{len(thin)} fixture(s) left out because a side has fewer than "
+            f"{MIN_MATCHES} matches in the pool, which is too few to rate: "
+            f"{_some(sorted(thin))}."
+        )
+        # Counted with the refusals in the summary line, because both are
+        # "priced nowhere" and a reader asking why the count is short wants
+        # one number, not two vocabularies for the same outcome.
+        unrated = unrated + thin
     if unrated:
         notes.append(
             f"{len(unrated)} fixture(s) left out because a club has no rating in "

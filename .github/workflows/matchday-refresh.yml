@@ -67,7 +67,8 @@ on:
     # email only fires when the selections change — so a duplicate run is
     # invisible unless it has something new to say.
     #
-    # Nineteen runs a week is about 5,100 credits a month against 20,000 —
+    # Fifteen runs a week, and with the Closing Snapshot's seven the whole
+    # schedule is about 18,300 requests a month against an allowance of 20,000 —
     # roughly a quarter of the allowance. Measured from consecutive runs: the counter moves
     # about 62 a run with every market fetched. Two earlier notes here were
     # wrong in both directions, 1,050 and 4,600, each computed rather than
@@ -121,19 +122,15 @@ on:
     - cron: "0 3 * * 5"
     - cron: "30 4 * * 5"
     - cron: "0 9 * * 5"
-    - cron: "30 10 * * 5"
     - cron: "0 3 * * 6"
     - cron: "30 4 * * 6"
     - cron: "0 9 * * 6"
-    - cron: "30 10 * * 6"
     - cron: "0 3 * * 0"
     - cron: "30 4 * * 0"
     - cron: "0 9 * * 0"
-    - cron: "30 10 * * 0"
     - cron: "0 3 * * 1"
     - cron: "30 4 * * 1"
     - cron: "0 9 * * 1"
-    - cron: "30 10 * * 1"
     # Thursday is the exception, and the tightest day in the schedule. It has no
     # matches, so nothing needs to stay fresh into an evening — but it is fenced
     # on both sides: nothing before 04:00 UTC counts as a Thursday receipt in New

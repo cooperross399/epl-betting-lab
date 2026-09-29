@@ -22,7 +22,7 @@
 </helmet>
 <div data-screen-label="Graphic" style="min-height:100vh;background:#e6e3dc;padding:24px;display:flex;flex-direction:column;align-items:flex-start;gap:16px;overflow-x:auto;">
   <nav style="width:1080px;flex:none;display:flex;justify-content:space-between;font-size:12px;letter-spacing:.1em;text-transform:uppercase;font-weight:500;">
-    <a href="Board.dc.html">← Back to board</a>
+    <a href="Board.dc.html" style="display:inline-flex;align-items:center;min-height:44px;">← Back to board</a>
     <span style="display:flex;gap:22px;"><sc-for list="{{ otherSports }}" as="s" hint-placeholder-count="2"><a href="{{ s.href }}">{{ s.name }} board</a></sc-for><span style="color:#6b6e7a;">1080 × 1350 share card</span></span>
   </nav>
   <div id="share-card" style="width:1080px;height:1350px;flex:none;background:#f4f2ee;color:#14151a;padding:56px 60px;display:flex;flex-direction:column;border-top:10px solid #14151a;">
@@ -72,7 +72,7 @@
     </div>
 
     <div style="display:flex;justify-content:space-between;padding-top:18px;font-family:'IBM Plex Mono',monospace;font-size:13px;color:#6b6e7a;">
-      <span>Scores are model projections · Times {{ tz }} · {{ hostLabel }}</span>
+      <span>Model projections · Times {{ tz }} · {{ hostLabel }} · @mavhightower</span>
       <span>Updated {{ updated }}</span>
     </div>
   </div>
@@ -103,7 +103,13 @@ class Component extends DCLogic {
     const rows = vm.groups.flatMap((d) => d.games).slice(0, 12).map((g) => ({
       time: g.time, tv: g.tv, l: g.sides[0], r: g.sides[1], score: g.score,
       pickLabel: g.pick.kind === "bet" || g.pick.kind === "lean" ? g.pick.label : g.pick.kind === "pass" ? "Pass" : g.pick.label.split(" · ")[0],
-      pickSub: g.pick.kind === "bet" || g.pick.kind === "lean" ? g.pick.sub.split(" · ").slice(0, 2).concat([`edge ${g.pick.edge}`]).join(" · ") : g.pick.kind === "pass" ? `${g.pick.label} · edge ${g.pick.edge}` : "Nothing clears the bar",
+      // A game with no pick carries the adapter's own reason in its label:
+      // "Exhibition · model abstains", "Not priced · ...", the allowlist or
+      // the edge bar. This printed "Nothing clears the bar" under every one
+      // of them, a model judgement the adapter goes out of its way not to
+      // assert for an exhibition, an empty allowlist or an unpriced game.
+      // Pinned by tests/test_site_never_calls_an_unpriced_game_a_pass.py.
+      pickSub: g.pick.kind === "bet" || g.pick.kind === "lean" ? g.pick.sub.split(" · ").slice(0, 2).concat([`edge ${g.pick.edge}`]).join(" · ") : g.pick.kind === "pass" ? `${g.pick.label} · edge ${g.pick.edge}` : g.pick.label.split(" · ").slice(1).join(" · "),
       pickBg: g.pick.kind === "bet" ? "#14151a" : "#f4f2ee", pickFg: g.pick.kind === "bet" ? "#f4f2ee" : "#6b6e7a",
     }));
     const epl = vm.sport.key === "epl";

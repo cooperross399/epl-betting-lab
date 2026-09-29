@@ -11,49 +11,67 @@
 <helmet>
   <title>Results — Maverick Hightower</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Yesterday's projections against the final scores. Settled from what was published before the games, never recomputed.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Maverick Hightower">
+  <meta property="og:title" content="Results — Maverick Hightower">
+  <meta property="og:description" content="Yesterday's projections against the final scores. Settled from what was published before the games, never recomputed.">
+  <meta property="og:image" content="https://maverickhightower.com/share.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@mavhightower">
+  <meta name="twitter:title" content="Results — Maverick Hightower">
+  <meta name="twitter:description" content="Yesterday's projections against the final scores. Settled from what was published before the games, never recomputed.">
+  <meta name="twitter:image" content="https://maverickhightower.com/share.png">
+  <meta name="theme-color" content="#14151a">
   <link rel="preconnect" href="https://fonts.googleapis.com">
+
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     html, body { margin: 0; padding: 0; background: #f4f2ee; color: #14151a; font-family: "IBM Plex Sans", Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
     * { box-sizing: border-box; }
     a { color: #14151a; text-decoration: none; }
     a:hover { color: #2a2d3a; text-decoration: underline; text-underline-offset: 3px; }
+    a:focus-visible { outline: 3px solid #14151a; outline-offset: 3px; }
+    .skip { position: absolute; left: 12px; top: -60px; background: #14151a; color: #f4f2ee; padding: 10px 14px; z-index: 10; font-size: 14px; }
+    .skip:focus { top: 12px; }
   </style>
 </helmet>
 <div data-screen-label="Results" style="min-height:100vh;background:#f4f2ee;color:#14151a;">
+  <a href="#main" class="skip">Skip to results</a>
   <div style="max-width:1240px;margin:0 auto;padding:0 clamp(16px,3vw,24px) 80px;">
-    <header style="border-top:4px solid #14151a;border-bottom:1px solid #14151a;padding:14px 0 12px;display:flex;align-items:center;justify-content:space-between;gap:12px 16px;flex-wrap:wrap;">
-      <a href="https://maverickhightower.com/" style="display:flex;align-items:center;gap:12px;">
-        <span style="width:36px;height:36px;background:#14151a;color:#f4f2ee;display:grid;place-items:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:18px;letter-spacing:.04em;">MH</span>
+    <header style="border-top:4px solid #14151a;border-bottom:1px solid #14151a;padding:10px 0 8px;display:flex;align-items:center;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;">
+      <a href="https://maverickhightower.com/" aria-label="Maverick Hightower home" style="display:flex;align-items:center;gap:12px;min-height:44px;">
+        <span aria-hidden="true" style="width:36px;height:36px;background:#14151a;color:#f4f2ee;display:grid;place-items:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:18px;letter-spacing:.04em;">MH</span>
         <span style="display:flex;flex-direction:column;line-height:1.1;">
           <span style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#6b6e7a;">Maverick Hightower</span>
           <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;letter-spacing:.02em;text-transform:uppercase;">{{ sportLong }}</span>
         </span>
       </a>
-      <nav style="display:flex;gap:14px 22px;font-size:13px;letter-spacing:.1em;text-transform:uppercase;font-weight:500;flex-wrap:wrap;">
-        <a href="Board.dc.html">Board</a>
-        <a href="Results.dc.html" style="border-bottom:2px solid #14151a;padding-bottom:2px;">Results</a>
-        <a href="Archive.dc.html">Archive</a>
-        <a href="Graphic.dc.html">Graphic</a>
+      <nav aria-label="Site" style="display:flex;gap:0 18px;font-size:13px;letter-spacing:.1em;text-transform:uppercase;font-weight:500;flex-wrap:wrap;">
+        <a href="Board.dc.html" style="display:inline-flex;align-items:center;min-height:44px;">Board</a>
+        <a href="Results.dc.html" aria-current="page" style="display:inline-flex;align-items:center;min-height:44px;box-shadow:inset 0 -2px 0 #14151a;">Results</a>
+        <a href="Archive.dc.html" style="display:inline-flex;align-items:center;min-height:44px;">Archive</a>
+        <a href="https://maverickhightower.com/about.html" style="display:inline-flex;align-items:center;min-height:44px;">About</a>
         <sc-for list="{{ otherSports }}" as="s" hint-placeholder-count="2"><a href="{{ s.href }}" style="{{ s.style }}">{{ s.name }}</a></sc-for>
       </nav>
     </header>
+
 
     <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:24px 40px;align-items:end;padding:40px 0 28px;border-bottom:1px solid #14151a;">
       <div style="min-width:0;grid-column:1 / -1;">
         <div style="font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#6b6e7a;margin-bottom:10px;">{{ kicker }}</div>
         <h1 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:clamp(56px,9vw,112px);line-height:.9;letter-spacing:-.01em;text-transform:uppercase;">Settled.</h1>
-        <p style="margin:18px 0 0;max-width:560px;font-size:17px;line-height:1.5;color:#2a2d3a;text-wrap:pretty;">Every projection from the last board against the final score. Hits and misses, nothing hidden, nothing recomputed after the fact.</p>
+        <p style="margin:18px 0 0;max-width:560px;font-size:17px;line-height:1.5;color:#2a2d3a;text-wrap:pretty;">Yesterday's board against the final scores.</p>
       </div>
       <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.7;color:#6b6e7a;display:flex;flex-wrap:wrap;gap:4px 24px;align-items:baseline;">
         <span style="text-transform:uppercase;letter-spacing:.1em;">Settled</span><span style="color:#14151a;">{{ updated }}</span>
-        <sc-if value="{{ stale }}" hint-placeholder-val="{{ false }}"><span style="background:#b0341f;color:#f4f2ee;padding:2px 8px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;font-size:11px;">{{ staleLabel }}</span></sc-if>
+        <sc-if value="{{ stale }}" hint-placeholder-val="{{ false }}"><span role="status" style="background:#b0341f;color:#f4f2ee;padding:2px 8px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;font-size:12px;">{{ staleLabel }}</span></sc-if>
       </div>
     </section>
 
     <sc-if value="{{ hasFeedNotice }}" hint-placeholder-val="{{ false }}">
       <div style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:20px;align-items:start;padding:18px 0;border-bottom:1px solid #14151a;">
-        <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase;border:1px solid #14151a;padding:4px 9px;">Sample data</span>
+        <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase;border:1px solid #14151a;padding:4px 9px;">Sample</span>
         <p style="margin:0;font-size:15px;line-height:1.5;color:#2a2d3a;max-width:760px;">{{ feedNotice }}</p>
       </div>
     </sc-if>
@@ -61,13 +79,13 @@
     <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:0 24px;border-bottom:1px solid #14151a;">
       <sc-for list="{{ strip }}" as="c" hint-placeholder-count="3">
         <div style="padding:22px 0;border-bottom:1px solid #d6d3cc;">
-          <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#6b6e7a;">{{ c.label }}</div>
+          <div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#6b6e7a;">{{ c.label }}</div>
           <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:44px;line-height:1;margin-top:8px;">{{ c.value }}</div>
         </div>
       </sc-for>
     </section>
 
-    <section style="padding-top:44px;">
+    <section id="main" style="padding-top:44px;">
       <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;border-bottom:3px solid #14151a;padding-bottom:10px;">
         <h2 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:34px;line-height:1;text-transform:uppercase;letter-spacing:.01em;">{{ dateShort }}</h2>
         <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#6b6e7a;">{{ count }} settled · {{ vsLabel }}</div>
@@ -79,22 +97,22 @@
         </div>
       </sc-if>
       <sc-for list="{{ games }}" as="g" hint-placeholder-count="4">
-        <article style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:18px 28px;padding:20px 0;border-bottom:1px solid #d6d3cc;align-items:start;">
+        <article aria-label="{{ g.ariaLabel }}" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:18px 28px;padding:20px 0;border-bottom:1px solid #d6d3cc;align-items:start;">
           <div style="display:flex;flex-direction:column;gap:10px;min-width:0;">
             <sc-for list="{{ g.sides }}" as="s" hint-placeholder-count="2">
               <div style="display:flex;align-items:center;gap:12px;">
-                <span style="width:38px;height:38px;border-radius:50%;flex:none;display:grid;place-items:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:13px;background:{{ s.color }};color:{{ s.fg }};">{{ s.abbr }}</span>
+                <span aria-hidden="true" style="width:38px;height:38px;border-radius:50%;flex:none;display:grid;place-items:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:13px;background:{{ s.color }};color:{{ s.fg }};">{{ s.abbr }}</span>
                 <span style="flex:1;font-weight:600;font-size:16px;min-width:0;">{{ s.name }}</span>
-                <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#6b6e7a;text-align:right;">proj {{ s.proj }}</span>
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#6b6e7a;text-align:right;"><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);">projected </span>proj {{ s.proj }}</span>
                 <span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:34px;line-height:1;width:44px;text-align:right;color:{{ s.scoreColor }};">{{ s.final }}</span>
               </div>
             </sc-for>
-            <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#6b6e7a;">Final{{ g.finishLabel }}</div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#6b6e7a;">Final{{ g.finishLabel }}</div>
           </div>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:14px 18px;">
             <sc-for list="{{ g.cells }}" as="c" hint-placeholder-count="2">
               <div style="border-top:2px solid #14151a;padding-top:8px;">
-                <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#6b6e7a;">{{ c.title }}</div>
+                <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#6b6e7a;">{{ c.title }}</div>
                 <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;line-height:1.7;margin-top:6px;">
                   <sc-for list="{{ c.rows }}" as="r" hint-placeholder-count="2">
                     <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;"><span style="color:#6b6e7a;">{{ r.label }}</span><span style="margin-left:auto;font-weight:{{ r.weight }};color:{{ r.color }};">{{ r.value }}</span></div>
@@ -104,11 +122,11 @@
             </sc-for>
             <sc-if value="{{ g.hasPick }}" hint-placeholder-val="{{ true }}">
               <div style="border-top:2px solid #14151a;padding-top:8px;">
-                <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#6b6e7a;">Model pick</div>
+                <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#6b6e7a;">Model pick</div>
                 <div style="margin-top:8px;display:flex;align-items:stretch;">
                   <div style="flex:1;background:#14151a;color:#f4f2ee;padding:8px 10px;min-width:0;">
                     <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:20px;line-height:1;text-transform:uppercase;">{{ g.pick.label }}</div>
-                    <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;margin-top:5px;color:#c9c7c0;">{{ g.pick.market }}</div>
+                    <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;margin-top:5px;color:#d6d3cc;">{{ g.pick.market }}</div>
                   </div>
                   <div style="width:64px;flex:none;display:grid;place-items:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:18px;letter-spacing:.06em;text-transform:uppercase;border:2px solid #14151a;color:{{ g.pick.color }};background:{{ g.pick.bg }};">{{ g.pick.result }}</div>
                 </div>
@@ -119,9 +137,14 @@
       </sc-for>
     </section>
 
-    <footer style="margin-top:56px;border-top:1px solid #14151a;padding-top:16px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#6b6e7a;">
+
+    <footer style="margin-top:56px;border-top:1px solid #14151a;padding-top:12px;display:flex;justify-content:space-between;align-items:center;gap:8px 16px;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;font-size:13px;color:#6b6e7a;">
       <span>© 2026 Maverick Hightower</span>
-      <a href="Archive.dc.html">Every past board, as published →</a>
+      <span style="display:flex;gap:0 20px;flex-wrap:wrap;">
+        <a href="Archive.dc.html" style="display:inline-flex;align-items:center;min-height:44px;">Every past board →</a>
+        <a href="https://maverickhightower.com/about.html" style="display:inline-flex;align-items:center;min-height:44px;">How results are graded</a>
+        <a href="https://x.com/mavhightower" style="display:inline-flex;align-items:center;min-height:44px;">@mavhightower</a>
+      </span>
     </footer>
   </div>
 </div>
@@ -138,9 +161,9 @@ class Component extends DCLogic {
     const cfg = S.SPORTS[sport];
     let data, feedNotice = null;
     try { const r = await fetch(deployed ? "./data/results.json" : cfg.sampleResults, { cache: "no-store" }); if (!r.ok) throw new Error(`HTTP ${r.status}`); data = await r.json(); }
-    catch (e) { data = await fetch(cfg.sampleResults).then((r) => r.json()); feedNotice = `The live feed is not reachable (${e.message}). Showing sample results.`; }
+    catch (e) { data = await fetch(cfg.sampleResults).then((r) => r.json()); feedNotice = "Live feed unreachable. These are sample results."; }
     const vm = S.ADAPTERS[sport].results(data);
-    vm.otherSports = S.ORDER.filter((k) => k !== sport).map((k, i) => ({ name: S.SPORTS[k].name, href: S.SPORTS[k].host, style: i === 0 ? "margin-left:10px;padding-left:22px;border-left:1px solid #d6d3cc;" : "" }));
+    vm.otherSports = S.ORDER.filter((k) => k !== sport).map((k, i) => ({ name: S.SPORTS[k].name, href: S.SPORTS[k].host, style: `display:inline-flex;align-items:center;min-height:44px;${i === 0 ? "margin-left:6px;padding-left:18px;border-left:1px solid #d6d3cc;" : ""}` }));
     this.setState({ vm, feedNotice });
   }
   componentDidMount() { this.load(); }
@@ -148,7 +171,7 @@ class Component extends DCLogic {
   renderVals() {
     const vm = this.state.vm;
     if (!vm) return { games: [], strip: [], otherSports: [] };
-    const games = vm.games.map((g) => ({ ...g, cells: g.cells.map((c) => ({ ...c, rows: c.rows.map((r) => ({ ...r, weight: r.bold ? 600 : 400, color: r.bold && r.value === "Miss" ? "#b0341f" : "#14151a" })) })) }));
+    const games = vm.games.map((g) => ({ ...g, ariaLabel: `${g.sides[0].name} ${g.sides[0].final}, ${g.sides[1].name} ${g.sides[1].final}`, cells: g.cells.map((c) => ({ ...c, rows: c.rows.map((r) => ({ ...r, weight: r.bold ? 600 : 400, color: r.bold && r.value === "Miss" ? "#b0341f" : "#14151a" })) })) }));
     return { ...vm, games, sportLong: vm.sport.longName, hasFeedNotice: !!this.state.feedNotice, feedNotice: this.state.feedNotice || "" };
   }
 }

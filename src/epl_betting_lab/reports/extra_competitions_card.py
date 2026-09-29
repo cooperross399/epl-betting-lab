@@ -8,9 +8,9 @@ where it cannot be mistaken for a recommendation to bet more of it.
 
 Every EFL Cup club is English and has played in E0-E3, so the unified English
 pool rates all of them. Champions League clubs are rated on the European pool,
-where 701 European ties bridge eleven domestic leagues onto one scale — a scale
-that beats a naive league-average prior by 8.5% on held-out ties, interval
--0.161 to -0.092.
+where 868 European ties bridge eleven domestic leagues onto one scale — a scale
+that beats a naive league-average prior by 7.45% on held-out ties, interval
+-0.1387 to -0.0798.
 
 **Neither has been shown to beat a price, and one has been shown not to.**
 
@@ -30,7 +30,7 @@ needs the closing-line record the price collection is accumulating.
 clubs it will find value on.** Fitted on everything, PSV Eindhoven comes out
 second by attack, with Sporting, Benfica, Fenerbahce, Galatasaray and Celtic
 above Real Madrid and Manchester City. A club that dominates a weak domestic
-league scores heavily against weak opposition and 701 ties correct that only
+league scores heavily against weak opposition and 868 ties correct that only
 partly. A selection on one of those clubs should be read with that in mind.
 
 **Prices come from the observation feed, not the staging bundle.** The provider
@@ -64,6 +64,9 @@ from epl_betting_lab.models.international_ratings import (
     fit_international_model,
 )
 from epl_betting_lab.models.european_ratings import (
+    BRIDGE_IMPROVEMENT_PCT,
+    BRIDGE_TIES,
+    CHAMPIONS_LEAGUE_TIES,
     EUROPEAN_RATINGS,
     build_european_pool,
 )
@@ -174,11 +177,11 @@ COMPETITIONS: dict[str, CompetitionSpec] = {
         name="UEFA Champions League",
         pool="european",
         note=(
-            "Priced on the European ratings, where 701 European ties bridge "
-            "eleven leagues onto one scale — 8.5% better than a league-average "
-            "prior on held-out ties. That scale **overrates clubs who dominate "
-            "weak leagues**, and those are the clubs it will most often call "
-            "value."
+            f"Priced on the European ratings, where {BRIDGE_TIES} European "
+            "ties bridge eleven leagues onto one scale — "
+            f"{BRIDGE_IMPROVEMENT_PCT}% better than a league-average prior on "
+            "held-out ties. That scale **overrates clubs who dominate weak "
+            "leagues**, and those are the clubs it will most often call value."
         ),
     ),
     "UEL": CompetitionSpec(
@@ -197,11 +200,13 @@ COMPETITIONS: dict[str, CompetitionSpec] = {
         name="UEFA Europa Conference League",
         pool="european",
         note=(
-            "The thinnest of the three. Only 24 Conference League ties survive "
-            "club resolution across five seasons, against 701 for the Champions "
-            "League, so this competition contributes almost nothing to the scale "
-            "it is priced on and most of its fixtures involve a club the pool "
-            "cannot rate at all."
+            "The thinnest of the three. Only 24 Conference League ties "
+            "survive club resolution across five seasons, against "
+            f"{CHAMPIONS_LEAGUE_TIES} for the Champions League — both resolved "
+            "counts, and together with the Europa League's 143 they are the "
+            f"{BRIDGE_TIES}-tie bridge. So this competition contributes almost "
+            "nothing to the scale it is priced on, and most of its fixtures "
+            "involve a club the pool cannot rate at all."
         ),
     ),
 }

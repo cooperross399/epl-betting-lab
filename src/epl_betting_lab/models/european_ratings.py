@@ -41,7 +41,7 @@ question and needs the closing-line record the price collection is accumulating.
 PSV Eindhoven comes out second by attack, with Sporting, Benfica, Fenerbahce,
 Galatasaray and Celtic all above Real Madrid and Manchester City. That is not a
 credible European ranking: a club that dominates a weak domestic league scores
-heavily against weak opposition, and 701 ties against 18,054 domestic matches
+heavily against weak opposition, and 868 ties against 18,054 domestic matches
 correct it only partly — most of a club's matches are domestic, so most of its
 rating is. The scale carries club-level information out of sample, which is what
 the test measures, and it is not a power ranking. Anything priced on it should
@@ -63,6 +63,34 @@ import pandas as pd
 
 from epl_betting_lab.config import COUNTRY_TO_LEAGUE
 from epl_betting_lab.data.european_results import COMPETITION_FILES, load_european_ties
+
+
+#: The measured figures, in one place, because four copies of them drifted.
+#:
+#: 701 is the Champions League's OWN resolved share of the bridge, and it was
+#: the whole bridge when the Champions League was the only competition on it.
+#: Adding the Europa League and the Conference League took the bridge to 868 —
+#: 701 + 143 + 24 — and four restatements of "701 European ties bridge eleven
+#: leagues" did not move with it, including one inside the report generator,
+#: which printed a computed 868 in its own summary line and a typed 701 twelve
+#: paragraphs later. The same document disagreed with itself.
+#:
+#: Every value here is read off `data/outputs/european_ratings.md`, which is
+#: generated. `test_the_card_quotes_the_current_measurement` reads that file
+#: and fails if these drift from it, so regenerating the report is what
+#: updates them. They are not constants of nature: the tie count grows with
+#: every European matchweek.
+BRIDGE_TIES = 868
+#: The bridge's three contributors, resolved — both clubs in a rated domestic
+#: pool. They sum to the bridge, and `test_the_shares_sum_to_the_bridge`
+#: checks that they do. That one assertion is what the original defect failed:
+#: 701 was quoted as the bridge for months while 701 + 143 + 24 = 868.
+CHAMPIONS_LEAGUE_TIES = 701
+EUROPA_LEAGUE_TIES = 143
+CONFERENCE_LEAGUE_TIES = 24
+BRIDGE_DOMESTIC_MATCHES = 18_054
+BRIDGE_IMPROVEMENT_PCT = 7.45
+BRIDGE_INTERVAL = (-0.1387, -0.0798)
 from epl_betting_lab.data.fetch_football_data import processed_path_for
 from epl_betting_lab.models.poisson_goals import PoissonGoalsModel, RatingConfig
 

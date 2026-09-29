@@ -13,12 +13,29 @@ from pathlib import Path
 import pandas as pd
 
 from epl_betting_lab.config import COUNTRY_TO_LEAGUE, EUROPEAN_LEAGUE_NAMES, OUTPUTS_DIR
+from epl_betting_lab.data.european_results import load_european_ties
 from epl_betting_lab.models.european_ratings import (
     EUROPEAN_RATINGS,
     build_european_pool,
     measure_bridge,
 )
 from epl_betting_lab.models.poisson_goals import PoissonGoalsModel
+
+
+def _resolved_by_competition(pool) -> list[tuple[str, int]]:
+    """Each competition's resolved share of the bridge, largest first.
+
+    The summary above printed one number for the bridge, so the Champions
+    League's own share — which was the whole bridge before the other two were
+    added — went on being quoted as the bridge after it no longer was. A
+    breakdown makes the difference visible in the document that measures it.
+    """
+    ties = load_european_ties().matches
+    resolved = ties[
+        ties["home_team"].isin(pool.country_of) & ties["away_team"].isin(pool.country_of)
+    ]
+    counts = resolved["competition"].value_counts()
+    return [(str(name), int(counts[name])) for name in counts.index]
 
 
 def main() -> int:
@@ -57,6 +74,13 @@ def main() -> int:
         f"**{pool.domestic:,} domestic matches** across {len(set(COUNTRY_TO_LEAGUE.values()))} "
         f"leagues, **{pool.ties:,} European ties** linking them, "
         f"{len(strengths)} clubs rated.",
+        "",
+        # Printed per competition because the total alone let the Champions
+        # League's own share be quoted as the whole bridge for months.
+        "By competition, counting only ties where both clubs are in a rated "
+        "domestic pool: " + ", ".join(
+            f"**{name} {count:,}**" for name, count in _resolved_by_competition(pool)
+        ) + ".",
         "",
         "## Does the bridged scale carry club-level information?",
         "",
@@ -126,7 +150,8 @@ def main() -> int:
         "Fenerbahce, Galatasaray and Celtic all sit above Real Madrid and "
         "Manchester City, which is not a credible European power ranking. A club "
         "that dominates a weak domestic league scores heavily against weak "
-        "opposition, and the 701 European ties correct that only partly: most of "
+        f"opposition, and the {pool.ties:,} European ties correct that only "
+        "partly: most of "
         "a club's matches are domestic, so most of its rating is. The bridge is "
         "strong enough to carry club-level information out of sample — that is "
         "what the test above measures — and not strong enough to make the "

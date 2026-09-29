@@ -1,10 +1,10 @@
-## Tuesday 29 September, 00:28 UTC — manual run
+## Tuesday 29 September, 12:21 UTC — manual run
 
 Already sent today; same selections (0 price move(s)).
 
 _This run was started by hand, not by the schedule. If you did not start it, someone was testing._
 
-Provider quota: 19174 (about 309 more runs)
+Provider quota: 19052 (about 19 days at the observed burn)
 
 Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
 
@@ -104,4 +104,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/36503021846)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/36567046043)

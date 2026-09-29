@@ -1,10 +1,10 @@
-## Tuesday 29 September, 14:31 UTC — manual run
+## Tuesday 29 September, 15:45 UTC — manual run
 
-Already sent today; same selections (0 price move(s)).
+Selections changed: 1 added, 1 dropped.
 
 _This run was started by hand, not by the schedule. If you did not start it, someone was testing._
 
-Provider quota: 18930 (about 18 days at the observed burn)
+Provider quota: 18642 (about 18 days at the observed burn)
 
 Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
 
@@ -23,6 +23,11 @@ Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_tot
 ### Leans
 
 _None._
+
+### What changed
+
+- **Added:** Sunderland v Brighton total_2_5 over
+- **Dropped:** Crystal Palace v Nott'm Forest btts yes
 
 
 ## Beyond the Premier League
@@ -106,4 +111,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/36582813848)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/36592103698)

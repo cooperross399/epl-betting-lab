@@ -247,7 +247,11 @@ class TestTheDisclosureActuallyReachesTheCard:
     def test_the_email_passes_the_uncounted_section(
         self, tmp_path: Path, monkeypatch
     ) -> None:
-        from tests.test_card_notification import NOW, _comparison, _write
+        # By basename, not `tests.…`: there is no `tests` package, so the
+        # dotted form imports locally (rootdir on the path) and fails in
+        # CI with ModuleNotFoundError. pytest's prepend import mode puts
+        # the test directory on sys.path, which is what makes this work.
+        from test_card_notification import NOW, _comparison, _write
         from epl_betting_lab.reports.card_notification import build_notification
 
         outputs = self._outputs(tmp_path)

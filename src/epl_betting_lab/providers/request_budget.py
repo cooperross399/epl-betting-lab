@@ -51,7 +51,7 @@ REQUESTS_PER_CLOSING_SNAPSHOT = 500
 #: How often each fires. Pinned to the workflow files by
 #: `test_the_cost_model_matches_the_schedule_it_models`.
 MATCHDAY_RUNS_PER_WEEK = 15
-CLOSING_SNAPSHOTS_PER_WEEK = 7
+CLOSING_SNAPSHOTS_PER_WEEK = 5
 
 #: The whole account's burn, straight off the counter: 16,439 requests between
 #: 2026-09-12 07:23 and 2026-09-28 18:17 UTC, 16.45 days, 999 a day. The last
@@ -64,6 +64,15 @@ CLOSING_SNAPSHOTS_PER_WEEK = 7
 #: not be the optimistic one.
 #:
 #: Re-measure by differencing the quota line across the card feed's history.
+#:
+#: STALE BY DESIGN until it is re-measured. This figure was taken while the
+#: Closing Snapshot fired seven times a week; it now fires five, which should
+#: take about 143 a day out and land near 857. That arithmetic is deliberately
+#: NOT applied here. The whole point of this constant is that it is read off
+#: the counter rather than computed from a model of who is spending — adjusting
+#: it by model arithmetic would quietly turn it back into the thing it replaced.
+#: It stays at the last measured value, which errs short, until a fortnight of
+#: the new cadence can be differenced.
 OBSERVED_REQUESTS_PER_DAY = 1_000
 
 #: The plan in use, as the provider reports it: the counter stood at 20,000

@@ -193,6 +193,17 @@ MEASURED_REQUESTS_PER_RUN = REQUESTS_PER_MATCHDAY_RUN
 MEASURED_REQUESTS_PER_SNAPSHOT = REQUESTS_PER_CLOSING_SNAPSHOT
 
 
+def _snapshot_cron_lines() -> list[str]:
+    """The Closing Snapshot's cron lines, in file order."""
+    text = (
+        PROJECT_ROOT / ".github" / "workflows" / "closing-snapshot.yml"
+    ).read_text(encoding="utf-8")
+    return [
+        line.strip() for line in text.splitlines()
+        if line.strip().startswith("- cron:")
+    ]
+
+
 def _snapshot_crons() -> int:
     """How often the Closing Snapshot fires. It spends from the same allowance."""
     return (
@@ -246,31 +257,52 @@ NEW_YORK_MIDNIGHT_UTC = 4.0
 WEEKS_PER_MONTH = BUDGET_WEEKS_PER_MONTH
 
 
-def test_the_scheduled_workflows_alone_are_over_the_allowance() -> None:
-    """Recorded because it is true, not asserted because it is wanted.
+def test_the_scheduled_workflows_stay_inside_the_allowance() -> None:
+    """Retired and restored, which is what the previous version asked for.
 
-    This guard used to read `<` and pass. It passed on two errors that both
-    pointed the same way: the Closing Snapshot was not in the sum at all, and
-    when it was added it went in at 338 a firing against a measured 481 to 522.
-    338 is the one value in that neighbourhood that made the schedule look
-    affordable.
+    The history matters because this guard has now been wrong in both
+    directions. It read `<` and passed on two errors that pointed the same way:
+    the Closing Snapshot was not in the sum at all, and when it was added it
+    went in at 338 a firing against a measured 481 to 522 — the one value in
+    that neighbourhood that made the schedule look affordable.
 
-    Corrected, the two scheduled workflows cost about 23,200 a month against a
-    20,000 plan. Nothing here fixes that, because the fix is a choice between
-    things this repository is not entitled to trade off on its own — how often
-    closing prices are captured for CLV, against how often a card refreshes.
-    Cutting the snapshot from seven firings a week to five brings the scheduled
-    figure inside the allowance.
+    Corrected, it read `>` and recorded a real 23,200-against-20,000 overage,
+    with a note saying the fix was an operator's trade and that resolving it
+    would make the test fail. Cooper took the trade on 2026-09-29: the snapshot
+    dropped from seven firings a week to five. So the finding is retired and
+    the `<` guard is back, now at about 18,800 against 20,000.
 
-    If someone makes that choice, this test fails. That is the point: the
-    finding stops being true and the record of it has to be retired by hand,
-    rather than quietly surviving as a stale warning.
+    It counts both workflows. Counting Matchday Refresh alone it once reported
+    5,124 a month while the real scheduled figure was 20,375.
     """
-    assert _monthly_requests() > MONTHLY_REQUEST_ALLOWANCE, (
-        f"the scheduled workflows now cost ~{_monthly_requests():.0f} against "
-        f"{MONTHLY_REQUEST_ALLOWANCE:,} — if this was resolved deliberately, "
-        "retire this test and restore the `<` guard with the new figures"
+    assert _monthly_requests() < MONTHLY_REQUEST_ALLOWANCE, (
+        f"the scheduled workflows cost ~{_monthly_requests():.0f} against "
+        f"{MONTHLY_REQUEST_ALLOWANCE:,}"
     )
+
+
+def test_the_snapshot_keeps_a_firing_on_every_single_slot_day() -> None:
+    """Which two came out is a CLV decision, and nothing guarded it.
+
+    A snapshot fetches every upcoming fixture, so a day's earlier firing is
+    already a decent observation for that day's later kick-offs — about 2h50
+    out for Saturday 17:30 UK and Sunday 16:30 UK, the two that were dropped.
+    Friday and Monday have one slot each, so dropping either would leave those
+    fixtures with nothing nearer than that morning's Matchday Refresh, roughly
+    ten hours out.
+
+    Nothing expressed that before, which means the cheapest-looking further cut
+    — Friday or Monday, one fixture each — is the most expensive one available.
+    """
+    crons = _snapshot_cron_lines()
+    days = [line.rsplit(" ", 1)[1].strip('"') for line in crons]
+
+    for single_slot_day in ("5", "1"):
+        assert days.count(single_slot_day) == 1, (
+            f"day {single_slot_day} has one kick-off slot and must keep its "
+            "snapshot; the nearest alternative observation is ten hours out"
+        )
+    assert days.count("6") >= 2, "Saturday holds the most fixtures of any day"
 
 
 def test_the_model_is_a_floor_not_the_bill() -> None:
@@ -290,6 +322,12 @@ def test_the_model_is_a_floor_not_the_bill() -> None:
     )
 
     assert observed_monthly_requests() > scheduled_monthly_requests()
+
+    # The counter still reads over the allowance, and after the snapshot cut
+    # that overage is no longer the schedule's. It is interactive work: manual
+    # dispatches and scripts run from a laptop, which is why the measured rate
+    # spans 321 a day on a quiet day and 2,019 on a working one. Left asserted
+    # because it remains true of the account, not because it indicts the cron.
     assert observed_monthly_requests() > MONTHLY_REQUEST_ALLOWANCE
 
 
@@ -757,9 +795,12 @@ def test_the_snapshot_states_its_own_cost_and_states_it_right() -> None:
 
     assert f"about {REQUESTS_PER_CLOSING_SNAPSHOT} requests a run" in text
     assert f"roughly {monthly:,.0f} a month" in text
-    assert "five firings a week" in text.lower(), (
-        "the remedy has to be stated where the cost is, or the figure is a "
-        "complaint rather than a decision someone can take"
+    # Both spellings are generated from the constant, so the comment cannot
+    # drift from it either way; the `or` buys prose, not slack.
+    words = {4: "four", 5: "five", 6: "six", 7: "seven"}
+    assert (
+        f"{CLOSING_SNAPSHOTS_PER_WEEK} runs a week" in text
+        or f"{words[CLOSING_SNAPSHOTS_PER_WEEK]} runs a week" in text
     )
 
 
@@ -784,12 +825,9 @@ def test_the_stated_credit_cost_matches_the_schedule() -> None:
 
     # The comment should state a figure within a reasonable distance of truth,
     # and it has to be the WHOLE bill — the snapshot spends the same allowance.
-    assert "about 23,200 a month against an allowance of 20,000" in text
-    assert "five a week" in text, (
-        "the comment has to say what would bring it inside the plan, or the "
-        "figure is a complaint rather than a decision someone can take"
-    )
-    assert 22_000 < monthly < 24_500, f"schedule now costs ~{monthly:.0f}"
+    assert "about 18,800 a month against an allowance of 20,000" in text
+    assert 18_000 < monthly < 19_500, f"schedule now costs ~{monthly:.0f}"
+    assert monthly < MONTHLY_REQUEST_ALLOWANCE
 
 
 def _thursday_trigger_hours() -> list[float]:

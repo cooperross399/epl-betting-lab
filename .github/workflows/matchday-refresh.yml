@@ -68,15 +68,17 @@ on:
     # invisible unless it has something new to say.
     #
     # COST. Fifteen runs a week at about 122 requests each, measured from the
-    # counter across consecutive runs. With the Closing Snapshot's seven at
-    # about 500 each, the two scheduled workflows come to about 23,200 a month
-    # against an allowance of 20,000 — over the plan. Cutting the snapshot to
-    # five a week brings it inside; that trades CLV coverage for card
-    # frequency and is an operator's decision, not a scheduling one.
+    # counter across consecutive runs. With the Closing Snapshot's five at
+    # about 500 each, the two scheduled workflows come to
+    # about 18,800 a month against an allowance of 20,000.
     #
-    # The counter itself says about 1,000 a day, roughly 30,000 a month, so
-    # even 23,200 is a floor: manual dispatches and runs from a laptop spend
-    # from the same account and no model of this file will ever see them.
+    # The snapshot fired seven times a week until 2026-09-29, which put the
+    # scheduled total at 23,200 and over the plan. Cooper chose to lose two
+    # near-kickoff observations rather than the cadence here.
+    #
+    # The counter itself said about 1,000 a day while that was still true, so
+    # 18,800 is a floor either way: manual dispatches and runs from a laptop
+    # spend from the same account and no model of this file will ever see them.
     #
     # Every figure above is measured. Earlier notes here were wrong in both
     # directions — 1,050, 4,600, 62 a run, 18,300 a month — each computed

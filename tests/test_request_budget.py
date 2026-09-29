@@ -83,19 +83,35 @@ def test_counting_only_refreshes_would_flatter_the_reader() -> None:
     assert refresh_only_days > 3 * days_of_runway(LIVE_REMAINING)
 
 
-def test_the_configuration_is_over_the_plan_on_both_measures() -> None:
-    """Recorded, not resolved. The fix is an operator's trade, not a constant."""
-    assert scheduled_monthly_requests() > MONTHLY_REQUEST_ALLOWANCE
-    assert observed_monthly_requests() > scheduled_monthly_requests()
+def test_the_schedule_is_inside_the_plan_and_one_more_snapshot_would_not_be() -> None:
+    """Both halves matter. The first alone would pass on a cadence of nothing.
 
-
-def test_five_snapshots_a_week_would_bring_the_schedule_inside_the_plan() -> None:
-    """The comments in both workflows say this. It has to actually be so."""
+    This asserted the overage until 2026-09-29, when Cooper cut the snapshot
+    from seven firings a week to five. The second assertion is the one that
+    says the cut was the smallest one that works: six would still be over.
+    """
     weekly_allowance = MONTHLY_REQUEST_ALLOWANCE / request_budget.WEEKS_PER_MONTH
     refreshes = MATCHDAY_RUNS_PER_WEEK * REQUESTS_PER_MATCHDAY_RUN
 
-    assert refreshes + 5 * REQUESTS_PER_CLOSING_SNAPSHOT < weekly_allowance
+    assert scheduled_monthly_requests() < MONTHLY_REQUEST_ALLOWANCE
+    assert scheduled_weekly_requests() < weekly_allowance
     assert refreshes + 6 * REQUESTS_PER_CLOSING_SNAPSHOT > weekly_allowance
+
+
+def test_the_account_still_outspends_the_plan_even_though_the_schedule_does_not() -> None:
+    """A fitting schedule is not a fitting account, and the card says so.
+
+    The counter read about a thousand a day while the snapshot still fired
+    seven times; the cut takes roughly 143 of that. What is left over the
+    allowance is interactive work — the measured daily rate spans 321 on a
+    quiet day and 2,019 on a working one — which no cron change reaches.
+
+    Kept asserted because the card's runway comes from the counter, and a
+    reader who saw the schedule brought inside the plan would otherwise assume
+    the runway problem went with it.
+    """
+    assert observed_monthly_requests() > scheduled_monthly_requests()
+    assert observed_monthly_requests() > MONTHLY_REQUEST_ALLOWANCE
 
 
 def test_an_empty_account_buys_no_days() -> None:

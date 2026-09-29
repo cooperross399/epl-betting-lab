@@ -156,8 +156,21 @@ jobs:
           # window costs nothing but a few skipped downloads — and at ten it
           # was short enough to be exhausted by about three days of failures,
           # which is how the refusal below became self-sustaining.
-          for candidate in $(gh run list --workflow publish-board.yml \
-            --limit 40 --json databaseId --jq '.[].databaseId'); do
+          # The listing captured first, and its exit status checked. Inline
+          # in a `for` header, a `gh run list` that fails on auth or a rate
+          # limit yields nothing, `seen` stays 0, and the refusal below reads
+          # that as "no prior run has ever published" — so a broken lookup
+          # takes the first-run path and publishes a one-entry history over
+          # the chain. The wipe, through the front door of the guard written
+          # to stop it.
+          if ! prior=$(gh run list --workflow publish-board.yml \
+            --limit 40 --json databaseId --jq '.[].databaseId'); then
+            echo "::warning::Could not list prior publish runs."
+            echo "boards=0" >> "$GITHUB_OUTPUT"
+            echo "candidates=unknown" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          for candidate in $prior; do
             if [ "$candidate" = "${{ github.run_id }}" ]; then
               continue
             fi
@@ -265,8 +278,8 @@ jobs:
           # `candidates` is what tells the two zeros apart, and until now it
           # was computed, written to the step output, described in a comment
           # as "read by The history must not shrink", and read by nothing.
-          if [ -z "$candidates" ]; then
-            echo "::error::The restore step reported no candidate count, so a first run cannot be told from an exhausted window. Refusing to publish."
+          if [ -z "$candidates" ] || [ "$candidates" = "unknown" ]; then
+            echo "::error::The restore step could not say how many prior publish runs there are, so a first run cannot be told from an exhausted window or from a failed lookup. Refusing to publish."
             exit 1
           fi
           if [ "${{ inputs.restart_history }}" = "true" ]; then
@@ -283,7 +296,8 @@ jobs:
             # the message below has to name it rather than say "by hand".
             echo "::warning::restart_history was set, so this run publishes a fresh history of $after board(s) over whatever the Archive holds. Everything earlier is dropped."
           elif [ "$before" -eq 0 ] && [ "$candidates" -gt 0 ]; then
-            echo "::error::$candidates prior publish run(s) exist and none of them carried a board-history artifact, so this run would publish a history of $after over whatever the Archive already holds. Refusing. Recover by fixing whatever stopped those runs uploading; if the history is genuinely meant to restart, re-run this workflow from the Actions tab with restart_history set."
+            echo "::error::$candidates prior publish run(s) exist and none of them carried a board-history artifact, so this run would publish a history of $after over whatever the Archive already holds. Refusing."
+            echo "::error::Fixing the uploader does NOT clear this by itself: this check runs before the upload, so a repaired run still refuses here and still carries no artifact. The history is not lost — artifacts are kept 400 days — so recover it by hand with 'gh run download <id> --name board-history' from a run that still has one, or accept the loss by re-running this workflow from the Actions tab with restart_history set."
             exit 1
           fi
           if [ "$before" -eq 0 ]; then

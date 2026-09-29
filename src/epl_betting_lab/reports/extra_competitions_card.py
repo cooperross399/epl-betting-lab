@@ -224,6 +224,13 @@ class ExtraCard:
     #: because a section that quietly dropped half its fixtures and one that was
     #: quoted half as many look identical to a reader.
     gate: "SlateGate | None" = None
+    #: Positive-edge selections the MAX_EXTRA_BETS cap cut. On the card since
+    #: round three; here too, because the record is what a later CLV or
+    #: coverage question is answered from, and a count that exists only in
+    #: rendered markdown cannot be queried. The record already carried
+    #: `priced` and `declined`; this is the third way a selection fails to
+    #: appear and the only one that was invisible to both.
+    withheld: int = 0
 
     @property
     def fixtures(self) -> int:
@@ -910,7 +917,14 @@ def build_extra_card(
         )
         for home, away in zip(selections["home_team"], selections["away_team"])
     ]
-    return ExtraCard(selections, notes, priced=len(records), unrated=unrated, gate=gate)
+    return ExtraCard(
+        selections,
+        notes,
+        priced=len(records),
+        unrated=unrated,
+        gate=gate,
+        withheld=withheld,
+    )
 
 
 def render_extra_card(cards: dict[str, ExtraCard]) -> list[str]:
@@ -1054,6 +1068,10 @@ def extra_card_record(
                 "priced": card.priced,
                 "declined": list(card.unrated),
                 "selections": int(len(card.selections)),
+                # The cap's share. `selections` is the POST-cap count, so
+                # without this the record cannot tell a competition that
+                # produced four from one that produced twenty-six.
+                "withheld_by_cap": int(card.withheld),
             }
             for key, card in cards.items()
         },

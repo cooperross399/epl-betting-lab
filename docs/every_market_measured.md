@@ -56,10 +56,12 @@ is retracted rather than restated — the honest summary of the current
 measurement is the interval, −22.4% to +43.9%, which contains zero and most
 of the plausible range on either side of it.
 
-**Two point estimates are negative, and the worse one is corners.**
-`corners_total_10_5` is −18.82% on 48 bets and `double_chance` is −6.47% on
-52. This paragraph said double chance was "the only negative point estimate",
-which was true of the harvest and is not true of the table above it.
+**Three point estimates are negative, and the worst is corners.**
+`corners_total_10_5` is −18.82% on 48 bets, `total_2_5` is −10.8% on 6, and
+`double_chance` is −6.47% on 52. This paragraph said double chance was "the
+only negative point estimate", which was true of the harvest and not of the
+measurement table; it then said two, which missed `total_2_5` because the
+guard counting them looked only at the markets whose prices were bought.
 
 Double chance's number is still structural, and that part holds.
 Three hundred and thirty-eight of its four hundred and fifty candidates —

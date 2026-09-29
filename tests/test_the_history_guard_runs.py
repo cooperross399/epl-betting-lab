@@ -109,7 +109,8 @@ class TestItRefusesWhatItCannotSee:
         [
             ("8", "3", "failure", "did not succeed"),
             ("", "3", "success", "reported no board count"),
-            ("0", "", "success", "reported no candidate count"),
+            ("0", "", "success", "could not say how many prior publish runs"),
+            ("0", "unknown", "success", "failed lookup"),
         ],
     )
     def test_an_unreadable_restore_stops_the_publish(
@@ -162,6 +163,24 @@ class TestTheRefusalHasAWayOut:
         assert "restart_history was set" in done.stdout
         assert "Everything earlier is dropped" in done.stdout
 
+    def test_an_empty_input_is_not_an_escape(self, tmp_path: Path) -> None:
+        """The value the schedule and workflow_run triggers actually supply.
+
+        `inputs.restart_history` is only "false" on a dispatch that left the
+        default alone. On the two triggers that fire this workflow in
+        practice there is no inputs context at all and the expression is the
+        empty string, which every test here was passing "false" for.
+        """
+        done = _run(
+            tmp_path, boards="0", candidates="9", outcome="success", after=1,
+            restart="",
+        )
+
+        assert done.returncode == 1, (
+            "an empty input opened the escape, so every scheduled run would "
+            "publish over the chain"
+        )
+
     def test_the_control_without_it_the_refusal_still_stands(
         self, tmp_path: Path
     ) -> None:
@@ -170,14 +189,21 @@ class TestTheRefusalHasAWayOut:
 
         assert done.returncode == 1
 
-    def test_the_message_names_the_input_rather_than_saying_by_hand(
-        self, tmp_path: Path
-    ) -> None:
-        """"Clear this by hand" named no mechanism that exists."""
+    def test_the_message_names_mechanisms_that_exist(self, tmp_path: Path) -> None:
+        """"Clear this by hand" named no mechanism at all.
+
+        The replacement has to name two that do, and say plainly that the
+        obvious one does not work: this check runs BEFORE the upload, so
+        repairing the uploader leaves a repaired run refusing here and still
+        carrying no artifact.
+        """
         done = _run(tmp_path, boards="0", candidates="9", outcome="success", after=1)
 
         assert "restart_history" in done.stdout
-        assert "by hand" not in done.stdout
+        assert "gh run download" in done.stdout, "no concrete recovery named"
+        assert "does NOT clear this" in done.stdout, (
+            "the message still implies fixing the uploader is enough"
+        )
 
     def test_restart_history_does_not_excuse_a_broken_restore(
         self, tmp_path: Path
@@ -213,3 +239,31 @@ def test_the_candidate_window_is_wide_enough_to_survive_a_failure_run() -> None:
 
     assert window, "the board-history restore no longer states a window"
     assert int(window.group(1)) >= 40, window.group(1)
+
+
+def test_the_run_listing_is_captured_and_its_exit_status_checked() -> None:
+    """Inline in a `for` header, a failed listing looks like no prior runs.
+
+    `for candidate in $(gh run list ...)` discards the command's exit
+    status: an auth failure or a rate limit yields nothing, `seen` stays 0,
+    and the total-wipe refusal reads that as "no prior run has ever
+    published" — so a broken lookup takes the first-run path and publishes
+    a one-entry history over the chain. The wipe through the front door of
+    the guard written to stop it.
+    """
+    spec = yaml.safe_load(WORKFLOW.read_text(encoding="utf-8"))
+    restore = next(
+        s for s in list(spec["jobs"].values())[0]["steps"] if s.get("id") == "restore"
+    )
+    code = "\n".join(
+        line for line in restore["run"].splitlines()
+        if not line.strip().startswith("#")
+    )
+
+    assert "if ! prior=$(gh run list --workflow publish-board.yml" in code, (
+        "the publish-run listing is not captured with its exit status checked"
+    )
+    assert "for candidate in $prior; do" in code
+    assert 'echo "candidates=unknown"' in code, (
+        "a failed listing has to be reported as unknown, not as zero"
+    )

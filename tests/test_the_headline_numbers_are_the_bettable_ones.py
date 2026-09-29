@@ -176,10 +176,18 @@ def test_cannot_be_profit_backtested_is_only_ever_said_of_one_market() -> None:
         for i, line in enumerate(text.splitlines()):
             if claim not in line:
                 continue
-            # The sentence may wrap, so read a small window around it.
-            window = "\n".join(text.splitlines()[max(0, i - 3): i + 4])
+            # The sentence may wrap, so read a small window around it —
+            # for the NEGATION as well as for the retraction marker. Reading
+            # the negation from `line` alone missed
+            # `models/poisson_goals.py`, where "no bet rule on it can ever be"
+            # ends one line and "profit-backtested" begins the next. A guard
+            # that only sees one line cannot see a wrapped sentence, which is
+            # how most of these are written.
+            lines = text.splitlines()
+            window = "\n".join(lines[max(0, i - 3): i + 4])
+            before = " ".join(lines[max(0, i - 2): i + 1]).lower()
             negated = any(
-                word in line.lower()
+                word in before
                 for word in ("cannot", "can never", "no ", "none")
             )
             # A retraction necessarily quotes the claim it retracts, so it
@@ -220,9 +228,27 @@ def test_the_prose_reading_the_table_agrees_with_the_table() -> None:
     wide enough for the retraction also covers a regression.
     """
     generated = _generated()
-    negatives = sorted(m for m in BOUGHT if generated[m]["roi"] < 0)
 
-    assert len(negatives) == 2, f"the table's negatives changed: {negatives}"
+    # Counted over the DOC'S OWN TABLE, not over BOUGHT. BOUGHT exists to
+    # pin the five book-filtered markets to the generated report, and
+    # `derived_market_backtest.md` has no `total_2_5` or `1x2` row at all —
+    # so counting negatives over it missed `total_2_5` at −10.8% and the
+    # guard demanded the sentence "two point estimates are negative" that
+    # its own table contradicts. A roster only guards what it names.
+    table = _doc_rows(
+        _ascii(MEASURED.read_text(encoding="utf-8")).split(
+            "### What the best-price-across-books harvest said"
+        )[0]
+    )
+    negatives = sorted(m for m, row in table.items() if row["roi"] < 0)
+
+    assert len(negatives) >= 2, f"the table's negatives changed: {negatives}"
+    for market in BOUGHT:
+        if generated[market]["roi"] < 0:
+            assert market in negatives, (
+                f"{market} is negative in the generated report and not in "
+                "the doc table"
+            )
 
     dnb = generated["draw_no_bet"]
     for path in (MEASURED, CLAUDE):
@@ -246,9 +272,23 @@ def test_the_prose_reading_the_table_agrees_with_the_table() -> None:
     # the heading is what a reader takes away. Generated from the table, so
     # a third negative market breaks it rather than passing quietly.
     words = {1: "One point estimate is", 2: "Two point estimates are",
-             3: "Three point estimates are"}
+             3: "Three point estimates are", 4: "Four point estimates are"}
     assert f"{words[len(negatives)]} negative" in hides, (
-        f"the section does not head with {len(negatives)} negative estimates"
+        f"the section does not head with {len(negatives)} negative estimates: "
+        f"{negatives}"
+    )
+    # And the same count on the card, which prints it to the reader. The
+    # card's note wraps across string literals, so the source is flattened
+    # before searching — an `or` across two spellings would pass on either.
+    card = " ".join(
+        (PROJECT_ROOT / "src" / "epl_betting_lab" / "reports" / "automated_card.py")
+        .read_text(encoding="utf-8")
+        .split()
+    ).replace('" "', "")
+    spelled = words[len(negatives)].split()[0].lower()
+    assert f"{spelled} point estimates are negative" in card, (
+        f"the card's staking note does not say {spelled} point estimates "
+        "are negative"
     )
 
 

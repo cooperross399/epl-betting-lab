@@ -265,7 +265,18 @@ def build_run_summary(
 
         archived = load_archived_cards(outputs / "archive" / "automated_cards")
         if archived:
-            lines += render_scoreboard(build_scoreboard(archived, load_matches()))
+            # The Beyond section's staked rows are printed above this
+            # record and are not in it. Said out loud rather than left for a
+            # reader to notice by adding the card up.
+            from epl_betting_lab.reports.extra_competitions_card import (
+                uncounted_beyond,
+            )
+
+            beyond = uncounted_beyond(outputs)
+            lines += render_scoreboard(
+                build_scoreboard(archived, load_matches()),
+                uncounted=[beyond] if beyond else [],
+            )
     except Exception:
         # A scoreboard that cannot be built must not take the card down with
         # it: it is a report about the past, and the card is about this week.

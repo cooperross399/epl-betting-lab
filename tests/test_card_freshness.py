@@ -299,7 +299,7 @@ class TestTheKickoffIsFoundUnderTheNameTheCardUses:
                     "market": "btts",
                     "selection": selection,
                     "american_odds": 100,
-                    "book": "Book",
+                    "book": "DraftKings",
                     "observed_at": "2026-09-28T06:00:00Z",
                 }
                 for selection in ("yes", "no")
@@ -393,7 +393,7 @@ class TestTheCardRecordsTheKickoffItLookedUp:
                         "market": "btts",
                         "selection": "yes",
                         "american_odds": 120,
-                        "book": "Book",
+                        "book": "DraftKings",
                         "status": "BETTABLE",
                         "calibrated_edge": 0.09,
                         "raw_edge": 0.09,
@@ -414,7 +414,7 @@ class TestTheCardRecordsTheKickoffItLookedUp:
                     "market": "btts",
                     "selection": selection,
                     "american_odds": 120,
-                    "book": "Book",
+                    "book": "DraftKings",
                     "observed_at": "2026-09-28T06:00:00Z",
                 }
                 for selection in ("yes", "no")

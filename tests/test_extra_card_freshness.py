@@ -145,7 +145,7 @@ class TestADateAloneCannotClearAFixture:
                     "market": "btts",
                     "selection": "yes",
                     "american_odds": 100,
-                    "book": "Book",
+                    "book": "DraftKings",
                     "observed_at": "2026-09-28T06:00:00Z",
                 }
             ]
@@ -228,7 +228,7 @@ class TestASlateIsOneRound:
                     "market": "btts",
                     "selection": "yes",
                     "american_odds": 100,
-                    "book": "Book",
+                    "book": "DraftKings",
                     "observed_at": "2026-09-28T06:00:00Z",
                 }
             )

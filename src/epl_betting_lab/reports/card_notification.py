@@ -343,7 +343,18 @@ def build_notification(
 
         archived = load_archived_cards(outputs / "archive" / "automated_cards")
         if archived:
-            lines += render_scoreboard(build_scoreboard(archived, load_matches()))
+            # The Beyond section's staked rows are printed above this
+            # record and are not in it. Said out loud rather than left for a
+            # reader to notice by adding the card up.
+            from epl_betting_lab.reports.extra_competitions_card import (
+                uncounted_beyond,
+            )
+
+            beyond = uncounted_beyond(outputs)
+            lines += render_scoreboard(
+                build_scoreboard(archived, load_matches()),
+                uncounted=[beyond] if beyond else [],
+            )
     except Exception:
         pass
 

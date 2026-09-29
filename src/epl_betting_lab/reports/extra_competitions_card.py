@@ -55,6 +55,7 @@ from dataclasses import dataclass, field
 
 import pandas as pd
 
+from epl_betting_lab.books import bettable_only, is_bettable
 from epl_betting_lab.config import OUTPUTS_DIR, MAX_DEFAULT_JUICE, PROCESSED_DIR
 from epl_betting_lab.data.european_clubs import provider_name
 from epl_betting_lab.data.international_teams import archive_name
@@ -267,11 +268,26 @@ def name_map_for(competition: str):
 
 
 def latest_prices(feed: pd.DataFrame, competition: str) -> pd.DataFrame:
-    """Best price per selection at the most recent observation.
+    """Best BETTABLE price per selection at the most recent observation.
 
     The feed is append-only and holds every snapshot, so a fixture appears many
-    times. Newest observation per selection, then the longest price across books
-    at that moment — which is the price the card would be read against.
+    times. Newest observation per selection, then the longest price across the
+    books Cooper can actually bet at — which is the price the card would be
+    read against.
+
+    "Bettable" was missing from that sentence and from the code. The Premier
+    League path filters twice (`automated_card_input._best_quote` and
+    `bettable_only(staged)`); this one took the longest price on the board
+    whoever was offering it, and printed that book in the card's Book column
+    beside prices that could be taken. `books.py` says why that is worse than
+    no recommendation: it looks like the others.
+
+    It has not yet shipped a bad price — every book in the 148-row September
+    sample is bettable — and two things make it a matter of when. The reason
+    `unknown_books` exists at all is that a new US book appearing and being
+    quietly ignored costs real value; and `scripts/collect_extra_competitions.py`
+    takes `--regions`, so one run with `eu` would hand every selection to
+    Pinnacle, which is always the longest price and is never bettable.
     """
     columns = ["home_team", "away_team", "market", "selection", "american_odds", "book"]
     if feed.empty or "competition" not in feed.columns:
@@ -293,8 +309,28 @@ def latest_prices(feed: pd.DataFrame, competition: str) -> pd.DataFrame:
     keys = ["home_team", "away_team", "market", "selection"]
     newest = rows.groupby(keys)["observed"].transform("max")
     at_close = rows[rows["observed"] == newest]
+    # Before the sort, not after. Picking the longest price and then checking
+    # whether it can be taken would discard the selection rather than fall
+    # back to the best price that can.
+    at_close = bettable_only(at_close)
+    if at_close.empty:
+        return pd.DataFrame(columns=columns)
     best = at_close.sort_values("american_odds", ascending=False).groupby(keys).head(1)
     return best[columns].reset_index(drop=True)
+
+
+def unbettable_books(feed: pd.DataFrame, competition: str) -> list[str]:
+    """Books quoting this competition that the card will not price at.
+
+    Reported rather than dropped in silence. A book that appears here and
+    ought to be bettable is a line missing from `books.BETTABLE_BOOKS`, which
+    is Cooper's decision to make and not one a filter should make quietly.
+    """
+    if feed.empty or "competition" not in feed.columns or "book" not in feed.columns:
+        return []
+    rows = feed[feed["competition"] == competition]
+    seen = {str(book) for book in rows["book"].dropna()}
+    return sorted(book for book in seen if not is_bettable(book))
 
 
 #: A fixture whose kickoff cannot be established from the feed. Same word the
@@ -560,6 +596,14 @@ def build_extra_card(
         model.avg_home_goals, model.avg_away_goals = baseline
 
     notes: list[str] = list(gate_notes)
+    ignored = unbettable_books(gate.kept, competition)
+    if ignored:
+        notes.append(
+            f"{len(ignored)} book(s) quoting this competition are not priced "
+            f"against, because they are not on the bettable list: "
+            f"{', '.join(ignored)}. If one of those should be bettable it is a "
+            "line missing from `books.BETTABLE_BOOKS`, not a filter to loosen."
+        )
     for market in sorted(POOL_EXCLUDED_MARKETS.get(spec.pool, ())):
         notes.append(
             f"`{market}` is not bet here: the model sits about 8 points below "
@@ -700,7 +744,7 @@ def build_extra_card(
 
 def render_extra_card(cards: dict[str, ExtraCard]) -> list[str]:
     """Markdown for the competitions beyond the Premier League."""
-    lines: list[str] = ["## Beyond the Premier League", ""]
+    lines: list[str] = [f"## {BEYOND_SECTION_NAME}", ""]
     # Deliberately count-free. This read "Neither competition below" and was
     # written when there were two; it survived the Europa League, the
     # Conference League and the Nations League being added and went out on a
@@ -766,6 +810,11 @@ def render_extra_card(cards: dict[str, ExtraCard]) -> list[str]:
 #: Where the machine-readable record of this section lives, mirroring
 #: `card_history.ARCHIVE_ROOT` for the Premier League card.
 EXTRA_CARD_JSON_FILENAME = "extra_competitions_card.json"
+
+#: What this section is called wherever it is referred to from outside it.
+#: The scoreboard has to name it to say it is not counted, and a second
+#: spelling of the name there would be one more thing to drift.
+BEYOND_SECTION_NAME = "Beyond the Premier League"
 EXTRA_ARCHIVE_ROOT = Path("archive") / "extra_cards"
 
 
@@ -833,6 +882,40 @@ def extra_card_record(
             for key, card in cards.items()
         },
     }
+
+
+def uncounted_beyond(output_dir: Path | None = None) -> "UncountedSection | None":
+    """This section's staked selections, for the record that leaves them out.
+
+    The record built from `archive/automated_cards` is Premier League only,
+    and the email prints it below this section's table — every row of which
+    carries a stake. Counting them here is not scoring them; it is refusing to
+    let a reader assume the denominator covers what sits above it.
+
+    Returns None when there is nothing to disclose: no record on disk, or a
+    record with nothing staked in it. A run that selected nothing should not
+    print a sentence about zero selections.
+    """
+    from epl_betting_lab.reports.card_scoreboard import UncountedSection
+
+    outputs = OUTPUTS_DIR if output_dir is None else Path(output_dir)
+    path = outputs / EXTRA_CARD_JSON_FILENAME
+    try:
+        record = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+
+    staked = 0
+    for row in record.get("selections", []):
+        try:
+            units = float(row.get("suggested_units") or 0)
+        except (TypeError, ValueError):
+            continue
+        if units > 0:
+            staked += 1
+    if staked <= 0:
+        return None
+    return UncountedSection(name=BEYOND_SECTION_NAME, staked=staked)
 
 
 def save_extra_card_record(

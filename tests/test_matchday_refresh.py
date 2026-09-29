@@ -1642,19 +1642,29 @@ def test_every_exit_from_the_publish_step_reports_a_state() -> None:
     empty mean "fine". This counts them.
     """
     script = _step("publish")["run"]
-    code = "\n".join(
+    lines = [
         line for line in script.splitlines() if not line.strip().startswith("#")
-    )
+    ]
 
-    exits = code.count("exit 0")
-    states = code.count('>> "$GITHUB_OUTPUT"')
+    # Every `exit 0` reports first. The previous form compared two counts
+    # — writes == exits + 1 — which broke the moment the fall-through grew a
+    # second state (`placeholder`), and would equally have passed if a new
+    # exit were added while an unrelated write appeared elsewhere. Position
+    # is the property that matters.
+    for i, line in enumerate(lines):
+        if line.strip() == "exit 0":
+            preceding = " ".join(lines[max(0, i - 3):i])
+            assert 'state=' in preceding and 'GITHUB_OUTPUT' in preceding, (
+                f"the `exit 0` on line {i} leaves without reporting a state, "
+                "which the outcome gate reads as the step having died"
+            )
 
-    assert states == exits + 1, (
-        f"{exits} early exit(s) and {states} state report(s): every exit needs "
-        "one, plus the fall-through after the push"
-    )
-    assert "state=left-alone" in code
-    assert "state=published" in code
+    code = "\n".join(lines)
+    assert {"state=published", "state=placeholder", "state=left-alone"} <= {
+        f"state={word}"
+        for word in ("published", "placeholder", "left-alone")
+        if f"state={word}" in code
+    }, "the three outcomes the gate distinguishes must all be reachable"
 
 
 def test_a_delivery_failure_is_not_excused_by_an_expected_refusal() -> None:

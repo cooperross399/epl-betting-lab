@@ -56,7 +56,31 @@ def main() -> int:
         "asking it with `--status success` is what made a data outage look "
         "like a scheduler outage.",
     )
+    parser.add_argument(
+        "--require-runs",
+        action="store_true",
+        help="Exit non-zero when the caller passed no runs at all. A lookup "
+        "that returned nothing and a workflow that has never run produce the "
+        "same empty list, and only one of them is fine.",
+    )
     args = parser.parse_args()
+
+    # An empty list is the one input this script cannot interpret on its own.
+    # Given nothing it reports "this one is the baseline" and "the last 0
+    # run(s) did not succeed, which is within the usual range", and exits 0 —
+    # so a `gh run list` that fails on auth, a rate limit or an API hiccup
+    # makes the watchdog green while the schedule could be entirely dead.
+    #
+    # The caller knows which case it is in. Matchday Refresh has run hundreds
+    # of times, so the watchdog passes `--require-runs` and an empty lookup is
+    # a fault; a genuinely new workflow would not.
+    if args.require_runs and not args.timestamps and not (args.conclusions or []):
+        print(
+            "::error::No runs were returned to check. This watchdog was told "
+            "to expect some, so an empty list means the lookup failed, not "
+            "that the schedule is idle. Refusing to report healthy."
+        )
+        return 1
 
     # The streak must never reach the degradation file, and this is a hard
     # refusal rather than a convention because the failure is self-sustaining

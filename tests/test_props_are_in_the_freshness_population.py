@@ -169,16 +169,70 @@ class TestTheCardKeepsTheProvidersKickoff:
 
         assert len(drop_started_fixtures(frame, AFTER)) == 1
 
-    def test_the_builder_uses_it(self) -> None:
-        """The producer being right is not the producer being called."""
+    def test_the_builder_KEEPS_what_the_filter_returns(self) -> None:
+        """A grep for the call name passes when the result is thrown away.
+
+        `drop_started_fixtures(frame, moment)` on its own line is a no-op
+        that reads exactly like the fix. The assertion has to be that the
+        return value is bound back to `frame`, so it goes through the
+        parser: the whole point of this module is that filtering a frame
+        and discarding the result looks identical to filtering it.
+        """
+        import ast
         import inspect
+        import textwrap
 
-        from epl_betting_lab.reports.player_props_card import build_player_props_card
+        from epl_betting_lab.reports import player_props_card
 
-        assert "drop_started_fixtures(" in inspect.getsource(build_player_props_card)
+        source = textwrap.dedent(
+            inspect.getsource(player_props_card.build_player_props_card)
+        )
+        bound = [
+            node
+            for node in ast.walk(ast.parse(source))
+            if isinstance(node, ast.Assign)
+            and isinstance(node.value, ast.Call)
+            and getattr(node.value.func, "id", None) == "drop_started_fixtures"
+            and any(getattr(t, "id", None) == "frame" for t in node.targets)
+        ]
 
-    def test_the_pick_records_the_kickoff(self) -> None:
-        """`PropPick` had no kickoff field, so the record carried none."""
-        from epl_betting_lab.reports.player_props_card import PropPick
+        assert len(bound) == 1, (
+            "the filter's result must be assigned back to `frame`; calling it "
+            "and dropping the return is a no-op that greps the same"
+        )
 
-        assert "kickoff_time" in PropPick.__dataclass_fields__
+    def test_the_pick_is_built_with_the_provider_kickoff(self) -> None:
+        """Having the field is not filling it.
+
+        Reaching the `PropPick(...)` construction needs an approved policy,
+        a staging file and player match logs; asserting the dataclass has a
+        `kickoff_time` attribute is what that difficulty produced, and it
+        passes with the constructor never setting it. This checks the
+        construction site instead: the keyword is present and reads
+        `commence_time` off the row.
+        """
+        import ast
+        import inspect
+        import textwrap
+
+        from epl_betting_lab.reports import player_props_card
+
+        assert "kickoff_time" in player_props_card.PropPick.__dataclass_fields__
+
+        source = textwrap.dedent(
+            inspect.getsource(player_props_card.build_player_props_card)
+        )
+        calls = [
+            node
+            for node in ast.walk(ast.parse(source))
+            if isinstance(node, ast.Call)
+            and getattr(node.func, "id", None) == "PropPick"
+        ]
+
+        assert len(calls) == 1
+        keywords = {k.arg: k for k in calls[0].keywords}
+        assert "kickoff_time" in keywords, "the pick is built without a kickoff"
+        assert "commence_time" in ast.unparse(keywords["kickoff_time"].value), (
+            "the kickoff has to come from the provider's column, not be "
+            "defaulted to something the audit will count as unchecked"
+        )

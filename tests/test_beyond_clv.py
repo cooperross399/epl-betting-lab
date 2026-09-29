@@ -244,3 +244,69 @@ class TestTheEventIdComesFromProductionNotTheFixture:
 
         assert len(frame) == 1
         assert frame.iloc[0]["closing_american_odds"] == -120
+
+
+class TestTheEventIdSurvivesTheWholeBuilder:
+    """The join was proven on a card production never builds.
+
+    `TestTheEventIdComesFromProductionNotTheFixture` chains
+    `latest_prices` -> `ExtraCard(...)` -> `extra_card_record`, and
+    `build_extra_card` does not do that. It hands `prices` to
+    `evaluate_btts` and friends, each of which writes its rows out from a
+    FIXED key set — home_team, away_team, market, selection, odds, book and
+    the grades — so a column added to `prices` does not survive evaluation.
+    The record recorded "", and every Beyond CLV join fell back to names:
+    the record says "Roma", the feed says "AS Roma", nothing matches, and an
+    empty CLV table is indistinguishable from a section that made no picks.
+
+    So this one runs the real builder.
+    """
+
+    def _card(self, monkeypatch):
+        import sys
+
+        sys.path.insert(0, str(__import__("pathlib").Path(__file__).parent))
+        from test_extra_competitions_card import _stub_international_pool
+
+        from epl_betting_lab.reports.extra_competitions_card import build_extra_card
+
+        _stub_international_pool(monkeypatch)
+        feed = pd.DataFrame(
+            {
+                "competition": ["UNL"] * 2,
+                "observed_at": ["2026-09-15T10:00:00Z"] * 2,
+                "provider_event_id": ["evt-77"] * 2,
+                "date": ["2026-09-16"] * 2,
+                "home_team": ["France"] * 2,
+                "away_team": ["Spain"] * 2,
+                "market": ["double_chance"] * 2,
+                "selection": ["home_or_draw", "draw_or_away"],
+                "book": ["DraftKings"] * 2,
+                "american_odds": [120, -110],
+            }
+        )
+        return build_extra_card(
+            feed, "UNL", now=pd.Timestamp("2026-09-15T12:00:00Z")
+        )
+
+    def test_the_built_card_carries_the_event_id(self, monkeypatch) -> None:
+        card = self._card(monkeypatch)
+
+        assert not card.selections.empty, (
+            "nothing was selected, so this proves nothing about the column"
+        )
+        assert "provider_event_id" in card.selections.columns
+        assert set(card.selections["provider_event_id"]) == {"evt-77"}
+
+    def test_and_the_record_written_from_it_does_too(self, monkeypatch) -> None:
+        from epl_betting_lab.reports.extra_competitions_card import extra_card_record
+
+        card = self._card(monkeypatch)
+        record = extra_card_record({"UNL": card}, now=WRITTEN)
+
+        assert record["selections"]
+        for row in record["selections"]:
+            assert row["provider_event_id"] == "evt-77", (
+                "the record recorded an empty id, so the CLV join falls back "
+                "to names the card has already renamed"
+            )

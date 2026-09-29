@@ -119,10 +119,14 @@ def test_the_history_guard_refuses_rather_than_warns() -> None:
     """A warning in a log nobody reads is how the record would go anyway."""
     script = _code(_named("The history must not shrink")["run"])
 
-    assert script.count("exit 1") == 3, (
-        "three ways to be blind: the restore failed, the restore said nothing, "
-        "or the history shrank"
-    )
+    # The count of `exit 1` used to be pinned at three. It is five now, and
+    # the number was never the point: `tests/test_the_history_guard_runs.py`
+    # executes this step and asserts the exit code for a total wipe, a
+    # partial shrink, a genuine first run, an intact history, a failed
+    # restore and each unreadable count. What is checked here is that the
+    # step refuses rather than advises.
+    assert "exit 1" in script
+    assert "::warning::" not in script, "this step blocks a deploy; it does not advise"
     conditions = _conditions(script)
 
     assert "-lt" in conditions

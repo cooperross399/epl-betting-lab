@@ -4,21 +4,44 @@ Football-Data carries historical odds for 1X2 and the 2.5 goals line and
 nothing else, so for a long time everything else could only be checked for
 calibration — which rules a model out and cannot rule one in. The provider
 sells historical prices per event, so the rest were bought: 291 fixtures of
-BTTS, and 150 fixtures of double chance, draw-no-bet and corner totals, priced
-three hours before each kick-off at the best price across books.
+BTTS, and 150 fixtures of double chance, draw-no-bet and corner totals.
 
-This is what came back.
+**The first harvest priced them at the best price across books, and those
+numbers are gone.** A maximum taken over books Cooper cannot bet is optimistic
+by construction; the run that produced it was ruled unusable and the generated
+report drops those rows. The table below is the bettable-books measurement out
+of `data/outputs/derived_market_backtest.md`, which is what the card's own
+rules would have taken at prices that were really available.
+
+The superseded figures sat in this table for weeks and were quoted from
+CLAUDE.md as the answer to "does it work?". Four of the five were more
+flattering than the truth, and `corners_total_10_5` went from +1.7% to
+−18.8%. They are listed at the bottom so the size of that gap is on the
+record rather than merely corrected.
 
 | Market | Bets | Profit | ROI | 95% interval | Source |
 |:-------|-----:|-------:|----:|:-------------|:-------|
 | `1x2` | 500 | +26.7u | +5.3% | −3.4% .. +14.1% | Football-Data, 4 seasons |
-| `btts` | 51 | +7.7u | +15.0% | −12.4% .. +42.5% | bought, 291 fixtures |
-| `draw_no_bet` | 49 | +6.4u | +13.0% | −15.0% .. +41.0% | bought, 150 fixtures |
-| `corners_total_9_5` | 33 | +4.6u | +14.0% | −20.2% .. +48.1% | bought, 150 fixtures |
-| `corners_total_10_5` | 37 | +0.6u | +1.7% | −30.5% .. +33.9% | bought, 150 fixtures |
-| `double_chance` | 32 | −3.4u | −10.5% | −45.2% .. +24.1% | bought, 150 fixtures |
+| `btts` | 31 | +0.2u | +0.66% | −34.2% .. +34.7% | bought, bettable books |
+| `draw_no_bet` | 68 | +5.6u | +8.24% | −22.4% .. +43.9% | bought, bettable books |
+| `corners_total_9_5` | 74 | +5.6u | +7.6% | −12.5% .. +28.6% | bought, bettable books |
+| `corners_total_10_5` | 48 | −9.0u | −18.82% | −47.0% .. +11.7% | bought, bettable books |
+| `double_chance` | 52 | −3.4u | −6.47% | −34.8% .. +23.4% | bought, bettable books |
 | `total_2_5` | 6 | −0.7u | −10.8% | −90.8% .. +69.2% | Football-Data, 4 seasons |
 | `corners_1x2` | — | — | — | — | **no history exists** |
+
+Across every bought market together: **273 bets, −0.96u, −0.35% ROI, −14.7%
+to +15.6%.** The pooled result is a loss, and its interval contains zero.
+
+### What the best-price-across-books harvest said
+
+| Market | Bets | ROI | now |
+|:-------|-----:|----:|----:|
+| `btts` | 51 | +15.0% | +0.66% |
+| `draw_no_bet` | 49 | +13.0% | +8.24% |
+| `corners_total_9_5` | 33 | +14.0% | +7.6% |
+| `corners_total_10_5` | 37 | +1.7% | −18.82% |
+| `double_chance` | 32 | −10.5% | −6.47% |
 
 **Every interval includes zero.** Not one market has a demonstrated edge.
 

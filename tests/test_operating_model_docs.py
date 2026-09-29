@@ -8,6 +8,8 @@ problem, not a documentation nicety.
 
 from __future__ import annotations
 
+import re
+
 from pathlib import Path
 
 import pytest
@@ -438,7 +440,11 @@ def test_the_evidence_document_states_the_intervals_not_just_the_rois() -> None:
     flat = " ".join(text.split())
 
     assert "−3.4% .. +14.1%" in flat or "-3.4% .. +14.1%" in flat
-    assert "Neither interval excludes zero" in flat
+    # "Neither" became "No" when a third row was added, and the claim is the
+    # thing being guarded, not the number of rows it happens to cover.
+    assert re.search(r"(Neither|No) intervals? excludes? zero", flat), (
+        "the document has to say that the intervals do not exclude zero"
+    )
 
 
 def test_it_says_how_long_proving_an_edge_would_take() -> None:

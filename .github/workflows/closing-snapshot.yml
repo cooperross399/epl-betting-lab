@@ -43,6 +43,14 @@ name: Closing Snapshot
 # timestamp, and `live_clv` only ever reads observations strictly before
 # kick-off, so a late run is ignored for the fixtures that have started and
 # still useful for the ones that have not.
+#
+# BUT A CRON AIMED AT ITS SLOT ALMOST NEVER LANDED THERE. Between 2026-09-08
+# and 2026-09-29 these runs started 2.4 h late at the median and 4.8 h at
+# worst, against a twenty-minute lead. Every Friday and Monday firing landed
+# after its 20:00 UK kick-off, the Monday ones after the final whistle, so the
+# single-slot days this schedule protects got no closing observation at all.
+# So each cron now fires eight hours before its slot and the run waits for the
+# slot (scripts/wait_for_round.py); see the schedule below.
 
 on:
   schedule:
@@ -63,11 +71,20 @@ on:
     # nearer than that morning's Matchday Refresh — roughly ten hours out. The
     # question is never how many fixtures a slot holds, it is how stale the
     # nearest surviving observation would be.
-    - cron: "10 11 * * 6"
-    - cron: "40 13 * * 6"
-    - cron: "40 12 * * 0"
-    - cron: "40 18 * * 5"
-    - cron: "40 18 * * 1"
+    #
+    # EACH CRON FIRES EIGHT HOURS BEFORE ITS SLOT (ROUND_LEAD in
+    # scripts/wait_for_round.py), and the `wait` jobs hold the run until the
+    # slot: 03:10 is the Saturday 11:10 slot, 05:40 Saturday 13:40, 04:40
+    # Sunday 12:40, and 10:40 the Friday and Monday 18:40. Lateness up to
+    # eight hours now costs nothing; beyond it the run fetches as soon as it
+    # starts, as every run did before. Moving a slot means moving its cron to
+    # eight hours before it, and a cron that lands before midnight must move
+    # its day back one. No cron here crosses midnight today.
+    - cron: "10 3 * * 6"
+    - cron: "40 5 * * 6"
+    - cron: "40 4 * * 0"
+    - cron: "40 10 * * 5"
+    - cron: "40 10 * * 1"
   workflow_dispatch:
 
 permissions:
@@ -75,16 +92,59 @@ permissions:
   # anywhere else, and main only changes through pull requests.
   contents: write
 
-concurrency:
-  # Never let two snapshots write the feed at once.
-  group: closing-snapshot
-  cancel-in-progress: false
-
 jobs:
+  # Hold a scheduled run until its slot. Two jobs, because one may run for at
+  # most six hours and a slot is eight away; each waits at most 340 minutes
+  # and the second recomputes the slot from the same cron. A manual dispatch
+  # does not wait. No install, no secret, no credit, no write.
+  wait:
+    name: Wait for the slot
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Wait for the slot
+        env:
+          SCHEDULE: ${{ github.event.schedule }}
+        run: python3 scripts/wait_for_round.py --schedule "$SCHEDULE" --budget-minutes 340
+
+  wait-more:
+    name: Wait for the slot (continued)
+    needs: wait
+    # A wait that failed must not cost the observation: fetch late rather
+    # than not at all.
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Wait for the slot
+        env:
+          SCHEDULE: ${{ github.event.schedule }}
+        run: python3 scripts/wait_for_round.py --schedule "$SCHEDULE" --budget-minutes 340
+
   snapshot:
     name: Closing Snapshot
+    needs: wait-more
+    # Spelled out: a bare condition carries an implicit success() over every
+    # job upstream, so a failed wait would skip the snapshot.
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # On the job, not the workflow: scheduled runs wait for hours, and a
+    # workflow-level group keeps only one pending run, where the next one
+    # cancels it. Snapshots still never write the feed two at once.
+    concurrency:
+      group: closing-snapshot
+      cancel-in-progress: false
 
     steps:
       - name: Check out repository
@@ -206,6 +266,7 @@ jobs:
             --feed data/processed/price_feed_extra.csv
 
       - name: Append the observation to the price feed
+        id: append
         # Plumbing commit, and append-only. The prior feed is read from the
         # branch rather than from an artifact, so it survives the 90-day
         # artifact expiry, and a snapshot that runs twice adds nothing because
@@ -266,11 +327,18 @@ jobs:
           done
           if [ -z "$ENTRIES" ] && [ -z "$KEEP" ]; then
             echo "Nothing to publish."
+            # Distinct from `unchanged`: there was no feed on disk at all,
+            # not a feed that already matched the branch. The gate reports
+            # it rather than failing — an empty fetch is already warned
+            # about above — but it must not read as an append.
+            echo "state=nothing-to-publish" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           TREE=$(printf '%s\n%b' "$KEEP" "$ENTRIES" | grep -v '^$' | git mktree)
           if [ -n "$PARENT" ] && [ "$(git rev-parse "$PARENT^{tree}")" = "$TREE" ]; then
             echo "Feed unchanged; nothing to commit."
+            # A delivered outcome: the observation was already on the branch.
+            echo "state=unchanged" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           export GIT_AUTHOR_NAME="Closing Snapshot" GIT_AUTHOR_EMAIL="actions@github.com"
@@ -285,11 +353,38 @@ jobs:
           if [ -s data/processed/price_feed_extra.csv ]; then
             wc -l < data/processed/price_feed_extra.csv | xargs echo "extra-feed rows:"
           fi
+          echo "state=appended" >> "$GITHUB_OUTPUT"
 
       - name: Report the outcome
+        # THE STEP THAT PERSISTS ANYTHING WAS NEVER CHECKED. This read only
+        # `steps.prices.outcome` and printed "Snapshot finished." — so a
+        # snapshot that fetched several hundred book-level prices and then
+        # failed to push a single one of them finished green, with no
+        # annotation and a log line saying it was done.
+        #
+        # That matters more here than in most workflows. This feed is the only
+        # forward evidence the corner markets will ever have, `live_clv`
+        # ignores any observation taken after kick-off, and a snapshot that
+        # never publishes and one that publishes late produce the same empty
+        # column. Nothing downstream would ever notice.
+        #
+        # An empty state means the step died before either of its exits — the
+        # `set -u` abort, a failed fetch, a failed push.
         if: always()
         run: |
           if [ "${{ steps.prices.outcome }}" = "failure" ]; then
             echo "::warning::Prices could not be fetched this snapshot. One observation is missing; the record is intact."
           fi
+          if [ "${{ steps.efl_prices.outcome }}" = "failure" ]; then
+            echo "::warning::The EFL and beyond-the-Premier-League prices could not be fetched this snapshot."
+          fi
+          APPENDED="${{ steps.append.outputs.state }}"
+          if [ "${{ steps.append.outcome }}" != "success" ] || [ -z "$APPENDED" ]; then
+            echo "::error::The observation did not reach the price-feed branch (outcome=${{ steps.append.outcome }}, state=${APPENDED:-none}). Nothing was recorded, and a snapshot that publishes nothing is indistinguishable downstream from one that never ran."
+            exit 1
+          fi
+          if [ "$APPENDED" = "nothing-to-publish" ]; then
+            echo "::warning::This snapshot had no feed to publish. Nothing was recorded; check the fetch warnings above."
+          fi
+          echo "price-feed: $APPENDED"
           echo "Snapshot finished."

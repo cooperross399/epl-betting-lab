@@ -269,3 +269,166 @@ class TestTheVerdictReachesTheFeed:
         workflow = self._workflow()
 
         assert 'echo \'{"checked":0,"unchecked":0,"faults":0,"clean":null}\'' in workflow
+
+
+class TestTheKickoffIsFoundUnderTheNameTheCardUses:
+    """The first production run of the freshness audit reported 0 faults and 3
+    unchecked. All three were fixtures whose provider spelling differs from
+    Football-Data's: "AS Roma" against "Roma", "Atletico Madrid" against
+    "Ath Madrid", "Union Saint-Gilloise" against "St. Gilloise".
+
+    `latest_prices` renames the teams; the kickoff lookup was keyed on the feed's
+    raw names, so it missed exactly those. Gating was never wrong — that works on
+    the feed's own names throughout — but the kickoff never reached the record,
+    which is what the audit reads. A zero over unverified rows is the failure
+    mode `unchecked` exists to expose, and it did.
+    """
+
+    @staticmethod
+    def _feed(home: str, away: str, competition: str = "UCL") -> "pd.DataFrame":
+        import pandas as pd
+
+        return pd.DataFrame(
+            [
+                {
+                    "competition": competition,
+                    "commence_time": "2026-10-14T19:00:00Z",
+                    "date": "2026-10-14",
+                    "home_team": home,
+                    "away_team": away,
+                    "market": "btts",
+                    "selection": selection,
+                    "american_odds": 100,
+                    "book": "Book",
+                    "observed_at": "2026-09-28T06:00:00Z",
+                }
+                for selection in ("yes", "no")
+            ]
+        )
+
+    @pytest.mark.parametrize(
+        "provider_spelling, card_spelling",
+        [
+            ("AS Roma", "Roma"),
+            ("Atletico Madrid", "Ath Madrid"),
+        ],
+    )
+    def test_a_renamed_club_still_resolves_to_its_kickoff(
+        self, provider_spelling, card_spelling
+    ) -> None:
+        from epl_betting_lab.reports.extra_competitions_card import (
+            _fixture_kickoffs,
+            name_map_for,
+        )
+
+        rows = self._feed(provider_spelling, "Real Madrid")
+        rename = name_map_for("UCL")
+        renamed = rows.copy()
+        renamed["home_team"] = renamed["home_team"].map(rename)
+        renamed["away_team"] = renamed["away_team"].map(rename)
+
+        kickoffs = _fixture_kickoffs(renamed)
+
+        key = (card_spelling.casefold(), "real madrid")
+        assert key in kickoffs, (
+            f"the card calls this fixture {card_spelling}, and the kickoff map "
+            f"has {sorted(kickoffs)} — it was built under the provider's name"
+        )
+        assert kickoffs[key] is not None
+
+    def test_the_name_map_is_chosen_in_one_place(self) -> None:
+        """The choice was made inside `latest_prices` and needed in two places.
+        A second copy is how the two came to disagree."""
+        from epl_betting_lab.data.european_clubs import provider_name
+        from epl_betting_lab.data.international_teams import archive_name
+        from epl_betting_lab.reports.extra_competitions_card import name_map_for
+
+        assert name_map_for("UCL") is provider_name
+        assert name_map_for("UNL") is archive_name
+
+
+class TestTheCardRecordsTheKickoffItLookedUp:
+    """`_fixture_kickoffs` resolving a renamed club and `build_extra_card`
+    recording it are two different facts. Only the first was tested, so
+    reverting the fix in the card left the suite green — the third time today
+    that a producer was tested and its consumer was not.
+    """
+
+    def test_a_renamed_club_gets_a_kickoff_on_the_recorded_selection(
+        self, monkeypatch
+    ) -> None:
+        import pandas as pd
+
+        from epl_betting_lab.models.european_ratings import EUROPEAN_RATINGS
+        from epl_betting_lab.reports import extra_competitions_card as card_module
+
+        # A pool that knows the clubs by the names the CARD uses.
+        history = pd.DataFrame(
+            [
+                {
+                    "date": pd.Timestamp("2024-01-01") + pd.Timedelta(days=7 * i),
+                    "home_team": home,
+                    "away_team": away,
+                    "home_goals": hg,
+                    "away_goals": ag,
+                }
+                for i in range(40)
+                for home, away, hg, ag in (
+                    ("Roma", "Real Madrid", 1, 1),
+                    ("Real Madrid", "Roma", 2, 1),
+                )
+            ]
+        )
+        monkeypatch.setattr(
+            card_module, "_pool_for", lambda spec: (history, EUROPEAN_RATINGS, None)
+        )
+        monkeypatch.setattr(
+            card_module,
+            "evaluate_btts",
+            lambda projections, odds, *a, **k: pd.DataFrame(
+                [
+                    {
+                        "home_team": "Roma",
+                        "away_team": "Real Madrid",
+                        "market": "btts",
+                        "selection": "yes",
+                        "american_odds": 120,
+                        "book": "Book",
+                        "status": "BETTABLE",
+                        "calibrated_edge": 0.09,
+                        "raw_edge": 0.09,
+                    }
+                ]
+            ),
+        )
+
+        # The feed names it the way the PROVIDER does.
+        feed = pd.DataFrame(
+            [
+                {
+                    "competition": "UCL",
+                    "commence_time": "2026-10-14T19:00:00Z",
+                    "date": "2026-10-14",
+                    "home_team": "AS Roma",
+                    "away_team": "Real Madrid",
+                    "market": "btts",
+                    "selection": selection,
+                    "american_odds": 120,
+                    "book": "Book",
+                    "observed_at": "2026-09-28T06:00:00Z",
+                }
+                for selection in ("yes", "no")
+            ]
+        )
+
+        built = card_module.build_extra_card(
+            feed, "UCL", now=pd.Timestamp("2026-09-28 18:17", tz="UTC")
+        )
+
+        assert not built.selections.empty, "the fixture did not reach the card at all"
+        kickoff = built.selections.iloc[0]["kickoff_time"]
+        assert kickoff, (
+            "the selection was recorded with no kickoff, so the freshness audit "
+            "cannot check it — the lookup used the provider's name and the card "
+            "uses Football-Data's"
+        )

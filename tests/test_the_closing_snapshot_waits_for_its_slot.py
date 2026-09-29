@@ -177,3 +177,15 @@ def test_the_concurrency_group_is_on_the_snapshot_job() -> None:
     }
     for name in ("wait", "wait-more"):
         assert "concurrency" not in document["jobs"][name]
+
+
+def test_an_at_time_just_reached_is_now_not_tomorrow() -> None:
+    """The NHL lab's run 36582803431: a second wait leg starting seconds after
+    its `--at` time read it as tomorrow's and failed the run."""
+    module = _script()
+    utc = timezone.utc
+    now = datetime(2026, 9, 29, 19, 45, 6, tzinfo=utc)
+    assert module.target_for("", "19:45", now) == datetime(2026, 9, 29, 19, 45, tzinfo=utc)
+    assert module.target_for("", "00:45", now) == datetime(2026, 9, 30, 0, 45, tzinfo=utc)
+    late = datetime(2026, 9, 30, 0, 10, tzinfo=utc)
+    assert module.target_for("", "23:50", late) == datetime(2026, 9, 29, 23, 50, tzinfo=utc)

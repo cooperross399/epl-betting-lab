@@ -585,6 +585,7 @@ jobs:
             --degraded-file run_degraded.txt
 
       - name: Email the card
+        id: email
         # Delivery. GitHub emails everyone watching the issue, so commenting is
         # the whole mechanism: no SMTP server, no credentials, no third party.
         #
@@ -718,6 +719,7 @@ jobs:
           git push "$REMOTE" "$COMMIT:refs/heads/price-feed"
 
       - name: Publish the card to the card-feed branch
+        id: publish
         # This is the delivery now. The SOCCER CARD routine reads today's card
         # from this branch with the plain git credential a cloud session
         # already holds for the repository — no API call, no extra token, no
@@ -804,6 +806,10 @@ jobs:
                && [ "$PREV_CARD" = "rendered" ]; then
               echo "card-feed left alone: $DAY already holds a good card; this run is degraded=$DEGRADED, card=$HAVE_CARD."
               echo "The blocked card is in this run's summary and in the issue comment."
+              # Declining on purpose is a delivered outcome, not a failure.
+              # "Report the outcome" can only tell the two apart because every
+              # exit from this step says which one it took.
+              echo "state=left-alone" >> "$GITHUB_OUTPUT"
               exit 0
             fi
           fi
@@ -816,6 +822,7 @@ jobs:
           fi
           git push "$REMOTE" "$COMMIT:refs/heads/card-feed"
           echo "card-feed updated for $DAY."
+          echo "state=published" >> "$GITHUB_OUTPUT"
 
       - name: Upload reports
         if: always()
@@ -885,6 +892,21 @@ jobs:
         # Last, and the only step that can fail the job. Everything above is
         # allowed to degrade so that the card still gets built, summarised, and
         # delivered; the run then finishes red so the failure notice arrives.
+        #
+        # IT COULD NOT SEE DELIVERY. This step called itself the only one that
+        # can fail the job while reading exactly two things: `steps.rebuild`
+        # and `steps.health`. The health step runs hundreds of lines earlier,
+        # so its outputs are fixed before a single byte is delivered. Both
+        # delivery steps are `continue-on-error` and neither carried an `id`,
+        # so their outcomes were not merely unchecked — they were
+        # unreferenceable. A run whose card-feed push failed printed "Clean
+        # run." and went green.
+        #
+        # That is not hypothetical here. The card-feed publish is the delivery;
+        # its own comment promises that "a missing commit for today means the
+        # workflow itself did not finish". The workflow finished, green, and
+        # the promise was kept only by an external routine noticing the gap a
+        # day later.
         if: always()
         run: |
           echo "This job refetched prices and rebuilt reports."
@@ -893,6 +915,28 @@ jobs:
           if [ "${{ steps.rebuild.outcome }}" = "failure" ]; then
             echo "Some reports failed to rebuild."
           fi
+
+          # Delivery first, and before the expected-refusal exit below. A
+          # refusal by policy is not a fault; a card that never reached the
+          # feed is one either way, so it must not be swallowed by the
+          # "not a fault" path.
+          #
+          # An EMPTY state is the case worth naming: the step sets it on both
+          # of its exits, so empty means it died before reaching either — the
+          # `set -u` abort, the failed fetch, the failed push. That is exactly
+          # the shape that produced a day of green runs and no card.
+          PUBLISHED="${{ steps.publish.outputs.state }}"
+          if [ "${{ steps.publish.outcome }}" != "success" ] || [ -z "$PUBLISHED" ]; then
+            echo "::error::The card did not reach the card-feed branch (outcome=${{ steps.publish.outcome }}, state=${PUBLISHED:-none}). The SOCCER CARD routine reads that branch, so nothing was delivered today."
+            exit 1
+          fi
+          echo "card-feed: $PUBLISHED"
+          if [ "${{ steps.email.outcome }}" != "success" ]; then
+            # A warning, not a failure: the feed is the delivery and the email
+            # is a convenience. Said out loud so a silent inbox has a reason.
+            echo "::warning::The issue comment step did not succeed (${{ steps.email.outcome }}). The card is on the card-feed branch regardless."
+          fi
+
           if [ "${{ steps.health.outputs.expected_refusal }}" = "true" ]; then
             # The policy declined, which is the policy working. A red run here
             # produced a week of alarming mail and a health check that

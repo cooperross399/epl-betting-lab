@@ -277,3 +277,67 @@ class TestTheDisclosureActuallyReachesTheCard:
 
         assert seen, "the summary never rendered a scoreboard"
         assert [s.staked for s in seen[0]] == [4]
+
+
+class TestTheUnbettableNoteReachesTheCard:
+    """The helper was tested and the card's use of it was not.
+
+    `unbettable_books` had four assertions on its return value and nothing
+    asserted the card ever prints it, so deleting the call site was
+    invisible — the producer tested, the line handing its result to the
+    consumer not. Third time in one day for that shape.
+    """
+
+    def _card(self, monkeypatch, books: list[str]):
+        import sys
+        from pathlib import Path as _Path
+
+        sys.path.insert(0, str(_Path(__file__).parent))
+        from test_extra_competitions_card import _stub_international_pool
+
+        from epl_betting_lab.reports.extra_competitions_card import build_extra_card
+
+        _stub_international_pool(monkeypatch)
+        feed = pd.DataFrame(
+            {
+                "competition": ["UNL"] * len(books),
+                "observed_at": ["2026-09-15T10:00:00Z"] * len(books),
+                "provider_event_id": ["evt-9"] * len(books),
+                "date": ["2026-09-16"] * len(books),
+                "home_team": ["France"] * len(books),
+                "away_team": ["Spain"] * len(books),
+                "market": ["double_chance"] * len(books),
+                "selection": (["home_or_draw", "draw_or_away"] * len(books))[: len(books)],
+                "book": books,
+                "american_odds": ([120, -110] * len(books))[: len(books)],
+            }
+        )
+        return build_extra_card(
+            feed, "UNL", now=pd.Timestamp("2026-09-15T12:00:00Z")
+        )
+
+    def test_the_card_names_a_book_it_will_not_price_at(self, monkeypatch) -> None:
+        card = self._card(monkeypatch, [BETTABLE, UNBETTABLE])
+
+        assert any(UNBETTABLE in note for note in card.notes), card.notes
+
+    def test_the_control_no_note_when_every_book_is_bettable(
+        self, monkeypatch
+    ) -> None:
+        card = self._card(monkeypatch, [BETTABLE, "FanDuel"])
+
+        assert not any("not on the bettable list" in note for note in card.notes)
+
+    def test_an_all_unbettable_feed_says_why_rather_than_no_price(
+        self, monkeypatch
+    ) -> None:
+        """The early return reported "No price on file", which is false.
+
+        The feed was quoted all along; the filter emptied it. The note
+        explaining that sat forty lines below a path this case never reaches.
+        """
+        card = self._card(monkeypatch, [UNBETTABLE, UNBETTABLE])
+
+        joined = " ".join(card.notes)
+        assert "No bettable" in joined, card.notes
+        assert UNBETTABLE in joined

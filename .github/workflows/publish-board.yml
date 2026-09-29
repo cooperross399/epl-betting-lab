@@ -136,10 +136,19 @@ jobs:
           fi
 
           mkdir -p dist/data/history
+          # PRIOR runs only. `gh run list` includes the run executing this
+          # step, so counting every row makes `candidates` at least 1 on the
+          # first publish this repository ever does — and a count that can
+          # never be zero cannot distinguish "nothing has been published yet"
+          # from "the window is exhausted", which is the only distinction it
+          # was added to make.
           seen=0
           from_run=""
           for candidate in $(gh run list --workflow publish-board.yml \
             --limit 10 --json databaseId --jq '.[].databaseId'); do
+            if [ "$candidate" = "${{ github.run_id }}" ]; then
+              continue
+            fi
             seen=$((seen + 1))
             if gh run download "$candidate" --name board-history --dir dist/data/history 2>/dev/null; then
               from_run="$candidate"
@@ -150,11 +159,8 @@ jobs:
           if [ -n "$from_run" ]; then
             echo "Restored $boards frozen board(s) from run $from_run."
           else
-            echo "No board-history artifact on any of the last $seen publish run(s); the history starts today."
+            echo "No board-history artifact on any of the last $seen prior publish run(s)."
           fi
-          # Read by "The history must not shrink" further down. `seen` is there
-          # so that "nothing to restore" can be told apart from "nothing has
-          # ever been published", which are the same empty directory.
           echo "boards=$boards" >> "$GITHUB_OUTPUT"
           echo "candidates=$seen" >> "$GITHUB_OUTPUT"
 
@@ -221,6 +227,7 @@ jobs:
         run: |
           set -u
           before="${{ steps.restore.outputs.boards }}"
+          candidates="${{ steps.restore.outputs.candidates }}"
           after=$(find dist/data/history -maxdepth 1 -name '*.json' ! -name index.json | wc -l | tr -d ' ')
 
           if [ "${{ steps.restore.outcome }}" != "success" ]; then
@@ -234,6 +241,28 @@ jobs:
           if [ "$after" -lt "$before" ]; then
             echo "::error::The history shrank: restored $before frozen board(s), about to publish $after. Refusing to overwrite the chain and the Archive page."
             exit 1
+          fi
+          # THE TOTAL WIPE, which the two checks above cannot see. They refuse
+          # a partial shrink; with `before` at 0 neither fires, because
+          # `-z "0"` is false and nothing is less than zero. Zero restored is
+          # exactly what the loop produces when none of the ten candidates
+          # carries the artifact, and the run would then publish a one-entry
+          # history over the whole chain — the failure this step exists for,
+          # in the one state it was blind to.
+          #
+          # `candidates` is what tells the two zeros apart, and until now it
+          # was computed, written to the step output, described in a comment
+          # as "read by The history must not shrink", and read by nothing.
+          if [ -z "$candidates" ]; then
+            echo "::error::The restore step reported no candidate count, so a first run cannot be told from an exhausted window. Refusing to publish."
+            exit 1
+          fi
+          if [ "$before" -eq 0 ] && [ "$candidates" -gt 0 ]; then
+            echo "::error::$candidates prior publish run(s) exist and none carried a board-history artifact, so this run would publish a history of $after over whatever the Archive already holds. Refusing. Recover by re-running a publish whose artifact is still within retention, or clear this by hand if the history is genuinely meant to restart."
+            exit 1
+          fi
+          if [ "$before" -eq 0 ]; then
+            echo "::notice::No prior publish run; the history starts with this one."
           fi
           echo "History intact: $before restored, $after to publish."
 

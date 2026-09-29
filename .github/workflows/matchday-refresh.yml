@@ -841,7 +841,18 @@ jobs:
           fi
           git push "$REMOTE" "$COMMIT:refs/heads/card-feed"
           echo "card-feed updated for $DAY."
-          echo "state=published" >> "$GITHUB_OUTPUT"
+          # WHAT reached the feed, not merely THAT something did. This said
+          # `published` on both paths, so the gate could tell a push from a
+          # failed push and could not tell a card from the one-line
+          # placeholder written a few lines above. A renderer crash produced
+          # a green run, a placeholder on the feed, and a log asserting the
+          # card was there — the 2026-09-15 outage, surviving the gate
+          # written to catch it.
+          if [ "$HAVE_CARD" = "true" ]; then
+            echo "state=published" >> "$GITHUB_OUTPUT"
+          else
+            echo "state=placeholder" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Upload reports
         if: always()
@@ -954,10 +965,22 @@ jobs:
             echo "::error::The card did not reach the card-feed branch (outcome=${{ steps.publish.outcome }}, state=${PUBLISHED:-none}). The SOCCER CARD routine reads that branch, so nothing was delivered today."
             exit 1
           fi
+          if [ "$PUBLISHED" = "placeholder" ]; then
+            # The push worked and there was no card in it. `degraded` cannot
+            # see this: the health step finishes hundreds of lines earlier,
+            # and a healthy run whose renderer crashed reports degraded=false
+            # — that is the 2026-09-15 case, written up beside the publish
+            # step. Without this line the run is green, the feed holds "No
+            # card was rendered this run.", and the log says the card is there.
+            echo "::error::Only the no-card placeholder reached the card-feed branch. The renderer produced nothing this run, so there is no card to read."
+            exit 1
+          fi
           echo "card-feed: $PUBLISHED"
           if [ "${{ steps.email.outcome }}" != "success" ]; then
             # A warning, not a failure: the feed is the delivery and the email
             # is a convenience. Said out loud so a silent inbox has a reason.
+            # Only reachable once the feed is known to hold a real card, so
+            # "regardless" is true where it is printed.
             echo "::warning::The issue comment step did not succeed (${{ steps.email.outcome }}). The card is on the card-feed branch regardless."
           fi
 

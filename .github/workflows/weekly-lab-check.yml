@@ -84,7 +84,7 @@ jobs:
           previous=$(gh run list --workflow matchday-refresh.yml \
             --limit 10 --json createdAt \
             --jq '.[].createdAt' | tr '\n' ' ')
-          python scripts/check_schedule_health.py $previous --fail-when-stale
+          python scripts/check_schedule_health.py $previous --fail-when-stale --require-runs
 
       - name: Watch for a run of matchday failures
         # "Did the cron fire" and "is it succeeding" are different questions.
@@ -110,7 +110,7 @@ jobs:
             --limit 10 --json conclusion \
             --jq '.[].conclusion // "pending"' | tr '\n' ' ')
           python scripts/check_schedule_health.py \
-            --conclusions $conclusions --fail-when-streaking
+            --conclusions $conclusions --fail-when-streaking --require-runs
 
       - name: Watch that the closing snapshot is still running
         # Added 2026-09-02 with the price feed, because that feed is the only

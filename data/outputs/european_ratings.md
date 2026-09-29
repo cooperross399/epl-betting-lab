@@ -56,7 +56,7 @@ It predicts goals better than a naive prior. **It is not evidence of beating a p
 | Man City | ENG | 1.545 | 0.657 |
 | Celtic | SCO | 1.535 | 0.747 |
 
-Read that ordering with care. PSV Eindhoven, Sporting, Benfica, Fenerbahce, Galatasaray and Celtic all sit above Real Madrid and Manchester City, which is not a credible European power ranking. A club that dominates a weak domestic league scores heavily against weak opposition, and the 701 European ties correct that only partly: most of a club's matches are domestic, so most of its rating is. The bridge is strong enough to carry club-level information out of sample — that is what the test above measures — and not strong enough to make the attack column a ranking. A Champions League price built on it should expect the weak-league sides to be overrated.
+Read that ordering with care. PSV Eindhoven, Sporting, Benfica, Fenerbahce, Galatasaray and Celtic all sit above Real Madrid and Manchester City, which is not a credible European power ranking. A club that dominates a weak domestic league scores heavily against weak opposition, and the 868 European ties correct that only partly: most of a club's matches are domestic, so most of its rating is. The bridge is strong enough to carry club-level information out of sample — that is what the test above measures — and not strong enough to make the attack column a ranking. A Champions League price built on it should expect the weak-league sides to be overrated.
 
 
 ## Who cannot be rated

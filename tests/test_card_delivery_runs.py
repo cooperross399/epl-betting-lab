@@ -453,3 +453,36 @@ def test_a_degraded_first_card_of_the_day_still_reports_published(
     feed.run(card="# Card\n\nDegraded but real.\n", degraded="true")
 
     assert feed.state() == "published"
+
+
+def test_a_run_that_rendered_nothing_reports_a_placeholder(tmp_path: Path) -> None:
+    """The state has to say WHAT reached the feed, not merely that a push happened.
+
+    It said `published` on both paths. So a renderer crash pushed the
+    one-line placeholder the step writes itself, reported `published`, and
+    the outcome gate — which exists to catch exactly this — printed
+    "card-feed: published" and "Clean run." A green run, no card, and a log
+    asserting the card was there.
+
+    `degraded` cannot cover it: the health step finishes hundreds of lines
+    earlier, and the 2026-09-15 case in this repository was a healthy run
+    whose renderer had crashed reporting `degraded: false`.
+    """
+    feed = Feed(tmp_path)
+    feed.run(card=None, degraded="false")
+
+    assert feed.state() == "placeholder"
+    assert feed.published() == "No card was rendered this run."
+    assert feed.status()["card"] == "missing"
+
+
+def test_a_placeholder_on_a_day_that_already_holds_a_card_is_left_alone(
+    tmp_path: Path,
+) -> None:
+    """The control for the case #302 already covered, so the two stay apart."""
+    feed = Feed(tmp_path)
+    feed.run(card="# Card\n\nA real card.\n")
+    feed.run(card=None, degraded="false")
+
+    assert feed.state() == "left-alone"
+    assert feed.published() == "# Card\n\nA real card."

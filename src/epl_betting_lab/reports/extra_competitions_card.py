@@ -597,10 +597,34 @@ def build_extra_card(
     gate = gate_slate(rows, now=moment)
     prices = latest_prices(gate.kept, competition)
     gate_notes = _gate_notes(gate, spec)
+    # Built here rather than after the early return below. A feed quoting
+    # only books that cannot be bet leaves `prices` empty, which takes the
+    # "No price on file" path — a sentence that is true about the filter and
+    # false about the feed, and the note explaining the difference sat forty
+    # lines further down where that path never reaches. The reader would see
+    # a competition reported as unquoted when it was quoted all along.
+    ignored = unbettable_books(gate.kept, competition)
+    ignored_note = (
+        [
+            f"{len(ignored)} book(s) quoting this competition are not priced "
+            f"against, because they are not on the bettable list: "
+            f"{', '.join(ignored)}. If one of those should be bettable it is a "
+            "line missing from `books.BETTABLE_BOOKS`, not a filter to loosen."
+        ]
+        if ignored
+        else []
+    )
     if prices.empty:
+        quoted = not gate.kept.empty
+        reason = (
+            f"No bettable {spec.name} price on file: every quote on the feed "
+            "is from a book that is not bet at."
+            if quoted and ignored
+            else f"No {spec.name} price on file."
+        )
         return ExtraCard(
             pd.DataFrame(),
-            gate_notes + [f"No {spec.name} price on file."],
+            gate_notes + [reason] + ignored_note,
             gate=gate,
         )
 
@@ -612,15 +636,7 @@ def build_extra_card(
         # double chance and draw-no-bet at once.
         model.avg_home_goals, model.avg_away_goals = baseline
 
-    notes: list[str] = list(gate_notes)
-    ignored = unbettable_books(gate.kept, competition)
-    if ignored:
-        notes.append(
-            f"{len(ignored)} book(s) quoting this competition are not priced "
-            f"against, because they are not on the bettable list: "
-            f"{', '.join(ignored)}. If one of those should be bettable it is a "
-            "line missing from `books.BETTABLE_BOOKS`, not a filter to loosen."
-        )
+    notes: list[str] = list(gate_notes) + ignored_note
     for market in sorted(POOL_EXCLUDED_MARKETS.get(spec.pool, ())):
         notes.append(
             f"`{market}` is not bet here: the model sits about 8 points below "
@@ -774,6 +790,47 @@ def build_extra_card(
     rename = name_map_for(competition)
     renamed["home_team"] = renamed["home_team"].map(rename)
     renamed["away_team"] = renamed["away_team"].map(rename)
+    # The provider's own identity for the fixture, attached the same way and
+    # for the same reason as the kickoff below.
+    #
+    # It was carried into `latest_prices` and stopped there. Every strategy
+    # builds its rows from a fixed key set — `evaluate_btts` and the rest each
+    # write out home_team, away_team, market, selection, odds, book and the
+    # grades — so a column added to `prices` does not survive evaluation.
+    # `extra_card_record` then read `row.get("provider_event_id")` off a frame
+    # that had never had one and recorded the empty string, and the CLV join
+    # fell back to names: the record says "Roma", the feed says "AS Roma".
+    #
+    # Caught only by re-auditing. The test that was supposed to cover it built
+    # an `ExtraCard` straight from `latest_prices` output, which production
+    # never does — the third fixture in one day to supply what production
+    # drops.
+    events = {
+        (
+            str(row["home_team"]).strip().casefold(),
+            str(row["away_team"]).strip().casefold(),
+            str(row["market"]).strip().casefold(),
+            str(row["selection"]).strip().casefold(),
+        ): str(row.get("provider_event_id") or "")
+        for _, row in prices.iterrows()
+    }
+    selections["provider_event_id"] = [
+        events.get(
+            (
+                str(home).strip().casefold(),
+                str(away).strip().casefold(),
+                str(market).strip().casefold(),
+                str(selection).strip().casefold(),
+            ),
+            "",
+        )
+        for home, away, market, selection in zip(
+            selections["home_team"],
+            selections["away_team"],
+            selections["market"],
+            selections["selection"],
+        )
+    ]
     kickoffs = _fixture_kickoffs(renamed)
     selections["kickoff_time"] = [
         kickoffs.get(

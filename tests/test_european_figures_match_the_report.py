@@ -116,3 +116,25 @@ def test_the_generator_no_longer_types_a_tie_count_into_its_prose() -> None:
     assert "pool.ties" in "\n".join(prose), (
         "the tie count in that sentence has to be interpolated, not typed"
     )
+
+
+def test_the_report_does_not_contradict_itself() -> None:
+    """Both mentions of the tie count, not just the one the generator writes.
+
+    The generator was fixed to interpolate `pool.ties` and the COMMITTED
+    report was left alone, so `european_ratings.md` went on saying 868 in
+    its summary line and 701 twelve paragraphs down — the exact
+    self-contradiction the change was supposed to remove, still sitting in
+    the artifact a reader opens.
+
+    Pinning the constants to the report cannot catch this: it reads the
+    first match and stops.
+    """
+    counts = {
+        int(found.replace(",", ""))
+        for found in re.findall(r"([\d,]+) European ties", _report())
+    }
+
+    assert counts == {BRIDGE_TIES}, (
+        f"the report states {sorted(counts)} European ties in different places"
+    )

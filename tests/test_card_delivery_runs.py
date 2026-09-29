@@ -147,10 +147,17 @@ class Feed:
         subprocess.run(["git", "init", "-q", str(self.work)], check=True)
         self.script = root / "publish.sh"
         self.script.write_text(_publish_step(), encoding="utf-8")
+        # The runner always sets this; the step writes its delivery verdict
+        # there and "Report the outcome" fails the job when it comes back
+        # empty. Supplying it here is what lets these tests assert the verdict
+        # the gate will actually read, rather than grepping the YAML for it.
+        self.output = root / "github_output"
+        self.output.write_text("", encoding="utf-8")
 
     def run(self, *, card: str | None, degraded: str = "false") -> str:
         for stale in ("card_comment.md", "card_status.json"):
             (self.work / stale).unlink(missing_ok=True)
+        self.output.write_text("", encoding="utf-8")
         if card is not None:
             (self.work / "card_comment.md").write_text(card, encoding="utf-8")
         # `bash -e`, because that is the shell GitHub gives a `run:` block —
@@ -167,6 +174,7 @@ class Feed:
                 "HOME": str(self.work),
                 "TEST_REMOTE": str(self.remote),
                 "TEST_DEGRADED": degraded,
+                "GITHUB_OUTPUT": str(self.output),
                 "GIT_AUTHOR_NAME": "t",
                 "GIT_AUTHOR_EMAIL": "t@t",
                 "GIT_COMMITTER_NAME": "t",
@@ -177,6 +185,17 @@ class Feed:
             "the publish step aborted:\n" + done.stdout + done.stderr
         )
         return done.stdout + done.stderr
+
+    def state(self) -> str:
+        """What the step told the outcome gate it did.
+
+        Empty means the step never reached either of its exits — the case the
+        gate reads as a delivery failure.
+        """
+        for line in self.output.read_text(encoding="utf-8").splitlines():
+            if line.startswith("state="):
+                return line.split("=", 1)[1]
+        return ""
 
     def status(self) -> dict:
         shown = subprocess.run(
@@ -397,3 +416,40 @@ def test_a_quiet_matchday_still_ends_the_step_cleanly(tmp_path: Path) -> None:
     assert done.returncode == 0, done.stdout + done.stderr
     assert "Not emailing" in done.stdout
     assert (tmp_path / "card_comment.md").read_text().strip() == "a real card"
+
+
+def test_a_published_card_reports_itself_published(tmp_path: Path) -> None:
+    """The gate reads this string. It has to be the one the step writes.
+
+    Counting `>> "$GITHUB_OUTPUT"` lines in the YAML proves a write exists,
+    not that it runs or what it says. This runs the step.
+    """
+    feed = Feed(tmp_path)
+    feed.run(card="# Card\n\nA real card.\n")
+
+    assert feed.state() == "published"
+
+
+def test_declining_to_replace_a_good_card_reports_left_alone(tmp_path: Path) -> None:
+    """A deliberate skip is a delivered outcome, and must not read as a death.
+
+    Without this the protection added on 2026-09-15 — a run with nothing
+    better to say never replaces a good card from the same day — would turn
+    every later trigger of a healthy matchday into a red run.
+    """
+    feed = Feed(tmp_path)
+    feed.run(card="# Card\n\nA real card.\n")
+    feed.run(card=None, degraded="true")
+
+    assert feed.state() == "left-alone"
+    assert feed.published() == "# Card\n\nA real card."
+
+
+def test_a_degraded_first_card_of_the_day_still_reports_published(
+    tmp_path: Path,
+) -> None:
+    """Degraded is not undelivered. The feed is how the routine reads the day."""
+    feed = Feed(tmp_path)
+    feed.run(card="# Card\n\nDegraded but real.\n", degraded="true")
+
+    assert feed.state() == "published"

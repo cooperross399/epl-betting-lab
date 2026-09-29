@@ -187,6 +187,7 @@ jobs:
             --provider odds_api --live --overwrite-staging --include-event-markets
 
       - name: Restore the price feeds before collecting into them
+        id: restore_feeds
         # `>` truncates its target before the command on the left runs. So
         #
         #     git show ...:price_feed_efl.csv > data/processed/price_feed_efl.csv
@@ -233,9 +234,18 @@ jobs:
             echo "no $DEST on the branch yet; starting one."
           }
 
+          # The fetch's failure was silent: `2>/dev/null` with no `else`, so
+          # the step exited 0 printing nothing at all and carried no `id` for
+          # the gate to read. The append step below then started from an
+          # empty frame and published this run's rows over the branch — the
+          # shrink that guard now refuses. Say which happened, either way.
           if git fetch "$REMOTE" +refs/heads/price-feed:refs/price-feed-tip 2>/dev/null; then
             restore_feed price_feed.csv price_feed.csv
             restore_feed price_feed_extra.csv price_feed_extra.csv price_feed_efl.csv
+            echo "state=restored" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::Could not fetch the price-feed branch, so this run starts from no feed at all. The append step will refuse to publish a shorter feed than the branch holds."
+            echo "state=no-fetch" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Observe EFL prices
@@ -318,13 +328,42 @@ jobs:
           if [ -n "$PARENT" ]; then
             KEEP=$(git ls-tree "$PARENT" | grep -vE "	($REPLACING)$" || true)
           fi
+          # A FEED MAY NOT SHRINK. The restore above and the PARENT here come
+          # from two independent `git fetch` calls and nothing connects them.
+          # If the first fails and the second succeeds — and the restore step
+          # exits 0 printing nothing when its fetch fails, with no `id` for
+          # the gate to read — this step appends to an EMPTY frame
+          # (`load_feed` returns empty for a missing path) and then publishes
+          # only this run's rows over a valid parent. Every name is in
+          # REPLACING unconditionally, so the parent's copies are stripped
+          # and only what is on disk is re-added.
+          #
+          # Reproduced against a bare remote: feeds of 64,001 and 5,001 rows
+          # came back as 501 and 301, pushed as a fast-forward and accepted,
+          # with the run green and the gate printing "price-feed: appended".
+          # The rows survive in `price-feed~1` because the push is not a
+          # force, so the loss is recoverable by hand — but nothing noticed.
           ENTRIES=""
+          SHRANK=""
           for FEED in price_feed.csv price_feed_extra.csv; do
             if [ -s "data/processed/$FEED" ]; then
+              NOW_ROWS=$(wc -l < "data/processed/$FEED" | tr -d ' ')
+              WAS_ROWS=0
+              if [ -n "$PARENT" ]; then
+                WAS_ROWS=$(git show "$PARENT:$FEED" 2>/dev/null | wc -l | tr -d ' ')
+              fi
+              if [ "$NOW_ROWS" -lt "$WAS_ROWS" ]; then
+                SHRANK="${SHRANK}${FEED} ${WAS_ROWS}->${NOW_ROWS}; "
+              fi
               B=$(git hash-object -w "data/processed/$FEED")
               ENTRIES="${ENTRIES}100644 blob ${B}\t${FEED}\n"
             fi
           done
+          if [ -n "$SHRANK" ]; then
+            echo "::error::A feed would lose rows: ${SHRANK}This run did not start from the branch's copy — most likely the restore fetch failed while this step's succeeded. Refusing to publish. The branch is untouched; fix the restore and re-run."
+            echo "state=refused-shrink" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
           if [ -z "$ENTRIES" ] && [ -z "$KEEP" ]; then
             echo "Nothing to publish."
             # Distinct from `unchanged`: there was no feed on disk at all,
@@ -377,6 +416,9 @@ jobs:
           fi
           if [ "${{ steps.efl_prices.outcome }}" = "failure" ]; then
             echo "::warning::The EFL and beyond-the-Premier-League prices could not be fetched this snapshot."
+          fi
+          if [ "${{ steps.restore_feeds.outputs.state }}" = "no-fetch" ]; then
+            echo "::warning::This run could not read the existing price feed before collecting into it."
           fi
           APPENDED="${{ steps.append.outputs.state }}"
           if [ "${{ steps.append.outcome }}" != "success" ] || [ -z "$APPENDED" ]; then

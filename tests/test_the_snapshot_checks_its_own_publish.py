@@ -51,6 +51,8 @@ def _gate(**values):
         (r"\$\{\{ steps\.append\.outcome \}\}", values.get("append", "success")),
         (r"\$\{\{ steps\.prices\.outcome \}\}", values.get("prices", "success")),
         (r"\$\{\{ steps\.efl_prices\.outcome \}\}", values.get("efl", "success")),
+        (r"\$\{\{ steps\.restore_feeds\.outputs\.state \}\}",
+         values.get("restore", "restored")),
     ):
         script = re.sub(expression, value, script)
     assert "${{" not in script
@@ -144,3 +146,91 @@ def test_every_exit_from_the_publish_step_reports_a_state() -> None:
         for word in ("appended", "unchanged", "nothing-to-publish")
         if f"state={word}" in code
     }
+
+
+class TestAFeedMayNotShrink:
+    """The restore and the publish fetch the branch independently.
+
+    Nothing connects them. If the restore's fetch fails and the append
+    step's succeeds, the append starts from an empty frame — `load_feed`
+    returns empty for a missing path — and publishes only this run's rows
+    over a valid parent, because every feed name is in REPLACING
+    unconditionally. Reproduced against a bare remote: feeds of 64,001 and
+    5,001 rows came back as 501 and 301, pushed as a fast-forward and
+    accepted, with the run green and the gate printing "price-feed:
+    appended".
+
+    The rows survive in `price-feed~1` because the push is not a force, so
+    the loss is recoverable by hand. Nothing noticed, which is the defect.
+    """
+
+    def _append_script(self) -> str:
+        return _named("Append the observation to the price feed")["run"]
+
+    def test_the_publish_step_compares_against_the_parent(self) -> None:
+        script = self._append_script()
+
+        assert 'git show "$PARENT:$FEED"' in script, (
+            "nothing reads the branch's own row count, so a truncated feed "
+            "publishes as a fast-forward and is accepted"
+        )
+        assert '"$NOW_ROWS" -lt "$WAS_ROWS"' in script
+
+    def test_a_shrinking_feed_is_refused_not_warned(self) -> None:
+        # Extracted by LINES to the block's own `fi`. Splitting the text on
+        # "fi" cuts at the first two letters it finds, which is inside the
+        # message, not at the end of the block — the same cut that made an
+        # earlier version of this suite assert against half a statement.
+        lines = self._append_script().splitlines()
+        start = next(
+            i for i, l in enumerate(lines) if 'if [ -n "$SHRANK" ]; then' in l
+        )
+        block_lines = []
+        for line in lines[start:]:
+            block_lines.append(line)
+            if line.strip() == "fi":
+                break
+        block = "\n".join(block_lines)
+
+        assert "::error::" in block
+        assert "exit 1" in block
+        assert "state=refused-shrink" in block, (
+            "the gate reads an empty state as a death; a deliberate refusal "
+            "has to say which it was"
+        )
+
+    def test_the_refusal_says_the_branch_is_untouched(self) -> None:
+        """A message that stops a publish has to say what was and was not done."""
+        script = self._append_script()
+
+        assert "The branch is untouched" in script
+
+    def test_the_restore_reports_a_failed_fetch(self) -> None:
+        """It exited 0 printing nothing, with no id for the gate to read."""
+        step = _named("Restore the price feeds before collecting into them")
+
+        assert step.get("id") == "restore_feeds"
+        assert "state=no-fetch" in step["run"]
+        assert "state=restored" in step["run"]
+
+    def test_the_gate_surfaces_a_failed_restore(self, tmp_path: Path) -> None:
+        script = _named("Report the outcome")["run"]
+
+        assert "steps.restore_feeds.outputs.state" in script
+
+
+def test_the_gate_warns_when_the_restore_could_not_read_the_branch(
+    tmp_path: Path,
+) -> None:
+    """Run it. The restore's failure was silent in every sense."""
+    done = _run(tmp_path, restore="no-fetch")
+
+    assert done.returncode == 0, done.stdout + done.stderr
+    assert "could not read the existing price feed" in done.stdout
+
+
+def test_the_control_a_restored_run_says_nothing_about_it(tmp_path: Path) -> None:
+    done = _run(tmp_path, restore="restored")
+
+    assert done.returncode == 0, done.stdout + done.stderr
+    assert "could not read the existing price feed" not in done.stdout

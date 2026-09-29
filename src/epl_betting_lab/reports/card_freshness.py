@@ -30,6 +30,12 @@ import pandas as pd
 #: Where each card writes what it recommended.
 CARD_JSON = "automated_card.json"
 EXTRA_CARD_JSON = "extra_competitions_card.json"
+#: Props is the third section the card publishes and it was in no audit's
+#: population, so `faults: 0, clean: true` was a verdict about two thirds of
+#: the card. `_audit` already reads `kickoff_time` or `commence_time` — it was
+#: written expecting this column — and `audit_card_freshness` simply never
+#: opened the file.
+PROPS_CARD_JSON = "player_props_card.json"
 
 #: Sections of the Premier League card that are recommendations. `quarantined`
 #: and `already_started` are deliberately excluded: those are the rows a gate
@@ -140,7 +146,16 @@ def audit_card_freshness(*, output_dir: Path) -> FreshnessVerdict:
     outputs = Path(output_dir)
     card = _read_json(outputs / CARD_JSON)
     extra = _read_json(outputs / EXTRA_CARD_JSON)
-    read = [name for name, payload in ((CARD_JSON, card), (EXTRA_CARD_JSON, extra)) if payload]
+    props = _read_json(outputs / PROPS_CARD_JSON)
+    read = [
+        name
+        for name, payload in (
+            (CARD_JSON, card),
+            (EXTRA_CARD_JSON, extra),
+            (PROPS_CARD_JSON, props),
+        )
+        if payload
+    ]
 
     checked = 0
     unchecked = 0
@@ -180,6 +195,20 @@ def audit_card_freshness(*, output_dir: Path) -> FreshnessVerdict:
             sections[competition] = len(found)
     elif extra:
         unchecked += len(extra_rows) if isinstance(extra_rows, list) else 0
+
+    props_generated = _stamp(props.get("generated_at"))
+    props_rows = props.get("picks") or []
+    if props and props_generated is not None and isinstance(props_rows, list):
+        got, missing, found = _audit(
+            props_rows, section="props", generated_at=props_generated
+        )
+        checked += got
+        unchecked += missing
+        faults.extend(found)
+        sections["props"] = len(found)
+    elif props:
+        # No generation time is not "clean", it is "cannot be checked".
+        unchecked += len(props_rows) if isinstance(props_rows, list) else 0
 
     return FreshnessVerdict(
         checked=checked,

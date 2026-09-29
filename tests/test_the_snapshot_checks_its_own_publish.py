@@ -32,7 +32,9 @@ WORKFLOW = PROJECT_ROOT / ".github" / "workflows" / "closing-snapshot.yml"
 
 def _steps() -> list[dict]:
     spec = yaml.safe_load(WORKFLOW.read_text(encoding="utf-8"))
-    return list(spec["jobs"].values())[0]["steps"]
+    # By name, not position: the first jobs are the waits that hold a
+    # scheduled run until its slot, and they publish nothing.
+    return spec["jobs"]["snapshot"]["steps"]
 
 
 def _named(name: str) -> dict:

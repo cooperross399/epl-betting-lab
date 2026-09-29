@@ -43,6 +43,14 @@ name: Closing Snapshot
 # timestamp, and `live_clv` only ever reads observations strictly before
 # kick-off, so a late run is ignored for the fixtures that have started and
 # still useful for the ones that have not.
+#
+# BUT A CRON AIMED AT ITS SLOT ALMOST NEVER LANDED THERE. Between 2026-09-08
+# and 2026-09-29 these runs started 2.4 h late at the median and 4.8 h at
+# worst, against a twenty-minute lead. Every Friday and Monday firing landed
+# after its 20:00 UK kick-off, the Monday ones after the final whistle, so the
+# single-slot days this schedule protects got no closing observation at all.
+# So each cron now fires eight hours before its slot and the run waits for the
+# slot (scripts/wait_for_round.py); see the schedule below.
 
 on:
   schedule:
@@ -63,11 +71,20 @@ on:
     # nearer than that morning's Matchday Refresh — roughly ten hours out. The
     # question is never how many fixtures a slot holds, it is how stale the
     # nearest surviving observation would be.
-    - cron: "10 11 * * 6"
-    - cron: "40 13 * * 6"
-    - cron: "40 12 * * 0"
-    - cron: "40 18 * * 5"
-    - cron: "40 18 * * 1"
+    #
+    # EACH CRON FIRES EIGHT HOURS BEFORE ITS SLOT (ROUND_LEAD in
+    # scripts/wait_for_round.py), and the `wait` jobs hold the run until the
+    # slot: 03:10 is the Saturday 11:10 slot, 05:40 Saturday 13:40, 04:40
+    # Sunday 12:40, and 10:40 the Friday and Monday 18:40. Lateness up to
+    # eight hours now costs nothing; beyond it the run fetches as soon as it
+    # starts, as every run did before. Moving a slot means moving its cron to
+    # eight hours before it, and a cron that lands before midnight must move
+    # its day back one. No cron here crosses midnight today.
+    - cron: "10 3 * * 6"
+    - cron: "40 5 * * 6"
+    - cron: "40 4 * * 0"
+    - cron: "40 10 * * 5"
+    - cron: "40 10 * * 1"
   workflow_dispatch:
 
 permissions:
@@ -75,16 +92,59 @@ permissions:
   # anywhere else, and main only changes through pull requests.
   contents: write
 
-concurrency:
-  # Never let two snapshots write the feed at once.
-  group: closing-snapshot
-  cancel-in-progress: false
-
 jobs:
+  # Hold a scheduled run until its slot. Two jobs, because one may run for at
+  # most six hours and a slot is eight away; each waits at most 340 minutes
+  # and the second recomputes the slot from the same cron. A manual dispatch
+  # does not wait. No install, no secret, no credit, no write.
+  wait:
+    name: Wait for the slot
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Wait for the slot
+        env:
+          SCHEDULE: ${{ github.event.schedule }}
+        run: python3 scripts/wait_for_round.py --schedule "$SCHEDULE" --budget-minutes 340
+
+  wait-more:
+    name: Wait for the slot (continued)
+    needs: wait
+    # A wait that failed must not cost the observation: fetch late rather
+    # than not at all.
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Wait for the slot
+        env:
+          SCHEDULE: ${{ github.event.schedule }}
+        run: python3 scripts/wait_for_round.py --schedule "$SCHEDULE" --budget-minutes 340
+
   snapshot:
     name: Closing Snapshot
+    needs: wait-more
+    # Spelled out: a bare condition carries an implicit success() over every
+    # job upstream, so a failed wait would skip the snapshot.
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # On the job, not the workflow: scheduled runs wait for hours, and a
+    # workflow-level group keeps only one pending run, where the next one
+    # cancels it. Snapshots still never write the feed two at once.
+    concurrency:
+      group: closing-snapshot
+      cancel-in-progress: false
 
     steps:
       - name: Check out repository

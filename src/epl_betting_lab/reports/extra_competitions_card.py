@@ -777,6 +777,55 @@ def build_extra_card(
         )
     edge = selections.get("calibrated_edge", selections.get("raw_edge"))
     selections = selections.assign(_edge=pd.to_numeric(edge, errors="coerce"))
+
+    # THE PRICE GATE, which this card computed and used only to sort.
+    #
+    # `evaluate_total_25_anchored` sets BETTABLE from the anchor LIFT alone —
+    # the blended probability against the de-vigged consensus — and every
+    # consumer is expected to re-apply the gate against the posted price
+    # afterwards. The Premier League card does: `_confidence_tier` returns
+    # Pass/Avoid when the edge is not positive and `_suggested_units` maps
+    # that to 0.0. This card filtered on `status == "BETTABLE"` and staked
+    # every survivor at EXTRA_UNITS, using the edge only as a sort key.
+    #
+    # So it staked rows the model's own final number calls negative: a sweep
+    # of prices inside the juice limit found 33 combinations where a totals
+    # selection was staked at 0.1u with a calibrated edge below zero, the
+    # worst at −0.053. `out_of_sample.score_rule` applies this gate by
+    # default and its docstring says it "must stay the default", because
+    # "the looser rule is the one that stakes money on a price the model's
+    # own final number says is negative" — so the published figures describe
+    # the gated rule and this card was running the other one.
+    #
+    # It only ever removes selections.
+    negative = selections[~(selections["_edge"] > 0)]
+    if not negative.empty:
+        notes.append(
+            f"{len(negative)} selection(s) cleared their market rule and were "
+            "left out because the edge against the posted price is not "
+            "positive: "
+            + _some(
+                sorted(
+                    f"{row.home_team} v {row.away_team} {row.market} "
+                    f"{row.selection}"
+                    for row in negative.itertuples()
+                )
+            )
+            + "."
+        )
+    selections = selections[selections["_edge"] > 0].copy()
+    if selections.empty:
+        return ExtraCard(
+            pd.DataFrame(),
+            notes
+            + [
+                f"None of {before} priced selections cleared the rules with a "
+                "positive edge against the price offered."
+            ],
+            priced=len(records),
+            unrated=unrated,
+            gate=gate,
+        )
     selections = selections.sort_values("_edge", ascending=False).head(MAX_EXTRA_BETS)
     selections = selections.drop(columns=["_edge"])
     selections["competition"] = competition

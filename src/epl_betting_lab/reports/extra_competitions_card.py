@@ -241,6 +241,26 @@ class ExtraCard:
         return self.priced > 0
 
 
+def name_map_for(competition: str):
+    """Which name map this competition's teams go through.
+
+    Clubs and national teams have separate maps. One dictionary for both would
+    be two vocabularies sharing a key space, which is how "home" came to mean
+    the provider in one table and the results feed in another.
+
+    Factored out because the choice was made in one place and needed in two.
+    `latest_prices` renamed the teams and the kickoff lookup did not, so a
+    fixture whose provider spelling differs from Football-Data's — "AS Roma"
+    against "Roma", "Atletico Madrid" against "Ath Madrid",
+    "Union Saint-Gilloise" against "St. Gilloise" — was recorded with no
+    kickoff at all. Gating was never wrong, because that works on the feed's own
+    names throughout; what was lost was the kickoff on the record, which is what
+    the freshness audit reads. Three of twelve selections on the first run after
+    the audit shipped, and the audit's `unchecked` count is what surfaced it.
+    """
+    return archive_name if COMPETITIONS[competition].pool == "international" else provider_name
+
+
 def latest_prices(feed: pd.DataFrame, competition: str) -> pd.DataFrame:
     """Best price per selection at the most recent observation.
 
@@ -257,10 +277,7 @@ def latest_prices(feed: pd.DataFrame, competition: str) -> pd.DataFrame:
     # The provider names clubs its own way — "Paris Saint Germain" where
     # Football-Data says "Paris SG". Without this, a fixture is declined as
     # unrateable while both its clubs sit in the pool.
-    # Clubs and national teams have separate name maps. One dictionary for both
-    # would be two vocabularies sharing a key space, which is how "home" came to
-    # mean the provider in one table and the results feed in another.
-    rename = archive_name if COMPETITIONS[competition].pool == "international" else provider_name
+    rename = name_map_for(competition)
     rows["home_team"] = rows["home_team"].map(rename)
     rows["away_team"] = rows["away_team"].map(rename)
     rows["observed"] = pd.to_datetime(rows["observed_at"], errors="coerce", utc=True)
@@ -660,7 +677,13 @@ def build_extra_card(
     # Carried from the gate, which already resolved every fixture's kickoff.
     # Recomputing it here would be a second implementation of the same
     # question, and the two could disagree.
-    kickoffs = _fixture_kickoffs(gate.kept)
+    # Keyed on the SAME names the selections carry. Built from the raw feed
+    # names it missed every fixture the name map renames.
+    renamed = gate.kept.copy()
+    rename = name_map_for(competition)
+    renamed["home_team"] = renamed["home_team"].map(rename)
+    renamed["away_team"] = renamed["away_team"].map(rename)
+    kickoffs = _fixture_kickoffs(renamed)
     selections["kickoff_time"] = [
         kickoffs.get(
             (str(home).strip().casefold(), str(away).strip().casefold())

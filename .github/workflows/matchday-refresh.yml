@@ -834,6 +834,9 @@ jobs:
             # with it. A measurement nobody can read is not a measurement.
             data/outputs/count_calibration.md
             data/outputs/live_clv_report.md
+            # The freshness verdict, so "did a stale selection ship" can be
+            # answered from the artifact rather than recomputed from the cards.
+            data/outputs/card_freshness.json
           if-no-files-found: warn
           retention-days: 30
 

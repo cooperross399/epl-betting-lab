@@ -25,8 +25,15 @@ name: Closing Snapshot
 # rebuilds no report, sends nothing, and touches no protected file. It cannot
 # change what is bet.
 #
-# COST: about 80 credits a run, seven runs a week, against 3,635,487 remaining.
-# Roughly 2,400 a month, or under a tenth of one per cent.
+# COST: about 500 requests a run, seven runs a week — roughly 15,225 a month,
+# which is three quarters of the whole 20,000 allowance and the larger half of
+# what this account spends. It was described here as 80 a run against
+# 3,635,487 remaining, and both halves of that are long dead: the figure was
+# never measured, and the plan is now 20,000 a month.
+#
+# Five firings a week would bring the scheduled total inside the allowance.
+# That is a real trade — fewer closing observations is less CLV — so it is
+# left to an operator rather than trimmed here.
 #
 # A LATE TRIGGER IS SAFE, NOT WRONG. GitHub delays scheduled runs, sometimes by
 # hours — this repository lost a Thursday card to a nine-hour delay. A snapshot

@@ -26,6 +26,10 @@ from epl_betting_lab.reports.scheduled_task_bridge import (
     WATCH_TASK_JSON,
 )
 from epl_betting_lab.config import OUTPUTS_DIR
+from epl_betting_lab.providers.request_budget import (
+    LOW_RUNWAY_DAYS,
+    days_of_runway,
+)
 from epl_betting_lab.reports.pick_display import (
     NOT_STAKEABLE_LABEL,
     NOT_STAKEABLE_NOTE,
@@ -74,25 +78,19 @@ def _table(rows: Sequence[Mapping[str, Any]]) -> list[str]:
     return lines
 
 
-#: Measured from consecutive live runs, not derived: the counter moved 14248 ->
-#: 14186 -> 14124, and 19612 -> 19540. Sixty-two a run with every market
-#: fetched.
-#:
-#: It read 15 until this was checked, from a measurement taken before the extra
-#: markets were added, so the "about N more runs" figure overstated the runway
-#: roughly fourfold. A number offered to reassure someone should not be the
-#: optimistic one.
-REQUESTS_PER_RUN = 62
-
-#: Below this many runs' worth, the summary says so. Quota running dry is one
-#: of the ways this automation stops without producing a red X, so the number
-#: has to become an argument rather than sit in a table being technically
-#: present. Fourteen is about a fortnight at ten runs a week.
-LOW_QUOTA_RUNS = 14
-
-
 def _quota_line(quota: Mapping[str, Any]) -> str:
-    """The remaining quota, and how many runs that actually buys."""
+    """The remaining quota, and how long the whole schedule can run on it.
+
+    This used to be counted in Matchday Refresh runs, using a per-run cost kept
+    here rather than beside the schedule guard's copy of the same number. Both
+    halves of that were wrong. The cost had doubled without this copy moving,
+    and Matchday Refresh is not the only thing spending: the Closing Snapshot
+    draws nearly three times as much per firing from the same account and was
+    not in the sum at all. The line read "19174 (about 309 more runs)" when the
+    account held about four and a half weeks of the actual schedule.
+
+    Both figures now come from `request_budget`, which both callers share.
+    """
     raw = _clean(quota.get("requests_remaining"))
     if not raw:
         return "unknown"
@@ -100,13 +98,13 @@ def _quota_line(quota: Mapping[str, Any]) -> str:
         remaining = int(float(raw))
     except ValueError:
         return raw
-    runs = remaining // REQUESTS_PER_RUN
-    if runs <= LOW_QUOTA_RUNS:
+    days = days_of_runway(remaining)
+    if days <= LOW_RUNWAY_DAYS:
         return (
-            f"**{remaining}** — about {runs} more run(s). "
+            f"**{remaining}** — about {days} day(s) at the observed burn. "
             "**Top this up or the schedule stops.**"
         )
-    return f"{remaining} (about {runs} more runs)"
+    return f"{remaining} (about {days} days at the observed burn)"
 
 
 def _picks_table(rows: Sequence[Mapping[str, Any]], empty: str) -> list[str]:

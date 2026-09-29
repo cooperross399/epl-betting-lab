@@ -47,6 +47,19 @@ def _archived_cards() -> list[dict]:
     return cards
 
 
+def _beyond_records() -> list[dict[str, Any]]:
+    """The Beyond section's archived picks, for the CLV step below.
+
+    The same shape of thing `_archived_cards` does for the Premier League,
+    and it did not exist: the record was written on every run, uploaded in
+    `matchday-state`, restored at the top of the next one, and read by
+    nothing that scored it.
+    """
+    from epl_betting_lab.reports.beyond_clv import load_beyond_records
+
+    return load_beyond_records(OUTPUTS_DIR / "archive" / "extra_cards")
+
+
 def _steps() -> list[tuple[str, str, Callable[[Path], Any]]]:
     """Steps in dependency order: each reads what the previous produced."""
     from epl_betting_lab.reports.automated_card import save_automated_card
@@ -60,6 +73,7 @@ def _steps() -> list[tuple[str, str, Callable[[Path], Any]]]:
         save_count_calibration_reports,
         walk_forward_counts,
     )
+    from epl_betting_lab.reports.beyond_clv import save_beyond_clv_reports
     from epl_betting_lab.reports.live_clv import save_live_clv_reports
     from epl_betting_lab.reports.price_feed import load_feed
     from epl_betting_lab.reports.card_history import (
@@ -85,6 +99,15 @@ def _steps() -> list[tuple[str, str, Callable[[Path], Any]]]:
             "Score the card's own picks against the prices later observed",
             lambda outputs: save_live_clv_reports(
                 _archived_cards(), load_feed(PROCESSED_DIR / "price_feed.csv"), outputs
+            ),
+        ),
+        (
+            "beyond_clv",
+            "Score the Beyond the Premier League picks against later prices",
+            lambda outputs: save_beyond_clv_reports(
+                _beyond_records(),
+                load_feed(PROCESSED_DIR / "price_feed_extra.csv"),
+                outputs,
             ),
         ),
         (

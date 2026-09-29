@@ -289,7 +289,15 @@ def latest_prices(feed: pd.DataFrame, competition: str) -> pd.DataFrame:
     takes `--regions`, so one run with `eu` would hand every selection to
     Pinnacle, which is always the longest price and is never bettable.
     """
-    columns = ["home_team", "away_team", "market", "selection", "american_odds", "book"]
+    # `provider_event_id` travels with the price because it is the only
+    # identity that survives renaming. The card maps the provider's club names
+    # onto Football-Data's before pricing, so a later join from the record back
+    # to the feed on names compares "Roma" against "AS Roma" and finds nothing
+    # — which is exactly how the freshness audit came back `unchecked: 3`.
+    columns = [
+        "home_team", "away_team", "market", "selection", "american_odds",
+        "book", "provider_event_id",
+    ]
     if feed.empty or "competition" not in feed.columns:
         return pd.DataFrame(columns=columns)
     rows = feed[feed["competition"] == competition].copy()
@@ -301,6 +309,8 @@ def latest_prices(feed: pd.DataFrame, competition: str) -> pd.DataFrame:
     rename = name_map_for(competition)
     rows["home_team"] = rows["home_team"].map(rename)
     rows["away_team"] = rows["away_team"].map(rename)
+    if "provider_event_id" not in rows.columns:
+        rows["provider_event_id"] = ""
     rows["observed"] = pd.to_datetime(rows["observed_at"], errors="coerce", utc=True)
     rows["american_odds"] = pd.to_numeric(rows["american_odds"], errors="coerce")
     rows = rows.dropna(subset=["observed", "american_odds"])
@@ -860,6 +870,11 @@ def extra_card_record(
                     "selection": row.get("selection"),
                     "american_odds": row.get("american_odds"),
                     "book": row.get("book"),
+                    # The provider's own identity for the fixture. The record
+                    # stores mapped club names and the feed stores the
+                    # provider's, so this is what lets closing-line value be
+                    # joined back without re-deriving the name map.
+                    "provider_event_id": row.get("provider_event_id") or "",
                     # The kickoff, so the record can be audited against the
                     # moment it was written. Without it a stale selection is
                     # only visible by going back to the price feed and hoping

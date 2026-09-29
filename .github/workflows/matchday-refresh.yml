@@ -841,6 +841,11 @@ jobs:
             # with it. A measurement nobody can read is not a measurement.
             data/outputs/count_calibration.md
             data/outputs/live_clv_report.md
+            # The Beyond section's closing-line value. For the international
+            # pool this is the only evidence that will ever exist — nothing
+            # backtests it — so losing it with the runner loses it for good.
+            data/outputs/beyond_clv_report.md
+            data/outputs/beyond_clv_bets.csv
             # The freshness verdict, so "did a stale selection ship" can be
             # answered from the artifact rather than recomputed from the cards.
             data/outputs/card_freshness.json

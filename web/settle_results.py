@@ -41,10 +41,67 @@ ESPN = {
 }
 
 
-def fetch(url):
+#: The per-match summary, which is the only place the corner counts are. The
+#: scoreboard above carries the score and nothing else, so a corner pick costs
+#: one extra request for its own fixture -- free, no provider credit, same host
+#: and same User-Agent rule as the scoreboard.
+#:
+#: Without it the public record cannot report on a single BET. Every one of the
+#: five bets on the 2026-10-10 board is a corner market; the two `draw_no_bet`
+#: picks are leans and the two `double_chance` picks are passes. A record that
+#: graded only what it could reach would have published a model record made
+#: entirely of leans, on a page that advertises bets.
+#:
+#: cbb is absent deliberately: there are no corners in basketball, and
+#: `corner_counts` returns None for any sport not listed.
+SUMMARY = {
+    "epl": "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/summary?event={e}",
+}
+
+#: `corners_total_10_5` -> 10.5. Parsed rather than held in a table, so a line
+#: the card starts quoting cannot leave this file behind. The lab's own copy of
+#: this rule is `card_scoreboard.CORNER_MARKETS`; the two are deliberately
+#: separate because this script is stdlib-only and shipped to four repos, and
+#: neither is a test of the other.
+CORNERS_TOTAL = re.compile(r"^corners_total_(\d+)_(\d+)$")
+
+
+def fetch(url, timeout: int = 30):
     req = urllib.request.Request(url)
-    with urllib.request.urlopen(req, timeout=30) as r:  # noqa: S310
+    with urllib.request.urlopen(req, timeout=timeout) as r:  # noqa: S310
         return json.load(r)
+
+
+def corner_counts(sport: str, event_id: str) -> dict | None:
+    """Corners won by each side, or None if the feed does not plainly say.
+
+    Never raises, and never substitutes a zero. A missing statistic read as
+    zero would settle `Under 10.5 corners` as a win every time the feed was
+    down, which is a fabricated result in the direction of the card. Both
+    sides must be present or the pick stays ungraded and is counted as such.
+    """
+    template = SUMMARY.get(sport)
+    if not template:
+        return None
+    try:
+        payload = fetch(template.format(e=event_id), timeout=15)
+    except (urllib.error.URLError, OSError, json.JSONDecodeError, TimeoutError, ValueError):
+        return None
+    if not isinstance(payload, dict):
+        return None
+    out: dict[str, int] = {}
+    for team in ((payload.get("boxscore") or {}).get("teams") or []):
+        side = str(team.get("homeAway") or "").lower()
+        if side not in ("home", "away"):
+            continue
+        for stat in (team.get("statistics") or []):
+            if stat.get("name") != "wonCorners":
+                continue
+            try:
+                out[side] = int(str(stat.get("displayValue")).strip())
+            except (TypeError, ValueError):
+                pass
+    return out if {"home", "away"} <= set(out) else None
 
 
 def finals(sport: str, day: date) -> dict:
@@ -95,12 +152,41 @@ def side_named(label: str, g: dict, teams: dict) -> str | None:
     return found
 
 
-def grade_pick(sport, pick, g, hf, af, teams=None):
+def grade_corners(market: str, label: str, g: dict, teams: dict, counts: dict) -> str | None:
+    """Settle a corner pick, on the same rule the lab settles its own record by.
+
+    `card_scoreboard.settle` is the authority and this follows it exactly:
+    `corners_1x2` is a THREE-way market -- `market_eligibility` lists it as
+    ("home", "draw", "away") -- so an equal corner count is the draw outcome
+    and a side selection loses rather than pushing. The totals are half lines,
+    so a push is impossible by construction; the branch is still written,
+    because a whole-number line would otherwise settle as a loss in silence.
+    """
+    home, away = counts["home"], counts["away"]
+    hit = CORNERS_TOTAL.match(market)
+    if hit:
+        line = float(f"{hit.group(1)}.{hit.group(2)}")
+        total = home + away
+        if total == line:
+            return "push"
+        return "win" if ("over" in label) == (total > line) else "loss"
+    if market == "corners_1x2":
+        side = side_named(label, g, teams)
+        if side is None:
+            return None
+        return "win" if (side == "home") == (home > away) else "loss"
+    return None
+
+
+def grade_pick(sport, pick, g, hf, af, teams=None, corners=None):
     if not pick or pick.get("kind", "bet") not in ("bet", "lean"):
         return None
     m, label = (pick.get("market") or "").lower(), (pick.get("label") or "").lower()
     tot = hf + af
     teams = teams or {}
+    if m.startswith("corners"):
+        # Left ungraded when the counts did not arrive, never guessed.
+        return grade_corners(m, label, g, teams, corners) if corners else None
     if sport == "epl":
         if m.startswith("total"):
             return "win" if ("over" in label) == (tot > 2.5) else "loss"
@@ -114,7 +200,12 @@ def grade_pick(sport, pick, g, hf, af, teams=None):
             if side is None:
                 return None
             return "win" if (side == "home") == (hf > af) else "loss"
-        return None  # corners / double chance need feeds the site does not have; left ungraded
+        # Corners are handled above. `double_chance` is reachable from the
+        # score alone and is left here only because every double-chance pick
+        # the card has published is a `pass`, which never reaches this
+        # function; a rule written for rows that do not exist is a rule
+        # nothing checks.
+        return None
     if sport == "cbb":
         margin = hf - af
         if m == "moneyline":
@@ -263,13 +354,23 @@ def main(argv=None) -> int:
         return 0
     games, picks, su, ats, tots = [], {"w": 0, "l": 0, "p": 0}, {"w": 0, "l": 0}, {"w": 0, "l": 0, "p": 0}, {"w": 0, "l": 0, "p": 0}
     teams_out: dict = {}
+    ungraded = 0
     for gid, (g, teams) in playing.items():
         f = fin.get(gid)
         if not f:
             continue
         hf, af = f["home"], f["away"]
         pick = g.get("pick")
-        res = grade_pick(args.sport, pick, g, hf, af, teams)
+        # One extra request, and only for a fixture whose pick needs it.
+        corners = None
+        if str((pick or {}).get("market") or "").lower().startswith("corners"):
+            corners = corner_counts(args.sport, gid)
+        res = grade_pick(args.sport, pick, g, hf, af, teams, corners)
+        if pick and pick.get("kind", "bet") in ("bet", "lean") and res is None:
+            # A published pick the record cannot answer for. Counted, because
+            # a record that silently drops what it could not settle reports a
+            # win rate for a subset it never names.
+            ungraded += 1
         # `res` is "win"/"loss"/"push"/"void"/None; `picks` is keyed
         # "w"/"l"/"p". `if res in picks` tested the grade against the KEYS,
         # so it was never true and the tally never ran: every results.json
@@ -309,7 +410,7 @@ def main(argv=None) -> int:
                 tots["p" if t == tt["current"] else "w" if (tt["proj"] > tt["current"]) == (t > tt["current"]) else "l"] += 1
         teams_out.update(teams)
         games.append(row)
-    summary = {"picks": picks}
+    summary = {"picks": picks, "ungraded": ungraded}
     if args.sport == "epl":
         summary.update(result=su, totals={"w": tots["w"], "l": tots["l"]})
     else:
@@ -317,7 +418,11 @@ def main(argv=None) -> int:
     base.update(season=season, windowLabel=window, notice=None if games else "The games were played but no final was available when this ran; the next build settles them.",
                 summary=summary, teams=teams_out, games=games)
     (data / "results.json").write_text(json.dumps(base, indent=1, ensure_ascii=False), encoding="utf-8")
-    print(f"settled {len(games)} of {len(playing)} fixture(s) that kicked off on {day}. No bet was placed.")
+    print(
+        f"settled {len(games)} of {len(playing)} fixture(s) that kicked off on {day}: "
+        f"picks {picks['w']}-{picks['l']}-{picks['p']}, {ungraded} ungraded. "
+        "No bet was placed."
+    )
     return 0
 
 

@@ -7,14 +7,20 @@ and therefore never run in CI — and those check that the *fit* lands near leag
 averages, which is a different question from whether a stated 60% happens 60%
 of the time.
 
-No corner rule can ever be profit-backtested. No source retains historical
-corner prices, so unlike 1X2 and the 2.5 line there is no held-out-season test
-available at any price. Calibration against outcomes is the only measurement
-these markets admit, and Football-Data ships the counts (`HC`/`AC`) on every
-row, so it costs nothing but time.
+`corners_1x2` can never be profit-backtested: no source retains a historical
+corner match-result price, so there is no held-out-season test available at
+any price. That was once true of the corner TOTALS as well and no longer is —
+the per-event history was bought, and `data/outputs/derived_market_backtest.md`
+scores `corners_total_9_5` at +7.6% over 74 bets and `corners_total_10_5` at
+−18.82% over 48.
 
-The same warning as `btts_calibration` applies, and applies harder here because
-there is no profit backtest to overrule a calibration result:
+Calibration is still the only measurement `corners_1x2` admits, and the
+cheapest one for the totals: Football-Data ships the counts (`HC`/`AC`) on
+every row, so it costs nothing but time.
+
+The same warning as `btts_calibration` applies, and hardest of all to
+`corners_1x2`, where no profit backtest exists to overrule a calibration
+result:
 `docs/why_better_calibration_lost_money.md` records a change that improved
 calibration everywhere and cost 140 units. Good calibration is a precondition.
 It cannot license a stake, and a bad number here is a reason to stake less

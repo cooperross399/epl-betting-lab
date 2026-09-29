@@ -10,8 +10,11 @@ Why it matters more than profit here. Separating a true 5% edge from zero takes
 roughly 1,500 settled bets, about twelve seasons at this rate, and the live
 record currently holds 33. Every bet yields a CLV reading the moment its market
 closes. And for the markets that carry this card it is the only feedback that
-will ever exist: corners are 23 of the first 42 best bets and no source retains
-their historical prices, so no corner rule can ever be profit-backtested.
+will ever exist for `corners_1x2`: no source retains a historical corner
+match-result price. The corner TOTALS were bought per event since this was
+written and are scored in `data/outputs/derived_market_backtest.md`, so for
+them this is the better feedback rather than the only kind. Corners of all
+sorts are 23 of the first 42 best bets.
 
 Three honesties are built in.
 

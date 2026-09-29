@@ -139,3 +139,123 @@ def test_only_the_market_with_no_history_is_called_unmeasurable() -> None:
         assert f"{market} have no historical prices" not in section
     for market in BOUGHT:
         assert market in _generated(), "a market called unmeasurable is scored"
+
+
+#: The one market with no historical price anywhere. Every other market the
+#: card stakes is scored in `derived_market_backtest.md`.
+UNMEASURABLE = "corners_1x2"
+
+#: How a document says it is quoting a claim it has retired rather than
+#: making one. A retraction has to repeat the sentence it retracts, so it
+#: needs a marker; one agreed marker beats a regex that grows a clause every
+#: time somebody phrases a correction differently.
+RETRACTED = ("Correction, ", "when this was written", "until 2026-")
+
+
+def test_cannot_be_profit_backtested_is_only_ever_said_of_one_market() -> None:
+    """It was said of the whole card, of BTTS, and of every corner rule.
+
+    All three stopped being true when the per-event history was bought. The
+    card's own staking note told the reader "none of them can be
+    profit-backtested" while six of its markets sit in the generated report
+    with bets and intervals — a false reason for a correct stake, which is
+    the kind of sentence that gets quoted back.
+
+    Scoped rather than banned: the claim is still true of `corners_1x2`, so
+    the test requires the market to be named near it rather than requiring
+    the phrase to disappear.
+    """
+    from pathlib import Path
+
+    claim = "profit-backtest"
+    offenders = []
+    for path in sorted((PROJECT_ROOT / "src").rglob("*.py")) + sorted(
+        (PROJECT_ROOT / "docs").rglob("*.md")
+    ):
+        text = path.read_text(encoding="utf-8")
+        for i, line in enumerate(text.splitlines()):
+            if claim not in line:
+                continue
+            # The sentence may wrap, so read a small window around it.
+            window = "\n".join(text.splitlines()[max(0, i - 3): i + 4])
+            negated = any(
+                word in line.lower()
+                for word in ("cannot", "can never", "no ", "none")
+            )
+            # A retraction necessarily quotes the claim it retracts, so it
+            # needs a way to say so. One agreed marker, not a growing list
+            # of spellings: a window carrying RETRACTED is a correction.
+            retracted = any(marker in window for marker in RETRACTED)
+            if negated and UNMEASURABLE not in window and not retracted:
+                offenders.append(f"{path.relative_to(PROJECT_ROOT)}:{i + 1}")
+
+    assert not offenders, (
+        "these say a market cannot be profit-backtested without naming "
+        f"{UNMEASURABLE}, the only one for which that is still true: {offenders}"
+    )
+
+
+def test_the_control_the_unmeasurable_market_is_still_called_out() -> None:
+    """A test that passes because the phrase vanished proves nothing."""
+    corners = (
+        PROJECT_ROOT / "src" / "epl_betting_lab" / "reports" / "count_calibration.py"
+    ).read_text(encoding="utf-8")
+
+    assert UNMEASURABLE in corners
+    assert "profit-backtest" in corners
+
+
+def test_the_prose_reading_the_table_agrees_with_the_table() -> None:
+    """The rewrite corrected the tables and left the paragraphs behind.
+
+    `every_market_measured.md` went on saying "Draw-no-bet's +13.0% is
+    thirteen bets" twenty-four lines under a table reading 68 bets at
+    +8.24%, and "Double chance is the only negative point estimate" under a
+    table with two negatives — the worse of them corners. CLAUDE.md carried
+    the thirteen-bet claim too.
+
+    Stated as what the prose MUST say, not as what it must not. Banning the
+    old phrases cannot work here: a retraction has to quote them, and it
+    sits directly beside the sentence it corrects, so any exemption window
+    wide enough for the retraction also covers a regression.
+    """
+    generated = _generated()
+    negatives = sorted(m for m in BOUGHT if generated[m]["roi"] < 0)
+
+    assert len(negatives) == 2, f"the table's negatives changed: {negatives}"
+
+    dnb = generated["draw_no_bet"]
+    for path in (MEASURED, CLAUDE):
+        text = _ascii(path.read_text(encoding="utf-8"))
+        assert f"{dnb['roi']}% on {int(dnb['bets'])} bets" in text, (
+            f"{path.name} does not state draw_no_bet as "
+            f"{dnb['roi']}% on {int(dnb['bets'])} bets"
+        )
+
+    measured = _ascii(MEASURED.read_text(encoding="utf-8"))
+    hides = measured.split("## What the headline numbers hide")[1]
+    for market in negatives:
+        assert market in hides, (
+            f"the interpretation does not name {market}, which the table "
+            "scores negative"
+        )
+
+    # And the heading has to carry the COUNT. Naming both markets in the
+    # body is not enough: a heading reading "Double chance is the only
+    # negative point estimate" sat above a body that named corners too, and
+    # the heading is what a reader takes away. Generated from the table, so
+    # a third negative market breaks it rather than passing quietly.
+    words = {1: "One point estimate is", 2: "Two point estimates are",
+             3: "Three point estimates are"}
+    assert f"{words[len(negatives)]} negative" in hides, (
+        f"the section does not head with {len(negatives)} negative estimates"
+    )
+
+
+def test_the_control_the_retraction_may_still_quote_the_old_claim() -> None:
+    """A correction has to repeat what it corrects, or it explains nothing."""
+    text = _ascii(MEASURED.read_text(encoding="utf-8"))
+
+    assert "thirteen bets" in text, (
+        "the retraction should name the figure it retires, not silently drop it"
+    )

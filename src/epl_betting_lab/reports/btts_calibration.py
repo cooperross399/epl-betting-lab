@@ -1,9 +1,12 @@
 """Does the stated BTTS probability match how often both teams score?
 
-BTTS cannot be profit-backtested. Football-Data ships historical prices for 1X2
-and the 2.5 line and none at all for both-teams-to-score, and the bought
-provider history covers props and corner totals only. Calibration against
-outcomes is the one measurement this market admits, because it needs no prices.
+BTTS could not be profit-backtested when this module was written: Football-Data
+ships historical prices for 1X2 and the 2.5 line and none at all for
+both-teams-to-score. The per-event history has since been bought, and
+`data/outputs/derived_market_backtest.md` scores BTTS at +0.66% over 31 bets
+against prices that were really offered at books that can really be bet. So
+calibration is no longer the only measurement this market admits — it is the
+cheap one, and it still needs no prices.
 
 That makes this module unusually easy to misuse, and
 `docs/why_better_calibration_lost_money.md` is the record of exactly that: a

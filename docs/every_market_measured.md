@@ -47,12 +47,21 @@ to +15.6%.** The pooled result is a loss, and its interval contains zero.
 
 ## What the headline numbers hide
 
-**Draw-no-bet's +13.0% is thirteen bets.** The home side returned +66.5% on
-n=13; the away side returned −6.3% on n=36. A number that large from a sample
-that small is what noise looks like, and the larger half of the same sample
-points the other way.
+**Draw-no-bet is +8.24% on 68 bets, eighteen of them pushes.** This paragraph
+read "+13.0% is thirteen bets" until 2026-09-29, with a home/away split of
++66.5% on n=13 against −6.3% on n=36. Those are the best-price-across-books
+figures; the table above replaced them and the paragraph reading it did not
+move. The split has not been recomputed on the bettable-books sample, so it
+is retracted rather than restated — the honest summary of the current
+measurement is the interval, −22.4% to +43.9%, which contains zero and most
+of the plausible range on either side of it.
 
-**Double chance is the only negative point estimate, and it is structural.**
+**Two point estimates are negative, and the worse one is corners.**
+`corners_total_10_5` is −18.82% on 48 bets and `double_chance` is −6.47% on
+52. This paragraph said double chance was "the only negative point estimate",
+which was true of the harvest and is not true of the table above it.
+
+Double chance's number is still structural, and that part holds.
 Three hundred and thirty-eight of its four hundred and fifty candidates —
 seventy-five per cent — were refused for juice. Double chance on a favourite
 prices around −400 and the project refuses anything worse than −160, so what

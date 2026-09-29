@@ -211,3 +211,88 @@ def test_the_control_the_same_injection_with_a_positive_edge_stakes(
 
     assert len(card.selections) == 1
     assert float(card.selections.iloc[0]["suggested_units"]) > 0
+
+
+class TestTheCapSaysWhatItWithheld:
+    """The cap withheld 22 of 26 selections and said nothing.
+
+    `MAX_EXTRA_BETS` is 4 and the published card shows exactly four for each
+    of UNL, UCL and UEL, so it is saturated on ordinary runs rather than in
+    edge cases. It appeared nowhere: not in `card.notes`, not in
+    `render_extra_card`, and not in `extra_card_record`, whose per-competition
+    block carries only `priced`, `declined` and the POST-cap selection count.
+
+    Worse, the price-gate note added beside it counted refusals taken before
+    the cut — and because a refused row always sorts below every positive
+    one, those refusals cost the card nothing whenever the cap is saturated.
+    The card announced the harmless loss and hid the real one.
+    """
+
+    #: Every pairing here is rateable in the stub pool, which holds exactly
+    #: France, Germany, Italy, Portugal and Spain. A pairing outside it is
+    #: declined as unrated and never reaches the cap, which is what made the
+    #: first version of this fixture prove nothing.
+    FIXTURES = (
+        ("France", "Spain"),
+        ("Spain", "France"),
+        ("Italy", "Germany"),
+        ("Germany", "Italy"),
+        ("Portugal", "Spain"),
+        ("Spain", "Portugal"),
+    )
+
+    def _many(self, n: int) -> pd.DataFrame:
+        """`n` rateable fixtures that all clear with a positive edge."""
+        rows = []
+        for i, (home, away) in enumerate(self.FIXTURES[:n]):
+            for selection, odds in (("over", -250), ("under", 200)):
+                rows.append(
+                    {
+                        "competition": "UNL",
+                        "observed_at": "2026-09-15T10:00:00Z",
+                        "provider_event_id": f"e{i}",
+                        "date": "2026-09-16",
+                        "home_team": home,
+                        "away_team": away,
+                        "market": "total_2_5",
+                        "selection": selection,
+                        "book": "DraftKings",
+                        "american_odds": odds,
+                    }
+                )
+        return pd.DataFrame(rows)
+
+    def test_the_card_says_how_many_it_withheld(self, _totals_pool) -> None:
+        from epl_betting_lab.reports.extra_competitions_card import MAX_EXTRA_BETS
+
+        card = build_extra_card(self._many(6), "UNL", now=NOW)
+
+        assert len(card.selections) == MAX_EXTRA_BETS, (
+            "the cap is not saturated, so this proves nothing about it"
+        )
+        note = next((n for n in card.notes if "not shown" in n), None)
+        assert note is not None, card.notes
+        assert str(MAX_EXTRA_BETS) in note
+
+    def test_the_control_nothing_is_said_when_nothing_is_withheld(
+        self, _totals_pool
+    ) -> None:
+        """A cap line on every card would stop being read."""
+        card = build_extra_card(_feed(-250, 200), "UNL", now=NOW)
+
+        assert len(card.selections) < 4
+        assert not any("not shown" in n for n in card.notes)
+
+    def test_the_refusal_note_does_not_claim_a_cost_it_did_not_have(
+        self, _totals_pool
+    ) -> None:
+        """A refused row sorts below every positive one.
+
+        So where the cap is saturated the gate removed nothing the card
+        would have printed, and the note has to say so rather than read as
+        "this is what you lost".
+        """
+        card = build_extra_card(_feed(*NEGATIVE_EDGE_PRICES), "UNL", now=NOW)
+
+        note = next(n for n in card.notes if "not positive" in n)
+        assert "sorts below every positive one" in note

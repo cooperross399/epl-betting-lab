@@ -134,9 +134,15 @@ jobs:
           previous=$(gh run list --workflow closing-snapshot.yml \
             --limit 10 --json createdAt \
             --jq '.[].createdAt' | tr '\n' ' ')
-          if [ -z "$previous" ]; then
-            echo "::warning::No successful Closing Snapshot run on record yet."
-            exit 0
-          fi
+          # The two watchdogs above pass `--require-runs` and this one kept
+          # its own empty-list branch, which warns and exits 0. The Closing
+          # Snapshot has run dozens of times, so an empty lookup means the
+          # lookup failed — auth, a rate limit, an API hiccup — not that the
+          # cron is idle, and this is the watchdog for the feed that is the
+          # only forward evidence the corner markets will ever have.
+          #
+          # The old message also said "No successful ... run", and the query
+          # above carries no `--status success`; it was describing a filter
+          # that is not there.
           python scripts/check_schedule_health.py $previous \
-            --max-days 14 --fail-when-stale
+            --max-days 14 --fail-when-stale --require-runs

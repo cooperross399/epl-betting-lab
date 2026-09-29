@@ -163,7 +163,7 @@
                   </div>
                   <sc-if value="{{ c.spark }}" hint-placeholder-val="{{ false }}">
                     <div style="display:flex;align-items:center;gap:8px;margin-top:6px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#6b6e7a;">
-                      <svg aria-hidden="true" width="72" height="18" viewBox="0 0 72 18" style="flex:none;overflow:visible;"><polyline points="{{ c.spark.points }}" fill="none" stroke="#14151a" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"></polyline></svg>
+                      <svg aria-hidden="true" width="72" height="18" viewBox="0 0 72 18" style="flex:none;overflow:visible;"><polyline sc-camel-points="{{ c.spark.points }}" fill="none" stroke="#14151a" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"></polyline></svg>
                       <span>{{ c.spark.note }}</span>
                     </div>
                   </sc-if>

@@ -70,7 +70,40 @@ def test_a_walk_forward_prediction_only_ever_sees_its_own_past():
     assert frame.observed.isin([0.0, 1.0]).all()
 
 
-def test_thin_bands_are_dropped_and_the_all_row_carries_the_scores():
+def test_a_thin_band_is_dropped_and_a_full_one_beside_it_is_kept():
+    """The name promised this and the fixture never built a thin band.
+
+    Forty rows all at 0.5 is one band of forty, comfortably over the floor:
+    no band in the frame had between 1 and 19 matches, so the `continue` that
+    drops a thin band never fired in any test. Dropping the floor to 1 passed
+    the whole suite.
+
+    That matters more here than in most places. This report is the ONLY
+    validation the corner markets have — no source retains historical corner
+    prices — so a three-match band reading 100% observed against 35%
+    predicted would be published beside bands built on hundreds, with no
+    marker, and read as a 65-point miscalibration.
+
+    The sibling module had it right: tests/test_btts_calibration.py builds a
+    band of exactly MIN_BAND_MATCHES - 1 and asserts it is absent.
+    """
+    thin = MIN_BAND_MATCHES - 1
+    frame = pd.DataFrame({
+        "market": ["corners_1x2"] * (thin + 40),
+        "selection": ["home"] * (thin + 40),
+        # A band under the floor, and a full band beside it. The second is
+        # the control: without it, dropping every band would pass.
+        "predicted": [0.35] * thin + [0.5] * 40,
+        "observed": [1.0] * thin + [1.0] * 20 + [0.0] * 20,
+    })
+    table = calibration_table(frame)
+    bands = set(table.band)
+
+    assert "30-45%" not in bands, f"{thin} matches is under the floor of {MIN_BAND_MATCHES}"
+    assert "45-55%" in bands
+
+
+def test_the_all_row_carries_the_scores():
     frame = pd.DataFrame({
         "market": ["corners_1x2"] * 40,
         "selection": ["home"] * 40,

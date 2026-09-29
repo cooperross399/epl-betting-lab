@@ -60,6 +60,7 @@ jobs:
           python -m pip install -e .
 
       - name: Restore the lab's latest run and the board's history
+        id: restore
         # Allowed to find nothing: before the first card the board is schedule-only and says so.
         #
         # WHAT EACH ARTIFACT ACTUALLY CONTAINS, read off the `upload-artifact`
@@ -100,24 +101,62 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -u
-          previous=$(gh run list --workflow matchday-refresh.yml --status completed \
-            --limit 1 --json databaseId --jq '.[0].databaseId // empty')
-          if [ -n "$previous" ]; then
-            mkdir -p data
-            gh run download "$previous" --name matchday-state --dir data || echo "No matchday-state artifact on run $previous."
-            mkdir -p data/outputs
-            gh run download "$previous" --name matchday-reports --dir data/outputs || echo "No matchday-reports artifact on run $previous."
+          # WALK BACK, DO NOT PIN TO THE NEWEST. `--limit 1` asks for the most
+          # recent COMPLETED run, and "completed" includes failed, cancelled
+          # and timed-out. A run that died before its upload step carries no
+          # artifact at all, so pinning to it restores nothing — and the `||`
+          # below turns that into a line of log rather than a stop.
+          #
+          # matchday-refresh.yml already learned this: pinning its equivalent
+          # restore froze the card archive for nine runs, and it now loops over
+          # ten candidates until one actually carries the artifact. This file
+          # kept the pinned version in both of its restores.
+          #
+          # For the history the stakes are higher than a frozen archive.
+          # `web/site_history.py` rebuilds `history/index.json` from whatever
+          # files are on disk, so an empty restore does not fail — it produces
+          # a one-entry history, uploads it over the chain, and deploys it to
+          # the public Archive page. Every earlier frozen board and every line
+          # series would go, and the run would finish green.
+          mkdir -p data data/outputs
+          restored=""
+          for candidate in $(gh run list --workflow matchday-refresh.yml \
+            --limit 10 --json databaseId --jq '.[].databaseId'); do
+            if gh run download "$candidate" --name matchday-state --dir data 2>/dev/null; then
+              restored="$candidate"
+              gh run download "$candidate" --name matchday-reports --dir data/outputs 2>/dev/null \
+                || echo "Run $candidate carried state but no reports."
+              break
+            fi
+          done
+          if [ -n "$restored" ]; then
+            echo "Restored the lab's state from run $restored."
           else
-            echo "No completed Matchday Refresh yet; building schedule-only."
+            echo "No recent Matchday Refresh carried state; building schedule-only."
           fi
-          last=$(gh run list --workflow publish-board.yml --status completed \
-            --limit 1 --json databaseId --jq '.[0].databaseId // empty')
+
           mkdir -p dist/data/history
-          if [ -n "$last" ]; then
-            gh run download "$last" --name board-history --dir dist/data/history || echo "No board-history artifact on run $last."
+          seen=0
+          from_run=""
+          for candidate in $(gh run list --workflow publish-board.yml \
+            --limit 10 --json databaseId --jq '.[].databaseId'); do
+            seen=$((seen + 1))
+            if gh run download "$candidate" --name board-history --dir dist/data/history 2>/dev/null; then
+              from_run="$candidate"
+              break
+            fi
+          done
+          boards=$(find dist/data/history -maxdepth 1 -name '*.json' ! -name index.json 2>/dev/null | wc -l | tr -d ' ')
+          if [ -n "$from_run" ]; then
+            echo "Restored $boards frozen board(s) from run $from_run."
           else
-            echo "No previous publish; the history starts today."
+            echo "No board-history artifact on any of the last $seen publish run(s); the history starts today."
           fi
+          # Read by "The history must not shrink" further down. `seen` is there
+          # so that "nothing to restore" can be told apart from "nothing has
+          # ever been published", which are the same empty directory.
+          echo "boards=$boards" >> "$GITHUB_OUTPUT"
+          echo "candidates=$seen" >> "$GITHUB_OUTPUT"
 
       - name: Say what the restore actually found
         # A board that quietly publishes the schedule and nothing else looks
@@ -159,7 +198,48 @@ jobs:
           python web/settle_results.py --data dist/data --sport epl
           printf '{"sport":"epl"}' > dist/site.json
 
+      - name: The history must not shrink
+        # HARD, and deliberately before both the upload and the Pages deploy.
+        # Those two are what make a wipe permanent: the artifact becomes the
+        # newest one the next run will find, and the deploy replaces the public
+        # Archive page. Stopping here costs one day's board and keeps every
+        # earlier one; stopping after them costs all of them.
+        #
+        # The restore above is `continue-on-error`, which is right — a missing
+        # lab artifact should still produce a schedule-only board — but it
+        # means a death inside that step is otherwise invisible. Its outcome is
+        # checked here rather than there for that reason.
+        #
+        # NOT SOLVED BY GIVING "Keep the history" AN `if: always()`. That was
+        # the obvious-looking fix and it is the wrong one: on a run that failed
+        # midway, `dist/data/history` holds a partial history, and uploading it
+        # would make the partial copy the newest artifact — poisoning the chain
+        # instead of leaving it intact. A failed run should carry no
+        # board-history artifact at all, which is what no `if:` already gives.
+        # The fix belongs on the restore, which now walks back to the last run
+        # that actually has one.
+        run: |
+          set -u
+          before="${{ steps.restore.outputs.boards }}"
+          after=$(find dist/data/history -maxdepth 1 -name '*.json' ! -name index.json | wc -l | tr -d ' ')
+
+          if [ "${{ steps.restore.outcome }}" != "success" ]; then
+            echo "::error::The restore step did not succeed (${{ steps.restore.outcome }}), so what it found cannot be trusted. Refusing to publish a history over the existing chain."
+            exit 1
+          fi
+          if [ -z "$before" ]; then
+            echo "::error::The restore step reported no board count. It died before saying what it found, so this run cannot tell a fresh history from a wiped one. Refusing to publish."
+            exit 1
+          fi
+          if [ "$after" -lt "$before" ]; then
+            echo "::error::The history shrank: restored $before frozen board(s), about to publish $after. Refusing to overwrite the chain and the Archive page."
+            exit 1
+          fi
+          echo "History intact: $before restored, $after to publish."
+
       - name: Keep the history
+        # No `if:` on purpose — see the step above. A run that failed partway
+        # must leave no artifact rather than a truncated one.
         uses: actions/upload-artifact@v4
         with:
           name: board-history

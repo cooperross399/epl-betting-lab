@@ -122,7 +122,7 @@ those parameter names do not exist. The ledger is opened read-only.
 Read this before pasting anything below.
 
 The card is produced by **GitHub Actions**
-(`.github/workflows/matchday-refresh.yml`), ten triggers a week across five
+(`.github/workflows/matchday-refresh.yml`), fifteen triggers a week across five
 matchdays, on GitHub's
 infrastructure. It fetches results, fetches prices, rebuilds every report, and
 renders the card on the run page. It needs no laptop, no terminal, and nothing

@@ -1555,3 +1555,137 @@ def test_the_card_is_not_named_for_one_competition() -> None:
 
     assert "EPL" not in ISSUE_TITLE
     assert ISSUE_TITLE.startswith("Soccer Card")
+
+
+def _steps() -> list[dict]:
+    import yaml
+
+    spec = yaml.safe_load(_workflow())
+    return list(spec["jobs"].values())[0]["steps"]
+
+
+def _step(step_id: str) -> dict:
+    for step in _steps():
+        if step.get("id") == step_id:
+            return step
+    raise AssertionError(f"no step with id {step_id!r}")
+
+
+def _gate() -> str:
+    for step in _steps():
+        if step.get("name") == "Report the outcome":
+            return step["run"]
+    raise AssertionError("no 'Report the outcome' step")
+
+
+def _conditions(script: str) -> str:
+    """Only the `if`/`elif` test expressions of a shell script.
+
+    Asserting an identifier appears anywhere in a step is not a guard on the
+    step's logic, because the identifier also appears in the `::error::`
+    message the step prints. Three mutants proved it: replacing a condition
+    with `[ "no" = "yes" ]` while leaving the message intact passed every one
+    of these tests. A check on a condition has to read the condition.
+    """
+    out, joining = [], False
+    for line in script.splitlines():
+        stripped = line.strip()
+        if joining or re.match(r"^(if|elif)\b", stripped):
+            out.append(stripped)
+            joining = not stripped.endswith("then")
+    return "\n".join(out)
+
+
+def _branch(marker: str) -> str:
+    """The `if` block of the outcome gate that tests `marker`, up to its `fi`."""
+    lines = _gate().splitlines()
+    for i, line in enumerate(lines):
+        if marker in line:
+            out = []
+            for rest in lines[i:]:
+                out.append(rest)
+                if rest.strip() == "fi":
+                    return "\n".join(out)
+            raise AssertionError(f"no closing fi after {marker!r}")
+    raise AssertionError(f"the gate never tests {marker!r}")
+
+
+def test_the_outcome_gate_can_see_whether_the_card_was_delivered() -> None:
+    """It called itself the only step that can fail the job and could not.
+
+    It read `steps.rebuild` and `steps.health`, and nothing else. The health
+    step runs hundreds of lines before delivery, so its outputs are fixed
+    before a byte is sent. Both delivery steps are continue-on-error and
+    neither carried an `id`, so their outcomes were not unchecked — they were
+    unreferenceable. A run whose card-feed push failed printed "Clean run."
+    """
+    conditions = _conditions(_gate())
+
+    assert _step("publish")["name"] == "Publish the card to the card-feed branch"
+    # In a CONDITION. Both identifiers also appear in the `::error::` message,
+    # so `in gate` passed with the condition replaced by `[ "never" = "always" ]`.
+    assert "steps.publish.outcome" in conditions
+    assert '-z "$PUBLISHED"' in conditions, (
+        "an empty state means the step died before either of its exits — the "
+        "shape that produced a day of green runs and no card"
+    )
+    assert 'PUBLISHED="${{ steps.publish.outputs.state }}"' in _gate()
+
+
+def test_every_exit_from_the_publish_step_reports_a_state() -> None:
+    """The gate reads an empty state as a death. That only works if it is one.
+
+    One exit says `left-alone` (declining to replace a good card is a
+    delivered outcome), one says `published`, and anything else means the step
+    stopped before reaching either. Add a third exit without a state and the
+    gate silently reclassifies it as a failure — or worse, a future edit makes
+    empty mean "fine". This counts them.
+    """
+    script = _step("publish")["run"]
+    code = "\n".join(
+        line for line in script.splitlines() if not line.strip().startswith("#")
+    )
+
+    exits = code.count("exit 0")
+    states = code.count('>> "$GITHUB_OUTPUT"')
+
+    assert states == exits + 1, (
+        f"{exits} early exit(s) and {states} state report(s): every exit needs "
+        "one, plus the fall-through after the push"
+    )
+    assert "state=left-alone" in code
+    assert "state=published" in code
+
+
+def test_a_delivery_failure_is_not_excused_by_an_expected_refusal() -> None:
+    """Order inside the gate, which is the whole of this one.
+
+    A provider refusal outside the Thursday window is the policy working, and
+    the gate exits 0 on it — correctly. But a card that never reached the feed
+    is a fault whether or not the provider also declined, so the delivery
+    check has to come first. Behind it, the refusal path would swallow it.
+    """
+    gate = _gate()
+
+    assert gate.index("steps.publish.outcome") < gate.index("expected_refusal")
+
+
+def test_a_failed_email_warns_and_a_failed_publish_fails() -> None:
+    """The feed is the delivery; the issue comment is a convenience.
+
+    Failing the run on a missed email would train the reader to ignore red
+    runs, which is the thing the notice exists to avoid.
+    """
+    assert _step("email")["name"] == "Email the card"
+
+    # Read each branch on its own. "Does the word appear anywhere in the gate"
+    # would pass on either half alone, and splitting the text on "fi" cuts at
+    # the first two letters it finds rather than at the end of the block —
+    # which is a line, so the extraction is by lines.
+    email_branch = _branch("steps.email.outcome")
+    publish_branch = _branch("steps.publish.outcome")
+
+    assert "::warning::" in email_branch
+    assert "exit 1" not in email_branch, "a missed email must not fail the run"
+    assert "::error::" in publish_branch
+    assert "exit 1" in publish_branch, "a missed card-feed push must fail it"

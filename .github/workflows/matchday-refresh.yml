@@ -261,20 +261,55 @@ jobs:
           # the next run needs.
           mkdir -p data
           restored=""
-          for candidate in $(gh run list --workflow matchday-refresh.yml \
-            --limit 10 --json databaseId --jq '.[].databaseId'); do
+          seen=0
+          # Captured, not inlined: a `gh run list` that fails on auth or a
+          # rate limit yields nothing from a `for` header and the loop reads
+          # as "no prior run exists" — the same shape that let the board's
+          # restore treat a broken lookup as a first run.
+          if ! prior=$(gh run list --workflow matchday-refresh.yml \
+            --limit 40 --json databaseId --jq '.[].databaseId'); then
+            echo "::error::Could not list prior runs, so this run cannot tell a first run from a broken lookup. The state upload is skipped rather than reseeding the card archive from nothing."
+            echo "safe=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          for candidate in $prior; do
+            if [ "$candidate" = "${{ github.run_id }}" ]; then
+              continue
+            fi
+            seen=$((seen + 1))
             if gh run download "$candidate" --name matchday-state --dir data 2>/dev/null; then
               restored="$candidate"
               break
             fi
           done
+          CARDS=$(find data/outputs/archive/automated_cards -name '*.json' 2>/dev/null | wc -l | tr -d ' ')
+          echo "restored_cards=$CARDS" >> "$GITHUB_OUTPUT"
           if [ -z "$restored" ]; then
-            echo "No previous run carried state. This run establishes the baseline."
+            # THE CARD LEDGER IS NOT REBUILDABLE. `archive/automated_cards` is
+            # the only record of what the card recommended, and the upload
+            # below carries no `if:`, so a run that restored nothing still
+            # publishes a `matchday-state` artifact — holding this run's one
+            # card. That artifact is then the newest, every later walk-back
+            # stops at it, and fifty-odd cards are orphaned in artifacts that
+            # expire in ninety days. Exactly the board-history wipe, in the
+            # workflow beside it.
+            if [ "$seen" -gt 0 ]; then
+              # Reported, not exited. THIS STEP IS continue-on-error, so an
+              # `exit 1` here marks the step red and the job carries on —
+              # and the upload below is `if: always()`, so the reseed would
+              # happen anyway. The guard has to sit on the upload, which is
+              # the destructive act.
+              echo "::error::$seen prior run(s) exist and none carried a matchday-state artifact. Publishing one now would reseed the card archive from this run alone and orphan the settled record, so the upload is skipped. Recover with 'gh run download <id> --name matchday-state' from a run still inside the 90-day retention."
+              echo "safe=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            echo "No prior run at all. This run establishes the baseline."
+            echo "safe=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           echo "Restored state from run $restored."
-          find data/outputs/archive/automated_cards -name '*.json' 2>/dev/null \
-            | wc -l | xargs echo "Archived card runs restored:"
+          echo "Archived card runs restored: $CARDS"
+          echo "safe=true" >> "$GITHUB_OUTPUT"
 
       - name: Check the schedule has not gone quiet
         # A schedule that never fires produces no run, no summary, no email and
@@ -899,6 +934,16 @@ jobs:
           retention-days: 30
 
       - name: Upload the state for the next run
+        # SKIPPED when the restore could not reach the chain. Without this
+        # the artifact published here — holding only this run's single card
+        # — becomes the newest, every later walk-back stops at it, and the
+        # fifty-odd cards in `archive/automated_cards` are orphaned in
+        # artifacts that expire in ninety days. That directory is the only
+        # record of what the card recommended and the settled record is read
+        # from it; it cannot be rebuilt.
+        #
+        # `always()` is kept for every other case: a degraded run that still
+        # built a card must carry its state forward.
         # The card archive and the match dataset together are the only link
         # between one matchweek and the next, which is why they outlive the
         # reports.
@@ -915,7 +960,7 @@ jobs:
         # re-fetching it to check is not an option this project takes. Keeping
         # the file the pipeline already downloaded makes the question
         # answerable without asking Understat again.
-        if: always()
+        if: always() && steps.restore.outputs.safe != 'false'
         uses: actions/upload-artifact@v4
         with:
           name: matchday-state

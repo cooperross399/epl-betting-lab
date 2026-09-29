@@ -336,13 +336,35 @@ def _implied(american):
 
 
 def test_a_market_with_a_higher_bar_demands_a_longer_price():
-    """total_2_5 unders carry a 0.08 floor against btts's 0.045, so the same
-    model probability has to be paid more to be worth taking."""
+    """Among the LIFT-gated markets, a higher floor demands a longer price.
+
+    This compared total_2_5 unders (floor 0.08) against btts (0.045) until
+    2026-09-29. The anchored rule replaced the floor for total_2_5: its
+    status comes from the lift against the de-vigged consensus, and whether
+    it is staked comes from `_confidence_tier`, which returns Pass/Avoid at
+    `edge <= 0` and never consults the floor. Quoting the floor as a price
+    limit printed "bet down to −108" beside a row recommended at −130 — a
+    limit the row had already passed.
+
+    So the comparison moves to two markets the floor still governs, and
+    `test_bet_down_to_uses_the_governing_rule` covers the anchored one.
+    """
     from epl_betting_lab.reports.thursday_best_bets import _bet_down_to
 
     same = {"calibrated_model_prob": 0.60}
-    strict = _bet_down_to(pd.Series({**same, "market": "total_2_5", "selection": "under"}))
-    loose = _bet_down_to(pd.Series({**same, "market": "btts", "selection": "yes"}))
+    # btts carries 0.045 against double chance's default 0.035 — checked
+    # rather than assumed, because the first version of this had the pair
+    # the wrong way round.
+    strict = _bet_down_to(pd.Series({**same, "market": "btts", "selection": "yes"}))
+    loose = _bet_down_to(
+        pd.Series({**same, "market": "double_chance", "selection": "home_or_draw"})
+    )
+    from epl_betting_lab.models.calibration import min_calibrated_edge
+    from epl_betting_lab.reports.thursday_best_bets import MIN_EDGE
+
+    assert min_calibrated_edge("btts", "yes", MIN_EDGE) > (
+        min_calibrated_edge("double_chance", "home_or_draw", MIN_EDGE)
+    ), "the two markets no longer differ in floor; pick another pair"
     assert _implied(strict) < _implied(loose)
 
 

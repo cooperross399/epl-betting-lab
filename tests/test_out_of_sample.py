@@ -54,9 +54,53 @@ def test_a_zero_model_weight_never_bets():
     assert score_rule(long, a=0.0, threshold=0.01) is None
 
 
-def test_too_few_bets_is_none_not_a_number():
-    long = selections_long(_probs(n=30), "1x2")
-    assert score_rule(long, a=1.0, threshold=0.5) is None
+def _qualifying(n, edge=0.20):
+    """`n` rows that clear any sane threshold, and nothing else.
+
+    Built directly rather than through `selections_long`, because that
+    fixture's prices are derived FROM its probabilities: de-vigged,
+    `p_market` equals `p_model` exactly, so no row can ever show an edge.
+    A threshold of 0.5 against it selects zero rows, and `score_rule`
+    returned None for having no bets at all rather than too few.
+    """
+    market = 0.40
+    return pd.DataFrame({
+        "p_model": [market + edge] * n,
+        "p_market": [market] * n,
+        "open_dec": [1 / market] * n,
+        "profit": [0.5] * n,
+        "clv": [0.01] * n,
+        "won": [1.0] * n,
+    })
+
+
+def test_one_bet_under_the_floor_is_none():
+    """The floor, tested at the floor. It was not tested at all.
+
+    Dropping `MIN_BETS` to 1 passed all 2,440 tests. The held-out report
+    would then publish ROI, units and CLV for grid cells backed by a single
+    bet, in the same sorted table as cells backed by hundreds and with no
+    marker — in the report whose whole purpose is to stop a number with
+    nothing behind it being read as evidence.
+    """
+    assert score_rule(_qualifying(MIN_BETS - 1), a=1.0, threshold=0.05) is None
+
+
+def test_and_one_bet_over_it_is_a_number():
+    """The control. Without it, a rule that always returned None would pass."""
+    scored = score_rule(_qualifying(MIN_BETS), a=1.0, threshold=0.05)
+
+    assert scored is not None
+    assert scored["bets"] == MIN_BETS
+
+
+def test_no_qualifying_bets_is_also_none():
+    """Zero and "too few" are different reasons for the same answer.
+
+    The old test believed it was checking the second and was checking the
+    first, so this keeps the first covered under its own name.
+    """
+    assert score_rule(_qualifying(0), a=1.0, threshold=0.05) is None
     assert MIN_BETS == 20
 
 

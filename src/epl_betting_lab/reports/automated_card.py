@@ -616,8 +616,9 @@ def render_automated_card(summary: Mapping[str, Any]) -> str:
         size = _units(staked[0].get("suggested_units"))
         return [
             f"_Every bet below is {size}u. No market on this card has a "
-            "demonstrated edge — every interval includes zero and two point "
-            "estimates are negative — so they are staked the same small size "
+            "demonstrated edge — every interval includes zero and three "
+            "point estimates are negative — so they are staked the same small "
+            "size "
             "while the closing-line record accumulates. The tier orders the "
             "card; it does not size the bet._",
             "",

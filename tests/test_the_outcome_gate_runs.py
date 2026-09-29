@@ -40,6 +40,8 @@ def _run(
     state: str = "published",
     publish: str = "success",
     email: str = "success",
+    feed: str = "appended",
+    feed_outcome: str = "success",
     degraded: str = "false",
     refusal: str = "false",
     rebuild: str = "success",
@@ -49,6 +51,8 @@ def _run(
         (r"\$\{\{ steps\.publish\.outputs\.state \}\}", state),
         (r"\$\{\{ steps\.publish\.outcome \}\}", publish),
         (r"\$\{\{ steps\.email\.outcome \}\}", email),
+        (r"\$\{\{ steps\.prices_feed\.outputs\.state \}\}", feed),
+        (r"\$\{\{ steps\.prices_feed\.outcome \}\}", feed_outcome),
         (r"\$\{\{ steps\.health\.outputs\.degraded \}\}", degraded),
         (r"\$\{\{ steps\.health\.outputs\.expected_refusal \}\}", refusal),
         (r"\$\{\{ steps\.rebuild\.outcome \}\}", rebuild),
@@ -120,3 +124,72 @@ class TestItPassesWhatShouldPass:
 
         assert done.returncode == 1
         assert "This run was degraded" in done.stdout
+
+
+class TestTheFourthPublishingStep:
+    """The price-feed push in this workflow had no `id` either.
+
+    Three publishing steps were given one today — the card, the board
+    history, the snapshot's append — and this fourth one was missed, in the
+    workflow that was fixed first. Its outcome was unreferenceable, so a run
+    that fetched prices and failed to append any of them said nothing.
+
+    It WARNS rather than failing. The card is the day's deliverable and a
+    missing feed row is one supplementary observation; the Closing
+    Snapshot's near-kickoff capture, which does fail hard, is the one
+    `live_clv` reads. Failing a delivered card over a lost feed row would
+    invert "a run never ends with nothing to show".
+    """
+
+    def test_a_lost_feed_row_warns(self, tmp_path: Path) -> None:
+        done = _run(tmp_path, feed="", feed_outcome="failure")
+
+        assert done.returncode == 0, done.stdout + done.stderr
+        assert "did not reach the price-feed branch" in done.stdout
+        assert "::warning::" in done.stdout
+
+    def test_a_step_that_died_before_reporting_warns_too(self, tmp_path: Path) -> None:
+        done = _run(tmp_path, feed="")
+
+        assert done.returncode == 0, done.stdout + done.stderr
+        assert "::warning::" in done.stdout
+
+    @pytest.mark.parametrize("state", ["appended", "unchanged", "nothing-to-publish"])
+    def test_the_control_a_delivered_row_says_so_quietly(
+        self, tmp_path: Path, state
+    ) -> None:
+        done = _run(tmp_path, feed=state)
+
+        assert done.returncode == 0, done.stdout + done.stderr
+        assert f"price-feed: {state}" in done.stdout
+        assert "did not reach the price-feed" not in done.stdout
+
+    def test_it_does_not_fail_a_run_whose_card_landed(self, tmp_path: Path) -> None:
+        """The judgement, pinned: a lost feed row is not a lost card."""
+        done = _run(tmp_path, feed="", feed_outcome="failure", state="published")
+
+        assert done.returncode == 0
+        assert "Clean run." in done.stdout
+
+
+def test_every_publishing_step_in_this_workflow_can_be_referred_to() -> None:
+    """Three publishing steps got an `id` today and a fourth was missed.
+
+    A step that pushes to a branch and carries no `id` has an outcome the
+    gate cannot name, which is how each of the others hid. Enumerated from
+    the workflow rather than listed by hand, so a fifth one added later
+    fails this instead of joining them.
+    """
+    spec = yaml.safe_load(WORKFLOW.read_text(encoding="utf-8"))
+    steps = list(spec["jobs"].values())[0]["steps"]
+    pushers = [
+        s for s in steps
+        if "git push" in (s.get("run") or "") and "refs/heads/" in (s.get("run") or "")
+    ]
+
+    assert pushers, "no publishing step found; the detector is broken"
+    for step in pushers:
+        assert step.get("id"), (
+            f"{step.get('name')!r} pushes to a branch with no id, so the "
+            "outcome gate cannot see whether it worked"
+        )

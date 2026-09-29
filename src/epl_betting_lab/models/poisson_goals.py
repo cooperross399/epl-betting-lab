@@ -116,10 +116,14 @@ TOTALS_RATINGS = RatingConfig(
 #: `yes`, and these bet 2 `yes` and no `no`. Fewer bets, not more, which is the
 #: opposite of the failed fix's signature.
 #:
-#: What this still cannot say is whether it makes money. BTTS has no historical
-#: prices at any source this project can reach, so no bet rule on it can ever be
-#: profit-backtested. That is a reason to keep its stake modest and its forward
-#: record separate, not a reason to keep a bias that has been measured out.
+#: What this still cannot say is whether it makes money. That was once
+#: unanswerable — BTTS has no historical prices in Football-Data — but the
+#: per-event history was bought, and `data/outputs/derived_market_backtest.md`
+#: scores BTTS at +0.66% over 31 bets against prices really offered at books
+#: that can really be bet, an interval of −34.2% to +34.7%. So the answer
+#: exists and it is "not demonstrably". That is a reason to keep its stake
+#: modest and its forward record separate, not a reason to keep a bias that
+#: has been measured out.
 BTTS_RATINGS = RatingConfig(
     opponent_adjusted=True, half_life_days=365, goal_source="blend", xg_weight=0.7
 )

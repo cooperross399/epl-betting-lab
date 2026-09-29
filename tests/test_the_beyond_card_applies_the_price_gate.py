@@ -274,6 +274,12 @@ class TestTheCapSaysWhatItWithheld:
         assert note is not None, card.notes
         assert str(MAX_EXTRA_BETS) in note
 
+        # The COUNT, not just the presence of a sentence. Asserting only
+        # that a note exists passes whatever number it carries, and the
+        # number is the whole content: "22 further selections" and "1
+        # further selection" are very different disclosures.
+        assert note.startswith(f"{6 - MAX_EXTRA_BETS} further selection"), note
+
     def test_the_control_nothing_is_said_when_nothing_is_withheld(
         self, _totals_pool
     ) -> None:
@@ -296,3 +302,32 @@ class TestTheCapSaysWhatItWithheld:
 
         note = next(n for n in card.notes if "not positive" in n)
         assert "sorts below every positive one" in note
+
+
+    def test_the_record_carries_the_withheld_count_too(self, _totals_pool) -> None:
+        """The card said it; the record the evidence is built from did not.
+
+        `selections` in the record is the POST-cap count, so without this a
+        competition that produced four selections and one that produced
+        twenty-six look identical to anything querying the record later —
+        which is the only thing a CLV or coverage question can read.
+        """
+        from epl_betting_lab.reports.extra_competitions_card import (
+            MAX_EXTRA_BETS,
+            extra_card_record,
+        )
+
+        card = build_extra_card(self._many(6), "UNL", now=NOW)
+        record = extra_card_record({"UNL": card})
+        block = record["competitions"]["UNL"]
+
+        assert block["selections"] == MAX_EXTRA_BETS
+        assert block["withheld_by_cap"] == 6 - MAX_EXTRA_BETS
+
+    def test_the_control_nothing_withheld_records_zero(self, _totals_pool) -> None:
+        from epl_betting_lab.reports.extra_competitions_card import extra_card_record
+
+        card = build_extra_card(_feed(-250, 200), "UNL", now=NOW)
+        record = extra_card_record({"UNL": card})
+
+        assert record["competitions"]["UNL"]["withheld_by_cap"] == 0

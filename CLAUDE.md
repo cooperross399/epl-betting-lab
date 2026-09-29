@@ -72,8 +72,12 @@ Use the repo, the reports, and GitHub.
   evidence and the decision stand on the record — say so plainly when asked
   what the card's picks rest on: `docs/every_market_measured.md`.
 - **No market in this system has a demonstrated edge.** 1X2 measures +5.3% over
-  500 bets (95% interval −3.4% to +14.1%); BTTS measures +15.0% over 51 bets
-  (−12.4% to +42.5%). Both intervals include zero. Separating a true +5% edge
+  500 bets (95% interval −3.4% to +14.1%); BTTS measures +0.66% over 31 bets
+  (−34.2% to +34.7%), and every bought market together is −0.35% over 273
+  (−14.7% to +15.6%). The BTTS figure here read +15.0% over 51 until
+  2026-09-29 — the best-price-across-books harvest the repo had already ruled
+  unusable. Quote the generated report, not a doc. Every interval includes
+  zero. Separating a true +5% edge
   from zero would take about 1,537 bets — roughly twelve seasons at the rate
   this system bets. Say this plainly when asked whether it works:
   `docs/what_we_can_and_cannot_claim.md`.

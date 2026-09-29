@@ -25,15 +25,17 @@ name: Closing Snapshot
 # rebuilds no report, sends nothing, and touches no protected file. It cannot
 # change what is bet.
 #
-# COST: about 500 requests a run, seven runs a week — roughly 15,225 a month,
-# which is three quarters of the whole 20,000 allowance and the larger half of
-# what this account spends. It was described here as 80 a run against
-# 3,635,487 remaining, and both halves of that are long dead: the figure was
-# never measured, and the plan is now 20,000 a month.
+# COST: about 500 requests a run, five runs a week — roughly 10,875 a month.
+# With Matchday Refresh's fifteen at 122 the scheduled total is about 18,800
+# against an allowance of 20,000.
 #
-# Five firings a week would bring the scheduled total inside the allowance.
-# That is a real trade — fewer closing observations is less CLV — so it is
-# left to an operator rather than trimmed here.
+# It was seven runs a week, which put the scheduled total at 23,200 and over
+# the plan. Before that it was described here as 80 a run against 3,635,487
+# remaining; both halves of that were dead — the figure was never measured, and
+# the plan is 20,000 a month now.
+#
+# The two firings that came out cost real CLV coverage. Cooper chose that over
+# a smaller allowance on 2026-09-29.
 #
 # A LATE TRIGGER IS SAFE, NOT WRONG. GitHub delays scheduled runs, sometimes by
 # hours — this repository lost a Thursday card to a nine-hour delay. A snapshot
@@ -44,14 +46,26 @@ name: Closing Snapshot
 
 on:
   schedule:
-    # Twenty minutes before each usual kick-off slot, in UTC, allowing for the
-    # UK being UTC+1 in summer. Saturday 12:30/15:00/17:30 UK, Sunday
-    # 14:00/16:30 UK, Friday and Monday evening 20:00 UK.
+    # Twenty minutes before a kick-off slot, in UTC, allowing for the UK being
+    # UTC+1 in summer: Saturday 12:30 and 15:00 UK, Sunday 14:00 UK, Friday and
+    # Monday evening 20:00 UK.
+    #
+    # WHICH TWO CAME OUT, AND WHY THOSE. Five firings fit the allowance and
+    # seven do not, so two slots lose their near-kickoff observation. The two
+    # dropped are the LATE slot on a day that already has an earlier one —
+    # Saturday 17:30 UK and Sunday 16:30 UK. A snapshot fetches every upcoming
+    # fixture, not just the imminent one, so those kick-offs still get an
+    # observation from the same day's earlier firing: about 2h50 before, rather
+    # than 20 minutes.
+    #
+    # Friday and Monday keep theirs for the same reason reversed. They are
+    # single-slot days, so dropping one would leave those fixtures with nothing
+    # nearer than that morning's Matchday Refresh — roughly ten hours out. The
+    # question is never how many fixtures a slot holds, it is how stale the
+    # nearest surviving observation would be.
     - cron: "10 11 * * 6"
     - cron: "40 13 * * 6"
-    - cron: "10 16 * * 6"
     - cron: "40 12 * * 0"
-    - cron: "10 15 * * 0"
     - cron: "40 18 * * 5"
     - cron: "40 18 * * 1"
   workflow_dispatch:

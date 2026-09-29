@@ -1,10 +1,10 @@
-## Tuesday 29 September, 17:00 UTC — manual run
+## Tuesday 29 September, 18:59 UTC — manual run
 
 Already sent today; same selections (0 price move(s)).
 
 _This run was started by hand, not by the schedule. If you did not start it, someone was testing._
 
-Provider quota: 18520 (about 18 days at the observed burn)
+Provider quota: 18398 (about 18 days at the observed burn)
 
 Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
 
@@ -45,6 +45,7 @@ National teams, on a pool that shares no information with the club ratings — a
 - `total_2_5` is not bet here: the model sits about 8 points below the market on the goals level for every fixture, so a selection in that market would be the gap rather than the fixture.
 - Ratings include no result after 2026-08-26; the results archive runs about a month behind, so the current international window is not in the fit.
 - No corner model: the pool carries no corner counts.
+- 2 further selection(s) qualified and are not shown: this section prints at most 4 per competition, the highest edges first.
 
 ### EFL Cup (Carabao)
 
@@ -68,6 +69,7 @@ Priced on the European ratings, where 868 European ties bridge eleven leagues on
 | Ath Madrid v Man United | `draw_no_bet` | home | +6.5% | -136 | FanDuel | 0.1 |
 
 - 6 fixture(s) left out because a club has no rating in the pool: Bodø/Glimt v Dortmund, LASK v Liverpool, Sabah FK v Slavia Praha, Shakhtar Donetsk v AEK, Viking FK v Bayern Munich, ŠK Slovan Bratislava v Stuttgart.
+- 14 further selection(s) qualified and are not shown: this section prints at most 4 per competition, the highest edges first.
 
 ### UEFA Europa League
 
@@ -106,4 +108,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/36601422786)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/36615417206)

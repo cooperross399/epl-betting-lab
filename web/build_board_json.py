@@ -696,11 +696,19 @@ def main(argv=None) -> int:
     out.mkdir(parents=True, exist_ok=True)
     board = build(Path(args.lab).resolve(), today)
     (out / "board.json").write_text(json.dumps(board, indent=1, ensure_ascii=False), encoding="utf-8")
-    hist = out / "history"
-    hist.mkdir(exist_ok=True)
-    frozen = hist / f"{today.isoformat()}.json"
-    if not frozen.exists():
-        frozen.write_text(json.dumps(board, indent=1, ensure_ascii=False), encoding="utf-8")
+    # The frozen copy is NOT written here. `web/site_history.py` runs straight
+    # after this and freezes the same board under `board_date()`, which is the
+    # window the fixtures belong to; this used `today`, the date the board was
+    # published. Both were write-once, so every run filed the same board under
+    # two names at once: seven archive entries for 2026-09-23 through 09-29,
+    # all of them the 2026-10-10 window, plus one filed as 2026-10-10.json.
+    #
+    # That is what made settlement structurally dead. `settle_results.py` read
+    # the board filed under the settle date, got a board of fixtures still to
+    # come, and graded it against finals for a day they were not played on.
+    # It now selects on each fixture's own kickoff, so the duplicate is no
+    # longer load-bearing -- but two writers naming one record differently is
+    # the defect, not the workaround.
     print(
         f"board {today}: {len(board['games'])} fixtures in {board['windowLabel']}, "
         f"card from {board['cardSource']}, prices from {board['priceSource']}. "

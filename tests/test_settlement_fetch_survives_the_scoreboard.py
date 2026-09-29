@@ -91,8 +91,24 @@ def test_a_scoreboard_outage_does_not_take_the_board_down(tmp_path) -> None:
     module = _module()
     history = tmp_path / "history"
     history.mkdir()
+    # A fixture that actually kicked off on the settle date. As written this
+    # board carried `"games": []`, so settlement had nothing to settle and
+    # returned before it ever reached the scoreboard -- the outage this test
+    # is named for was never triggered, and the test passed on a path that
+    # does not exist in production.
     (history / "2026-09-22.json").write_text(
-        json.dumps({"season": "2026-27", "teams": {}, "games": []}), encoding="utf-8"
+        json.dumps({
+            "season": "2026-27",
+            "generatedAt": "2026-09-20T09:00:00Z",
+            "windowLabel": "2026-09-22 through 2026-09-22",
+            "teams": {"ARS": {"name": "Arsenal"}, "LEE": {"name": "Leeds United"}},
+            "games": [{
+                "id": "401879268", "kickoff": "2026-09-22T19:00Z",
+                "home": {"abbr": "ARS"}, "away": {"abbr": "LEE"},
+                "pick": {"market": "total_2_5", "label": "Over 2.5"},
+            }],
+        }),
+        encoding="utf-8",
     )
 
     def _boom(url: str):

@@ -4,15 +4,21 @@ the finals come from ESPN's public scoreboard for the sport named in site.json.
 
     python web/settle_results.py --data dist/data --sport epl|cbb [--date YYYY-MM-DD]
 
-Reads history/<date>.json (the board as published), fetches finals, grades each
-game's projection and pick, writes results.json. The board is never edited.
+Reads every frozen board under history/, takes each fixture that kicked off on
+the settle date as it was FIRST published, fetches that date's finals, grades
+each projection and pick, and writes results.json. The board is never edited.
 The NHL lab settles inside build_site_json.py and does not use this file.
+
+The selection is by the fixture's own `kickoff`, NOT by the board filed under
+the settle date -- see `first_published`, which is where that cost the record
+every pick it has ever published.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import re
 import urllib.error
 import urllib.request
 from datetime import date, datetime, timedelta, timezone
@@ -130,6 +136,79 @@ def grade_pick(sport, pick, g, hf, af, teams=None):
     return None
 
 
+#: A frozen board is named `<date>.json`, or `<date>_<slot>.json` for a sport
+#: with several cards a day. `history/index.json` and `history/lines/` sit
+#: alongside them and are not boards.
+BOARD_NAME = re.compile(r"^(\d{4}-\d{2}-\d{2})(?:_\w+)?\.json$")
+
+
+def frozen_boards(hist: Path) -> list[dict]:
+    """Every frozen board, oldest publication first.
+
+    Ordered on `generatedAt` rather than on the filename. The filename is the
+    date the board was filed under, and this repository has filed the same
+    board under two different dates at once -- `build_board_json.py` used
+    today's date while `site_history.py` used the window start -- so only
+    `generatedAt` says which opinion was actually published first.
+    """
+    out: list[dict] = []
+    for path in sorted(hist.glob("*.json")):
+        if not BOARD_NAME.match(path.name):
+            continue
+        try:
+            board = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, UnicodeError, json.JSONDecodeError):
+            continue
+        if isinstance(board, dict):
+            out.append(board)
+    out.sort(key=lambda b: str(b.get("generatedAt") or ""))
+    return out
+
+
+def first_published(boards: list[dict], day: date) -> tuple[dict, str | None]:
+    """Each fixture that kicked off on `day`, as it was FIRST published.
+
+    The board is a FORWARD window. The copy frozen on 2026-09-28 carried the
+    2026-10-10 through 2026-10-12 fixtures, and so did all seven of its
+    neighbours. This step used to read the single board filed under the settle
+    date and grade it against that date's finals, which compared ten fixtures
+    still to come against the results of a day they were not played on. It
+    matched none of them, every time: `results.json` has carried
+    `picks 0-0-0` since the page went up, under the notice "The games were
+    played but no final was available when this ran" -- of games eleven days
+    away. Not one published pick has ever been graded.
+
+    A fixture's own `kickoff` is the only field that says when it was played,
+    so that is what selects it, and it is looked for across every frozen board
+    rather than one. That also reaches the rest of a multi-day window: a board
+    filed under its window start spans three dates here, and only the first of
+    them could ever have matched even once the filing was consistent.
+
+    First publication wins, which is the convention `live_clv`'s
+    `first_recommendations` already uses. The pick that was advertised first is
+    the one the record owes an answer for, and a board frozen later -- after a
+    price moved, or after the model changed its mind -- must not be able to
+    quietly replace it.
+    """
+    found: dict[str, tuple[dict, dict]] = {}
+    window: str | None = None
+    for board in boards:
+        teams = board.get("teams") or {}
+        for game in board.get("games", []):
+            if str(game.get("kickoff") or "")[:10] != day.isoformat():
+                continue
+            gid = str(game.get("id"))
+            if gid in found:
+                continue
+            found[gid] = (game, teams)
+            if window is None:
+                window = board.get("windowLabel")
+    ordered = dict(
+        sorted(found.items(), key=lambda kv: (str(kv[1][0].get("kickoff") or ""), kv[0]))
+    )
+    return ordered, window
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--data", default="dist/data")
@@ -138,16 +217,29 @@ def main(argv=None) -> int:
     args = ap.parse_args(argv)
     data = Path(args.data)
     day = date.fromisoformat(args.date) if args.date else (datetime.now(timezone.utc) - timedelta(days=1)).date()
-    hist = data / "history"
-    frozen = sorted(hist.glob(f"{day.isoformat()}*.json"))
+    boards = frozen_boards(data / "history")
     now = datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
     base = {"generatedAt": now, "resultsDate": day.isoformat(), "teams": {}, "games": []}
-    if not frozen:
-        base.update(season="", notice=f"No board was published for {day.isoformat()}, so there is nothing to settle.", summary={})
+    season = next((str(b.get("season") or "") for b in reversed(boards) if b.get("season")), "")
+    if not boards:
+        base.update(season="", notice="No board has been published yet, so there is nothing to settle.", summary={})
         (data / "results.json").write_text(json.dumps(base, indent=1), encoding="utf-8")
         print("nothing to settle")
         return 0
-    board = json.loads(frozen[0].read_text(encoding="utf-8"))
+    playing, window = first_published(boards, day)
+    if not playing:
+        # Said plainly, because the old wording for this case claimed the
+        # opposite: "The games were played but no final was available." No
+        # fixture in the record kicked off, which the record alone establishes
+        # -- so this needs no scoreboard and must not blame one.
+        base.update(
+            season=season, windowLabel=window,
+            notice=f"No fixture in the published record kicked off on {day.isoformat()}, so there is nothing to settle.",
+            summary={},
+        )
+        (data / "results.json").write_text(json.dumps(base, indent=1, ensure_ascii=False), encoding="utf-8")
+        print(f"no published fixture kicked off on {day}. No bet was placed.")
+        return 0
     try:
         fin = finals(args.sport, day)
     except (urllib.error.URLError, json.JSONDecodeError, TimeoutError) as exc:
@@ -162,7 +254,7 @@ def main(argv=None) -> int:
         # day with no games, and this page's whole claim is that the record is
         # settled from what was published.
         base.update(
-            season=board.get("season", ""),
+            season=season,
             notice=f"Yesterday's results could not be settled: the scoreboard feed answered {type(exc).__name__} ({exc}). The board above is unaffected; settlement is retried on the next build.",
             summary={},
         )
@@ -170,13 +262,14 @@ def main(argv=None) -> int:
         print(f"settlement skipped: {type(exc).__name__}: {exc}")
         return 0
     games, picks, su, ats, tots = [], {"w": 0, "l": 0, "p": 0}, {"w": 0, "l": 0}, {"w": 0, "l": 0, "p": 0}, {"w": 0, "l": 0, "p": 0}
-    for g in board.get("games", []):
-        f = fin.get(str(g.get("id")))
+    teams_out: dict = {}
+    for gid, (g, teams) in playing.items():
+        f = fin.get(gid)
         if not f:
             continue
         hf, af = f["home"], f["away"]
         pick = g.get("pick")
-        res = grade_pick(args.sport, pick, g, hf, af, board.get("teams") or {})
+        res = grade_pick(args.sport, pick, g, hf, af, teams)
         # `res` is "win"/"loss"/"push"/"void"/None; `picks` is keyed
         # "w"/"l"/"p". `if res in picks` tested the grade against the KEYS,
         # so it was never true and the tally never ran: every results.json
@@ -214,16 +307,17 @@ def main(argv=None) -> int:
             if isinstance(tt.get("proj"), (int, float)) and isinstance(tt.get("current"), (int, float)):
                 t = hf + af
                 tots["p" if t == tt["current"] else "w" if (tt["proj"] > tt["current"]) == (t > tt["current"]) else "l"] += 1
+        teams_out.update(teams)
         games.append(row)
     summary = {"picks": picks}
     if args.sport == "epl":
         summary.update(result=su, totals={"w": tots["w"], "l": tots["l"]})
     else:
         summary.update(straightUp=su, ats=ats, totals=tots)
-    base.update(season=board.get("season", ""), windowLabel=board.get("windowLabel"), notice=None if games else "The games were played but no final was available when this ran; the next build settles them.",
-                summary=summary, teams=board.get("teams", {}), games=games)
+    base.update(season=season, windowLabel=window, notice=None if games else "The games were played but no final was available when this ran; the next build settles them.",
+                summary=summary, teams=teams_out, games=games)
     (data / "results.json").write_text(json.dumps(base, indent=1, ensure_ascii=False), encoding="utf-8")
-    print(f"settled {len(games)} of {len(board.get('games', []))} games for {day}. No bet was placed.")
+    print(f"settled {len(games)} of {len(playing)} fixture(s) that kicked off on {day}. No bet was placed.")
     return 0
 
 

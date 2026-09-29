@@ -25,7 +25,7 @@ from epl_betting_lab.reports.scheduled_task_bridge import (
     SETTLE_TASK_JSON,
     WATCH_TASK_JSON,
 )
-from epl_betting_lab.config import OUTPUTS_DIR
+from epl_betting_lab.config import AUTOMATED_CARD_JSON, OUTPUTS_DIR
 from epl_betting_lab.providers.request_budget import (
     LOW_RUNWAY_DAYS,
     days_of_runway,
@@ -129,7 +129,7 @@ def build_run_summary(
     model = _read(outputs / WATCH_TASK_JSON)
     card = _read(outputs / CARD_TASK_JSON)
     settle = _read(outputs / SETTLE_TASK_JSON)
-    generated = _read(outputs / "automated_card.json")
+    generated = _read(outputs / AUTOMATED_CARD_JSON)
     comparison = _read(outputs / "automated_card_comparison.json")
     shadow = _read(outputs / "provider_shadow_verification.json")
 

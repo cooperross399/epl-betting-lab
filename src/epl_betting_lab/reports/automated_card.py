@@ -40,7 +40,7 @@ from typing import Any
 
 import pandas as pd
 
-from epl_betting_lab.config import MANUAL_DIR, OUTPUTS_DIR, STAGING_DIR
+from epl_betting_lab.config import AUTOMATED_CARD_JSON, MANUAL_DIR, OUTPUTS_DIR, STAGING_DIR
 from epl_betting_lab.dashboard_actions import run_thursday_best_bets_report
 from epl_betting_lab.reports.automated_card_input import CARD_INPUT_FILENAME
 from epl_betting_lab.reports.pick_display import (
@@ -55,7 +55,7 @@ from epl_betting_lab.reports.current_odds_validation import (
 )
 
 
-CARD_JSON_FILENAME = "automated_card.json"
+CARD_JSON_FILENAME = AUTOMATED_CARD_JSON
 CARD_MARKDOWN_FILENAME = "automated_card.md"
 
 BEST_BETS_SECTION = "Best bets"

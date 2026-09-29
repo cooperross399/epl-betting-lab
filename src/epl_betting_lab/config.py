@@ -8,6 +8,20 @@ PROCESSED_DIR = DATA_DIR / "processed"
 MANUAL_DIR = DATA_DIR / "manual"
 STAGING_DIR = DATA_DIR / "staging"
 OUTPUTS_DIR = DATA_DIR / "outputs"
+#: What each card writes, named once.
+#:
+#: These were thirteen literals across seven modules, and two of them
+#: collided: `CARD_JSON_FILENAME` meant `automated_card.json` in
+#: `automated_card.py` and `card_history.py` and `player_props_card.json` in
+#: `player_props_card.py`. An import of the wrong one would have type-checked,
+#: run, and quietly audited the wrong card.
+#:
+#: The names here say which card they belong to, because that is the thing
+#: the old spelling left out.
+AUTOMATED_CARD_JSON = "automated_card.json"
+EXTRA_CARD_JSON = "extra_competitions_card.json"
+PROPS_CARD_JSON = "player_props_card.json"
+
 STAGING_PROVENANCE_PATH = STAGING_DIR / "staging_provenance.json"
 STAGING_PROVIDER_POLICY_PATH = MANUAL_DIR / "staging_provider_policy.json"
 

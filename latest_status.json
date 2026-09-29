@@ -2,11 +2,11 @@
   "date": "2026-09-28",
   "degraded": "false",
   "trigger": "workflow_dispatch",
-  "run_url": "https://github.com/cooperross399/epl-betting-lab/actions/runs/36501074903",
+  "run_url": "https://github.com/cooperross399/epl-betting-lab/actions/runs/36502441456",
   "card": "rendered",
   "freshness": {
-    "checked": 24,
-    "unchecked": 3,
+    "checked": 27,
+    "unchecked": 0,
     "faults": 0,
     "clean": true
   }

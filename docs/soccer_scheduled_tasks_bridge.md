@@ -329,10 +329,14 @@ Say which of these is true:
 If you cannot tell whether a failure came from the schedule, say you cannot
 tell rather than assuming it did.
 
-STEP 3 — From the most recent card email, report:
+STEP 3 — From `latest_card_comment.md` and `latest_status.json` on the
+`card-feed` branch, report:
 - Whether the latest card was ready, blocked, or degraded.
 - Which markets are included and excluded.
-- How much provider quota remains and how many runs that buys.
+- How much provider quota remains and how many days that buys at the observed
+  burn. The run summary states it that way; it stopped counting in runs on
+  2026-09-29, because a cost model that enumerates named consumers always
+  understates and the provider's own counter cannot omit one.
 
 A card from a manual run is a real card: manual and scheduled runs use the
 same reviewed configuration, so it is the current advice until a newer card
@@ -367,18 +371,18 @@ FACTS ABOUT THE MARKETS — state these rather than guessing:
   a calibrated player model, and a held-out measurement showing good
   calibration and no demonstrated edge — about two qualifying picks a month.
   They are held by the reviewed policy allowlist; if Cooper ever approves
-  them on a policy PR, a Player props section appears in card emails at 0.1
-  units. Held is the normal state, not a fault.
+  them on a policy PR, a Player props section appears in the published card
+  at 0.1 units. Held is the normal state, not a fault.
 
 HARD RULES — follow exactly:
 - Generate no picks. Place no bets. Apply no settlement. Never edit the bet
   ledger, record a result, or compute a profit or loss.
 - Do not propose enabling or disabling a market. Scope changes are reviewed
   decisions behind the policy gate, not something a health check suggests.
-- Report only what the emails say; if something is missing, say it is missing.
+- Report only what the feed says; if something is missing, say it is missing.
 - Never tell Cooper to open a Terminal or to ask ChatGPT.
 
-Within a single day, no card email does not mean the system is broken; it
+Within a single day, no new card does not mean the system is broken; it
 can mean the picks did not move. A gap of more than four days most likely
 means a missed run — settle it from the issue and Actions pages, never from
 the inbox alone.

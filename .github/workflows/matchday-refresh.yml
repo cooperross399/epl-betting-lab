@@ -16,13 +16,20 @@ name: Matchday Refresh
 # arrives too. Silence therefore always means "it ran and nothing moved", which
 # is the only thing that makes silence safe to read.
 #
-# CADENCE: one run per day that can hold a match, plus the Thursday planning
-# card.
+# CADENCE: three runs per day that can hold a match, plus three on Thursday
+# for the planning card. Fifteen triggers a week.
 #
 # This was briefly Thursday-only, when 500 credits a month meant a second run
-# cost more than an extra market was worth. On the 20,000 plan that trade is
-# gone: every market the project can price, at every matchday, costs roughly
-# 2,300 a month — about a ninth of the allowance.
+# cost more than an extra market was worth. That trade is gone, but the
+# allowance is no longer roomy either: at 122 requests a run this workflow
+# costs about 7,960 a month, and with the Closing Snapshot's five firings the
+# scheduled total is about 18,800 against a 20,000 plan.
+#
+# Every figure in this header was wrong until 2026-09-29, and all of them in
+# the direction that makes adding a market look free: one run a day against
+# three, 15 credits a run against 122, "about a ninth of the allowance"
+# against about two fifths for this workflow alone. A header is the first
+# thing a session reads and CLAUDE.md sends it here as the authority.
 #
 # The reason to run more than once a week is the freshness policy. A run older
 # than 12 hours is treated as stale and its card is refused, so Friday's run
@@ -33,29 +40,41 @@ name: Matchday Refresh
 # Each run lands before that day's earliest kick-off and stays fresh through its
 # latest, allowing for the UK being UTC+1 in summer:
 #
-#   Thursday  04:30 UTC  planning card; no matches, and a 10:00 New York
-#                        policy cutoff the run has to land in front of
-#   Friday    09:00 UTC  ~10h before a 20:00 UK kick-off, fresh until 21:00
-#   Saturday  09:00 UTC  ~2.5h before a 12:30 UK kick-off, fresh until 21:00
-#   Sunday    09:00 UTC  covers the afternoon slate
-#   Monday    09:00 UTC  ~10h before a 20:00 UK kick-off, fresh until 21:00
+#   Thursday  04:15, 05:45, 08:15 UTC  planning card; no matches, and a
+#                                      10:00 New York policy cutoff the run
+#                                      has to land in front of
+#   Friday    03:00, 04:30, 09:00 UTC  ~10h before a 20:00 UK kick-off
+#   Saturday  03:00, 04:30, 09:00 UTC  ~2.5h before a 12:30 UK kick-off
+#   Sunday    03:00, 04:30, 09:00 UTC  covers the afternoon slate
+#   Monday    03:00, 04:30, 09:00 UTC  ~10h before a 20:00 UK kick-off
 #
-# Every day's last trigger is 10:30 UTC, because Cooper reads the card at
-# 08:00 New York and the relay that carries it to him runs at 07:30. Friday
-# and Monday used to sit at 11:30 and 13:00 — comfortably before their own
-# evening kick-offs, and comfortably after the moment he actually reads. A
-# card built after the read is a card he sees the following day.
+# `test_the_header_describes_the_schedule_it_sits_above` builds those rows
+# from the crons below and fails if they drift, because every one of them was
+# wrong before it existed.
+#
+# The early two beat the relay, which carries the card to Cooper at 07:30 for
+# an 08:00 New York read — GitHub's measured lateness on this repository is
+# 5h30, so a 03:00 trigger is the one that reliably lands in front of it. The
+# 09:00 is the evening-freshness trigger: a run older than 12 hours is refused,
+# and a 20:00 UK kick-off is 19:00 UTC. A 10:30 trigger was dropped from each
+# match day on 2026-09-29 to bring the schedule inside the allowance.
 #
 # Nothing here is pinned by kick-off any more except the weekend, whose 12:30
 # UK lunch match still sets the ceiling. The evenings have slack to spare: a
 # 09:00 UTC run stays fresh until 21:00, and a 20:00 UK kick-off is 19:00 UTC.
 #
-# COST: measured, not estimated. A run is about 15 credits plus 10 for each
-# extra per-event market. Every run prints the quota remaining and how many
-# runs it buys.
+# COST: measured, not estimated, and read off the provider's own counter
+# rather than computed: about 122 requests a run with every market fetched. Every run prints the quota remaining and how many DAYS of the
+# observed burn that buys — it used to say how many runs, which counted this
+# workflow only while the Closing Snapshot spent from the same account.
+#
+# The single copy of every one of these figures is
+# `src/epl_betting_lab/providers/request_budget.py`. Re-measure the per-run
+# cost from the card's own quota line whenever a competition or a market is
+# added; it has gone stale twice, 15 against 62 and 62 against 122.
 on:
   schedule:
-    # Each matchday is triggered twice, ninety minutes apart. GitHub documents
+    # Each matchday is triggered three times. GitHub documents
     # that scheduled workflows may be delayed or dropped entirely under load,
     # and one was dropped the day this was written: 13:00 Thursday produced no
     # run at all, while a Monday cron in the same repository had fired three

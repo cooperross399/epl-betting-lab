@@ -81,6 +81,18 @@ PROPS_UNITS = 0.1
 @dataclass(frozen=True)
 class PropPick:
     date: str
+    #: The provider's exact kick-off timestamp, carried from the staging
+    #: file. It was written there by `player_props_staging` and dropped
+    #: here, so the only staleness filter this section had was the
+    #: date-string compare `frame["date"] >= today` — under which a fixture
+    #: that kicked off at 12:30 is still offered by the 15:00 run, because
+    #: "2026-10-03" >= "2026-10-03". That is the defect that shipped eight
+    #: already-played fixtures on 2026-09-28, for the one section that got
+    #: neither the kickoff gate nor the freshness audit.
+    #:
+    #: Empty when the staging file predates this column: recorded as unknown
+    #: rather than guessed, which `card_freshness` counts as unchecked.
+    kickoff_time: str
     home_team: str
     away_team: str
     market: str
@@ -119,6 +131,33 @@ def approved_prop_markets(policy_path: Path | None = None) -> list[str]:
         if isinstance(markets, list):
             approved.update(str(item).strip() for item in markets)
     return [m for m in PROP_EVENT_MARKETS if m in approved]
+
+
+def drop_started_fixtures(frame: pd.DataFrame, moment: datetime) -> pd.DataFrame:
+    """Rows whose kick-off has not passed, by the provider's own timestamp.
+
+    The only staleness filter this section had was the date-string compare
+    `frame["date"] >= today`, which keeps a fixture on the card for the whole
+    day it is played: `"2026-10-03" >= "2026-10-03"` is true at 15:00 for a
+    match that kicked off at 12:30. `player_props_staging` has been writing
+    `commence_time` into every row the whole time and nothing read it.
+
+    A separate function so it can be tested on its own. Reaching this filter
+    through `build_player_props_card` needs an approved policy, a staging
+    file and player match logs, and a test that has to build all three to
+    check a comparison is a test that will be deleted.
+
+    An unparseable or missing timestamp is KEPT. The date compare still
+    applies to it and `card_freshness` will count it unchecked, which is the
+    honest answer; dropping a fixture because a column would not parse is the
+    worse failure.
+    """
+    if "commence_time" not in frame.columns:
+        return frame
+    kickoff = pd.to_datetime(frame["commence_time"], errors="coerce", utc=True)
+    cutoff = pd.Timestamp(moment)
+    cutoff = cutoff.tz_localize("UTC") if cutoff.tzinfo is None else cutoff.tz_convert("UTC")
+    return frame[~(kickoff <= cutoff)]
 
 
 def build_player_props_card(
@@ -222,6 +261,7 @@ def build_player_props_card(
     frame = frame.dropna(subset=["american_odds"])
     frame = frame[frame["market"].isin(approved)]
     frame = frame[frame["date"] >= today]
+    frame = drop_started_fixtures(frame, moment)
     summary["markets_with_staged_prices"] = sorted(set(frame["market"]))
 
     if not logs_file.is_file():
@@ -293,6 +333,7 @@ def build_player_props_card(
         picks.append(
             PropPick(
                 date=str(row["date"]),
+                kickoff_time=str(row.get("commence_time") or "").strip(),
                 home_team=str(row["home_team"]),
                 away_team=str(row["away_team"]),
                 market=market,

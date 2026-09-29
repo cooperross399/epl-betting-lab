@@ -172,8 +172,44 @@ def test_a_duplicate_run_cannot_collide_with_the_first() -> None:
     assert "cancel-in-progress: false" in text
 
 
-#: Measured, not estimated: two live runs moved the counter from 340 to 311.
-MEASURED_REQUESTS_PER_RUN = 62  # measured from consecutive live runs
+#: Measured, not estimated.
+#:
+#: 122, from four consecutive live runs on 2026-09-28/29: the published cards
+#: reported 19,540, 19,418, 19,296 and 19,174 remaining — exactly 122 apart each
+#: time.
+#:
+#: It was 62, and 62 was right when it was written. The competitions added since
+#: — the Nations League most recently, at eight markets across 23 fixtures —
+#: roughly doubled the per-run cost, and the constant did not move with them.
+#: This is the second time that has happened; `test_the_stated_credit_cost_
+#: matches_the_schedule` exists because the figure was once four times too low
+#: for the same reason. Re-measure it from the card's own quota line whenever a
+#: competition or a market is added.
+MEASURED_REQUESTS_PER_RUN = 122
+
+#: What one Closing Snapshot costs, measured the same way: the counter fell 460
+#: across a snapshot and one refresh on 2026-09-28, and a refresh is 122.
+#:
+#: Counted here because the budget guard did not count it at all. It compared
+#: only Matchday Refresh crons against the allowance, so a schedule sitting at
+#: 102% of the plan passed — the snapshot is the larger half of the bill.
+MEASURED_REQUESTS_PER_SNAPSHOT = 338
+
+
+def _snapshot_crons() -> int:
+    """How often the Closing Snapshot fires. It spends from the same allowance."""
+    return (
+        PROJECT_ROOT / ".github" / "workflows" / "closing-snapshot.yml"
+    ).read_text(encoding="utf-8").count("- cron:")
+
+
+def _monthly_requests() -> float:
+    """Everything that spends the provider allowance, per month."""
+    refreshes = _workflow().count("- cron:")
+    return WEEKS_PER_MONTH * (
+        refreshes * MEASURED_REQUESTS_PER_RUN
+        + _snapshot_crons() * MEASURED_REQUESTS_PER_SNAPSHOT
+    )
 
 #: Each extra per-event market costs one request per fixture.
 REQUESTS_PER_EXTRA_MARKET_PER_RUN = 10
@@ -189,22 +225,25 @@ WEEKS_PER_MONTH = 4.35
 
 
 def test_the_cadence_stays_inside_the_request_allowance() -> None:
-    """One run a week is ~65 requests a month against a 500 allowance."""
-    text = _workflow()
-    runs_per_week = text.count("- cron:")
+    """Every workflow that spends the allowance, not just this one.
 
-    monthly = runs_per_week * WEEKS_PER_MONTH * MEASURED_REQUESTS_PER_RUN
-    assert monthly < MONTHLY_REQUEST_ALLOWANCE
+    Counting Matchday Refresh alone, the schedule reported 5,124 a month
+    against 20,000 while actually costing 20,375 — over the plan — because the
+    Closing Snapshot draws on the same account and was not in the sum. A budget
+    guard that measures part of the spend is not a budget guard.
+    """
+    assert _monthly_requests() < MONTHLY_REQUEST_ALLOWANCE, (
+        f"the schedule costs ~{_monthly_requests():.0f} against an allowance of "
+        f"{MONTHLY_REQUEST_ALLOWANCE:,}"
+    )
 
 
 def test_the_cadence_leaves_room_for_manual_dispatches() -> None:
     """A schedule that exactly fills the allowance cannot be run by hand."""
-    text = _workflow()
-    runs_per_week = text.count("- cron:")
+    spare = MONTHLY_REQUEST_ALLOWANCE - _monthly_requests()
+    spare_runs = spare / MEASURED_REQUESTS_PER_RUN
 
-    monthly = runs_per_week * WEEKS_PER_MONTH * MEASURED_REQUESTS_PER_RUN
-    spare_runs = (MONTHLY_REQUEST_ALLOWANCE - monthly) / MEASURED_REQUESTS_PER_RUN
-    assert spare_runs >= 5
+    assert spare_runs >= 5, f"only {spare_runs:.0f} manual run(s) of headroom"
 
 
 def test_the_allowance_covers_every_market_the_project_knows() -> None:
@@ -655,12 +694,12 @@ def test_the_stated_credit_cost_matches_the_schedule() -> None:
     someone relies on it to decide the cadence is affordable.
     """
     text = _workflow()
-    runs_per_week = text.count("- cron:")
-    monthly = runs_per_week * WEEKS_PER_MONTH * MEASURED_REQUESTS_PER_RUN
+    monthly = _monthly_requests()
 
-    # The comment should state a figure within a reasonable distance of truth.
-    assert "5,100 credits a month" in text
-    assert 4_700 < monthly < 5_600, f"schedule now costs ~{monthly:.0f}"
+    # The comment should state a figure within a reasonable distance of truth,
+    # and it has to be the WHOLE bill — the snapshot spends the same allowance.
+    assert "18,300 requests a month" in text
+    assert 17_000 < monthly < 19_500, f"schedule now costs ~{monthly:.0f}"
     assert monthly < MONTHLY_REQUEST_ALLOWANCE
 
 

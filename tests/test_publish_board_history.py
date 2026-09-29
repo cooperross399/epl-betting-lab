@@ -85,10 +85,16 @@ def test_the_restores_walk_back_instead_of_pinning_to_the_newest_run() -> None:
     assert not re.search(r"--limit 1(?![0-9])", script), (
         "pinned to the newest completed run again; it may be a failed one"
     )
-    assert script.count("--limit 10") == 2, (
+    # Both restores walk back; the windows differ on purpose. The
+    # board-history one was widened to 40 because ten was short enough to be
+    # exhausted by a few days of failures, which made the refusal below
+    # self-sustaining.
+    windows = [int(w) for w in re.findall(r"--limit (\d+)", script)]
+    assert len(windows) == 2, (
         "both restores — the lab's state and the board's history — need the "
         "walk-back, not just one of them"
     )
+    assert all(w >= 10 for w in windows), windows
     assert script.count("break") == 2
 
 
@@ -126,7 +132,11 @@ def test_the_history_guard_refuses_rather_than_warns() -> None:
     # restore and each unreadable count. What is checked here is that the
     # step refuses rather than advises.
     assert "exit 1" in script
-    assert "::warning::" not in script, "this step blocks a deploy; it does not advise"
+    # One warning is allowed and only one: the `restart_history` escape,
+    # which publishes over the chain on purpose. Every other path refuses.
+    warnings = [l for l in script.splitlines() if "::warning::" in l]
+    assert len(warnings) == 1, warnings
+    assert "restart_history was set" in warnings[0]
     conditions = _conditions(script)
 
     assert "-lt" in conditions

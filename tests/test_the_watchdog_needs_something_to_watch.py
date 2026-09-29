@@ -26,6 +26,13 @@ SCRIPT = PROJECT_ROOT / "scripts" / "check_schedule_health.py"
 WORKFLOW = PROJECT_ROOT / ".github" / "workflows" / "weekly-lab-check.yml"
 
 
+def _code(script: str) -> str:
+    """A step's script with its comment lines removed."""
+    return "\n".join(
+        line for line in script.splitlines() if not line.strip().startswith("#")
+    )
+
+
 def _run(*args: str):
     """The interpreter running the tests, not whatever `python` resolves to.
 
@@ -70,16 +77,37 @@ class TestAnEmptyLookupIsNotHealth:
         assert "baseline" in done.stdout
 
 
-def test_both_matchday_watchdogs_pass_the_flag() -> None:
-    """The script being able to refuse is not the watchdog asking it to."""
+def test_every_watchdog_passes_the_flag() -> None:
+    """The script being able to refuse is not the watchdog asking it to.
+
+    Two of the three were given the flag and the third — the one guarding
+    the price feed, which is the only forward evidence the corner markets
+    will ever have — kept its own empty-list branch that warned and exited
+    0. Scoped to matchday-refresh, the first version of this test could not
+    see it.
+    """
     spec = yaml.safe_load(WORKFLOW.read_text(encoding="utf-8"))
     steps = [s for j in spec["jobs"].values() for s in j["steps"]]
-    checks = [
-        s for s in steps
-        if "check_schedule_health.py" in (s.get("run") or "")
-        and "matchday-refresh.yml" in (s.get("run") or "")
-    ]
+    checks = [s for s in steps if "check_schedule_health.py" in (s.get("run") or "")]
 
-    assert len(checks) == 2, "expected the gap check and the streak check"
+    assert len(checks) == 3, [s.get("name") for s in checks]
     for step in checks:
-        assert "--require-runs" in step["run"], step.get("name")
+        # Comments stripped. The comment in the snapshot step explaining this
+        # fix contains the string `--require-runs`, so reading the raw `run`
+        # matched the explanation and a mutant that removed the flag from the
+        # COMMAND passed. Same shape as the `::error::` message that named
+        # the identifier its own condition tested.
+        assert "--require-runs" in _code(step["run"]), step.get("name")
+
+
+def test_no_watchdog_keeps_its_own_empty_list_escape() -> None:
+    """`if [ -z "$previous" ]; then ... exit 0` is the flag undone."""
+    spec = yaml.safe_load(WORKFLOW.read_text(encoding="utf-8"))
+    steps = [s for j in spec["jobs"].values() for s in j["steps"]]
+
+    for step in steps:
+        run = step.get("run") or ""
+        if "check_schedule_health.py" not in run:
+            continue
+        assert 'if [ -z "$previous" ]' not in run, step.get("name")
+        assert 'if [ -z "$conclusions" ]' not in run, step.get("name")

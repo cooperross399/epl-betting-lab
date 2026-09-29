@@ -64,10 +64,12 @@ Use the repo, the reports, and GitHub.
     `Provider Market Discovery` → `line_coverage` before concluding a market is
     unreachable.
 - **Every market has now been measured against real prices** — the unpriced ones
-  were bought per event. Not one interval excludes zero, `double_chance` is
-  negative, `draw_no_bet`'s positive number rests on thirteen bets, and
-  `corners_1x2` can never be measured because the provider does not retain it
-  historically. The measurement recommended enabling nothing; Cooper reviewed
+  were bought per event. Not one interval excludes zero; `corners_total_10_5`
+  is −18.82% and `double_chance` −6.47%; `draw_no_bet` is +8.24% on 68 bets.
+  Only `corners_1x2` can never be measured, because the provider does not
+  retain it historically. This line said "`draw_no_bet`'s positive number
+  rests on thirteen bets" until 2026-09-29 — the best-price-across-books
+  harvest, superseded. The measurement recommended enabling nothing; Cooper reviewed
   that evidence and enabled all eight markets anyway on 2026-08-21. Both the
   evidence and the decision stand on the record — say so plainly when asked
   what the card's picks rest on: `docs/every_market_measured.md`.

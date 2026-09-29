@@ -15,6 +15,14 @@ on:
     workflows: ["Matchday Refresh"]
     types: [completed]
   workflow_dispatch:
+    inputs:
+      restart_history:
+        description: >-
+          Publish a fresh history even though prior runs exist. The only way
+          out of the total-wipe refusal, which is otherwise self-sustaining.
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: read
@@ -144,8 +152,12 @@ jobs:
           # was added to make.
           seen=0
           from_run=""
+          # Forty, not ten. Retention on this artifact is 400 days, so the
+          # window costs nothing but a few skipped downloads — and at ten it
+          # was short enough to be exhausted by about three days of failures,
+          # which is how the refusal below became self-sustaining.
           for candidate in $(gh run list --workflow publish-board.yml \
-            --limit 10 --json databaseId --jq '.[].databaseId'); do
+            --limit 40 --json databaseId --jq '.[].databaseId'); do
             if [ "$candidate" = "${{ github.run_id }}" ]; then
               continue
             fi
@@ -257,8 +269,21 @@ jobs:
             echo "::error::The restore step reported no candidate count, so a first run cannot be told from an exhausted window. Refusing to publish."
             exit 1
           fi
-          if [ "$before" -eq 0 ] && [ "$candidates" -gt 0 ]; then
-            echo "::error::$candidates prior publish run(s) exist and none carried a board-history artifact, so this run would publish a history of $after over whatever the Archive already holds. Refusing. Recover by re-running a publish whose artifact is still within retention, or clear this by hand if the history is genuinely meant to restart."
+          if [ "${{ inputs.restart_history }}" = "true" ]; then
+            # The escape. The refusal below fails the job before "Keep the
+            # history", which has no `if:` by design, so a refusing run adds
+            # one more artifact-less run to the window it reads — and once
+            # the window holds nothing but those, every later run refuses on
+            # the same line, forever. The Pages deploy stops and the Archive
+            # freezes even after the original cause is fixed.
+            #
+            # Re-running an older publish does not help: the loop skips the
+            # re-run's own id, which is the only run in reach still carrying
+            # the artifact. So the way out has to be an explicit input, and
+            # the message below has to name it rather than say "by hand".
+            echo "::warning::restart_history was set, so this run publishes a fresh history of $after board(s) over whatever the Archive holds. Everything earlier is dropped."
+          elif [ "$before" -eq 0 ] && [ "$candidates" -gt 0 ]; then
+            echo "::error::$candidates prior publish run(s) exist and none of them carried a board-history artifact, so this run would publish a history of $after over whatever the Archive already holds. Refusing. Recover by fixing whatever stopped those runs uploading; if the history is genuinely meant to restart, re-run this workflow from the Actions tab with restart_history set."
             exit 1
           fi
           if [ "$before" -eq 0 ]; then

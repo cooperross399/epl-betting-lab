@@ -599,8 +599,15 @@ def render_automated_card(summary: Mapping[str, Any]) -> str:
         Every market the card can stake is capped at the smallest size, so the
         tier orders the bets without changing what is staked on them. Eight
         rows of "C" with no explanation invites the reader to think the ranking
-        is sizing the bet. It is not, and the reason is worth a sentence: none
-        of these markets can be profit-backtested, so none has earned more.
+        is sizing the bet. It is not, and the reason is worth a sentence: no
+        market on this card has a demonstrated edge, so none has earned more.
+
+        That sentence used to read "none of these markets can be
+        profit-backtested", which stopped being true when the per-event
+        history was bought. All of them except `corners_1x2` are measured in
+        `data/outputs/derived_market_backtest.md`; what they lack is an edge,
+        not a measurement, and the two are different reasons for the same
+        stake.
         """
         staked = [r for r in rows if _units(r.get("suggested_units")) > 0]
         tiers = {_clean(r.get("confidence_tier")) for r in staked}
@@ -609,9 +616,10 @@ def render_automated_card(summary: Mapping[str, Any]) -> str:
         size = _units(staked[0].get("suggested_units"))
         return [
             f"_Every bet below is {size}u. No market on this card has a "
-            "demonstrated edge and none of them can be profit-backtested, so "
-            "they are staked the same small size while the closing-line record "
-            "accumulates. The tier orders the card; it does not size the bet._",
+            "demonstrated edge — every interval includes zero and two point "
+            "estimates are negative — so they are staked the same small size "
+            "while the closing-line record accumulates. The tier orders the "
+            "card; it does not size the bet._",
             "",
         ]
 

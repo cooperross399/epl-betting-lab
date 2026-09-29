@@ -3,8 +3,14 @@
 `CLAUDE.md` carried this for weeks, and it was true when written:
 
 > BTTS has a known, measured, **unfixed** calibration bias of roughly nine
-> points, and cannot be profit-backtested because no historical BTTS prices
-> exist. It produces most of the picks on a card. Say so rather than patching it.
+> points. It produces most of the picks on a card. Say so rather than patching it.
+
+*Correction, 2026-09-29: the quote above and the section below said BTTS
+"cannot be profit-backtested because no historical BTTS prices exist". The
+per-event history was bought afterwards and
+`data/outputs/derived_market_backtest.md` scores BTTS at +0.66% over 31 bets.
+The calibration finding this document records is unaffected; only the claim
+that no profit measurement could ever exist is retired.*
 
 It is now measured out, by a change made for an entirely different reason.
 
@@ -62,8 +68,9 @@ measured bias rather than discovered after the fact.
 
 ## What is still true
 
-**No bet rule on BTTS can ever be profit-backtested.** Football-Data ships no
-BTTS prices and the bought provider history covers props and corner totals
+**No bet rule on BTTS could be profit-backtested when this was written** —
+see the correction at the top; it can be now. Football-Data ships no
+BTTS prices and the bought provider history then covered props and corner totals
 only. Removing a measured bias is not the same as demonstrating an edge, and
 nothing here demonstrates one.
 

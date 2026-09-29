@@ -4,8 +4,10 @@ Closing-line value is the only feedback this lab has that returns an answer
 inside a season. Profit needs roughly 1,500 settled bets to separate a 5% edge
 from zero — about twelve seasons at this rate — while every bet produces a CLV
 reading the moment its market closes. And for the markets that carry the card
-it is the ONLY feedback there will ever be: corners cannot be profit-backtested
-because no source retains their historical prices, and they are 23 of the first
+it is the ONLY feedback there will ever be: `corners_1x2` cannot be
+profit-backtested because no source retains a historical corner match-result
+price. The corner totals have since been bought and measured; corners are 23
+of the first
 42 best bets.
 
 None of that worked. `closing_american_odds` is written as the empty string by

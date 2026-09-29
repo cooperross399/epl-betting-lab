@@ -802,7 +802,7 @@ def build_extra_card(
     if not negative.empty:
         notes.append(
             f"{len(negative)} selection(s) cleared their market rule and were "
-            "left out because the edge against the posted price is not "
+            "refused because the edge against the posted price is not "
             "positive: "
             + _some(
                 sorted(
@@ -811,7 +811,10 @@ def build_extra_card(
                     for row in negative.itertuples()
                 )
             )
-            + "."
+            + ". A refused row always sorts below every positive one, so "
+            f"where {MAX_EXTRA_BETS} or more selections qualify this costs "
+            "the card nothing; the cap line below is the one that says what "
+            "was actually withheld."
         )
     selections = selections[selections["_edge"] > 0].copy()
     if selections.empty:
@@ -826,7 +829,27 @@ def build_extra_card(
             unrated=unrated,
             gate=gate,
         )
+    qualified = len(selections)
     selections = selections.sort_values("_edge", ascending=False).head(MAX_EXTRA_BETS)
+    # THE CAP, SAID OUT LOUD. It was disclosed nowhere: not on the card, not
+    # in `extra_card_record`, whose per-competition block carries only
+    # `priced`, `declined` and the POST-cap selection count. On the committed
+    # feed the Nations League produces 26 positive-edge selections and the
+    # card prints four, so twenty-two were withheld in silence — and the
+    # published card shows exactly four for each of UNL, UCL and UEL, which
+    # means the cap is saturated on ordinary runs rather than in edge cases.
+    #
+    # The refusal note above was added so that "a section that quietly loses
+    # half its selections and one that was quoted half as many" would not
+    # look identical. On the only path where the section does quietly lose
+    # selections, it still did.
+    withheld = qualified - len(selections)
+    if withheld:
+        notes.append(
+            f"{withheld} further selection(s) qualified and are not shown: "
+            f"this section prints at most {MAX_EXTRA_BETS} per competition, "
+            "the highest edges first."
+        )
     selections = selections.drop(columns=["_edge"])
     selections["competition"] = competition
     selections["suggested_units"] = EXTRA_UNITS

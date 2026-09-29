@@ -7,8 +7,11 @@ recognise a second time.
 
 ## What prompted it
 
-BTTS produces most of the picks on a live card and cannot be profit-backtested:
-Football-Data ships historical prices for 1X2 and the 2.5 goals line, and none
+BTTS produces most of the picks on a live card and, when this was written,
+could not be profit-backtested — the per-event history was bought afterwards
+and `data/outputs/derived_market_backtest.md` now scores it at +0.66% over 31
+bets. At the time: Football-Data ships historical prices for 1X2 and the 2.5
+goals line, and none
 at all for BTTS. So the only check available is calibration — does a stated
 probability match how often the thing happens.
 

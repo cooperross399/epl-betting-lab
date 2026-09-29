@@ -37,12 +37,21 @@ def _guard_script() -> str:
     raise AssertionError("the guard step is gone; re-pin this file")
 
 
-def _run(tmp_path: Path, *, boards: str, candidates: str, outcome: str, after: int):
+def _run(
+    tmp_path: Path,
+    *,
+    boards: str,
+    candidates: str,
+    outcome: str,
+    after: int,
+    restart: str = "false",
+):
     script = _guard_script()
     for expression, value in (
         (r"\$\{\{ steps\.restore\.outputs\.boards \}\}", boards),
         (r"\$\{\{ steps\.restore\.outputs\.candidates \}\}", candidates),
         (r"\$\{\{ steps\.restore\.outcome \}\}", outcome),
+        (r"\$\{\{ inputs\.restart_history \}\}", restart),
     ):
         script = re.sub(expression, value, script)
     assert "${{" not in script, "an unsubstituted expression would run as shell"
@@ -66,7 +75,7 @@ class TestItRefusesTheWipeItWasWrittenFor:
         done = _run(tmp_path, boards="0", candidates="3", outcome="success", after=1)
 
         assert done.returncode == 1
-        assert "none carried a board-history artifact" in done.stdout
+        assert "carried a board-history artifact" in done.stdout
 
     def test_the_control_a_genuine_first_run_is_allowed(self, tmp_path: Path) -> None:
         """Otherwise the fix is "refuse whenever nothing was restored", which
@@ -127,3 +136,80 @@ def test_the_candidate_count_excludes_the_running_job() -> None:
     )
 
     assert 'if [ "$candidate" = "${{ github.run_id }}" ]; then' in restore["run"]
+
+
+class TestTheRefusalHasAWayOut:
+    """The refusal was an absorbing state.
+
+    It fails the job before "Keep the history", which carries no `if:` by
+    design, so a refusing run adds one more artifact-less run to the window
+    the restore reads. Once the window holds nothing else, every later run
+    refuses on the same line — the Pages deploy stops and the Archive
+    freezes even after the original cause is fixed.
+
+    Re-running an older publish does not help: the loop skips the re-run's
+    own id, which is the only run in reach still carrying the artifact. The
+    recovery the old message named could not work.
+    """
+
+    def test_restart_history_publishes_over_the_refusal(self, tmp_path: Path) -> None:
+        done = _run(
+            tmp_path, boards="0", candidates="9", outcome="success", after=1,
+            restart="true",
+        )
+
+        assert done.returncode == 0, done.stdout + done.stderr
+        assert "restart_history was set" in done.stdout
+        assert "Everything earlier is dropped" in done.stdout
+
+    def test_the_control_without_it_the_refusal_still_stands(
+        self, tmp_path: Path
+    ) -> None:
+        """An escape that is always open is not a guard."""
+        done = _run(tmp_path, boards="0", candidates="9", outcome="success", after=1)
+
+        assert done.returncode == 1
+
+    def test_the_message_names_the_input_rather_than_saying_by_hand(
+        self, tmp_path: Path
+    ) -> None:
+        """"Clear this by hand" named no mechanism that exists."""
+        done = _run(tmp_path, boards="0", candidates="9", outcome="success", after=1)
+
+        assert "restart_history" in done.stdout
+        assert "by hand" not in done.stdout
+
+    def test_restart_history_does_not_excuse_a_broken_restore(
+        self, tmp_path: Path
+    ) -> None:
+        """It answers "the window is exhausted", not "nothing can be read".
+
+        A restore that died still cannot say what was there, and publishing
+        over the chain on that basis is the wipe the step exists to stop.
+        """
+        done = _run(
+            tmp_path, boards="", candidates="9", outcome="failure", after=1,
+            restart="true",
+        )
+
+        assert done.returncode == 1
+
+
+def test_the_candidate_window_is_wide_enough_to_survive_a_failure_run() -> None:
+    """Ten was short enough to be exhausted by about three days of failures.
+
+    Artifact retention here is 400 days, so a wider window costs a few
+    skipped downloads and removes the only realistic route into the
+    absorbing state.
+    """
+    spec = yaml.safe_load(WORKFLOW.read_text(encoding="utf-8"))
+    restore = next(
+        s for s in list(spec["jobs"].values())[0]["steps"] if s.get("id") == "restore"
+    )
+    # The board-history loop only. The lab-state restore beside it reads a
+    # different workflow and is not what the refusal counts.
+    board = restore["run"].split("--workflow publish-board.yml")[1]
+    window = re.search(r"--limit (\d+)", board)
+
+    assert window, "the board-history restore no longer states a window"
+    assert int(window.group(1)) >= 40, window.group(1)

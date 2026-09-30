@@ -21,9 +21,11 @@ import json
 from pathlib import Path
 
 from epl_betting_lab.reports.github_approval import (
+    APPROVABLE_MARKETS,
     APPROVAL_PHRASE,
     DEFAULT_MAX_APPROVAL_AGE_HOURS,
     EXPECTED_PROVIDER,
+    FORBIDDEN_MARKETS,
     GitHubApprovalError,
     approval_template,
     fetch_pr_activity,
@@ -139,9 +141,62 @@ def _repository(explicit: str) -> str:
     return result.stdout.strip() if result.returncode == 0 else ""
 
 
+
+def _cannot_be_approved(markets: list[str]) -> tuple[list[str], list[str]]:
+    """Markets no approval can grant, read from the same sources the verifier uses.
+
+    Deliberately not taken from the verifier's error text: the message and the
+    condition drift apart, and this repository has had three guards pass by
+    matching the very string they were meant to guard against.
+    """
+    wanted = set(markets)
+    return (
+        sorted(wanted - APPROVABLE_MARKETS),
+        sorted(wanted & FORBIDDEN_MARKETS),
+    )
+
+
+def _refuse_unapprovable(unapprovable: list[str], forbidden: list[str]) -> None:
+    """Say why no approval helps, instead of handing over one that cannot work.
+
+    The approval block used to be printed on every failure, including this one.
+    So a scope the flow can never grant produced `BLOCKED:` and then, four
+    lines later, "Paste this into a PR review or comment to approve:" followed
+    by a block naming the markets it had just refused. Posting it is a public
+    comment on the PR granting a scope that fails closed every time it is
+    read -- and the reader has been told to post it by the tool that refused
+    it. PR #318 sat in exactly that state.
+    """
+    if forbidden:
+        print(f"BLOCKED: {forbidden} are held unapprovable by an exclusion "
+              "decision in force. No approval can grant them while that "
+              "stands; the exclusion is lifted in code, in FORBIDDEN_MARKETS.")
+    if unapprovable:
+        print(f"BLOCKED: {unapprovable} cannot be approved through this flow, "
+              "because the project cannot price them.")
+        print()
+        print("A market becomes approvable by being registered in")
+        print("`market_eligibility.MARKET_SELECTIONS` (or, for a prop, in the")
+        print("props staging list). That registration needs a provider market")
+        print("key that really serves the market and a settlement rule in")
+        print("`card_scoreboard.settle`. Allowlisting a market the project")
+        print("cannot price would put a market in the policy record that no")
+        print("card can ever stake.")
+    print()
+    print("No approval block is offered: there is no approval that would work.")
+
+
 def main() -> int:
     args = parse_args()
     markets = [item.strip() for item in args.markets.split(",") if item.strip()]
+
+    # Before anything is printed or fetched, including --print-template: a
+    # template for a scope that cannot be granted is the one output of this
+    # command that actively misleads.
+    unapprovable, forbidden = _cannot_be_approved(markets)
+    if unapprovable or forbidden:
+        _refuse_unapprovable(unapprovable, forbidden)
+        return 2
 
     if args.print_template:
         print(approval_template(args.pr, provider_name=args.provider_name, markets=markets))

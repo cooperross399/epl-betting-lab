@@ -166,12 +166,12 @@ def test_a_missing_statistic_is_not_a_zero(tmp_path) -> None:
         "reports a win rate for a subset it never names"
     )
     # The row carries no pick at all, and that is load-bearing rather than
-    # incidental: `resultPick` in web/lib/sports.js maps every result it does
-    # not recognise to "Push", so an ungraded pick reaching the page as
-    # `result: null` would be published as a returned stake. The row is
-    # dropped so the renderer's fallthrough is never asked the question, and
-    # the `ungraded` count above is what keeps the pick from vanishing
-    # unrecorded.
+    # incidental: `resultPick` in web/lib/sports.js mapped every result it did
+    # not recognise to "Push" until 2026-10-01, so an ungraded pick reaching
+    # the page as `result: null` was published as a returned stake. It now
+    # prints "Not graded" (tests/test_an_ungraded_pick_is_never_a_push.py),
+    # but the row is still dropped, and the `ungraded` count above, which the
+    # strip now prints, is what keeps the pick from vanishing unrecorded.
     assert written["games"][0]["pick"] is None, (
         "an ungraded pick reached the page, which renders an unknown result as Push"
     )

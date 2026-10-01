@@ -1,10 +1,8 @@
-## Tuesday 29 September, 18:59 UTC — manual run
+## Thursday 01 October, 10:59 UTC — scheduled run
 
-Already sent today; same selections (0 price move(s)).
+Selections changed: 3 added, 1 dropped.
 
-_This run was started by hand, not by the schedule. If you did not start it, someone was testing._
-
-Provider quota: 18398 (about 18 days at the observed burn)
+Provider quota: 19960 (about 19 days at the observed burn)
 
 Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
 
@@ -12,10 +10,10 @@ Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_tot
 
 | Match | Market | Selection | Tier | Edge | Price | Book | Units |
 |:------|:-------|:----------|:-----|-----:|------:|:-----|------:|
-| Arsenal v Leeds | `corners_total_10_5` | under | C | +5.5% | -141 | BetRivers | 0.1 |
-| Sunderland v Brighton | `corners_total_10_5` | under | C | +5.1% | -152 | BetRivers | 0.1 |
+| Arsenal v Leeds | `corners_total_10_5` | under | C | +7.6% | -129 | Caesars | 0.1 |
+| Sunderland v Brighton | `corners_total_10_5` | under | C | +6.5% | -143 | Caesars | 0.1 |
 | Hull v Everton | `corners_total_10_5` | over | C | +6.8% | +165 | BetRivers | 0.1 |
-| Hull v Everton | `corners_total_9_5` | over | C | +4.9% | +105 | BetRivers | 0.1 |
+| Hull v Everton | `corners_total_9_5` | over | C | +5.7% | +111 | Caesars | 0.1 |
 | Sunderland v Brighton | `corners_total_9_5` | under | C | +4.2% | +105 | BetRivers | 0.1 |
 | Arsenal v Leeds | `corners_total_9_5` | under | C | +3.9% | +110 | BetRivers | 0.1 |
 | Chelsea v Bournemouth | `draw_no_bet` | away | C | +4.5% | +250 | FanDuel | 0.1 |
@@ -23,6 +21,13 @@ Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_tot
 ### Leans
 
 _None._
+
+### What changed
+
+- **Added:** Crystal Palace v Nott'm Forest btts yes
+- **Added:** Liverpool v Man City draw_no_bet away
+- **Added:** Man United v Tottenham corners_total_10_5 over
+- **Dropped:** Liverpool v Man City double_chance draw_or_away
 
 
 ## Beyond the Premier League
@@ -35,17 +40,13 @@ National teams, on a pool that shares no information with the club ratings — a
 
 | Match | Market | Selection | Edge | Price | Book | Units |
 |:--|:--|:--|--:|--:|:--|--:|
-| Germany v Serbia | `double_chance` | draw_or_away | +6.1% | +285 | BetRivers | 0.1 |
 | Latvia v Montenegro | `double_chance` | home_or_draw | +5.9% | -109 | BetRivers | 0.1 |
-| Germany v Serbia | `draw_no_bet` | away | +5.3% | +600 | BetRivers | 0.1 |
-| Denmark v Portugal | `double_chance` | home_or_draw | +5.0% | -134 | BetRivers | 0.1 |
 
-- 52 fixture(s) dropped as already kicked off: Albania v Belarus, Andorra v Malta, Armenia v Latvia, Armenia v Montenegro, Austria v Israel, Austria v Kosovo, and 46 more.
+- 60 fixture(s) dropped as already kicked off: Albania v Belarus, Andorra v Malta, Armenia v Latvia, Armenia v Montenegro, Austria v Israel, Austria v Kosovo, and 54 more.
 - `btts` is not bet here: the model sits about 8 points below the market on the goals level for every fixture, so a selection in that market would be the gap rather than the fixture.
 - `total_2_5` is not bet here: the model sits about 8 points below the market on the goals level for every fixture, so a selection in that market would be the gap rather than the fixture.
 - Ratings include no result after 2026-08-26; the results archive runs about a month behind, so the current international window is not in the fit.
 - No corner model: the pool carries no corner counts.
-- 2 further selection(s) qualified and are not shown: this section prints at most 4 per competition, the highest edges first.
 
 ### EFL Cup (Carabao)
 
@@ -89,16 +90,16 @@ _Fitted but not bet: UEFA Europa Conference League (0 of 18 fixtures rateable). 
 
 ### How the recommendations have done
 
-- Settled: **79** selections, 40 won
-- Staked: 10.75 units
-- Profit: **+0.53 units** (+5.0% on turnover)
+- Settled: **84** selections, 40 won, 5 returned the stake
+- Staked: 11.25 units
+- Profit: **+0.53 units** (+4.8% on turnover)
 - Still pending: 11
 
-- Stake returned (void): 5
+- Stake returned (void): 5 — counted in the settled total above at zero profit, because a push is a bet
 
 Each selection is scored at the first price a card offered it, and only rows the card staked are counted — a lean carries no stake and is not a recommendation.
 
-**Beyond the Premier League is not in these numbers.** 12 staked selection(s) from that section are recorded and not yet scored — nothing settles them. The rule above is stated by stake, so without this line the only way to notice would be to total the card by hand.
+**Beyond the Premier League is not in these numbers.** 9 staked selection(s) from that section are recorded and not yet scored — nothing settles them. The rule above is stated by stake, so without this line the only way to notice would be to total the card by hand.
 
 This is the only out-of-sample evidence this project has. It will take a long time to mean anything: separating a real 5% edge from zero needs roughly 1,500 settled bets.
 
@@ -108,4 +109,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/36615417206)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/36852173236)

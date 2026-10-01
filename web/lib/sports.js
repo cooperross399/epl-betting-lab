@@ -234,7 +234,7 @@ function nhlResults(data) {
       ...(g.pick ? nhlResultPick(g.pick) : nhlNoPick(g)) };
   });
   return { ...common(data, sport), kicker: `${data.season} NHL · ${data.resultsDate ? F.fmtDateOnly(data.resultsDate) : ""}`, dateShort: data.resultsDate ? F.fmtDateOnly(data.resultsDate) : "",
-    strip: [{ label: "Straight up", value: F.recStr(s.straightUp || { w: 0, l: 0 }) }, { label: "Model picks", value: F.recStr(s.picks || { w: 0, l: 0, p: 0 }) }, { label: "Totals", value: F.recStr(s.totals || { w: 0, l: 0, p: 0 }) }],
+    strip: [{ label: "Straight up", value: F.recStr(s.straightUp || { w: 0, l: 0 }) }, picksCell(s), { label: "Totals", value: F.recStr(s.totals || { w: 0, l: 0, p: 0 }) }],
     games, count: games.length, isEmpty: games.length === 0, notice: data.notice || "No games were settled for this date.", vsLabel: "Projected score vs final" };
 }
 
@@ -288,7 +288,7 @@ function eplResults(data) {
       ...resultPick(g.pick) };
   });
   return { ...common(data, sport), kicker: `${data.season} Premier League · ${data.resultsDate ? F.fmtDateOnly(data.resultsDate) : ""}`, dateShort: data.windowLabel || (data.resultsDate ? F.fmtDateOnly(data.resultsDate) : ""),
-    strip: [{ label: "Model picks", value: F.recStr(s.picks || { w: 0, l: 0, p: 0 }) }, { label: "Favoured side", value: F.recStr(s.result || { w: 0, l: 0 }) }, { label: "Total 2.5 leans", value: F.recStr(s.totals || { w: 0, l: 0 }) }],
+    strip: [picksCell(s), { label: "Favoured side", value: F.recStr(s.result || { w: 0, l: 0 }) }, { label: "Total 2.5 leans", value: F.recStr(s.totals || { w: 0, l: 0 }) }],
     games, count: games.length, isEmpty: games.length === 0, notice: data.notice || "No fixtures were settled for this window.", vsLabel: "Projected goals vs final" };
 }
 
@@ -340,14 +340,29 @@ function cbbResults(data) {
       ...resultPick(g.pick) };
   });
   return { ...common(data, sport), kicker: `${data.season} Men's College Basketball · ${data.resultsDate ? F.fmtDateOnly(data.resultsDate) : ""}`, dateShort: data.resultsDate ? F.fmtDateOnly(data.resultsDate) : "",
-    strip: [{ label: "Straight up", value: F.recStr(s.straightUp || { w: 0, l: 0 }) }, { label: "Model picks", value: F.recStr(s.picks || { w: 0, l: 0, p: 0 }) }, { label: "Against the spread", value: F.recStr(s.ats || { w: 0, l: 0, p: 0 }) }],
+    strip: [{ label: "Straight up", value: F.recStr(s.straightUp || { w: 0, l: 0 }) }, picksCell(s), { label: "Against the spread", value: F.recStr(s.ats || { w: 0, l: 0, p: 0 }) }],
     games, count: games.length, isEmpty: games.length === 0, notice: data.notice || "No games were settled for this date.", vsLabel: "Projected score vs final" };
 }
 
+// Only "push" is a Push. This mapped every result it did not recognise --
+// null, a missing key, any other word -- to "Push", so a pick the settler
+// could not answer for was published as a returned stake. Anything that is
+// not a grade is "Not graded", in the colours an unpriced game uses. Pinned
+// by tests/test_an_ungraded_pick_is_never_a_push.py.
+const GRADES = { win: "Win", loss: "Loss", void: "Void", push: "Push" };
 function resultPick(p) {
   if (!p) return { hasPick: false, pick: { label: "", market: "", result: "", color: "#14151a", bg: "#f4f2ee" } };
-  const r = p.result;
-  return { hasPick: true, pick: { label: p.label, market: `${p.market}${typeof p.price === "number" ? ` · ${F.fmtOdds(p.price)}` : ""}`, result: r === "win" ? "Win" : r === "loss" ? "Loss" : r === "void" ? "Void" : "Push", color: r === "win" ? "#f4f2ee" : r === "loss" ? "#b0341f" : "#14151a", bg: r === "win" ? "#2c7a5a" : "#f4f2ee" } };
+  const r = p.result, word = Object.hasOwn(GRADES, r) ? GRADES[r] : "Not graded";
+  return { hasPick: true, pick: { label: p.label, market: `${p.market}${typeof p.price === "number" ? ` · ${F.fmtOdds(p.price)}` : ""}`, result: word, color: r === "win" ? "#f4f2ee" : r === "loss" ? "#b0341f" : word === "Not graded" ? "#6b6e7a" : "#14151a", bg: r === "win" ? "#2c7a5a" : "#f4f2ee" } };
+}
+
+// The Model picks cell of a Results strip. The record is graded picks only,
+// so a page whose every pick went ungraded read "0–0–0" exactly like a page
+// with nothing to grade; the cell now names the ungraded count when there is
+// one. Pinned by tests/test_an_ungraded_pick_is_never_a_push.py.
+function picksCell(s) {
+  const n = typeof s.ungraded === "number" && s.ungraded > 0 ? s.ungraded : 0;
+  return { label: n ? `Model picks · ${n} ungraded` : "Model picks", value: F.recStr(s.picks || { w: 0, l: 0, p: 0 }) };
 }
 
 export const ADAPTERS = { nhl: { board: nhlBoard, results: nhlResults }, epl: { board: eplBoard, results: eplResults }, cbb: { board: cbbBoard, results: cbbResults } };

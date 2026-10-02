@@ -1,8 +1,8 @@
-## Thursday 01 October, 11:53 UTC — scheduled run
+## Friday 02 October, 09:09 UTC — scheduled run
 
-Already sent today; same selections (0 price move(s)).
+Selections changed: 29 added.
 
-Provider quota: 19838 (about 19 days at the observed burn)
+Provider quota: 18093 (about 18 days at the observed burn)
 
 Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
 
@@ -22,6 +22,38 @@ Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_tot
 
 _None._
 
+### What changed
+
+- **Added:** Arsenal v Leeds btts yes
+- **Added:** Arsenal v Leeds corners_total_10_5 under
+- **Added:** Arsenal v Leeds corners_total_9_5 under
+- **Added:** Aston Villa v Brentford corners_1x2 home
+- **Added:** Aston Villa v Brentford draw_no_bet away
+- **Added:** Chelsea v Bournemouth corners_1x2 home
+- **Added:** Chelsea v Bournemouth corners_total_10_5 over
+- **Added:** Chelsea v Bournemouth corners_total_9_5 over
+- **Added:** Chelsea v Bournemouth double_chance draw_or_away
+- **Added:** Chelsea v Bournemouth draw_no_bet away
+- **Added:** Coventry v Newcastle corners_1x2 home
+- **Added:** Coventry v Newcastle double_chance draw_or_away
+- **Added:** Coventry v Newcastle double_chance home_or_away
+- **Added:** Coventry v Newcastle draw_no_bet away
+- **Added:** Crystal Palace v Nott'm Forest btts yes
+- **Added:** Crystal Palace v Nott'm Forest draw_no_bet away
+- **Added:** Crystal Palace v Nott'm Forest total_2_5 over
+- **Added:** Hull v Everton corners_1x2 home
+- **Added:** Hull v Everton corners_total_10_5 over
+- **Added:** Hull v Everton corners_total_9_5 over
+- **Added:** Hull v Everton draw_no_bet home
+- **Added:** Ipswich v Fulham draw_no_bet away
+- **Added:** Liverpool v Man City draw_no_bet away
+- **Added:** Man United v Tottenham corners_total_10_5 over
+- **Added:** Man United v Tottenham draw_no_bet away
+- **Added:** Sunderland v Brighton corners_total_10_5 under
+- **Added:** Sunderland v Brighton corners_total_9_5 under
+- **Added:** Sunderland v Brighton double_chance draw_or_away
+- **Added:** Sunderland v Brighton total_2_5 over
+
 
 ## Beyond the Premier League
 
@@ -31,15 +63,14 @@ Nothing below has been shown to beat a price. Some of it has been shown not to, 
 
 National teams, on a pool that shares no information with the club ratings — a country has never played any club in them, so nothing bridges the two and this is a second model. It **cannot be backtested**: no free archive carries international prices, so it can only be judged forward, at roughly 80 matches a year. **Only the result markets are bet here.** Measured against the de-vigged market across 45 live fixtures, the model put the chance of over 2.5 goals at 0.418 where the market said 0.499 — eight points low, the same way on every fixture — so `total_2_5` and `btts` are priced by a standing gap rather than by the fixture, and are withheld. Three of the first four selections this section ever made were low-scoring bets off that gap. The baselines are now this competition's own rather than the pool's, which halved a separate bias: it was applying +0.656 goals of home advantage where the Nations League's own is +0.346. Two expected problems measured out **not** to apply — seeding keeps League A away from League D, so 0.3% of fixtures have a favourite above 90% and none above 95%, and a rating survives squad turnover (r = +0.82 across seven years). One remains and cannot be fixed from the feed: 5.2% of these matches are at neutral venues and the price feed does not say which, so those carry a home advantage one side does not have.
 
-| Match | Market | Selection | Edge | Price | Book | Units |
-|:--|:--|:--|--:|--:|:--|--:|
-| Latvia v Montenegro | `double_chance` | home_or_draw | +5.9% | -109 | BetRivers | 0.1 |
+_No selection this run._
 
-- 60 fixture(s) dropped as already kicked off: Albania v Belarus, Andorra v Malta, Armenia v Latvia, Armenia v Montenegro, Austria v Israel, Austria v Kosovo, and 54 more.
+- 63 fixture(s) dropped as already kicked off: Albania v Belarus, Andorra v Malta, Armenia v Latvia, Armenia v Montenegro, Austria v Israel, Austria v Kosovo, and 57 more.
 - `btts` is not bet here: the model sits about 8 points below the market on the goals level for every fixture, so a selection in that market would be the gap rather than the fixture.
 - `total_2_5` is not bet here: the model sits about 8 points below the market on the goals level for every fixture, so a selection in that market would be the gap rather than the fixture.
 - Ratings include no result after 2026-08-26; the results archive runs about a month behind, so the current international window is not in the fit.
 - No corner model: the pool carries no corner counts.
+- No selection cleared the rules.
 
 ### EFL Cup (Carabao)
 
@@ -92,7 +123,7 @@ _Fitted but not bet: UEFA Europa Conference League (0 of 18 fixtures rateable). 
 
 Each selection is scored at the first price a card offered it, and only rows the card staked are counted — a lean carries no stake and is not a recommendation.
 
-**Beyond the Premier League is not in these numbers.** 9 staked selection(s) from that section are recorded and not yet scored — nothing settles them. The rule above is stated by stake, so without this line the only way to notice would be to total the card by hand.
+**Beyond the Premier League is not in these numbers.** 8 staked selection(s) from that section are recorded and not yet scored — nothing settles them. The rule above is stated by stake, so without this line the only way to notice would be to total the card by hand.
 
 This is the only out-of-sample evidence this project has. It will take a long time to mean anything: separating a real 5% edge from zero needs roughly 1,500 settled bets.
 
@@ -102,4 +133,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/36857775126)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/36987880162)

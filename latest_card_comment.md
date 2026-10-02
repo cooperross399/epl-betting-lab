@@ -1,8 +1,8 @@
-## Friday 02 October, 10:44 UTC — scheduled run
+## Friday 02 October, 15:37 UTC — scheduled run
 
-Already sent today; same selections (0 price move(s)).
+Selections changed: 1 added, 1 dropped.
 
-Provider quota: 17971 (about 17 days at the observed burn)
+Provider quota: 17509 (about 17 days at the observed burn)
 
 Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
 
@@ -11,16 +11,21 @@ Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_tot
 | Match | Market | Selection | Tier | Edge | Price | Book | Units |
 |:------|:-------|:----------|:-----|-----:|------:|:-----|------:|
 | Arsenal v Leeds | `corners_total_10_5` | under | C | +7.6% | -129 | Caesars | 0.1 |
-| Sunderland v Brighton | `corners_total_10_5` | under | C | +6.5% | -143 | Caesars | 0.1 |
+| Sunderland v Brighton | `corners_total_10_5` | under | C | +6.9% | -141 | BetRivers | 0.1 |
 | Hull v Everton | `corners_total_10_5` | over | C | +6.8% | +165 | BetRivers | 0.1 |
 | Hull v Everton | `corners_total_9_5` | over | C | +5.7% | +111 | Caesars | 0.1 |
-| Sunderland v Brighton | `corners_total_9_5` | under | C | +4.2% | +105 | BetRivers | 0.1 |
-| Arsenal v Leeds | `corners_total_9_5` | under | C | +3.9% | +110 | BetRivers | 0.1 |
+| Sunderland v Brighton | `corners_total_9_5` | under | C | +5.2% | +110 | BetRivers | 0.1 |
+| Arsenal v Leeds | `corners_total_9_5` | under | C | +4.3% | +112 | BetRivers | 0.1 |
 | Chelsea v Bournemouth | `draw_no_bet` | away | C | +4.5% | +250 | FanDuel | 0.1 |
 
 ### Leans
 
 _None._
+
+### What changed
+
+- **Added:** Ipswich v Fulham double_chance home_or_away
+- **Dropped:** Sunderland v Brighton total_2_5 over
 
 
 ## Beyond the Premier League
@@ -101,4 +106,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/36996783400)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/37027874888)

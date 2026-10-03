@@ -1,8 +1,8 @@
-## Saturday 03 October, 08:39 UTC — scheduled run
+## Saturday 03 October, 10:00 UTC — scheduled run
 
-First card of the day; the selections are unchanged.
+Already sent today; same selections (0 price move(s)).
 
-Provider quota: 16276 (about 16 days at the observed burn)
+Provider quota: 16154 (about 16 days at the observed burn)
 
 Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
 
@@ -107,4 +107,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/37110197636)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/37114741975)

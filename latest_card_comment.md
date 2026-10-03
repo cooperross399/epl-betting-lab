@@ -1,8 +1,8 @@
-## Saturday 03 October, 10:00 UTC — scheduled run
+## Saturday 03 October, 14:11 UTC — scheduled run
 
-Already sent today; same selections (0 price move(s)).
+Already sent today; same selections (2 price move(s)).
 
-Provider quota: 16154 (about 16 days at the observed burn)
+Provider quota: **14431** — about 14 day(s) at the observed burn. **Top this up or the schedule stops.**
 
 Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
 
@@ -33,17 +33,17 @@ National teams, on a pool that shares no information with the club ratings — a
 
 | Match | Market | Selection | Edge | Price | Book | Units |
 |:--|:--|:--|--:|--:|:--|--:|
-| England v Czech Republic | `double_chance` | draw_or_away | +6.7% | +325 | BetRivers | 0.1 |
+| England v Czech Republic | `double_chance` | draw_or_away | +7.0% | +330 | BetRivers | 0.1 |
+| Romania v Sweden | `double_chance` | home_or_draw | +6.8% | -115 | BetRivers | 0.1 |
+| Malta v Andorra | `double_chance` | draw_or_away | +6.7% | +128 | BetRivers | 0.1 |
 | France v Belgium | `draw_no_bet` | away | +6.1% | +290 | BetRivers | 0.1 |
-| Romania v Sweden | `double_chance` | home_or_draw | +5.7% | -124 | BetRivers | 0.1 |
-| France v Belgium | `double_chance` | draw_or_away | +5.5% | +130 | BetRivers | 0.1 |
 
 - 77 fixture(s) dropped as already kicked off: Albania v Belarus, Andorra v Malta, Armenia v Latvia, Armenia v Montenegro, Austria v Israel, Austria v Kosovo, and 71 more.
 - `btts` is not bet here: the model sits about 8 points below the market on the goals level for every fixture, so a selection in that market would be the gap rather than the fixture.
 - `total_2_5` is not bet here: the model sits about 8 points below the market on the goals level for every fixture, so a selection in that market would be the gap rather than the fixture.
 - Ratings include no result after 2026-08-26; the results archive runs about a month behind, so the current international window is not in the fit.
 - No corner model: the pool carries no corner counts.
-- 1 further selection(s) qualified and are not shown: this section prints at most 4 per competition, the highest edges first.
+- 4 further selection(s) qualified and are not shown: this section prints at most 4 per competition, the highest edges first.
 
 ### EFL Cup (Carabao)
 
@@ -51,6 +51,7 @@ Priced on the unified English ratings. Measured out of sample, a club's rating d
 
 | Match | Market | Selection | Edge | Price | Book | Units |
 |:--|:--|:--|--:|--:|:--|--:|
+| Fulham v Crystal Palace | `btts` | no | +4.5% | +125 | BetMGM | 0.1 |
 | Fulham v Crystal Palace | `total_2_5` | under | +2.4% | +115 | Bovada | 0.1 |
 
 - 10 fixture(s) dropped as already kicked off: Coventry v Aston Villa, Everton v Wolves, Fleetwood Town v Sheffield United, Ipswich v Arsenal, Liverpool v Tottenham, Man City v Norwich, and 4 more.
@@ -62,8 +63,8 @@ Priced on the European ratings, where 868 European ties bridge eleven leagues on
 
 | Match | Market | Selection | Edge | Price | Book | Units |
 |:--|:--|:--|--:|--:|:--|--:|
-| Arsenal v Lille | `total_2_5` | under | +7.0% | +150 | BetRivers | 0.1 |
-| Arsenal v Lille | `corners_total_10_5` | under | +6.9% | -122 | BetRivers | 0.1 |
+| Arsenal v Lille | `total_2_5` | under | +7.0% | +150 | BetUS | 0.1 |
+| Arsenal v Lille | `corners_total_10_5` | under | +7.0% | -121 | BetRivers | 0.1 |
 | Roma v Real Madrid | `double_chance` | home_or_draw | +6.6% | -124 | BetRivers | 0.1 |
 | Ath Madrid v Man United | `draw_no_bet` | home | +6.5% | -136 | FanDuel | 0.1 |
 
@@ -97,7 +98,7 @@ _Fitted but not bet: UEFA Europa Conference League (0 of 18 fixtures rateable). 
 
 Each selection is scored at the first price a card offered it, and only rows the card staked are counted — a lean carries no stake and is not a recommendation.
 
-**Beyond the Premier League is not in these numbers.** 13 staked selection(s) from that section are recorded and not yet scored — nothing settles them. The rule above is stated by stake, so without this line the only way to notice would be to total the card by hand.
+**Beyond the Premier League is not in these numbers.** 14 staked selection(s) from that section are recorded and not yet scored — nothing settles them. The rule above is stated by stake, so without this line the only way to notice would be to total the card by hand.
 
 This is the only out-of-sample evidence this project has. It will take a long time to mean anything: separating a real 5% edge from zero needs roughly 1,500 settled bets.
 
@@ -107,4 +108,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/37114741975)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/37128529032)

@@ -1,8 +1,8 @@
-## Sunday 04 October, 10:45 UTC — scheduled run
+## Sunday 04 October, 14:43 UTC — scheduled run
 
-Already sent today; same selections (3 price move(s)).
+Already sent today; same selections (1 price move(s)).
 
-Provider quota: **12427** — about 12 day(s) at the observed burn. **Top this up or the schedule stops.**
+Provider quota: **10955** — about 10 day(s) at the observed burn. **Top this up or the schedule stops.**
 
 Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
 
@@ -34,16 +34,16 @@ National teams, on a pool that shares no information with the club ratings — a
 | Match | Market | Selection | Edge | Price | Book | Units |
 |:--|:--|:--|--:|--:|:--|--:|
 | England v Czech Republic | `double_chance` | draw_or_away | +7.0% | +330 | BetRivers | 0.1 |
-| Romania v Sweden | `double_chance` | home_or_draw | +6.8% | -115 | BetRivers | 0.1 |
-| France v Belgium | `draw_no_bet` | away | +6.1% | +290 | BetRivers | 0.1 |
-| France v Belgium | `double_chance` | draw_or_away | +5.8% | +133 | BetRivers | 0.1 |
+| Scotland v Slovenia | `double_chance` | draw_or_away | +6.9% | +104 | BetRivers | 0.1 |
+| Belarus v Finland | `draw_no_bet` | home | +6.7% | +140 | BetMGM | 0.1 |
+| Ukraine v Hungary | `draw_no_bet` | home | +5.8% | -135 | DraftKings | 0.1 |
 
 - 85 fixture(s) dropped as already kicked off: Albania v Belarus, Andorra v Malta, Armenia v Latvia, Armenia v Montenegro, Austria v Israel, Austria v Kosovo, and 79 more.
 - `btts` is not bet here: the model sits about 8 points below the market on the goals level for every fixture, so a selection in that market would be the gap rather than the fixture.
 - `total_2_5` is not bet here: the model sits about 8 points below the market on the goals level for every fixture, so a selection in that market would be the gap rather than the fixture.
 - Ratings include no result after 2026-08-26; the results archive runs about a month behind, so the current international window is not in the fit.
 - No corner model: the pool carries no corner counts.
-- 1 further selection(s) qualified and are not shown: this section prints at most 4 per competition, the highest edges first.
+- 9 further selection(s) qualified and are not shown: this section prints at most 4 per competition, the highest edges first.
 
 ### EFL Cup (Carabao)
 
@@ -65,8 +65,8 @@ Priced on the European ratings, where 868 European ties bridge eleven leagues on
 |:--|:--|:--|--:|--:|:--|--:|
 | Arsenal v Lille | `total_2_5` | under | +7.0% | +150 | BetUS | 0.1 |
 | Arsenal v Lille | `corners_total_10_5` | under | +7.0% | -121 | BetRivers | 0.1 |
-| Roma v Real Madrid | `double_chance` | home_or_draw | +6.6% | -124 | BetRivers | 0.1 |
 | Ath Madrid v Man United | `draw_no_bet` | home | +6.5% | -136 | FanDuel | 0.1 |
+| Inter v Club Brugge | `corners_1x2` | away | +6.5% | +480 | BetRivers | 0.1 |
 
 - 6 fixture(s) left out because a club has no rating in the pool: Bodø/Glimt v Dortmund, LASK v Liverpool, Sabah FK v Slavia Praha, Shakhtar Donetsk v AEK, Viking FK v Bayern Munich, ŠK Slovan Bratislava v Stuttgart.
 - 16 further selection(s) qualified and are not shown: this section prints at most 4 per competition, the highest edges first.
@@ -108,4 +108,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/37196216798)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/37210133547)

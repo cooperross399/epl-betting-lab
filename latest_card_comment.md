@@ -1,8 +1,8 @@
-## Sunday 04 October, 14:43 UTC — scheduled run
+## Monday 05 October, 10:02 UTC — scheduled run
 
-Already sent today; same selections (1 price move(s)).
+Selections changed: 2 added, 3 dropped.
 
-Provider quota: **10955** — about 10 day(s) at the observed burn. **Top this up or the schedule stops.**
+Provider quota: **10395** — about 10 day(s) at the observed burn. **Top this up or the schedule stops.**
 
 Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
 
@@ -10,17 +10,23 @@ Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_tot
 
 | Match | Market | Selection | Tier | Edge | Price | Book | Units |
 |:------|:-------|:----------|:-----|-----:|------:|:-----|------:|
-| Arsenal v Leeds | `corners_total_10_5` | under | C | +7.6% | -129 | Caesars | 0.1 |
 | Sunderland v Brighton | `corners_total_10_5` | under | C | +6.9% | -141 | BetRivers | 0.1 |
 | Hull v Everton | `corners_total_10_5` | over | C | +6.8% | +165 | BetRivers | 0.1 |
-| Chelsea v Bournemouth | `draw_no_bet` | away | C | +6.6% | +240 | FanDuel | 0.1 |
-| Hull v Everton | `corners_total_9_5` | over | C | +5.7% | +111 | Caesars | 0.1 |
 | Sunderland v Brighton | `corners_total_9_5` | under | C | +5.2% | +110 | BetRivers | 0.1 |
-| Arsenal v Leeds | `corners_total_9_5` | under | C | +4.3% | +112 | BetRivers | 0.1 |
+| Hull v Everton | `corners_total_9_5` | over | C | +4.9% | +105 | BetRivers | 0.1 |
+| Chelsea v Bournemouth | `draw_no_bet` | away | C | +4.5% | +250 | FanDuel | 0.1 |
 
 ### Leans
 
 _None._
+
+### What changed
+
+- **Added:** Arsenal v Leeds draw_no_bet away
+- **Added:** Aston Villa v Brentford corners_total_9_5 over
+- **Dropped:** Arsenal v Leeds corners_total_10_5 under
+- **Dropped:** Arsenal v Leeds corners_total_9_5 under
+- **Dropped:** Liverpool v Man City draw_no_bet away
 
 
 ## Beyond the Premier League
@@ -36,14 +42,14 @@ National teams, on a pool that shares no information with the club ratings — a
 | England v Czech Republic | `double_chance` | draw_or_away | +7.0% | +330 | BetRivers | 0.1 |
 | Scotland v Slovenia | `double_chance` | draw_or_away | +6.9% | +104 | BetRivers | 0.1 |
 | Belarus v Finland | `draw_no_bet` | home | +6.7% | +140 | BetMGM | 0.1 |
-| Ukraine v Hungary | `draw_no_bet` | home | +5.8% | -135 | DraftKings | 0.1 |
+| Scotland v Slovenia | `draw_no_bet` | away | +5.4% | +230 | BetMGM | 0.1 |
 
-- 85 fixture(s) dropped as already kicked off: Albania v Belarus, Andorra v Malta, Armenia v Latvia, Armenia v Montenegro, Austria v Israel, Austria v Kosovo, and 79 more.
+- 93 fixture(s) dropped as already kicked off: Albania v Belarus, Andorra v Malta, Armenia v Latvia, Armenia v Montenegro, Austria v Israel, Austria v Kosovo, and 87 more.
 - `btts` is not bet here: the model sits about 8 points below the market on the goals level for every fixture, so a selection in that market would be the gap rather than the fixture.
 - `total_2_5` is not bet here: the model sits about 8 points below the market on the goals level for every fixture, so a selection in that market would be the gap rather than the fixture.
 - Ratings include no result after 2026-08-26; the results archive runs about a month behind, so the current international window is not in the fit.
 - No corner model: the pool carries no corner counts.
-- 9 further selection(s) qualified and are not shown: this section prints at most 4 per competition, the highest edges first.
+- 3 further selection(s) qualified and are not shown: this section prints at most 4 per competition, the highest edges first.
 
 ### EFL Cup (Carabao)
 
@@ -108,4 +114,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/37210133547)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/37293493645)

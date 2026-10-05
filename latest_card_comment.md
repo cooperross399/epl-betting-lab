@@ -1,8 +1,8 @@
-## Monday 05 October, 11:50 UTC — scheduled run
+## Monday 05 October, 18:18 UTC — scheduled run
 
-Selections changed: 1 added, 1 dropped.
+Selections changed: 2 added.
 
-Provider quota: **10273** — about 10 day(s) at the observed burn. **Top this up or the schedule stops.**
+Provider quota: **9872** — about 9 day(s) at the observed burn. **Top this up or the schedule stops.**
 
 Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
 
@@ -22,8 +22,8 @@ _None._
 
 ### What changed
 
-- **Added:** Arsenal v Leeds corners_total_9_5 under
-- **Dropped:** Sunderland v Brighton corners_total_10_5 under
+- **Added:** Coventry v Newcastle corners_total_10_5 over
+- **Added:** Coventry v Newcastle corners_total_9_5 over
 
 
 ## Beyond the Premier League
@@ -111,4 +111,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/37305050765)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/37354366235)

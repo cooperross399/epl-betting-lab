@@ -143,47 +143,26 @@ function nhlBoard(data) {
       score: modelled ? `${num(g.away.projGoals)} – ${num(g.home.projGoals)}` : dash,
     });
   }
-  const r = data.record || {}, fw = r.forward;
-  // A season record is shown only when the board carries one. These used to
-  // fall back to 0–0, and build_site_json published exactly that constant on
-  // every path -- nothing tallies a season and nothing grades a puck line --
-  // so the strip read "Straight up 0–0" after 55 settled games (28–27). An
-  // absent record is a dash that says why, never 0–0. Pinned by
+  const r = data.record || {}, season = r.season || {};
+  // The season's record, summed by build_site_json from every frozen board
+  // it settled (season_record). Shown only when the board carries one: an
+  // absent record is a dash that says why, never 0–0, because 0–0 is what
+  // this strip printed for weeks while nothing tallied anything. Pinned by
   // tests/test_site_invents_no_season_record.py.
+  //
+  // The forward ledger is not on this strip (owner's call, 2026-10-05). Its
+  // size stays in board.json; its return stays sealed until 2027-04-25
+  // (docs/when_this_ends.md) and must never be added here. Pinned by
+  // tests/test_site_publishes_no_forward_return.py.
   const kept = (rec) => rec && typeof rec === "object";
-  const untallied = "Season not tallied · each night is on Results";
+  const untallied = "No night settled yet · each night is on Results";
+  const nights = typeof season.nights === "number" ? `${season.nights} night${season.nights === 1 ? "" : "s"}` : "";
+  const missed = season.missingNights ? ` · ${season.missingNights} not yet settled` : "";
   const strip = [
-    { label: "Straight up", value: kept(r.straightUp) ? F.recStr(r.straightUp) : dash, sub: kept(r.straightUp) ? `${F.winRate(r.straightUp.w || 0, r.straightUp.l || 0)} of games` : untallied, fine: "" },
-    { label: "Puck line", value: kept(r.puckLine) ? F.recStr(r.puckLine) : dash, sub: kept(r.puckLine) ? "against the spread" : "Not graded", fine: "" },
-    { label: "Totals", value: kept(r.totals) ? F.recStr(r.totals) : dash, sub: kept(r.totals) ? "over / under" : untallied, fine: "" },
-    // No unsealed branch, on purpose, for the fifth time -- it arrived again
-    // when this rendering moved out of the page and into this module, where
-    // the guard that greps the page could not see it. `load_record` always
-    // returns sealed:true and never emits the return fields, so
-    // the branch is unreachable today and a live route back to publishing the
-    // return tomorrow. NHL's pooled forward return IS the test decided
-    // 2027-04-25 (docs/when_this_ends.md).
-    //
-    // `wagers` is the forward report's own count: one per selection at the
-    // best price, on slates whose games have all finished (void and
-    // unsettleable included, which is why the sub says "settled slates" and
-    // not "settled"). This printed `rows` as "opinions frozen", and both
-    // words were wrong: a ledger row is one BOOK'S QUOTE (180 rows from 18
-    // opinions on one real slate), and the ledger holds only settled slates,
-    // so opening night -- 118 opinions frozen, none settled -- read "Nothing
-    // frozen yet". A board with no `wagers` shows no number, never `rows`.
-    //
-    // The sibling adapters below DO publish their records, and must: EPL's
-    // card is allowlisted and CBB's measurement is historical. Neither is a
-    // pre-registered forward test. Pinned by
-    // tests/test_site_publishes_no_forward_return.py and
-    // tests/test_site_counts_one_opinion_per_wager.py.
-    { label: "Forward ledger · sealed", value: fw && typeof fw.wagers === "number" && fw.wagers ? String(fw.wagers) : dash,
-      sub: !fw ? "No forward ledger yet"
-        : typeof fw.wagers !== "number" ? `Ledger size not reported · return decided ${F.fmtDateOnly(fw.decisionDate)}, not before`
-        : fw.wagers ? `opinions on settled slates, across ${fw.markets} market${fw.markets === 1 ? "" : "s"} · return decided ${F.fmtDateOnly(fw.decisionDate)}, not before`
-        : `No slate settled yet · return decided ${F.fmtDateOnly(fw.decisionDate)}, not before`,
-      fine: "" },
+    { label: "Best bets · season", value: kept(r.picks) ? F.recStr(r.picks) : dash, sub: kept(r.picks) ? `${F.winRate(r.picks.w || 0, r.picks.l || 0)} · ${nights}${missed}` : untallied, fine: "" },
+    { label: "Straight up · season", value: kept(r.straightUp) ? F.recStr(r.straightUp) : dash, sub: kept(r.straightUp) ? `${F.winRate(r.straightUp.w || 0, r.straightUp.l || 0)} of games` : untallied, fine: "" },
+    { label: "Totals · season", value: kept(r.totals) ? F.recStr(r.totals) : dash, sub: kept(r.totals) ? "model side of the line" : untallied, fine: "" },
+    { label: "Leans · season", value: kept(r.leans) ? F.recStr(r.leans) : dash, sub: kept(r.leans) ? "recorded, not staked" : untallied, fine: "" },
   ];
   return { ...common(data, sport), kicker: `${data.season} NHL · ${data.boardDate ? F.fmtDateOnly(data.boardDate) : ""}`, title: ["Tonight's", "Board."],
     blurb: "Projected scores, win probabilities and market prices for tonight's slate.", strip, groups: [...byDay.values()].map((d) => ({ ...d, countLabel: `${d.games.length} game${d.games.length === 1 ? "" : "s"}` })),
@@ -234,7 +213,10 @@ function nhlResults(data) {
       ...(g.pick ? nhlResultPick(g.pick) : nhlNoPick(g)) };
   });
   return { ...common(data, sport), kicker: `${data.season} NHL · ${data.resultsDate ? F.fmtDateOnly(data.resultsDate) : ""}`, dateShort: data.resultsDate ? F.fmtDateOnly(data.resultsDate) : "",
-    strip: [{ label: "Straight up", value: F.recStr(s.straightUp || { w: 0, l: 0 }) }, picksCell(s), { label: "Totals", value: F.recStr(s.totals || { w: 0, l: 0, p: 0 }) }],
+    strip: [{ label: "Straight up", value: F.recStr(s.straightUp || { w: 0, l: 0 }) }, picksCell(s), { label: "Totals", value: F.recStr(s.totals || { w: 0, l: 0, p: 0 }) },
+      // The season's best bets beside the night's, when the file carries a
+      // season that has settled at least one night.
+      ...(data.seasonRecord && data.seasonRecord.nights && data.seasonRecord.picks ? [{ label: "Best bets · season", value: F.recStr(data.seasonRecord.picks) }] : [])],
     games, count: games.length, isEmpty: games.length === 0, notice: data.notice || "No games were settled for this date.", vsLabel: "Projected score vs final" };
 }
 

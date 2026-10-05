@@ -68,7 +68,12 @@ def walk_forward_btts(
             last_n_matches_per_team=ratings.last_n_matches_per_team,
             config=ratings.config,
         )
-        probs = model.match_probabilities(game.home_team, game.away_team)
+        # A team absent from the training frame is a promoted club: this
+        # frame is one league's own history, so nobody arrives from another
+        # competition. The league-average prior is the one legitimate use of
+        # allow_unrated, and refusing it would crash this on the first
+        # fixture of the second season (Nott'm Forest, promoted 2022-23).
+        probs = model.match_probabilities(game.home_team, game.away_team, allow_unrated=True)
         rows.append({
             "date": game.date,
             "predicted": float(probs["btts_yes"]),

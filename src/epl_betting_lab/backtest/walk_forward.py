@@ -97,7 +97,12 @@ def run_walk_forward_backtest(
             ),
             config=rating_config,
         )
-        probs = model.match_probabilities(game.home_team, game.away_team)
+        # A team absent from the training frame is a promoted club: this
+        # frame is one league's own history, so nobody arrives from another
+        # competition. The league-average prior is the one legitimate use of
+        # allow_unrated, and refusing it crashed the weekly check on the first
+        # fixture of the second season (Nott'm Forest, promoted 2022-23).
+        probs = model.match_probabilities(game.home_team, game.away_team, allow_unrated=True)
         projected_home_goals = float(probs["home_xg"])
         projected_away_goals = float(probs["away_xg"])
         projected_total_goals = projected_home_goals + projected_away_goals

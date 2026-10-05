@@ -69,9 +69,14 @@ def walk_forward_probabilities(
     rows = []
     for i in range(start_after_matches, len(df)):
         game = df.iloc[i]
+        # A team absent from the training frame is a promoted club: this
+        # frame is one league's own history, so nobody arrives from another
+        # competition. The league-average prior is the one legitimate use of
+        # allow_unrated, and refusing it would crash this on the first
+        # fixture of the second season (Nott'm Forest, promoted 2022-23).
         probs = PoissonGoalsModel().fit(
             df.iloc[:i], last_n_matches_per_team=last_n, config=config
-        ).match_probabilities(game.home_team, game.away_team)
+        ).match_probabilities(game.home_team, game.away_team, allow_unrated=True)
         rows.append({
             "date": game.date, "season": game.season,
             "home_team": game.home_team, "away_team": game.away_team,

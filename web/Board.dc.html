@@ -22,36 +22,41 @@
   <meta name="twitter:title" content="Tonight's Board — Maverick Hightower">
   <meta name="twitter:description" content="Model-projected scores, win probabilities and market prices for tonight's slate.">
   <meta name="twitter:image" content="https://maverickhightower.com/share.png">
-  <meta name="theme-color" content="#14151a">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    html, body { margin: 0; padding: 0; background: #f4f2ee; color: #14151a; font-family: "IBM Plex Sans", Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+    /* One look per site: NHL dark, EPL gray, CBB white. EPL and CBB darken with the phone's dark mode. */
+    :root, html[data-sport="nhl"] { color-scheme: dark; --paper:#14151a; --ink:#f1efe9; --ink-2:#d2d0ca; --mute:#a3a6b1; --mute-2:#80838e; --rule:#3a3d49; --rule-2:#262832; --on-ink:#3a3d49; --alert:#f08a72; --on-alert:#14151a; --win:#5cc196; --on-win:#14151a; --desk:#0d0e12; }
+    html[data-sport="epl"], html[data-sport="epl"] [data-theme="light"] { color-scheme: light; --paper:#d9dade; --ink:#14151a; --ink-2:#2a2d36; --mute:#50535e; --mute-2:#767984; --rule:#b4b6bd; --rule-2:#c6c8ce; --on-ink:#c6c8ce; --alert:#9e2c19; --on-alert:#f4f4f6; --win:#22664a; --on-win:#f4f4f6; --desk:#c9cbd0; }
+    html[data-sport="cbb"], html[data-sport="cbb"] [data-theme="light"] { color-scheme: light; --paper:#ffffff; --ink:#14151a; --ink-2:#2a2d3a; --mute:#62656f; --mute-2:#9a9ca6; --rule:#dddbd6; --rule-2:#ecebe7; --on-ink:#d6d3cc; --alert:#b0341f; --on-alert:#ffffff; --win:#2c7a5a; --on-win:#ffffff; --desk:#eeede9; }
+    @media (prefers-color-scheme: dark) { html[data-sport="epl"] { color-scheme: dark; --paper:#2a2c32; --ink:#ecebe7; --ink-2:#cfcec9; --mute:#a9abb4; --mute-2:#878a94; --rule:#474a53; --rule-2:#363840; --on-ink:#474a53; --alert:#f29077; --on-alert:#1b1c20; --win:#62c79c; --on-win:#1b1c20; --desk:#212328; } html[data-sport="cbb"] { color-scheme: dark; --paper:#0f1a2b; --ink:#eef1f6; --ink-2:#cdd4e0; --mute:#9ba6b8; --mute-2:#7a869a; --rule:#2b3a52; --rule-2:#1c2a3f; --on-ink:#2b3a52; --alert:#f08a72; --on-alert:#0f1a2b; --win:#5cc196; --on-win:#0f1a2b; --desk:#0a1220; } }
+    html[data-sport="epl"] [data-theme="dark"] { color-scheme: dark; --paper:#2a2c32; --ink:#ecebe7; --ink-2:#cfcec9; --mute:#a9abb4; --mute-2:#878a94; --rule:#474a53; --rule-2:#363840; --on-ink:#474a53; --alert:#f29077; --on-alert:#1b1c20; --win:#62c79c; --on-win:#1b1c20; --desk:#212328; }
+    html[data-sport="cbb"] [data-theme="dark"] { color-scheme: dark; --paper:#0f1a2b; --ink:#eef1f6; --ink-2:#cdd4e0; --mute:#9ba6b8; --mute-2:#7a869a; --rule:#2b3a52; --rule-2:#1c2a3f; --on-ink:#2b3a52; --alert:#f08a72; --on-alert:#0f1a2b; --win:#5cc196; --on-win:#0f1a2b; --desk:#0a1220; }
+    html, body { margin: 0; padding: 0; background: var(--paper); color: var(--ink); font-family: "IBM Plex Sans", Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
     * { box-sizing: border-box; }
-    a { color: #14151a; text-decoration: none; }
-    a:hover { color: #2a2d3a; text-decoration: underline; text-underline-offset: 3px; }
-    a:focus-visible, button:focus-visible { outline: 3px solid #14151a; outline-offset: 3px; }
-    .skip { position: absolute; left: 12px; top: -60px; background: #14151a; color: #f4f2ee; padding: 10px 14px; z-index: 10; font-size: 14px; }
+    a { color: var(--ink); text-decoration: none; }
+    a:hover { color: var(--ink-2); text-decoration: underline; text-underline-offset: 3px; }
+    a:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+    .skip { position: absolute; left: 12px; top: -60px; background: var(--ink); color: var(--paper); padding: 10px 14px; z-index: 10; font-size: 14px; }
     .skip:focus { top: 12px; }
-    @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+    @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; scroll-behavior: auto !important; } }
   </style>
+  <meta name="theme-color" content="#14151a">
+  <script>(function(){var m=/^(nhl|epl|cbb)\./.exec(location.hostname),d=document.documentElement;d.setAttribute("data-sport",m?m[1]:(d.getAttribute("data-sport")||"nhl"));})();</script>
 </helmet>
-<div data-screen-label="Board" style="min-height:100vh;background:#f4f2ee;color:#14151a;">
+<div data-screen-label="Board" data-theme="{{ themeAttr }}" style="min-height:100vh;background:var(--paper);color:var(--ink);">
   <a href="#main" class="skip">Skip to tonight's games</a>
   <div style="max-width:1240px;margin:0 auto;padding:0 clamp(16px,3vw,24px) 80px;">
 
-    <header style="border-top:4px solid #14151a;border-bottom:1px solid #14151a;padding:10px 0 8px;display:flex;align-items:center;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;">
+    <header style="border-top:4px solid var(--ink);padding:10px 0 4px;display:flex;align-items:center;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;">
       <a href="https://maverickhightower.com/" aria-label="Maverick Hightower home" style="display:flex;align-items:center;gap:12px;min-height:44px;">
-        <span aria-hidden="true" style="width:36px;height:36px;background:#14151a;color:#f4f2ee;display:grid;place-items:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:18px;letter-spacing:.04em;">MH</span>
+        <span aria-hidden="true" style="width:36px;height:36px;background:var(--ink);color:var(--paper);display:grid;place-items:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:18px;letter-spacing:.04em;">MH</span>
         <span style="display:flex;flex-direction:column;line-height:1.1;">
-          <span style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#6b6e7a;">Maverick Hightower</span>
+          <span style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);">Maverick Hightower</span>
           <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;letter-spacing:.02em;text-transform:uppercase;">{{ sportLong }}</span>
         </span>
       </a>
       <nav aria-label="Site" style="display:flex;gap:0 18px;font-size:13px;letter-spacing:.1em;text-transform:uppercase;font-weight:500;flex-wrap:wrap;">
-        <a href="{{ links.board }}" aria-current="page" style="display:inline-flex;align-items:center;min-height:44px;box-shadow:inset 0 -2px 0 #14151a;">Board</a>
-        <a href="{{ links.results }}" style="display:inline-flex;align-items:center;min-height:44px;">Results</a>
-        <a href="{{ links.archive }}" style="display:inline-flex;align-items:center;min-height:44px;">Archive</a>
         <a href="https://maverickhightower.com/about.html" style="display:inline-flex;align-items:center;min-height:44px;">About</a>
         <sc-for list="{{ otherSports }}" as="s" hint-placeholder-count="2">
           <a href="{{ s.href }}" style="{{ s.style }}">{{ s.name }}</a>
@@ -59,173 +64,475 @@
       </nav>
     </header>
 
+    <nav aria-label="Board sections" style="position:sticky;top:0;z-index:5;background:var(--paper);border-bottom:1px solid var(--ink);display:flex;">
+      <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5">
+        <a href="{{ t.href }}" onClick="{{ t.onClick }}" aria-current="{{ t.current }}" style="flex:1 1 0;max-width:150px;min-width:0;display:flex;align-items:center;justify-content:center;gap:5px;min-height:48px;padding:0 4px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;white-space:nowrap;text-decoration:none;box-shadow:{{ t.shadow }};color:{{ t.color }};">
+          <span>{{ t.label }}</span>
+          <sc-if value="{{ t.badge }}" hint-placeholder-val="{{ false }}"><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0;background:var(--ink);color:var(--paper);padding:1px 5px;">{{ t.badge }}</span></sc-if>
+        </a>
+      </sc-for>
+    </nav>
+
     <sc-if value="{{ isArchived }}" hint-placeholder-val="{{ false }}">
-      <div role="status" style="display:flex;align-items:center;gap:12px 16px;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid #14151a;font-family:'IBM Plex Mono',monospace;font-size:13px;">
-        <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase;background:#14151a;color:#f4f2ee;padding:5px 9px;">Archived</span>
+      <div role="status" style="display:flex;align-items:center;gap:12px 16px;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid var(--ink);font-family:'IBM Plex Mono',monospace;font-size:13px;">
+        <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase;background:var(--ink);color:var(--paper);padding:5px 9px;">Archived</span>
         <span>{{ archivedLabel }}</span>
         <a href="{{ links.board }}" style="margin-left:auto;display:inline-flex;align-items:center;min-height:44px;">Current board →</a>
       </div>
     </sc-if>
 
-    <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:24px 40px;align-items:end;padding:40px 0 28px;border-bottom:1px solid #14151a;">
+    <sc-if value="{{ showScores }}" hint-placeholder-val="{{ true }}">
+      <section aria-labelledby="scores-h" style="padding:12px 0;border-bottom:1px solid var(--ink);">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:2px 12px;flex-wrap:wrap;">
+          <h2 id="scores-h" style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;letter-spacing:.1em;text-transform:uppercase;">Scores</h2>
+          <span role="status" style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:{{ liveColor }};">{{ liveLine }}</span>
+        </div>
+        <sc-if value="{{ noScoreCards }}" hint-placeholder-val="{{ false }}">
+          <p style="margin:8px 0 0;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">No games on tonight's board.</p>
+        </sc-if>
+        <div style="display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x proximity;margin:10px calc(-1 * clamp(16px,3vw,24px)) 0;padding:0 clamp(16px,3vw,24px) 4px;scrollbar-width:thin;">
+          <sc-for list="{{ scoreCards }}" as="s" hint-placeholder-count="5">
+            <button type="button" onClick="{{ s.onClick }}" aria-label="{{ s.aria }}" aria-disabled="{{ s.disabled }}" style="flex:none;scroll-snap-align:start;width:128px;min-height:76px;text-align:left;background:transparent;color:var(--ink);border:1px solid var(--rule);border-top:3px solid {{ s.topColor }};padding:6px 10px;font:inherit;cursor:{{ s.cursor }};display:flex;flex-direction:column;gap:3px;">
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:{{ s.stateColor }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">{{ s.state }}</span>
+              <sc-for list="{{ s.rows }}" as="r" hint-placeholder-count="2">
+                <span style="display:flex;justify-content:space-between;gap:10px;font-family:'IBM Plex Mono',monospace;font-size:14px;line-height:1.3;font-weight:{{ r.weight }};"><span>{{ r.abbr }}</span><span>{{ r.score }}</span></span>
+              </sc-for>
+              <sc-if value="{{ s.unmatched }}" hint-placeholder-val="{{ false }}">
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;line-height:1.3;letter-spacing:.04em;text-transform:uppercase;color:var(--alert);">Unmatched · {{ s.why }}</span>
+              </sc-if>
+            </button>
+          </sc-for>
+        </div>
+      </section>
+    </sc-if>
+
+    <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:24px 40px;align-items:end;padding:36px 0 28px;border-bottom:1px solid var(--ink);">
       <div style="min-width:0;grid-column:1 / -1;">
-        <div style="font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#6b6e7a;margin-bottom:10px;">{{ kicker }}</div>
+        <div style="font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin-bottom:10px;">{{ kicker }}</div>
         <h1 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:clamp(56px,9vw,112px);line-height:.9;letter-spacing:-.01em;text-transform:uppercase;">{{ title1 }}<br>{{ title2 }}</h1>
-        <p style="margin:18px 0 0;max-width:560px;font-size:17px;line-height:1.5;color:#2a2d3a;text-wrap:pretty;">{{ blurb }}</p>
       </div>
-      <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.7;color:#6b6e7a;display:flex;flex-wrap:wrap;gap:4px 24px;align-items:baseline;">
-        <span style="text-transform:uppercase;letter-spacing:.1em;white-space:nowrap;">Updated</span>
-        <span style="color:#14151a;white-space:nowrap;">{{ updated }}</span>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.7;color:var(--mute);display:flex;flex-wrap:wrap;gap:4px 24px;align-items:baseline;">
+        <span style="text-transform:uppercase;letter-spacing:.1em;white-space:nowrap;">Board built</span>
+        <span style="color:var(--ink);">{{ updated }}</span>
         <span style="white-space:nowrap;">Times in {{ tz }}</span>
+        <sc-if value="{{ showScores }}" hint-placeholder-val="{{ true }}"><span style="white-space:nowrap;">Live scores {{ liveStamp }}</span></sc-if>
         <sc-if value="{{ stale }}" hint-placeholder-val="{{ false }}">
-          <span role="status" style="background:#b0341f;color:#f4f2ee;padding:2px 8px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;font-size:12px;white-space:nowrap;">{{ staleLabel }}</span>
+          <span role="status" style="background:var(--alert);color:var(--on-alert);padding:2px 8px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;font-size:12px;white-space:nowrap;">{{ staleLabel }}</span>
         </sc-if>
       </div>
     </section>
 
     <sc-if value="{{ hasNotice }}" hint-placeholder-val="{{ false }}">
-      <div role="note" style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:20px;align-items:start;padding:18px 0;border-bottom:1px solid #14151a;">
-        <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase;background:#14151a;color:#f4f2ee;padding:5px 9px;">Note</span>
-        <p style="margin:0;font-size:15px;line-height:1.5;color:#2a2d3a;max-width:760px;text-wrap:pretty;">{{ notice }}</p>
+      <div role="note" style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:20px;align-items:start;padding:18px 0;border-bottom:1px solid var(--ink);">
+        <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase;background:var(--ink);color:var(--paper);padding:5px 9px;">Note</span>
+        <sc-if value="{{ noticeRest }}" hint-placeholder-val="{{ false }}"><details style="min-width:0;font-size:15px;line-height:1.5;color:var(--ink-2);max-width:760px;"><summary style="cursor:pointer;">{{ noticeHead }}</summary><p style="margin:6px 0 0;text-wrap:pretty;">{{ noticeRest }}</p></details></sc-if>
+        <sc-if value="{{ noticeShort }}" hint-placeholder-val="{{ false }}"><p style="margin:0;font-size:15px;line-height:1.5;color:var(--ink-2);max-width:760px;text-wrap:pretty;">{{ noticeHead }}</p></sc-if>
       </div>
     </sc-if>
     <sc-if value="{{ hasFeedNotice }}" hint-placeholder-val="{{ false }}">
-      <div role="status" style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:20px;align-items:start;padding:18px 0;border-bottom:1px solid #14151a;">
-        <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase;border:1px solid #14151a;padding:4px 9px;">Sample</span>
-        <p style="margin:0;font-size:15px;line-height:1.5;color:#2a2d3a;max-width:760px;text-wrap:pretty;">{{ feedNotice }}</p>
+      <div role="status" style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:20px;align-items:start;padding:18px 0;border-bottom:1px solid var(--ink);">
+        <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--ink);padding:4px 9px;">Sample</span>
+        <p style="margin:0;font-size:15px;line-height:1.5;color:var(--ink-2);max-width:760px;text-wrap:pretty;">{{ feedNotice }}</p>
       </div>
     </sc-if>
 
-    <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:0 24px;border-bottom:1px solid #14151a;">
+    <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:0 24px;border-bottom:1px solid var(--ink);">
       <sc-for list="{{ strip }}" as="c" hint-placeholder-count="4">
-        <div style="padding:22px 0;border-bottom:1px solid #d6d3cc;">
-          <div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#6b6e7a;">{{ c.label }}</div>
+        <div style="padding:22px 0;border-bottom:1px solid var(--rule);">
+          <div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);">{{ c.label }}</div>
           <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:44px;line-height:1;margin-top:8px;">{{ c.value }}</div>
-          <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#2a2d3a;margin-top:6px;">{{ c.sub }}</div>
-          <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#6b6e7a;margin-top:4px;text-transform:uppercase;letter-spacing:.08em;">{{ c.fine }}</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--ink-2);margin-top:6px;">{{ c.sub }}</div>
         </div>
       </sc-for>
     </section>
 
-    <section id="main" aria-labelledby="projections-h" style="padding-top:44px;">
-      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;border-bottom:3px solid #14151a;padding-bottom:10px;">
-        <h2 id="projections-h" style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:34px;line-height:1;text-transform:uppercase;letter-spacing:.01em;">Projections</h2>
-        <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#6b6e7a;">{{ summary }}</div>
-      </div>
+    <div id="main">
+      <sc-if value="{{ isTonight }}" hint-placeholder-val="{{ true }}">
+        <section aria-labelledby="projections-h" style="padding-top:40px;">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;border-bottom:3px solid var(--ink);padding-bottom:10px;">
+            <h2 id="projections-h" style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:34px;line-height:1;text-transform:uppercase;letter-spacing:.01em;">Projections</h2>
+            <div style="display:flex;align-items:center;gap:4px 16px;flex-wrap:wrap;">
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">{{ summary }}</span>
+              <button type="button" onClick="{{ onToggleAll }}" style="min-height:44px;padding:0 12px;background:transparent;border:1px solid var(--ink);color:var(--ink);font-family:'IBM Plex Mono',monospace;font-size:12px;cursor:pointer;">{{ toggleAllLabel }}</button>
+            </div>
+          </div>
 
-      <sc-for list="{{ groups }}" as="day" hint-placeholder-count="1">
-        <div style="display:flex;align-items:baseline;gap:14px;padding:26px 0 10px;border-bottom:1px solid #14151a;">
-          <h3 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:26px;text-transform:uppercase;letter-spacing:.02em;">{{ day.label }}</h3>
-          <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#6b6e7a;">{{ day.countLabel }}</span>
-        </div>
-
-        <sc-for list="{{ day.games }}" as="g" hint-placeholder-count="4">
-          <article aria-label="{{ g.ariaLabel }}" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:18px 28px;padding:20px 0;border-bottom:1px solid #d6d3cc;align-items:start;opacity:{{ g.opacity }};">
-            <div style="display:flex;flex-direction:column;gap:10px;min-width:0;">
-              <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#6b6e7a;line-height:1.5;">
-                <span style="flex:none;white-space:nowrap;"><span style="color:#14151a;font-weight:600;font-size:15px;">{{ g.time }}</span> · {{ g.tv }}</span>
-                <span style="flex:1;min-width:0;font-size:12px;text-align:right;">{{ g.venue }} · {{ g.city }}</span>
-              </div>
-              <sc-for list="{{ g.sides }}" as="s" hint-placeholder-count="2">
-                <div style="display:flex;align-items:center;gap:12px;">
-                  <span aria-hidden="true" style="width:38px;height:38px;border-radius:50%;flex:none;display:grid;place-items:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:13px;letter-spacing:.02em;background:{{ s.color }};color:{{ s.fg }};">{{ s.abbr }}</span>
-                  <div style="flex:1;min-width:0;">
-                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                      <span style="font-weight:600;font-size:16px;">{{ s.name }}</span>
-                      <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#6b6e7a;">{{ s.record }}</span>
-                      <sc-if value="{{ s.flag }}" hint-placeholder-val="{{ false }}"><span title="Back to back" style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;border:1px solid #14151a;padding:1px 5px;">{{ s.flag }}</span></sc-if>
-                    </div>
-                    <div style="font-size:12px;color:#6b6e7a;">{{ s.role }} <span style="font-family:'IBM Plex Mono',monospace;">{{ s.note }}</span></div>
-                  </div>
-                  <div style="text-align:right;flex:none;">
-                    <div style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:22px;line-height:1;">{{ s.proj }}</div>
-                    <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#6b6e7a;margin-top:3px;">{{ s.win }}</div>
-                  </div>
-                </div>
-              </sc-for>
-              <sc-if value="{{ g.hasBar }}" hint-placeholder-val="{{ true }}">
-                <div role="img" aria-label="{{ g.barAria }}" style="height:4px;display:flex;background:#d6d3cc;margin-top:2px;">
-                  <sc-for list="{{ g.bar }}" as="b" hint-placeholder-count="1"><div style="width:{{ b.width }};background:{{ b.color }};"></div></sc-for>
-                  <div style="flex:1;background:{{ g.barTail }};"></div>
-                </div>
-              </sc-if>
-              <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#6b6e7a;">{{ g.barNote }}</div>
+          <sc-for list="{{ groups }}" as="day" hint-placeholder-count="1">
+            <div style="display:flex;align-items:baseline;gap:14px;padding:26px 0 10px;border-bottom:1px solid var(--ink);">
+              <h3 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:26px;text-transform:uppercase;letter-spacing:.02em;">{{ day.label }}</h3>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">{{ day.countLabel }}</span>
             </div>
 
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,128px),1fr));gap:14px 18px;min-width:0;">
-              <sc-for list="{{ g.cells }}" as="c" hint-placeholder-count="3">
-                <div style="border-top:2px solid #14151a;padding-top:8px;">
-                  <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#6b6e7a;">{{ c.title }}</div>
-                  <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;line-height:1.7;margin-top:6px;">
-                    <sc-for list="{{ c.rows }}" as="r" hint-placeholder-count="3">
-                      <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;"><span style="color:#6b6e7a;">{{ r.label }}</span><span style="white-space:nowrap;margin-left:auto;font-weight:{{ r.weight }};">{{ r.value }}</span></div>
-                    </sc-for>
-                  </div>
-                  <sc-if value="{{ c.spark }}" hint-placeholder-val="{{ false }}">
-                    <div style="display:flex;align-items:center;gap:8px;margin-top:6px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#6b6e7a;">
-                      <svg aria-hidden="true" width="72" height="18" viewBox="0 0 72 18" style="flex:none;overflow:visible;"><polyline sc-camel-points="{{ c.spark.points }}" fill="none" stroke="#14151a" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"></polyline></svg>
-                      <span>{{ c.spark.note }}</span>
-                    </div>
-                  </sc-if>
-                  <sc-if value="{{ c.note }}" hint-placeholder-val="{{ false }}"><div style="font-size:11px;color:#6b6e7a;margin-top:4px;">{{ c.note }}</div></sc-if>
-                </div>
-              </sc-for>
+            <sc-for list="{{ day.games }}" as="g" hint-placeholder-count="4">
+              <article id="{{ g.anchor }}" aria-label="{{ g.ariaLabel }}" style="border-bottom:1px solid var(--rule);scroll-margin-top:56px;">
+                <button type="button" onClick="{{ g.onToggle }}" aria-expanded="{{ g.expandedAttr }}" aria-controls="{{ g.panelId }}" style="width:100%;display:grid;grid-template-columns:64px minmax(0,1fr) auto 14px;gap:10px;align-items:center;min-height:60px;padding:10px 0;background:transparent;border:0;color:var(--ink);font:inherit;text-align:left;cursor:pointer;">
+                  <span style="display:flex;flex-direction:column;gap:2px;font-family:'IBM Plex Mono',monospace;line-height:1.2;min-width:0;">
+                    <span style="font-weight:600;font-size:13px;white-space:nowrap;">{{ g.sum.top }}</span>
+                    <span style="font-size:10px;color:{{ g.sum.subColor }};letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ g.sum.sub }}</span>
+                  </span>
+                  <span style="display:flex;align-items:center;gap:5px;min-width:0;font-family:'IBM Plex Mono',monospace;font-size:15px;white-space:nowrap;">
+                    <span aria-hidden="true" style="width:8px;height:8px;border-radius:50%;flex:none;background:{{ g.sum.awayColor }};box-shadow:0 0 0 1px var(--rule);"></span>
+                    <span style="font-weight:600;">{{ g.sum.away }}</span>
+                    <span style="font-weight:{{ g.sum.awayWeight }};">{{ g.sum.awayScore }}</span>
+                    <span style="color:var(--mute);">{{ g.sum.sep }}</span>
+                    <span style="font-weight:{{ g.sum.homeWeight }};">{{ g.sum.homeScore }}</span>
+                    <span style="font-weight:600;">{{ g.sum.home }}</span>
+                    <span aria-hidden="true" style="width:8px;height:8px;border-radius:50%;flex:none;background:{{ g.sum.homeColor }};box-shadow:0 0 0 1px var(--rule);"></span>
+                  </span>
+                  <span style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;min-width:0;">
+                    <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:17px;line-height:1;text-transform:uppercase;letter-spacing:.02em;white-space:nowrap;color:{{ g.sum.tagColor }};">{{ g.sum.tag }}</span>
+                    <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;color:{{ g.sum.kindColor }};">{{ g.sum.kind }}</span>
+                    <sc-if value="{{ g.sum.drought }}" hint-placeholder-val="{{ false }}"><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;color:var(--ink-2);border:1px solid var(--rule);padding:1px 4px;">{{ g.sum.drought }}</span></sc-if>
+                  </span>
+                  <span aria-hidden="true" style="font-family:'IBM Plex Mono',monospace;font-size:16px;color:var(--mute);text-align:right;">{{ g.sum.chev }}</span>
+                </button>
 
-              <div style="border-top:2px solid #14151a;padding-top:8px;grid-column:1 / -1;">
-                <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#6b6e7a;">{{ g.pick.heading }}</div>
-                <sc-if value="{{ g.pick.isBet }}" hint-placeholder-val="{{ true }}">
-                  <div style="margin-top:8px;background:#14151a;color:#f4f2ee;padding:8px 10px;">
-                    <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:20px;line-height:1;text-transform:uppercase;letter-spacing:.02em;">{{ g.pick.label }}</div>
-                    <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;margin-top:5px;color:#d6d3cc;">{{ g.pick.sub }}</div>
-                    <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;margin-top:2px;color:#d6d3cc;">{{ g.pick.extra }}</div>
+                <sc-if value="{{ g.expanded }}" hint-placeholder-val="{{ false }}">
+                  <div id="{{ g.panelId }}" style="padding:2px 0 22px;display:flex;flex-direction:column;gap:18px;">
+
+                    <sc-if value="{{ g.box.show }}" hint-placeholder-val="{{ false }}">
+                      <div style="border:1px solid var(--ink);padding:10px 12px;display:flex;flex-direction:column;gap:6px;">
+                        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:2px 12px;flex-wrap:wrap;">
+                          <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;text-transform:uppercase;letter-spacing:.04em;color:{{ g.box.titleColor }};">{{ g.box.title }}</span>
+                          <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mute);">{{ g.box.stamp }}</span>
+                        </div>
+                        <div style="font-family:'IBM Plex Mono',monospace;font-size:16px;font-weight:600;">{{ g.box.score }}</div>
+                        <sc-if value="{{ g.box.shots }}" hint-placeholder-val="{{ false }}"><div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-2);">{{ g.box.shots }}</div></sc-if>
+                        <sc-if value="{{ g.box.pick }}" hint-placeholder-val="{{ false }}"><div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:{{ g.box.pickColor }};">{{ g.box.pick }}</div></sc-if>
+                      </div>
+                    </sc-if>
+
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:18px 28px;align-items:start;opacity:{{ g.opacity }};">
+                      <div style="display:flex;flex-direction:column;gap:10px;min-width:0;">
+                        <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);line-height:1.5;">
+                          <span style="flex:none;white-space:nowrap;"><span style="color:var(--ink);font-weight:600;font-size:15px;">{{ g.time }}</span> · {{ g.tv }}</span>
+                          <span style="flex:1;min-width:0;font-size:12px;text-align:right;">{{ g.venue }} · {{ g.city }}</span>
+                        </div>
+                        <sc-for list="{{ g.sides }}" as="s" hint-placeholder-count="2">
+                          <div style="display:flex;align-items:center;gap:12px;">
+                            <span aria-hidden="true" style="width:38px;height:38px;border-radius:50%;flex:none;display:grid;place-items:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:13px;letter-spacing:.02em;background:{{ s.color }};color:{{ s.fg }};box-shadow:0 0 0 1px var(--rule);">{{ s.abbr }}</span>
+                            <div style="flex:1;min-width:0;">
+                              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                                <span style="font-weight:600;font-size:16px;">{{ s.name }}</span>
+                                <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">{{ s.record }}</span>
+                                <sc-if value="{{ s.flag }}" hint-placeholder-val="{{ false }}"><span title="Back to back" style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;border:1px solid var(--ink);padding:1px 5px;">{{ s.flag }}</span></sc-if>
+                              </div>
+                              <div style="font-size:12px;color:var(--mute);">{{ s.role }} <span style="font-family:'IBM Plex Mono',monospace;">{{ s.note }}</span></div>
+                            </div>
+                            <div style="text-align:right;flex:none;">
+                              <div style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:22px;line-height:1;">{{ s.proj }}</div>
+                              <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);margin-top:3px;">{{ s.win }}</div>
+                            </div>
+                          </div>
+                        </sc-for>
+                        <sc-if value="{{ g.hasBar }}" hint-placeholder-val="{{ true }}">
+                          <div role="img" aria-label="{{ g.barAria }}" style="height:4px;display:flex;background:var(--rule);margin-top:2px;">
+                            <sc-for list="{{ g.bar }}" as="b" hint-placeholder-count="1"><div style="width:{{ b.width }};background:{{ b.color }};"></div></sc-for>
+                            <div style="flex:1;background:{{ g.barTail }};"></div>
+                          </div>
+                        </sc-if>
+                        <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">{{ g.barNote }}</div>
+                      </div>
+
+                      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,128px),1fr));gap:14px 18px;min-width:0;">
+                        <sc-for list="{{ g.cells }}" as="c" hint-placeholder-count="3">
+                          <div style="border-top:2px solid var(--ink);padding-top:8px;">
+                            <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);">{{ c.title }}</div>
+                            <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;line-height:1.7;margin-top:6px;">
+                              <sc-for list="{{ c.rows }}" as="r" hint-placeholder-count="3">
+                                <div style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:0 8px;align-items:baseline;"><span style="color:var(--mute);white-space:nowrap;">{{ r.label }}</span><span style="text-align:right;font-weight:{{ r.weight }};">{{ r.value }}</span></div>
+                              </sc-for>
+                            </div>
+                            <sc-if value="{{ c.spark }}" hint-placeholder-val="{{ false }}">
+                              <div style="display:flex;align-items:center;gap:8px;margin-top:6px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mute);">
+                                <svg aria-hidden="true" width="72" height="18" viewBox="0 0 72 18" style="flex:none;overflow:visible;"><polyline sc-camel-points="{{ c.spark.points }}" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" style="color:var(--ink);"></polyline></svg>
+                                <span>{{ c.spark.note }}</span>
+                              </div>
+                            </sc-if>
+                            <sc-if value="{{ c.note }}" hint-placeholder-val="{{ false }}"><div style="font-size:11px;color:var(--mute);margin-top:4px;">{{ c.note }}</div></sc-if>
+                          </div>
+                        </sc-for>
+
+                        <div style="border-top:2px solid var(--ink);padding-top:8px;grid-column:1 / -1;">
+                          <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);">{{ g.pick.heading }}</div>
+                          <sc-if value="{{ g.pick.isBet }}" hint-placeholder-val="{{ true }}">
+                            <div style="margin-top:8px;background:var(--ink);color:var(--paper);padding:8px 10px;">
+                              <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:20px;line-height:1;text-transform:uppercase;letter-spacing:.02em;">{{ g.pick.label }}</div>
+                              <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;margin-top:5px;color:var(--on-ink);">{{ g.pick.sub }}</div>
+                              <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;margin-top:2px;color:var(--on-ink);">{{ g.pick.extra }}</div>
+                            </div>
+                          </sc-if>
+                          <sc-if value="{{ g.pick.isLean }}" hint-placeholder-val="{{ false }}">
+                            <div style="margin-top:8px;border:1px dashed var(--ink);padding:8px 10px;">
+                              <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:20px;line-height:1;text-transform:uppercase;letter-spacing:.02em;">{{ g.pick.label }}</div>
+                              <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;margin-top:5px;color:var(--mute);">{{ g.pick.sub }}</div>
+                              <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;margin-top:2px;color:var(--mute);">{{ g.pick.extra }}</div>
+                            </div>
+                          </sc-if>
+                          <sc-if value="{{ g.pick.isNone }}" hint-placeholder-val="{{ false }}">
+                            <div style="margin-top:8px;border:1px dashed var(--mute);padding:8px 10px;font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.5;color:var(--mute);">{{ g.pick.label }}</div>
+                          </sc-if>
+                          <sc-if value="{{ g.started }}" hint-placeholder-val="{{ false }}">
+                            <div style="margin-top:6px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);text-transform:uppercase;letter-spacing:.08em;">Started · not a play</div>
+                          </sc-if>
+                          <sc-if value="{{ g.live.has }}" hint-placeholder-val="{{ false }}">
+                            <div style="margin-top:6px;font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.5;color:{{ g.live.color }};"><span style="text-transform:uppercase;letter-spacing:.08em;font-weight:600;">Live · {{ g.live.word }}</span> · {{ g.live.detail }}</div>
+                          </sc-if>
+                        </div>
+                      </div>
+                    </div>
+
+                    <sc-if value="{{ g.props.show }}" hint-placeholder-val="{{ false }}">
+                    <div style="border-top:2px solid var(--ink);padding-top:4px;">
+                      <div style="display:flex;justify-content:space-between;align-items:center;gap:4px 12px;flex-wrap:wrap;">
+                        <span style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);min-height:44px;display:inline-flex;align-items:center;">Props on this game</span>
+                        <sc-if value="{{ g.props.hasAll }}" hint-placeholder-val="{{ false }}"><a href="#props" onClick="{{ g.props.onAll }}" style="display:inline-flex;align-items:center;min-height:44px;font-family:'IBM Plex Mono',monospace;font-size:12px;">{{ g.props.allLabel }}</a></sc-if>
+                      </div>
+                      <sc-for list="{{ g.props.rows }}" as="r" hint-placeholder-count="0">
+                        <div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;padding:9px 0;border-top:1px solid var(--rule-2);align-items:start;opacity:{{ r.opacity }};">
+                          <div style="min-width:0;display:flex;flex-direction:column;gap:3px;">
+                            <span style="font-size:14px;"><span style="font-weight:600;">{{ r.player }}</span> <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mute);">{{ r.team }} · {{ r.meta }}</span></span>
+                            <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-2);">{{ r.label }} · {{ r.priceLine }} · edge {{ r.edge }}</span>
+                            <sc-if value="{{ r.track.show }}" hint-placeholder-val="{{ false }}">
+                              <div style="display:flex;flex-direction:column;gap:4px;margin-top:2px;">
+                                <sc-if value="{{ r.track.bar }}" hint-placeholder-val="{{ false }}"><div aria-hidden="true" style="height:4px;background:var(--rule);max-width:220px;"><div style="height:4px;width:{{ r.track.pct }};background:{{ r.track.color }};"></div></div></sc-if>
+                                <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:{{ r.track.textColor }};">{{ r.track.text }}</span>
+                              </div>
+                            </sc-if>
+                          </div>
+                          <sc-if value="{{ r.isBet }}" hint-placeholder-val="{{ false }}"><span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;background:var(--ink);color:var(--paper);padding:3px 7px;white-space:nowrap;">Best bet</span></sc-if>
+                          <sc-if value="{{ r.isLean }}" hint-placeholder-val="{{ false }}"><span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;border:1px dashed var(--ink);padding:2px 7px;white-space:nowrap;">Lean</span></sc-if>
+                        </div>
+                      </sc-for>
+                      <sc-if value="{{ g.props.isEmpty }}" hint-placeholder-val="{{ false }}">
+                        <p style="margin:0;padding:6px 0 0;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">{{ g.props.empty }}</p>
+                      </sc-if>
+                    </div>
+                    </sc-if>
+
+                    <sc-if value="{{ g.drought.show }}" hint-placeholder-val="{{ false }}">
+                      <div style="border-top:2px solid var(--ink);padding-top:4px;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;gap:4px 12px;flex-wrap:wrap;">
+                          <span style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);min-height:44px;display:inline-flex;align-items:center;">Drought rule · potential bets</span>
+                          <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mute);border:1px solid var(--rule);padding:2px 6px;">Not model bets · no stake</span>
+                        </div>
+                        <sc-for list="{{ g.drought.rows }}" as="r" hint-placeholder-count="0">
+                          <article aria-label="{{ r.aria }}" style="display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:4px 12px;padding:12px 0;border-top:1px solid var(--rule-2);align-items:start;">
+                            <div aria-hidden="true" style="border:1px solid var(--rule);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:54px;padding:4px 0;">
+                              <span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:30px;line-height:1;">{{ r.streak }}</span>
+                              <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);">games w/o</span>
+                            </div>
+                            <div style="min-width:0;display:flex;flex-direction:column;gap:3px;">
+                              <div style="display:flex;align-items:center;gap:8px;min-width:0;">
+                                <span aria-hidden="true" style="width:22px;height:22px;border-radius:50%;flex:none;display:grid;place-items:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:8px;background:{{ r.color }};color:{{ r.fg }};box-shadow:0 0 0 1px var(--rule);">{{ r.team }}</span>
+                                <span style="font-weight:600;font-size:15px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ r.player }}</span>
+                              </div>
+                              <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:19px;line-height:1.05;text-transform:uppercase;letter-spacing:.02em;">{{ r.category }}</span>
+                              <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.5;color:var(--ink-2);">{{ r.history }}</span>
+                              <sc-if value="{{ r.track.show }}" hint-placeholder-val="{{ false }}">
+                                <div style="display:flex;flex-direction:column;gap:4px;margin-top:3px;">
+                                  <sc-if value="{{ r.track.bar }}" hint-placeholder-val="{{ false }}"><div aria-hidden="true" style="height:4px;background:var(--rule);max-width:220px;"><div style="height:4px;width:{{ r.track.pct }};background:{{ r.track.color }};"></div></div></sc-if>
+                                  <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:{{ r.track.textColor }};">{{ r.track.text }}</span>
+                                </div>
+                              </sc-if>
+                            </div>
+                            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;text-align:right;">
+                              <span style="font-family:'IBM Plex Mono',monospace;font-size:16px;font-weight:600;color:{{ r.priceColor }};">{{ r.price }}</span>
+                              <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mute);white-space:nowrap;">{{ r.book }}</span>
+                              <sc-if value="{{ r.juice }}" hint-placeholder-val="{{ false }}"><span title="Shorter than −160" style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--alert);border:1px solid var(--alert);padding:1px 5px;white-space:nowrap;">Heavy juice</span></sc-if>
+                            </div>
+                          </article>
+                        </sc-for>
+                      </div>
+                    </sc-if>
                   </div>
                 </sc-if>
-                <sc-if value="{{ g.pick.isLean }}" hint-placeholder-val="{{ false }}">
-                  <div style="margin-top:8px;border:1px dashed #14151a;padding:8px 10px;">
-                    <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:20px;line-height:1;text-transform:uppercase;letter-spacing:.02em;">{{ g.pick.label }}</div>
-                    <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;margin-top:5px;color:#6b6e7a;">{{ g.pick.sub }}</div>
-                    <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;margin-top:2px;color:#6b6e7a;">{{ g.pick.extra }}</div>
+              </article>
+            </sc-for>
+          </sc-for>
+        </section>
+      </sc-if>
+
+      <sc-if value="{{ isProps }}" hint-placeholder-val="{{ false }}">
+        <section id="props-panel" aria-labelledby="props-h" style="padding-top:40px;">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;border-bottom:3px solid var(--ink);padding-bottom:10px;">
+            <h2 id="props-h" style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:34px;line-height:1;text-transform:uppercase;letter-spacing:.01em;">Player props</h2>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">{{ headSummary }}</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--ink);margin-top:16px;">
+            <sc-for list="{{ propViews }}" as="v" hint-placeholder-count="2">
+              <button type="button" onClick="{{ v.onClick }}" aria-pressed="{{ v.pressed }}" style="min-height:44px;padding:0 8px;background:{{ v.bg }};color:{{ v.fg }};border:0;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;">{{ v.label }}</button>
+            </sc-for>
+          </div>
+
+          <sc-if value="{{ isDroughtView }}" hint-placeholder-val="{{ false }}">
+            <div role="note" style="display:flex;flex-wrap:wrap;gap:10px 20px;align-items:flex-start;padding:16px 0;border-bottom:1px solid var(--ink);">
+              <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--ink);padding:4px 9px;white-space:nowrap;">Not model bets</span>
+              <p style="margin:0;flex:1 1 280px;font-size:15px;line-height:1.5;color:var(--ink-2);max-width:760px;text-wrap:pretty;">{{ dv.note }}</p>
+            </div>
+            <sc-if value="{{ dv.empty }}" hint-placeholder-val="{{ false }}">
+              <div role="status" style="display:flex;flex-direction:column;gap:8px;padding:24px 0;border-bottom:1px solid var(--rule);">
+                <span style="align-self:flex-start;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--ink);padding:4px 9px;">{{ dv.empty.tag }}</span>
+                <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:26px;line-height:1.05;text-transform:uppercase;">{{ dv.empty.title }}</p>
+                <p style="margin:0;font-size:15px;line-height:1.5;color:var(--ink-2);max-width:620px;text-wrap:pretty;">{{ dv.empty.body }}</p>
+              </div>
+            </sc-if>
+            <sc-for list="{{ dv.groups }}" as="dg" hint-placeholder-count="2">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;gap:4px 12px;flex-wrap:wrap;padding:22px 0 8px;border-bottom:1px solid var(--ink);">
+                <h3 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;text-transform:uppercase;letter-spacing:.02em;">{{ dg.title }}</h3>
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:{{ dg.subColor }};">{{ dg.sub }}</span>
+              </div>
+              <sc-for list="{{ dg.rows }}" as="r" hint-placeholder-count="2">
+                <article aria-label="{{ r.aria }}" style="display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:4px 12px;padding:12px 0;border-top:1px solid var(--rule-2);align-items:start;">
+                  <div aria-hidden="true" style="border:1px solid var(--rule);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:54px;padding:4px 0;">
+                    <span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:30px;line-height:1;">{{ r.streak }}</span>
+                    <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);">games w/o</span>
                   </div>
-                </sc-if>
-                <sc-if value="{{ g.pick.isNone }}" hint-placeholder-val="{{ false }}">
-                  <div style="margin-top:8px;border:1px dashed #6b6e7a;padding:8px 10px;font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.5;color:#6b6e7a;">{{ g.pick.label }}</div>
-                </sc-if>
-                <sc-if value="{{ g.started }}" hint-placeholder-val="{{ false }}">
-                  <div style="margin-top:6px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#6b6e7a;text-transform:uppercase;letter-spacing:.08em;">Started · not a play</div>
+                  <div style="min-width:0;display:flex;flex-direction:column;gap:3px;">
+                    <div style="display:flex;align-items:center;gap:8px;min-width:0;">
+                      <span aria-hidden="true" style="width:22px;height:22px;border-radius:50%;flex:none;display:grid;place-items:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:8px;background:{{ r.color }};color:{{ r.fg }};box-shadow:0 0 0 1px var(--rule);">{{ r.team }}</span>
+                      <span style="font-weight:600;font-size:15px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ r.player }}</span>
+                    </div>
+                    <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:19px;line-height:1.05;text-transform:uppercase;letter-spacing:.02em;">{{ r.category }}</span>
+                    <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.5;color:var(--ink-2);">{{ r.history }}</span>
+                    <sc-if value="{{ r.track.show }}" hint-placeholder-val="{{ false }}">
+                      <div style="display:flex;flex-direction:column;gap:4px;margin-top:3px;">
+                        <sc-if value="{{ r.track.bar }}" hint-placeholder-val="{{ false }}"><div aria-hidden="true" style="height:4px;background:var(--rule);max-width:220px;"><div style="height:4px;width:{{ r.track.pct }};background:{{ r.track.color }};"></div></div></sc-if>
+                        <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:{{ r.track.textColor }};">{{ r.track.text }}</span>
+                      </div>
+                    </sc-if>
+                  </div>
+                  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;text-align:right;">
+                    <span style="font-family:'IBM Plex Mono',monospace;font-size:16px;font-weight:600;color:{{ r.priceColor }};">{{ r.price }}</span>
+                    <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mute);white-space:nowrap;">{{ r.book }}</span>
+                    <sc-if value="{{ r.juice }}" hint-placeholder-val="{{ false }}"><span title="Shorter than −160" style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--alert);border:1px solid var(--alert);padding:1px 5px;white-space:nowrap;">Heavy juice</span></sc-if>
+                  </div>
+                </article>
+              </sc-for>
+            </sc-for>
+          </sc-if>
+
+          <sc-if value="{{ isModelView }}" hint-placeholder-val="{{ true }}">
+
+          <div role="note" style="display:flex;flex-wrap:wrap;gap:10px 20px;align-items:flex-start;padding:16px 0;border-bottom:1px solid var(--ink);">
+            <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase;background:var(--ink);color:var(--paper);padding:5px 9px;white-space:nowrap;">No demonstrated edge</span>
+            <p style="margin:0;flex:1 1 280px;font-size:15px;line-height:1.5;color:var(--ink-2);max-width:760px;text-wrap:pretty;">{{ pv.disclosure }}</p>
+          </div>
+          <sc-if value="{{ pv.note }}" hint-placeholder-val="{{ false }}">
+            <p style="margin:0;padding:12px 0;border-bottom:1px solid var(--rule);font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.6;color:var(--mute);">{{ pv.note }}</p>
+          </sc-if>
+
+          <sc-if value="{{ pv.hasRows }}" hint-placeholder-val="{{ true }}">
+            <div role="search" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));gap:10px;padding:16px 0;border-bottom:1px solid var(--rule);align-items:end;">
+              <label style="display:flex;flex-direction:column;gap:4px;grid-column:1 / -1;">
+                <span style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);">Player</span>
+                <input type="search" value="{{ f.q }}" onChange="{{ onQ }}" placeholder="Search by name" autocomplete="off" style="min-height:44px;padding:0 12px;border:1px solid var(--ink);border-radius:0;background:var(--paper);color:var(--ink);font-family:inherit;font-size:16px;width:100%;">
+              </label>
+              <label style="display:flex;flex-direction:column;gap:4px;min-width:0;">
+                <span style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);">Game</span>
+                <select value="{{ f.game }}" onChange="{{ onGame }}" style="min-height:44px;padding:0 8px;border:1px solid var(--ink);border-radius:0;background:var(--paper);color:var(--ink);font-family:inherit;font-size:15px;width:100%;">
+                  <sc-for list="{{ gameOptions }}" as="o" hint-placeholder-count="1"><option value="{{ o.value }}">{{ o.label }}</option></sc-for>
+                </select>
+              </label>
+              <label style="display:flex;flex-direction:column;gap:4px;min-width:0;">
+                <span style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);">Team</span>
+                <select value="{{ f.team }}" onChange="{{ onTeam }}" style="min-height:44px;padding:0 8px;border:1px solid var(--ink);border-radius:0;background:var(--paper);color:var(--ink);font-family:inherit;font-size:15px;width:100%;">
+                  <sc-for list="{{ teamOptions }}" as="o" hint-placeholder-count="1"><option value="{{ o.value }}">{{ o.label }}</option></sc-for>
+                </select>
+              </label>
+              <label style="display:flex;flex-direction:column;gap:4px;min-width:0;">
+                <span style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);">Market</span>
+                <select value="{{ f.market }}" onChange="{{ onMarket }}" style="min-height:44px;padding:0 8px;border:1px solid var(--ink);border-radius:0;background:var(--paper);color:var(--ink);font-family:inherit;font-size:15px;width:100%;">
+                  <sc-for list="{{ marketOptions }}" as="o" hint-placeholder-count="1"><option value="{{ o.value }}">{{ o.label }}</option></sc-for>
+                </select>
+              </label>
+              <button type="button" onClick="{{ onBetsOnly }}" aria-pressed="{{ betsOnlyAttr }}" style="min-height:44px;padding:0 12px;border:1px solid var(--ink);border-radius:0;background:{{ betsOnlyBg }};color:{{ betsOnlyFg }};font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;">Bets &amp; leans only</button>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:4px 12px;flex-wrap:wrap;min-height:44px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);border-bottom:1px solid var(--ink);">
+              <span>{{ pv.countLine }}</span>
+              <sc-if value="{{ pv.filtered }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ onClear }}" style="min-height:44px;padding:0 4px;background:transparent;border:0;color:var(--ink);font:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer;">Clear filters</button></sc-if>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ pv.empty }}" hint-placeholder-val="{{ false }}">
+            <div role="status" style="display:flex;flex-direction:column;gap:8px;padding:24px 0;border-bottom:1px solid var(--rule);">
+              <span style="align-self:flex-start;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--ink);padding:4px 9px;">{{ pv.empty.tag }}</span>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:26px;line-height:1.05;text-transform:uppercase;">{{ pv.empty.title }}</p>
+              <p style="margin:0;font-size:15px;line-height:1.5;color:var(--ink-2);max-width:620px;text-wrap:pretty;">{{ pv.empty.body }}</p>
+            </div>
+          </sc-if>
+
+          <sc-for list="{{ pv.rows }}" as="r" hint-placeholder-count="6">
+            <article aria-label="{{ r.aria }}" style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 14px;padding:14px 0;border-bottom:1px solid var(--rule);align-items:start;opacity:{{ r.opacity }};">
+              <div style="min-width:0;display:flex;flex-direction:column;gap:4px;">
+                <div style="display:flex;align-items:center;gap:8px;min-width:0;">
+                  <span aria-hidden="true" style="width:28px;height:28px;border-radius:50%;flex:none;display:grid;place-items:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:10px;background:{{ r.color }};color:{{ r.fg }};box-shadow:0 0 0 1px var(--rule);">{{ r.team }}</span>
+                  <span style="font-weight:600;font-size:15px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ r.player }}</span>
+                  <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mute);white-space:nowrap;">{{ r.meta }}</span>
+                </div>
+                <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;line-height:1.05;text-transform:uppercase;letter-spacing:.01em;">{{ r.label }}</div>
+                <div style="display:flex;flex-wrap:wrap;gap:2px 14px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-2);">
+                  <span>{{ r.priceLine }}</span><span>proj {{ r.proj }}</span><span>model {{ r.prob }}</span><span>fair {{ r.fair }}</span><span style="font-weight:600;color:var(--ink);">edge {{ r.edge }}</span>
+                </div>
+                <sc-if value="{{ r.stake }}" hint-placeholder-val="{{ false }}"><div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink);">{{ r.stake }}</div></sc-if>
+                <sc-if value="{{ r.goalieNote }}" hint-placeholder-val="{{ false }}"><div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink);font-weight:600;">{{ r.goalieNote }}</div></sc-if>
+                <sc-if value="{{ r.note }}" hint-placeholder-val="{{ false }}"><div style="align-self:flex-start;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mute);border:1px solid var(--rule);padding:2px 6px;">{{ r.note }}</div></sc-if>
+                <sc-if value="{{ r.track.show }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;gap:4px;margin-top:2px;">
+                    <sc-if value="{{ r.track.bar }}" hint-placeholder-val="{{ false }}"><div aria-hidden="true" style="height:4px;background:var(--rule);max-width:260px;"><div style="height:4px;width:{{ r.track.pct }};background:{{ r.track.color }};"></div></div></sc-if>
+                    <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:{{ r.track.textColor }};">{{ r.track.text }}</span>
+                  </div>
                 </sc-if>
               </div>
-            </div>
-          </article>
-        </sc-for>
-      </sc-for>
-    </section>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;">
+                <sc-if value="{{ r.isBet }}" hint-placeholder-val="{{ false }}"><span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.08em;text-transform:uppercase;background:var(--ink);color:var(--paper);padding:4px 8px;white-space:nowrap;">Best bet</span></sc-if>
+                <sc-if value="{{ r.isLean }}" hint-placeholder-val="{{ false }}"><span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.08em;text-transform:uppercase;border:1px dashed var(--ink);padding:3px 8px;white-space:nowrap;">Lean</span></sc-if>
+                <sc-if value="{{ r.isPass }}" hint-placeholder-val="{{ false }}"><span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.08em;text-transform:uppercase;border:1px dashed var(--mute);color:var(--mute);padding:3px 8px;white-space:nowrap;">Pass</span></sc-if>
+              </div>
+            </article>
+          </sc-for>
+          </sc-if>
+        </section>
+      </sc-if>
+    </div>
 
-    <footer style="margin-top:56px;border-top:1px solid #14151a;padding-top:12px;display:flex;justify-content:space-between;align-items:center;gap:8px 16px;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;font-size:13px;color:#6b6e7a;">
+    <footer style="margin-top:56px;border-top:1px solid var(--ink);padding-top:12px;display:flex;justify-content:space-between;align-items:center;gap:8px 16px;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--mute);">
       <span>© 2026 Maverick Hightower</span>
-      <span style="display:flex;gap:0 20px;flex-wrap:wrap;">
-        <a href="https://maverickhightower.com/about.html" style="display:inline-flex;align-items:center;min-height:44px;">How to read this board</a>
-        <a href="https://x.com/mavhightower" style="display:inline-flex;align-items:center;min-height:44px;">@mavhightower</a>
-      </span>
     </footer>
   </div>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;sport&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;nhl&quot;,&quot;epl&quot;,&quot;cbb&quot;],&quot;default&quot;:&quot;nhl&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Preview&quot;,&quot;description&quot;:&quot;Ignored when deployed: the subdomain decides.&quot;},&quot;scenario&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Normal&quot;,&quot;Leans only&quot;,&quot;Empty&quot;],&quot;default&quot;:&quot;Normal&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Preview&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;sport&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;nhl&quot;,&quot;epl&quot;,&quot;cbb&quot;],&quot;default&quot;:&quot;nhl&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Preview&quot;,&quot;description&quot;:&quot;Ignored when deployed: the subdomain decides.&quot;},&quot;scenario&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Normal&quot;,&quot;Leans only&quot;,&quot;Empty&quot;,&quot;Props · live sample&quot;,&quot;Props · no lines&quot;,&quot;Props · abstain&quot;],&quot;default&quot;:&quot;Props · live sample&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Preview&quot;,&quot;description&quot;:&quot;Off the real domain the props sample is the default; on the domain, Normal.&quot;},&quot;live&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Auto&quot;,&quot;ESPN&quot;,&quot;Fixture&quot;,&quot;Fixture · ESPN down&quot;,&quot;Off&quot;],&quot;default&quot;:&quot;Auto&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Preview&quot;,&quot;description&quot;:&quot;Auto: ESPN on the real domain, the sample feed elsewhere.&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Auto&quot;,&quot;Light&quot;,&quot;Dark&quot;],&quot;default&quot;:&quot;Auto&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Preview&quot;}}">
 class Component extends DCLogic {
-  state = { vm: null, feedNotice: null, loadedFor: null, sportKey: null, deployed: false };
+  state = { vm: null, data: null, feedNotice: null, loadedFor: null, sportKey: null, deployed: false,
+    tab: "tonight", propView: "model", expanded: {}, allOpen: null, wide: true, f: { q: "", game: "", team: "", market: "", betsOnly: false },
+    live: { mode: "off", data: null, at: null, error: null, nextAt: null }, boxes: {}, now: Date.now() };
+  boxPollers = {};
+  onSite() { return /(^|\.)maverickhightower\.com$/.test(location.hostname); }
   async load() {
-    const want = (this.props.sport || "nhl") + "|" + (this.props.scenario || "") + "|" + location.search;
+    const want = [this.props.sport || "nhl", this.props.scenario || "", this.props.live || "", location.search].join("|");
     if (this.state.loadedFor === want) return;
     this.setState({ loadedFor: want });
-    const S = await import("./lib/sports.js");
+    const [S, F, L] = await Promise.all([import("./lib/sports.js"), import("./lib/format.js"), import("./lib/live.js")]);
+    this.S = S; this.F = F; this.L = L;
     const { sport, deployed } = await S.detectSport(this.props.sport || "nhl");
+    if (typeof document !== "undefined") { document.documentElement.setAttribute("data-sport", sport); { const p = getComputedStyle(document.documentElement).getPropertyValue("--paper").trim(), m = document.querySelector('meta[name="theme-color"]'); if (m && p) m.setAttribute("content", p); } }
     const cfg = S.SPORTS[sport];
     const q = new URLSearchParams(location.search);
     const date = q.get("date");
     const base = deployed ? "./data/" : cfg.sample.replace(/board\.json$/, "");
     let url = deployed ? "./data/board.json" : cfg.sample;
-    if (this.props.scenario === "Leans only" || this.props.scenario === "Empty") url = cfg.sample.replace("board.json", this.props.scenario === "Leans only" ? "board_leans.json" : "board_empty.json");
-    let data = null, feedNotice = null, archived = null;
+    // Off the real domain the preview opens on the props fixture; on the domain, the live board.
+    // On the real domain the board is ALWAYS the real one. The preview control
+    // gives `scenario` a default ("Props · live sample"), so `props.scenario ||`
+    // never fell through and nhl.maverickhightower.com served the sample board
+    // on 2026-10-07 (the first deploy of PR #304).
+    const scenario = this.onSite() ? "Normal" : this.props.scenario || "Props · live sample";
+    if (scenario === "Leans only" || scenario === "Empty") url = cfg.sample.replace("board.json", scenario === "Leans only" ? "board_leans.json" : "board_empty.json");
+    const FIX = { "Props · live sample": "./data/sample/board_props.json", "Props · no lines": "./data/sample/board_props_no_lines.json", "Props · abstain": "./data/sample/board_props_abstain.json" };
+    const fixture = sport === "nhl" && FIX[scenario];
+    if (fixture) url = fixture;
+    let data = null, feedNotice = fixture ? "Sample data, not tonight's board." : null, archived = null;
     if (date) {
       try {
         const idx = await fetch(`${base}history/index.json`, { cache: "no-store" }).then((r) => r.json());
@@ -236,27 +543,280 @@ class Component extends DCLogic {
     }
     if (!data) {
       try { const r = await fetch(url, { cache: "no-store" }); if (!r.ok) throw new Error(`HTTP ${r.status}`); data = await r.json(); }
-      catch (e) { data = await fetch(cfg.sample).then((r) => r.json()); feedNotice = "Live feed unreachable. This is a sample board, not tonight's projections."; }
+      catch (e) { data = await fetch(cfg.sample).then((r) => r.json()); feedNotice = "Live feed unreachable · showing sample data."; }
     }
     if (archived) data.__archived = archived;
     const vm = S.ADAPTERS[sport].board(data);
-    vm.otherSports = S.ORDER.filter((k) => k !== sport).map((k, i) => ({ name: S.SPORTS[k].name, href: S.SPORTS[k].host, style: `display:inline-flex;align-items:center;min-height:44px;${i === 0 ? "margin-left:6px;padding-left:18px;border-left:1px solid #d6d3cc;" : ""}` }));
-    this.setState({ vm, feedNotice, sportKey: sport, deployed });
+    vm.otherSports = S.ORDER.filter((k) => k !== sport).map((k, i) => ({ name: S.SPORTS[k].name, href: S.SPORTS[k].host, style: `display:inline-flex;align-items:center;min-height:44px;${i === 0 ? "margin-left:6px;padding-left:18px;border-left:1px solid var(--rule);" : ""}` }));
+    const pv = S.ADAPTERS[sport].props ? S.ADAPTERS[sport].props(data) : null;
+    this.setState({ vm, data, pv, feedNotice, sportKey: sport, deployed, tab: pv && /^#(props|drought)$/.test(location.hash) ? "props" : "tonight", propView: location.hash === "#drought" ? "drought" : "model" }, () => this.startLive());
   }
-  componentDidMount() { this.load(); }
+  startLive() {
+    const L = this.L, { data, sportKey } = this.state, choice = this.props.live || "Auto";
+    this.stopLive();
+    // On the real domain live scores always come from ESPN: a preview setting
+    // ("Fixture", "Off") must never serve sample scores on the live site, the
+    // same rule #305 applies to the board's data.
+    let mode = this.onSite() ? "espn" : choice === "Off" ? "off" : choice === "ESPN" ? "espn" : choice === "Fixture" ? "fixture" : choice === "Fixture · ESPN down" ? "down" : "fixture";
+    if (!L.LIVE_SPORTS[sportKey] || !data || data.__archived || !(data.games || []).length) mode = "off";
+    const blank = { mode, data: null, at: null, error: null, nextAt: null };
+    if (mode === "off") { this.setState({ live: blank, boxes: {} }); return; }
+    const ymd = (data.boardDate || data.slateDate || this.liveGames()[0].startUtc.slice(0, 10)).replace(/-/g, "");
+    const missing = "./data/sample/espn_unreachable.json";
+    // NHL reads one league date; EPL a window of dates; CBB its slate, Division I only.
+    const espnUrl = sportKey === "nhl" ? L.ESPN.scoreboard(ymd) : L.scoreboardUrlFor(sportKey, this.liveGames().map((g) => g.startUtc));
+    const url = mode === "espn" ? espnUrl : mode === "down" ? missing : "./data/sample/espn_scoreboard.json";
+    const parse = sportKey === "nhl" ? L.parseScoreboard : (j) => L.parseScoreboardFor(sportKey, j);
+    this.summaryUrl = (id) => (mode === "espn" ? L.ESPN.summary(id) : mode === "down" ? missing : `./data/sample/espn_summary_${id}.json`);
+    this.setState({ live: blank, boxes: {} });
+    this.poller = new L.Poller({ fetcher: () => L.getJSON(url).then(parse), delayFor: (ev) => L.scoreboardDelay(ev),
+      onChange: (s) => this.setState({ live: { mode, ...s } }, () => this.syncBoxes()) }).start();
+  }
+  stopLive() {
+    if (this.poller) this.poller.stop();
+    this.poller = null;
+    for (const id of Object.keys(this.boxPollers)) this.boxPollers[id].stop();
+    this.boxPollers = {};
+  }
+  // Every sport's games as {id, startUtc, away, home}: EPL dates by kickoff, CBB by tip.
+  liveGames() { return ((this.state.data || {}).games || []).map((g) => ({ id: g.id, startUtc: g.startUtc || g.kickoff || g.tip, away: g.away, home: g.home })); }
+  isOpen(id) { const s = this.state; return s.expanded[id] ?? s.allOpen ?? s.wide; }
+  // Box scores load only for games someone is looking at: an open live card on
+  // Tonight, or a live game holding a best bet or lean on Props.
+  syncBoxes() {
+    const L = this.L, { live, data, tab, pv } = this.state;
+    if (!L || !data) return;
+    // Box scores feed the NHL prop and drought trackers only.
+    if (this.state.sportKey !== "nhl") { for (const id of Object.keys(this.boxPollers)) this.boxPollers[id].stop(); this.boxPollers = {}; return; }
+    const { byGame } = L.matchEvents(live.data || [], data.games || []);
+    const want = new Set();
+    if (tab === "tonight") for (const [gid, e] of Object.entries(byGame)) { if (e.state !== "pre" && this.isOpen(gid)) want.add(e.id); }
+    if (tab === "props" && this.state.propView === "drought") for (const g of data.games || []) { const e = byGame[g.id]; if (Array.isArray(g.drought) && g.drought.length && e && e.state !== "pre") want.add(e.id); }
+    if (tab === "props" && this.state.propView === "model" && pv) for (const r of pv.rows) { const e = byGame[r.gameId]; if (r.kind !== "pass" && e && e.state !== "pre") want.add(e.id); }
+    for (const id of want) if (!this.boxPollers[id]) {
+      const stateOf = () => { const e = (this.state.live.data || []).find((x) => x.id === id); return e ? e.state : "post"; };
+      this.boxPollers[id] = new L.Poller({ fetcher: () => L.getJSON(this.summaryUrl(id)).then(L.parseSummary), delayFor: () => (stateOf() === "in" ? 25e3 : null),
+        onChange: (s) => this.setState((st) => ({ boxes: { ...st.boxes, [id]: s } })) }).start();
+    }
+    for (const id of Object.keys(this.boxPollers)) if (!want.has(id)) { this.boxPollers[id].stop(); delete this.boxPollers[id]; }
+  }
+  setTab(tab) {
+    this.setState({ tab }, () => this.syncBoxes());
+    try { history.replaceState(null, "", tab === "props" ? "#props" : location.pathname + location.search); } catch (_) {}
+    const el = document.getElementById("main");
+    if (el) { const y = el.getBoundingClientRect().top + window.scrollY - 52; if (window.scrollY > y) window.scrollTo({ top: y }); }
+  }
+  setView(propView) {
+    this.setState({ propView }, () => this.syncBoxes());
+    try { history.replaceState(null, "", propView === "drought" ? "#drought" : "#props"); } catch (_) {}
+  }
+  setF(patch) { this.setState((s) => ({ f: { ...s.f, ...patch } }), () => this.syncBoxes()); }
+  toggle(id) { const cur = this.isOpen(id); this.setState((s) => ({ expanded: { ...s.expanded, [id]: !cur } }), () => this.syncBoxes()); }
+  jumpTo(id) {
+    this.setState((s) => ({ tab: "tonight", expanded: { ...s.expanded, [id]: true } }), () => {
+      this.syncBoxes();
+      requestAnimationFrame(() => {
+        const el = document.getElementById(`g-${id}`);
+        const smooth = !matchMedia("(prefers-reduced-motion: reduce)").matches;
+        if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 56, behavior: smooth ? "smooth" : "auto" });
+      });
+    });
+  }
+  componentDidMount() {
+    this.mq = matchMedia("(min-width: 760px)");
+    this.onMq = () => this.setState({ wide: this.mq.matches });
+    this.mq.addEventListener("change", this.onMq);
+    this.setState({ wide: this.mq.matches });
+    this.ticker = setInterval(() => { const l = this.state.live; if (!document.hidden && (l.at || l.error)) this.setState({ now: Date.now() }); }, 1000);
+    this.load();
+  }
   componentDidUpdate() { this.load(); }
+  componentWillUnmount() { this.stopLive(); clearInterval(this.ticker); if (this.mq) this.mq.removeEventListener("change", this.onMq); }
   renderVals() {
     const vm = this.state.vm;
-    const links = { board: "Board.dc.html", results: "Results.dc.html", archive: "Archive.dc.html", graphic: "Graphic.dc.html" };
-    if (!vm) return { links, groups: [], strip: [], otherSports: [], title1: "Tonight's", title2: "Board." };
-    const groups = vm.groups.map((d) => ({ ...d, games: d.games.map((g) => ({ ...g, hasBar: g.bar.length > 0,
-      ariaLabel: `${g.sides[0].name} at ${g.sides[1].name}, ${g.time}`,
-      barAria: g.sides.map((s) => `${s.name} ${s.win || ""}`.trim()).join(", "),
-      cells: g.cells.map((c) => ({ ...c, rows: c.rows.map((r) => ({ ...r, weight: r.bold ? 600 : 400 })) })),
-      pick: { ...g.pick, isBet: g.pick.kind === "bet", isLean: g.pick.kind === "lean", isNone: g.pick.kind === "none" } })) }));
-    return { ...vm, links, groups, sportLong: vm.sport.longName, title1: vm.title[0], title2: vm.title[1],
-      hasNotice: !!vm.notice, hasFeedNotice: !!this.state.feedNotice, feedNotice: this.state.feedNotice || "",
-      isArchived: !!vm.archived, archivedLabel: vm.archived ? `Board for ${vm.archived.date}${vm.archived.slot ? ` · ${vm.archived.slot} card` : ""}, as published` : "" };
+    const links = { board: "Board.dc.html", results: "Results.dc.html", archive: "Archive.dc.html", graphic: "Graphic.dc.html", season: "Season.dc.html" };
+    const themeAttr = { Light: "light", Dark: "dark" }[this.props.theme] || "auto";
+    const sk = this.state.sportKey || ((/^(nhl|epl|cbb)\./.exec(location.hostname) || [])[1]) || this.props.sport || "nhl";
+    const tabLink = (label, href) => ({ label, href, current: undefined, shadow: "none", color: "var(--ink)", badge: "" });
+    const tabsFor = (tab, pv) => [
+      { label: sk === "epl" ? "This week" : "Tonight", href: links.board, onClick: (e) => { e.preventDefault(); this.setTab("tonight"); }, current: tab === "tonight" ? "page" : undefined, shadow: tab === "tonight" ? "inset 0 -3px 0 var(--ink)" : "none", color: "var(--ink)", badge: "" },
+      ...(pv ? [{ label: "Props", href: `${links.board}#props`, onClick: (e) => { e.preventDefault(); this.setTab("props"); }, current: tab === "props" ? "page" : undefined, shadow: tab === "props" ? "inset 0 -3px 0 var(--ink)" : "none", color: "var(--ink)", badge: pv.status === "ok" && pv.counts.bets + pv.counts.leans ? String(pv.counts.bets + pv.counts.leans) : "" }] : []),
+      tabLink("Results", links.results), ...(sk === "nhl" ? [tabLink("Season", links.season)] : []), tabLink("Archive", links.archive),
+    ];
+    if (!vm) return { links, themeAttr, tabs: tabsFor("tonight", null), groups: [], strip: [], otherSports: [], scoreCards: [], showScores: false, isTonight: true, isProps: false, title1: "Tonight's", title2: "Board.", pv: { rows: [] }, propViews: [], dv: { groups: [] }, isModelView: true, isDroughtView: false };
+    const L = this.L, F = this.F, S = this.state, live = S.live, now = S.now, data = S.data, T = data.teams || {}, pv = S.pv, nhl = sk === "nhl", epl = sk === "epl";
+    const start = (g) => g.startUtc || g.kickoff || g.tip, SL = (e) => L.stateLabelFor(sk, e);
+    const [p1, p2] = epl ? ["home", "away"] : ["away", "home"];
+    const raw = Object.fromEntries((data.games || []).map((g) => [g.id, g]));
+    const M = live.data ? L.matchEventsFor(sk, live.data, this.liveGames(), T) : { byGame: {}, unmatched: [] };
+    const tone = { win: "var(--win)", lose: "var(--alert)", flat: "var(--ink)", mute: "var(--mute)" };
+
+    // Cooper's drought rule (board.json games[].drought): an unstaked list he picks from. Never styled as a pick, never given units.
+    const DROUGHT_UNITS = { points: ["point", "points", "1+ point", "a point"], goals: ["goal", "goals", "Anytime goal", "a goal"], assists: ["assist", "assists", "1+ assist", "an assist"] };
+    const DROUGHT_NOTE = data.droughtNote || "70+ points, 30+ goals or 30+ assists last season, and 5+ straight games without one in that category.";
+    const track = (r) => {
+      const e = M.byGame[r.gameId];
+      if (!e || e.state === "pre") return { show: false };
+      const msg = (text) => ({ show: true, bar: false, text, textColor: "var(--mute)" });
+      if (!L.PROP_STATS[r.market]) return msg("Live stat unavailable for this market");
+      const b = S.boxes[e.id];
+      if (!b || (!b.data && !b.error)) return { show: false };
+      if (!b.data) return msg("Live stat unavailable · retrying");
+      const st = L.liveStat(r, b.data);
+      if (!st.ok) return msg(st.why);
+      const p = L.propProgress(r, st.value, e), v = st.value;
+      const text = p.fin ? `Finished with ${v} ${p.mark} · unofficial`
+        : r.side === "under" ? `${v} ${v === 1 ? r.unitOne : r.unitMany} · under holds below ${p.target} · ${p.period}`
+        : v >= p.target ? `${v} ${v === 1 ? r.unitOne : r.unitMany} · cleared · ${p.period}`
+        : `${v} of ${p.target} ${r.unitMany} · ${p.period}`;
+      return { show: true, bar: true, pct: `${p.pct}%`, color: tone[p.tone] === "var(--ink)" ? "var(--ink)" : tone[p.tone], text, textColor: p.tone === "lose" ? "var(--alert)" : p.tone === "win" ? "var(--win)" : "var(--ink)" };
+    };
+    const deco = (r) => ({ ...r, stake: r.kind === "lean" ? "" : r.stake, track: track(r), opacity: r.unconfirmed ? "0.6" : "1", isBet: r.kind === "bet" && !r.unconfirmed, isLean: r.kind === "lean" && !r.unconfirmed, isPass: r.kind === "pass" || r.unconfirmed,
+      aria: `${r.player}, ${r.label}, ${r.kindLabel}` });
+    const drRow = (x, gid) => {
+      const u = DROUGHT_UNITS[x.market] || [x.market, x.market, x.market, x.market], line = typeof x.line === "number" ? x.line : 0.5, t = T[x.team] || {}, priced = typeof x.price === "number";
+      return { player: x.player, team: x.team || "", color: t.color || "var(--ink)", fg: t.fg || "var(--paper)", streak: x.drought != null ? String(x.drought) : "—", category: u[2],
+        history: `${x.lastSeason ?? "—"} ${u[1]} last season · ${x.drought} straight games without ${u[3]}`,
+        price: priced ? F.fmtOdds(x.price) : "—", book: priced ? x.book || "" : "price not posted", priceColor: priced ? "var(--ink)" : "var(--mute)", juice: !!x.heavyJuice,
+        track: track({ ...x, gameId: gid, side: "over", line, unitOne: u[0], unitMany: u[1] }),
+        aria: `${x.player}, ${u[2]}, ${x.drought} straight games without ${u[3]}, ${priced ? F.fmtOdds(x.price) : "price not posted"}${x.heavyJuice ? ", heavy juice" : ""}` };
+    };
+    const byGameProps = {};
+    for (const r of pv ? pv.rows : []) (byGameProps[r.gameId] = byGameProps[r.gameId] || []).push(r);
+
+    // NHL Total cell, re-laid out on the page (sports.js is shared and stays as is):
+    // the two-part labels wrapped and pushed values onto their own lines, and
+    // `open` is always null on NHL boards (SCHEMA.md), so it read "— / 6.0".
+    // Sparkline notes: the arrow and the move only; the line itself shows the refreshes.
+    // CBB Current cells carried "line · price" in one value and wrapped; the price gets its own row.
+    const totalCell = (c0, r) => {
+      const c = c0.spark ? { ...c0, spark: { ...c0.spark, note: c0.spark.note.replace(/ over \d+ refreshes$/, "") } } : c0;
+      if (sk === "cbb" && (c.title === "Spread" || c.title === "Total")) {
+        const rows = [];
+        for (const x of c.rows) {
+          const m = x.label === "Current" && / · /.test(x.value) ? x.value.split(" · ") : null;
+          if (m) rows.push({ ...x, value: m[0] }, { label: c.title === "Total" ? "Over" : "Price", value: m.slice(1).join(" · ").replace(/^O /, ""), bold: false });
+          else rows.push(x);
+        }
+        return { ...c, rows };
+      }
+      if (!nhl || c.title !== "Total" || !r.total) return c;
+      const t = r.total, n = (x) => (typeof x === "number" ? x.toFixed(1) : "—"), o = (x) => (typeof x === "number" ? F.fmtOdds(x) : "—");
+      const line = typeof t.open === "number" && t.open !== t.current ? `${n(t.open)} → ${n(t.current)}` : n(t.current);
+      const proj = `${n(t.proj)}${typeof t.overProb === "number" ? ` · O ${Math.round(t.overProb * 100)}%` : ""}`;
+      return { ...c, rows: [{ label: "Line", value: line, bold: false }, { label: "Over", value: o(t.overPrice), bold: false }, { label: "Under", value: o(t.underPrice), bold: false }, { label: "Proj", value: proj, bold: true }] };
+    };
+    const splitNotice = (t) => { const m = /^(.+?[.!?])\s+(\S[\s\S]*)$/.exec(t || ""); return m ? { noticeHead: m[1], noticeRest: m[2], noticeShort: false } : { noticeHead: t || "", noticeRest: "", noticeShort: !!t }; };
+    const shortNone = (label) => /^Not priced/.test(label) ? "Not priced" : /^Exhibition|^Not a regular/.test(label) ? "Abstains" : "No play";
+    const groups = vm.groups.map((d) => ({ ...d, games: d.games.map((g) => {
+      const r = raw[g.id] || { away: {}, home: {} }, e = M.byGame[g.id], open = this.isOpen(g.id), a = r.away.abbr, h = r.home.abbr;
+      const st = e ? SL(e) : null, scored = !!e && e.state !== "pre" && e.away.score != null && e.home.score != null;
+      const ls = e && r.pick && g.pick.kind !== "none" ? L.pickStatusFor(sk, { kind: "bet", ...r.pick }, e) : null;
+      const liveV = ls ? { has: true, word: ls.word, detail: ls.detail, color: tone[ls.tone] } : { has: false };
+      const kindShort = g.pick.kind === "bet" ? "Best bet" : g.pick.kind === "lean" ? "Lean" : "";
+      const b = e ? S.boxes[e.id] : null, bt = b && b.data ? b.data.teams : null;
+      const sog = (x) => (x ? x.shotsTotal ?? x.shotsOnGoal ?? x.shots : null);
+      const shots = bt && sog(bt[a]) != null && sog(bt[h]) != null ? `Shots on goal ${a} ${sog(bt[a])} – ${sog(bt[h])} ${h}` : "";
+      const gp = byGameProps[g.id] || [], shown = gp.filter((x) => x.kind !== "pass");
+      const dr = (Array.isArray(r.drought) ? r.drought : []).map((x) => drRow(x, g.id));
+      return { ...g, hasBar: g.bar.length > 0, anchor: `g-${g.id}`, panelId: `p-${g.id}`, expanded: open, expandedAttr: open ? "true" : "false", onToggle: () => this.toggle(g.id),
+        ariaLabel: `${g.sides[0].name} at ${g.sides[1].name}, ${g.time}`,
+        barAria: g.sides.map((s) => `${s.name} ${s.win || ""}`.trim()).join(", "),
+        cells: g.cells.map((c) => totalCell(c, r)).map((c) => ({ ...c, rows: c.rows.map((x) => ({ ...x, weight: x.bold ? 600 : 400 })) })),
+        pick: { ...g.pick, isBet: g.pick.kind === "bet", isLean: g.pick.kind === "lean", isNone: g.pick.kind === "none", label: g.pick.kind === "none" ? shortNone(g.pick.label) : g.pick.label, extra: g.pick.kind === "lean" ? "" : g.pick.extra },
+        live: liveV,
+        sum: { top: st && st.top ? st.top : g.time, sub: st ? (st.tone === "in" ? "Live" : "") : g.tv, subColor: st && st.tone === "in" ? "var(--alert)" : "var(--mute)",
+          away: r[p1].abbr, home: r[p2].abbr, awayColor: (T[r[p1].abbr] || {}).color || "var(--ink)", homeColor: (T[r[p2].abbr] || {}).color || "var(--ink)",
+          awayScore: scored ? String(e[p1].score) : "", homeScore: scored ? String(e[p2].score) : "", sep: scored ? "–" : epl ? "v" : "@",
+          awayWeight: scored && e[p1].score > e[p2].score ? 700 : 400, homeWeight: scored && e[p2].score > e[p1].score ? 700 : 400,
+          tag: g.pick.kind === "none" ? shortNone(g.pick.label) : g.pick.label, tagColor: g.pick.kind === "none" ? "var(--mute)" : "var(--ink)",
+          drought: dr.length ? `Drought rule ×${dr.length}` : "",
+          kind: liveV.has ? [kindShort, liveV.word].filter(Boolean).join(" · ") : kindShort, kindColor: liveV.has ? liveV.color : "var(--mute)", chev: open ? "−" : "+" },
+        box: scored || (e && e.state !== "pre") ? { show: true, title: st.tone === "in" ? `Live · ${st.top}` : st.top, titleColor: st.tone === "in" ? "var(--alert)" : "var(--ink)",
+          score: `${r[p1].abbr} ${scored ? e[p1].score : "–"} – ${scored ? e[p2].score : "–"} ${r[p2].abbr}`, shots,
+          stamp: b && b.data ? `Box score ${F.fmtAgo(now - b.at)}${b.error ? " · retrying" : ""}` : b && b.error ? "Box score unavailable · retrying" : "",
+          pick: ls ? `Model pick ${g.pick.label} · ${ls.word} · ${ls.detail}` : "", pickColor: liveV.color || "var(--ink)" } : { show: false },
+        drought: { show: dr.length > 0, rows: dr, note: DROUGHT_NOTE },
+        props: { show: !!pv, rows: shown.map(deco), isEmpty: !shown.length, hasAll: !!pv && pv.status === "ok" && gp.length > 0, allLabel: `All ${gp.length} props on this game →`,
+          empty: !pv ? "" : pv.status !== "ok" ? pv.empty.title : gp.length ? `No props cleared the bar on this game · ${gp.length} priced, all passes` : "No props priced on this game",
+          onAll: (ev) => { ev.preventDefault(); this.setState({ f: { q: "", game: g.id, team: "", market: "", betsOnly: false } }); this.setTab("props"); } },
+      };
+    }) }));
+
+    // Scoreboard strip: every board game in start order, then every ESPN game that matched none.
+    const cardRows = (r, e, scored, code) => [p1, p2].map((k, i) => ({ abbr: r[k][code], score: scored ? String(e[k].score) : "", weight: scored && e[k].score > e[[p1, p2][1 - i]].score ? 700 : 400 }));
+    const scoreCards = (data.games || []).slice().sort((x, y) => Date.parse(start(x)) - Date.parse(start(y))).map((r) => {
+      const e = M.byGame[r.id], st = e ? SL(e) : null, scored = !!e && e.state !== "pre" && e.away.score != null;
+      const stateTxt = st && st.top ? st.top : F.fmtTime(start(r));
+      return { state: stateTxt, stateColor: st && st.tone === "in" ? "var(--alert)" : "var(--mute)", topColor: st && st.tone === "in" ? "var(--alert)" : st && st.tone === "post" ? "var(--ink)" : "var(--rule)",
+        rows: cardRows(r, e, scored, "abbr"),
+        unmatched: false, why: "", onClick: () => this.jumpTo(r.id), disabled: undefined, cursor: "pointer",
+        aria: `${r[p1].abbr} ${epl ? "v" : "at"} ${r[p2].abbr}, ${scored ? `${e.away.score} to ${e.home.score}, ` : ""}${stateTxt}. Open game.` };
+    }).concat(M.unmatched.map((u) => {
+      const st = SL(u), scored = u.state !== "pre" && u.away.score != null;
+      return { state: st.top || F.fmtTime(u.startUtc), stateColor: "var(--alert)", topColor: "var(--alert)", unmatched: true, why: u.why, onClick: undefined, disabled: "true", cursor: "default",
+        rows: cardRows(u, u, scored, "espn").map((x) => ({ ...x, weight: 400 })),
+        aria: `ESPN game ${u.away.espn} at ${u.home.espn}, not matched to the board: ${u.why}` };
+    }));
+
+    const sample = live.mode === "fixture" || live.mode === "down" ? "Sample scores · " : "";
+    let liveLine = "", liveColor = "var(--mute)", liveStamp = "";
+    if (live.mode === "off") { liveLine = data.__archived ? "Archived board · live scores off" : "Live scores off"; liveStamp = "off"; }
+    else if (live.error) { liveLine = `${sample}Live scores unavailable — retrying in ${F.fmtIn((live.nextAt || now) - now)}${live.at ? ` · last update ${F.fmtAgo(now - live.at)}` : ""}`; liveColor = "var(--alert)"; liveStamp = live.at ? `${F.fmtAgo(now - live.at)} · retrying` : "unavailable"; }
+    else if (!live.at) { liveLine = `${sample}Connecting to live scores…`; liveStamp = "connecting"; }
+    else {
+      const ev = live.data || [], anyIn = ev.some((x) => x.state === "in"), ago = F.fmtAgo(now - live.at), frozen = anyIn && now - live.at > 75e3;
+      liveLine = sample + (!ev.length ? `No games on the live feed for this date · checked ${ago}` : anyIn ? `Live · updated ${ago}${frozen ? " · feed may be frozen" : ""}` : live.nextAt ? `Updated ${ago} · next check in ${F.fmtIn(live.nextAt - now)}` : `All games final · updated ${ago}`);
+      liveColor = frozen ? "var(--alert)" : anyIn ? "var(--ink)" : "var(--mute)";
+      liveStamp = `updated ${ago}`;
+    }
+
+    // Props tab.
+    const f = S.f, nq = L.norm(f.q);
+    const all = pv ? pv.rows : [];
+    const rows = all.filter((r) => (!f.game || r.gameId === f.game) && (!f.team || r.team === f.team) && (!f.market || r.market === f.market) && (!f.betsOnly || r.kind !== "pass") && (!nq || L.norm(r.player).includes(nq)));
+    const filtered = !!(f.q || f.game || f.team || f.market || f.betsOnly);
+    const cleared = pv ? pv.counts.bets + pv.counts.leans : 0;
+    let empty = pv && pv.empty ? pv.empty : null;
+    if (!empty && pv && !rows.length) empty = f.betsOnly && !cleared
+      ? { tag: "Nothing cleared", title: "No props cleared the bar tonight", body: "Every priced prop is a pass. Turn off “Bets & leans only” to see them all." }
+      : { tag: "No match", title: "No props match these filters", body: "Clear the filters to see every priced prop." };
+    const uniq = (xs) => [...new Map(xs).entries()];
+    // Drought view: the whole night's list, by game.
+    const dGames = (data.games || []).slice().sort((x, y) => Date.parse(x.startUtc) - Date.parse(y.startUtc));
+    const dHasField = dGames.some((g) => Array.isArray(g.drought));
+    const dRegular = data.phase !== "preseason" && dGames.some((g) => g.gameType == null || g.gameType === 2);
+    const dGroups = dGames.filter((g) => Array.isArray(g.drought) && g.drought.length).map((g) => {
+      const e = M.byGame[g.id], st = e ? SL(e) : null, scored = !!e && e.state !== "pre" && e.away.score != null;
+      return { title: `${g.away.abbr} @ ${g.home.abbr}`, subColor: st && st.tone === "in" ? "var(--alert)" : "var(--mute)",
+        sub: [st && st.top ? st.top : F.fmtTime(g.startUtc), scored ? `${e.away.score}–${e.home.score}` : "", `${g.drought.length} listed`].filter(Boolean).join(" · "),
+        rows: g.drought.map((x) => drRow(x, g.id)) };
+    });
+    const dCount = dGroups.reduce((n, x) => n + x.rows.length, 0);
+    const dEmpty = !dRegular ? { tag: "Preseason", title: "Drought rule starts with the regular season", body: "The list needs last season's totals and this season's games; exhibition games count for neither." }
+      : !dHasField ? { tag: "Not on this board", title: "No drought list on this board", body: "This board was built before the drought list was published." }
+      : !dCount ? { tag: "Nobody tonight", title: "No player meets the drought rule tonight", body: "The rule needs 70+ points, 30+ goals or 30+ assists last season and 5+ straight games without one in that category." } : null;
+    const isDrought = S.propView === "drought";
+    const viewBtn = (key, label) => ({ label, pressed: S.propView === key ? "true" : "false", bg: S.propView === key ? "var(--ink)" : "transparent", fg: S.propView === key ? "var(--paper)" : "var(--ink)", onClick: () => this.setView(key) });
+    const view = pv ? { ...pv, rows: rows.map(deco), empty, filtered, hasRows: pv.status === "ok" && all.length > 0,
+      countLine: `${rows.length} of ${all.length}${cleared ? "" : " · none cleared the bar"}`, disclosure: "Picks are recorded so they can be graded, not because they are known winners.",
+      summary: pv.status === "ok" ? pv.summary : "" } : { rows: [], hasRows: false };
+    return { ...vm, links, themeAttr, groups, sportLong: vm.sport.longName, title1: vm.title[0], title2: vm.title[1],
+      ...splitNotice(vm.notice), hasNotice: !!vm.notice, hasFeedNotice: !!S.feedNotice, feedNotice: S.feedNotice || "",
+      isArchived: !!vm.archived, archivedLabel: vm.archived ? `Board for ${vm.archived.date}${vm.archived.slot ? ` · ${vm.archived.slot} card` : ""}, as published` : "",
+      tabs: tabsFor(S.tab, pv), isTonight: S.tab === "tonight" || !pv, isProps: S.tab === "props" && !!pv,
+      showScores: !!L.LIVE_SPORTS[sk], scoreCards, noScoreCards: !scoreCards.length, liveLine, liveColor, liveStamp,
+      toggleAllLabel: S.allOpen ?? S.wide ? "Collapse all" : "Expand all",
+      onToggleAll: () => { const next = !(S.allOpen ?? S.wide); this.setState({ allOpen: next, expanded: {} }, () => this.syncBoxes()); },
+      pv: view, f, isModelView: !isDrought, isDroughtView: isDrought,
+      propViews: [viewBtn("model", pv && pv.status === "ok" ? `Model props · ${pv.counts.total}` : "Model props"), viewBtn("drought", `Drought rule · ${dCount}`)],
+      dv: { groups: dGroups, empty: dEmpty, note: DROUGHT_NOTE }, headSummary: isDrought ? (dCount ? `${dCount} player${dCount === 1 ? "" : "s"} · ${dGroups.length} game${dGroups.length === 1 ? "" : "s"}` : "") : view.summary || "",
+      gameOptions: [{ value: "", label: "All games" }, ...(data.games || []).filter((g) => byGameProps[g.id]).map((g) => ({ value: g.id, label: `${g.away.abbr} @ ${g.home.abbr} · ${F.fmtTime(g.startUtc)}` }))],
+      teamOptions: [{ value: "", label: "All teams" }, ...uniq(all.map((r) => [r.team, r.teamName])).sort((x, y) => x[1].localeCompare(y[1])).map(([value, label]) => ({ value, label }))],
+      marketOptions: [{ value: "", label: "All markets" }, ...uniq(all.map((r) => [r.market, r.marketTitle])).map(([value, label]) => ({ value, label }))],
+      onQ: (e) => this.setF({ q: e.target.value }), onGame: (e) => this.setF({ game: e.target.value }), onTeam: (e) => this.setF({ team: e.target.value }), onMarket: (e) => this.setF({ market: e.target.value }),
+      onBetsOnly: () => this.setF({ betsOnly: !f.betsOnly }), onClear: () => this.setF({ q: "", game: "", team: "", market: "", betsOnly: false }),
+      betsOnlyAttr: f.betsOnly ? "true" : "false", betsOnlyBg: f.betsOnly ? "var(--ink)" : "transparent", betsOnlyFg: f.betsOnly ? "var(--paper)" : "var(--ink)" };
   }
 }
 </script>

@@ -14,17 +14,32 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    html, body { margin: 0; padding: 0; background: #e6e3dc; color: #14151a; font-family: "IBM Plex Sans", Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+    /* One look per site: NHL dark, EPL gray, CBB white. EPL and CBB darken with the phone's dark mode. */
+    :root, html[data-sport="nhl"] { color-scheme: dark; --paper:#14151a; --ink:#f1efe9; --ink-2:#d2d0ca; --mute:#a3a6b1; --mute-2:#80838e; --rule:#3a3d49; --rule-2:#262832; --on-ink:#3a3d49; --alert:#f08a72; --on-alert:#14151a; --win:#5cc196; --on-win:#14151a; --desk:#0d0e12; }
+    html[data-sport="epl"], html[data-sport="epl"] [data-theme="light"] { color-scheme: light; --paper:#d9dade; --ink:#14151a; --ink-2:#2a2d36; --mute:#50535e; --mute-2:#767984; --rule:#b4b6bd; --rule-2:#c6c8ce; --on-ink:#c6c8ce; --alert:#9e2c19; --on-alert:#f4f4f6; --win:#22664a; --on-win:#f4f4f6; --desk:#c9cbd0; }
+    html[data-sport="cbb"], html[data-sport="cbb"] [data-theme="light"] { color-scheme: light; --paper:#ffffff; --ink:#14151a; --ink-2:#2a2d3a; --mute:#62656f; --mute-2:#9a9ca6; --rule:#dddbd6; --rule-2:#ecebe7; --on-ink:#d6d3cc; --alert:#b0341f; --on-alert:#ffffff; --win:#2c7a5a; --on-win:#ffffff; --desk:#eeede9; }
+    @media (prefers-color-scheme: dark) { html[data-sport="epl"] { color-scheme: dark; --paper:#2a2c32; --ink:#ecebe7; --ink-2:#cfcec9; --mute:#a9abb4; --mute-2:#878a94; --rule:#474a53; --rule-2:#363840; --on-ink:#474a53; --alert:#f29077; --on-alert:#1b1c20; --win:#62c79c; --on-win:#1b1c20; --desk:#212328; } html[data-sport="cbb"] { color-scheme: dark; --paper:#0f1a2b; --ink:#eef1f6; --ink-2:#cdd4e0; --mute:#9ba6b8; --mute-2:#7a869a; --rule:#2b3a52; --rule-2:#1c2a3f; --on-ink:#2b3a52; --alert:#f08a72; --on-alert:#0f1a2b; --win:#5cc196; --on-win:#0f1a2b; --desk:#0a1220; } }
+    html[data-sport="epl"] [data-theme="dark"] { color-scheme: dark; --paper:#2a2c32; --ink:#ecebe7; --ink-2:#cfcec9; --mute:#a9abb4; --mute-2:#878a94; --rule:#474a53; --rule-2:#363840; --on-ink:#474a53; --alert:#f29077; --on-alert:#1b1c20; --win:#62c79c; --on-win:#1b1c20; --desk:#212328; }
+    html[data-sport="cbb"] [data-theme="dark"] { color-scheme: dark; --paper:#0f1a2b; --ink:#eef1f6; --ink-2:#cdd4e0; --mute:#9ba6b8; --mute-2:#7a869a; --rule:#2b3a52; --rule-2:#1c2a3f; --on-ink:#2b3a52; --alert:#f08a72; --on-alert:#0f1a2b; --win:#5cc196; --on-win:#0f1a2b; --desk:#0a1220; }
+    html, body { margin: 0; padding: 0; background: var(--desk); color: var(--ink); font-family: "IBM Plex Sans", Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
     * { box-sizing: border-box; }
-    a { color: #14151a; text-decoration: none; }
-    a:hover { color: #2a2d3a; text-decoration: underline; text-underline-offset: 3px; }
+    a { color: var(--ink); text-decoration: none; }
+    a:hover { color: var(--ink-2); text-decoration: underline; text-underline-offset: 3px; }
+    a:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
   </style>
+  <meta name="theme-color" content="#14151a">
+  <script>(function(){var m=/^(nhl|epl|cbb)\./.exec(location.hostname),d=document.documentElement;d.setAttribute("data-sport",m?m[1]:(d.getAttribute("data-sport")||"nhl"));})();</script>
 </helmet>
-<div data-screen-label="Graphic" style="min-height:100vh;background:#e6e3dc;padding:24px;display:flex;flex-direction:column;align-items:flex-start;gap:16px;overflow-x:auto;">
-  <nav style="width:1080px;flex:none;display:flex;justify-content:space-between;font-size:12px;letter-spacing:.1em;text-transform:uppercase;font-weight:500;">
-    <a href="Board.dc.html" style="display:inline-flex;align-items:center;min-height:44px;">← Back to board</a>
-    <span style="display:flex;gap:22px;"><sc-for list="{{ otherSports }}" as="s" hint-placeholder-count="2"><a href="{{ s.href }}">{{ s.name }} board</a></sc-for><span style="color:#6b6e7a;">1080 × 1350 share card</span></span>
-  </nav>
+<div data-screen-label="Graphic" data-theme="{{ themeAttr }}" style="min-height:100vh;background:var(--desk);color:var(--ink);padding:24px;display:flex;flex-direction:column;align-items:flex-start;gap:16px;overflow-x:auto;">
+  <nav aria-label="Board sections" style="position:sticky;top:0;z-index:5;background:var(--paper);border-bottom:1px solid var(--ink);display:flex;width:1080px;flex:none;background:var(--desk);">
+      <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="4">
+        <a href="{{ t.href }}" aria-current="{{ t.current }}" style="flex:1 1 0;max-width:150px;min-width:0;display:flex;align-items:center;justify-content:center;min-height:48px;padding:0 4px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;white-space:nowrap;text-decoration:none;box-shadow:{{ t.shadow }};">{{ t.label }}</a>
+      </sc-for>
+    </nav>
+  <div style="width:1080px;flex:none;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">
+    <span>1080 × 1350 share card</span>
+    <span style="display:flex;gap:22px;"><sc-for list="{{ otherSports }}" as="s" hint-placeholder-count="2"><a href="{{ s.href }}" style="display:inline-flex;align-items:center;min-height:44px;font-family:'IBM Plex Sans',sans-serif;text-transform:uppercase;letter-spacing:.1em;">{{ s.name }} board</a></sc-for></span>
+  </div>
   <div id="share-card" style="width:1080px;height:1350px;flex:none;background:#f4f2ee;color:#14151a;padding:56px 60px;display:flex;flex-direction:column;border-top:10px solid #14151a;">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;">
       <div>
@@ -78,7 +93,7 @@
   </div>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1128,&quot;height&quot;:1420},&quot;sport&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;nhl&quot;,&quot;epl&quot;,&quot;cbb&quot;],&quot;default&quot;:&quot;nhl&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Preview&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1128,&quot;height&quot;:1420},&quot;sport&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;nhl&quot;,&quot;epl&quot;,&quot;cbb&quot;],&quot;default&quot;:&quot;nhl&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Preview&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Auto&quot;,&quot;Light&quot;,&quot;Dark&quot;],&quot;default&quot;:&quot;Auto&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Preview&quot;}}">
 class Component extends DCLogic {
   state = { vm: null, loadedFor: null };
   async load() {
@@ -87,6 +102,7 @@ class Component extends DCLogic {
     this.setState({ loadedFor: want });
     const S = await import("./lib/sports.js");
     const { sport, deployed } = await S.detectSport(want);
+    if (typeof document !== "undefined") { document.documentElement.setAttribute("data-sport", sport); { const p = getComputedStyle(document.documentElement).getPropertyValue("--paper").trim(), m = document.querySelector('meta[name="theme-color"]'); if (m && p) m.setAttribute("content", p); } }
     const cfg = S.SPORTS[sport];
     let data;
     try { const r = await fetch(deployed ? "./data/board.json" : cfg.sample, { cache: "no-store" }); if (!r.ok) throw new Error("HTTP " + r.status); data = await r.json(); }
@@ -99,7 +115,11 @@ class Component extends DCLogic {
   componentDidUpdate() { this.load(); }
   renderVals() {
     const vm = this.state.vm;
-    if (!vm) return { rows: [], strip3: [], otherSports: [], title1: "Tonight's", title2: "Board." };
+    const sk = (vm && vm.sport.key) || ((/^(nhl|epl|cbb)\./.exec(location.hostname) || [])[1]) || this.props.sport || "nhl";
+    const tab = (label, href, on) => ({ label, href, current: on ? "page" : undefined, shadow: on ? "inset 0 -3px 0 var(--ink)" : "none" });
+    const tabs = [tab(sk === "epl" ? "This week" : "Tonight", "Board.dc.html"), ...(sk === "nhl" ? [tab("Props", "Board.dc.html#props")] : []), tab("Results", "Results.dc.html", false), ...(sk === "nhl" ? [tab("Season", "Season.dc.html")] : []), tab("Archive", "Archive.dc.html", false)];
+    const themeAttr = { Light: "light", Dark: "dark" }[this.props.theme] || "auto";
+    if (!vm) return { themeAttr, tabs, rows: [], strip3: [], otherSports: [], title1: "Tonight's", title2: "Board." };
     const rows = vm.groups.flatMap((d) => d.games).slice(0, 12).map((g) => ({
       time: g.time, tv: g.tv, l: g.sides[0], r: g.sides[1], score: g.score,
       pickLabel: g.pick.kind === "bet" || g.pick.kind === "lean" ? g.pick.label : g.pick.kind === "pass" ? "Pass" : g.pick.label.split(" · ")[0],
@@ -113,7 +133,7 @@ class Component extends DCLogic {
       pickBg: g.pick.kind === "bet" ? "#14151a" : "#f4f2ee", pickFg: g.pick.kind === "bet" ? "#f4f2ee" : "#6b6e7a",
     }));
     const epl = vm.sport.key === "epl";
-    return { rows, strip3: vm.strip.slice(0, 3), otherSports: vm.otherSports, kicker: vm.kicker, title1: vm.title[0], title2: vm.title[1], sportLong: vm.sport.longName,
+    return { themeAttr, tabs, rows, strip3: vm.strip.slice(0, 3), otherSports: vm.otherSports, kicker: vm.kicker, title1: vm.title[0], title2: vm.title[1], sportLong: vm.sport.longName,
       timeWord: vm.sport.timeWord, leftWord: epl ? "Home" : "Away", rightWord: epl ? "Away" : "Home", tz: vm.tz, updated: vm.updated, hostLabel: vm.sport.host.replace("https://", "").replace(/\/$/, "") };
   }
 }

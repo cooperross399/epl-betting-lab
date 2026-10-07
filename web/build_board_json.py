@@ -435,7 +435,30 @@ def pick_for(card: dict, home: str, away: str) -> dict | None:
         "edgePct": round(100 * float(top["calibrated_edge"]), 1) if top.get("calibrated_edge") not in (None, "") else None,
         "modelProb": round(float(top["calibrated_model_prob"]), 4) if top.get("calibrated_model_prob") not in (None, "") else None,
         "betDownTo": int(float(top["bet_down_to_american"])) if top.get("bet_down_to_american") not in (None, "") else None,
+        **pick_side_and_line(top),
     }
+
+
+def pick_side_and_line(r: dict) -> dict:
+    """What `web/lib/live.js::pickStatusFor` needs to judge a pick against
+    the live score, from the card row's own market and selection.
+
+    Only goal markets get a side. Corner markets never do: live.js reads any
+    market containing "1x2" as the match result, so a `corners_1x2` pick given
+    a side would be graded on goals. Double chance has no live rule, so it
+    gets none either. A pick with no side shows no live status; it is never
+    guessed.
+    """
+    m, s = (r.get("market") or "").lower(), (r.get("selection") or "").lower()
+    if m == "1x2" and s in ("home", "draw", "away"):
+        return {"side": s, "line": None}
+    if m == "draw_no_bet" and s in ("home", "away"):
+        return {"side": s, "line": None}
+    if m == "total_2_5" and s in ("over", "under"):
+        return {"side": s, "line": 2.5}
+    if m == "btts" and s in ("yes", "no", "over", "under"):
+        return {"side": "yes" if s in ("yes", "over") else "no", "line": None}
+    return {"side": None, "line": None}
 
 
 def selection_label(r: dict, home: str, away: str) -> str:

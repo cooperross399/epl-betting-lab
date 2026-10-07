@@ -262,7 +262,9 @@
     "tier": "C",
     "units": 0.1,
     "edgePct": 4.2,
-    "modelProb": 0.53
+    "modelProb": 0.53,
+    "side": "under",
+    "line": 2.5
    }
   },
   {
@@ -362,7 +364,8 @@
     "price": -115,
     "book": "FanDuel",
     "edgePct": 0.9,
-    "modelProb": 0.54
+    "modelProb": 0.54,
+    "side": "yes"
    }
   },
   {
@@ -416,7 +419,9 @@
     "price": -135,
     "book": "DraftKings",
     "edgePct": -1.8,
-    "modelProb": 0.56
+    "modelProb": 0.56,
+    "side": "over",
+    "line": 2.5
    }
   },
   {
@@ -472,7 +477,8 @@
     "tier": "C",
     "units": 0.1,
     "edgePct": 4.1,
-    "modelProb": 0.58
+    "modelProb": 0.58,
+    "side": "yes"
    }
   },
   {
@@ -526,7 +532,8 @@
     "price": -160,
     "book": "Fanatics",
     "edgePct": 0.6,
-    "modelProb": 0.6
+    "modelProb": 0.6,
+    "side": "no"
    }
   },
   {
@@ -688,7 +695,9 @@
     "price": -105,
     "book": "BetRivers",
     "edgePct": 1.1,
-    "modelProb": 0.55
+    "modelProb": 0.55,
+    "side": "over",
+    "line": 2.5
    }
   }
  ],

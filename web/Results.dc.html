@@ -195,6 +195,41 @@
     </section>
     </sc-if>
 
+    <sc-if value="{{ dl.show }}" hint-placeholder-val="{{ false }}">
+    <section id="due" aria-labelledby="due-h" style="padding-top:48px;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;border-bottom:3px solid var(--ink);padding-bottom:10px;">
+        <h2 id="due-h" style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:34px;line-height:1;text-transform:uppercase;letter-spacing:.01em;">Due List</h2>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mute);border:1px solid var(--rule);padding:2px 6px;">Not model bets · no stake</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,160px),1fr));gap:0 24px;border-bottom:1px solid var(--ink);">
+        <sc-for list="{{ dl.strip }}" as="c" hint-placeholder-count="5">
+          <div style="padding:20px 0;border-bottom:1px solid var(--rule);">
+            <div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);">{{ c.label }}</div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:40px;line-height:1;margin-top:8px;">{{ c.value }}</div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--ink-2);margin-top:6px;">{{ c.sub }}</div>
+          </div>
+        </sc-for>
+      </div>
+      <sc-if value="{{ dl.empty }}" hint-placeholder-val="{{ false }}">
+        <p style="margin:0;padding:18px 0;border-bottom:1px solid var(--rule);font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--mute);">{{ dl.empty }}</p>
+      </sc-if>
+      <sc-for list="{{ dl.rows }}" as="r" hint-placeholder-count="3">
+        <article aria-label="{{ r.aria }}" style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 14px;padding:14px 0;border-bottom:1px solid var(--rule);align-items:center;">
+          <div style="min-width:0;display:flex;flex-direction:column;gap:4px;">
+            <div style="display:flex;align-items:center;gap:8px;min-width:0;">
+              <span aria-hidden="true" style="width:28px;height:28px;border-radius:50%;flex:none;display:grid;place-items:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:10px;background:{{ r.color }};color:{{ r.fg }};box-shadow:0 0 0 1px var(--rule);">{{ r.team }}</span>
+              <span style="font-weight:600;font-size:15px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ r.player }}</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mute);white-space:nowrap;">{{ r.meta }}</span>
+            </div>
+            <div style="font-size:16px;font-weight:600;line-height:1.35;">{{ r.line }}</div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">{{ r.priceLine }}</div>
+          </div>
+          <span style="min-width:64px;text-align:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:16px;letter-spacing:.06em;text-transform:uppercase;border:1px dashed var(--ink);padding:4px 6px;color:{{ r.resultColor }};">{{ r.result }}</span>
+        </article>
+      </sc-for>
+    </section>
+    </sc-if>
+
     <footer style="margin-top:56px;border-top:1px solid var(--ink);padding-top:12px;display:flex;justify-content:space-between;align-items:center;gap:8px 16px;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--mute);">
       <span>© 2026 Maverick Hightower</span>
     </footer>
@@ -224,7 +259,7 @@ class Component extends DCLogic {
     const vm = S.ADAPTERS[sport].results(data);
     vm.otherSports = S.ORDER.filter((k) => k !== sport).map((k, i) => ({ name: S.SPORTS[k].name, href: S.SPORTS[k].host, style: `display:inline-flex;align-items:center;min-height:44px;${i === 0 ? "margin-left:6px;padding-left:18px;border-left:1px solid var(--rule);" : ""}` }));
     const pr = S.ADAPTERS[sport].propResults ? S.ADAPTERS[sport].propResults(data) : null;
-    this.setState({ vm, feedNotice, pr });
+    this.setState({ vm, feedNotice, pr, raw: data });
   }
   componentDidMount() { this.load(); }
   componentDidUpdate() { this.load(); }
@@ -237,11 +272,36 @@ class Component extends DCLogic {
     // sports.js hands back light-theme hex; map them onto the theme tokens.
     const TOK = { "#14151a": "var(--ink)", "#f4f2ee": "var(--paper)", "#6b6e7a": "var(--mute)", "#9a9ca6": "var(--mute-2)", "#b0341f": "var(--alert)", "#2c7a5a": "var(--win)" };
     const tok = (c) => TOK[c] || c;
-    if (!vm) return { games: [], strip: [], otherSports: [], tabs, themeAttr, pr: { rows: [], strip: [] } };
+    if (!vm) return { games: [], strip: [], otherSports: [], tabs, themeAttr, pr: { rows: [], strip: [] }, dl: { show: false, rows: [], strip: [] } };
     const P = this.state.pr;
     const pr = P ? { ...P, hasStrip: P.status === "ok", rows: P.rows.map((r) => ({ ...r, color2: r.result === "Win" ? "var(--on-win)" : tok(r.color2), bg: tok(r.bg), aria: `${r.player}, ${r.line}, ${r.result}` })) } : { rows: [], strip: [], hasStrip: false, empty: null, summaryLine: "" };
     const games = vm.games.map((g) => ({ ...g, ariaLabel: `${g.sides[0].name} ${g.sides[0].final}, ${g.sides[1].name} ${g.sides[1].final}`, cells: g.cells.map((c) => ({ ...c, rows: c.rows.map((r) => ({ ...r, weight: r.bold ? 600 : 400, color: r.bold && r.value === "Miss" ? "var(--alert)" : "var(--ink)" })) })), sides: g.sides.map((x) => ({ ...x, scoreColor: tok(x.scoreColor) })), pick: { ...g.pick, color: g.pick.result === "Win" ? "var(--on-win)" : tok(g.pick.color), bg: tok(g.pick.bg) } }));
-    return { ...vm, games, tabs, themeAttr, pr, hasProps: !!P, sportLong: vm.sport.longName, hasFeedNotice: !!this.state.feedNotice, feedNotice: this.state.feedNotice || "" };
+    // Props leans, season long, beside the adapter's best-bet cells (sports.js is shared; added here).
+    const raw = this.state.raw || {}, RP = raw.props || {}, sgn = (x) => (x > 0 ? "+" : x < 0 ? "−" : "") + Math.abs(x).toFixed(2);
+    const rec = (r) => `${r.w || 0}–${r.l || 0}${r.p != null ? `–${r.p}` : ""}`;
+    const rate = (r) => { const n = (r.w || 0) + (r.l || 0); return n ? `${Math.round(((r.w || 0) / n) * 100)}% hit` : "—"; };
+    if (pr.strip && RP.seasonLeans) pr.strip = [...pr.strip, { label: "Props · leans · season", value: RP.seasonLeans.nights ? rec(RP.seasonLeans) : "—", sub: RP.seasonLeans.nights ? rate(RP.seasonLeans) : "No night settled yet" }];
+    // Due List (results.json dueList): Cooper's list, graded like a prop, never staked, so no units.
+    const D = raw.dueList, T = raw.teams || {};
+    const CAT = { points: ["1+ point", "point", "points"], goals: ["Anytime goal", "goal", "goals"], assists: ["1+ assist", "assist", "assists"] };
+    const GW = { win: ["Hit", "var(--win)"], loss: ["Miss", "var(--alert)"], push: ["Push", "var(--ink)"], void: ["Void", "var(--mute)"] };
+    const dl = !D ? { show: false, rows: [], strip: [] } : (() => {
+      const se = D.season || {}, bm = se.byMarket || {}, su = D.summary;
+      const strip = [
+        { label: "Last night", value: su ? rec(su) : "—", sub: su ? rate(su) : "Nothing graded" },
+        { label: "Season", value: se.nights ? rec(se) : "—", sub: se.nights ? `${rate(se)}${typeof se.impliedPct === "number" ? ` · prices implied ${Math.round(se.impliedPct)}%` : ""}` : "No night settled yet" },
+        ...["points", "goals", "assists"].map((k) => ({ label: `${CAT[k][0]} · season`, value: bm[k] ? rec(bm[k]) : "—", sub: bm[k] ? rate(bm[k]) : "" })),
+      ];
+      const rows = (D.rows || []).map((x) => {
+        const c = CAT[x.market] || [x.market, x.market, x.market], t = T[x.team] || {}, g = GW[x.result] || ["Not graded", "var(--mute)"];
+        const fin = typeof x.actual === "number" ? `finished with ${x.actual}` : x.result === "void" ? "did not play" : "no final stat yet";
+        return { player: x.player, team: x.team || "", color: t.color || "var(--ink)", fg: t.fg || "var(--paper)", meta: [x.opp ? `vs ${x.opp}` : "", x.drought != null ? `${x.drought} games without` : ""].filter(Boolean).join(" · "),
+          line: `${c[0]} — ${fin}`, priceLine: typeof x.price === "number" ? `${x.price > 0 ? "+" : "−"}${Math.abs(x.price)}${x.book ? ` at ${x.book}` : ""}${x.heavyJuice ? " · heavy juice" : ""}` : "price not posted",
+          result: g[0], resultColor: g[1], aria: `${x.player}, ${c[0]}, ${g[0]}` };
+      });
+      return { show: true, strip, rows, empty: rows.length ? "" : "Nobody on the Due List for this date." };
+    })();
+    return { ...vm, games, tabs, themeAttr, pr, dl, hasProps: !!P, sportLong: vm.sport.longName, hasFeedNotice: !!this.state.feedNotice, feedNotice: this.state.feedNotice || "" };
   }
 }
 </script>

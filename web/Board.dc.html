@@ -313,7 +313,7 @@
                     <sc-if value="{{ g.drought.show }}" hint-placeholder-val="{{ false }}">
                       <div style="border-top:2px solid var(--ink);padding-top:4px;">
                         <div style="display:flex;justify-content:space-between;align-items:center;gap:4px 12px;flex-wrap:wrap;">
-                          <span style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);min-height:44px;display:inline-flex;align-items:center;">Drought rule · potential bets</span>
+                          <span style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);min-height:44px;display:inline-flex;align-items:center;">Due List · potential bets</span>
                           <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mute);border:1px solid var(--rule);padding:2px 6px;">Not model bets · no stake</span>
                         </div>
                         <sc-for list="{{ g.drought.rows }}" as="r" hint-placeholder-count="0">
@@ -329,6 +329,8 @@
                               </div>
                               <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:19px;line-height:1.05;text-transform:uppercase;letter-spacing:.02em;">{{ r.category }}</span>
                               <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.5;color:var(--ink-2);">{{ r.history }}</span>
+                              <sc-if value="{{ r.meta }}" hint-placeholder-val="{{ false }}"><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.5;color:var(--mute);">{{ r.meta }}</span></sc-if>
+                              <sc-if value="{{ r.record }}" hint-placeholder-val="{{ false }}"><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.5;color:var(--mute);">{{ r.record }}</span></sc-if>
                               <sc-if value="{{ r.track.show }}" hint-placeholder-val="{{ false }}">
                                 <div style="display:flex;flex-direction:column;gap:4px;margin-top:3px;">
                                   <sc-if value="{{ r.track.bar }}" hint-placeholder-val="{{ false }}"><div aria-hidden="true" style="height:4px;background:var(--rule);max-width:220px;"><div style="height:4px;width:{{ r.track.pct }};background:{{ r.track.color }};"></div></div></sc-if>
@@ -365,16 +367,18 @@
             </sc-for>
           </div>
 
+          <div style="display:flex;flex-wrap:wrap;gap:4px 20px;padding:10px 0;border-bottom:1px solid var(--rule);font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-2);">
+            <sc-for list="{{ propSeason }}" as="x" hint-placeholder-count="3"><span><span style="color:var(--mute);text-transform:uppercase;letter-spacing:.08em;font-size:11px;">{{ x.label }}</span> {{ x.value }}</span></sc-for>
+          </div>
+
           <sc-if value="{{ isDroughtView }}" hint-placeholder-val="{{ false }}">
             <div role="note" style="display:flex;flex-wrap:wrap;gap:10px 20px;align-items:flex-start;padding:16px 0;border-bottom:1px solid var(--ink);">
               <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--ink);padding:4px 9px;white-space:nowrap;">Not model bets</span>
-              <p style="margin:0;flex:1 1 280px;font-size:15px;line-height:1.5;color:var(--ink-2);max-width:760px;text-wrap:pretty;">{{ dv.note }}</p>
             </div>
             <sc-if value="{{ dv.empty }}" hint-placeholder-val="{{ false }}">
               <div role="status" style="display:flex;flex-direction:column;gap:8px;padding:24px 0;border-bottom:1px solid var(--rule);">
                 <span style="align-self:flex-start;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--ink);padding:4px 9px;">{{ dv.empty.tag }}</span>
                 <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:26px;line-height:1.05;text-transform:uppercase;">{{ dv.empty.title }}</p>
-                <p style="margin:0;font-size:15px;line-height:1.5;color:var(--ink-2);max-width:620px;text-wrap:pretty;">{{ dv.empty.body }}</p>
               </div>
             </sc-if>
             <sc-for list="{{ dv.groups }}" as="dg" hint-placeholder-count="2">
@@ -395,6 +399,8 @@
                     </div>
                     <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:19px;line-height:1.05;text-transform:uppercase;letter-spacing:.02em;">{{ r.category }}</span>
                     <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.5;color:var(--ink-2);">{{ r.history }}</span>
+                    <sc-if value="{{ r.meta }}" hint-placeholder-val="{{ false }}"><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.5;color:var(--mute);">{{ r.meta }}</span></sc-if>
+                    <sc-if value="{{ r.record }}" hint-placeholder-val="{{ false }}"><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.5;color:var(--mute);">{{ r.record }}</span></sc-if>
                     <sc-if value="{{ r.track.show }}" hint-placeholder-val="{{ false }}">
                       <div style="display:flex;flex-direction:column;gap:4px;margin-top:3px;">
                         <sc-if value="{{ r.track.bar }}" hint-placeholder-val="{{ false }}"><div aria-hidden="true" style="height:4px;background:var(--rule);max-width:220px;"><div style="height:4px;width:{{ r.track.pct }};background:{{ r.track.color }};"></div></div></sc-if>
@@ -643,7 +649,7 @@ class Component extends DCLogic {
       ...(pv ? [{ label: "Props", href: `${links.board}#props`, onClick: (e) => { e.preventDefault(); this.setTab("props"); }, current: tab === "props" ? "page" : undefined, shadow: tab === "props" ? "inset 0 -3px 0 var(--ink)" : "none", color: "var(--ink)", badge: pv.status === "ok" && pv.counts.bets + pv.counts.leans ? String(pv.counts.bets + pv.counts.leans) : "" }] : []),
       tabLink("Results", links.results), ...(sk === "nhl" ? [tabLink("Season", links.season)] : []), tabLink("Archive", links.archive),
     ];
-    if (!vm) return { links, themeAttr, tabs: tabsFor("tonight", null), groups: [], strip: [], otherSports: [], scoreCards: [], showScores: false, isTonight: true, isProps: false, title1: "Tonight's", title2: "Board.", pv: { rows: [] }, propViews: [], dv: { groups: [] }, isModelView: true, isDroughtView: false };
+    if (!vm) return { links, themeAttr, tabs: tabsFor("tonight", null), groups: [], strip: [], otherSports: [], scoreCards: [], showScores: false, isTonight: true, isProps: false, title1: "Tonight's", title2: "Board.", pv: { rows: [] }, propViews: [], dv: { groups: [] }, isModelView: true, isDroughtView: false, propSeason: [] };
     const L = this.L, F = this.F, S = this.state, live = S.live, now = S.now, data = S.data, T = data.teams || {}, pv = S.pv, nhl = sk === "nhl", epl = sk === "epl";
     const start = (g) => g.startUtc || g.kickoff || g.tip, SL = (e) => L.stateLabelFor(sk, e);
     const [p1, p2] = epl ? ["home", "away"] : ["away", "home"];
@@ -651,9 +657,13 @@ class Component extends DCLogic {
     const M = live.data ? L.matchEventsFor(sk, live.data, this.liveGames(), T) : { byGame: {}, unmatched: [] };
     const tone = { win: "var(--win)", lose: "var(--alert)", flat: "var(--ink)", mute: "var(--mute)" };
 
-    // Cooper's drought rule (board.json games[].drought): an unstaked list he picks from. Never styled as a pick, never given units.
+    // Cooper's Due List (board.json games[].drought): an unstaked list he picks from. Never styled as a pick, never given units.
     const DROUGHT_UNITS = { points: ["point", "points", "1+ point", "a point"], goals: ["goal", "goals", "Anytime goal", "a goal"], assists: ["assist", "assists", "1+ assist", "an assist"] };
-    const DROUGHT_NOTE = data.droughtNote || "70+ points, 30+ goals or 30+ assists last season, and 5+ straight games without one in that category.";
+    const DROUGHT_NOTE = data.droughtNote || "70+ points, 30+ goals or 30+ assists last season, and a drought in that category at the tier bar his total sets or at his own equal-surprise bar.";
+    // The seasons the cell records were measured on ("2024-26"), read from the board (SCHEMA.md droughtWindow); a board
+    // without it names no window rather than one the record was not measured on.
+    const DROUGHT_WINDOW = typeof data.droughtWindow === "string" && data.droughtWindow ? ` ${data.droughtWindow}` : "";
+    const thousands = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     const track = (r) => {
       const e = M.byGame[r.gameId];
       if (!e || e.state === "pre") return { show: false };
@@ -673,13 +683,33 @@ class Component extends DCLogic {
     };
     const deco = (r) => ({ ...r, stake: r.kind === "lean" ? "" : r.stake, track: track(r), opacity: r.unconfirmed ? "0.6" : "1", isBet: r.kind === "bet" && !r.unconfirmed, isLean: r.kind === "lean" && !r.unconfirmed, isPass: r.kind === "pass" || r.unconfirmed,
       aria: `${r.player}, ${r.label}, ${r.kindLabel}` });
+    // The rows of one game's list: an absent or malformed field is no list, and a row that is not an object is skipped
+    // rather than thrown on, so one bad row cannot take the board down.
+    const droughtRows = (rows) => (Array.isArray(rows) ? rows : []).filter((x) => x != null && typeof x === "object");
     const drRow = (x, gid) => {
       const u = DROUGHT_UNITS[x.market] || [x.market, x.market, x.market, x.market], line = typeof x.line === "number" ? x.line : 0.5, t = T[x.team] || {}, priced = typeof x.price === "number";
+      // The two bars (2026-10-07 evening; SCHEMA.md games[].drought). Every read is guarded: this page is shared byte for
+      // byte with the EPL and CBB boards, which carry no drought field, and it renders NHL boards frozen before these
+      // fields existed; such a row shows nothing extra. "bar N · rule" is the bar his drought reached under the rule
+      // named; under "both" it is the higher of the two, which he has also cleared. The cell record is a number beside
+      // a number, never coloured good or bad; a null record says so, an absent one (an older board) says nothing.
+      const num = (v) => (typeof v === "number" && Number.isFinite(v) ? v : null), tier = num(x.tierBar), surprise = num(x.surpriseBar), rarity = num(x.rarity), oneIn = num(x.oneIn), hit = num(x.hitRate);
+      const bar = x.rule === "tier" ? tier : x.rule === "surprise" ? surprise : x.rule === "both" ? (tier != null && surprise != null ? Math.max(tier, surprise) : tier ?? surprise) : null;
+      // "1 in N for him" is the card's own N (oneIn, from the unrounded figure). A row without it (written before the field
+      // existed) reads N off the 4-dp rarity, as the card did, and spells the two ends that rounding reaches as the card does:
+      // 0 is "never last season" when he hit in every game, otherwise rarer than the rounding can say. Only a row with
+      // neither figure shows no line.
+      const forHim = oneIn != null && oneIn > 0 ? `1 in ${thousands(Math.round(oneIn))} for him`
+        : rarity == null ? "" : rarity > 0 ? `1 in ${thousands(Math.round(1 / rarity))} for him`
+        : hit != null && hit >= 1 ? "never last season" : "rarer than 1 in 10,000 for him";
+      const meta = [bar != null ? `bar ${bar} · ${x.rule}` : "", forHim].filter(Boolean).join(" · ");
+      const c = x.cellRecord, pc = (v) => `${v > 0 ? "+" : ""}${v.toFixed(1)}%`, whole = !!c && typeof c === "object" && [c.wagers, c.returnPct, c.lowPct, c.highPct].every((v) => num(v) != null);
+      const record = !("cellRecord" in x) ? "" : whole ? `This cell${DROUGHT_WINDOW}: ${pc(c.returnPct)} over ${c.wagers} (95% ${pc(c.lowPct)} to ${pc(c.highPct)})` : "no record for this cell";
       return { player: x.player, team: x.team || "", color: t.color || "var(--ink)", fg: t.fg || "var(--paper)", streak: x.drought != null ? String(x.drought) : "—", category: u[2],
-        history: `${x.lastSeason ?? "—"} ${u[1]} last season · ${x.drought} straight games without ${u[3]}`,
+        history: `${x.lastSeason ?? "—"} ${u[1]} last season · ${x.drought} straight games without ${u[3]}`, meta, record,
         price: priced ? F.fmtOdds(x.price) : "—", book: priced ? x.book || "" : "price not posted", priceColor: priced ? "var(--ink)" : "var(--mute)", juice: !!x.heavyJuice,
         track: track({ ...x, gameId: gid, side: "over", line, unitOne: u[0], unitMany: u[1] }),
-        aria: `${x.player}, ${u[2]}, ${x.drought} straight games without ${u[3]}, ${priced ? F.fmtOdds(x.price) : "price not posted"}${x.heavyJuice ? ", heavy juice" : ""}` };
+        aria: `${x.player}, ${u[2]}, ${x.drought} straight games without ${u[3]}, ${priced ? F.fmtOdds(x.price) : "price not posted"}${x.heavyJuice ? ", heavy juice" : ""}${meta ? `, ${meta}` : ""}${record ? `, ${record}` : ""}` };
     };
     const byGameProps = {};
     for (const r of pv ? pv.rows : []) (byGameProps[r.gameId] = byGameProps[r.gameId] || []).push(r);
@@ -718,7 +748,7 @@ class Component extends DCLogic {
       const sog = (x) => (x ? x.shotsTotal ?? x.shotsOnGoal ?? x.shots : null);
       const shots = bt && sog(bt[a]) != null && sog(bt[h]) != null ? `Shots on goal ${a} ${sog(bt[a])} – ${sog(bt[h])} ${h}` : "";
       const gp = byGameProps[g.id] || [], shown = gp.filter((x) => x.kind !== "pass");
-      const dr = (Array.isArray(r.drought) ? r.drought : []).map((x) => drRow(x, g.id));
+      const dr = droughtRows(r.drought).map((x) => drRow(x, g.id));
       return { ...g, hasBar: g.bar.length > 0, anchor: `g-${g.id}`, panelId: `p-${g.id}`, expanded: open, expandedAttr: open ? "true" : "false", onToggle: () => this.toggle(g.id),
         ariaLabel: `${g.sides[0].name} at ${g.sides[1].name}, ${g.time}`,
         barAria: g.sides.map((s) => `${s.name} ${s.win || ""}`.trim()).join(", "),
@@ -730,7 +760,7 @@ class Component extends DCLogic {
           awayScore: scored ? String(e[p1].score) : "", homeScore: scored ? String(e[p2].score) : "", sep: scored ? "–" : epl ? "v" : "@",
           awayWeight: scored && e[p1].score > e[p2].score ? 700 : 400, homeWeight: scored && e[p2].score > e[p1].score ? 700 : 400,
           tag: g.pick.kind === "none" ? shortNone(g.pick.label) : g.pick.label, tagColor: g.pick.kind === "none" ? "var(--mute)" : "var(--ink)",
-          drought: dr.length ? `Drought rule ×${dr.length}` : "",
+          drought: dr.length ? `Due List ×${dr.length}` : "",
           kind: liveV.has ? [kindShort, liveV.word].filter(Boolean).join(" · ") : kindShort, kindColor: liveV.has ? liveV.color : "var(--mute)", chev: open ? "−" : "+" },
         box: scored || (e && e.state !== "pre") ? { show: true, title: st.tone === "in" ? `Live · ${st.top}` : st.top, titleColor: st.tone === "in" ? "var(--alert)" : "var(--ink)",
           score: `${r[p1].abbr} ${scored ? e[p1].score : "–"} – ${scored ? e[p2].score : "–"} ${r[p2].abbr}`, shots,
@@ -786,16 +816,16 @@ class Component extends DCLogic {
     const dGames = (data.games || []).slice().sort((x, y) => Date.parse(x.startUtc) - Date.parse(y.startUtc));
     const dHasField = dGames.some((g) => Array.isArray(g.drought));
     const dRegular = data.phase !== "preseason" && dGames.some((g) => g.gameType == null || g.gameType === 2);
-    const dGroups = dGames.filter((g) => Array.isArray(g.drought) && g.drought.length).map((g) => {
-      const e = M.byGame[g.id], st = e ? SL(e) : null, scored = !!e && e.state !== "pre" && e.away.score != null;
+    const dGroups = dGames.filter((g) => droughtRows(g.drought).length).map((g) => {
+      const e = M.byGame[g.id], st = e ? SL(e) : null, scored = !!e && e.state !== "pre" && e.away.score != null, rows = droughtRows(g.drought);
       return { title: `${g.away.abbr} @ ${g.home.abbr}`, subColor: st && st.tone === "in" ? "var(--alert)" : "var(--mute)",
-        sub: [st && st.top ? st.top : F.fmtTime(g.startUtc), scored ? `${e.away.score}–${e.home.score}` : "", `${g.drought.length} listed`].filter(Boolean).join(" · "),
-        rows: g.drought.map((x) => drRow(x, g.id)) };
+        sub: [st && st.top ? st.top : F.fmtTime(g.startUtc), scored ? `${e.away.score}–${e.home.score}` : "", `${rows.length} listed`].filter(Boolean).join(" · "),
+        rows: rows.map((x) => drRow(x, g.id)) };
     });
     const dCount = dGroups.reduce((n, x) => n + x.rows.length, 0);
-    const dEmpty = !dRegular ? { tag: "Preseason", title: "Drought rule starts with the regular season", body: "The list needs last season's totals and this season's games; exhibition games count for neither." }
-      : !dHasField ? { tag: "Not on this board", title: "No drought list on this board", body: "This board was built before the drought list was published." }
-      : !dCount ? { tag: "Nobody tonight", title: "No player meets the drought rule tonight", body: "The rule needs 70+ points, 30+ goals or 30+ assists last season and 5+ straight games without one in that category." } : null;
+    const dEmpty = !dRegular ? { tag: "Preseason", title: "Due List starts with the regular season", body: "" }
+      : !dHasField ? { tag: "Not on this board", title: "No Due List on this board", body: "" }
+      : !dCount ? { tag: "Nobody tonight", title: "Nobody on the Due List tonight", body: "" } : null;
     const isDrought = S.propView === "drought";
     const viewBtn = (key, label) => ({ label, pressed: S.propView === key ? "true" : "false", bg: S.propView === key ? "var(--ink)" : "transparent", fg: S.propView === key ? "var(--paper)" : "var(--ink)", onClick: () => this.setView(key) });
     const view = pv ? { ...pv, rows: rows.map(deco), empty, filtered, hasRows: pv.status === "ok" && all.length > 0,
@@ -809,7 +839,18 @@ class Component extends DCLogic {
       toggleAllLabel: S.allOpen ?? S.wide ? "Collapse all" : "Expand all",
       onToggleAll: () => { const next = !(S.allOpen ?? S.wide); this.setState({ allOpen: next, expanded: {} }, () => this.syncBoxes()); },
       pv: view, f, isModelView: !isDrought, isDroughtView: isDrought,
-      propViews: [viewBtn("model", pv && pv.status === "ok" ? `Model props · ${pv.counts.total}` : "Model props"), viewBtn("drought", `Drought rule · ${dCount}`)],
+      // Season-long lines from board.json record (props, propLeans, dueList); a dash until a night has settled.
+      propSeason: (() => {
+        const R = data.record || {}, rec = (r) => `${r.w || 0}–${r.l || 0}${r.p != null ? `–${r.p}` : ""}`, ok = (r) => r && r.nights;
+        const u = (x) => (typeof x === "number" ? ` · ${x > 0 ? "+" : x < 0 ? "−" : ""}${Math.abs(x).toFixed(2)} u` : "");
+        const hit = (r) => { const n = (r.w || 0) + (r.l || 0); return n ? ` · ${Math.round(((r.w || 0) / n) * 100)}%` : ""; };
+        return [
+          { label: "Props best bets · season", value: ok(R.props) ? rec(R.props) + u(R.props.units) : "—" },
+          { label: "Props leans · season", value: ok(R.propLeans) ? rec(R.propLeans) + hit(R.propLeans) : "—" },
+          { label: "Due List · season", value: ok(R.dueList) ? rec(R.dueList) + hit(R.dueList) : "—" },
+        ];
+      })(),
+      propViews: [viewBtn("model", pv && pv.status === "ok" ? `Model props · ${pv.counts.total}` : "Model props"), viewBtn("drought", `Due List · ${dCount}`)],
       dv: { groups: dGroups, empty: dEmpty, note: DROUGHT_NOTE }, headSummary: isDrought ? (dCount ? `${dCount} player${dCount === 1 ? "" : "s"} · ${dGroups.length} game${dGroups.length === 1 ? "" : "s"}` : "") : view.summary || "",
       gameOptions: [{ value: "", label: "All games" }, ...(data.games || []).filter((g) => byGameProps[g.id]).map((g) => ({ value: g.id, label: `${g.away.abbr} @ ${g.home.abbr} · ${F.fmtTime(g.startUtc)}` }))],
       teamOptions: [{ value: "", label: "All teams" }, ...uniq(all.map((r) => [r.team, r.teamName])).sort((x, y) => x[1].localeCompare(y[1])).map(([value, label]) => ({ value, label }))],

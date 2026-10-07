@@ -44,6 +44,8 @@ export const HOW_TO_READ = [
   ["Lean", "The model's side, recorded so it can be judged later, but not staked. Below the bar or in a market that is not yet allowlisted."],
   ["Pass", "The best available market on that game and why it was not taken."],
   ["Record", "Every number in the strip is settled from what was published before the game, never recomputed afterwards. Intervals are 95% confidence; 'no demonstrated edge' means zero sits inside the interval."],
+  ["Props", "Player markets, priced the way team markets are: the model's projection for the stat, its probability for the side, the fair price and the edge. The same Best bet / Lean / Pass rules apply, and each market carries a note on what testing has shown so far."],
+  ["Live", "Scores, periods and box-score counts come from ESPN while games are on. A pick's live status compares the current score with what the board published; it is not a settlement. Results settle the next morning from the official finals."],
 ];
 
 const pickView = (p, unit, opts = {}) => {
@@ -347,7 +349,94 @@ function picksCell(s) {
   return { label: n ? `Model picks · ${n} ungraded` : "Model picks", value: F.recStr(s.picks || { w: 0, l: 0, p: 0 }) };
 }
 
-export const ADAPTERS = { nhl: { board: nhlBoard, results: nhlResults }, epl: { board: eplBoard, results: eplResults }, cbb: { board: cbbBoard, results: cbbResults } };
+// ---------- NHL player props ----------
+// The props block of board.json / results.json. Kind, tier, units and edge are the
+// pipeline's; nothing here decides a pick. Pinned by the same rule as team picks:
+// a lean is never shown as a best bet, and a starter who is not confirmed is never
+// staked (the pipeline writes such a goalie prop as a pass; the page greys it).
+export const PROP_MARKETS = {
+  shots_on_goal: { title: "Shots on goal", one: "shot", many: "shots" },
+  points: { title: "Points", one: "point", many: "points" },
+  goals: { title: "Goals", one: "goal", many: "goals" },
+  assists: { title: "Assists", one: "assist", many: "assists" },
+  blocked_shots: { title: "Blocked shots", one: "blocked shot", many: "blocked shots" },
+  hits: { title: "Hits", one: "hit", many: "hits" },
+  faceoffs_won: { title: "Faceoffs won", one: "faceoff won", many: "faceoffs won" },
+  power_play_points: { title: "Power-play points", one: "power-play point", many: "power-play points" },
+  goalie_saves: { title: "Goalie saves", one: "save", many: "saves" },
+  goals_against: { title: "Goals against", one: "goal against", many: "goals against" },
+};
+export const PROPS_DISCLOSURE = "The model has no demonstrated edge in any market. Picks are recorded so they can be graded, not because they are known winners.";
+const propMarket = (k) => PROP_MARKETS[k] || { title: String(k || "").replace(/_/g, " "), one: String(k || "").replace(/_/g, " "), many: String(k || "").replace(/_/g, " ") };
+const propLabel = (r, m) => `${r.side === "under" ? "Under" : "Over"} ${typeof r.line === "number" ? r.line : dash} ${r.line === 1 ? m.one : m.many}`;
+const PROP_RANK = { bet: 0, lean: 1, pass: 2 };
+const money = (x) => `$${x % 1 ? x.toFixed(2) : x.toFixed(0)}`;
+const unitsWord = (u) => `${u} unit${u === 1 ? "" : "s"}`;
+
+function nhlProps(data) {
+  const P = data.props, T = data.teams || {}, unit = data.unitDollars ?? 25, pre = data.phase === "preseason";
+  const games = Object.fromEntries((data.games || []).map((g) => [g.id, g]));
+  const none = { bets: 0, leans: 0, total: 0 };
+  if (!P || typeof P !== "object") return { status: "missing", rows: [], counts: none, note: "", disclosure: PROPS_DISCLOSURE,
+    empty: { tag: "No props", title: "Props are not on this board", body: "This board was built before the pipeline published player props." } };
+  const status = ["ok", "no_lines", "abstain"].includes(P.status) ? P.status : "ok", notes = P.marketNotes || {};
+  const rows = (status === "ok" ? P.rows || [] : []).map((r) => {
+    const m = propMarket(r.market), t = T[r.team] || {}, g = games[r.gameId];
+    const kind = PROP_RANK[r.kind] != null ? r.kind : "pass", unconfirmed = r.starterConfirmed === false, u = typeof r.units === "number" ? r.units : null;
+    const where = g ? (g.home.abbr === r.team ? `vs ${r.opp}` : `@ ${r.opp}`) : r.opp ? `vs ${r.opp}` : "";
+    return {
+      key: `${r.gameId}|${r.playerId || r.player}|${r.market}|${r.line}|${r.side}`,
+      gameId: r.gameId, player: r.player, playerId: r.playerId, espnId: r.espnId, team: r.team, opp: r.opp, position: r.position || "",
+      teamName: t.short || t.name || r.team, color: t.color || "#14151a", fg: t.fg || "#fff", meta: [r.position, where].filter(Boolean).join(" · "),
+      market: r.market, marketTitle: m.title, unitOne: m.one, unitMany: m.many, line: r.line, side: r.side, label: propLabel(r, m),
+      priceLine: `${odds(r.price)}${r.book ? ` at ${r.book}` : ""}`, proj: typeof r.projection === "number" ? r.projection.toFixed(r.projection < 1 ? 2 : 1) : dash,
+      prob: pct(r.modelProb), fair: odds(r.fairPrice), edge: typeof r.edgePct === "number" ? `${F.fmtSigned(r.edgePct)}%` : dash, edgeNum: typeof r.edgePct === "number" ? r.edgePct : -Infinity,
+      kind, kindLabel: kind === "bet" ? "Best bet" : kind === "lean" ? "Lean" : "Pass",
+      stake: kind === "bet" && u != null && !unconfirmed ? [r.tier ? `Tier ${r.tier}` : null, unitsWord(u), money(u * unit)].filter(Boolean).join(" · ")
+        : kind === "lean" ? `Recorded, not staked${r.allowlisted === false ? " · market not allowlisted" : ""}` : "",
+      note: notes[r.market] || "", unconfirmed, goalieNote: unconfirmed ? "Starter not confirmed — not priced as a bet" : "",
+    };
+  }).sort((a, b) => PROP_RANK[a.kind] - PROP_RANK[b.kind] || b.edgeNum - a.edgeNum);
+  let empty = null;
+  if (status === "no_lines") empty = { tag: "No lines", title: "Lines not posted yet", body: P.note || "No book had posted player props when this board was built. The next refresh looks again." };
+  else if (status === "abstain") empty = { tag: "Abstains", title: pre ? "Model abstains — preseason" : "Model abstains", body: P.note || "The props model prices regular-season games only." };
+  else if (!rows.length) empty = { tag: "No props", title: "No props priced tonight", body: P.note || "The props block arrived with no rows." };
+  const bets = rows.filter((r) => r.kind === "bet").length, leans = rows.filter((r) => r.kind === "lean").length;
+  return { status, rows, empty, note: status === "ok" ? P.note || "" : "", disclosure: PROPS_DISCLOSURE, counts: { bets, leans, total: rows.length },
+    summary: `${rows.length} priced · ${bets} best bet${bets === 1 ? "" : "s"} · ${leans} lean${leans === 1 ? "" : "s"}` };
+}
+
+function nhlPropResults(data) {
+  const P = data.props, T = data.teams || {};
+  if (!P || typeof P !== "object") return { status: "missing", rows: [], strip: [], summaryLine: "",
+    empty: { tag: "No props", title: "No props on this page", body: "These results were settled before the pipeline published player props." } };
+  const status = ["ok", "no_lines", "abstain"].includes(P.status) ? P.status : "ok";
+  const rows = (status === "ok" ? P.rows || [] : []).map((r) => {
+    const m = propMarket(r.market), t = T[r.team] || {}, label = propLabel(r, m), kind = PROP_RANK[r.kind] != null ? r.kind : "pass";
+    const res = r.result, word = Object.hasOwn(GRADES, res) ? GRADES[res] : "Not graded", has = typeof r.actual === "number";
+    const outcome = res === "void" ? (has ? `finished with ${r.actual} · void` : "did not play · void")
+      : has ? `finished with ${r.actual}${res === "win" ? " ✓" : res === "loss" ? " ✗" : res === "push" ? " · push" : ""}` : "no final stat yet";
+    return { key: `${r.gameId}|${r.playerId || r.player}|${r.market}`, player: r.player, team: r.team, color: t.color || "#14151a", fg: t.fg || "#fff",
+      meta: [r.position, r.opp ? `vs ${r.opp}` : ""].filter(Boolean).join(" · "), line: `${label} — ${outcome}`, kind, rank: PROP_RANK[kind],
+      kindWord: kind === "bet" ? ["Best bet", r.tier ? `Tier ${r.tier}` : null, typeof r.units === "number" ? unitsWord(r.units) : null].filter(Boolean).join(" · ") : `${kind === "lean" ? "Lean" : "Pass"} · not in the record`,
+      priceLine: `${odds(r.price)}${r.book ? ` at ${r.book}` : ""}`, result: word,
+      color2: res === "win" ? "#f4f2ee" : res === "loss" ? "#b0341f" : word === "Not graded" ? "#6b6e7a" : "#14151a", bg: res === "win" ? "#2c7a5a" : "#f4f2ee",
+      units: kind === "bet" && typeof r.profitUnits === "number" ? `${F.fmtSigned(r.profitUnits, 2)} u` : "" };
+  }).sort((a, b) => a.rank - b.rank);
+  const s = P.summary, se = P.season, u = (x) => (typeof x === "number" ? `${F.fmtSigned(x, 2)} units` : dash);
+  const strip = [
+    { label: "Props · best bets", value: s ? F.recStr(s) : dash, sub: s ? `${u(s.units)}${s.ungraded ? ` · ${s.ungraded} ungraded` : ""}` : "Nothing graded" },
+    { label: "Props · season", value: se && se.nights ? F.recStr(se) : dash, sub: se && se.nights ? `${u(se.units)} · ${se.nights} night${se.nights === 1 ? "" : "s"}` : "No night settled yet" },
+  ];
+  let empty = null;
+  if (status === "no_lines") empty = { tag: "No lines", title: "No props were published for this date", body: P.note || "No book had posted player props when the board was built." };
+  else if (status === "abstain") empty = { tag: "Abstained", title: data.phase === "preseason" ? "Model abstained — preseason" : "Model abstained", body: P.note || "The props model prices regular-season games only." };
+  else if (!rows.length) empty = { tag: "No props", title: "No props were recorded for this date", body: P.note || "The props block arrived with no rows." };
+  const bets = rows.filter((r) => r.kind === "bet").length, leans = rows.filter((r) => r.kind === "lean").length;
+  return { status, rows, strip, empty, summaryLine: rows.length ? `${bets} best bet${bets === 1 ? "" : "s"} · ${leans} lean${leans === 1 ? "" : "s"} settled` : "" };
+}
+
+export const ADAPTERS = { nhl: { board: nhlBoard, results: nhlResults, props: nhlProps, propResults: nhlPropResults }, epl: { board: eplBoard, results: eplResults }, cbb: { board: cbbBoard, results: cbbResults } };
 
 // One line for the home page.
 export function hubLine(sport, board, results) {

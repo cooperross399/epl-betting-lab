@@ -32,3 +32,7 @@ export const recStr = (r) => (r.p != null ? `${r.w}–${r.l}–${r.p}` : `${r.w}
 // The market favorite as "ABBR −150", matching the CFB page's open/current convention.
 export const favLine = (ml, away, home) =>
   ml.home <= ml.away ? `${home} ${fmtOdds(ml.home)}` : `${away} ${fmtOdds(ml.away)}`;
+
+// Live-feed stamps.
+export const fmtAgo = (ms) => { const s = Math.max(0, Math.round(ms / 1000)); return s < 60 ? `${s}s ago` : s < 3600 ? `${Math.floor(s / 60)} min ago` : `${Math.floor(s / 3600)} h ago`; };
+export const fmtIn = (ms) => { const s = Math.max(0, Math.round(ms / 1000)); return s < 60 ? `${s}s` : `${Math.round(s / 60)} min`; };

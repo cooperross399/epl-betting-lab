@@ -1,8 +1,8 @@
-## Friday 09 October, 09:47 UTC — scheduled run
+## Friday 09 October, 11:31 UTC — scheduled run
 
-Selections changed: 30 added.
+Selections changed: 1 added.
 
-Provider quota: **2592** — about 2 day(s) at the observed burn. **Top this up or the schedule stops.**
+Provider quota: **2470** — about 2 day(s) at the observed burn. **Top this up or the schedule stops.**
 
 Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
 
@@ -13,10 +13,10 @@ Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_tot
 | Coventry v Newcastle | `corners_total_9_5` | over | C | +5.6% | -110 | FanDuel | 0.1 |
 | Arsenal v Leeds | `btts` | yes | C | +6.5% | +130 | FanDuel | 0.1 |
 | Man United v Tottenham | `corners_total_10_5` | over | C | +5.1% | -108 | FanDuel | 0.1 |
+| Aston Villa v Brentford | `corners_total_9_5` | over | C | +4.9% | -125 | Fanatics | 0.1 |
 | Coventry v Newcastle | `corners_total_10_5` | over | C | +6.0% | +155 | FanDuel | 0.1 |
-| Aston Villa v Brentford | `corners_total_9_5` | over | C | +3.6% | -132 | Bovada | 0.1 |
-| Chelsea v Bournemouth | `draw_no_bet` | away | C | +4.9% | +260 | Bovada | 0.1 |
 | Ipswich v Fulham | `corners_total_10_5` | over | C | +4.3% | +154 | FanDuel | 0.1 |
+| Chelsea v Bournemouth | `draw_no_bet` | away | C | +4.7% | +255 | Bovada | 0.1 |
 | Chelsea v Bournemouth | `double_chance` | draw_or_away | C | +3.8% | +116 | BetRivers | 0.1 |
 
 ### Leans
@@ -25,36 +25,7 @@ _None._
 
 ### What changed
 
-- **Added:** Arsenal v Leeds btts yes
-- **Added:** Arsenal v Leeds corners_1x2 away
-- **Added:** Aston Villa v Brentford corners_total_10_5 over
-- **Added:** Aston Villa v Brentford corners_total_9_5 over
-- **Added:** Aston Villa v Brentford draw_no_bet away
-- **Added:** Chelsea v Bournemouth corners_1x2 home
-- **Added:** Chelsea v Bournemouth corners_total_9_5 over
-- **Added:** Chelsea v Bournemouth double_chance draw_or_away
-- **Added:** Chelsea v Bournemouth draw_no_bet away
-- **Added:** Coventry v Newcastle corners_1x2 home
-- **Added:** Coventry v Newcastle corners_total_10_5 over
-- **Added:** Coventry v Newcastle corners_total_9_5 over
-- **Added:** Coventry v Newcastle double_chance home_or_away
-- **Added:** Coventry v Newcastle draw_no_bet away
-- **Added:** Crystal Palace v Nott'm Forest corners_total_9_5 over
-- **Added:** Crystal Palace v Nott'm Forest draw_no_bet away
-- **Added:** Hull v Everton corners_total_10_5 over
-- **Added:** Hull v Everton corners_total_9_5 over
-- **Added:** Hull v Everton draw_no_bet home
-- **Added:** Ipswich v Fulham corners_1x2 away
-- **Added:** Ipswich v Fulham corners_total_10_5 over
-- **Added:** Ipswich v Fulham corners_total_9_5 over
-- **Added:** Ipswich v Fulham double_chance draw_or_away
-- **Added:** Liverpool v Man City corners_total_10_5 under
-- **Added:** Liverpool v Man City corners_total_9_5 under
-- **Added:** Man United v Tottenham corners_1x2 away
-- **Added:** Man United v Tottenham corners_total_10_5 over
-- **Added:** Man United v Tottenham corners_total_9_5 over
-- **Added:** Man United v Tottenham double_chance draw_or_away
-- **Added:** Sunderland v Brighton double_chance draw_or_away
+- **Added:** Man United v Tottenham draw_no_bet away
 
 
 ## Beyond the Premier League
@@ -124,4 +95,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/37913189747)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/37923868839)

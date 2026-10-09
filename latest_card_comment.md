@@ -1,8 +1,8 @@
-## Friday 09 October, 11:31 UTC — scheduled run
+## Friday 09 October, 16:01 UTC — scheduled run
 
-Selections changed: 1 added.
+Selections changed: 2 added, 2 dropped, 1 moved section.
 
-Provider quota: **2470** — about 2 day(s) at the observed burn. **Top this up or the schedule stops.**
+Provider quota: **1838** — about 1 day(s) at the observed burn. **Top this up or the schedule stops.**
 
 Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
 
@@ -10,14 +10,13 @@ Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_tot
 
 | Match | Market | Selection | Tier | Edge | Price | Book | Units |
 |:------|:-------|:----------|:-----|-----:|------:|:-----|------:|
-| Coventry v Newcastle | `corners_total_9_5` | over | C | +5.6% | -110 | FanDuel | 0.1 |
-| Arsenal v Leeds | `btts` | yes | C | +6.5% | +130 | FanDuel | 0.1 |
-| Man United v Tottenham | `corners_total_10_5` | over | C | +5.1% | -108 | FanDuel | 0.1 |
-| Aston Villa v Brentford | `corners_total_9_5` | over | C | +4.9% | -125 | Fanatics | 0.1 |
-| Coventry v Newcastle | `corners_total_10_5` | over | C | +6.0% | +155 | FanDuel | 0.1 |
+| Coventry v Newcastle | `corners_total_9_5` | over | C | +5.0% | -113 | Caesars | 0.1 |
+| Man United v Tottenham | `corners_total_10_5` | over | C | +4.7% | -110 | Caesars | 0.1 |
+| Coventry v Newcastle | `corners_total_10_5` | over | C | +5.3% | +150 | FanDuel | 0.1 |
+| Aston Villa v Brentford | `corners_total_9_5` | over | C | +3.6% | -132 | Bovada | 0.1 |
 | Ipswich v Fulham | `corners_total_10_5` | over | C | +4.3% | +154 | FanDuel | 0.1 |
-| Chelsea v Bournemouth | `draw_no_bet` | away | C | +4.7% | +255 | Bovada | 0.1 |
 | Chelsea v Bournemouth | `double_chance` | draw_or_away | C | +3.8% | +116 | BetRivers | 0.1 |
+| Chelsea v Bournemouth | `draw_no_bet` | away | C | +4.5% | +250 | DraftKings | 0.1 |
 
 ### Leans
 
@@ -25,7 +24,11 @@ _None._
 
 ### What changed
 
-- **Added:** Man United v Tottenham draw_no_bet away
+- **Added:** Hull v Everton corners_1x2 home
+- **Added:** Liverpool v Man City double_chance draw_or_away
+- **Dropped:** Crystal Palace v Nott'm Forest draw_no_bet away
+- **Dropped:** Ipswich v Fulham double_chance draw_or_away
+- **Moved section:** Arsenal v Leeds btts yes
 
 
 ## Beyond the Premier League
@@ -95,4 +98,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/37923868839)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/37955554979)

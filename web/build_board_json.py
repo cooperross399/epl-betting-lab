@@ -226,7 +226,7 @@ def to_american(p: float) -> int:
     return round(-100 * p / (1 - p)) if p >= 0.5 else round(100 * (1 - p) / p)
 
 
-def read_card(lab: Path) -> tuple[dict, str]:
+def read_card(lab: Path, today: date | None = None) -> tuple[dict, str]:
     """This run's card, and where it was read from.
 
     `data/outputs/automated_card.json` is what a local run leaves behind. A
@@ -235,19 +235,32 @@ def read_card(lab: Path) -> tuple[dict, str]:
     uploads `data/outputs/archive/automated_cards`. So the archive is the
     fallback, newest first, read with the card archive's own layout
     (`card_history.ARCHIVE_ROOT` / date / time / automated_card.json).
+
+    The newest card that GENERATED for a round not yet over wins over a newer
+    one that did not. A run whose price fetch failed still archives a card,
+    and on 2026-10-10 that card named the opening round (a stale input
+    report) and replaced the morning's real board with August's fixtures.
+    The card-feed keeps the last good card in that case, and so does this.
+    With no such card, the newest card is used as before.
     """
+    today = today or datetime.now(timezone.utc).date()
     outputs = lab / "data" / "outputs"
+    candidates: list[tuple[dict, str]] = []
     direct = outputs / "automated_card.json"
     if direct.is_file():
         card = _read_json(direct)
         if card:
-            return card, "data/outputs/automated_card.json"
+            candidates.append((card, "data/outputs/automated_card.json"))
     archived = sorted((outputs / "archive" / "automated_cards").glob("*/*/automated_card.json"))
     for path in reversed(archived):
         card = _read_json(path)
         if card:
-            return card, str(path.relative_to(lab)) if path.is_relative_to(lab) else str(path)
-    return {}, "no card on disk"
+            candidates.append((card, str(path.relative_to(lab)) if path.is_relative_to(lab) else str(path)))
+    for card, source in candidates:
+        window = card_window(card)
+        if window and window[1] >= today:
+            return card, source
+    return candidates[0] if candidates else ({}, "no card on disk")
 
 
 def _read_json(path: Path) -> dict:
@@ -550,8 +563,12 @@ def card_window(card: dict) -> tuple[date, date] | None:
 
     `selected_slate.selected_window_label` writes "2026-10-10 through
     2026-10-12", and `automated_card` copies it into `window_label`. An
-    unusable window ("no dated fixtures") returns None.
+    unusable window ("no dated fixtures") returns None, and so does a card
+    that did not generate: its window comes from whatever input report was on
+    disk, which after a failed price fetch is a stale one.
     """
+    if not card.get("card_generated"):
+        return None
     label = str(card.get("window_label") or "")
     if WINDOW_SEPARATOR not in label:
         return None
@@ -584,7 +601,7 @@ def slate_window(fixtures: list[dict], today: date) -> tuple[date, date] | None:
 
 def build(lab: Path, today: date) -> dict:
     now = datetime.now(timezone.utc)
-    card, card_source = read_card(lab)
+    card, card_source = read_card(lab, today)
     prices, price_source = read_prices(lab, card)
     project, model_note = load_model(lab)
 
@@ -697,7 +714,7 @@ def build(lab: Path, today: date) -> dict:
     return {
         "generatedAt": now.isoformat(timespec="seconds").replace("+00:00", "Z"),
         "season": SEASON,
-        "windowLabel": card.get("window_label") or f"{start.isoformat()}{WINDOW_SEPARATOR}{end.isoformat()}",
+        "windowLabel": f"{start.isoformat()}{WINDOW_SEPARATOR}{end.isoformat()}",
         "windowStart": start.isoformat(), "windowEnd": end.isoformat(),
         "notice": " ".join(notices) or None,
         "unitDollars": unit_dollars(),

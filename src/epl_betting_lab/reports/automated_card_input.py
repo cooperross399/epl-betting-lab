@@ -416,6 +416,10 @@ def save_automated_card_input(
     blockers: list[str] = []
     odds = pd.DataFrame()
     fixtures = pd.DataFrame()
+    # Bound before the staging read so a run with no staging (a provider 401,
+    # quota exhausted) writes a Blocked report instead of raising. Raising left
+    # the committed 2026-08-21 report in place, and the card read its window.
+    staged = pd.DataFrame()
 
     for label, path in (("odds", staging_odds), ("fixtures", staging_fixtures)):
         if not path.is_file():

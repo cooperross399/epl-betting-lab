@@ -1,8 +1,8 @@
-## Friday 09 October, 16:01 UTC — scheduled run
+## Saturday 10 October, 09:10 UTC — scheduled run
 
-Selections changed: 2 added, 2 dropped, 1 moved section.
+Selections changed: 4 added, 3 dropped, 3 moved section.
 
-Provider quota: **1838** — about 1 day(s) at the observed burn. **Top this up or the schedule stops.**
+Provider quota: **230** — about 0 day(s) at the observed burn. **Top this up or the schedule stops.**
 
 Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
 
@@ -10,13 +10,12 @@ Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_tot
 
 | Match | Market | Selection | Tier | Edge | Price | Book | Units |
 |:------|:-------|:----------|:-----|-----:|------:|:-----|------:|
-| Coventry v Newcastle | `corners_total_9_5` | over | C | +5.0% | -113 | Caesars | 0.1 |
-| Man United v Tottenham | `corners_total_10_5` | over | C | +4.7% | -110 | Caesars | 0.1 |
+| Coventry v Newcastle | `corners_total_9_5` | over | C | +5.6% | -110 | FanDuel | 0.1 |
+| Man United v Tottenham | `corners_total_10_5` | over | C | +4.3% | -112 | FanDuel | 0.1 |
 | Coventry v Newcastle | `corners_total_10_5` | over | C | +5.3% | +150 | FanDuel | 0.1 |
 | Aston Villa v Brentford | `corners_total_9_5` | over | C | +3.6% | -132 | Bovada | 0.1 |
-| Ipswich v Fulham | `corners_total_10_5` | over | C | +4.3% | +154 | FanDuel | 0.1 |
-| Chelsea v Bournemouth | `double_chance` | draw_or_away | C | +3.8% | +116 | BetRivers | 0.1 |
-| Chelsea v Bournemouth | `draw_no_bet` | away | C | +4.5% | +250 | DraftKings | 0.1 |
+| Chelsea v Bournemouth | `draw_no_bet` | away | C | +4.5% | +215 | FanDuel | 0.1 |
+| Chelsea v Bournemouth | `corners_total_9_5` | over | C | +4.3% | -160 | FanDuel | 0.1 |
 
 ### Leans
 
@@ -24,11 +23,16 @@ _None._
 
 ### What changed
 
-- **Added:** Hull v Everton corners_1x2 home
-- **Added:** Liverpool v Man City double_chance draw_or_away
-- **Dropped:** Crystal Palace v Nott'm Forest draw_no_bet away
-- **Dropped:** Ipswich v Fulham double_chance draw_or_away
-- **Moved section:** Arsenal v Leeds btts yes
+- **Added:** Chelsea v Bournemouth btts yes
+- **Added:** Chelsea v Bournemouth corners_total_10_5 over
+- **Added:** Crystal Palace v Nott'm Forest corners_total_10_5 over
+- **Added:** Ipswich v Fulham double_chance home_or_away
+- **Dropped:** Arsenal v Leeds corners_1x2 away
+- **Dropped:** Aston Villa v Brentford draw_no_bet away
+- **Dropped:** Man United v Tottenham double_chance draw_or_away
+- **Moved section:** Chelsea v Bournemouth corners_total_9_5 over
+- **Moved section:** Chelsea v Bournemouth double_chance draw_or_away
+- **Moved section:** Ipswich v Fulham corners_total_10_5 over
 
 
 ## Beyond the Premier League
@@ -53,13 +57,13 @@ Priced on the European ratings, where 868 European ties bridge eleven leagues on
 
 | Match | Market | Selection | Edge | Price | Book | Units |
 |:--|:--|:--|--:|--:|:--|--:|
-| Arsenal v Lille | `total_2_5` | under | +7.0% | +150 | BetUS | 0.1 |
-| Arsenal v Lille | `corners_total_10_5` | under | +7.0% | -121 | BetRivers | 0.1 |
-| Ath Madrid v Man United | `draw_no_bet` | home | +6.5% | -136 | FanDuel | 0.1 |
-| Inter v Club Brugge | `corners_1x2` | away | +6.4% | +475 | BetRivers | 0.1 |
+| Lens v Sp Lisbon | `draw_no_bet` | away | +6.4% | +100 | FanDuel | 0.1 |
+| Roma v Real Madrid | `double_chance` | home_or_draw | +6.1% | -109 | BetRivers | 0.1 |
+| Arsenal v Lille | `corners_total_10_5` | under | +5.9% | -130 | BetRivers | 0.1 |
+| Arsenal v Lille | `total_2_5` | under | +5.8% | +140 | FanDuel | 0.1 |
 
 - 6 fixture(s) left out because a club has no rating in the pool: Bodø/Glimt v Dortmund, LASK v Liverpool, Sabah FK v Slavia Praha, Shakhtar Donetsk v AEK, Viking FK v Bayern Munich, ŠK Slovan Bratislava v Stuttgart.
-- 15 further selection(s) qualified and are not shown: this section prints at most 4 per competition, the highest edges first.
+- 13 further selection(s) qualified and are not shown: this section prints at most 4 per competition, the highest edges first.
 
 ### UEFA Europa League
 
@@ -67,10 +71,9 @@ Same European ratings as the Champions League, and **thinner in both directions*
 
 | Match | Market | Selection | Edge | Price | Book | Units |
 |:--|:--|:--|--:|--:|:--|--:|
-| Rennes v OFI Crete | `double_chance` | draw_or_away | +6.4% | +220 | FanDuel | 0.1 |
+| Rennes v OFI Crete | `btts` | yes | +6.2% | -102 | FanDuel | 0.1 |
 | Benfica v Celtic | `btts` | yes | +5.7% | -106 | FanDuel | 0.1 |
-| Rennes v OFI Crete | `btts` | yes | +5.0% | -112 | FanDuel | 0.1 |
-| St. Gilloise v Sociedad | `btts` | no | +4.8% | +130 | FanDuel | 0.1 |
+| St. Gilloise v Sociedad | `btts` | no | +4.8% | +130 | DraftKings | 0.1 |
 
 - 18 fixture(s) dropped as already kicked off: AC Milan v Benfica, Anderlecht v Lyon, Bayer Leverkusen v NK Celje, Besiktas JK v Marseille, Celtic v Ferencváros TC, Crystal Palace v Lech Poznań, and 12 more.
 - 14 fixture(s) left out because a club has no rating in the pool: AZ Alkmaar v Hapoel Be'er Sheva, Bournemouth v SK Sturm Graz, Celta Vigo v Juventus, Dinamo Zagreb v Anderlecht, Ferencváros TC v Viktoria Plzeň, Jagiellonia Białystok v FC Ararat-Armenia, Lech Poznań v Leverkusen, Marseille v Olympiakos Piraeus, NEC Nijmegen v PFC Levski Sofia, NK Celje v Omonoia FC, Salzburg v AC Milan, Sparta Prague v Lillestrom, TSG Hoffenheim v Besiktas JK, Torreense v Sunderland.
@@ -88,7 +91,7 @@ _Fitted but not bet: UEFA Nations League (0 of 0 fixtures rateable), UEFA Europa
 
 Each selection is scored at the first price a card offered it, and only rows the card staked are counted — a lean carries no stake and is not a recommendation.
 
-**Beyond the Premier League is not in these numbers.** 10 staked selection(s) from that section are recorded and not yet scored — nothing settles them. The rule above is stated by stake, so without this line the only way to notice would be to total the card by hand.
+**Beyond the Premier League is not in these numbers.** 9 staked selection(s) from that section are recorded and not yet scored — nothing settles them. The rule above is stated by stake, so without this line the only way to notice would be to total the card by hand.
 
 This is the only out-of-sample evidence this project has. It will take a long time to mean anything: separating a real 5% edge from zero needs roughly 1,500 settled bets.
 
@@ -98,4 +101,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/37955554979)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/38040248484)

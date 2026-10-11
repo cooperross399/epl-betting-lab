@@ -1,8 +1,8 @@
-## Sunday 11 October, 09:54 UTC — scheduled run
+## Sunday 11 October, 11:01 UTC — scheduled run
 
-Selections changed: 15 added, 3 dropped, 1 moved section.
+Selections changed: 3 dropped, 4 moved section.
 
-Provider quota: 96229 (about 96 days at the observed burn)
+Provider quota: 96103 (about 96 days at the observed burn)
 
 Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
 
@@ -11,9 +11,8 @@ Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_tot
 | Match | Market | Selection | Tier | Edge | Price | Book | Units |
 |:------|:-------|:----------|:-----|-----:|------:|:-----|------:|
 | Coventry v Newcastle | `corners_total_9_5` | over | C | +5.0% | -113 | Caesars | 0.1 |
-| Hull v Everton | `corners_total_9_5` | over | C | +4.6% | -112 | Bovada | 0.1 |
+| Hull v Everton | `corners_total_9_5` | over | C | +4.0% | -115 | Bovada | 0.1 |
 | Coventry v Newcastle | `corners_total_10_5` | over | C | +5.3% | +150 | FanDuel | 0.1 |
-| Hull v Everton | `corners_total_10_5` | over | C | +4.0% | +145 | Bovada | 0.1 |
 
 ### Leans
 
@@ -21,25 +20,13 @@ _None._
 
 ### What changed
 
-- **Added:** Coventry v Newcastle corners_1x2 draw
-- **Added:** Coventry v Newcastle corners_total_10_5 over
-- **Added:** Coventry v Newcastle double_chance draw_or_away
-- **Added:** Crystal Palace v Nott'm Forest btts yes
-- **Added:** Crystal Palace v Nott'm Forest corners_1x2 home
-- **Added:** Crystal Palace v Nott'm Forest corners_total_10_5 over
-- **Added:** Crystal Palace v Nott'm Forest corners_total_9_5 over
-- **Added:** Crystal Palace v Nott'm Forest total_2_5 over
-- **Added:** Hull v Everton corners_1x2 home
-- **Added:** Hull v Everton corners_total_10_5 over
-- **Added:** Hull v Everton double_chance home_or_draw
-- **Added:** Liverpool v Man City corners_1x2 draw
-- **Added:** Liverpool v Man City corners_1x2 home
-- **Added:** Liverpool v Man City corners_total_10_5 under
-- **Added:** Liverpool v Man City draw_no_bet away
-- **Dropped:** Man United v Tottenham corners_1x2 away
-- **Dropped:** Man United v Tottenham corners_total_9_5 over
-- **Dropped:** Man United v Tottenham draw_no_bet away
-- **Moved section:** Hull v Everton corners_total_9_5 over
+- **Dropped:** Coventry v Newcastle corners_1x2 draw
+- **Dropped:** Crystal Palace v Nott'm Forest btts yes
+- **Dropped:** Liverpool v Man City corners_1x2 draw
+- **Moved section:** Crystal Palace v Nott'm Forest corners_total_9_5 over
+- **Moved section:** Hull v Everton corners_total_10_5 over
+- **Moved section:** Liverpool v Man City corners_1x2 home
+- **Moved section:** Liverpool v Man City draw_no_bet away
 
 
 ## Beyond the Premier League
@@ -109,4 +96,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/38129846116)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/38133819376)

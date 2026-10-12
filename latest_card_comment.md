@@ -1,8 +1,10 @@
-## Monday 12 October, 12:24 UTC — scheduled run
+## Monday 12 October, 13:54 UTC — manual run
 
-Selections changed: 1 added, 2 moved section.
+Selections changed: 2 moved section.
 
-Provider quota: 92870 (about 92 days at the observed burn)
+_This run was started by hand, not by the schedule. If you did not start it, someone was testing._
+
+Provider quota: 92517 (about 92 days at the observed burn)
 
 Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
 
@@ -10,8 +12,8 @@ Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_tot
 
 | Match | Market | Selection | Tier | Edge | Price | Book | Units |
 |:------|:-------|:----------|:-----|-----:|------:|:-----|------:|
-| Coventry v Newcastle | `corners_total_9_5` | over | C | +3.9% | -118 | Caesars | 0.1 |
-| Coventry v Newcastle | `corners_1x2` | home | C | +3.8% | +125 | DraftKings | 0.1 |
+| Coventry v Newcastle | `corners_total_9_5` | over | C | +5.6% | -110 | FanDuel | 0.1 |
+| Coventry v Newcastle | `corners_total_10_5` | over | C | +5.3% | +150 | FanDuel | 0.1 |
 
 ### Leans
 
@@ -19,9 +21,8 @@ _None._
 
 ### What changed
 
-- **Added:** Coventry v Newcastle double_chance home_or_draw
+- **Moved section:** Coventry v Newcastle corners_1x2 home
 - **Moved section:** Coventry v Newcastle corners_total_10_5 over
-- **Moved section:** Coventry v Newcastle draw_no_bet away
 
 
 ## Beyond the Premier League
@@ -91,4 +92,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/38248370246)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/38258503144)

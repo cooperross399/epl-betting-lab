@@ -1,8 +1,8 @@
-## Sunday 11 October, 15:26 UTC — scheduled run
+## Monday 12 October, 10:13 UTC — scheduled run
 
-Selections changed: 3 added, 9 dropped, 2 moved section.
+Selections changed: 5 added, 9 dropped, 2 moved section.
 
-Provider quota: 94094 (about 94 days at the observed burn)
+Provider quota: 92980 (about 92 days at the observed burn)
 
 Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
 
@@ -10,8 +10,9 @@ Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_tot
 
 | Match | Market | Selection | Tier | Edge | Price | Book | Units |
 |:------|:-------|:----------|:-----|-----:|------:|:-----|------:|
-| Coventry v Newcastle | `corners_total_9_5` | over | C | +5.6% | -110 | FanDuel | 0.1 |
-| Coventry v Newcastle | `corners_total_10_5` | over | C | +5.3% | +150 | FanDuel | 0.1 |
+| Coventry v Newcastle | `corners_total_9_5` | over | C | +3.9% | -118 | Caesars | 0.1 |
+| Coventry v Newcastle | `corners_1x2` | home | C | +3.8% | +125 | DraftKings | 0.1 |
+| Coventry v Newcastle | `corners_total_10_5` | over | C | +3.8% | +140 | FanDuel | 0.1 |
 
 ### Leans
 
@@ -19,20 +20,22 @@ _None._
 
 ### What changed
 
-- **Added:** Coventry v Newcastle total_2_5 over
-- **Added:** Coventry v Newcastle total_2_5 under
-- **Added:** Liverpool v Man City total_2_5 over
-- **Dropped:** Crystal Palace v Nott'm Forest corners_1x2 home
-- **Dropped:** Crystal Palace v Nott'm Forest corners_total_10_5 over
-- **Dropped:** Crystal Palace v Nott'm Forest corners_total_9_5 over
-- **Dropped:** Crystal Palace v Nott'm Forest total_2_5 over
-- **Dropped:** Hull v Everton corners_1x2 home
-- **Dropped:** Hull v Everton corners_total_10_5 over
-- **Dropped:** Hull v Everton corners_total_9_5 over
-- **Dropped:** Hull v Everton double_chance home_or_draw
-- **Dropped:** Hull v Everton draw_no_bet home
-- **Moved section:** Liverpool v Man City corners_1x2 home
-- **Moved section:** Liverpool v Man City draw_no_bet away
+- **Added:** Coventry v Newcastle btts yes
+- **Added:** Coventry v Newcastle corners_1x2 away
+- **Added:** Coventry v Newcastle corners_total_10_5 under
+- **Added:** Coventry v Newcastle corners_total_9_5 under
+- **Added:** Coventry v Newcastle draw_no_bet home
+- **Dropped:** Liverpool v Man City btts yes
+- **Dropped:** Liverpool v Man City corners_1x2 draw
+- **Dropped:** Liverpool v Man City corners_1x2 home
+- **Dropped:** Liverpool v Man City corners_total_10_5 under
+- **Dropped:** Liverpool v Man City corners_total_9_5 under
+- **Dropped:** Liverpool v Man City double_chance draw_or_away
+- **Dropped:** Liverpool v Man City double_chance home_or_away
+- **Dropped:** Liverpool v Man City draw_no_bet away
+- **Dropped:** Liverpool v Man City total_2_5 over
+- **Moved section:** Coventry v Newcastle corners_1x2 home
+- **Moved section:** Coventry v Newcastle draw_no_bet away
 
 
 ## Beyond the Premier League
@@ -71,7 +74,7 @@ Same European ratings as the Champions League, and **thinner in both directions*
 
 | Match | Market | Selection | Edge | Price | Book | Units |
 |:--|:--|:--|--:|--:|:--|--:|
-| Rennes v OFI Crete | `btts` | yes | +6.2% | -102 | FanDuel | 0.1 |
+| Rennes v OFI Crete | `btts` | yes | +6.2% | -102 | BetMGM | 0.1 |
 | St. Gilloise v Sociedad | `btts` | no | +5.5% | +138 | FanDuel | 0.1 |
 | Benfica v Celtic | `btts` | yes | +5.5% | -108 | FanDuel | 0.1 |
 
@@ -85,8 +88,8 @@ _Fitted but not bet: UEFA Nations League (0 of 0 fixtures rateable), UEFA Europa
 - Settled: **84** selections, 40 won, 5 returned the stake
 - Staked: 11.25 units
 - Profit: **+0.53 units** (+4.8% on turnover)
-- Still pending: 4
-- Played, waiting on results data: **17** — these are settled matches the results feed has not caught up with, so the record above is behind rather than still accumulating.
+- Still pending: 3
+- Played, waiting on results data: **18** — these are settled matches the results feed has not caught up with, so the record above is behind rather than still accumulating.
 
 - Stake returned (void): 5 — counted in the settled total above at zero profit, because a push is a bet
 
@@ -102,4 +105,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/38151068352)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/38234605216)

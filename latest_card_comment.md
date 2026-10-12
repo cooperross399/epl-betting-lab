@@ -1,10 +1,8 @@
-## Monday 12 October, 13:54 UTC — manual run
+## Monday 12 October, 18:55 UTC — scheduled run
 
-Selections changed: 2 moved section.
+Selections changed: 3 moved section.
 
-_This run was started by hand, not by the schedule. If you did not start it, someone was testing._
-
-Provider quota: 92517 (about 92 days at the observed burn)
+Provider quota: 91648 (about 91 days at the observed burn)
 
 Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
 
@@ -13,7 +11,8 @@ Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_tot
 | Match | Market | Selection | Tier | Edge | Price | Book | Units |
 |:------|:-------|:----------|:-----|-----:|------:|:-----|------:|
 | Coventry v Newcastle | `corners_total_9_5` | over | C | +5.6% | -110 | FanDuel | 0.1 |
-| Coventry v Newcastle | `corners_total_10_5` | over | C | +5.3% | +150 | FanDuel | 0.1 |
+| Coventry v Newcastle | `corners_total_10_5` | over | C | +6.0% | +155 | FanDuel | 0.1 |
+| Coventry v Newcastle | `corners_1x2` | home | C | +5.5% | +135 | BetRivers | 0.1 |
 
 ### Leans
 
@@ -21,8 +20,9 @@ _None._
 
 ### What changed
 
+- **Moved section:** Coventry v Newcastle btts no
 - **Moved section:** Coventry v Newcastle corners_1x2 home
-- **Moved section:** Coventry v Newcastle corners_total_10_5 over
+- **Moved section:** Coventry v Newcastle draw_no_bet away
 
 
 ## Beyond the Premier League
@@ -35,8 +35,8 @@ Priced on the unified English ratings. Measured out of sample, a club's rating d
 
 | Match | Market | Selection | Edge | Price | Book | Units |
 |:--|:--|:--|--:|--:|:--|--:|
-| Fulham v Crystal Palace | `btts` | no | +4.5% | +125 | BetMGM | 0.1 |
-| Fulham v Crystal Palace | `total_2_5` | under | +2.4% | +115 | Bovada | 0.1 |
+| Fulham v Crystal Palace | `btts` | no | +5.3% | +130 | BetMGM | 0.1 |
+| Fulham v Crystal Palace | `total_2_5` | under | +2.8% | +118 | Bovada | 0.1 |
 
 - 10 fixture(s) dropped as already kicked off: Coventry v Aston Villa, Everton v Wolves, Fleetwood Town v Sheffield United, Ipswich v Arsenal, Liverpool v Tottenham, Man City v Norwich, and 4 more.
 - 1 fixture(s) left out because a club has no rating in the pool: Bradford City v Peterborough United.
@@ -47,13 +47,13 @@ Priced on the European ratings, where 868 European ties bridge eleven leagues on
 
 | Match | Market | Selection | Edge | Price | Book | Units |
 |:--|:--|:--|--:|--:|:--|--:|
-| Lens v Sp Lisbon | `draw_no_bet` | away | +6.4% | +100 | FanDuel | 0.1 |
-| Roma v Real Madrid | `double_chance` | home_or_draw | +6.1% | -109 | BetRivers | 0.1 |
-| Arsenal v Lille | `corners_total_10_5` | under | +5.9% | -130 | BetRivers | 0.1 |
-| Inter v Club Brugge | `btts` | yes | +5.8% | -120 | DraftKings | 0.1 |
+| Lens v Sp Lisbon | `corners_total_9_5` | under | +7.5% | -109 | BetRivers | 0.1 |
+| Arsenal v Lille | `total_2_5` | under | +6.7% | +148 | BetRivers | 0.1 |
+| Feyenoord v Como | `btts` | no | +6.3% | +200 | FanDuel | 0.1 |
+| Roma v Real Madrid | `corners_total_9_5` | under | +6.1% | +108 | BetRivers | 0.1 |
 
 - 6 fixture(s) left out because a club has no rating in the pool: Bodø/Glimt v Dortmund, LASK v Liverpool, Sabah FK v Slavia Praha, Shakhtar Donetsk v AEK, Viking FK v Bayern Munich, ŠK Slovan Bratislava v Stuttgart.
-- 14 further selection(s) qualified and are not shown: this section prints at most 4 per competition, the highest edges first.
+- 12 further selection(s) qualified and are not shown: this section prints at most 4 per competition, the highest edges first.
 
 ### UEFA Europa League
 
@@ -62,8 +62,8 @@ Same European ratings as the Champions League, and **thinner in both directions*
 | Match | Market | Selection | Edge | Price | Book | Units |
 |:--|:--|:--|--:|--:|:--|--:|
 | Rennes v OFI Crete | `btts` | yes | +6.2% | -102 | BetMGM | 0.1 |
-| St. Gilloise v Sociedad | `btts` | no | +5.5% | +138 | FanDuel | 0.1 |
-| Benfica v Celtic | `btts` | yes | +5.5% | -108 | FanDuel | 0.1 |
+| St. Gilloise v Sociedad | `btts` | no | +5.3% | +135 | DraftKings | 0.1 |
+| Benfica v Celtic | `btts` | yes | +5.0% | -112 | BetMGM | 0.1 |
 
 - 18 fixture(s) dropped as already kicked off: AC Milan v Benfica, Anderlecht v Lyon, Bayer Leverkusen v NK Celje, Besiktas JK v Marseille, Celtic v Ferencváros TC, Crystal Palace v Lech Poznań, and 12 more.
 - 14 fixture(s) left out because a club has no rating in the pool: AZ Alkmaar v Hapoel Be'er Sheva, Bournemouth v SK Sturm Graz, Celta Vigo v Juventus, Dinamo Zagreb v Anderlecht, Ferencváros TC v Viktoria Plzeň, Jagiellonia Białystok v FC Ararat-Armenia, Lech Poznań v Leverkusen, Marseille v Olympiakos Piraeus, NEC Nijmegen v PFC Levski Sofia, NK Celje v Omonoia FC, Salzburg v AC Milan, Sparta Prague v Lillestrom, TSG Hoffenheim v Besiktas JK, Torreense v Sunderland.
@@ -92,4 +92,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/38258503144)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/38293687420)

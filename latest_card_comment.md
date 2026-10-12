@@ -1,8 +1,8 @@
-## Monday 12 October, 10:13 UTC — scheduled run
+## Monday 12 October, 12:24 UTC — scheduled run
 
-Selections changed: 5 added, 9 dropped, 2 moved section.
+Selections changed: 1 added, 2 moved section.
 
-Provider quota: 92980 (about 92 days at the observed burn)
+Provider quota: 92870 (about 92 days at the observed burn)
 
 Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
 
@@ -12,7 +12,6 @@ Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_tot
 |:------|:-------|:----------|:-----|-----:|------:|:-----|------:|
 | Coventry v Newcastle | `corners_total_9_5` | over | C | +3.9% | -118 | Caesars | 0.1 |
 | Coventry v Newcastle | `corners_1x2` | home | C | +3.8% | +125 | DraftKings | 0.1 |
-| Coventry v Newcastle | `corners_total_10_5` | over | C | +3.8% | +140 | FanDuel | 0.1 |
 
 ### Leans
 
@@ -20,21 +19,8 @@ _None._
 
 ### What changed
 
-- **Added:** Coventry v Newcastle btts yes
-- **Added:** Coventry v Newcastle corners_1x2 away
-- **Added:** Coventry v Newcastle corners_total_10_5 under
-- **Added:** Coventry v Newcastle corners_total_9_5 under
-- **Added:** Coventry v Newcastle draw_no_bet home
-- **Dropped:** Liverpool v Man City btts yes
-- **Dropped:** Liverpool v Man City corners_1x2 draw
-- **Dropped:** Liverpool v Man City corners_1x2 home
-- **Dropped:** Liverpool v Man City corners_total_10_5 under
-- **Dropped:** Liverpool v Man City corners_total_9_5 under
-- **Dropped:** Liverpool v Man City double_chance draw_or_away
-- **Dropped:** Liverpool v Man City double_chance home_or_away
-- **Dropped:** Liverpool v Man City draw_no_bet away
-- **Dropped:** Liverpool v Man City total_2_5 over
-- **Moved section:** Coventry v Newcastle corners_1x2 home
+- **Added:** Coventry v Newcastle double_chance home_or_draw
+- **Moved section:** Coventry v Newcastle corners_total_10_5 over
 - **Moved section:** Coventry v Newcastle draw_no_bet away
 
 
@@ -105,4 +91,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/38234605216)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/38248370246)

@@ -318032,3 +318032,1661 @@ observed_at,provider_event_id,date,home_team,away_team,market,selection,book,ame
 2026-10-12T18:51:53+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,total_2_5,under,FanDuel,124
 2026-10-12T18:51:53+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,total_2_5,under,Fanatics,115
 2026-10-12T18:51:53+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,total_2_5,under,MyBookie.ag,119
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,1x2,away,BetRivers,285
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,1x2,away,Bovada,290
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,1x2,away,FanDuel,280
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,1x2,away,Fanatics,280
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,1x2,away,MyBookie.ag,280
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,1x2,draw,BetRivers,310
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,1x2,draw,Bovada,295
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,1x2,draw,FanDuel,290
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,1x2,draw,Fanatics,300
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,1x2,draw,MyBookie.ag,285
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,1x2,home,BetRivers,-114
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,1x2,home,Bovada,-115
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,1x2,home,FanDuel,-130
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,1x2,home,Fanatics,-115
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,1x2,home,MyBookie.ag,-126
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,btts,no,BetRivers,143
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,btts,no,Bovada,140
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,btts,no,FanDuel,150
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,btts,no,Fanatics,145
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,btts,yes,BetRivers,-200
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,btts,yes,Bovada,-185
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,btts,yes,FanDuel,-196
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,btts,yes,Fanatics,-190
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,corners_1x2,away,BetRivers,195
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,corners_1x2,draw,BetRivers,700
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,corners_1x2,home,BetRivers,-205
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,corners_total_10_5,over,BetRivers,-141
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,corners_total_10_5,under,BetRivers,-104
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,corners_total_9_5,over,BetRivers,-225
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,corners_total_9_5,under,BetRivers,150
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,double_chance,draw_or_away,BetRivers,-108
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,double_chance,draw_or_away,Bovada,-108
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,double_chance,draw_or_away,FanDuel,-110
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,double_chance,draw_or_away,Fanatics,-105
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,double_chance,home_or_away,BetRivers,-420
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,double_chance,home_or_away,Bovada,-385
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,double_chance,home_or_away,FanDuel,-400
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,double_chance,home_or_away,Fanatics,-400
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,double_chance,home_or_draw,BetRivers,-385
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,double_chance,home_or_draw,Bovada,-420
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,double_chance,home_or_draw,FanDuel,-425
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,double_chance,home_or_draw,Fanatics,-375
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,draw_no_bet,away,BetRivers,170
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,draw_no_bet,away,Bovada,200
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,draw_no_bet,away,FanDuel,210
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,draw_no_bet,away,Fanatics,185
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,draw_no_bet,home,BetRivers,-265
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,draw_no_bet,home,Bovada,-250
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,draw_no_bet,home,FanDuel,-250
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,draw_no_bet,home,Fanatics,-250
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,total_2_5,over,BetRivers,-186
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,total_2_5,over,Bovada,-168
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,total_2_5,over,FanDuel,-178
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,total_2_5,over,Fanatics,-175
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,total_2_5,over,MyBookie.ag,-180
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,total_2_5,under,BetRivers,143
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,total_2_5,under,Bovada,138
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,total_2_5,under,FanDuel,146
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,total_2_5,under,Fanatics,135
+2026-10-12T19:59:17+00:00,0382a9faef0bb8df1bcc436536cffb05,2026-10-24,Chelsea,Tottenham,total_2_5,under,MyBookie.ag,129
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,1x2,away,BetRivers,140
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,1x2,away,Bovada,130
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,1x2,away,DraftKings,130
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,1x2,away,FanDuel,125
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,1x2,away,Fanatics,130
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,1x2,away,MyBookie.ag,131
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,1x2,draw,BetRivers,260
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,1x2,draw,Bovada,260
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,1x2,draw,DraftKings,245
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,1x2,draw,FanDuel,260
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,1x2,draw,Fanatics,250
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,1x2,draw,MyBookie.ag,238
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,1x2,home,BetRivers,195
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,1x2,home,Bovada,195
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,1x2,home,DraftKings,190
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,1x2,home,FanDuel,185
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,1x2,home,Fanatics,200
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,1x2,home,MyBookie.ag,184
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,btts,no,BetRivers,125
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,btts,no,Bovada,128
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,btts,no,DraftKings,130
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,btts,no,FanDuel,128
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,btts,no,Fanatics,120
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,btts,yes,BetRivers,-175
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,btts,yes,Bovada,-170
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,btts,yes,DraftKings,-185
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,btts,yes,FanDuel,-164
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,btts,yes,Fanatics,-160
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,corners_1x2,away,BetRivers,-103
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,corners_1x2,draw,BetRivers,650
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,corners_1x2,home,BetRivers,102
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,corners_total_10_5,over,BetRivers,-115
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,corners_total_10_5,under,BetRivers,-125
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,corners_total_9_5,over,BetRivers,-182
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,corners_total_9_5,under,BetRivers,125
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,double_chance,draw_or_away,BetRivers,-250
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,double_chance,draw_or_away,Bovada,-245
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,double_chance,draw_or_away,DraftKings,-265
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,double_chance,draw_or_away,FanDuel,-260
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,double_chance,draw_or_away,Fanatics,-250
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,double_chance,home_or_away,BetRivers,-345
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,double_chance,home_or_away,Bovada,-335
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,double_chance,home_or_away,DraftKings,-360
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,double_chance,home_or_away,FanDuel,-360
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,double_chance,home_or_away,Fanatics,-325
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,double_chance,home_or_draw,BetRivers,-175
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,double_chance,home_or_draw,Bovada,-176
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,double_chance,home_or_draw,DraftKings,-185
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,double_chance,home_or_draw,FanDuel,-170
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,double_chance,home_or_draw,Fanatics,-160
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,draw_no_bet,away,BetRivers,-148
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,draw_no_bet,away,Bovada,-136
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,draw_no_bet,away,DraftKings,-150
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,draw_no_bet,away,FanDuel,-140
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,draw_no_bet,away,Fanatics,-150
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,draw_no_bet,home,BetRivers,102
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,draw_no_bet,home,Bovada,113
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,draw_no_bet,home,DraftKings,105
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,draw_no_bet,home,FanDuel,118
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,draw_no_bet,home,Fanatics,115
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,total_2_5,over,BetRivers,-137
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,total_2_5,over,Bovada,-140
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,total_2_5,over,DraftKings,-145
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,total_2_5,over,FanDuel,-138
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,total_2_5,over,Fanatics,-140
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,total_2_5,over,MyBookie.ag,-144
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,total_2_5,under,BetRivers,107
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,total_2_5,under,Bovada,115
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,total_2_5,under,DraftKings,105
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,total_2_5,under,FanDuel,112
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,total_2_5,under,Fanatics,105
+2026-10-12T19:59:17+00:00,0fbb2626ed9534b9dcf21d16925f9bd7,2026-10-24,Coventry,Fulham,total_2_5,under,MyBookie.ag,104
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,1x2,away,BetRivers,245
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,1x2,away,Bovada,230
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,1x2,away,FanDuel,240
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,1x2,away,Fanatics,230
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,1x2,away,MyBookie.ag,222
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,1x2,draw,BetRivers,300
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,1x2,draw,Bovada,295
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,1x2,draw,FanDuel,280
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,1x2,draw,Fanatics,300
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,1x2,draw,MyBookie.ag,270
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,1x2,home,BetRivers,102
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,1x2,home,Bovada,100
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,1x2,home,FanDuel,100
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,1x2,home,Fanatics,100
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,1x2,home,MyBookie.ag,101
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,btts,no,BetRivers,148
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,btts,no,Bovada,147
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,btts,no,FanDuel,154
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,btts,no,Fanatics,145
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,btts,yes,BetRivers,-210
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,btts,yes,Bovada,-195
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,btts,yes,FanDuel,-200
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,btts,yes,Fanatics,-190
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,corners_1x2,away,BetRivers,143
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,corners_1x2,draw,BetRivers,650
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,corners_1x2,home,BetRivers,-148
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,corners_total_10_5,over,BetRivers,-103
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,corners_total_10_5,under,BetRivers,-141
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,corners_total_9_5,over,BetRivers,-159
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,corners_total_9_5,under,BetRivers,110
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,double_chance,draw_or_away,BetRivers,-125
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,double_chance,draw_or_away,Bovada,-132
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,double_chance,draw_or_away,FanDuel,-135
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,double_chance,draw_or_away,Fanatics,-125
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,double_chance,home_or_away,BetRivers,-420
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,double_chance,home_or_away,Bovada,-375
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,double_chance,home_or_away,FanDuel,-390
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,double_chance,home_or_away,Fanatics,-375
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,double_chance,home_or_draw,BetRivers,-335
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,double_chance,home_or_draw,Bovada,-325
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,double_chance,home_or_draw,FanDuel,-320
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,double_chance,home_or_draw,Fanatics,-300
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,draw_no_bet,away,BetRivers,143
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,draw_no_bet,away,Bovada,155
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,draw_no_bet,away,FanDuel,158
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,draw_no_bet,away,Fanatics,145
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,draw_no_bet,home,BetRivers,-215
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,draw_no_bet,home,Bovada,-188
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,draw_no_bet,home,FanDuel,-186
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,draw_no_bet,home,Fanatics,-190
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,total_2_5,over,BetRivers,-190
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,total_2_5,over,Bovada,-170
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,total_2_5,over,FanDuel,-176
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,total_2_5,over,Fanatics,-175
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,total_2_5,under,BetRivers,145
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,total_2_5,under,Bovada,140
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,total_2_5,under,FanDuel,142
+2026-10-12T19:59:17+00:00,290ba8cd3f3a2e9252effca673bf5549,2026-10-25,Liverpool,Brighton,total_2_5,under,Fanatics,135
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,1x2,away,BetRivers,295
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,1x2,away,Bovada,290
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,1x2,away,FanDuel,280
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,1x2,away,Fanatics,280
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,1x2,away,MyBookie.ag,275
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,1x2,draw,BetRivers,320
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,1x2,draw,Bovada,300
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,1x2,draw,FanDuel,310
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,1x2,draw,Fanatics,310
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,1x2,draw,MyBookie.ag,290
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,1x2,home,BetRivers,-121
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,1x2,home,Bovada,-120
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,1x2,home,FanDuel,-130
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,1x2,home,Fanatics,-120
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,1x2,home,MyBookie.ag,-125
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,btts,no,BetRivers,155
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,btts,no,Bovada,175
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,btts,no,FanDuel,178
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,btts,no,Fanatics,165
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,btts,yes,BetRivers,-225
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,btts,yes,Bovada,-235
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,btts,yes,FanDuel,-235
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,btts,yes,Fanatics,-225
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,corners_1x2,away,BetRivers,143
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,corners_1x2,draw,BetRivers,700
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,corners_1x2,home,BetRivers,-148
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,corners_total_10_5,over,BetRivers,-132
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,corners_total_10_5,under,BetRivers,-110
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,corners_total_9_5,over,BetRivers,-220
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,corners_total_9_5,under,BetRivers,143
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,double_chance,draw_or_away,BetRivers,-103
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,double_chance,draw_or_away,Bovada,-107
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,double_chance,draw_or_away,FanDuel,-110
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,double_chance,draw_or_away,Fanatics,100
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,double_chance,home_or_away,BetRivers,-435
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,double_chance,home_or_away,Bovada,-420
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,double_chance,home_or_away,FanDuel,-450
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,double_chance,home_or_away,Fanatics,-400
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,double_chance,home_or_draw,BetRivers,-400
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,double_chance,home_or_draw,Bovada,-385
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,double_chance,home_or_draw,FanDuel,-390
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,double_chance,home_or_draw,Fanatics,-375
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,draw_no_bet,away,BetRivers,180
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,draw_no_bet,away,Bovada,193
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,draw_no_bet,away,FanDuel,200
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,draw_no_bet,away,Fanatics,190
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,draw_no_bet,home,BetRivers,-278
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,draw_no_bet,home,Bovada,-240
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,draw_no_bet,home,FanDuel,-245
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,draw_no_bet,home,Fanatics,-260
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,total_2_5,over,BetRivers,-220
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,total_2_5,over,Bovada,-200
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,total_2_5,over,FanDuel,-230
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,total_2_5,over,Fanatics,-225
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,total_2_5,under,BetRivers,165
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,total_2_5,under,Bovada,163
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,total_2_5,under,FanDuel,184
+2026-10-12T19:59:17+00:00,33fb7467b23c91d57dc976d9ab05ea97,2026-10-25,Man United,Bournemouth,total_2_5,under,Fanatics,165
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,1x2,away,BetMGM,160
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,1x2,away,BetOnline.ag,168
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,1x2,away,BetRivers,165
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,1x2,away,BetUS,182
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,1x2,away,Bovada,170
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,1x2,away,DraftKings,165
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,1x2,away,FanDuel,170
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,1x2,away,Fanatics,160
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,1x2,away,LowVig.ag,168
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,1x2,away,MyBookie.ag,165
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,1x2,draw,BetMGM,260
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,1x2,draw,BetOnline.ag,266
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,1x2,draw,BetRivers,265
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,1x2,draw,BetUS,265
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,1x2,draw,Bovada,260
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,1x2,draw,DraftKings,260
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,1x2,draw,FanDuel,250
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,1x2,draw,Fanatics,250
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,1x2,draw,LowVig.ag,266
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,1x2,draw,MyBookie.ag,250
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,1x2,home,BetMGM,155
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,1x2,home,BetOnline.ag,157
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,1x2,home,BetRivers,148
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,1x2,home,BetUS,148
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,1x2,home,Bovada,150
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,1x2,home,DraftKings,145
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,1x2,home,FanDuel,140
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,1x2,home,Fanatics,150
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,1x2,home,LowVig.ag,157
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,1x2,home,MyBookie.ag,139
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,btts,no,BetMGM,140
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,btts,no,BetRivers,140
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,btts,no,Bovada,150
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,btts,no,DraftKings,155
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,btts,no,FanDuel,152
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,btts,no,Fanatics,140
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,btts,no,MyBookie.ag,137
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,btts,yes,BetMGM,-200
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,btts,yes,BetRivers,-195
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,btts,yes,Bovada,-200
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,btts,yes,DraftKings,-205
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,btts,yes,FanDuel,-200
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,btts,yes,Fanatics,-180
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,btts,yes,MyBookie.ag,-193
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,corners_1x2,away,BetRivers,115
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,corners_1x2,draw,BetRivers,650
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,corners_1x2,home,BetRivers,-115
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,corners_total_10_5,over,BetRivers,104
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,corners_total_10_5,under,BetRivers,-152
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,corners_total_9_5,over,BetRivers,-155
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,corners_total_9_5,under,BetRivers,106
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,double_chance,draw_or_away,BetRivers,-190
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,double_chance,draw_or_away,Bovada,-186
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,double_chance,draw_or_away,DraftKings,-195
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,double_chance,draw_or_away,FanDuel,-195
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,double_chance,draw_or_away,Fanatics,-190
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,double_chance,draw_or_away,MyBookie.ag,-236
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,double_chance,home_or_away,BetRivers,-375
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,double_chance,home_or_away,Bovada,-360
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,double_chance,home_or_away,DraftKings,-360
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,double_chance,home_or_away,FanDuel,-340
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,double_chance,home_or_away,Fanatics,-350
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,double_chance,home_or_away,MyBookie.ag,-420
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,double_chance,home_or_draw,BetRivers,-215
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,double_chance,home_or_draw,Bovada,-225
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,double_chance,home_or_draw,DraftKings,-225
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,double_chance,home_or_draw,FanDuel,-230
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,double_chance,home_or_draw,Fanatics,-200
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,double_chance,home_or_draw,MyBookie.ag,-280
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,draw_no_bet,away,BetMGM,-115
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,draw_no_bet,away,BetRivers,-112
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,draw_no_bet,away,Bovada,102
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,draw_no_bet,away,DraftKings,-105
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,draw_no_bet,away,FanDuel,102
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,draw_no_bet,away,Fanatics,-110
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,draw_no_bet,away,MyBookie.ag,-101
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,draw_no_bet,home,BetMGM,-120
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,draw_no_bet,home,BetRivers,-129
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,draw_no_bet,home,Bovada,-122
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,draw_no_bet,home,DraftKings,-130
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,draw_no_bet,home,FanDuel,-120
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,draw_no_bet,home,Fanatics,-120
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,draw_no_bet,home,MyBookie.ag,-126
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,total_2_5,over,BetMGM,-165
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,total_2_5,over,BetRivers,-157
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,total_2_5,over,Bovada,-162
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,total_2_5,over,DraftKings,-160
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,total_2_5,over,FanDuel,-160
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,total_2_5,over,Fanatics,-160
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,total_2_5,over,MyBookie.ag,-166
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,total_2_5,under,BetMGM,120
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,total_2_5,under,BetRivers,123
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,total_2_5,under,Bovada,134
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,total_2_5,under,DraftKings,125
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,total_2_5,under,FanDuel,130
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,total_2_5,under,Fanatics,120
+2026-10-12T19:59:17+00:00,676b3b0b609e9cf565da450786618d26,2026-10-18,Leeds,Man United,total_2_5,under,MyBookie.ag,119
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,1x2,away,BetRivers,-130
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,1x2,away,Bovada,-136
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,1x2,away,FanDuel,-145
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,1x2,away,Fanatics,-140
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,1x2,away,MyBookie.ag,-143
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,1x2,draw,BetRivers,295
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,1x2,draw,Bovada,295
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,1x2,draw,FanDuel,290
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,1x2,draw,Fanatics,300
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,1x2,draw,MyBookie.ag,280
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,1x2,home,BetRivers,350
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,1x2,home,Bovada,360
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,1x2,home,FanDuel,340
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,1x2,home,Fanatics,350
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,1x2,home,MyBookie.ag,340
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,btts,no,BetRivers,110
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,btts,no,Bovada,110
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,btts,no,FanDuel,116
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,btts,no,Fanatics,120
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,btts,yes,BetRivers,-152
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,btts,yes,Bovada,-145
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,btts,yes,FanDuel,-148
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,btts,yes,Fanatics,-160
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,corners_1x2,away,BetRivers,-190
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,corners_1x2,draw,BetRivers,650
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,corners_1x2,home,BetRivers,185
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,corners_total_10_5,over,BetRivers,107
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,corners_total_10_5,under,BetRivers,-159
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,corners_total_9_5,over,BetRivers,-148
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,corners_total_9_5,under,BetRivers,102
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,double_chance,draw_or_away,BetRivers,-500
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,double_chance,draw_or_away,Bovada,-575
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,double_chance,draw_or_away,FanDuel,-475
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,double_chance,draw_or_away,Fanatics,-500
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,double_chance,home_or_away,BetRivers,-400
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,double_chance,home_or_away,Bovada,-385
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,double_chance,home_or_away,FanDuel,-400
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,double_chance,home_or_away,Fanatics,-400
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,double_chance,home_or_draw,BetRivers,106
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,double_chance,home_or_draw,Bovada,109
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,double_chance,home_or_draw,FanDuel,100
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,double_chance,home_or_draw,Fanatics,110
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,draw_no_bet,away,BetRivers,-335
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,draw_no_bet,away,Bovada,-320
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,draw_no_bet,away,FanDuel,-300
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,draw_no_bet,away,Fanatics,-325
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,draw_no_bet,home,BetRivers,210
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,draw_no_bet,home,Bovada,255
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,draw_no_bet,home,FanDuel,245
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,draw_no_bet,home,Fanatics,230
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,total_2_5,over,BetRivers,-143
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,total_2_5,over,Bovada,-134
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,total_2_5,over,FanDuel,-142
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,total_2_5,over,Fanatics,-150
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,total_2_5,over,MyBookie.ag,-147
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,total_2_5,under,BetRivers,110
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,total_2_5,under,Bovada,112
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,total_2_5,under,FanDuel,116
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,total_2_5,under,Fanatics,115
+2026-10-12T19:59:17+00:00,69493b5ebb84f24ab1d6023a30ee89f0,2026-10-25,Hull,Brentford,total_2_5,under,MyBookie.ag,106
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,1x2,away,BetMGM,110
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,1x2,away,BetOnline.ag,121
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,1x2,away,BetRivers,112
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,1x2,away,BetUS,115
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,1x2,away,Bovada,115
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,1x2,away,DraftKings,115
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,1x2,away,FanDuel,115
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,1x2,away,Fanatics,115
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,1x2,away,LowVig.ag,121
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,1x2,away,MyBookie.ag,112
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,1x2,draw,BetMGM,275
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,1x2,draw,BetOnline.ag,271
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,1x2,draw,BetRivers,290
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,1x2,draw,BetUS,275
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,1x2,draw,Bovada,275
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,1x2,draw,DraftKings,270
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,1x2,draw,FanDuel,260
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,1x2,draw,Fanatics,260
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,1x2,draw,LowVig.ag,271
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,1x2,draw,MyBookie.ag,260
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,1x2,home,BetMGM,220
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,1x2,home,BetOnline.ag,219
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,1x2,home,BetRivers,210
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,1x2,home,BetUS,220
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,1x2,home,Bovada,220
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,1x2,home,DraftKings,215
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,1x2,home,FanDuel,210
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,1x2,home,Fanatics,210
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,1x2,home,LowVig.ag,219
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,1x2,home,MyBookie.ag,204
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,btts,no,BetMGM,125
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,btts,no,BetRivers,143
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,btts,no,Bovada,138
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,btts,no,DraftKings,140
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,btts,no,FanDuel,148
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,btts,no,Fanatics,145
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,btts,no,MyBookie.ag,129
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,btts,yes,BetMGM,-185
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,btts,yes,BetRivers,-195
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,btts,yes,Bovada,-183
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,btts,yes,DraftKings,-185
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,btts,yes,FanDuel,-190
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,btts,yes,Fanatics,-190
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,btts,yes,MyBookie.ag,-181
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,corners_1x2,away,BetRivers,-114
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,corners_1x2,draw,BetRivers,650
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,corners_1x2,home,BetRivers,112
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,corners_total_10_5,over,BetRivers,-114
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,corners_total_10_5,under,BetRivers,-129
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,corners_total_9_5,over,BetRivers,-182
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,corners_total_9_5,under,BetRivers,123
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,double_chance,draw_or_away,BetRivers,-278
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,double_chance,draw_or_away,Bovada,-305
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,double_chance,draw_or_away,DraftKings,-290
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,double_chance,draw_or_away,FanDuel,-280
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,double_chance,draw_or_away,MyBookie.ag,-350
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,double_chance,home_or_away,BetRivers,-400
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,double_chance,home_or_away,Bovada,-360
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,double_chance,home_or_away,DraftKings,-370
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,double_chance,home_or_away,FanDuel,-350
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,double_chance,home_or_away,MyBookie.ag,-441
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,double_chance,home_or_draw,BetRivers,-141
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,double_chance,home_or_draw,Bovada,-143
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,double_chance,home_or_draw,DraftKings,-150
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,double_chance,home_or_draw,FanDuel,-160
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,double_chance,home_or_draw,MyBookie.ag,-193
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,draw_no_bet,away,BetMGM,-190
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,draw_no_bet,away,BetRivers,-182
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,draw_no_bet,away,Bovada,-170
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,draw_no_bet,away,DraftKings,-180
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,draw_no_bet,away,FanDuel,-156
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,draw_no_bet,away,Fanatics,-170
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,draw_no_bet,away,MyBookie.ag,-165
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,draw_no_bet,home,BetMGM,130
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,draw_no_bet,home,BetRivers,125
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,draw_no_bet,home,Bovada,140
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,draw_no_bet,home,DraftKings,135
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,draw_no_bet,home,FanDuel,132
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,draw_no_bet,home,Fanatics,130
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,draw_no_bet,home,MyBookie.ag,129
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,total_2_5,over,BetMGM,-160
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,total_2_5,over,BetRivers,-167
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,total_2_5,over,BetUS,-150
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,total_2_5,over,Bovada,-150
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,total_2_5,over,DraftKings,-155
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,total_2_5,over,FanDuel,-158
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,total_2_5,over,Fanatics,-165
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,total_2_5,over,MyBookie.ag,-160
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,total_2_5,under,BetMGM,115
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,total_2_5,under,BetRivers,130
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,total_2_5,under,BetUS,130
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,total_2_5,under,Bovada,125
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,total_2_5,under,DraftKings,120
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,total_2_5,under,FanDuel,128
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,total_2_5,under,Fanatics,125
+2026-10-12T19:59:17+00:00,764e6513cb3f348881503df70ccb90e0,2026-10-17,Everton,Chelsea,total_2_5,under,MyBookie.ag,115
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,1x2,away,BetMGM,375
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,1x2,away,BetOnline.ag,397
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,1x2,away,BetRivers,375
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,1x2,away,BetUS,380
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,1x2,away,Bovada,380
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,1x2,away,DraftKings,380
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,1x2,away,FanDuel,380
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,1x2,away,LowVig.ag,397
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,1x2,away,MyBookie.ag,350
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,1x2,draw,BetMGM,300
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,1x2,draw,BetOnline.ag,315
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,1x2,draw,BetRivers,320
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,1x2,draw,BetUS,300
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,1x2,draw,Bovada,300
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,1x2,draw,DraftKings,310
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,1x2,draw,FanDuel,310
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,1x2,draw,LowVig.ag,315
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,1x2,draw,MyBookie.ag,285
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,1x2,home,BetMGM,-145
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,1x2,home,BetOnline.ag,-146
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,1x2,home,BetRivers,-150
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,1x2,home,BetUS,-148
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,1x2,home,Bovada,-148
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,1x2,home,DraftKings,-150
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,1x2,home,FanDuel,-165
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,1x2,home,LowVig.ag,-146
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,1x2,home,MyBookie.ag,-147
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,btts,no,BetMGM,100
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,btts,no,BetRivers,106
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,btts,no,Bovada,108
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,btts,no,DraftKings,110
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,btts,no,FanDuel,110
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,btts,no,MyBookie.ag,103
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,btts,yes,BetMGM,-145
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,btts,yes,BetRivers,-143
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,btts,yes,Bovada,-140
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,btts,yes,DraftKings,-145
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,btts,yes,FanDuel,-140
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,btts,yes,MyBookie.ag,-142
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,corners_1x2,away,BetRivers,295
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,corners_1x2,draw,BetRivers,750
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,corners_1x2,home,BetRivers,-335
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,corners_total_10_5,over,BetRivers,-103
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,corners_total_10_5,under,BetRivers,-143
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,corners_total_9_5,over,BetRivers,-162
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,corners_total_9_5,under,BetRivers,110
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,double_chance,draw_or_away,BetRivers,118
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,double_chance,draw_or_away,Bovada,116
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,double_chance,draw_or_away,DraftKings,110
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,double_chance,draw_or_away,FanDuel,115
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,double_chance,draw_or_away,MyBookie.ag,-123
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,double_chance,home_or_away,BetRivers,-455
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,double_chance,home_or_away,Bovada,-400
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,double_chance,home_or_away,DraftKings,-450
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,double_chance,home_or_away,FanDuel,-425
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,double_chance,home_or_away,MyBookie.ag,-500
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,double_chance,home_or_draw,BetRivers,-560
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,double_chance,home_or_draw,Bovada,-600
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,double_chance,home_or_draw,DraftKings,-550
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,double_chance,home_or_draw,FanDuel,-600
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,double_chance,home_or_draw,MyBookie.ag,-625
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,draw_no_bet,away,BetMGM,240
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,draw_no_bet,away,BetRivers,235
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,draw_no_bet,away,Bovada,280
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,draw_no_bet,away,DraftKings,260
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,draw_no_bet,away,FanDuel,290
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,draw_no_bet,away,MyBookie.ag,240
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,draw_no_bet,home,BetMGM,-375
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,draw_no_bet,home,BetRivers,-385
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,draw_no_bet,home,Bovada,-365
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,draw_no_bet,home,DraftKings,-370
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,draw_no_bet,home,FanDuel,-360
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,draw_no_bet,home,MyBookie.ag,-330
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,total_2_5,over,BetMGM,-145
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,total_2_5,over,BetOnline.ag,-137
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,total_2_5,over,BetRivers,-141
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,total_2_5,over,BetUS,-136
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,total_2_5,over,Bovada,-136
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,total_2_5,over,DraftKings,-140
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,total_2_5,over,FanDuel,-142
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,total_2_5,over,LowVig.ag,-137
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,total_2_5,over,MyBookie.ag,-145
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,total_2_5,under,BetMGM,105
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,total_2_5,under,BetOnline.ag,111
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,total_2_5,under,BetRivers,112
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,total_2_5,under,BetUS,116
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,total_2_5,under,Bovada,113
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,total_2_5,under,DraftKings,110
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,total_2_5,under,FanDuel,116
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,total_2_5,under,LowVig.ag,111
+2026-10-12T19:59:17+00:00,7895f97f2f9577f3b13287a3d086859d,2026-10-17,Fulham,Hull,total_2_5,under,MyBookie.ag,105
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,1x2,away,BetMGM,155
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,1x2,away,BetOnline.ag,176
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,1x2,away,BetRivers,170
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,1x2,away,BetUS,181
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,1x2,away,Bovada,170
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,1x2,away,DraftKings,170
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,1x2,away,FanDuel,170
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,1x2,away,Fanatics,160
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,1x2,away,LowVig.ag,176
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,1x2,away,MyBookie.ag,162
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,1x2,draw,BetMGM,270
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,1x2,draw,BetOnline.ag,264
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,1x2,draw,BetRivers,270
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,1x2,draw,BetUS,265
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,1x2,draw,Bovada,265
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,1x2,draw,DraftKings,260
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,1x2,draw,FanDuel,260
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,1x2,draw,Fanatics,250
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,1x2,draw,LowVig.ag,264
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,1x2,draw,MyBookie.ag,260
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,1x2,home,BetMGM,150
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,1x2,home,BetOnline.ag,151
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,1x2,home,BetRivers,143
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,1x2,home,BetUS,148
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,1x2,home,Bovada,150
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,1x2,home,DraftKings,145
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,1x2,home,FanDuel,140
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,1x2,home,Fanatics,150
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,1x2,home,LowVig.ag,151
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,1x2,home,MyBookie.ag,137
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,btts,no,BetMGM,150
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,btts,no,BetRivers,165
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,btts,no,Bovada,171
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,btts,no,DraftKings,175
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,btts,no,FanDuel,180
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,btts,no,Fanatics,165
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,btts,no,MyBookie.ag,149
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,btts,yes,BetMGM,-220
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,btts,yes,BetRivers,-235
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,btts,yes,Bovada,-230
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,btts,yes,DraftKings,-235
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,btts,yes,FanDuel,-235
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,btts,yes,Fanatics,-225
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,btts,yes,MyBookie.ag,-212
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,corners_1x2,away,BetRivers,100
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,corners_1x2,draw,BetRivers,650
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,corners_1x2,home,BetRivers,100
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,corners_total_10_5,over,BetRivers,-122
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,corners_total_10_5,under,BetRivers,-120
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,corners_total_9_5,over,BetRivers,-200
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,corners_total_9_5,under,BetRivers,133
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,double_chance,draw_or_away,BetRivers,-182
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,double_chance,draw_or_away,Bovada,-176
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,double_chance,draw_or_away,DraftKings,-190
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,double_chance,draw_or_away,FanDuel,-190
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,double_chance,draw_or_away,MyBookie.ag,-234
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,double_chance,home_or_away,BetRivers,-375
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,double_chance,home_or_away,Bovada,-375
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,double_chance,home_or_away,DraftKings,-360
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,double_chance,home_or_away,FanDuel,-360
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,double_chance,home_or_away,MyBookie.ag,-441
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,double_chance,home_or_draw,BetRivers,-225
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,double_chance,home_or_draw,Bovada,-230
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,double_chance,home_or_draw,DraftKings,-225
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,double_chance,home_or_draw,FanDuel,-230
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,double_chance,home_or_draw,MyBookie.ag,-275
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,draw_no_bet,away,BetMGM,-115
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,draw_no_bet,away,BetRivers,-107
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,draw_no_bet,away,Bovada,105
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,draw_no_bet,away,DraftKings,-105
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,draw_no_bet,away,FanDuel,102
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,draw_no_bet,away,Fanatics,-110
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,draw_no_bet,away,MyBookie.ag,-101
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,draw_no_bet,home,BetMGM,-120
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,draw_no_bet,home,BetRivers,-136
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,draw_no_bet,home,Bovada,-125
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,draw_no_bet,home,DraftKings,-130
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,draw_no_bet,home,FanDuel,-120
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,draw_no_bet,home,Fanatics,-120
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,draw_no_bet,home,MyBookie.ag,-125
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,total_2_5,over,BetMGM,-190
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,total_2_5,over,BetRivers,-195
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,total_2_5,over,Bovada,-180
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,total_2_5,over,DraftKings,-185
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,total_2_5,over,FanDuel,-188
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,total_2_5,over,Fanatics,-180
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,total_2_5,under,BetMGM,138
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,total_2_5,under,BetRivers,150
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,total_2_5,under,Bovada,147
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,total_2_5,under,DraftKings,140
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,total_2_5,under,FanDuel,152
+2026-10-12T19:59:17+00:00,8f1945e7272bc7e89016439f5ab321c7,2026-10-17,Brentford,Liverpool,total_2_5,under,Fanatics,140
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,1x2,away,BetMGM,525
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,1x2,away,BetRivers,540
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,1x2,away,BetUS,530
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,1x2,away,Bovada,500
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,1x2,away,DraftKings,500
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,1x2,away,FanDuel,500
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,1x2,away,MyBookie.ag,480
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,1x2,draw,BetMGM,360
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,1x2,draw,BetRivers,350
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,1x2,draw,BetUS,374
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,1x2,draw,Bovada,370
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,1x2,draw,DraftKings,360
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,1x2,draw,FanDuel,360
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,1x2,draw,MyBookie.ag,350
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,1x2,home,BetMGM,-210
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,1x2,home,BetRivers,-205
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,1x2,home,BetUS,-207
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,1x2,home,Bovada,-205
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,1x2,home,DraftKings,-210
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,1x2,home,FanDuel,-240
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,1x2,home,MyBookie.ag,-220
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,btts,no,BetMGM,100
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,btts,no,BetRivers,108
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,btts,no,Bovada,110
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,btts,no,DraftKings,110
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,btts,no,FanDuel,112
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,btts,no,MyBookie.ag,101
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,btts,yes,BetMGM,-145
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,btts,yes,BetRivers,-148
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,btts,yes,Bovada,-145
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,btts,yes,DraftKings,-145
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,btts,yes,FanDuel,-142
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,btts,yes,MyBookie.ag,-140
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,corners_1x2,away,BetRivers,290
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,corners_1x2,draw,BetRivers,800
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,corners_1x2,home,BetRivers,-335
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,corners_total_10_5,over,BetRivers,-143
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,corners_total_10_5,under,BetRivers,-103
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,corners_total_9_5,over,BetRivers,-240
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,corners_total_9_5,under,BetRivers,155
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,double_chance,draw_or_away,BetRivers,160
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,double_chance,draw_or_away,Bovada,160
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,double_chance,draw_or_away,DraftKings,150
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,double_chance,draw_or_away,FanDuel,165
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,double_chance,draw_or_away,MyBookie.ag,112
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,double_chance,home_or_away,BetRivers,-500
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,double_chance,home_or_away,Bovada,-500
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,double_chance,home_or_away,DraftKings,-550
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,double_chance,home_or_away,FanDuel,-550
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,double_chance,home_or_away,MyBookie.ag,-676
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,double_chance,home_or_draw,BetRivers,-910
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,double_chance,home_or_draw,Bovada,-950
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,double_chance,home_or_draw,DraftKings,-800
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,double_chance,home_or_draw,FanDuel,-800
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,double_chance,home_or_draw,MyBookie.ag,-952
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,draw_no_bet,away,BetMGM,360
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,draw_no_bet,away,BetRivers,340
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,draw_no_bet,away,Bovada,395
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,draw_no_bet,away,DraftKings,370
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,draw_no_bet,away,FanDuel,410
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,draw_no_bet,away,MyBookie.ag,360
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,draw_no_bet,home,BetMGM,-625
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,draw_no_bet,home,BetRivers,-670
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,draw_no_bet,home,Bovada,-550
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,draw_no_bet,home,DraftKings,-575
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,draw_no_bet,home,FanDuel,-550
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,draw_no_bet,home,MyBookie.ag,-526
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,total_2_5,over,BetMGM,-185
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,total_2_5,over,BetRivers,-177
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,total_2_5,over,Bovada,-175
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,total_2_5,over,DraftKings,-180
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,total_2_5,over,FanDuel,-176
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,total_2_5,over,MyBookie.ag,-181
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,total_2_5,under,BetMGM,130
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,total_2_5,under,BetRivers,138
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,total_2_5,under,Bovada,143
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,total_2_5,under,DraftKings,140
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,total_2_5,under,FanDuel,142
+2026-10-12T19:59:17+00:00,9baaf4e48b041cfef04e70e42532502e,2026-10-19,Tottenham,Coventry,total_2_5,under,MyBookie.ag,129
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,1x2,away,BetMGM,425
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,1x2,away,BetOnline.ag,438
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,1x2,away,BetRivers,425
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,1x2,away,BetUS,420
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,1x2,away,Bovada,420
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,1x2,away,DraftKings,400
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,1x2,away,FanDuel,430
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,1x2,away,Fanatics,425
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,1x2,away,LowVig.ag,438
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,1x2,away,MyBookie.ag,410
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,1x2,draw,BetMGM,333
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,1x2,draw,BetOnline.ag,365
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,1x2,draw,BetRivers,340
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,1x2,draw,BetUS,340
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,1x2,draw,Bovada,340
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,1x2,draw,DraftKings,340
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,1x2,draw,FanDuel,330
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,1x2,draw,Fanatics,330
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,1x2,draw,LowVig.ag,365
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,1x2,draw,MyBookie.ag,330
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,1x2,home,BetMGM,-175
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,1x2,home,BetOnline.ag,-173
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,1x2,home,BetRivers,-175
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,1x2,home,BetUS,-170
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,1x2,home,Bovada,-170
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,1x2,home,DraftKings,-175
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,1x2,home,FanDuel,-190
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,1x2,home,Fanatics,-170
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,1x2,home,LowVig.ag,-173
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,1x2,home,MyBookie.ag,-186
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,btts,no,BetMGM,110
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,btts,no,BetRivers,118
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,btts,no,Bovada,118
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,btts,no,DraftKings,120
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,btts,no,FanDuel,128
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,btts,no,Fanatics,120
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,btts,no,MyBookie.ag,112
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,btts,yes,BetMGM,-160
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,btts,yes,BetRivers,-162
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,btts,yes,Bovada,-155
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,btts,yes,DraftKings,-160
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,btts,yes,FanDuel,-160
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,btts,yes,Fanatics,-160
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,btts,yes,MyBookie.ag,-156
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,corners_1x2,away,BetRivers,310
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,corners_1x2,draw,BetRivers,800
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,corners_1x2,home,BetRivers,-360
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,corners_total_10_5,over,BetRivers,-118
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,corners_total_10_5,under,BetRivers,-124
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,corners_total_9_5,over,BetRivers,-195
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,corners_total_9_5,under,BetRivers,130
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,double_chance,draw_or_away,BetRivers,135
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,double_chance,draw_or_away,Bovada,136
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,double_chance,draw_or_away,DraftKings,130
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,double_chance,draw_or_away,FanDuel,130
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,double_chance,draw_or_away,Fanatics,140
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,double_chance,draw_or_away,MyBookie.ag,-102
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,double_chance,home_or_away,BetRivers,-500
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,double_chance,home_or_away,Bovada,-460
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,double_chance,home_or_away,DraftKings,-500
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,double_chance,home_or_away,FanDuel,-475
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,double_chance,home_or_away,Fanatics,-450
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,double_chance,home_or_away,MyBookie.ag,-599
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,double_chance,home_or_draw,BetRivers,-670
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,double_chance,home_or_draw,Bovada,-725
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,double_chance,home_or_draw,DraftKings,-600
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,double_chance,home_or_draw,FanDuel,-600
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,double_chance,home_or_draw,Fanatics,-575
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,double_chance,home_or_draw,MyBookie.ag,-800
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,draw_no_bet,away,BetMGM,290
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,draw_no_bet,away,BetRivers,270
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,draw_no_bet,away,Bovada,325
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,draw_no_bet,away,DraftKings,300
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,draw_no_bet,away,FanDuel,310
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,draw_no_bet,away,Fanatics,300
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,draw_no_bet,away,MyBookie.ag,300
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,draw_no_bet,home,BetMGM,-450
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,draw_no_bet,home,BetRivers,-455
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,draw_no_bet,home,Bovada,-435
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,draw_no_bet,home,DraftKings,-450
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,draw_no_bet,home,FanDuel,-390
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,draw_no_bet,home,Fanatics,-425
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,draw_no_bet,home,MyBookie.ag,-429
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,total_2_5,over,BetMGM,-185
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,total_2_5,over,BetRivers,-175
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,total_2_5,over,Bovada,-168
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,total_2_5,over,DraftKings,-180
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,total_2_5,over,FanDuel,-172
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,total_2_5,over,Fanatics,-175
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,total_2_5,over,MyBookie.ag,-184
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,total_2_5,under,BetMGM,130
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,total_2_5,under,BetRivers,135
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,total_2_5,under,Bovada,138
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,total_2_5,under,DraftKings,135
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,total_2_5,under,FanDuel,140
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,total_2_5,under,Fanatics,135
+2026-10-12T19:59:17+00:00,9fc08b390a49c4434f7cf631a0bb88fb,2026-10-18,Brighton,Crystal Palace,total_2_5,under,MyBookie.ag,131
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,1x2,away,BetRivers,-152
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,1x2,away,Bovada,-152
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,1x2,away,DraftKings,-155
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,1x2,away,FanDuel,-170
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,1x2,away,Fanatics,-150
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,1x2,away,MyBookie.ag,-156
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,1x2,draw,BetRivers,330
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,1x2,draw,Bovada,320
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,1x2,draw,DraftKings,310
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,1x2,draw,FanDuel,330
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,1x2,draw,Fanatics,330
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,1x2,draw,MyBookie.ag,300
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,1x2,home,BetRivers,390
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,1x2,home,Bovada,370
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,1x2,home,DraftKings,350
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,1x2,home,FanDuel,380
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,1x2,home,Fanatics,375
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,1x2,home,MyBookie.ag,350
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,btts,no,BetRivers,133
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,btts,no,Bovada,140
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,btts,no,DraftKings,130
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,btts,no,FanDuel,140
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,btts,no,Fanatics,150
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,btts,yes,BetRivers,-186
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,btts,yes,Bovada,-185
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,btts,yes,DraftKings,-180
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,btts,yes,FanDuel,-180
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,btts,yes,Fanatics,-200
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,corners_1x2,away,BetRivers,-162
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,corners_1x2,draw,BetRivers,650
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,corners_1x2,home,BetRivers,155
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,corners_total_10_5,over,BetRivers,-105
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,corners_total_10_5,under,BetRivers,-139
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,corners_total_9_5,over,BetRivers,-165
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,corners_total_9_5,under,BetRivers,112
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,double_chance,draw_or_away,BetRivers,-560
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,double_chance,draw_or_away,Bovada,-575
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,double_chance,draw_or_away,DraftKings,-550
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,double_chance,draw_or_away,FanDuel,-550
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,double_chance,draw_or_away,Fanatics,-500
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,double_chance,home_or_away,BetRivers,-455
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,double_chance,home_or_away,Bovada,-435
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,double_chance,home_or_away,DraftKings,-500
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,double_chance,home_or_away,FanDuel,-475
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,double_chance,home_or_away,Fanatics,-425
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,double_chance,home_or_draw,BetRivers,123
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,double_chance,home_or_draw,Bovada,117
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,double_chance,home_or_draw,DraftKings,110
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,double_chance,home_or_draw,FanDuel,125
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,double_chance,home_or_draw,Fanatics,125
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,draw_no_bet,away,BetRivers,-400
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,draw_no_bet,away,Bovada,-340
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,draw_no_bet,away,DraftKings,-380
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,draw_no_bet,away,FanDuel,-360
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,draw_no_bet,away,Fanatics,-350
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,draw_no_bet,home,BetRivers,240
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,draw_no_bet,home,Bovada,265
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,draw_no_bet,home,DraftKings,250
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,draw_no_bet,home,FanDuel,290
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,draw_no_bet,home,Fanatics,250
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,total_2_5,over,BetRivers,-200
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,total_2_5,over,Bovada,-175
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,total_2_5,over,DraftKings,-190
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,total_2_5,over,FanDuel,-192
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,total_2_5,over,Fanatics,-200
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,total_2_5,under,BetRivers,148
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,total_2_5,under,Bovada,143
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,total_2_5,under,DraftKings,140
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,total_2_5,under,FanDuel,154
+2026-10-12T19:59:17+00:00,aca5dd297dbee71f576f7641569fe578,2026-10-24,Aston Villa,Man City,total_2_5,under,Fanatics,150
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,1x2,away,BetMGM,300
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,1x2,away,Bovada,275
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,1x2,away,Caesars,270
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,1x2,away,DraftKings,300
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,1x2,away,FanDuel,290
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,1x2,away,Fanatics,300
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,1x2,away,MyBookie.ag,245
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,1x2,draw,BetMGM,210
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,1x2,draw,Bovada,225
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,1x2,draw,Caesars,220
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,1x2,draw,DraftKings,245
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,1x2,draw,FanDuel,200
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,1x2,draw,Fanatics,220
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,1x2,draw,MyBookie.ag,220
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,1x2,home,BetMGM,-108
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,1x2,home,Bovada,105
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,1x2,home,Caesars,100
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,1x2,home,DraftKings,-110
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,1x2,home,FanDuel,110
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,1x2,home,Fanatics,105
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,1x2,home,MyBookie.ag,100
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,btts,no,BetMGM,190
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,btts,no,Bovada,235
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,btts,no,Caesars,215
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,btts,no,DraftKings,235
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,btts,no,FanDuel,240
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,btts,no,Fanatics,230
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,btts,yes,BetMGM,-295
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,btts,yes,Bovada,-335
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,btts,yes,Caesars,-295
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,btts,yes,DraftKings,-310
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,btts,yes,FanDuel,-330
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,btts,yes,Fanatics,-300
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,corners_1x2,away,BetMGM,-10000
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,corners_1x2,away,FanDuel,-5000
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,corners_1x2,away,Fanatics,-4500
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,corners_1x2,draw,BetMGM,1900
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,corners_1x2,draw,FanDuel,2500
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,corners_1x2,draw,Fanatics,1800
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,corners_1x2,home,BetMGM,2200
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,corners_1x2,home,FanDuel,2500
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,corners_1x2,home,Fanatics,3000
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,corners_total_10_5,over,BetMGM,375
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,corners_total_10_5,over,FanDuel,360
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,corners_total_10_5,under,BetMGM,-700
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,corners_total_10_5,under,FanDuel,-550
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,corners_total_9_5,over,BetMGM,200
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,corners_total_9_5,over,FanDuel,190
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,corners_total_9_5,over,Fanatics,160
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,corners_total_9_5,under,BetMGM,-325
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,corners_total_9_5,under,FanDuel,-290
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,corners_total_9_5,under,Fanatics,-240
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,double_chance,draw_or_away,Bovada,-150
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,double_chance,draw_or_away,DraftKings,-120
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,double_chance,draw_or_away,FanDuel,-150
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,double_chance,draw_or_away,Fanatics,-125
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,double_chance,home_or_away,Bovada,-305
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,double_chance,home_or_away,DraftKings,-320
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,double_chance,home_or_away,FanDuel,-280
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,double_chance,home_or_away,Fanatics,-275
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,double_chance,home_or_draw,Bovada,-400
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,double_chance,home_or_draw,DraftKings,-425
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,double_chance,home_or_draw,FanDuel,-400
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,double_chance,home_or_draw,Fanatics,-400
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,draw_no_bet,away,BetMGM,180
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,draw_no_bet,away,Bovada,169
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,draw_no_bet,away,Caesars,160
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,draw_no_bet,away,DraftKings,195
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,draw_no_bet,away,FanDuel,170
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,draw_no_bet,away,Fanatics,175
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,draw_no_bet,home,BetMGM,-285
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,draw_no_bet,home,Bovada,-210
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,draw_no_bet,home,Caesars,-210
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,draw_no_bet,home,DraftKings,-250
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,draw_no_bet,home,FanDuel,-220
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,draw_no_bet,home,Fanatics,-240
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,total_2_5,over,BetMGM,-140
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,total_2_5,over,Bovada,-148
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,total_2_5,over,DraftKings,-149
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,total_2_5,over,FanDuel,-142
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,total_2_5,over,Fanatics,-140
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,total_2_5,over,MyBookie.ag,-154
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,total_2_5,under,BetMGM,-102
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,total_2_5,under,Bovada,122
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,total_2_5,under,DraftKings,125
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,total_2_5,under,FanDuel,116
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,total_2_5,under,Fanatics,105
+2026-10-12T19:59:17+00:00,acd5bd945dd953ad1e300df5bfe696f9,2026-10-12,Coventry,Newcastle,total_2_5,under,MyBookie.ag,110
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,1x2,away,BetMGM,950
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,1x2,away,BetOnline.ag,985
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,1x2,away,BetRivers,1100
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,1x2,away,BetUS,900
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,1x2,away,Bovada,900
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,1x2,away,DraftKings,950
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,1x2,away,FanDuel,1000
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,1x2,away,Fanatics,1000
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,1x2,away,LowVig.ag,985
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,1x2,away,MyBookie.ag,890
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,1x2,draw,BetMGM,600
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,1x2,draw,BetOnline.ag,660
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,1x2,draw,BetRivers,600
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,1x2,draw,BetUS,600
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,1x2,draw,Bovada,600
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,1x2,draw,DraftKings,600
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,1x2,draw,FanDuel,600
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,1x2,draw,Fanatics,600
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,1x2,draw,LowVig.ag,660
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,1x2,draw,MyBookie.ag,540
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,1x2,home,BetMGM,-450
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,1x2,home,BetOnline.ag,-430
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,1x2,home,BetRivers,-455
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,1x2,home,BetUS,-435
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,1x2,home,Bovada,-435
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,1x2,home,DraftKings,-450
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,1x2,home,FanDuel,-600
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,1x2,home,Fanatics,-450
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,1x2,home,LowVig.ag,-430
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,1x2,home,MyBookie.ag,-469
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,btts,no,BetMGM,-115
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,btts,no,BetRivers,-105
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,btts,no,Bovada,105
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,btts,no,DraftKings,-105
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,btts,no,FanDuel,-108
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,btts,no,Fanatics,100
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,btts,no,MyBookie.ag,-108
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,btts,yes,BetMGM,-120
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,btts,yes,BetRivers,-130
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,btts,yes,Bovada,-135
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,btts,yes,DraftKings,-130
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,btts,yes,FanDuel,-118
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,btts,yes,Fanatics,-130
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,btts,yes,MyBookie.ag,-128
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,corners_1x2,away,BetRivers,500
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,corners_1x2,draw,BetRivers,900
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,corners_1x2,home,BetRivers,-670
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,corners_total_10_5,over,BetRivers,-132
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,corners_total_10_5,under,BetRivers,-112
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,corners_total_9_5,over,BetRivers,-210
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,corners_total_9_5,under,BetRivers,140
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,double_chance,draw_or_away,BetRivers,320
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,double_chance,draw_or_away,Bovada,285
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,double_chance,draw_or_away,DraftKings,280
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,double_chance,draw_or_away,FanDuel,370
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,double_chance,draw_or_away,Fanatics,310
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,double_chance,draw_or_away,MyBookie.ag,178
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,double_chance,home_or_away,BetRivers,-1000
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,double_chance,home_or_away,Bovada,-950
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,double_chance,home_or_away,DraftKings,-1100
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,double_chance,home_or_away,FanDuel,-1000
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,double_chance,home_or_away,Fanatics,-900
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,double_chance,home_or_away,MyBookie.ag,-1408
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,double_chance,home_or_draw,BetRivers,-2500
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,double_chance,home_or_draw,Bovada,-2500
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,double_chance,home_or_draw,DraftKings,-2000
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,double_chance,home_or_draw,FanDuel,-2500
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,double_chance,home_or_draw,Fanatics,-1700
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,double_chance,home_or_draw,MyBookie.ag,-2273
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,draw_no_bet,away,BetMGM,725
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,draw_no_bet,away,BetRivers,650
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,draw_no_bet,away,Bovada,750
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,draw_no_bet,away,DraftKings,700
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,draw_no_bet,away,FanDuel,1080
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,draw_no_bet,away,Fanatics,750
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,draw_no_bet,away,MyBookie.ag,680
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,draw_no_bet,home,BetMGM,-1600
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,draw_no_bet,home,BetRivers,-2000
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,draw_no_bet,home,Bovada,-1500
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,draw_no_bet,home,DraftKings,-1800
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,draw_no_bet,home,FanDuel,-1700
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,draw_no_bet,home,Fanatics,-1400
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,draw_no_bet,home,MyBookie.ag,-1299
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,total_2_5,over,BetMGM,-275
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,total_2_5,over,BetRivers,-286
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,total_2_5,over,Bovada,-265
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,total_2_5,over,DraftKings,-280
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,total_2_5,over,FanDuel,-280
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,total_2_5,over,Fanatics,-275
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,total_2_5,under,BetMGM,195
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,total_2_5,under,BetRivers,215
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,total_2_5,under,Bovada,212
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,total_2_5,under,DraftKings,210
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,total_2_5,under,FanDuel,220
+2026-10-12T19:59:17+00:00,bf2142d1ca76ba2fc9e61afce80f86c0,2026-10-17,Man City,Ipswich,total_2_5,under,Fanatics,200
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,1x2,away,BetRivers,140
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,1x2,away,Bovada,140
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,1x2,away,DraftKings,140
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,1x2,away,FanDuel,135
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,1x2,away,Fanatics,140
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,1x2,away,MyBookie.ag,136
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,1x2,draw,BetRivers,255
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,1x2,draw,Bovada,255
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,1x2,draw,DraftKings,240
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,1x2,draw,FanDuel,250
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,1x2,draw,Fanatics,250
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,1x2,draw,MyBookie.ag,238
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,1x2,home,BetRivers,195
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,1x2,home,Bovada,185
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,1x2,home,DraftKings,175
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,1x2,home,FanDuel,180
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,1x2,home,Fanatics,185
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,1x2,home,MyBookie.ag,177
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,btts,no,BetRivers,118
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,btts,no,Bovada,120
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,btts,no,DraftKings,125
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,btts,no,FanDuel,124
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,btts,no,Fanatics,125
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,btts,yes,BetRivers,-165
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,btts,yes,Bovada,-160
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,btts,yes,DraftKings,-175
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,btts,yes,FanDuel,-158
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,btts,yes,Fanatics,-165
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,corners_1x2,away,BetRivers,112
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,corners_1x2,draw,BetRivers,600
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,corners_1x2,home,BetRivers,-112
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,corners_total_10_5,over,BetRivers,118
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,corners_total_10_5,under,BetRivers,-175
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,corners_total_9_5,over,BetRivers,-134
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,corners_total_9_5,under,BetRivers,-108
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,double_chance,draw_or_away,BetRivers,-250
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,double_chance,draw_or_away,Bovada,-245
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,double_chance,draw_or_away,DraftKings,-250
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,double_chance,draw_or_away,FanDuel,-250
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,double_chance,draw_or_away,Fanatics,-225
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,double_chance,home_or_away,BetRivers,-345
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,double_chance,home_or_away,Bovada,-335
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,double_chance,home_or_away,DraftKings,-360
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,double_chance,home_or_away,FanDuel,-340
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,double_chance,home_or_away,Fanatics,-325
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,double_chance,home_or_draw,BetRivers,-177
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,double_chance,home_or_draw,Bovada,-182
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,double_chance,home_or_draw,DraftKings,-190
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,double_chance,home_or_draw,FanDuel,-185
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,double_chance,home_or_draw,Fanatics,-175
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,draw_no_bet,away,BetRivers,-148
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,draw_no_bet,away,Bovada,-128
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,draw_no_bet,away,DraftKings,-140
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,draw_no_bet,away,FanDuel,-128
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,draw_no_bet,away,Fanatics,-130
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,draw_no_bet,home,BetRivers,102
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,draw_no_bet,home,Bovada,108
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,draw_no_bet,home,DraftKings,100
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,draw_no_bet,home,FanDuel,110
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,draw_no_bet,home,Fanatics,100
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,total_2_5,over,BetRivers,-129
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,total_2_5,over,Bovada,-125
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,total_2_5,over,DraftKings,-135
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,total_2_5,over,FanDuel,-124
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,total_2_5,over,Fanatics,-140
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,total_2_5,over,MyBookie.ag,-133
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,total_2_5,under,BetRivers,100
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,total_2_5,under,Bovada,105
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,total_2_5,under,DraftKings,100
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,total_2_5,under,FanDuel,104
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,total_2_5,under,Fanatics,105
+2026-10-12T19:59:17+00:00,d0202960708a442401d7fc7bd74a0183,2026-10-23,Ipswich,Nott'm Forest,total_2_5,under,MyBookie.ag,-104
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,1x2,away,BetMGM,220
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,1x2,away,BetRivers,220
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,1x2,away,BetUS,227
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,1x2,away,Bovada,220
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,1x2,away,DraftKings,215
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,1x2,away,FanDuel,200
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,1x2,away,MyBookie.ag,210
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,1x2,draw,BetMGM,260
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,1x2,draw,BetRivers,280
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,1x2,draw,BetUS,282
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,1x2,draw,Bovada,275
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,1x2,draw,DraftKings,275
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,1x2,draw,FanDuel,280
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,1x2,draw,MyBookie.ag,255
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,1x2,home,BetMGM,115
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,1x2,home,BetRivers,110
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,1x2,home,BetUS,115
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,1x2,home,Bovada,115
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,1x2,home,DraftKings,110
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,1x2,home,FanDuel,110
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,1x2,home,MyBookie.ag,110
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,btts,no,BetMGM,140
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,btts,no,BetRivers,140
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,btts,no,Bovada,147
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,btts,no,DraftKings,150
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,btts,no,FanDuel,152
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,btts,no,MyBookie.ag,141
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,btts,yes,BetMGM,-200
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,btts,yes,BetRivers,-195
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,btts,yes,Bovada,-195
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,btts,yes,DraftKings,-205
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,btts,yes,FanDuel,-196
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,btts,yes,MyBookie.ag,-199
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,corners_1x2,away,BetRivers,130
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,corners_1x2,draw,BetRivers,700
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,corners_1x2,home,BetRivers,-134
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,corners_total_10_5,over,BetRivers,-141
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,corners_total_10_5,under,BetRivers,-104
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,corners_total_9_5,over,BetRivers,-235
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,corners_total_9_5,under,BetRivers,155
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,double_chance,draw_or_away,BetRivers,-139
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,double_chance,draw_or_away,Bovada,-143
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,double_chance,draw_or_away,DraftKings,-150
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,double_chance,draw_or_away,FanDuel,-155
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,double_chance,draw_or_away,MyBookie.ag,-189
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,double_chance,home_or_away,BetRivers,-385
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,double_chance,home_or_away,Bovada,-375
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,double_chance,home_or_away,DraftKings,-380
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,double_chance,home_or_away,FanDuel,-390
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,double_chance,home_or_away,MyBookie.ag,-429
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,double_chance,home_or_draw,BetRivers,-295
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,double_chance,home_or_draw,Bovada,-300
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,double_chance,home_or_draw,DraftKings,-290
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,double_chance,home_or_draw,FanDuel,-270
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,double_chance,home_or_draw,MyBookie.ag,-360
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,draw_no_bet,away,BetMGM,130
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,draw_no_bet,away,BetRivers,128
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,draw_no_bet,away,Bovada,140
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,draw_no_bet,away,DraftKings,135
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,draw_no_bet,away,FanDuel,130
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,draw_no_bet,away,MyBookie.ag,133
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,draw_no_bet,home,BetMGM,-185
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,draw_no_bet,home,BetRivers,-190
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,draw_no_bet,home,Bovada,-170
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,draw_no_bet,home,DraftKings,-175
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,draw_no_bet,home,FanDuel,-152
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,draw_no_bet,home,MyBookie.ag,-171
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,total_2_5,over,BetMGM,-175
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,total_2_5,over,BetRivers,-167
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,total_2_5,over,Bovada,-162
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,total_2_5,over,DraftKings,-170
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,total_2_5,over,FanDuel,-172
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,total_2_5,over,MyBookie.ag,-177
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,total_2_5,under,BetMGM,125
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,total_2_5,under,BetRivers,130
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,total_2_5,under,Bovada,134
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,total_2_5,under,DraftKings,130
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,total_2_5,under,FanDuel,140
+2026-10-12T19:59:17+00:00,d1bbbdcd3d430e70091b518369b559cf,2026-10-17,Newcastle,Aston Villa,total_2_5,under,MyBookie.ag,127
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,1x2,away,BetMGM,250
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,1x2,away,BetOnline.ag,270
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,1x2,away,BetRivers,270
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,1x2,away,BetUS,264
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,1x2,away,Bovada,260
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,1x2,away,DraftKings,255
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,1x2,away,FanDuel,250
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,1x2,away,Fanatics,260
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,1x2,away,LowVig.ag,270
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,1x2,away,MyBookie.ag,240
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,1x2,draw,BetMGM,260
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,1x2,draw,BetOnline.ag,268
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,1x2,draw,BetRivers,260
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,1x2,draw,BetUS,264
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,1x2,draw,Bovada,260
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,1x2,draw,DraftKings,255
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,1x2,draw,FanDuel,260
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,1x2,draw,LowVig.ag,268
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,1x2,draw,MyBookie.ag,244
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,1x2,home,BetMGM,100
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,1x2,home,BetOnline.ag,103
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,1x2,home,BetRivers,100
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,1x2,home,BetUS,106
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,1x2,home,Bovada,100
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,1x2,home,DraftKings,100
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,1x2,home,FanDuel,100
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,1x2,home,Fanatics,100
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,1x2,home,LowVig.ag,103
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,1x2,home,MyBookie.ag,102
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,btts,no,BetMGM,105
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,btts,no,BetRivers,110
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,btts,no,Bovada,118
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,btts,no,DraftKings,120
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,btts,no,FanDuel,112
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,btts,no,Fanatics,110
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,btts,no,MyBookie.ag,111
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,btts,yes,BetMGM,-150
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,btts,yes,BetRivers,-150
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,btts,yes,Bovada,-155
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,btts,yes,DraftKings,-160
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,btts,yes,FanDuel,-142
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,btts,yes,Fanatics,-145
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,btts,yes,MyBookie.ag,-154
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,corners_1x2,away,BetRivers,185
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,corners_1x2,draw,BetRivers,700
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,corners_1x2,home,BetRivers,-200
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,corners_total_10_5,over,BetRivers,-130
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,corners_total_10_5,under,BetRivers,-113
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,corners_total_9_5,over,BetRivers,-215
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,corners_total_9_5,under,BetRivers,140
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,double_chance,draw_or_away,BetRivers,-125
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,double_chance,draw_or_away,Bovada,-132
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,double_chance,draw_or_away,DraftKings,-135
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,double_chance,draw_or_away,FanDuel,-135
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,double_chance,draw_or_away,MyBookie.ag,-176
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,double_chance,home_or_away,BetRivers,-360
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,double_chance,home_or_away,Bovada,-345
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,double_chance,home_or_away,DraftKings,-350
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,double_chance,home_or_away,FanDuel,-360
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,double_chance,home_or_away,MyBookie.ag,-420
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,double_chance,home_or_draw,BetRivers,-375
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,double_chance,home_or_draw,Bovada,-345
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,double_chance,home_or_draw,DraftKings,-350
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,double_chance,home_or_draw,FanDuel,-340
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,double_chance,home_or_draw,MyBookie.ag,-410
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,draw_no_bet,away,BetMGM,150
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,draw_no_bet,away,BetRivers,155
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,draw_no_bet,away,Bovada,163
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,draw_no_bet,away,DraftKings,155
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,draw_no_bet,away,FanDuel,166
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,draw_no_bet,away,Fanatics,160
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,draw_no_bet,away,MyBookie.ag,152
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,draw_no_bet,home,BetMGM,-220
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,draw_no_bet,home,BetRivers,-235
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,draw_no_bet,home,Bovada,-200
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,draw_no_bet,home,DraftKings,-210
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,draw_no_bet,home,FanDuel,-196
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,draw_no_bet,home,Fanatics,-210
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,draw_no_bet,home,MyBookie.ag,-196
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,total_2_5,over,BetMGM,-130
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,total_2_5,over,BetOnline.ag,-123
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,total_2_5,over,BetRivers,-122
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,total_2_5,over,BetUS,-118
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,total_2_5,over,Bovada,-125
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,total_2_5,over,DraftKings,-130
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,total_2_5,over,FanDuel,-122
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,total_2_5,over,Fanatics,-125
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,total_2_5,over,LowVig.ag,-123
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,total_2_5,over,MyBookie.ag,-133
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,total_2_5,under,BetMGM,-105
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,total_2_5,under,BetOnline.ag,101
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,total_2_5,under,BetRivers,-105
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,total_2_5,under,BetUS,-102
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,total_2_5,under,Bovada,105
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,total_2_5,under,DraftKings,100
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,total_2_5,under,FanDuel,100
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,total_2_5,under,Fanatics,-105
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,total_2_5,under,LowVig.ag,101
+2026-10-12T19:59:17+00:00,dfd5d6648be46426e418801584d46a68,2026-10-18,Bournemouth,Sunderland,total_2_5,under,MyBookie.ag,-104
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,1x2,away,BetRivers,163
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,1x2,away,Bovada,155
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,1x2,away,FanDuel,145
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,1x2,away,Fanatics,160
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,1x2,away,MyBookie.ag,149
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,1x2,draw,BetRivers,235
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,1x2,draw,Bovada,245
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,1x2,draw,FanDuel,240
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,1x2,draw,Fanatics,230
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,1x2,draw,MyBookie.ag,224
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,1x2,home,BetRivers,180
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,1x2,home,Bovada,170
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,1x2,home,FanDuel,175
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,1x2,home,Fanatics,165
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,1x2,home,MyBookie.ag,170
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,btts,no,BetRivers,-106
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,btts,no,Bovada,-105
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,btts,no,FanDuel,-102
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,btts,no,Fanatics,-105
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,btts,yes,BetRivers,-130
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,btts,yes,Bovada,-125
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,btts,yes,FanDuel,-126
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,btts,yes,Fanatics,-125
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,corners_1x2,away,BetRivers,140
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,corners_1x2,draw,BetRivers,650
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,corners_1x2,home,BetRivers,-141
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,corners_total_10_5,over,BetRivers,120
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,corners_total_10_5,under,BetRivers,-177
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,corners_total_9_5,over,BetRivers,-132
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,corners_total_9_5,under,BetRivers,-110
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,double_chance,draw_or_away,BetRivers,-230
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,double_chance,draw_or_away,Bovada,-235
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,double_chance,draw_or_away,FanDuel,-230
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,double_chance,draw_or_away,Fanatics,-210
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,double_chance,home_or_away,BetRivers,-305
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,double_chance,home_or_away,Bovada,-300
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,double_chance,home_or_away,FanDuel,-340
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,double_chance,home_or_away,Fanatics,-300
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,double_chance,home_or_draw,BetRivers,-210
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,double_chance,home_or_draw,Bovada,-205
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,double_chance,home_or_draw,FanDuel,-195
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,double_chance,home_or_draw,Fanatics,-200
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,draw_no_bet,away,BetRivers,-127
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,draw_no_bet,away,Bovada,-120
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,draw_no_bet,away,FanDuel,-120
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,draw_no_bet,away,Fanatics,-115
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,draw_no_bet,home,BetRivers,-114
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,draw_no_bet,home,Bovada,100
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,draw_no_bet,home,FanDuel,102
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,draw_no_bet,home,Fanatics,-115
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,total_2_5,over,BetRivers,105
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,total_2_5,over,Bovada,112
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,total_2_5,over,FanDuel,104
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,total_2_5,over,Fanatics,100
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,total_2_5,over,MyBookie.ag,100
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,total_2_5,under,BetRivers,-136
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,total_2_5,under,Bovada,-134
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,total_2_5,under,FanDuel,-124
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,total_2_5,under,Fanatics,-130
+2026-10-12T19:59:17+00:00,e82f6b60fa41b82c8510f5b67ce61849,2026-10-25,Sunderland,Leeds,total_2_5,under,MyBookie.ag,-139
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,1x2,away,BetRivers,750
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,1x2,away,Bovada,775
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,1x2,away,DraftKings,750
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,1x2,away,FanDuel,700
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,1x2,away,Fanatics,700
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,1x2,away,MyBookie.ag,670
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,1x2,draw,BetRivers,380
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,1x2,draw,Bovada,370
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,1x2,draw,DraftKings,350
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,1x2,draw,FanDuel,380
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,1x2,draw,Fanatics,375
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,1x2,draw,MyBookie.ag,370
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,1x2,home,BetRivers,-245
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,1x2,home,Bovada,-260
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,1x2,home,DraftKings,-265
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,1x2,home,FanDuel,-310
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,1x2,home,Fanatics,-275
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,1x2,home,MyBookie.ag,-280
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,btts,no,BetRivers,-143
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,btts,no,Bovada,-140
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,btts,no,DraftKings,-140
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,btts,no,FanDuel,-128
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,btts,no,Fanatics,-140
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,btts,yes,BetRivers,104
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,btts,yes,Bovada,108
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,btts,yes,DraftKings,100
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,btts,yes,FanDuel,100
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,btts,yes,Fanatics,105
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,corners_1x2,away,BetRivers,390
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,corners_1x2,draw,BetRivers,850
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,corners_1x2,home,BetRivers,-455
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,corners_total_10_5,over,BetRivers,-109
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,corners_total_10_5,under,BetRivers,-134
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,corners_total_9_5,over,BetRivers,-175
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,corners_total_9_5,under,BetRivers,118
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,double_chance,draw_or_away,BetRivers,195
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,double_chance,draw_or_away,Bovada,193
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,double_chance,draw_or_away,DraftKings,175
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,double_chance,draw_or_away,FanDuel,200
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,double_chance,draw_or_away,Fanatics,200
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,double_chance,home_or_away,BetRivers,-560
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,double_chance,home_or_away,Bovada,-550
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,double_chance,home_or_away,DraftKings,-575
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,double_chance,home_or_away,FanDuel,-550
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,double_chance,home_or_away,Fanatics,-500
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,double_chance,home_or_draw,BetRivers,-1430
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,double_chance,home_or_draw,Bovada,-1725
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,double_chance,home_or_draw,DraftKings,-1600
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,double_chance,home_or_draw,FanDuel,-1250
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,double_chance,home_or_draw,Fanatics,-1200
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,draw_no_bet,away,BetRivers,440
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,draw_no_bet,away,Bovada,550
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,draw_no_bet,away,DraftKings,500
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,draw_no_bet,away,FanDuel,570
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,draw_no_bet,away,Fanatics,500
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,draw_no_bet,home,BetRivers,-1000
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,draw_no_bet,home,Bovada,-900
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,draw_no_bet,home,DraftKings,-1100
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,draw_no_bet,home,FanDuel,-850
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,draw_no_bet,home,Fanatics,-900
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,total_2_5,over,BetRivers,-127
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,total_2_5,over,Bovada,-122
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,total_2_5,over,DraftKings,-130
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,total_2_5,over,FanDuel,-132
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,total_2_5,over,Fanatics,-125
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,total_2_5,over,MyBookie.ag,-132
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,total_2_5,under,BetRivers,-103
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,total_2_5,under,Bovada,102
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,total_2_5,under,DraftKings,-105
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,total_2_5,under,FanDuel,106
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,total_2_5,under,Fanatics,-105
+2026-10-12T19:59:17+00:00,f66e4f29c1b7bcfc5ab58c0b88c8850b,2026-10-24,Arsenal,Everton,total_2_5,under,MyBookie.ag,-105
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,1x2,away,BetMGM,-175
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,1x2,away,BetOnline.ag,-173
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,1x2,away,BetRivers,-177
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,1x2,away,BetUS,-169
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,1x2,away,Bovada,-170
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,1x2,away,DraftKings,-175
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,1x2,away,FanDuel,-195
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,1x2,away,Fanatics,-175
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,1x2,away,LowVig.ag,-173
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,1x2,away,MyBookie.ag,-182
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,1x2,draw,BetMGM,290
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,1x2,draw,BetOnline.ag,304
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,1x2,draw,BetRivers,300
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,1x2,draw,BetUS,289
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,1x2,draw,Bovada,295
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,1x2,draw,DraftKings,295
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,1x2,draw,FanDuel,300
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,1x2,draw,Fanatics,300
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,1x2,draw,LowVig.ag,304
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,1x2,draw,MyBookie.ag,295
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,1x2,home,BetMGM,475
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,1x2,home,BetOnline.ag,555
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,1x2,home,BetRivers,500
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,1x2,home,BetUS,555
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,1x2,home,Bovada,500
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,1x2,home,DraftKings,500
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,1x2,home,FanDuel,500
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,1x2,home,Fanatics,475
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,1x2,home,LowVig.ag,555
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,1x2,home,MyBookie.ag,450
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,btts,no,BetMGM,-125
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,btts,no,BetRivers,-121
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,btts,no,Bovada,-125
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,btts,no,DraftKings,-115
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,btts,no,FanDuel,-112
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,btts,no,Fanatics,-130
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,btts,no,MyBookie.ag,-129
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,btts,yes,BetMGM,-110
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,btts,yes,BetRivers,-112
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,btts,yes,Bovada,-105
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,btts,yes,DraftKings,-115
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,btts,yes,FanDuel,-112
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,btts,yes,Fanatics,100
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,btts,yes,MyBookie.ag,-107
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,corners_1x2,away,BetRivers,-215
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,corners_1x2,draw,BetRivers,650
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,corners_1x2,home,BetRivers,205
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,corners_total_10_5,over,BetRivers,130
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,corners_total_10_5,under,BetRivers,-195
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,corners_total_9_5,over,BetRivers,-124
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,corners_total_9_5,under,BetRivers,-118
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,double_chance,draw_or_away,BetRivers,-835
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,double_chance,draw_or_away,Bovada,-800
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,double_chance,draw_or_away,DraftKings,-800
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,double_chance,draw_or_away,FanDuel,-800
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,double_chance,draw_or_away,Fanatics,-700
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,double_chance,draw_or_away,MyBookie.ag,-847
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,double_chance,home_or_away,BetRivers,-435
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,double_chance,home_or_away,Bovada,-400
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,double_chance,home_or_away,DraftKings,-425
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,double_chance,home_or_away,FanDuel,-425
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,double_chance,home_or_away,Fanatics,-400
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,double_chance,home_or_away,MyBookie.ag,-549
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,double_chance,home_or_draw,BetRivers,138
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,double_chance,home_or_draw,Bovada,132
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,double_chance,home_or_draw,DraftKings,130
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,double_chance,home_or_draw,FanDuel,140
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,double_chance,home_or_draw,Fanatics,140
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,double_chance,home_or_draw,MyBookie.ag,-104
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,draw_no_bet,away,BetMGM,-500
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,draw_no_bet,away,BetRivers,-560
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,draw_no_bet,away,Bovada,-470
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,draw_no_bet,away,DraftKings,-550
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,draw_no_bet,away,FanDuel,-550
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,draw_no_bet,away,Fanatics,-500
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,draw_no_bet,away,MyBookie.ag,-461
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,draw_no_bet,home,BetMGM,310
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,draw_no_bet,home,BetRivers,300
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,draw_no_bet,home,Bovada,345
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,draw_no_bet,home,DraftKings,350
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,draw_no_bet,home,FanDuel,390
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,draw_no_bet,home,Fanatics,330
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,draw_no_bet,home,MyBookie.ag,320
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,total_2_5,over,BetMGM,-118
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,total_2_5,over,BetOnline.ag,-108
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,total_2_5,over,BetRivers,-113
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,total_2_5,over,BetUS,-107
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,total_2_5,over,Bovada,-105
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,total_2_5,over,DraftKings,-115
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,total_2_5,over,FanDuel,-112
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,total_2_5,over,Fanatics,-115
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,total_2_5,over,LowVig.ag,-108
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,total_2_5,over,MyBookie.ag,-117
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,total_2_5,under,BetMGM,-118
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,total_2_5,under,BetOnline.ag,-112
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,total_2_5,under,BetRivers,-113
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,total_2_5,under,BetUS,-110
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,total_2_5,under,Bovada,-115
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,total_2_5,under,DraftKings,-115
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,total_2_5,under,FanDuel,-108
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,total_2_5,under,Fanatics,-115
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,total_2_5,under,LowVig.ag,-112
+2026-10-12T19:59:17+00:00,f696a248965373d9071dc0662e5c58a8,2026-10-18,Nott'm Forest,Arsenal,total_2_5,under,MyBookie.ag,-118
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,1x2,away,BetRivers,160
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,1x2,away,Bovada,155
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,1x2,away,FanDuel,155
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,1x2,away,Fanatics,160
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,1x2,away,MyBookie.ag,151
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,1x2,draw,BetRivers,260
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,1x2,draw,Bovada,265
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,1x2,draw,FanDuel,260
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,1x2,draw,Fanatics,250
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,1x2,draw,MyBookie.ag,242
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,1x2,home,BetRivers,165
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,1x2,home,Bovada,160
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,1x2,home,FanDuel,155
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,1x2,home,Fanatics,150
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,1x2,home,MyBookie.ag,157
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,btts,no,BetRivers,138
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,btts,no,Bovada,140
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,btts,no,FanDuel,150
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,btts,no,Fanatics,140
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,btts,yes,BetRivers,-195
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,btts,yes,Bovada,-185
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,btts,yes,FanDuel,-192
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,btts,yes,Fanatics,-180
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,corners_1x2,away,BetRivers,-106
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,corners_1x2,draw,BetRivers,650
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,corners_1x2,home,BetRivers,102
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,corners_total_10_5,over,BetRivers,-121
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,corners_total_10_5,under,BetRivers,-121
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,corners_total_9_5,over,BetRivers,-195
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,corners_total_9_5,under,BetRivers,130
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,double_chance,draw_or_away,BetRivers,-210
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,double_chance,draw_or_away,Bovada,-210
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,double_chance,draw_or_away,FanDuel,-210
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,double_chance,draw_or_away,Fanatics,-190
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,double_chance,home_or_away,BetRivers,-345
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,double_chance,home_or_away,Bovada,-345
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,double_chance,home_or_away,FanDuel,-360
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,double_chance,home_or_away,Fanatics,-325
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,double_chance,home_or_draw,BetRivers,-205
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,double_chance,home_or_draw,Bovada,-205
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,double_chance,home_or_draw,FanDuel,-210
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,double_chance,home_or_draw,Fanatics,-200
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,draw_no_bet,away,BetRivers,-122
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,draw_no_bet,away,Bovada,-112
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,draw_no_bet,away,FanDuel,-110
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,draw_no_bet,away,Fanatics,-110
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,draw_no_bet,home,BetRivers,-118
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,draw_no_bet,home,Bovada,-108
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,draw_no_bet,home,FanDuel,-106
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,draw_no_bet,home,Fanatics,-120
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,total_2_5,over,BetRivers,-155
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,total_2_5,over,Bovada,-148
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,total_2_5,over,FanDuel,-162
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,total_2_5,over,Fanatics,-150
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,total_2_5,over,MyBookie.ag,-166
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,total_2_5,under,BetRivers,118
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,total_2_5,under,Bovada,122
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,total_2_5,under,FanDuel,134
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,total_2_5,under,Fanatics,115
+2026-10-12T19:59:17+00:00,fe235b26408c477368c40672a4488694,2026-10-25,Crystal Palace,Newcastle,total_2_5,under,MyBookie.ag,119

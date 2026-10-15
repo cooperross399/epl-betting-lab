@@ -1,8 +1,10 @@
-## Thursday 15 October, 10:24 UTC — scheduled run
+## Thursday 15 October, 12:45 UTC — manual run
 
-Already sent today; same selections (2 price move(s)).
+Selections changed: 1 added.
 
-Provider quota: 81031 (about 81 days at the observed burn)
+_This run was started by hand, not by the schedule. If you did not start it, someone was testing._
+
+Provider quota: 80885 (about 80 days at the observed burn)
 
 Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
 
@@ -11,13 +13,17 @@ Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_tot
 | Match | Market | Selection | Tier | Edge | Price | Book | Units |
 |:------|:-------|:----------|:-----|-----:|------:|:-----|------:|
 | Leeds v Man United | `corners_1x2` | home | C | +5.8% | +121 | Bovada | 0.1 |
-| Fulham v Hull | `corners_1x2` | away | C | +5.2% | +390 | DraftKings | 0.1 |
+| Fulham v Hull | `corners_1x2` | away | C | +5.4% | +400 | DraftKings | 0.1 |
 | Brighton v Crystal Palace | `draw_no_bet` | away | C | +4.1% | +360 | FanDuel | 0.1 |
 | Brighton v Crystal Palace | `corners_1x2` | away | C | +4.1% | +450 | DraftKings | 0.1 |
 
 ### Leans
 
 _None._
+
+### What changed
+
+- **Added:** Brentford v Liverpool corners_total_9_5 over
 
 
 ## Beyond the Premier League
@@ -59,4 +65,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/38719622567)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/38736615012)

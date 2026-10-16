@@ -1,8 +1,8 @@
-## Friday 16 October, 07:38 UTC — scheduled run
+## Friday 16 October, 09:16 UTC — scheduled run
 
-Selections changed: 7 added, 2 dropped, 4 moved section.
+Selections changed: 1 dropped, 1 moved section.
 
-Provider quota: 77245 (about 77 days at the observed burn)
+Provider quota: 77123 (about 77 days at the observed burn)
 
 Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
 
@@ -14,7 +14,7 @@ Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_tot
 | Leeds v Man United | `corners_1x2` | home | C | +5.8% | +121 | Bovada | 0.1 |
 | Tottenham v Coventry | `corners_1x2` | away | C | +6.4% | +380 | FanDuel | 0.1 |
 | Fulham v Hull | `corners_1x2` | away | C | +5.2% | +390 | DraftKings | 0.1 |
-| Newcastle v Aston Villa | `corners_total_10_5` | over | C | +3.9% | +128 | FanDuel | 0.1 |
+| Newcastle v Aston Villa | `corners_total_10_5` | over | C | +3.6% | +126 | FanDuel | 0.1 |
 | Brighton v Crystal Palace | `draw_no_bet` | away | C | +4.5% | +370 | FanDuel | 0.1 |
 
 ### Leans
@@ -23,19 +23,8 @@ _None._
 
 ### What changed
 
-- **Added:** Bournemouth v Sunderland total_2_5 over
-- **Added:** Brentford v Liverpool corners_1x2 away
-- **Added:** Everton v Chelsea corners_1x2 away
-- **Added:** Fulham v Hull corners_1x2 draw
-- **Added:** Fulham v Hull double_chance draw_or_away
-- **Added:** Man City v Ipswich btts yes
-- **Added:** Newcastle v Aston Villa corners_total_10_5 over
-- **Dropped:** Brighton v Crystal Palace corners_total_10_5 under
-- **Dropped:** Leeds v Man United corners_total_9_5 over
-- **Moved section:** Bournemouth v Sunderland corners_total_10_5 over
-- **Moved section:** Brighton v Crystal Palace corners_1x2 away
-- **Moved section:** Newcastle v Aston Villa corners_total_9_5 over
-- **Moved section:** Tottenham v Coventry corners_1x2 away
+- **Dropped:** Man City v Ipswich corners_1x2 home
+- **Moved section:** Brentford v Liverpool corners_total_9_5 over
 
 
 ## Beyond the Premier League
@@ -77,4 +66,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/38868209032)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/38878854636)

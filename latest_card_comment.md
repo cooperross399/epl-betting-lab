@@ -1,10 +1,8 @@
-## Friday 16 October, 12:47 UTC — manual run
+## Friday 16 October, 13:53 UTC — scheduled run
 
-Selections changed: 3 added, 2 dropped, 4 moved section.
+Already sent today; same selections (3 price move(s)).
 
-_This run was started by hand, not by the schedule. If you did not start it, someone was testing._
-
-Provider quota: 77001 (about 77 days at the observed burn)
+Provider quota: 76793 (about 76 days at the observed burn)
 
 Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
 
@@ -12,7 +10,7 @@ Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_tot
 
 | Match | Market | Selection | Tier | Edge | Price | Book | Units |
 |:------|:-------|:----------|:-----|-----:|------:|:-----|------:|
-| Bournemouth v Sunderland | `corners_total_9_5` | over | C | +6.6% | +100 | FanDuel | 0.1 |
+| Bournemouth v Sunderland | `corners_total_9_5` | over | C | +6.5% | -102 | FanDuel | 0.1 |
 | Bournemouth v Sunderland | `corners_total_10_5` | over | C | +6.3% | +164 | FanDuel | 0.1 |
 | Leeds v Man United | `corners_1x2` | home | C | +5.7% | +120 | DraftKings | 0.1 |
 | Tottenham v Coventry | `corners_1x2` | away | C | +5.5% | +360 | FanDuel | 0.1 |
@@ -23,18 +21,6 @@ Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_tot
 ### Leans
 
 _None._
-
-### What changed
-
-- **Added:** Leeds v Man United corners_1x2 draw
-- **Added:** Nott'm Forest v Arsenal corners_total_10_5 over
-- **Added:** Nott'm Forest v Arsenal corners_total_9_5 over
-- **Dropped:** Everton v Chelsea corners_1x2 away
-- **Dropped:** Man City v Ipswich corners_total_10_5 over
-- **Moved section:** Bournemouth v Sunderland corners_total_10_5 over
-- **Moved section:** Bournemouth v Sunderland corners_total_9_5 over
-- **Moved section:** Brentford v Liverpool corners_total_9_5 over
-- **Moved section:** Man City v Ipswich btts yes
 
 
 ## Beyond the Premier League
@@ -76,4 +62,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/38902478517)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/38910933285)

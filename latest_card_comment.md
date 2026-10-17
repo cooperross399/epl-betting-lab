@@ -1,8 +1,8 @@
-## Saturday 17 October, 07:18 UTC — scheduled run
+## Saturday 17 October, 08:44 UTC — scheduled run
 
-Selections changed: 4 added, 5 dropped, 2 moved section.
+Selections changed: 4 added, 1 dropped, 1 moved section.
 
-Provider quota: 75667 (about 75 days at the observed burn)
+Provider quota: 75545 (about 75 days at the observed burn)
 
 Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
 
@@ -16,8 +16,8 @@ Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_tot
 | Fulham v Hull | `corners_1x2` | away | C | +5.4% | +400 | DraftKings | 0.1 |
 | Tottenham v Coventry | `corners_1x2` | away | C | +5.3% | +450 | DraftKings | 0.1 |
 | Brighton v Crystal Palace | `draw_no_bet` | away | C | +5.3% | +390 | FanDuel | 0.1 |
-| Newcastle v Aston Villa | `corners_total_10_5` | over | C | +4.3% | +130 | FanDuel | 0.1 |
 | Brighton v Crystal Palace | `double_chance` | draw_or_away | C | +4.0% | +150 | BetRivers | 0.1 |
+| Bournemouth v Sunderland | `corners_total_10_5` | over | C | +3.8% | +146 | FanDuel | 0.1 |
 
 ### Leans
 
@@ -25,17 +25,12 @@ _None._
 
 ### What changed
 
-- **Added:** Everton v Chelsea corners_1x2 away
-- **Added:** Man City v Ipswich draw_no_bet home
-- **Added:** Newcastle v Aston Villa btts no
-- **Added:** Tottenham v Coventry corners_1x2 draw
-- **Dropped:** Bournemouth v Sunderland corners_total_10_5 over
-- **Dropped:** Man City v Ipswich btts yes
-- **Dropped:** Man City v Ipswich corners_total_9_5 over
-- **Dropped:** Nott'm Forest v Arsenal corners_total_10_5 over
-- **Dropped:** Nott'm Forest v Arsenal corners_total_9_5 over
-- **Moved section:** Brighton v Crystal Palace double_chance draw_or_away
-- **Moved section:** Fulham v Hull draw_no_bet away
+- **Added:** Bournemouth v Sunderland corners_1x2 draw
+- **Added:** Bournemouth v Sunderland corners_total_10_5 over
+- **Added:** Everton v Chelsea btts no
+- **Added:** Tottenham v Coventry btts yes
+- **Dropped:** Newcastle v Aston Villa btts no
+- **Moved section:** Newcastle v Aston Villa corners_total_10_5 over
 
 
 ## Beyond the Premier League
@@ -116,4 +111,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/39012826049)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/39018235757)

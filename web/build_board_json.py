@@ -616,7 +616,7 @@ def load_due_list(lab: Path) -> dict | None:
 def due_rows_for(due: dict | None, event_id: str) -> list[dict]:
     """`games[].drought` for one fixture, in the shape the shared board renders (SCHEMA.md).
 
-    Goals only, over 0.5. The tier bar is the only bar here, so `rule` is
+    Goals and assists, over 0.5. The tier bar is the only bar here, so `rule` is
     "tier"; no `cellRecord` is written, because no price-based record exists
     for a cell, and the page prints nothing rather than a number it lacks.
     """
@@ -629,8 +629,8 @@ def due_rows_for(due: dict | None, event_id: str) -> list[dict]:
         rate = row.get("prior_rate")
         drought = int(row.get("drought") or 0)
         out.append({
-            "player": row.get("player", ""), "team": abbr, "market": "goals", "line": 0.5,
-            "lastSeason": row.get("prior_goals"), "drought": drought,
+            "player": row.get("player", ""), "team": abbr, "market": row.get("market") or "goals", "line": 0.5,
+            "lastSeason": row.get("prior_total", row.get("prior_goals")), "drought": drought,
             "price": price if isinstance(price, (int, float)) else None,
             "book": row.get("book") or "", "heavyJuice": isinstance(price, (int, float)) and price <= -160,
             "tierBar": row.get("bar"), "surpriseBar": None, "rule": "tier",
@@ -772,8 +772,10 @@ def build(lab: Path, today: date) -> dict:
 
 
 def due_note(due: dict) -> str:
-    """The rule and the measurement in one line, for the board's Due List block."""
-    return f"{due.get('rule', '')} {due.get('headline', '')}".replace("**", "").strip()
+    """Each category's rule and measurement, for the board's Due List block."""
+    parts = [f"{c.get('rule', '')} {c.get('headline', '')}" for c in (due.get("categories") or {}).values()
+             if isinstance(c, dict)]
+    return " ".join(parts or [f"{due.get('rule', '')} {due.get('headline', '')}"]).replace("**", "").strip()
 
 
 def main(argv=None) -> int:

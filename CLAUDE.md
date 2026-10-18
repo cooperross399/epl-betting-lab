@@ -320,18 +320,21 @@ Use the repo, the reports, and GitHub.
     not recoverable.
   - A late snapshot is safe: `live_clv` only reads observations strictly before
     kick-off, so a delayed cron is ignored rather than trusted.
-- **The Due List (anytime goalscorers) sits beside the card, never in it
+- **The Due List (goals and assists) sits beside the card, never in it
   (2026-10-18, Cooper: "a due goalscorer feature ... like we have our Due
-  list for nhl and the nfl TD scorers", parameters left to Claude).**
-  `src/epl_betting_lab/due_list.py`: 10+ league goals last season and a run
-  of appearances without a goal at the band's bar (20+ -> 4, 15-19 -> 6,
-  10-14 -> 8), from keyless ESPN squads, built each Matchday Refresh by
-  `scripts/build_due_list.py` into the card and the board. **Measured, being
-  due has meant scoring LESS often:** 18.0% of 388 listed appearances against
-  28.6% for the same qualifiers when not due, 2022/23-2025/26, interval
-  excluding zero (`data/outputs/due_list_backtest.md`). No units, no
-  goalscorer price is ever bought for it, and the card prints that headline
-  beside the list. Do not present it as an edge.
+  list for nhl and the nfl TD scorers", then "Add assists to that due list",
+  parameters left to Claude).** `src/epl_betting_lab/due_list.py`: 10+ league
+  goals last season and a run of appearances without a goal at the band's
+  bar (20+ -> 4, 15-19 -> 6, 10-14 -> 8); 7+ assists and a run without an
+  assist (12+ -> 8, 9-11 -> 10, 7-8 -> 13). Keyless ESPN squads, built each
+  Matchday Refresh by `scripts/build_due_list.py` into the card and the board,
+  and posted to the project chat each Friday by the EPL DUE LIST routine.
+  **Measured, being due has meant LESS, not more:** goals 18.7% of 380 listed
+  appearances against 28.8% not due; assists 10.3% of 448 against 17.8%;
+  2022/23-2025/26, both intervals excluding zero
+  (`data/outputs/due_list_backtest.md`). No units, no prop price is ever
+  bought for it, and the card prints those headlines beside the list. Do not
+  present it as an edge.
 - **Card delivery is the `card-feed` branch, and no email.** Each run publishes
   `latest_card_comment.md` + `latest_status.json` there; the issue #162 comment
   remains as the written record but mentions nobody, and the repository's

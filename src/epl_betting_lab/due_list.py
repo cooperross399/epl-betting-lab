@@ -1,7 +1,9 @@
-"""The EPL Due List: the NHL lab's Due List and the NFL lab's TD Due List, for goalscorers.
+"""The EPL Due List: the NHL lab's Due List and the NFL lab's TD Due List, for goals and assists.
 
 Cooper asked on 2026-10-18 for "a due goalscorer feature for the EPL like we
-have our Due list for nhl and the nfl TD scorers", parameters left to Claude.
+have our Due list for nhl and the nfl TD scorers", parameters left to Claude,
+and the same morning "Add assists to that due list". Assists follow the goals
+rule below with their own numbers (`ASSISTS`); see "Assists".
 This module is the port. The machinery is the other labs'
 (`nhl_betting_lab.drought_rule`, `football_betting_lab.td_due_list`, read,
 not imported: the labs never import each other); the parameters and every
@@ -44,10 +46,30 @@ any listed row was compared with an outcome.
 
 Being due has NOT meant scoring more. Over 2022/23-2025/26 a listed player
 scored in fewer of his next appearances than the same qualifiers did when
-not due, by about eleven points, and the interval excludes zero
+not due, by about ten points, and the interval excludes zero
 (`data/outputs/due_list_backtest.md`). A long drought in this league is
 usually a lost place, a new role or an injury, not variance waiting to turn.
 The card prints that headline beside the list every time.
+
+## Assists
+
+The same machinery on ESPN's `goalAssists`, listed for 1+ assist, over 0.5.
+A player with **7 or more league assists last season** is listed when his run
+of appearances without an assist reaches his band's bar, set by the same
+one-in-sixteen rule from 2022/23-2025/26 hit rates:
+
+    band   players  share of apps with an assist  bar  (1 - p)^bar
+    12+       7              0.31                  8      ~0.05
+    9-11     28              0.26                 10      ~0.05
+    7-8      52              0.20                 13      ~0.05
+
+Assists are rarer than goals, so the bars are longer. 7 is the floor because
+it gave 19-37 qualifiers a season before 2025/26; below it the bar passes
+fifteen appearances. 2025/26 was a thin assist season in ESPN's record (six
+players reached 7), so this season's pool is small, and the list says who is
+in it rather than lowering the bar to fill it. Measured the same way as
+goals, a listed player had an assist in fewer of his next appearances than
+the same qualifiers did when not due (`data/outputs/due_list_backtest.md`).
 
 ## Who is left off
 
@@ -83,48 +105,68 @@ from typing import Any
 import pandas as pd
 
 
-#: Last league season's goals needed to be considered at all.
-THRESHOLD = 10
-#: (floor of last season's goals, drought that lists him), best band first.
-TIERS: tuple[tuple[int, int], ...] = ((20, 4), (15, 6), (10, 8))
+@dataclass(frozen=True)
+class Category:
+    """One list: the log column it counts, who qualifies, and the bars."""
+
+    key: str  # the board's market key (SCHEMA.md games[].drought)
+    column: str  # the ESPN log column counted
+    label: str  # how the bet reads on the card
+    noun: str  # plural, as in "10+ Premier League goals"
+    one: str  # singular, as in "without a goal"
+    #: (floor of last season's total, drought that lists him), best band first.
+    tiers: tuple[tuple[int, int], ...]
+
+    @property
+    def threshold(self) -> int:
+        """Last league season's total needed to be considered at all: the lowest floor."""
+        return self.tiers[-1][0]
+
+
+GOALS = Category("goals", "goals", "Anytime goalscorer", "goals", "a goal", ((20, 4), (15, 6), (10, 8)))
+ASSISTS = Category("assists", "assists", "1+ assist", "assists", "an assist", ((12, 8), (9, 10), (7, 13)))
+CATEGORIES: tuple[Category, ...] = (GOALS, ASSISTS)
+
+#: The goals list's numbers under their original names.
+THRESHOLD = GOALS.threshold
+TIERS = GOALS.tiers
 #: Missing from this many of his club's latest league squads in a row removes him.
 ABSENT_REMOVE_MATCHES = 2
-MARKET = "goals"
+MARKET = GOALS.key
 LINE = 0.5
-SECTION_TITLE = "Due List · anytime goalscorers"
+SECTION_TITLE = "Due List · goals and assists"
 BACKTEST_JSON = "due_list_backtest.json"
 DUE_LIST_JSON = "due_list.json"
 DUE_LIST_MD = "due_list.md"
 
-assert TIERS[-1][0] == THRESHOLD, "the lowest tier is the base qualifier"
 
-
-def tier_bar(prior_goals: Any) -> int | None:
-    """The drought that lists a player on last season's goals; None below the qualifier."""
-    if prior_goals is None or pd.isna(prior_goals):
+def tier_bar(prior_total: Any, category: Category = GOALS) -> int | None:
+    """The drought that lists a player on last season's total; None below the qualifier."""
+    if prior_total is None or pd.isna(prior_total):
         return None
-    for floor, bar in TIERS:
-        if prior_goals >= floor:
+    for floor, bar in category.tiers:
+        if prior_total >= floor:
             return bar
     return None
 
 
-def band_label(prior_goals: Any) -> str | None:
+def band_label(prior_total: Any, category: Category = GOALS) -> str | None:
     """The band last season's total falls in ("20+", "15-19", "10-14"); None below the qualifier."""
-    if prior_goals is None or pd.isna(prior_goals):
+    if prior_total is None or pd.isna(prior_total):
         return None
-    for i, (floor, _) in enumerate(TIERS):
-        if prior_goals >= floor:
-            return f"{floor}+" if i == 0 else f"{floor}-{TIERS[i - 1][0] - 1}"
+    tiers = category.tiers
+    for i, (floor, _) in enumerate(tiers):
+        if prior_total >= floor:
+            return f"{floor}+" if i == 0 else f"{floor}-{tiers[i - 1][0] - 1}"
     return None
 
 
-def rule_sentence() -> str:
+def rule_sentence(category: Category = GOALS) -> str:
     """The rule in one line, from the constants, so no copy of it can drift."""
-    bars = ", ".join(f"{band_label(floor)} goals -> {bar}" for floor, bar in TIERS)
+    bars = ", ".join(f"{band_label(floor, category)} {category.noun} -> {bar}" for floor, bar in category.tiers)
     return (
-        f"{THRESHOLD}+ Premier League goals last season and a run of league appearances "
-        f"without a goal at the bar his total sets ({bars} straight games)."
+        f"{category.threshold}+ Premier League {category.noun} last season and a run of league appearances "
+        f"without {category.one} at the bar his total sets ({bars} straight games)."
     )
 
 
@@ -141,11 +183,12 @@ def one_in(hit_rate: Any, drought: int) -> int | None:
     return int(round(1.0 / rarity))
 
 
-_NEEDED = {"season", "date", "event_id", "team", "player_id", "appeared", "goals"}
+_NEEDED = {"season", "date", "event_id", "team", "player_id", "appeared"}
 
 
-def _clean_logs(logs: pd.DataFrame) -> pd.DataFrame:
-    missing = _NEEDED - set(logs.columns)
+def _clean_logs(logs: pd.DataFrame, category: Category = GOALS) -> pd.DataFrame:
+    """The logs with `count` set to the category's column, typed and de-duplicated."""
+    missing = (_NEEDED | {category.column}) - set(logs.columns)
     if missing:
         raise ValueError(f"player logs lack {sorted(missing)}")
     frame = logs.dropna(subset=["player_id", "event_id"]).copy()
@@ -153,11 +196,11 @@ def _clean_logs(logs: pd.DataFrame) -> pd.DataFrame:
     frame["event_id"] = frame["event_id"].astype(str)
     frame["season"] = pd.to_numeric(frame["season"], errors="coerce")
     frame["appeared"] = pd.to_numeric(frame["appeared"], errors="coerce")
-    goals = pd.to_numeric(frame["goals"], errors="coerce")
-    # A missing count is not a match without a goal. Counting it as one would
+    count = pd.to_numeric(frame[category.column], errors="coerce")
+    # A missing count is not a match without one. Counting it as one would
     # extend a drought on a row that says nothing.
-    frame = frame[goals.notna() & frame["season"].notna() & frame["appeared"].notna()].copy()
-    frame["goals"] = pd.to_numeric(frame["goals"]).astype(int)
+    frame = frame[count.notna() & frame["season"].notna() & frame["appeared"].notna()].copy()
+    frame["count"] = pd.to_numeric(frame[category.column]).astype(int)
     frame["season"] = frame["season"].astype(int)
     frame["appeared"] = frame["appeared"].astype(int)
     frame["date"] = frame["date"].astype(str).str[:10]
@@ -166,18 +209,18 @@ def _clean_logs(logs: pd.DataFrame) -> pd.DataFrame:
     return frame.drop_duplicates(subset=["player_id", "event_id"], keep="first")
 
 
-def prepare_logs(logs: pd.DataFrame) -> pd.DataFrame:
+def prepare_logs(logs: pd.DataFrame, category: Category = GOALS) -> pd.DataFrame:
     """Every league appearance with the drought entering it and last season's record.
 
-    Columns added: `scored`, `drought` (appearances without a goal entering
-    this one, carried across seasons), `prior_goals`, `prior_apps`,
-    `prior_rate` (last season's appearances with a goal over appearances),
-    `bar` and `listed`. The card and the backtest both read this, so they
-    cannot disagree about who was due.
+    Columns added: `scored` (one or more in the category), `drought`
+    (appearances without one entering this one, carried across seasons),
+    `prior_total`, `prior_apps`, `prior_rate` (last season's appearances with
+    one over appearances), `bar` and `listed`. The card and the backtest both
+    read this, so they cannot disagree about who was due.
     """
-    frame = _clean_logs(logs)
+    frame = _clean_logs(logs, category)
     frame = frame[frame["appeared"] > 0].copy()
-    frame["scored"] = frame["goals"] > 0
+    frame["scored"] = frame["count"] > 0
     frame = frame.sort_values(["player_id", "date", "event_id"], kind="mergesort")
 
     # Appearances without a goal entering each row: the running count of
@@ -190,18 +233,18 @@ def prepare_logs(logs: pd.DataFrame) -> pd.DataFrame:
 
     totals = (
         frame.groupby(["player_id", "season"])
-        .agg(prior_goals=("goals", "sum"), prior_apps=("scored", "size"), prior_hits=("scored", "sum"))
+        .agg(prior_total=("count", "sum"), prior_apps=("scored", "size"), prior_hits=("scored", "sum"))
         .reset_index()
     )
     totals["season"] = totals["season"] + 1
     frame = frame.merge(totals, on=["player_id", "season"], how="left")
     frame["prior_rate"] = frame["prior_hits"] / frame["prior_apps"]
-    frame["bar"] = frame["prior_goals"].map(tier_bar)
+    frame["bar"] = frame["prior_total"].map(lambda total: tier_bar(total, category))
     frame["listed"] = frame["bar"].notna() & (frame["drought"] >= frame["bar"].fillna(10**9))
     return frame.sort_values(["date", "event_id", "player_id"]).reset_index(drop=True)
 
 
-def entering(logs: pd.DataFrame, *, season: int, before: str) -> pd.DataFrame:
+def entering(logs: pd.DataFrame, *, season: int, before: str, category: Category = GOALS) -> pd.DataFrame:
     """Each qualifier's state entering his next match of `season`, from matches before `before`.
 
     The same `prepare_logs`, asked about one more appearance: a sentinel row
@@ -212,11 +255,11 @@ def entering(logs: pd.DataFrame, *, season: int, before: str) -> pd.DataFrame:
     team of his latest squad this season) and `club_absent`, the number of
     his club's latest league matches in a row whose squad he was not in.
     """
-    frame = _clean_logs(logs)
+    frame = _clean_logs(logs, category)
     frame = frame[frame["date"] < before]
     last = frame[(frame["season"] == season - 1) & (frame["appeared"] > 0)]
-    totals = last.groupby("player_id")["goals"].sum()
-    qualifiers = list(totals[totals >= THRESHOLD].index)
+    totals = last.groupby("player_id")["count"].sum()
+    qualifiers = list(totals[totals >= category.threshold].index)
     current = frame[frame["season"] == season].sort_values(["date", "event_id"], kind="mergesort")
     latest_squad = current.groupby("player_id").tail(1).set_index("player_id")
     qualifiers = [pid for pid in qualifiers if pid in latest_squad.index]
@@ -232,10 +275,10 @@ def entering(logs: pd.DataFrame, *, season: int, before: str) -> pd.DataFrame:
             "player_id": qualifiers,
             "player": [names.get(pid, "") for pid in qualifiers],
             "appeared": 1,
-            "goals": 0,
+            category.column: 0,
         }
     )
-    prepared = prepare_logs(pd.concat([frame, sentinel], ignore_index=True))
+    prepared = prepare_logs(pd.concat([frame, sentinel], ignore_index=True), category)
     out = prepared[prepared["event_id"].str.startswith("__next__")].copy()
     out["club"] = out["team"]
 
@@ -266,7 +309,7 @@ class DueRow:
     opponent: str
     event_id: str
     kickoff: str
-    prior_goals: int
+    prior_total: int
     prior_apps: int
     prior_rate: float
     band: str
@@ -276,6 +319,7 @@ class DueRow:
     price: float | None = None
     book: str = ""
     status: str = ""
+    market: str = GOALS.key
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -285,9 +329,9 @@ class DueRow:
             "opponent": self.opponent,
             "event_id": self.event_id,
             "kickoff": self.kickoff,
-            "market": MARKET,
+            "market": self.market,
             "line": LINE,
-            "prior_goals": self.prior_goals,
+            "prior_total": self.prior_total,
             "prior_apps": self.prior_apps,
             "prior_rate": round(self.prior_rate, 4),
             "band": self.band,
@@ -314,6 +358,7 @@ def build_due_list(
     before: str,
     prices: dict[str, tuple[float, str]] | None = None,
     removed_out: list[tuple[DueRow, str]] | None = None,
+    category: Category = GOALS,
 ) -> list[DueRow]:
     """The listed players whose club plays one of `fixtures`.
 
@@ -326,7 +371,7 @@ def build_due_list(
     `prices` maps a player id to (best American price, book) when a price
     was staged; nothing is ever filled in.
     """
-    state = entering(logs, season=season, before=before)
+    state = entering(logs, season=season, before=before, category=category)
     if state.empty:
         return []
     opponents: dict[str, dict[str, str]] = {}
@@ -349,16 +394,17 @@ def build_due_list(
             opponent=fixture["opponent"],
             event_id=str(fixture.get("event_id", "")),
             kickoff=str(fixture.get("kickoff", "")),
-            prior_goals=int(record.prior_goals),
+            prior_total=int(record.prior_total),
             prior_apps=int(record.prior_apps),
             prior_rate=float(record.prior_rate),
-            band=band_label(record.prior_goals) or "",
+            band=band_label(record.prior_total, category) or "",
             bar=int(record.bar),
             drought=int(record.drought),
             one_in=one_in(record.prior_rate, int(record.drought)),
             price=price,
             book=book,
             status=_absence_words(absent, str(record.club)) if 0 < absent < ABSENT_REMOVE_MATCHES else "",
+            market=category.key,
         )
         if absent >= ABSENT_REMOVE_MATCHES:
             if removed_out is not None:
@@ -379,25 +425,27 @@ def load_headline(outputs_dir: Path) -> dict[str, Any] | None:
     return payload if isinstance(payload, dict) else None
 
 
-def headline_sentence(headline: dict[str, Any] | None) -> str:
+def headline_sentence(headline: dict[str, Any] | None, category: Category = GOALS) -> str:
     """One line on what being due has been worth, read from the backtest; never invented."""
     if not headline:
         return "No backtest is committed yet, so nothing is said here about what being due is worth."
-    hits = headline.get("hit_rate")
+    measured = (headline.get("categories") or {}).get(category.key)
+    hits = measured.get("hit_rate") if isinstance(measured, dict) else None
     if not isinstance(hits, dict) or not hits.get("listed_n"):
-        return "The committed backtest has no headline, so nothing is said here."
+        return f"The committed backtest has no {category.noun} headline, so nothing is said here."
+    verb = "scoring" if category is GOALS else "assisting"
     if hits["diff_high"] < 0:
-        verdict = "**Being due has meant scoring less often, not more.** "
+        verdict = f"**Being due has meant {verb} less often, not more.** "
     elif hits["diff_low"] > 0:
-        verdict = "Being due has meant scoring more often. "
+        verdict = f"Being due has meant {verb} more often. "
     else:
         verdict = "Being due has shown no difference either way. "
     return verdict + (
-        f"Seasons {hits.get('window')}: listed players scored in {hits['listed_rate']:.1%} of "
+        f"Seasons {hits.get('window')}: listed players had {category.one} in {hits['listed_rate']:.1%} of "
         f"{hits['listed_n']:,} next appearances, against {hits['others_rate']:.1%} for the same "
         f"qualifiers when not due (n = {hits['others_n']:,}; difference "
         f"{hits['diff']:+.1%}, 95% {hits['diff_low']:+.1%} to {hits['diff_high']:+.1%}). "
-        "No price-based measurement exists: historical goalscorer prices were never bought."
+        "No price-based measurement exists: historical player-prop prices were never bought."
     )
 
 
@@ -414,33 +462,38 @@ def render_section(
     removed: list[tuple[DueRow, str]] | None = None,
     note: str = "",
 ) -> str:
-    """The card section. A list beside the card, never a selection."""
+    """The card section, one table per category. A list beside the card, never a selection."""
     out = [f"### {SECTION_TITLE}", ""]
-    out.append(
-        f"Anytime goalscorer, over {LINE}. Listed: {rule_sentence()} "
-        "Context only: no units, nothing here is a selection, and no edge is shown."
-    )
-    out += ["", headline_sentence(headline), ""]
+    out.append("Context only: no units, nothing here is a selection, and no edge is shown.")
+    out.append("")
     if note:
         out += [note, ""]
-    if not rows:
-        out.append("Nobody playing in this round is due.")
-    else:
+    for category in CATEGORIES:
+        mine = [r for r in rows if r.market == category.key]
+        out += [f"**{category.label}, over {LINE}.** Listed: {rule_sentence(category)}", ""]
+        out += [headline_sentence(headline, category), ""]
+        if not mine:
+            out += ["Nobody playing in this round is due.", ""]
+            continue
         out.append("| Player | Team | Opp | Kickoff (UTC) | Last season | Drought (bar) | 1 in N for him | Status | Price |")
         out.append("|:--|:--|:--|:--|--:|:--|--:|:--|:--|")
-        for row in rows:
+        for row in mine:
             rarity = f"1 in {row.one_in:,}" if row.one_in else "—"
             kickoff = row.kickoff.replace("T", " ").replace("Z", "")[:16]
             out.append(
                 f"| {row.player} | {row.team} | {row.opponent} | {kickoff} | "
-                f"{row.prior_goals} G, scored in {row.prior_rate:.0%} of apps | {row.drought} ({row.bar}) | "
+                f"{row.prior_total} {category.noun}, {row.prior_rate:.0%} of apps | {row.drought} ({row.bar}) | "
                 f"{rarity} | {row.status or '—'} | {_price_text(row.price, row.book)} |"
             )
+        out.append("")
     if removed:
-        out += ["", "Removed, probably not playing (missing from recent squads):", ""]
+        out += ["Removed, probably not playing (missing from recent squads):", ""]
+        seen: set[str] = set()
         for row, reason in removed:
-            out.append(f"- {row.player} ({row.team}): {reason}")
-    return "\n".join(out) + "\n"
+            if row.player_id not in seen:
+                seen.add(row.player_id)
+                out.append(f"- {row.player} ({row.team}): {reason}")
+    return "\n".join(out).rstrip("\n") + "\n"
 
 
 def payload(
@@ -458,10 +511,15 @@ def payload(
         "generated_at": generated_at,
         "season": season,
         "entering": before,
-        "rule": rule_sentence(),
-        "threshold": THRESHOLD,
-        "tiers": [list(t) for t in TIERS],
-        "headline": headline_sentence(headline),
+        "categories": {
+            c.key: {
+                "rule": rule_sentence(c),
+                "threshold": c.threshold,
+                "tiers": [list(t) for t in c.tiers],
+                "headline": headline_sentence(headline, c),
+            }
+            for c in CATEGORIES
+        },
         "fetch_note": fetch_note,
         "rows": [r.as_dict() for r in rows],
         "removed": [{**r.as_dict(), "reason": why} for r, why in removed],

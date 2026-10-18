@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Write the Due List (anytime goalscorers) the card appends and the board shows.
+"""Write the Due List (goals and assists) the card appends and the board shows.
 
     PYTHONPATH=src python scripts/build_due_list.py
 
@@ -28,6 +28,7 @@ import pandas as pd
 
 from epl_betting_lab.config import OUTPUTS_DIR
 from epl_betting_lab.due_list import (
+    CATEGORIES,
     DUE_LIST_JSON,
     DUE_LIST_MD,
     build_due_list,
@@ -44,7 +45,8 @@ from epl_betting_lab.providers.espn_player_logs import LeagueEvent, fetch_logs
 ROUND_DAYS = 4
 #: Props staging, written only when the reviewed policy approves prop markets.
 PROPS_STAGING = Path("data/staging/player_props_staging.csv")
-ANYTIME_MARKET = "player_goal_scorer_anytime"
+#: The provider's prop market for each Due List category.
+PROP_MARKETS = {"goals": "player_goal_scorer_anytime", "assists": "player_assists"}
 
 
 def season_for(now: datetime) -> int:
@@ -67,8 +69,8 @@ def _fold(name: object) -> str:
     return " ".join("".join(c for c in text if not unicodedata.combining(c)).lower().split())
 
 
-def staged_prices(path: Path, players: dict[str, str]) -> dict[str, tuple[float, str]]:
-    """player id -> (best anytime price, book) from the props staging file, bettable books only."""
+def staged_prices(path: Path, players: dict[str, str], market: str) -> dict[str, tuple[float, str]]:
+    """player id -> (best over-0.5 price, book) for one prop market, bettable books only."""
     if not path.is_file():
         return {}
     from epl_betting_lab.books import bettable_only
@@ -79,8 +81,10 @@ def staged_prices(path: Path, players: dict[str, str]) -> dict[str, tuple[float,
         return {}
     if frame.empty or "market" not in frame.columns:
         return {}
-    frame = frame[frame["market"] == ANYTIME_MARKET]
-    frame = frame[~frame["selection"].astype(str).str.lower().str.startswith(("no", "under"))]
+    frame = frame[frame["market"] == market]
+    selection = frame["selection"].astype(str).str.lower()
+    # Over 0.5 only (anytime has no point; assists are "Over@0.5"): a 1.5 line is another bet.
+    frame = frame[~selection.str.startswith(("no", "under")) & (~selection.str.contains("@") | selection.str.endswith("@0.5"))]
     frame = frame.assign(odds=pd.to_numeric(frame["american_odds"], errors="coerce")).dropna(subset=["odds"])
     by_name = {_fold(name): pid for pid, name in players.items()}
     out: dict[str, tuple[float, str]] = {}
@@ -123,14 +127,18 @@ def main(argv: list[str] | None = None) -> int:
     before = fixtures[0].kickoff[:10]
     names = dict(zip(logs["player_id"].astype(str), logs["player"].astype(str))) if not logs.empty else {}
     removed: list = []
-    rows = build_due_list(
-        logs,
-        [{"event_id": e.event_id, "home": e.home, "away": e.away, "kickoff": e.kickoff} for e in fixtures],
-        season=season,
-        before=before,
-        prices=staged_prices(PROPS_STAGING, names),
-        removed_out=removed,
-    ) if not logs.empty else []
+    rows: list = []
+    round_fixtures = [{"event_id": e.event_id, "home": e.home, "away": e.away, "kickoff": e.kickoff} for e in fixtures]
+    for category in CATEGORIES if not logs.empty else ():
+        rows += build_due_list(
+            logs,
+            round_fixtures,
+            season=season,
+            before=before,
+            prices=staged_prices(PROPS_STAGING, names, PROP_MARKETS[category.key]),
+            removed_out=removed,
+            category=category,
+        )
     headline = load_headline(args.outputs)
     md_path.write_text(render_section(rows, headline=headline, removed=removed, note=note), encoding="utf-8")
     json_path.write_text(

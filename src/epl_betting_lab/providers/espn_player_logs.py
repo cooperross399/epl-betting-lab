@@ -12,8 +12,8 @@ answers quickly. Two endpoints cover everything:
   documented range form ``?dates=A-B`` answers HTTP 400 on the soccer
   endpoint, so a season is read as its two calendar years and filtered.
 - ``summary?event=ID`` — both matchday squads, each player with
-  ``appearances`` (1 if he got on the pitch), ``totalGoals`` and
-  ``ownGoals``. ``totalGoals`` does not count own goals, which is what an
+  ``appearances`` (1 if he got on the pitch), ``totalGoals``, ``ownGoals``
+  and ``goalAssists``. ``totalGoals`` does not count own goals, which is what an
   anytime-goalscorer bet settles on.
 
 **A player in the squad who never came on is kept, with ``appeared`` 0.**
@@ -53,6 +53,7 @@ LOG_FIELDS = (
     "appeared",
     "goals",
     "own_goals",
+    "assists",
 )
 
 #: Takes a URL, returns decoded JSON or raises.
@@ -157,6 +158,7 @@ def match_rows(summary: Mapping, event: LeagueEvent) -> list[dict[str, Any]]:
                     "appeared": int(_stat(player, "appearances") > 0),
                     "goals": _stat(player, "totalGoals"),
                     "own_goals": _stat(player, "ownGoals"),
+                    "assists": _stat(player, "goalAssists"),
                 }
             )
     return rows
@@ -191,12 +193,17 @@ def fetch_logs(
     wanted = [e for e in result.events if e.completed and e.event_id not in skip]
 
     def one(event: LeagueEvent) -> tuple[LeagueEvent, list[dict[str, Any]] | None]:
-        try:
-            summary = request(f"{ESPN_SOCCER}/summary?event={event.event_id}")
-        except EspnError:
-            return event, None
-        rows = match_rows(summary, event)
-        return event, rows if rows else None
+        # Two tries: a few hundred requests in a burst lose one or two to a
+        # dropped connection, and a match missing for that reason is a drought
+        # understated for no reason. A second failure is reported, not retried.
+        for _ in range(2):
+            try:
+                rows = match_rows(request(f"{ESPN_SOCCER}/summary?event={event.event_id}"), event)
+            except EspnError:
+                continue
+            if rows:
+                return event, rows
+        return event, None
 
     with ThreadPoolExecutor(max_workers=max(1, workers)) as pool:
         for event, rows in pool.map(one, wanted):

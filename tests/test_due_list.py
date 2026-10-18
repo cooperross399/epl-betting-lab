@@ -52,6 +52,26 @@ class TestTheRule:
         assert d.one_in(1.0, 3) is None and d.one_in(0.3, 0) is None
 
 
+class TestAssists:
+    def test_bands_and_bars(self) -> None:
+        assert d.ASSISTS.threshold == 7
+        assert d.tier_bar(13, d.ASSISTS) == 8 and d.tier_bar(10, d.ASSISTS) == 10
+        assert d.tier_bar(7, d.ASSISTS) == 13 and d.tier_bar(6, d.ASSISTS) is None
+        assert "7+ Premier League assists" in d.rule_sentence(d.ASSISTS)
+
+    def test_assists_are_listed_on_their_own_column(self) -> None:
+        rows = []
+        for r in _qualifier_logs():
+            r = dict(r)
+            r["assists"] = r.pop("goals")  # the same pattern, read as assists
+            r["goals"] = 0
+            rows.append(r)
+        # 12 assists last season -> bar 8; 8 straight blanks this season.
+        listed = d.build_due_list(pd.DataFrame(rows), FIXTURES, season=2026, before="2026-10-03", category=d.ASSISTS)
+        assert [(r.player, r.market, r.bar, r.drought) for r in listed] == [("Due Striker", "assists", 8, 8)]
+        assert d.build_due_list(pd.DataFrame(rows), FIXTURES, season=2026, before="2026-10-03") == []
+
+
 class TestTheDrought:
     def test_only_appearances_count_and_it_carries_across_seasons(self) -> None:
         rows = _season(2025, "1", "Arsenal", [1] + [0] * 11)
@@ -67,7 +87,7 @@ class TestTheDrought:
         rows = _season(2025, "1", "Arsenal", [2, 0, 1, 0]) + _season(2026, "1", "Arsenal", [0])
         frame = d.prepare_logs(pd.DataFrame(rows))
         now = frame[frame["season"] == 2026].iloc[0]
-        assert now["prior_goals"] == 3 and now["prior_apps"] == 4 and now["prior_rate"] == 0.5
+        assert now["prior_total"] == 3 and now["prior_apps"] == 4 and now["prior_rate"] == 0.5
 
     def test_a_missing_goal_count_is_not_a_blank(self) -> None:
         rows = _season(2025, "1", "Arsenal", [1, 0, 0])
@@ -97,7 +117,8 @@ class TestTheList:
         assert [r.player for r in rows] == ["Due Striker"]
         row = rows[0]
         assert (row.team, row.opponent, row.event_id) == ("Arsenal", "Everton", "next1")
-        assert (row.prior_goals, row.bar, row.drought, row.band) == (12, 8, 8, "10-14")
+        assert (row.prior_total, row.bar, row.drought, row.band) == (12, 8, 8, "10-14")
+        assert row.market == "goals"
         assert row.price is None
 
     def test_one_short_of_the_bar_is_not_listed(self) -> None:
@@ -150,12 +171,14 @@ class TestTheList:
 class TestTheSection:
     def test_it_says_it_is_not_a_selection_and_reads_the_measurement(self) -> None:
         rows = d.build_due_list(pd.DataFrame(_qualifier_logs()), FIXTURES, season=2026, before="2026-10-03")
-        headline = {"hit_rate": {"window": "2022/23 to 2025/26", "listed_n": 388, "listed_rate": 0.18,
-                                 "others_n": 2286, "others_rate": 0.286, "diff": -0.106,
-                                 "diff_low": -0.148, "diff_high": -0.063}}
+        hits = {"window": "2022/23 to 2025/26", "listed_n": 388, "listed_rate": 0.18,
+                "others_n": 2286, "others_rate": 0.286, "diff": -0.106,
+                "diff_low": -0.148, "diff_high": -0.063}
+        headline = {"categories": {"goals": {"hit_rate": hits}, "assists": {"hit_rate": hits}}}
         text = d.render_section(rows, headline=headline)
         assert "no units" in text and "nothing here is a selection" in text
-        assert "scoring less often, not more" in text
+        assert "scoring less often, not more" in text and "assisting less often, not more" in text
+        assert "1+ assist, over 0.5" in text
         assert "| Due Striker | Arsenal | Everton |" in text
         assert "not posted" in text
 
@@ -165,19 +188,20 @@ class TestTheSection:
     def test_the_committed_backtest_is_readable(self) -> None:
         headline = d.load_headline(ROOT / "data" / "outputs")
         assert headline is not None
-        assert headline["hit_rate"]["listed_n"] > 0
+        for category in d.CATEGORIES:
+            assert headline["categories"][category.key]["hit_rate"]["listed_n"] > 0
         assert headline["priced"] is None
 
     def test_the_card_carries_the_list(self, tmp_path: Path) -> None:
-        (tmp_path / d.DUE_LIST_MD).write_text("### Due List · anytime goalscorers\n\nrow\n", encoding="utf-8")
+        (tmp_path / d.DUE_LIST_MD).write_text(f"### {d.SECTION_TITLE}\n\nrow\n", encoding="utf-8")
         body = build_notification(output_dir=tmp_path, now=datetime(2026, 10, 3, 9, tzinfo=timezone.utc))["body"]
-        assert "### Due List · anytime goalscorers" in body
+        assert f"### {d.SECTION_TITLE}" in body
 
 
 def _summary():
     def player(pid, name, *, starter, apps, goals, own=0):
         stats = [{"name": "appearances", "value": float(apps)}, {"name": "totalGoals", "value": float(goals)},
-                 {"name": "ownGoals", "value": float(own)}]
+                 {"name": "ownGoals", "value": float(own)}, {"name": "goalAssists", "value": float(goals > 1)}]
         return {"starter": starter, "athlete": {"id": pid, "displayName": name},
                 "position": {"abbreviation": "F"}, "stats": stats}
 
@@ -199,6 +223,7 @@ class TestEspn:
         assert by["1"]["goals"] == 2 and by["1"]["team"] == "Arsenal" and by["1"]["opponent"] == "Everton"
         assert by["2"]["appeared"] == 0
         assert by["3"]["goals"] == 0 and by["3"]["own_goals"] == 1
+        assert by["1"]["assists"] == 1
         assert set(rows[0]) == set(espn.LOG_FIELDS)
 
     def test_a_summary_without_both_squads_is_no_rows(self) -> None:
@@ -226,6 +251,21 @@ class TestEspn:
         assert {e.event_id for e in result.events} == {"a", "c"}
         assert result.fetched == 1 and not result.failed
         assert any("dates=2025" in c for c in calls) and any("dates=2026" in c for c in calls)
+
+    def test_a_dropped_request_is_tried_once_more(self) -> None:
+        attempts = []
+
+        def request(url):
+            if "scoreboard" in url:
+                return {"events": [{"id": "a", "date": "2026-01-01T15:00Z", "season": {"year": 2025},
+                                    "status": {"type": {"completed": True}}, "competitions": [{}]}]}
+            attempts.append(url)
+            if len(attempts) == 1:
+                raise espn.EspnError("reset")
+            return _summary()
+
+        result = espn.fetch_logs([2025], request=request, workers=1)
+        assert len(attempts) == 2 and result.fetched == 1 and not result.failed
 
     def test_an_unreadable_summary_is_named_not_filled(self) -> None:
         def request(url):
@@ -259,6 +299,9 @@ def test_the_board_attaches_rows_to_their_fixture_in_the_shared_page_shape(tmp_p
     assert entry["market"] == "goals" and entry["line"] == 0.5 and entry["rule"] == "tier"
     assert entry["team"] == "ARS" and entry["drought"] == 8 and entry["tierBar"] == 8
     assert entry["price"] is None and "cellRecord" not in entry
+    assert entry["lastSeason"] == 12
+    note = board.due_note(due)
+    assert "goals" in note and "assists" in note and "**" not in note
     assert board.load_due_list(tmp_path / "nowhere") is None
 
 

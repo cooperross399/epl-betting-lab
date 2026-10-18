@@ -1,287 +1,592 @@
 {
-  "generated_at": "2026-10-18T12:22:59+00:00",
-  "source": "ESPN league squads (appearances, totalGoals)",
-  "rule": "10+ Premier League goals last season and a run of league appearances without a goal at the bar his total sets (20+ goals -> 4, 15-19 goals -> 6, 10-14 goals -> 8 straight games).",
-  "hit_rate": {
-    "window": "2022/23 to 2025/26",
-    "first_season": 2022,
-    "last_season": 2025,
-    "listed_n": 388,
-    "listed_rate": 0.1804,
-    "listed_own_rate": 0.3554,
-    "others_n": 2286,
-    "others_rate": 0.2861,
-    "others_own_rate": 0.3506,
-    "diff": -0.1057,
-    "diff_low": -0.1482,
-    "diff_high": -0.0632
-  },
-  "by_band": [
-    {
-      "band": "20+",
-      "bar": 4,
-      "players": 8,
-      "own_rate": 0.524,
-      "listed_n": 62,
-      "listed_rate": 0.2258,
-      "others_n": 280,
-      "others_rate": 0.4071,
-      "by_drought": [
+  "generated_at": "2026-10-18T12:54:07+00:00",
+  "source": "ESPN league squads (appearances, totalGoals, goalAssists)",
+  "categories": {
+    "goals": {
+      "key": "goals",
+      "label": "Anytime goalscorer",
+      "noun": "goals",
+      "rule": "10+ Premier League goals last season and a run of league appearances without a goal at the bar his total sets (20+ goals -> 4, 15-19 goals -> 6, 10-14 goals -> 8 straight games).",
+      "hit_rate": {
+        "window": "2022/23 to 2025/26",
+        "first_season": 2022,
+        "last_season": 2025,
+        "listed_n": 380,
+        "listed_rate": 0.1868,
+        "listed_own_rate": 0.3547,
+        "others_n": 2270,
+        "others_rate": 0.2885,
+        "others_own_rate": 0.3525,
+        "diff": -0.1017,
+        "diff_low": -0.1451,
+        "diff_high": -0.0583
+      },
+      "by_band": [
         {
-          "drought": 0,
-          "n": 131,
-          "rate": 0.4275,
-          "own_rate": 0.5344
+          "band": "20+",
+          "bar": 4,
+          "players": 8,
+          "own_rate": 0.5268,
+          "listed_n": 60,
+          "listed_rate": 0.2333,
+          "others_n": 283,
+          "others_rate": 0.4099,
+          "by_drought": [
+            {
+              "drought": 0,
+              "n": 133,
+              "rate": 0.4286,
+              "own_rate": 0.5375
+            },
+            {
+              "drought": 1,
+              "n": 77,
+              "rate": 0.3896,
+              "own_rate": 0.5303
+            },
+            {
+              "drought": 2,
+              "n": 49,
+              "rate": 0.449,
+              "own_rate": 0.5254
+            },
+            {
+              "drought": 3,
+              "n": 24,
+              "rate": 0.2917,
+              "own_rate": 0.5176
+            },
+            {
+              "drought": 4,
+              "n": 15,
+              "rate": 0.2667,
+              "own_rate": 0.5235
+            },
+            {
+              "drought": 5,
+              "n": 11,
+              "rate": 0.2727,
+              "own_rate": 0.51
+            },
+            {
+              "drought": 6,
+              "n": 8,
+              "rate": 0.125,
+              "own_rate": 0.5064
+            },
+            {
+              "drought": 7,
+              "n": 7,
+              "rate": 0.1429,
+              "own_rate": 0.5032
+            },
+            {
+              "drought": 8,
+              "n": 6,
+              "rate": 0.1667,
+              "own_rate": 0.4961
+            },
+            {
+              "drought": 9,
+              "n": 5,
+              "rate": 0.2,
+              "own_rate": 0.4894
+            },
+            {
+              "drought": 10,
+              "n": 4,
+              "rate": 0.25,
+              "own_rate": 0.4937
+            },
+            {
+              "drought": 11,
+              "n": 3,
+              "rate": 0.3333,
+              "own_rate": 0.4478
+            },
+            {
+              "drought": "12+",
+              "n": 1,
+              "rate": 1.0,
+              "own_rate": 0.4375
+            }
+          ]
         },
         {
-          "drought": 1,
-          "n": 76,
-          "rate": 0.3816,
-          "own_rate": 0.5263
+          "band": "15-19",
+          "bar": 6,
+          "players": 19,
+          "own_rate": 0.3967,
+          "listed_n": 93,
+          "listed_rate": 0.2043,
+          "others_n": 568,
+          "others_rate": 0.3292,
+          "by_drought": [
+            {
+              "drought": 0,
+              "n": 203,
+              "rate": 0.3892,
+              "own_rate": 0.3969
+            },
+            {
+              "drought": 1,
+              "n": 128,
+              "rate": 0.3125,
+              "own_rate": 0.3952
+            },
+            {
+              "drought": 2,
+              "n": 91,
+              "rate": 0.2967,
+              "own_rate": 0.3933
+            },
+            {
+              "drought": 3,
+              "n": 66,
+              "rate": 0.2273,
+              "own_rate": 0.3952
+            },
+            {
+              "drought": 4,
+              "n": 50,
+              "rate": 0.38,
+              "own_rate": 0.4001
+            },
+            {
+              "drought": 5,
+              "n": 30,
+              "rate": 0.2333,
+              "own_rate": 0.3983
+            },
+            {
+              "drought": 6,
+              "n": 22,
+              "rate": 0.1364,
+              "own_rate": 0.3939
+            },
+            {
+              "drought": 7,
+              "n": 20,
+              "rate": 0.35,
+              "own_rate": 0.3909
+            },
+            {
+              "drought": 8,
+              "n": 12,
+              "rate": 0.25,
+              "own_rate": 0.3924
+            },
+            {
+              "drought": 9,
+              "n": 9,
+              "rate": 0.1111,
+              "own_rate": 0.3935
+            },
+            {
+              "drought": 10,
+              "n": 6,
+              "rate": 0.1667,
+              "own_rate": 0.4142
+            },
+            {
+              "drought": 11,
+              "n": 5,
+              "rate": 0.4,
+              "own_rate": 0.4323
+            },
+            {
+              "drought": "12+",
+              "n": 19,
+              "rate": 0.1053,
+              "own_rate": 0.4123
+            }
+          ]
         },
         {
-          "drought": 2,
-          "n": 49,
-          "rate": 0.449,
-          "own_rate": 0.5213
-        },
-        {
-          "drought": 3,
-          "n": 24,
-          "rate": 0.2917,
-          "own_rate": 0.5142
-        },
-        {
-          "drought": 4,
-          "n": 15,
-          "rate": 0.2667,
-          "own_rate": 0.5209
-        },
-        {
-          "drought": 5,
-          "n": 11,
-          "rate": 0.2727,
-          "own_rate": 0.5064
-        },
-        {
-          "drought": 6,
-          "n": 8,
-          "rate": 0.125,
-          "own_rate": 0.5035
-        },
-        {
-          "drought": 7,
-          "n": 7,
-          "rate": 0.0,
-          "own_rate": 0.5019
-        },
-        {
-          "drought": 8,
-          "n": 7,
-          "rate": 0.1429,
-          "own_rate": 0.5019
-        },
-        {
-          "drought": 9,
-          "n": 6,
-          "rate": 0.1667,
-          "own_rate": 0.4999
-        },
-        {
-          "drought": 10,
-          "n": 5,
-          "rate": 0.4,
-          "own_rate": 0.5054
-        },
-        {
-          "drought": 11,
-          "n": 3,
-          "rate": 0.6667,
-          "own_rate": 0.449
+          "band": "10-14",
+          "bar": 8,
+          "players": 49,
+          "own_rate": 0.299,
+          "listed_n": 227,
+          "listed_rate": 0.1674,
+          "others_n": 1419,
+          "others_rate": 0.2481,
+          "by_drought": [
+            {
+              "drought": 0,
+              "n": 396,
+              "rate": 0.2803,
+              "own_rate": 0.3025
+            },
+            {
+              "drought": 1,
+              "n": 291,
+              "rate": 0.2715,
+              "own_rate": 0.301
+            },
+            {
+              "drought": 2,
+              "n": 212,
+              "rate": 0.2406,
+              "own_rate": 0.2986
+            },
+            {
+              "drought": 3,
+              "n": 159,
+              "rate": 0.2138,
+              "own_rate": 0.2963
+            },
+            {
+              "drought": 4,
+              "n": 124,
+              "rate": 0.2097,
+              "own_rate": 0.2943
+            },
+            {
+              "drought": 5,
+              "n": 100,
+              "rate": 0.22,
+              "own_rate": 0.2939
+            },
+            {
+              "drought": 6,
+              "n": 78,
+              "rate": 0.2308,
+              "own_rate": 0.2993
+            },
+            {
+              "drought": 7,
+              "n": 59,
+              "rate": 0.1864,
+              "own_rate": 0.3008
+            },
+            {
+              "drought": 8,
+              "n": 49,
+              "rate": 0.1429,
+              "own_rate": 0.3017
+            },
+            {
+              "drought": 9,
+              "n": 39,
+              "rate": 0.1026,
+              "own_rate": 0.2987
+            },
+            {
+              "drought": 10,
+              "n": 33,
+              "rate": 0.2424,
+              "own_rate": 0.3
+            },
+            {
+              "drought": 11,
+              "n": 25,
+              "rate": 0.2,
+              "own_rate": 0.3075
+            },
+            {
+              "drought": "12+",
+              "n": 81,
+              "rate": 0.1728,
+              "own_rate": 0.288
+            }
+          ]
         }
       ]
     },
-    {
-      "band": "15-19",
-      "bar": 6,
-      "players": 17,
-      "own_rate": 0.4003,
-      "listed_n": 86,
-      "listed_rate": 0.1977,
-      "others_n": 517,
-      "others_rate": 0.3385,
-      "by_drought": [
+    "assists": {
+      "key": "assists",
+      "label": "1+ assist",
+      "noun": "assists",
+      "rule": "7+ Premier League assists last season and a run of league appearances without an assist at the bar his total sets (12+ assists -> 8, 9-11 assists -> 10, 7-8 assists -> 13 straight games).",
+      "hit_rate": {
+        "window": "2022/23 to 2025/26",
+        "first_season": 2022,
+        "last_season": 2025,
+        "listed_n": 448,
+        "listed_rate": 0.1027,
+        "listed_own_rate": 0.2346,
+        "others_n": 2484,
+        "others_rate": 0.1779,
+        "others_own_rate": 0.2329,
+        "diff": -0.0753,
+        "diff_low": -0.1071,
+        "diff_high": -0.0434
+      },
+      "by_band": [
         {
-          "drought": 0,
-          "n": 190,
-          "rate": 0.4105,
-          "own_rate": 0.3986
+          "band": "12+",
+          "bar": 8,
+          "players": 7,
+          "own_rate": 0.312,
+          "listed_n": 73,
+          "listed_rate": 0.0822,
+          "others_n": 215,
+          "others_rate": 0.2372,
+          "by_drought": [
+            {
+              "drought": 0,
+              "n": 56,
+              "rate": 0.3036,
+              "own_rate": 0.328
+            },
+            {
+              "drought": 1,
+              "n": 39,
+              "rate": 0.1795,
+              "own_rate": 0.3144
+            },
+            {
+              "drought": 2,
+              "n": 32,
+              "rate": 0.1562,
+              "own_rate": 0.3133
+            },
+            {
+              "drought": 3,
+              "n": 27,
+              "rate": 0.2963,
+              "own_rate": 0.3115
+            },
+            {
+              "drought": 4,
+              "n": 20,
+              "rate": 0.35,
+              "own_rate": 0.314
+            },
+            {
+              "drought": 5,
+              "n": 14,
+              "rate": 0.0714,
+              "own_rate": 0.3102
+            },
+            {
+              "drought": 6,
+              "n": 14,
+              "rate": 0.0714,
+              "own_rate": 0.3139
+            },
+            {
+              "drought": 7,
+              "n": 13,
+              "rate": 0.3846,
+              "own_rate": 0.3117
+            },
+            {
+              "drought": 8,
+              "n": 8,
+              "rate": 0.25,
+              "own_rate": 0.3031
+            },
+            {
+              "drought": 9,
+              "n": 6,
+              "rate": 0.0,
+              "own_rate": 0.2989
+            },
+            {
+              "drought": 10,
+              "n": 6,
+              "rate": 0.1667,
+              "own_rate": 0.2989
+            },
+            {
+              "drought": 11,
+              "n": 5,
+              "rate": 0.0,
+              "own_rate": 0.2901
+            },
+            {
+              "drought": "12+",
+              "n": 48,
+              "rate": 0.0625,
+              "own_rate": 0.2971
+            }
+          ]
         },
         {
-          "drought": 1,
-          "n": 116,
-          "rate": 0.319,
-          "own_rate": 0.3983
+          "band": "9-11",
+          "bar": 10,
+          "players": 28,
+          "own_rate": 0.2632,
+          "listed_n": 156,
+          "listed_rate": 0.1026,
+          "others_n": 807,
+          "others_rate": 0.1995,
+          "by_drought": [
+            {
+              "drought": 0,
+              "n": 185,
+              "rate": 0.2432,
+              "own_rate": 0.2613
+            },
+            {
+              "drought": 1,
+              "n": 140,
+              "rate": 0.2214,
+              "own_rate": 0.2638
+            },
+            {
+              "drought": 2,
+              "n": 110,
+              "rate": 0.1455,
+              "own_rate": 0.2653
+            },
+            {
+              "drought": 3,
+              "n": 94,
+              "rate": 0.1702,
+              "own_rate": 0.2644
+            },
+            {
+              "drought": 4,
+              "n": 78,
+              "rate": 0.1667,
+              "own_rate": 0.2707
+            },
+            {
+              "drought": 5,
+              "n": 64,
+              "rate": 0.2344,
+              "own_rate": 0.2706
+            },
+            {
+              "drought": 6,
+              "n": 47,
+              "rate": 0.1915,
+              "own_rate": 0.2646
+            },
+            {
+              "drought": 7,
+              "n": 37,
+              "rate": 0.1892,
+              "own_rate": 0.264
+            },
+            {
+              "drought": 8,
+              "n": 30,
+              "rate": 0.2333,
+              "own_rate": 0.2647
+            },
+            {
+              "drought": 9,
+              "n": 22,
+              "rate": 0.0909,
+              "own_rate": 0.2691
+            },
+            {
+              "drought": 10,
+              "n": 20,
+              "rate": 0.1,
+              "own_rate": 0.2733
+            },
+            {
+              "drought": 11,
+              "n": 18,
+              "rate": 0.1111,
+              "own_rate": 0.2706
+            },
+            {
+              "drought": "12+",
+              "n": 118,
+              "rate": 0.1017,
+              "own_rate": 0.2488
+            }
+          ]
         },
         {
-          "drought": 2,
-          "n": 82,
-          "rate": 0.2805,
-          "own_rate": 0.3987
-        },
-        {
-          "drought": 3,
-          "n": 59,
-          "rate": 0.2542,
-          "own_rate": 0.3995
-        },
-        {
-          "drought": 4,
-          "n": 43,
-          "rate": 0.3488,
-          "own_rate": 0.4046
-        },
-        {
-          "drought": 5,
-          "n": 27,
-          "rate": 0.2593,
-          "own_rate": 0.4053
-        },
-        {
-          "drought": 6,
-          "n": 19,
-          "rate": 0.1579,
-          "own_rate": 0.4038
-        },
-        {
-          "drought": 7,
-          "n": 17,
-          "rate": 0.2941,
-          "own_rate": 0.4005
-        },
-        {
-          "drought": 8,
-          "n": 11,
-          "rate": 0.2727,
-          "own_rate": 0.394
-        },
-        {
-          "drought": 9,
-          "n": 8,
-          "rate": 0.125,
-          "own_rate": 0.399
-        },
-        {
-          "drought": 10,
-          "n": 6,
-          "rate": 0.0,
-          "own_rate": 0.4174
-        },
-        {
-          "drought": 11,
-          "n": 6,
-          "rate": 0.5,
-          "own_rate": 0.4174
-        },
-        {
-          "drought": "12+",
-          "n": 19,
-          "rate": 0.1053,
-          "own_rate": 0.4123
-        }
-      ]
-    },
-    {
-      "band": "10-14",
-      "bar": 8,
-      "players": 52,
-      "own_rate": 0.3,
-      "listed_n": 240,
-      "listed_rate": 0.1625,
-      "others_n": 1489,
-      "others_rate": 0.2451,
-      "by_drought": [
-        {
-          "drought": 0,
-          "n": 409,
-          "rate": 0.2787,
-          "own_rate": 0.3024
-        },
-        {
-          "drought": 1,
-          "n": 301,
-          "rate": 0.2625,
-          "own_rate": 0.3009
-        },
-        {
-          "drought": 2,
-          "n": 222,
-          "rate": 0.2477,
-          "own_rate": 0.2991
-        },
-        {
-          "drought": 3,
-          "n": 167,
-          "rate": 0.2036,
-          "own_rate": 0.2975
-        },
-        {
-          "drought": 4,
-          "n": 134,
-          "rate": 0.2015,
-          "own_rate": 0.2969
-        },
-        {
-          "drought": 5,
-          "n": 108,
-          "rate": 0.213,
-          "own_rate": 0.2992
-        },
-        {
-          "drought": 6,
-          "n": 84,
-          "rate": 0.2262,
-          "own_rate": 0.3001
-        },
-        {
-          "drought": 7,
-          "n": 64,
-          "rate": 0.2188,
-          "own_rate": 0.3029
-        },
-        {
-          "drought": 8,
-          "n": 50,
-          "rate": 0.1,
-          "own_rate": 0.3018
-        },
-        {
-          "drought": 9,
-          "n": 44,
-          "rate": 0.1364,
-          "own_rate": 0.3018
-        },
-        {
-          "drought": 10,
-          "n": 35,
-          "rate": 0.2857,
-          "own_rate": 0.299
-        },
-        {
-          "drought": 11,
-          "n": 24,
-          "rate": 0.1667,
-          "own_rate": 0.3034
-        },
-        {
-          "drought": "12+",
-          "n": 87,
-          "rate": 0.1609,
-          "own_rate": 0.2946
+          "band": "7-8",
+          "bar": 13,
+          "players": 52,
+          "own_rate": 0.2025,
+          "listed_n": 219,
+          "listed_rate": 0.1096,
+          "others_n": 1462,
+          "others_rate": 0.1573,
+          "by_drought": [
+            {
+              "drought": 0,
+              "n": 257,
+              "rate": 0.2101,
+              "own_rate": 0.2034
+            },
+            {
+              "drought": 1,
+              "n": 205,
+              "rate": 0.1366,
+              "own_rate": 0.2033
+            },
+            {
+              "drought": 2,
+              "n": 178,
+              "rate": 0.1629,
+              "own_rate": 0.2035
+            },
+            {
+              "drought": 3,
+              "n": 153,
+              "rate": 0.1895,
+              "own_rate": 0.2004
+            },
+            {
+              "drought": 4,
+              "n": 128,
+              "rate": 0.125,
+              "own_rate": 0.202
+            },
+            {
+              "drought": 5,
+              "n": 113,
+              "rate": 0.2035,
+              "own_rate": 0.2028
+            },
+            {
+              "drought": 6,
+              "n": 90,
+              "rate": 0.1444,
+              "own_rate": 0.2019
+            },
+            {
+              "drought": 7,
+              "n": 75,
+              "rate": 0.1467,
+              "own_rate": 0.2059
+            },
+            {
+              "drought": 8,
+              "n": 67,
+              "rate": 0.1194,
+              "own_rate": 0.2072
+            },
+            {
+              "drought": 9,
+              "n": 58,
+              "rate": 0.1207,
+              "own_rate": 0.2037
+            },
+            {
+              "drought": 10,
+              "n": 52,
+              "rate": 0.0769,
+              "own_rate": 0.2013
+            },
+            {
+              "drought": 11,
+              "n": 44,
+              "rate": 0.0455,
+              "own_rate": 0.2012
+            },
+            {
+              "drought": "12+",
+              "n": 261,
+              "rate": 0.1149,
+              "own_rate": 0.1996
+            }
+          ]
         }
       ]
     }
-  ],
+  },
   "priced": null,
-  "priced_note": "Historical anytime-goalscorer prices were never bought; no return is measured."
+  "priced_note": "Historical player-prop prices were never bought; no return is measured."
 }

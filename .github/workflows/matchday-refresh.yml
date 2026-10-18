@@ -595,6 +595,19 @@ jobs:
             echo "Some divisions could not be built; the section will say what it could price."
           python scripts/build_extra_card.py
 
+      - name: Build the Due List
+        # Anytime goalscorers on a scoring drought, beside the card and never in
+        # it. Soft in every direction: the card and the board read the files
+        # this writes if they are there, so ESPN failing costs the list and
+        # never the card. Keyless ESPN squads, no provider quota.
+        if: always()
+        continue-on-error: true
+        timeout-minutes: 8
+        env:
+          PYTHONPATH: src
+        run: |
+          python scripts/build_due_list.py
+
       - name: Rebuild every report
         # Soft: refresh_all_reports already continues past a failed step and
         # exits non-zero at the end, so letting it stop the job here would
@@ -930,6 +943,9 @@ jobs:
             # The freshness verdict, so "did a stale selection ship" can be
             # answered from the artifact rather than recomputed from the cards.
             data/outputs/card_freshness.json
+            # The Due List, which the board reads from this artifact.
+            data/outputs/due_list.md
+            data/outputs/due_list.json
           if-no-files-found: warn
           retention-days: 30
 

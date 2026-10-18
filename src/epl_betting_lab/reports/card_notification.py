@@ -25,6 +25,7 @@ from typing import Any
 from epl_betting_lab.reports.scheduled_task_bridge import CARD_TASK_JSON
 from epl_betting_lab.config import AUTOMATED_CARD_JSON, OUTPUTS_DIR, PROPS_CARD_JSON
 from epl_betting_lab.reports.run_summary import _quota_line
+from epl_betting_lab.due_list import DUE_LIST_MD
 from epl_betting_lab.reports.pick_display import (
     format_american_odds,
     format_market_list,
@@ -329,6 +330,18 @@ def build_notification(
         # Named rather than swallowed: a section that silently stops appearing
         # looks exactly like a week with no cup fixtures.
         lines += ["", f"_The cup and European section could not be read: {exc}._", ""]
+
+    # The Due List (anytime goalscorers on a drought), written by
+    # `scripts/build_due_list.py`. A list beside the card, never part of it:
+    # read from a file for the same reason as the section above.
+    due = outputs / DUE_LIST_MD
+    try:
+        if due.is_file():
+            section = due.read_text(encoding="utf-8").strip()
+            if section:
+                lines += ["", section, ""]
+    except OSError as exc:
+        lines += ["", f"_The Due List could not be read: {exc}._", ""]
 
     try:
         # OUTPUTS_DIR is imported at module scope. Importing it here as well

@@ -1,0 +1,287 @@
+{
+  "generated_at": "2026-10-18T12:22:59+00:00",
+  "source": "ESPN league squads (appearances, totalGoals)",
+  "rule": "10+ Premier League goals last season and a run of league appearances without a goal at the bar his total sets (20+ goals -> 4, 15-19 goals -> 6, 10-14 goals -> 8 straight games).",
+  "hit_rate": {
+    "window": "2022/23 to 2025/26",
+    "first_season": 2022,
+    "last_season": 2025,
+    "listed_n": 388,
+    "listed_rate": 0.1804,
+    "listed_own_rate": 0.3554,
+    "others_n": 2286,
+    "others_rate": 0.2861,
+    "others_own_rate": 0.3506,
+    "diff": -0.1057,
+    "diff_low": -0.1482,
+    "diff_high": -0.0632
+  },
+  "by_band": [
+    {
+      "band": "20+",
+      "bar": 4,
+      "players": 8,
+      "own_rate": 0.524,
+      "listed_n": 62,
+      "listed_rate": 0.2258,
+      "others_n": 280,
+      "others_rate": 0.4071,
+      "by_drought": [
+        {
+          "drought": 0,
+          "n": 131,
+          "rate": 0.4275,
+          "own_rate": 0.5344
+        },
+        {
+          "drought": 1,
+          "n": 76,
+          "rate": 0.3816,
+          "own_rate": 0.5263
+        },
+        {
+          "drought": 2,
+          "n": 49,
+          "rate": 0.449,
+          "own_rate": 0.5213
+        },
+        {
+          "drought": 3,
+          "n": 24,
+          "rate": 0.2917,
+          "own_rate": 0.5142
+        },
+        {
+          "drought": 4,
+          "n": 15,
+          "rate": 0.2667,
+          "own_rate": 0.5209
+        },
+        {
+          "drought": 5,
+          "n": 11,
+          "rate": 0.2727,
+          "own_rate": 0.5064
+        },
+        {
+          "drought": 6,
+          "n": 8,
+          "rate": 0.125,
+          "own_rate": 0.5035
+        },
+        {
+          "drought": 7,
+          "n": 7,
+          "rate": 0.0,
+          "own_rate": 0.5019
+        },
+        {
+          "drought": 8,
+          "n": 7,
+          "rate": 0.1429,
+          "own_rate": 0.5019
+        },
+        {
+          "drought": 9,
+          "n": 6,
+          "rate": 0.1667,
+          "own_rate": 0.4999
+        },
+        {
+          "drought": 10,
+          "n": 5,
+          "rate": 0.4,
+          "own_rate": 0.5054
+        },
+        {
+          "drought": 11,
+          "n": 3,
+          "rate": 0.6667,
+          "own_rate": 0.449
+        }
+      ]
+    },
+    {
+      "band": "15-19",
+      "bar": 6,
+      "players": 17,
+      "own_rate": 0.4003,
+      "listed_n": 86,
+      "listed_rate": 0.1977,
+      "others_n": 517,
+      "others_rate": 0.3385,
+      "by_drought": [
+        {
+          "drought": 0,
+          "n": 190,
+          "rate": 0.4105,
+          "own_rate": 0.3986
+        },
+        {
+          "drought": 1,
+          "n": 116,
+          "rate": 0.319,
+          "own_rate": 0.3983
+        },
+        {
+          "drought": 2,
+          "n": 82,
+          "rate": 0.2805,
+          "own_rate": 0.3987
+        },
+        {
+          "drought": 3,
+          "n": 59,
+          "rate": 0.2542,
+          "own_rate": 0.3995
+        },
+        {
+          "drought": 4,
+          "n": 43,
+          "rate": 0.3488,
+          "own_rate": 0.4046
+        },
+        {
+          "drought": 5,
+          "n": 27,
+          "rate": 0.2593,
+          "own_rate": 0.4053
+        },
+        {
+          "drought": 6,
+          "n": 19,
+          "rate": 0.1579,
+          "own_rate": 0.4038
+        },
+        {
+          "drought": 7,
+          "n": 17,
+          "rate": 0.2941,
+          "own_rate": 0.4005
+        },
+        {
+          "drought": 8,
+          "n": 11,
+          "rate": 0.2727,
+          "own_rate": 0.394
+        },
+        {
+          "drought": 9,
+          "n": 8,
+          "rate": 0.125,
+          "own_rate": 0.399
+        },
+        {
+          "drought": 10,
+          "n": 6,
+          "rate": 0.0,
+          "own_rate": 0.4174
+        },
+        {
+          "drought": 11,
+          "n": 6,
+          "rate": 0.5,
+          "own_rate": 0.4174
+        },
+        {
+          "drought": "12+",
+          "n": 19,
+          "rate": 0.1053,
+          "own_rate": 0.4123
+        }
+      ]
+    },
+    {
+      "band": "10-14",
+      "bar": 8,
+      "players": 52,
+      "own_rate": 0.3,
+      "listed_n": 240,
+      "listed_rate": 0.1625,
+      "others_n": 1489,
+      "others_rate": 0.2451,
+      "by_drought": [
+        {
+          "drought": 0,
+          "n": 409,
+          "rate": 0.2787,
+          "own_rate": 0.3024
+        },
+        {
+          "drought": 1,
+          "n": 301,
+          "rate": 0.2625,
+          "own_rate": 0.3009
+        },
+        {
+          "drought": 2,
+          "n": 222,
+          "rate": 0.2477,
+          "own_rate": 0.2991
+        },
+        {
+          "drought": 3,
+          "n": 167,
+          "rate": 0.2036,
+          "own_rate": 0.2975
+        },
+        {
+          "drought": 4,
+          "n": 134,
+          "rate": 0.2015,
+          "own_rate": 0.2969
+        },
+        {
+          "drought": 5,
+          "n": 108,
+          "rate": 0.213,
+          "own_rate": 0.2992
+        },
+        {
+          "drought": 6,
+          "n": 84,
+          "rate": 0.2262,
+          "own_rate": 0.3001
+        },
+        {
+          "drought": 7,
+          "n": 64,
+          "rate": 0.2188,
+          "own_rate": 0.3029
+        },
+        {
+          "drought": 8,
+          "n": 50,
+          "rate": 0.1,
+          "own_rate": 0.3018
+        },
+        {
+          "drought": 9,
+          "n": 44,
+          "rate": 0.1364,
+          "own_rate": 0.3018
+        },
+        {
+          "drought": 10,
+          "n": 35,
+          "rate": 0.2857,
+          "own_rate": 0.299
+        },
+        {
+          "drought": 11,
+          "n": 24,
+          "rate": 0.1667,
+          "own_rate": 0.3034
+        },
+        {
+          "drought": "12+",
+          "n": 87,
+          "rate": 0.1609,
+          "own_rate": 0.2946
+        }
+      ]
+    }
+  ],
+  "priced": null,
+  "priced_note": "Historical anytime-goalscorer prices were never bought; no return is measured."
+}

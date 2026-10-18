@@ -599,6 +599,48 @@ def slate_window(fixtures: list[dict], today: date) -> tuple[date, date] | None:
     return selected_window(pd.Series([f["date"] for f in fixtures]), today=today)
 
 
+#: Written by `scripts/build_due_list.py` in Matchday Refresh and restored here
+#: from its `matchday-reports` artifact (`epl_betting_lab.due_list.DUE_LIST_JSON`).
+DUE_LIST_FILE = Path("data/outputs/due_list.json")
+
+
+def load_due_list(lab: Path) -> dict | None:
+    """The run's Due List, or None when no run wrote one (the board then carries no list)."""
+    try:
+        payload = json.loads((lab / DUE_LIST_FILE).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    return payload if isinstance(payload, dict) and isinstance(payload.get("rows"), list) else None
+
+
+def due_rows_for(due: dict | None, event_id: str) -> list[dict]:
+    """`games[].drought` for one fixture, in the shape the shared board renders (SCHEMA.md).
+
+    Goals only, over 0.5. The tier bar is the only bar here, so `rule` is
+    "tier"; no `cellRecord` is written, because no price-based record exists
+    for a cell, and the page prints nothing rather than a number it lacks.
+    """
+    out: list[dict] = []
+    for row in (due or {}).get("rows") or []:
+        if not isinstance(row, dict) or str(row.get("event_id")) != str(event_id):
+            continue
+        abbr, _ = team_entry(fd_name(str(row.get("team", ""))))
+        price = row.get("price")
+        rate = row.get("prior_rate")
+        drought = int(row.get("drought") or 0)
+        out.append({
+            "player": row.get("player", ""), "team": abbr, "market": "goals", "line": 0.5,
+            "lastSeason": row.get("prior_goals"), "drought": drought,
+            "price": price if isinstance(price, (int, float)) else None,
+            "book": row.get("book") or "", "heavyJuice": isinstance(price, (int, float)) and price <= -160,
+            "tierBar": row.get("bar"), "surpriseBar": None, "rule": "tier",
+            "hitRate": rate,
+            "rarity": round((1 - rate) ** drought, 4) if isinstance(rate, (int, float)) else None,
+            "oneIn": row.get("one_in"),
+        })
+    return out
+
+
 def build(lab: Path, today: date) -> dict:
     now = datetime.now(timezone.utc)
     card, card_source = read_card(lab, today)
@@ -615,6 +657,7 @@ def build(lab: Path, today: date) -> dict:
     fixtures = [f for f in fixtures if start.isoformat() <= f["date"] <= end.isoformat()]
 
     excluded = [str(m).lower() for m in card.get("excluded_markets") or []]
+    due = load_due_list(lab)
     teams, games = {}, []
     for f in fixtures:
         h, a = f["home"]["fd"], f["away"]["fd"]
@@ -637,6 +680,8 @@ def build(lab: Path, today: date) -> dict:
                           "away": best_price(prices, h, a, "draw_no_bet", "away")},
             "pick": pick_for(card, h, a),
         }
+        if due is not None:
+            row["drought"] = due_rows_for(due, f["id"])
         pr = project(h, a) if project else None
         if pr:
             row["home"].update(projGoals=round(pr["eh"], 2), winProb=round(pr["home"], 4))
@@ -722,7 +767,13 @@ def build(lab: Path, today: date) -> dict:
         "excludedMarkets": list(card.get("excluded_markets") or []),
         "cardSource": card_source, "priceSource": price_source,
         "record": load_record(lab), "teams": teams, "games": games,
+        **({"droughtNote": due_note(due)} if due is not None else {}),
     }
+
+
+def due_note(due: dict) -> str:
+    """The rule and the measurement in one line, for the board's Due List block."""
+    return f"{due.get('rule', '')} {due.get('headline', '')}".replace("**", "").strip()
 
 
 def main(argv=None) -> int:

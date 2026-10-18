@@ -1,10 +1,8 @@
-## Sunday 18 October, 12:45 UTC — manual run
+## Sunday 18 October, 13:07 UTC — scheduled run
 
-Selections changed: 5 added, 4 dropped, 2 moved section.
+Selections changed: 21 dropped.
 
-_This run was started by hand, not by the schedule. If you did not start it, someone was testing._
-
-Provider quota: 68864 (about 68 days at the observed burn)
+Provider quota: 68728 (about 68 days at the observed burn)
 
 Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: 1x2)
 
@@ -12,14 +10,7 @@ Markets: **total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_tot
 
 | Match | Market | Selection | Tier | Edge | Price | Book | Units |
 |:------|:-------|:----------|:-----|-----:|------:|:-----|------:|
-| Bournemouth v Sunderland | `btts` | yes | C | +6.4% | +101 | Caesars | 0.1 |
 | Tottenham v Coventry | `corners_1x2` | away | C | +7.1% | +400 | DraftKings | 0.1 |
-| Bournemouth v Sunderland | `corners_total_9_5` | over | C | +4.9% | -109 | BetRivers | 0.1 |
-| Leeds v Man United | `corners_1x2` | home | C | +5.1% | +115 | Fanatics | 0.1 |
-| Brighton v Crystal Palace | `double_chance` | draw_or_away | C | +5.5% | +190 | FanDuel | 0.1 |
-| Bournemouth v Sunderland | `total_2_5` | over | C | +6.5% | +134 | FanDuel | 0.1 |
-| Bournemouth v Sunderland | `corners_total_10_5` | over | C | +4.6% | +152 | FanDuel | 0.1 |
-| Brighton v Crystal Palace | `draw_no_bet` | away | C | +5.1% | +490 | FanDuel | 0.1 |
 
 ### Leans
 
@@ -27,17 +18,27 @@ _None._
 
 ### What changed
 
-- **Added:** Bournemouth v Sunderland double_chance home_or_away
-- **Added:** Brighton v Crystal Palace corners_total_10_5 under
-- **Added:** Nott'm Forest v Arsenal corners_total_10_5 over
-- **Added:** Nott'm Forest v Arsenal draw_no_bet away
-- **Added:** Tottenham v Coventry total_2_5 under
-- **Dropped:** Bournemouth v Sunderland draw_no_bet home
-- **Dropped:** Brighton v Crystal Palace corners_1x2 away
-- **Dropped:** Nott'm Forest v Arsenal btts yes
-- **Dropped:** Nott'm Forest v Arsenal corners_total_9_5 over
-- **Moved section:** Bournemouth v Sunderland btts yes
-- **Moved section:** Brighton v Crystal Palace corners_total_9_5 under
+- **Dropped:** Bournemouth v Sunderland btts yes
+- **Dropped:** Bournemouth v Sunderland corners_1x2 draw
+- **Dropped:** Bournemouth v Sunderland corners_total_10_5 over
+- **Dropped:** Bournemouth v Sunderland corners_total_9_5 over
+- **Dropped:** Bournemouth v Sunderland double_chance home_or_away
+- **Dropped:** Bournemouth v Sunderland total_2_5 over
+- **Dropped:** Brighton v Crystal Palace btts yes
+- **Dropped:** Brighton v Crystal Palace corners_1x2 draw
+- **Dropped:** Brighton v Crystal Palace corners_total_10_5 under
+- **Dropped:** Brighton v Crystal Palace corners_total_9_5 under
+- **Dropped:** Brighton v Crystal Palace double_chance draw_or_away
+- **Dropped:** Brighton v Crystal Palace draw_no_bet away
+- **Dropped:** Leeds v Man United btts yes
+- **Dropped:** Leeds v Man United corners_1x2 draw
+- **Dropped:** Leeds v Man United corners_1x2 home
+- **Dropped:** Leeds v Man United corners_total_10_5 over
+- **Dropped:** Leeds v Man United corners_total_9_5 over
+- **Dropped:** Leeds v Man United double_chance draw_or_away
+- **Dropped:** Leeds v Man United draw_no_bet away
+- **Dropped:** Nott'm Forest v Arsenal corners_total_10_5 over
+- **Dropped:** Nott'm Forest v Arsenal draw_no_bet away
 
 
 ## Beyond the Premier League
@@ -105,17 +106,15 @@ Anytime goalscorer, over 0.5. Listed: 10+ Premier League goals last season and a
 
 **Being due has meant scoring less often, not more.** Seasons 2022/23 to 2025/26: listed players scored in 18.0% of 388 next appearances, against 28.6% for the same qualifiers when not due (n = 2,286; difference -10.6%, 95% -14.8% to -6.3%). No price-based measurement exists: historical goalscorer prices were never bought.
 
-| Player | Team | Opp | Kickoff (UTC) | Last season | Drought (bar) | 1 in N for him | Status | Price |
-|:--|:--|:--|:--|--:|:--|--:|:--|:--|
-| Harry Wilson | Leeds United | Manchester United | 2026-10-18 13:00 | 10 G, scored in 28% of apps | 12 (8) | 1 in 50 | — | not posted |
+Nobody playing in this round is due.
 
 ### How the recommendations have done
 
 - Settled: **105** selections, 46 won, 6 returned the stake
 - Staked: 13.35 units
 - Profit: **-0.16 units** (-1.2% on turnover)
-- Still pending: 9
-- Played, waiting on results data: **4** — these are settled matches the results feed has not caught up with, so the record above is behind rather than still accumulating.
+- Still pending: 1
+- Played, waiting on results data: **12** — these are settled matches the results feed has not caught up with, so the record above is behind rather than still accumulating.
 
 - Stake returned (void): 6 — counted in the settled total above at zero profit, because a push is a bet
 
@@ -131,4 +130,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/39128348161)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/39129850651)

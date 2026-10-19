@@ -132,7 +132,9 @@ def test_nothing_asks_for_team_totals_until_the_policy_approves_one(tmp_path: Pa
     shipped = ROOT / "data" / "manual" / "staging_provider_policy.json"
     payload = json.loads(shipped.read_text(encoding="utf-8"))
     entry = next(iter(payload["provider_allowlist_entries"].values()))
-    entry["required_markets"] = list(entry["required_markets"]) + ["team_total_home_1_5"]
+    entry["required_markets"] = [
+        market for market in entry["required_markets"] if market not in TEAM_TOTAL_MARKETS
+    ] + ["team_total_home_1_5"]
     approved = tmp_path / "approved.json"
     approved.write_text(json.dumps(payload), encoding="utf-8")
     assert approved_team_total_markets(approved) == ["team_total_home_1_5"]
@@ -146,8 +148,9 @@ def test_nothing_asks_for_team_totals_until_the_policy_approves_one(tmp_path: Pa
     assert explicit.event_markets == ("btts",)
 
 
-def test_the_shipped_policy_approves_no_team_total_yet() -> None:
-    assert approved_team_total_markets() == []
+def test_the_shipped_policy_approves_all_six() -> None:
+    """Approved by Cooper on PR #371 (2026-10-19)."""
+    assert approved_team_total_markets() == list(TEAM_TOTAL_MARKETS)
 
 
 def test_a_priced_line_is_graded_against_the_model() -> None:

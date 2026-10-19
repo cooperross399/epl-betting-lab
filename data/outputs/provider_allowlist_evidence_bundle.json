@@ -1,8 +1,8 @@
 {
-  "bundle_checksum_sha256": "5c96e85f075dc5a3defedcd5f0797dd9288115dbb4ed457306057a6a703e7581",
-  "bundle_id": "odds_api-allowlist-evidence-5c96e85f075dc5a3",
+  "bundle_checksum_sha256": "9d3e1ee53f7b7a86efe2685238d2a6f01e743b90c81f39650eb98fbd01096d07",
+  "bundle_id": "odds_api-allowlist-evidence-9d3e1ee53f7b7a86",
   "bundle_storage": {
-    "archive_directory": "data/outputs/archive/provider_allowlist_evidence_bundles/2026-10-19/064843_odds_api_5c96e85f075d",
+    "archive_directory": "data/outputs/archive/provider_allowlist_evidence_bundles/2026-10-19/131415_odds_api_9d3e1ee53f7b",
     "latest_csv_path": "data/outputs/provider_allowlist_evidence_bundle.csv",
     "latest_json_path": "data/outputs/provider_allowlist_evidence_bundle.json",
     "latest_markdown_path": "data/outputs/provider_allowlist_evidence_bundle.md"
@@ -11,33 +11,33 @@
   "conformance_verdict": "Conforms to preview",
   "evidence": [
     {
-      "current_checksum_sha256": "bfd6b830c3432e527a5d1a7c5be25cf94bb9e7da3379b87cdbc8ed825c18c819",
+      "current_checksum_sha256": "35c17ebb00be96a7a204efcee43225cf3682903ee2cc7fb4896473f1b50a693e",
       "details": "Current checksum matches every available binding.",
       "evidence_path": "data/outputs/provider_allowlist_pr_preview.json",
       "evidence_type": "provider_allowlist_pr_preview",
       "expected_checksum_sha256": "",
-      "generated_at": "2026-10-19T06:48:29+00:00",
+      "generated_at": "2026-10-19T13:14:02+00:00",
       "required": "Yes",
       "status": "Included",
       "verdict": "Ready for separate allowlist PR"
     },
     {
-      "current_checksum_sha256": "db780554963c79ef24ba2c489ec35a641c82ef63af8490afda3b89184e39615e",
+      "current_checksum_sha256": "e636f3312444ad2ec13451a2dd5b35303e175cbb7d6c26e7695c15dae1aa65a8",
       "details": "Current checksum matches every available binding.",
       "evidence_path": "data/outputs/provider_human_acceptance_receipt_verification.json",
       "evidence_type": "provider_human_acceptance_receipt_verification",
-      "expected_checksum_sha256": "db780554963c79ef24ba2c489ec35a641c82ef63af8490afda3b89184e39615e",
-      "generated_at": "2026-10-19T06:48:28+00:00",
+      "expected_checksum_sha256": "e636f3312444ad2ec13451a2dd5b35303e175cbb7d6c26e7695c15dae1aa65a8",
+      "generated_at": "2026-10-19T13:14:01+00:00",
       "required": "Yes",
       "status": "Included",
       "verdict": "Verified for allowlist PR review"
     },
     {
-      "current_checksum_sha256": "9d648f9f714ce7300b51e29d0d2dad6e99b0c1349360f26cebbc634b86fe4580",
+      "current_checksum_sha256": "d44f9a7a813e98a77021950e48c6cdeb1807abe28f9b6e602cbf5362eee6e0bf",
       "details": "Current checksum matches every available binding.",
       "evidence_path": "data/outputs/provider_human_acceptance_receipt.json",
       "evidence_type": "provider_human_acceptance_receipt",
-      "expected_checksum_sha256": "9d648f9f714ce7300b51e29d0d2dad6e99b0c1349360f26cebbc634b86fe4580",
+      "expected_checksum_sha256": "d44f9a7a813e98a77021950e48c6cdeb1807abe28f9b6e602cbf5362eee6e0bf",
       "generated_at": "",
       "required": "Yes",
       "status": "Included",
@@ -616,22 +616,22 @@
       "verdict": "Stable enough for review"
     },
     {
-      "current_checksum_sha256": "2ae50e064a6821f29005db206d4af0511e5850bc84cc56fb4b394c597b332e1b",
+      "current_checksum_sha256": "c2c04df04a59914c2f0c5d1c0136395afeaa3521c039f55f8a6a7d5f1d822bfb",
       "details": "Current checksum matches every available binding.",
       "evidence_path": "data/outputs/provider_allowlist_pr_conformance.json",
       "evidence_type": "provider_allowlist_pr_conformance",
       "expected_checksum_sha256": "",
-      "generated_at": "2026-10-19T06:48:42+00:00",
+      "generated_at": "2026-10-19T13:14:14+00:00",
       "required": "No",
       "status": "Included",
       "verdict": "Conforms to preview"
     },
     {
-      "current_checksum_sha256": "8b83fd66ba56fd3a9afbdcb696c434e489fe1eaa2cdfb6f401c92c22ca9e975e",
+      "current_checksum_sha256": "9ad801b38a4250eb98dac8551845057f893cf295c8adacc6787c0811091b6d4a",
       "details": "Current checksum matches every available binding.",
       "evidence_path": "data/manual/staging_provider_policy.json",
       "evidence_type": "staging_provider_policy",
-      "expected_checksum_sha256": "8b83fd66ba56fd3a9afbdcb696c434e489fe1eaa2cdfb6f401c92c22ca9e975e",
+      "expected_checksum_sha256": "9ad801b38a4250eb98dac8551845057f893cf295c8adacc6787c0811091b6d4a",
       "generated_at": "",
       "required": "Yes",
       "status": "Included",
@@ -641,7 +641,7 @@
   "evidence_file_count": 57,
   "evidence_manifest": [
     {
-      "checksum_sha256": "8b83fd66ba56fd3a9afbdcb696c434e489fe1eaa2cdfb6f401c92c22ca9e975e",
+      "checksum_sha256": "9ad801b38a4250eb98dac8551845057f893cf295c8adacc6787c0811091b6d4a",
       "path": "data/manual/staging_provider_policy.json"
     },
     {
@@ -849,19 +849,19 @@
       "path": "data/outputs/provider_acceptance_checklist.json"
     },
     {
-      "checksum_sha256": "2ae50e064a6821f29005db206d4af0511e5850bc84cc56fb4b394c597b332e1b",
+      "checksum_sha256": "c2c04df04a59914c2f0c5d1c0136395afeaa3521c039f55f8a6a7d5f1d822bfb",
       "path": "data/outputs/provider_allowlist_pr_conformance.json"
     },
     {
-      "checksum_sha256": "bfd6b830c3432e527a5d1a7c5be25cf94bb9e7da3379b87cdbc8ed825c18c819",
+      "checksum_sha256": "35c17ebb00be96a7a204efcee43225cf3682903ee2cc7fb4896473f1b50a693e",
       "path": "data/outputs/provider_allowlist_pr_preview.json"
     },
     {
-      "checksum_sha256": "9d648f9f714ce7300b51e29d0d2dad6e99b0c1349360f26cebbc634b86fe4580",
+      "checksum_sha256": "d44f9a7a813e98a77021950e48c6cdeb1807abe28f9b6e602cbf5362eee6e0bf",
       "path": "data/outputs/provider_human_acceptance_receipt.json"
     },
     {
-      "checksum_sha256": "db780554963c79ef24ba2c489ec35a641c82ef63af8490afda3b89184e39615e",
+      "checksum_sha256": "e636f3312444ad2ec13451a2dd5b35303e175cbb7d6c26e7695c15dae1aa65a8",
       "path": "data/outputs/provider_human_acceptance_receipt_verification.json"
     },
     {
@@ -869,13 +869,13 @@
       "path": "data/outputs/provider_shadow_run_comparison.json"
     }
   ],
-  "generated_at": "2026-10-19T06:48:43+00:00",
+  "generated_at": "2026-10-19T13:14:15+00:00",
   "preview_verdict": "Ready for separate allowlist PR",
   "provider_key": "odds_api",
   "provider_name": "the_odds_api",
-  "receipt_id": "odds_api-20261019T064821+0000-5e5248a72a82",
+  "receipt_id": "odds_api-20261019T131401+0000-968716f836e0",
   "receipt_verification_verdict": "Verified for allowlist PR review",
-  "recommended_pr_description": "Updates the reviewed allowlist entry for `the_odds_api` (`odds_api`) to cover 1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5, player_assists, player_goal_scorer_anytime, player_shots, player_shots_on_target. Binds the policy entry to human acceptance receipt `odds_api-20261019T064821+0000-5e5248a72a82` and its verified evidence. Known limitations: Player props carry no demonstrated edge: the held-out measurement (data/outputs/player_props_backtest.md) found the corrected model well calibrated and clearing its edge bar about twice a month, and books reprice on the team sheet after the card is built. Approving them approves that trade-off. Allowlisting does not bypass staging validation, freshness, completeness, checksum, receipt, or Thursday cutoff gates. This policy-only proposal does not promote staging, run a provider, generate picks, place bets, or enable cron.",
+  "recommended_pr_description": "Updates the reviewed allowlist entry for `the_odds_api` (`odds_api`) to cover 1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5, player_assists, player_goal_scorer_anytime, player_shots, player_shots_on_target, team_total_home_0_5, team_total_home_1_5, team_total_home_2_5, team_total_away_0_5, team_total_away_1_5, team_total_away_2_5. Binds the policy entry to human acceptance receipt `odds_api-20261019T131401+0000-968716f836e0` and its verified evidence. Known limitations: Player props carry no demonstrated edge: the held-out measurement (data/outputs/player_props_backtest.md) found the corrected model well calibrated and clearing its edge bar about twice a month, and books reprice on the team sheet after the card is built. Approving them approves that trade-off. Team totals carry no demonstrated edge: they have never been measured against real prices. They are priced off the same goal-count ratings as the 2.5 line and BTTS, and a line a book does not post stays excluded. Allowlisting does not bypass staging validation, freshness, completeness, checksum, receipt, or Thursday cutoff gates. This policy-only proposal does not promote staging, run a provider, generate picks, place bets, or enable cron.",
   "recommended_pr_title": "Update the the_odds_api allowlisted market scope",
   "safety": {
     "bets_placed": false,

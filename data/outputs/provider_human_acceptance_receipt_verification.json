@@ -7,7 +7,7 @@
       "details": "Receipt JSON is readable.",
       "evidence_path": "data/outputs/provider_human_acceptance_receipt.json",
       "expected": "Readable receipt JSON object",
-      "observed": "9d648f9f714ce7300b51e29d0d2dad6e99b0c1349360f26cebbc634b86fe4580",
+      "observed": "d44f9a7a813e98a77021950e48c6cdeb1807abe28f9b6e602cbf5362eee6e0bf",
       "status": "Verified"
     },
     {
@@ -34,7 +34,7 @@
       "details": "",
       "evidence_path": "",
       "expected": "Timezone-aware ISO timestamp",
-      "observed": "2026-10-19T06:48:21+00:00",
+      "observed": "2026-10-19T13:14:01+00:00",
       "status": "Verified"
     },
     {
@@ -240,8 +240,8 @@
       "check": "Provider policy checksum",
       "details": "Current file checksum matches the human receipt.",
       "evidence_path": "data/manual/staging_provider_policy.json",
-      "expected": "7a01454f6fc252f39bbe110c8f864fc99d90421876d8c2cb5d22a1d0e68fee3f",
-      "observed": "7a01454f6fc252f39bbe110c8f864fc99d90421876d8c2cb5d22a1d0e68fee3f",
+      "expected": "7845043b8a47c22d65f9a9002507216de65c47cc4ec6b79fe2a08f3f4d8c730c",
+      "observed": "7845043b8a47c22d65f9a9002507216de65c47cc4ec6b79fe2a08f3f4d8c730c",
       "status": "Verified"
     },
     {
@@ -258,19 +258,19 @@
       "check": "Receipt ID",
       "details": "Receipt ID binds human fields and recorded evidence checksums.",
       "evidence_path": "",
-      "expected": "odds_api-20261019T064821+0000-5e5248a72a82",
-      "observed": "odds_api-20261019T064821+0000-5e5248a72a82",
+      "expected": "odds_api-20261019T131401+0000-968716f836e0",
+      "observed": "odds_api-20261019T131401+0000-968716f836e0",
       "status": "Verified"
     }
   ],
   "decision": "approved_for_allowlist_pr",
-  "generated_at": "2026-10-19T06:48:28+00:00",
+  "generated_at": "2026-10-19T13:14:01+00:00",
   "next_step": "A separate human-reviewed provider allowlist PR may now be considered. This verifier does not edit policy or enable cron.",
   "provider_key": "odds_api",
   "provider_name": "the_odds_api",
-  "receipt_checksum_sha256": "9d648f9f714ce7300b51e29d0d2dad6e99b0c1349360f26cebbc634b86fe4580",
-  "receipt_created_at": "2026-10-19T06:48:21+00:00",
-  "receipt_id": "odds_api-20261019T064821+0000-5e5248a72a82",
+  "receipt_checksum_sha256": "d44f9a7a813e98a77021950e48c6cdeb1807abe28f9b6e602cbf5362eee6e0bf",
+  "receipt_created_at": "2026-10-19T13:14:01+00:00",
+  "receipt_id": "odds_api-20261019T131401+0000-968716f836e0",
   "receipt_path": "data/outputs/provider_human_acceptance_receipt.json",
   "reviewer_name": "cooperross399",
   "safety": {

@@ -1,0 +1,194 @@
+{
+  "approval_gate": {
+    "note": "Checklist was ready for human allowlist review.",
+    "override_used": false,
+    "status": "Passed"
+  },
+  "checklist_verdict": "Ready for human allowlist review",
+  "created_at": "2026-10-19T13:14:01+00:00",
+  "decision": "approved_for_allowlist_pr",
+  "evidence": {
+    "checklist": {
+      "checksum_sha256": "ec5461c17cb7c629263d64f0cbc53b86c70af825d701aeda9ae70f22376dc3da",
+      "generated_at": "2026-10-19T02:10:48+00:00",
+      "path": "data/outputs/provider_acceptance_checklist.json",
+      "provider_key": "odds_api",
+      "provider_name": "the_odds_api",
+      "status": "Bound",
+      "verdict": "Ready for human allowlist review"
+    },
+    "comparison": {
+      "checksum_sha256": "81a23e87f4e585b8b1e7b3d25d80a5ad6ff7427f806563d98e22dff2785474e5",
+      "generated_at": "2026-08-21T11:44:26-04:00",
+      "path": "data/outputs/provider_shadow_run_comparison.json",
+      "status": "Bound",
+      "verdict": "Stable enough for review"
+    },
+    "provider_policy": {
+      "checksum_sha256": "7845043b8a47c22d65f9a9002507216de65c47cc4ec6b79fe2a08f3f4d8c730c",
+      "path": "data/manual/staging_provider_policy.json",
+      "status": "Bound"
+    },
+    "reviewed_shadow_archives": [
+      {
+        "archive_integrity_status": "Verified",
+        "archive_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154335_odds_api",
+        "checksum_sha256": "6b2842cbc84eddbecbd3ca435a652bc900f47c2b00999985ce398c47059aa866",
+        "current_integrity_note": "Verified 8 archived report checksum(s).",
+        "current_integrity_status": "Verified",
+        "file_count": 9,
+        "generated_at": "2026-08-21T15:43:35+00:00",
+        "metadata_checksum_sha256": "00a8ed2f5e471c240b7333af072afdb4d96ff2bbb3737c3dc661977a52d6f9cc",
+        "metadata_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154335_odds_api/archive_metadata.json",
+        "provider_run_status": "Completed",
+        "shadow_verdict": "Shadow ready for review",
+        "staging_verdict": "Ready for handoff"
+      },
+      {
+        "archive_integrity_status": "Verified",
+        "archive_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154222_odds_api",
+        "checksum_sha256": "539a2672fc06e78616e8235fecd39d85a9c67d697350547a6a20f80d0c197c28",
+        "current_integrity_note": "Verified 8 archived report checksum(s).",
+        "current_integrity_status": "Verified",
+        "file_count": 9,
+        "generated_at": "2026-08-21T15:42:22+00:00",
+        "metadata_checksum_sha256": "e4a87d50ebc2f7cb5747c10b364363135f30c0c387b203f29ce389d215c5c117",
+        "metadata_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154222_odds_api/archive_metadata.json",
+        "provider_run_status": "Completed",
+        "shadow_verdict": "Shadow ready for review",
+        "staging_verdict": "Ready for handoff"
+      },
+      {
+        "archive_integrity_status": "Verified",
+        "archive_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154019_odds_api",
+        "checksum_sha256": "9525c7de23a88ac19b34b9e812e68b6caa156d5d3483f9360b12edfc3c262935",
+        "current_integrity_note": "Verified 8 archived report checksum(s).",
+        "current_integrity_status": "Verified",
+        "file_count": 9,
+        "generated_at": "2026-08-21T15:40:19+00:00",
+        "metadata_checksum_sha256": "74ab893d1efbde34329b9df97b82803e14967b7e326c519d4f7526b9be2c7038",
+        "metadata_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154019_odds_api/archive_metadata.json",
+        "provider_run_status": "Completed",
+        "shadow_verdict": "Shadow ready for review",
+        "staging_verdict": "Ready for handoff"
+      },
+      {
+        "archive_integrity_status": "Verified",
+        "archive_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153908_odds_api",
+        "checksum_sha256": "0e0aae3c2da51bf78bd25991ad100e5421195356ff9f3fa8bc2c8c1bae411398",
+        "current_integrity_note": "Verified 8 archived report checksum(s).",
+        "current_integrity_status": "Verified",
+        "file_count": 9,
+        "generated_at": "2026-08-21T15:39:08+00:00",
+        "metadata_checksum_sha256": "a960c6e46dde87b7de95ef8a7aecefd7f1216d9bd02fcc8e1ee4285f4a14d659",
+        "metadata_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153908_odds_api/archive_metadata.json",
+        "provider_run_status": "Completed",
+        "shadow_verdict": "Shadow ready for review",
+        "staging_verdict": "Ready for handoff"
+      },
+      {
+        "archive_integrity_status": "Verified",
+        "archive_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153816_odds_api",
+        "checksum_sha256": "30f6c1ad63ccda5181ff5fd39a9f9f474e6f0630041d22b3c84b37cd4b564491",
+        "current_integrity_note": "Verified 8 archived report checksum(s).",
+        "current_integrity_status": "Verified",
+        "file_count": 9,
+        "generated_at": "2026-08-21T15:38:16+00:00",
+        "metadata_checksum_sha256": "de53269f32536f3ddd216d10630266cdfdb4be7846d7fc8763fb4aeb2578ab2b",
+        "metadata_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153816_odds_api/archive_metadata.json",
+        "provider_run_status": "Completed",
+        "shadow_verdict": "Shadow ready for review",
+        "staging_verdict": "Ready for handoff"
+      }
+    ],
+    "shadow_archive_set": {
+      "latest_live_archive_count": 5,
+      "latest_live_archive_paths": [
+        "archive/provider_shadow_runs/2026-08-21/153816_odds_api",
+        "archive/provider_shadow_runs/2026-08-21/153908_odds_api",
+        "archive/provider_shadow_runs/2026-08-21/154019_odds_api",
+        "archive/provider_shadow_runs/2026-08-21/154222_odds_api",
+        "archive/provider_shadow_runs/2026-08-21/154335_odds_api"
+      ],
+      "note": "The checklist reviewed the current latest live shadow-run archive set.",
+      "path": "data/outputs/archive/provider_shadow_runs",
+      "review_window": 5,
+      "reviewed_archive_count": 5,
+      "reviewed_archive_paths": [
+        "archive/provider_shadow_runs/2026-08-21/153816_odds_api",
+        "archive/provider_shadow_runs/2026-08-21/153908_odds_api",
+        "archive/provider_shadow_runs/2026-08-21/154019_odds_api",
+        "archive/provider_shadow_runs/2026-08-21/154222_odds_api",
+        "archive/provider_shadow_runs/2026-08-21/154335_odds_api"
+      ],
+      "status": "Verified"
+    }
+  },
+  "github_approval": {
+    "activity_source": "github_api",
+    "approval_age_hours": 0.02,
+    "approval_phrase": "APPROVED_FOR_ALLOWLIST_PR",
+    "approved_at": "2026-10-19T13:12:52+00:00",
+    "approved_markets": [
+      "1x2",
+      "btts",
+      "corners_1x2",
+      "corners_total_10_5",
+      "corners_total_9_5",
+      "double_chance",
+      "draw_no_bet",
+      "player_assists",
+      "player_goal_scorer_anytime",
+      "player_shots",
+      "player_shots_on_target",
+      "team_total_away_0_5",
+      "team_total_away_1_5",
+      "team_total_away_2_5",
+      "team_total_home_0_5",
+      "team_total_home_1_5",
+      "team_total_home_2_5",
+      "total_2_5"
+    ],
+    "commit_id": "",
+    "decision": "approved_for_allowlist_pr",
+    "evidence_checksums_sha256": {
+      "automated_card_input.json": "9403b1bd16ebfc0f790600af32361ca5624fe284ad5cfe6c4cab79e0944bd1de",
+      "provider_acceptance_checklist.json": "ec5461c17cb7c629263d64f0cbc53b86c70af825d701aeda9ae70f22376dc3da",
+      "provider_allowlist_evidence_bundle.json": "9cb06d6f5ba00cedf5aef325f5be8fbe812cfb85cebd296c4b7cd1842df0b202",
+      "provider_shadow_verification.json": "e9afa9b87bbbab56915eb2fa336d611975ce7ed81dbdb26777698d947085ead9"
+    },
+    "evidence_generated_at": "2026-10-19T13:10:57+00:00",
+    "excluded_markets": [],
+    "head_sha": "2f313c18ebeb77f77dd9e4180b4559e6bb569632",
+    "pr_number": 371,
+    "provider_name": "the_odds_api",
+    "repository": "cooperross399/epl-betting-lab",
+    "review_state": "",
+    "reviewer_github_login": "cooperross399",
+    "source_id": 6268058200,
+    "source_kind": "comment",
+    "verified_at": "2026-10-19T13:14:01.301134+00:00"
+  },
+  "notes": "Approved in GitHub UI on PR #371 by cooperross399 via comment at 2026-10-19T13:12:52+00:00. Markets: 1x2, btts, corners_1x2, corners_total_10_5, corners_total_9_5, double_chance, draw_no_bet, player_assists, player_goal_scorer_anytime, player_shots, player_shots_on_target, team_total_away_0_5, team_total_away_1_5, team_total_away_2_5, team_total_home_0_5, team_total_home_1_5, team_total_home_2_5, total_2_5. Excluded: .",
+  "provider_key": "odds_api",
+  "provider_name": "the_odds_api",
+  "receipt_id": "odds_api-20261019T131401+0000-968716f836e0",
+  "receipt_storage": {
+    "archive_directory": "data/outputs/archive/provider_acceptance_receipts/2026-10-19/131401_odds_api_approved_for_allowlist_pr",
+    "latest_csv_path": "data/outputs/provider_human_acceptance_receipt.csv",
+    "latest_json_path": "data/outputs/provider_human_acceptance_receipt.json",
+    "latest_markdown_path": "data/outputs/provider_human_acceptance_receipt.md"
+  },
+  "reviewer_name": "cooperross399",
+  "safety": {
+    "bets_placed": false,
+    "cron_enabled": false,
+    "human_review_documented_only": true,
+    "manual_or_production_files_edited": false,
+    "provider_allowlisted": false,
+    "provider_policy_edited": false,
+    "staging_promoted": false
+  },
+  "schema_version": 1,
+  "warnings": []
+}

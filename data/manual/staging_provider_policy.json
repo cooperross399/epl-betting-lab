@@ -16,14 +16,15 @@
   "provider_allowlist_entries": {
     "the_odds_api": {
       "allowlist_status": "allowed",
-      "approved_at": "2026-08-21T11:46:55-04:00",
+      "approved_at": "2026-10-19T06:48:21+00:00",
       "cutoff_policy": {
         "day": "Thursday",
         "time": "10:00",
         "timezone": "America/New_York"
       },
-      "evidence_receipt_id": "odds_api-20260821T114655-0400-20ffa5677988",
+      "evidence_receipt_id": "odds_api-20261019T064821+0000-5e5248a72a82",
       "known_limitations": [
+        "Player props carry no demonstrated edge: the held-out measurement (data/outputs/player_props_backtest.md) found the corrected model well calibrated and clearing its edge bar about twice a month, and books reprice on the team sheet after the card is built. Approving them approves that trade-off.",
         "Allowlisting does not bypass staging validation, freshness, completeness, checksum, receipt, or Thursday cutoff gates."
       ],
       "max_provider_run_age_hours": 12.0,
@@ -39,14 +40,14 @@
         "corners_1x2",
         "corners_total_9_5",
         "corners_total_10_5",
-        "player_shots",
-        "player_shots_on_target",
         "player_assists",
-        "player_goal_scorer_anytime"
+        "player_goal_scorer_anytime",
+        "player_shots",
+        "player_shots_on_target"
       ],
-      "reviewed_at": "2026-08-21T11:47:03-04:00",
+      "reviewed_at": "2026-10-19T06:48:28+00:00",
       "reviewer_name": "cooperross399",
-      "verification_report_checksum_sha256": "a5b59887648b80bd03f4ee8e04d7e6f68281497a7e18d3beac80bb77fc3a51fd",
+      "verification_report_checksum_sha256": "db780554963c79ef24ba2c489ec35a641c82ef63af8490afda3b89184e39615e",
       "verification_report_path": "data/outputs/provider_human_acceptance_receipt_verification.json"
     }
   },

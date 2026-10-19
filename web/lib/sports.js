@@ -362,6 +362,10 @@ export const PROP_MARKETS = {
   points: { title: "Points", one: "point", many: "points" },
   goals: { title: "Goals", one: "goal", many: "goals" },
   assists: { title: "Assists", one: "assist", many: "assists" },
+  // EPL cards and tackles (2026-10-19); EPL saves use goalie_saves below.
+  booked: { title: "Booked", one: "card", many: "cards" },
+  sent_off: { title: "Sent off", one: "red card", many: "red cards" },
+  tackles: { title: "Tackles", one: "tackle", many: "tackles" },
   blocked_shots: { title: "Blocked shots", one: "blocked shot", many: "blocked shots" },
   hits: { title: "Hits", one: "hit", many: "hits" },
   faceoffs_won: { title: "Faceoffs won", one: "faceoff won", many: "faceoffs won" },

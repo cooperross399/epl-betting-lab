@@ -44,8 +44,15 @@ from epl_betting_lab.config import (
     STAGING_DIR,
 )
 from epl_betting_lab.models.player_props import (
+    FPL_STATS,
     PlayerPropsModel,
+    PlayerRates,
     PropCalibration,
+    add_card_columns,
+)
+from epl_betting_lab.providers.fpl_players import (
+    FPL_LOGS_FILENAME,
+    FPL_PRIOR_FILENAME,
 )
 from epl_betting_lab.providers.player_props_staging import (
     PROP_EVENT_MARKETS,
@@ -53,8 +60,10 @@ from epl_betting_lab.providers.player_props_staging import (
 )
 from epl_betting_lab.reports.player_props_backtest import (
     SETTLEMENT_COLUMNS,
+    YES_MARKETS,
     _implied_probability,
     _parse_selection,
+    _player_key,
 )
 
 
@@ -69,6 +78,20 @@ NO_STAGING_STATUS = "No props staging evidence"
 #: measurement with a split; never hand-tune.
 SHIPPED_CORRECTION = PropCalibration(
     intercept=-0.2383, slope=0.9133, fitted_on=7254
+)
+
+#: Markets the shipped correction does not touch. It was fitted on shots,
+#: shots on target, assists and the anytime scorer only; applying it to
+#: cards, tackles or saves would borrow a measurement from markets they are
+#: not, so their probabilities are the model's own, uncorrected.
+UNCORRECTED_MARKETS = frozenset(
+    {
+        "player_to_receive_card",
+        "player_to_receive_red_card",
+        "player_tackles_alternate",
+        "player_goalie_saves",
+        "player_goalie_saves_alternate",
+    }
 )
 
 #: Above every match-level bar, for the team-sheet deficit.
@@ -164,10 +187,69 @@ def drop_started_fixtures(frame: pd.DataFrame, moment: datetime) -> pd.DataFrame
     return frame[~(kickoff <= cutoff)]
 
 
+def needs_fpl_logs(markets: list[str]) -> bool:
+    """Whether any of `markets` is rated on the Fantasy Premier League logs."""
+    return any(SETTLEMENT_COLUMNS.get(m) in FPL_STATS for m in markets)
+
+
+def _resolve_player(
+    model: PlayerPropsModel, name: str, home: str, away: str
+) -> PlayerRates | None:
+    """The model's player for a book's spelling, on one of the two sides.
+
+    The exact name first. Otherwise a name whose tokens contain, or are
+    contained by, exactly one squad player's tokens on either side — books
+    add or drop given names ("Iyenoma Destiny Udogie" against FPL's "Destiny
+    Udogie"). Any ambiguity is no opinion, never a guess.
+    """
+    exact = model.players.get(name)
+    if exact is not None:
+        return exact
+    tokens = frozenset(_player_key(name).split())
+    if not tokens:
+        return None
+    found = [
+        rates
+        for rates in model.players.values()
+        if rates.team in (home, away)
+        and (
+            (player_tokens := frozenset(_player_key(rates.player).split()))
+            and (player_tokens <= tokens or tokens <= player_tokens)
+        )
+    ]
+    return found[0] if len(found) == 1 else None
+
+
+def _one_stake_per_outcome(picks: list[PropPick]) -> list[PropPick]:
+    """Keep the best-edge rung of each player's outcome.
+
+    A ladder (`Over@0.5`, `Over@1.5`, ...) and two markets on one stat (the
+    saves line and the saves ladder) settle on one number: staking every
+    rung that clears the bar is one position sized several times. Grouped on
+    fixture, player, stat and side; the line is what is chosen between.
+    """
+    best: dict[tuple, PropPick] = {}
+    for pick in picks:
+        side, _ = _parse_selection(pick.selection)
+        key = (
+            pick.date,
+            pick.home_team,
+            pick.away_team,
+            SETTLEMENT_COLUMNS.get(pick.market, pick.market),
+            pick.player,
+            "over" if side.casefold() == "yes" else side.casefold(),
+        )
+        if key not in best or pick.edge > best[key].edge:
+            best[key] = pick
+    return list(best.values())
+
+
 def build_player_props_card(
     *,
     props_staging_path: Path | None = None,
     logs_path: Path | None = None,
+    fpl_logs_path: Path | None = None,
+    fpl_prior_path: Path | None = None,
     policy_path: Path | None = None,
     run_at: datetime | None = None,
     edge_threshold: float = PROPS_EDGE_THRESHOLD,
@@ -182,6 +264,16 @@ def build_player_props_card(
         Path(logs_path)
         if logs_path
         else Path(PROCESSED_DIR) / "player_match_logs.csv"
+    )
+    fpl_logs_file = (
+        Path(fpl_logs_path)
+        if fpl_logs_path
+        else Path(PROCESSED_DIR) / FPL_LOGS_FILENAME
+    )
+    fpl_prior_file = (
+        Path(fpl_prior_path)
+        if fpl_prior_path
+        else Path(fpl_logs_file).parent / FPL_PRIOR_FILENAME
     )
     moment = run_at or datetime.now().astimezone()
     today = moment.strftime("%Y-%m-%d")
@@ -263,10 +355,14 @@ def build_player_props_card(
         frame["american_odds"], errors="coerce"
     )
     frame = frame.dropna(subset=["american_odds"])
-    frame = frame[frame["market"].isin(approved)]
     frame = frame[frame["date"] >= today]
     frame = drop_started_fixtures(frame, moment)
-    summary["markets_with_staged_prices"] = sorted(set(frame["market"]))
+    # Every prop market holding a live price, approved or not: a held
+    # market's prices are the evidence its approval binds to.
+    summary["markets_with_staged_prices"] = sorted(
+        set(frame["market"]) & set(PROP_EVENT_MARKETS)
+    )
+    frame = frame[frame["market"].isin(approved)]
 
     if not logs_file.is_file():
         summary["status"] = NO_STAGING_STATUS
@@ -275,10 +371,30 @@ def build_player_props_card(
             "missing, so no rate can be modelled and no pick is made."
         )
         return summary
-    logs = pd.read_csv(logs_file, dtype=str)
+    logs = add_card_columns(pd.read_csv(logs_file, dtype=str))
     for stat in set(SETTLEMENT_COLUMNS.values()) | {"minutes"}:
-        logs[stat] = pd.to_numeric(logs[stat], errors="coerce").fillna(0)
+        if stat in logs.columns:
+            logs[stat] = pd.to_numeric(logs[stat], errors="coerce").fillna(0)
     model = PlayerPropsModel().fit(logs)
+
+    # Tackles and saves are rated on the Fantasy Premier League logs. Absent
+    # logs mean no opinion on those markets, never a baseline one.
+    fpl_model: PlayerPropsModel | None = None
+    if needs_fpl_logs(approved) and fpl_logs_file.is_file():
+        fpl_logs = pd.read_csv(fpl_logs_file, dtype=str)
+        if not fpl_logs.empty:
+            for column in ("minutes", *FPL_STATS):
+                fpl_logs[column] = pd.to_numeric(
+                    fpl_logs[column], errors="coerce"
+                ).fillna(0)
+            prior = (
+                pd.read_csv(fpl_prior_file, dtype=str)
+                if fpl_prior_file.is_file()
+                else None
+            )
+            fpl_model = PlayerPropsModel(stats=FPL_STATS).fit(
+                fpl_logs, prior=prior
+            )
 
     # Best price per outcome across books, matching the card's behaviour.
     best: dict[tuple, dict] = {}
@@ -302,9 +418,14 @@ def build_player_props_card(
         stat = SETTLEMENT_COLUMNS.get(market)
         if stat is None:
             continue
+        source = fpl_model if stat in FPL_STATS else model
+        if source is None:
+            continue
         # The player prices as a member of one of the two squads; venue
         # follows the team the logs last saw them with.
-        rates = model.players.get(str(row["player"]))
+        rates = _resolve_player(
+            source, str(row["player"]), str(row["home_team"]), str(row["away_team"])
+        )
         if rates is None:
             continue
         if rates.team == str(row["home_team"]):
@@ -317,18 +438,20 @@ def build_player_props_card(
             continue
         name, point = _parse_selection(str(row["selection"]))
         if name.casefold() == "over" and point is not None:
-            raw = model.over_probability(
-                str(row["player"]), stat, point, opponent=opponent, venue=venue
+            raw = source.over_probability(
+                rates.player, stat, point, opponent=opponent, venue=venue
             )
-        elif market == "player_goal_scorer_anytime" and name.casefold() == "yes":
-            raw = model.anytime_scorer_probability(
-                str(row["player"]), opponent=opponent, venue=venue
+        elif market in YES_MARKETS and name.casefold() == "yes":
+            raw = source.over_probability(
+                rates.player, stat, 0.5, opponent=opponent, venue=venue
             )
         else:
             raw = None
         if raw is None:
             continue
-        probability = correction.apply(raw)
+        probability = (
+            raw if market in UNCORRECTED_MARKETS else correction.apply(raw)
+        )
         american = float(row["american_odds"])
         implied = _implied_probability(american)
         edge = probability - implied
@@ -353,6 +476,7 @@ def build_player_props_card(
             )
         )
 
+    picks = _one_stake_per_outcome(picks)
     picks.sort(key=lambda p: -p.edge)
     summary["status"] = READY_STATUS
     summary["picks"] = [p.__dict__ for p in picks]

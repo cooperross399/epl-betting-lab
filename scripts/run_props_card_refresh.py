@@ -5,8 +5,9 @@ This is the matchday pipeline's props step, and it gates itself on the
 reviewed policy: while no prop market is approved, it writes the
 Held-by-policy report and exits without a single network request or credit
 spent. Only after an approval does it refresh the player logs (free,
-Understat), fetch live prop prices (about four credits per event), and
-build the props card.
+Understat, and Fantasy Premier League once tackles or saves are approved),
+fetch live prop prices (about one credit per approved market per event),
+and build the props card.
 
 A props failure must never cost a match card; the workflow runs this step
 with continue-on-error, and this script still reports its own failures
@@ -28,6 +29,11 @@ from epl_betting_lab.providers.player_props_staging import (
     fetch_player_props,
     write_props_staging,
 )
+from epl_betting_lab.providers.fpl_players import (
+    FplError,
+    fetch_fpl_player_data,
+    write_fpl_data,
+)
 from epl_betting_lab.providers.understat_players import (
     LOG_FIELDS,
     fetch_player_match_logs,
@@ -35,6 +41,7 @@ from epl_betting_lab.providers.understat_players import (
 from epl_betting_lab.reports.player_props_card import (
     HELD_STATUS,
     approved_prop_markets,
+    needs_fpl_logs,
     save_player_props_card,
 )
 
@@ -73,6 +80,25 @@ def _refresh_player_logs() -> str:
     )
 
 
+def _refresh_fpl_logs() -> str:
+    """Tackles and saves, from FPL. Soft: a failure keeps the previous file,
+    and with none the card simply holds no opinion on those markets."""
+    try:
+        result = fetch_fpl_player_data()
+    except (FplError, OSError, ValueError) as exc:
+        return f"WARNING: FPL player data not refreshed: {exc}"
+    if result.logs.empty:
+        return "WARNING: FPL returned no appearances; the previous file stands."
+    logs_path, _ = write_fpl_data(result, Path(PROCESSED_DIR))
+    note = (
+        f"FPL logs: {len(result.logs)} appearance(s) from "
+        f"{result.players_fetched}/{result.players_seen} player(s) -> {logs_path}"
+    )
+    if result.errors:
+        note += f" ({len(result.errors)} player(s) failed)"
+    return note
+
+
 def main() -> int:
     print("EPL Betting Lab - Props Card Refresh")
     approved = approved_prop_markets()
@@ -94,6 +120,8 @@ def main() -> int:
 
     print(f"Approved prop markets: {', '.join(approved)}")
     print(_refresh_player_logs())
+    if needs_fpl_logs(approved):
+        print(_refresh_fpl_logs())
     fetched_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     try:
         fetch_result = fetch_player_props(

@@ -174,7 +174,17 @@ class TestHeldByPolicy:
         # Approved, so nothing is held; with no staged prices it says so.
         assert summary["status"] == NO_STAGING_STATUS
         assert summary["picks"] == []
-        assert summary.get("held_prop_markets", []) == []
+        # Cards, tackles and saves (2026-10-19) are held until their own
+        # approval; the four props of PR #365 are not.
+        assert sorted(summary.get("held_prop_markets", [])) == sorted(
+            [
+                "player_to_receive_card",
+                "player_to_receive_red_card",
+                "player_tackles_alternate",
+                "player_goalie_saves",
+                "player_goalie_saves_alternate",
+            ]
+        )
 
     def test_held_still_reports_which_markets_hold_prices(
         self, tmp_path: Path
@@ -316,5 +326,12 @@ class TestApprovability:
 
         for market in PROP_EVENT_MARKETS:
             assert market in APPROVABLE_MARKETS
-        # The shipped policy approves all of them (PR #365, 2026-10-19).
-        assert sorted(approved_prop_markets()) == sorted(PROP_EVENT_MARKETS)
+        # The shipped policy approves the four of PR #365 (2026-10-19).
+        assert sorted(approved_prop_markets()) == sorted(
+            [
+                "player_shots",
+                "player_shots_on_target",
+                "player_assists",
+                "player_goal_scorer_anytime",
+            ]
+        )

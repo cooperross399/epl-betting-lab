@@ -12,6 +12,18 @@ The NHL lab settles inside build_site_json.py and does not use this file.
 The selection is by the fixture's own `kickoff`, NOT by the board filed under
 the settle date -- see `first_published`, which is where that cost the record
 every pick it has ever published.
+
+It also sums the season (`season_record`): every day a published fixture
+kicked off, each settled once and kept under history/settled/<date>.json, which
+rides in the same board-history artifact as the frozen boards. That season is
+written into results.json as `seasonRecord` and onto board.json's `record`
+(picks, straightUp, totals, leans, season, and the Due List's `dueList`), and
+only once a day has settled: a tally nobody has made is absent, never 0-0.
+Best bets are `picks`; leans are graded the same way and kept in `leans`.
+
+EPL boards carry the Due List (`games[].drought`). Each entry is graded from
+the match summary's squads: `actual` goals or assists and win/loss when he
+played, `void` when he did not. Never a unit, never a stake.
 """
 
 from __future__ import annotations
@@ -72,13 +84,11 @@ def fetch(url, timeout: int = 30):
         return json.load(r)
 
 
-def corner_counts(sport: str, event_id: str) -> dict | None:
-    """Corners won by each side, or None if the feed does not plainly say.
+def match_summary(sport: str, event_id: str) -> dict | None:
+    """One match's ESPN summary, or None when the sport has none or the feed did not answer.
 
-    Never raises, and never substitutes a zero. A missing statistic read as
-    zero would settle `Under 10.5 corners` as a win every time the feed was
-    down, which is a fabricated result in the direction of the card. Both
-    sides must be present or the pick stays ungraded and is counted as such.
+    Never raises. The corner counts and the Due List's player lines both come
+    from it, and settlement asks for it at most once per fixture.
     """
     template = SUMMARY.get(sport)
     if not template:
@@ -87,6 +97,22 @@ def corner_counts(sport: str, event_id: str) -> dict | None:
         payload = fetch(template.format(e=event_id), timeout=15)
     except (urllib.error.URLError, OSError, json.JSONDecodeError, TimeoutError, ValueError):
         return None
+    return payload if isinstance(payload, dict) else None
+
+
+def corner_counts(sport: str, event_id: str) -> dict | None:
+    """Corners won by each side, or None if the feed does not plainly say.
+
+    Never raises, and never substitutes a zero. A missing statistic read as
+    zero would settle `Under 10.5 corners` as a win every time the feed was
+    down, which is a fabricated result in the direction of the card. Both
+    sides must be present or the pick stays ungraded and is counted as such.
+    """
+    return corners_from(match_summary(sport, event_id))
+
+
+def corners_from(payload: dict | None) -> dict | None:
+    """`corner_counts` on a summary already in hand."""
     if not isinstance(payload, dict):
         return None
     out: dict[str, int] = {}
@@ -300,23 +326,134 @@ def first_published(boards: list[dict], day: date) -> tuple[dict, str | None]:
     return ordered, window
 
 
-def main(argv=None) -> int:
-    ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--data", default="dist/data")
-    ap.add_argument("--sport", required=True, choices=list(ESPN))
-    ap.add_argument("--date", default="")
-    args = ap.parse_args(argv)
-    data = Path(args.data)
-    day = date.fromisoformat(args.date) if args.date else (datetime.now(timezone.utc) - timedelta(days=1)).date()
-    boards = frozen_boards(data / "history")
-    now = datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
-    base = {"generatedAt": now, "resultsDate": day.isoformat(), "teams": {}, "games": []}
+#: What a scoreboard fetch can raise. A day whose finals cannot be read is not
+#: settled, and the season says so (`missingNights`) rather than counting it 0–0.
+FETCH_ERRORS = (urllib.error.URLError, OSError, json.JSONDecodeError, TimeoutError, ValueError)
+
+#: The Due List's two categories, as the board's `games[].drought` names them,
+#: and the ESPN summary statistic each settles on. `totalGoals` excludes own
+#: goals, which is what an anytime-goalscorer line settles on
+#: (`providers/espn_player_logs`, which builds the list from the same feed).
+DUE_STATS = {"goals": "totalGoals", "assists": "goalAssists"}
+
+
+def _name_key(name: object) -> str:
+    return " ".join(str(name or "").split()).casefold()
+
+
+def _stat_value(stats: dict, name: str) -> float | None:
+    try:
+        value = stats.get(name)
+        return None if value is None or str(value).strip() == "" else float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def player_lines(payload: dict | None) -> dict | None:
+    """Both matchday squads from a summary: side -> players, or None if the feed does not hold both.
+
+    Each player is {id, name, stats}. A squad member who never came on is kept
+    (`appearances` 0), because "did not play" is a grade here, not a gap.
+    """
+    rosters = (payload or {}).get("rosters") if isinstance(payload, dict) else None
+    if not isinstance(rosters, list) or len(rosters) != 2:
+        return None
+    out: dict[str, list] = {}
+    for roster in rosters:
+        if not isinstance(roster, dict):
+            return None
+        side = str(roster.get("homeAway") or "").lower()
+        if side not in ("home", "away"):
+            return None
+        players = []
+        for player in roster.get("roster") or []:
+            if not isinstance(player, dict):
+                continue
+            athlete = player.get("athlete") or {}
+            stats = {s.get("name"): s.get("value") for s in player.get("stats") or [] if isinstance(s, dict)}
+            players.append({"id": str(athlete.get("id") or ""), "name": _name_key(athlete.get("displayName")), "stats": stats})
+        out[side] = players
+    return out if set(out) == {"home", "away"} else None
+
+
+def grade_due_entry(entry: dict, g: dict, lines: dict | None) -> dict:
+    """One Due List entry, graded against what the player did in that match.
+
+    `void` when he did not play: not in his club's matchday squad, or in it
+    and never on the pitch. `actual` is his goals (or assists) when he played.
+    Nothing here is a unit or a stake. An entry the feed cannot answer for (no
+    squads yet, his side not on this fixture, a statistic missing) is left
+    ungraded, `result: null`, and never guessed.
+    """
+    home, away = (g.get("home") or {}).get("abbr"), (g.get("away") or {}).get("abbr")
+    team = entry.get("team")
+    side = "home" if team == home else "away" if team == away else None
+    line = entry.get("line") if isinstance(entry.get("line"), (int, float)) else 0.5
+    market = str(entry.get("market") or "goals")
+    price = entry.get("price")
+    row = {
+        "player": entry.get("player", ""), "team": team or "",
+        "opp": (away if side == "home" else home if side == "away" else "") or "",
+        "market": market, "line": line, "drought": entry.get("drought"),
+        "price": price if isinstance(price, (int, float)) and not isinstance(price, bool) else None,
+        "book": entry.get("book") or "", "heavyJuice": bool(entry.get("heavyJuice")),
+        "actual": None, "result": None,
+    }
+    if entry.get("lastSeason") is not None:
+        row["lastSeason"] = entry.get("lastSeason")
+    stat = DUE_STATS.get(market)
+    if side is None or lines is None or stat is None:
+        return row
+    squad = lines.get(side) or []
+    pid = str(entry.get("playerId") or "")
+    found = next((p for p in squad if pid and p["id"] == pid), None)
+    if found is None:
+        name = _name_key(entry.get("player"))
+        found = next((p for p in squad if name and p["name"] == name), None)
+    if found is None:
+        row["result"] = "void"
+        return row
+    appeared = _stat_value(found["stats"], "appearances")
+    if appeared is None:
+        return row
+    if appeared <= 0:
+        row["result"] = "void"
+        return row
+    value = _stat_value(found["stats"], stat)
+    if value is None:
+        return row
+    row["actual"] = int(value)
+    row["result"] = "push" if value == line else "win" if value > line else "loss"
+    return row
+
+
+def due_tallies(rows: list) -> dict:
+    """A day's Due List in W-L-P, with what is still ungraded. Voids are in none of them."""
+    out = {"w": 0, "l": 0, "p": 0, "byMarket": {m: {"w": 0, "l": 0} for m in DUE_STATS}, "pending": 0}
+    for r in rows:
+        if not isinstance(r, dict):
+            continue
+        res = r.get("result")
+        if res is None:
+            out["pending"] += 1
+            continue
+        if res not in ("win", "loss", "push"):
+            continue
+        out[{"win": "w", "loss": "l", "push": "p"}[res]] += 1
+        split = out["byMarket"].get(r.get("market"))
+        if split is not None and res in ("win", "loss"):
+            split["w" if res == "win" else "l"] += 1
+    return out
+
+
+def settle_day(sport: str, day: date, boards: list[dict]) -> tuple[dict, bool]:
+    """One day's results.json body, and whether anything on it is still to be read.
+
+    Raises one of FETCH_ERRORS when that day's scoreboard cannot be fetched;
+    the caller decides what that means for the page and for the season.
+    """
     season = next((str(b.get("season") or "") for b in reversed(boards) if b.get("season")), "")
-    if not boards:
-        base.update(season="", notice="No board has been published yet, so there is nothing to settle.", summary={})
-        (data / "results.json").write_text(json.dumps(base, indent=1), encoding="utf-8")
-        print("nothing to settle")
-        return 0
+    base: dict = {"resultsDate": day.isoformat(), "teams": {}, "games": [], "season": season}
     playing, window = first_published(boards, day)
     if not playing:
         # Said plainly, because the old wording for this case claimed the
@@ -324,74 +461,73 @@ def main(argv=None) -> int:
         # fixture in the record kicked off, which the record alone establishes
         # -- so this needs no scoreboard and must not blame one.
         base.update(
-            season=season, windowLabel=window,
+            windowLabel=window,
             notice=f"No fixture in the published record kicked off on {day.isoformat()}, so there is nothing to settle.",
             summary={},
         )
-        (data / "results.json").write_text(json.dumps(base, indent=1, ensure_ascii=False), encoding="utf-8")
-        print(f"no published fixture kicked off on {day}. No bet was placed.")
-        return 0
-    try:
-        fin = finals(args.sport, day)
-    except (urllib.error.URLError, json.JSONDecodeError, TimeoutError) as exc:
-        # Yesterday's settlement is not today's board. This step runs after the
-        # board is built, and an unhandled raise here took the whole publish
-        # down with it -- the 403 above did exactly that on 2026-09-23, so the
-        # site served nothing rather than serving a board with one section
-        # unavailable.
-        #
-        # The failure is written into results.json instead of swallowed,
-        # because a settlement that quietly stops is indistinguishable from a
-        # day with no games, and this page's whole claim is that the record is
-        # settled from what was published.
-        base.update(
-            season=season,
-            notice=f"Yesterday's results could not be settled: the scoreboard feed answered {type(exc).__name__} ({exc}). The board above is unaffected; settlement is retried on the next build.",
-            summary={},
-        )
-        (data / "results.json").write_text(json.dumps(base, indent=1), encoding="utf-8")
-        print(f"settlement skipped: {type(exc).__name__}: {exc}")
-        return 0
-    games, picks, su, ats, tots = [], {"w": 0, "l": 0, "p": 0}, {"w": 0, "l": 0}, {"w": 0, "l": 0, "p": 0}, {"w": 0, "l": 0, "p": 0}
+        return base, False
+    fin = finals(sport, day)
+    games, picks, leans = [], {"w": 0, "l": 0, "p": 0}, {"w": 0, "l": 0, "p": 0}
+    su, ats, tots = {"w": 0, "l": 0}, {"w": 0, "l": 0, "p": 0}, {"w": 0, "l": 0, "p": 0}
     teams_out: dict = {}
     ungraded = 0
+    due_rows: list | None = None
     for gid, (g, teams) in playing.items():
         f = fin.get(gid)
         if not f:
             continue
         hf, af = f["home"], f["away"]
         pick = g.get("pick")
-        # One extra request, and only for a fixture whose pick needs it.
+        # One extra request, only for a fixture whose pick or Due List needs
+        # it, and never two for the same fixture.
+        summary: dict = {}
+
+        def payload(gid=gid, summary=summary):
+            if "v" not in summary:
+                summary["v"] = match_summary(sport, gid)
+            return summary["v"]
+
         corners = None
         if str((pick or {}).get("market") or "").lower().startswith("corners"):
-            corners = corner_counts(args.sport, gid)
-        res = grade_pick(args.sport, pick, g, hf, af, teams, corners)
-        if pick and pick.get("kind", "bet") in ("bet", "lean") and res is None:
+            corners = corners_from(payload())
+        res = grade_pick(sport, pick, g, hf, af, teams, corners)
+        kind = (pick or {}).get("kind", "bet")
+        if pick and kind in ("bet", "lean") and res is None:
             # A published pick the record cannot answer for. Counted, because
             # a record that silently drops what it could not settle reports a
             # win rate for a subset it never names.
             ungraded += 1
-        # `res` is "win"/"loss"/"push"/"void"/None; `picks` is keyed
+        # `res` is "win"/"loss"/"push"/"void"/None; the tallies are keyed
         # "w"/"l"/"p". `if res in picks` tested the grade against the KEYS,
         # so it was never true and the tally never ran: every results.json
-        # this script has written carries picks 0-0-0, and the public
-        # Results page prints "Model picks 0–0–0" in its headline strip on
-        # the same screen that prints Win beside each individual pick.
-        # The mapping dict on the next line shows what the guard meant.
+        # this script wrote carried picks 0-0-0. A lean is graded the same
+        # way and tallied apart: it was recorded, never staked, and is never
+        # in `picks`.
         if res in ("win", "loss", "push"):
-            picks[{"win": "w", "loss": "l", "push": "p"}[res]] += 1
+            tally = leans if kind == "lean" else picks
+            tally[{"win": "w", "loss": "l", "push": "p"}[res]] += 1
         row = {"id": g["id"], "home": {"abbr": g["home"]["abbr"], "final": hf}, "away": {"abbr": g["away"]["abbr"], "final": af}, "finish": f["finish"],
                "pick": {**pick, "result": res} if pick and res else None}
-        if args.sport == "epl":
+        if sport == "epl":
             row["home"]["projGoals"], row["away"]["projGoals"] = g["home"].get("projGoals"), g["away"].get("projGoals")
             hp, dp, ap_ = g["home"].get("winProb"), g.get("drawProb"), g["away"].get("winProb")
             row["projResult"] = max((("home", hp or 0), ("draw", dp or 0), ("away", ap_ or 0)), key=lambda x: x[1])[0]
             out = "home" if hf > af else "away" if hf < af else "draw"
-            su["w" if out == row["projResult"] else "l"] += 1
+            # The favoured side is the model's 1X2 favourite, draw included:
+            # a draw is a loss unless the draw was favoured. A fixture the
+            # model published no probabilities for has no favourite, and is
+            # not counted as though it favoured the home side.
+            if all(isinstance(x, (int, float)) for x in (hp, dp, ap_)):
+                su["w" if out == row["projResult"] else "l"] += 1
             over_p = (g.get("total") or {}).get("overProb")
             if isinstance(over_p, (int, float)):
                 tots["w" if (over_p > 0.5) == (hf + af > 2.5) else "l"] += 1
             row["markets"] = {"total": {"line": 2.5, "overProb": over_p}, "btts": {"yesProb": (g.get("btts") or {}).get("yesProb")}}
+            if "drought" in g:
+                due_rows = due_rows if due_rows is not None else []
+                entries = [e for e in g.get("drought") or [] if isinstance(e, dict)]
+                lines = player_lines(payload()) if entries else None
+                due_rows.extend(grade_due_entry(e, g, lines) for e in entries)
         else:
             row["home"]["projPts"], row["away"]["projPts"] = g["home"].get("projPts"), g["away"].get("projPts")
             hp = g["home"].get("winProb")
@@ -410,19 +546,237 @@ def main(argv=None) -> int:
                 tots["p" if t == tt["current"] else "w" if (tt["proj"] > tt["current"]) == (t > tt["current"]) else "l"] += 1
         teams_out.update(teams)
         games.append(row)
-    summary = {"picks": picks, "ungraded": ungraded}
-    if args.sport == "epl":
-        summary.update(result=su, totals={"w": tots["w"], "l": tots["l"]})
+    summary_out = {"picks": picks, "leans": leans, "ungraded": ungraded}
+    if sport == "epl":
+        # `result` is the key this file has always published; `straightUp`
+        # is the same tally under the name every lab's season record uses.
+        summary_out.update(result=su, straightUp=dict(su), totals={"w": tots["w"], "l": tots["l"]})
     else:
-        summary.update(straightUp=su, ats=ats, totals=tots)
-    base.update(season=season, windowLabel=window, notice=None if games else "The games were played but no final was available when this ran; the next build settles them.",
-                summary=summary, teams=teams_out, games=games)
-    (data / "results.json").write_text(json.dumps(base, indent=1, ensure_ascii=False), encoding="utf-8")
-    print(
-        f"settled {len(games)} of {len(playing)} fixture(s) that kicked off on {day}: "
-        f"picks {picks['w']}-{picks['l']}-{picks['p']}, {ungraded} ungraded. "
-        "No bet was placed."
-    )
+        summary_out.update(straightUp=su, ats=ats, totals=tots)
+    base.update(windowLabel=window, notice=None if games else "The games were played but no final was available when this ran; the next build settles them.",
+                summary=summary_out, teams=teams_out, games=games)
+    waiting = len(games) < len(playing) or ungraded > 0
+    if due_rows is not None:
+        tallies = due_tallies(due_rows)
+        due = {"rows": due_rows}
+        if tallies["w"] + tallies["l"] + tallies["p"]:
+            due["summary"] = {k: tallies[k] for k in ("w", "l", "p")}
+        base["dueList"] = due
+        waiting = waiting or tallies["pending"] > 0
+    return base, waiting
+
+
+# ---------- the season ----------
+
+#: Where each settled day is kept, inside the history the publish workflow
+#: restores and uploads (dist/data/history), so the season reads an old day
+#: once instead of re-fetching its finals every morning.
+SETTLED_DIR = "settled"
+
+SEASON_KEYS = ("straightUp", "picks", "leans", "totals")
+
+#: How long a day with something still unread (a fixture with no final, an
+#: ungraded pick, a Due List entry with no stat) is settled again each run
+#: rather than kept. The NHL lab's DUE_LIST_PATIENCE_DAYS, for the same reason:
+#: a postponed match must not hold a day out of the cache forever.
+PATIENCE_DAYS = 14
+
+
+def night_record(results: dict) -> dict:
+    """What the season keeps of one settled day."""
+    night = {"games": len(results.get("games") or []), "summary": results.get("summary") or {}}
+    due = results.get("dueList")
+    if isinstance(due, dict):
+        night["dueList"] = due_tallies(due.get("rows") or [])
+    return night
+
+
+def _kept_night(path: Path) -> dict | None:
+    if not path.is_file():
+        return None
+    try:
+        night = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError):
+        return None
+    return night if isinstance(night, dict) and isinstance(night.get("summary"), dict) else None
+
+
+def kickoff_days(boards: list[dict], through: date) -> list[date]:
+    """Every date a published fixture kicked off on, up to and including `through`."""
+    days: set[date] = set()
+    for board in boards:
+        for game in board.get("games") or []:
+            try:
+                day = date.fromisoformat(str(game.get("kickoff") or "")[:10])
+            except ValueError:
+                continue
+            if day <= through:
+                days.add(day)
+    return sorted(days)
+
+
+def season_record(sport: str, day: date, hist: Path, boards: list[dict],
+                  latest: dict | None, latest_waiting: bool) -> dict:
+    """The season so far: every day a published fixture kicked off, settled and summed.
+
+    `day` is the day this run settled and `latest` its results (None when its
+    scoreboard could not be read). Every earlier day is read from
+    `history/settled/<day>.json` when one is kept, and otherwise settled now;
+    it is kept once it is at least two days old and nothing on it is still
+    unread, or once it is PATIENCE_DAYS old. A day whose finals cannot be
+    fetched, or whose fixtures have no final yet, is not counted as 0–0: it
+    is left out and counted in `missingNights`, and the next run tries again.
+
+    The four tallies are absent until a day has settled; so is `dueList`
+    (`{w, l, p, nights, byMarket}`), which sums the graded Due List entries
+    of every settled day whose board carried the list. It is never a unit or
+    a stake, and none of it is in `picks`; nor is a lean.
+    """
+    tally = {key: {"w": 0, "l": 0} if key == "straightUp" else {"w": 0, "l": 0, "p": 0} for key in SEASON_KEYS}
+    due = {"w": 0, "l": 0, "p": 0, "nights": 0, "byMarket": {m: {"w": 0, "l": 0} for m in DUE_STATS}}
+    kept = hist / SETTLED_DIR
+    nights, missing, first, last = 0, 0, None, None
+    for d in kickoff_days(boards, day):
+        cached = kept / f"{d.isoformat()}.json"
+        waiting = False
+        if d == day:
+            if latest is None:
+                missing += 1
+                continue
+            night, waiting = night_record(latest), latest_waiting
+        else:
+            night = _kept_night(cached)
+            if night is None:
+                try:
+                    settled, waiting = settle_day(sport, d, boards)
+                except (*FETCH_ERRORS, KeyError, TypeError):
+                    missing += 1
+                    continue
+                night = night_record(settled)
+                patient = d > day - timedelta(days=PATIENCE_DAYS)
+                if d <= day - timedelta(days=1) and not (waiting and patient):
+                    kept.mkdir(parents=True, exist_ok=True)
+                    cached.write_text(json.dumps({"resultsDate": d.isoformat(), **night}, indent=1), encoding="utf-8")
+                waiting = waiting and patient
+        night_due = night.get("dueList") if isinstance(night.get("dueList"), dict) else None
+        if night_due and sum(int(night_due.get(k) or 0) for k in ("w", "l", "p")):
+            due["nights"] += 1
+            for k in ("w", "l", "p"):
+                due[k] += int(night_due.get(k) or 0)
+            for market, split in (night_due.get("byMarket") or {}).items():
+                if market in due["byMarket"] and isinstance(split, dict):
+                    for k in ("w", "l"):
+                        due["byMarket"][market][k] += int(split.get(k) or 0)
+        if not night["games"]:
+            # Fixtures kicked off and none has a final yet: not settled, and
+            # said so, rather than a day that happened to go 0–0.
+            if waiting:
+                missing += 1
+            continue
+        nights += 1
+        first = first or d.isoformat()
+        last = d.isoformat()
+        summary = night["summary"]
+        for key in SEASON_KEYS:
+            source = summary.get(key)
+            if source is None and key == "straightUp":
+                source = summary.get("result")
+            for k, v in (source or {}).items():
+                if k in tally[key]:
+                    tally[key][k] += int(v)
+    span = {"nights": nights, "firstDate": first, "lastDate": last, "missingNights": missing}
+    season = {**tally, **span} if nights else dict(span)
+    if due["nights"]:
+        season["dueList"] = due
+    return season
+
+
+def write_season(data: Path, results: dict, season: dict) -> None:
+    """The season into results.json (`seasonRecord`) and onto the board's `record`.
+
+    Nothing is written for a tally nobody has made: before a day has settled
+    there is no `seasonRecord` and the board's record keeps only the keys it
+    already carried, so the page shows a dash and "Not tallied yet", never 0–0.
+    """
+    if season.get("nights"):
+        span = {k: season[k] for k in ("nights", "firstDate", "lastDate", "missingNights")}
+        results["seasonRecord"] = {**{k: season[k] for k in SEASON_KEYS}, **span, "season": span,
+                                   **({"dueList": season["dueList"]} if "dueList" in season else {})}
+    if "dueList" in season and isinstance(results.get("dueList"), dict):
+        results["dueList"]["season"] = season["dueList"]
+    board_path = data / "board.json"
+    try:
+        board = json.loads(board_path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError):
+        return
+    if not isinstance(board, dict):
+        return
+    record = board.get("record") if isinstance(board.get("record"), dict) else {}
+    if season.get("nights"):
+        record.update({k: season[k] for k in SEASON_KEYS})
+        record["season"] = {k: v for k, v in season.items() if k != "dueList"}
+    if "dueList" in season:
+        record["dueList"] = {k: season["dueList"][k] for k in ("w", "l", "p", "nights")}
+    board["record"] = record
+    board_path.write_text(json.dumps(board, indent=1, ensure_ascii=False), encoding="utf-8")
+
+
+def main(argv=None) -> int:
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--data", default="dist/data")
+    ap.add_argument("--sport", required=True, choices=list(ESPN))
+    ap.add_argument("--date", default="")
+    args = ap.parse_args(argv)
+    data = Path(args.data)
+    day = date.fromisoformat(args.date) if args.date else (datetime.now(timezone.utc) - timedelta(days=1)).date()
+    boards = frozen_boards(data / "history")
+    now = datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
+    base = {"generatedAt": now, "resultsDate": day.isoformat(), "teams": {}, "games": []}
+    if not boards:
+        base.update(season="", notice="No board has been published yet, so there is nothing to settle.", summary={})
+        (data / "results.json").write_text(json.dumps(base, indent=1), encoding="utf-8")
+        print("nothing to settle")
+        return 0
+    latest: dict | None
+    try:
+        latest, waiting = settle_day(args.sport, day, boards)
+    except FETCH_ERRORS as exc:
+        # Yesterday's settlement is not today's board. This step runs after the
+        # board is built, and an unhandled raise here took the whole publish
+        # down with it -- the 403 above did exactly that on 2026-09-23, so the
+        # site served nothing rather than serving a board with one section
+        # unavailable.
+        #
+        # The failure is written into results.json instead of swallowed,
+        # because a settlement that quietly stops is indistinguishable from a
+        # day with no games, and this page's whole claim is that the record is
+        # settled from what was published.
+        season = next((str(b.get("season") or "") for b in reversed(boards) if b.get("season")), "")
+        base.update(
+            season=season,
+            notice=f"Yesterday's results could not be settled: the scoreboard feed answered {type(exc).__name__} ({exc}). The board above is unaffected; settlement is retried on the next build.",
+            summary={},
+        )
+        latest, waiting = None, False
+        results = base
+        print(f"settlement skipped: {type(exc).__name__}: {exc}")
+    else:
+        results = {**base, **latest}
+    try:
+        season_so_far = season_record(args.sport, day, data / "history", boards, latest, waiting)
+    except Exception as exc:  # the season line must never take the day's results or the deploy down
+        print(f"the season record could not be summed: {type(exc).__name__}: {exc}")
+    else:
+        write_season(data, results, season_so_far)
+    (data / "results.json").write_text(json.dumps(results, indent=1, ensure_ascii=False), encoding="utf-8")
+    if latest is not None:
+        s = results.get("summary") or {}
+        picks = s.get("picks") or {"w": 0, "l": 0, "p": 0}
+        print(
+            f"settled {len(results['games'])} fixture(s) that kicked off on {day}: "
+            f"picks {picks['w']}-{picks['l']}-{picks['p']}, {s.get('ungraded', 0)} ungraded. "
+            "No bet was placed."
+        )
     return 0
 
 

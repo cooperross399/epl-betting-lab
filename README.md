@@ -66,6 +66,25 @@ artifact, so the card is read from the archived copy in `matchday-state`; and
 come off the card's own rows on a published run. `board.json` carries
 `cardSource` and `priceSource` saying which was used.
 
+Open prices (`total.openOver/openUnder`, `btts.openYes/openNo`,
+`drawNoBet.openHome/openAway`) and `lineHistory` (one point per capture) come
+from the `price-feed` branch's record when it is restored to
+`data/processed/price_feed.csv`: open is the first capture in the week before
+kick-off at the best bettable book, and a selection never captured has no
+open key. Publish Board does not fetch that branch today, so a published board
+carries neither until it does; `lineHistory` then falls back to one point per
+build (`web/site_history.py`). `matchResult {home, draw, away}` is the 1X2
+prices beside the fair ones.
+
+`web/settle_results.py` keeps each settled day under
+`history/settled/<date>.json` and sums the season from them: board.json's
+`record.picks / straightUp / totals / leans / season` and results.json's
+`seasonRecord`, absent until a day has settled, with `missingNights` for a day
+whose finals could not be read. Leans are graded and kept in `leans`, never in
+`picks`. The Due List is graded in results.json's `dueList` (goals or assists
+from the match's squads, `void` when he did not play) and summed as
+`record.dueList {w, l, p, nights}`; it is never a unit or a stake.
+
 ## Legacy sections below
 
 Much of this README documents the **manual-odds era**, when prices were typed

@@ -119,6 +119,12 @@ def test_valid_review_approval_verifies(tmp_path: Path) -> None:
         "player_goal_scorer_anytime",
         "player_shots",
         "player_shots_on_target",
+        "team_total_away_0_5",
+        "team_total_away_1_5",
+        "team_total_away_2_5",
+        "team_total_home_0_5",
+        "team_total_home_1_5",
+        "team_total_home_2_5",
         "total_2_5",
     ]
     assert approval["source_kind"] == "review"

@@ -3,6 +3,10 @@ from __future__ import annotations
 
 import argparse
 
+from epl_betting_lab.providers.odds_api_staging_provider import (
+    DEFAULT_EVENT_MARKETS,
+    TEAM_TOTAL_REQUEST_MARKETS,
+)
 from epl_betting_lab.providers.base import UnknownProviderError
 from epl_betting_lab.providers.env_file import load_provider_env
 from epl_betting_lab.providers.provider_registry import (
@@ -59,6 +63,15 @@ def parse_args() -> argparse.Namespace:
             "Costs extra quota: markets x regions per event."
         ),
     )
+    parser.add_argument(
+        "--with-team-totals",
+        action="store_true",
+        help=(
+            "With --include-event-markets, also ask for the team-total ladder "
+            "before the policy approves it, so an allowlist review has staged "
+            "evidence to bind to. One extra credit per event per region."
+        ),
+    )
     return parser.parse_args()
 
 
@@ -71,6 +84,11 @@ def _provider_from_args(args: argparse.Namespace):
             regions=args.regions,
             bookmakers=args.bookmakers,
             include_event_markets=bool(getattr(args, "include_event_markets", False)),
+            **(
+                {"event_markets": DEFAULT_EVENT_MARKETS + TEAM_TOTAL_REQUEST_MARKETS}
+                if getattr(args, "with_team_totals", False)
+                else {}
+            ),
         )
     return create_provider(key)
 

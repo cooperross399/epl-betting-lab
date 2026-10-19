@@ -57,6 +57,11 @@ from typing import Any
 
 import pandas as pd
 
+from epl_betting_lab.strategies.team_totals import (
+    TEAM_TOTAL_MARKETS,
+    team_total_side_and_line,
+)
+
 
 #: Corner markets and the line each is settled against. `corners_1x2` has no
 #: line — it compares the two counts — so it is listed with None.
@@ -260,6 +265,12 @@ def settle(
         total = home_corners + away_corners
         # The lines are halves, so a push is impossible by construction.
         return {"over": total > line, "under": total < line}.get(selection)
+    side_line = team_total_side_and_line(market)
+    if side_line is not None:
+        # One team's goals against a half line, so a push cannot happen.
+        side, line = side_line
+        goals = home_goals if side == "home" else away_goals
+        return {"over": goals > line, "under": goals < line}.get(selection)
     if market in CARD_MARKETS:
         # Same rule as corners: a result without the counts settles nothing.
         if home_cards is None or away_cards is None:
@@ -274,7 +285,7 @@ def settleable_markets() -> frozenset[str]:
     """Markets `settle` has a rule for, whatever the result data turns out to be."""
     return frozenset(
         {"1x2", "btts", "total_2_5", "double_chance", "draw_no_bet"} | set(CORNER_MARKETS)
-        | set(CARD_MARKETS)
+        | set(CARD_MARKETS) | set(TEAM_TOTAL_MARKETS)
     )
 
 

@@ -55,13 +55,21 @@ MARKET_SELECTIONS: dict[str, tuple[str, ...]] = {
     # every account is. A price that cannot be taken is not a price. The model
     # stays so the market can be added the day one appears.
     #
-    # Team totals are likewise absent, for a different reason: the book sets a
-    # different line per team on the same fixture — Arsenal at 2.5 and Coventry
-    # at 0.5 in the same market — so a fixed line in the market name can never
-    # match. Supporting them needs line-aware selections, not another entry.
     "corners_1x2": ("home", "draw", "away"),
     "corners_total_9_5": ("over", "under"),
     "corners_total_10_5": ("over", "under"),
+    # Team totals, one team at one line each (Cooper, 2026-10-19). A book sets
+    # a different line per team on one fixture -- Arsenal 2.5, Coventry 0.5 --
+    # which is why a single "team total" market could never be complete and
+    # why these were once left out. That was the featured market; the
+    # alternate ladder carries every line, so each team and line is judged on
+    # its own coverage here. See strategies/team_totals.py.
+    "team_total_home_0_5": ("over", "under"),
+    "team_total_home_1_5": ("over", "under"),
+    "team_total_home_2_5": ("over", "under"),
+    "team_total_away_0_5": ("over", "under"),
+    "team_total_away_1_5": ("over", "under"),
+    "team_total_away_2_5": ("over", "under"),
 }
 
 #: Markets intentionally excluded from automated picks regardless of coverage.

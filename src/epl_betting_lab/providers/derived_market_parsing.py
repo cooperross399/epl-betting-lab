@@ -9,6 +9,8 @@ differently for every fixture:
     draw_no_bet     "Arsenal", "Coventry City"
     corners_1x2     "Arsenal", "Coventry City", "Draw"
     corners totals  "Over"/"Under" with the line carried in `point`
+    team totals     "Over"/"Under", the team in `description`, the line in
+                    `point` -- one book posts Arsenal 2.5 and Coventry 0.5
 
 Two consequences follow, and both are the reason this is a module rather than a
 few lines inline.
@@ -140,6 +142,36 @@ def matches_line(outcome: Mapping[str, Any], line: float) -> bool:
         return False
 
 
+def team_total_market(
+    outcome: Mapping[str, Any],
+    home_team: str,
+    away_team: str,
+    provider_home_team: str = "",
+    provider_away_team: str = "",
+    lines: tuple[float, ...] = (0.5, 1.5, 2.5),
+) -> str | None:
+    """`team_total_<side>_<line>` for a team-total outcome, None if off-ladder.
+
+    The team is in `description`. A name that is neither side raises, like
+    every other parser here: a dropped side is a card missing a bet.
+    """
+    team = str(outcome.get("description", ""))
+    name = _norm(team)
+    if name in _names(home_team, provider_home_team):
+        side = "home"
+    elif name in _names(away_team, provider_away_team):
+        side = "away"
+    else:
+        raise UnrecognizedOutcomeError(
+            f"Team total outcome for {team!r} names neither {home_team!r} nor "
+            f"{away_team!r}."
+        )
+    for line in lines:
+        if matches_line(outcome, line):
+            return f"team_total_{side}_{int(line)}_5"
+    return None
+
+
 #: market -> how to read one of its outcomes.
 def selection_for(
     market: str,
@@ -163,7 +195,7 @@ def selection_for(
         return team_selection(
             name, home_team, away_team, provider_home_team, provider_away_team
         )
-    if market.startswith("corners_total_") or market == "total_2_5":
+    if market.startswith("corners_total_") or market.startswith("team_total_") or market == "total_2_5":
         line = 2.5 if market == "total_2_5" else float(
             market.rsplit("_", 2)[-2] + "." + market.rsplit("_", 1)[-1]
         )

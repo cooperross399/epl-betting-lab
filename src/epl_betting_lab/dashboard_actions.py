@@ -136,6 +136,7 @@ from epl_betting_lab.strategies.derived_result import (
     evaluate_draw_no_bet,
 )
 from epl_betting_lab.strategies.ml_value import evaluate_1x2_value
+from epl_betting_lab.strategies.team_totals import evaluate_team_totals
 from epl_betting_lab.strategies.totals import evaluate_total_25, evaluate_total_25_anchored
 
 
@@ -790,6 +791,10 @@ def run_thursday_best_bets_report(
         evaluate_btts(totals_projections, odds, min_edge=MIN_EDGE, max_juice=MAX_DEFAULT_JUICE),
         evaluate_double_chance(projections, odds, min_edge=MIN_EDGE, max_juice=MAX_DEFAULT_JUICE),
         evaluate_draw_no_bet(projections, odds, min_edge=MIN_EDGE, max_juice=MAX_DEFAULT_JUICE),
+        # Team totals count goals, so they take the same ratings as the 2.5
+        # line and BTTS rather than CARD_RATINGS. Never measured against real
+        # prices; see strategies/team_totals.py.
+        evaluate_team_totals(totals_projections, odds, min_edge=MIN_EDGE, max_juice=MAX_DEFAULT_JUICE),
     ]
 
     # Corner markets need their own fit, on columns that ship in the same file

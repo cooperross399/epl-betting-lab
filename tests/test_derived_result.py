@@ -234,6 +234,9 @@ class TestTheCardEvaluatesEveryPriceableMarket:
         evaluated = {"1x2", "total_2_5", "btts"}
         evaluated |= set(DERIVED_MARKETS)
         evaluated |= set(COUNT_MARKETS) - set(UNAVAILABLE_MARKETS)
+        from epl_betting_lab.strategies.team_totals import TEAM_TOTAL_MARKETS
+
+        evaluated |= set(TEAM_TOTAL_MARKETS)
 
         assert set(MARKET_SELECTIONS) <= evaluated
 

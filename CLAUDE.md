@@ -104,14 +104,25 @@ Use the repo, the reports, and GitHub.
   `thursday_best_bets.FLOOR_ONLY_MARKETS` holds 1X2 at 0.1u whatever its
   ranking score, so "every bet is 0.1 units" stays true. Say plainly that 1X2
   lost out of sample when asked what its picks rest on.
-- **Player props: built, wired to the card and the board, and waiting only on
-  Cooper's approval of the policy PR.** The props card, the card section and
-  the board's Props tab (`web/build_board_json.props_block`, the shared
-  `sports.js` EPL props adapter) all run from `player_props_card.json`; the
-  live fetch buys only the selected round's fixtures that have not kicked off
-  (`player_props_staging.slate_events`), about 4 credits per fixture per run.
-  Approving the four prop markets in `required_markets` is what turns the
-  fetch on.
+- **Player props are allowlisted (2026-10-19, PR #365, receipt
+  `odds_api-20261019T064821+0000-5e5248a72a82`).** The props card, the card
+  section and the board's Props tab (`web/build_board_json.props_block`, the
+  shared `sports.js` EPL props adapter) all run from `player_props_card.json`;
+  the live fetch buys only the selected round's fixtures that have not kicked
+  off (`player_props_staging.slate_events`), about 4 credits per fixture per
+  run. No edge is demonstrated.
+- **Team totals are built and waiting on an allowlist approval (2026-10-19,
+  Cooper: "yes build team totals").** Six markets, one team at one half line
+  each (`team_total_home_0_5` ... `team_total_away_2_5`,
+  `strategies/team_totals.py`), priced off each side's Poisson marginal on
+  `TOTALS_RATINGS`, settled on that team's goals. They were left out once
+  because a book posts a different featured line per team; the alternate
+  ladder (`alternate_team_totals`) carries 0.5/1.5/2.5 for both teams at
+  BetMGM, BetRivers, Bovada, DraftKings and FanDuel (one-fixture probe,
+  2026-10-19) - the `total_2_5` lesson again. The per-event request asks for
+  the ladder only once the policy approves a team-total market
+  (`approved_team_total_markets`), at one credit per event per region per
+  run. Never measured against real prices: no demonstrated edge.
 - **The card's ranking takes no reliability nudge from the backtest.**
   `_market_reliability_from_backtest` returns `{}`. It used to scale each
   market's in-sample ROI into a ±12 band, which handed `total_2_5` the maximum

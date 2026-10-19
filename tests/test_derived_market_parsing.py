@@ -249,6 +249,11 @@ class TestTheProviderNormalisesThem:
         _, _, derived, _ = self._maps()
         sourced = {target for targets in derived.values() for target in targets}
         sourced |= {"1x2", "total_2_5", "btts"}
+        # Team totals come from their own provider markets, asked for once the
+        # policy approves one (see tests/test_team_totals.py).
+        from epl_betting_lab.strategies.team_totals import TEAM_TOTAL_MARKETS
+
+        sourced |= set(TEAM_TOTAL_MARKETS)
 
         assert set(MARKET_SELECTIONS) == sourced
 

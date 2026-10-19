@@ -400,20 +400,24 @@ class PoissonGoalsModel:
             "draw_no_bet_away": round(float(dnb_away), 4),
             # Team totals come off each side's own marginal, not the joint
             # matrix, so they stay correct even where the matrix is truncated.
-            "team_total_home_over_1_5": round(
-                float(1.0 - sum(self._poisson_pmf(k, home_xg) for k in (0, 1))), 4
-            ),
-            "team_total_home_under_1_5": round(
-                float(sum(self._poisson_pmf(k, home_xg) for k in (0, 1))), 4
-            ),
-            "team_total_away_over_1_5": round(
-                float(1.0 - sum(self._poisson_pmf(k, away_xg) for k in (0, 1))), 4
-            ),
-            "team_total_away_under_1_5": round(
-                float(sum(self._poisson_pmf(k, away_xg) for k in (0, 1))), 4
-            ),
+            # One column pair per side and line the card can price; see
+            # strategies/team_totals.py.
+            **self._team_total_columns(home_xg, away_xg),
             "top_scores": top_scores[["score", "prob"]].assign(prob=lambda d: d["prob"].round(4)).to_dict("records"),
         }
+
+    #: The team-total lines priced: one team, one half line, over and under.
+    TEAM_TOTAL_LINES: tuple[float, ...] = (0.5, 1.5, 2.5)
+
+    def _team_total_columns(self, home_xg: float, away_xg: float) -> dict[str, float]:
+        columns: dict[str, float] = {}
+        for side, xg in (("home", home_xg), ("away", away_xg)):
+            for line in self.TEAM_TOTAL_LINES:
+                under = sum(self._poisson_pmf(k, xg) for k in range(int(line) + 1))
+                tag = f"{int(line)}_5"
+                columns[f"team_total_{side}_over_{tag}"] = round(float(1.0 - under), 4)
+                columns[f"team_total_{side}_under_{tag}"] = round(float(under), 4)
+        return columns
 
     def project_fixtures(self, fixtures: pd.DataFrame) -> pd.DataFrame:
         records = []

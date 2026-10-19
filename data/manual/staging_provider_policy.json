@@ -50,7 +50,11 @@
         "team_total_home_2_5",
         "team_total_away_0_5",
         "team_total_away_1_5",
-        "team_total_away_2_5"
+        "team_total_away_2_5",
+        "player_to_receive_card",
+        "player_to_receive_red_card",
+        "player_tackles_alternate",
+        "player_goalie_saves_alternate"
       ],
       "reviewed_at": "2026-10-19T13:14:01+00:00",
       "reviewer_name": "cooperross399",

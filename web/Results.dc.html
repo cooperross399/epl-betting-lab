@@ -26,13 +26,9 @@
 
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    /* One look per site: NHL dark, EPL gray, CBB white. EPL and CBB darken with the phone's dark mode. */
-    :root, html[data-sport="nhl"] { color-scheme: dark; --paper:#14151a; --ink:#f1efe9; --ink-2:#d2d0ca; --mute:#a3a6b1; --mute-2:#80838e; --rule:#3a3d49; --rule-2:#262832; --on-ink:#3a3d49; --alert:#f08a72; --on-alert:#14151a; --win:#5cc196; --on-win:#14151a; --desk:#0d0e12; }
-    html[data-sport="epl"], html[data-sport="epl"] [data-theme="light"] { color-scheme: light; --paper:#d9dade; --ink:#14151a; --ink-2:#2a2d36; --mute:#50535e; --mute-2:#767984; --rule:#b4b6bd; --rule-2:#c6c8ce; --on-ink:#c6c8ce; --alert:#9e2c19; --on-alert:#f4f4f6; --win:#22664a; --on-win:#f4f4f6; --desk:#c9cbd0; }
-    html[data-sport="cbb"], html[data-sport="cbb"] [data-theme="light"] { color-scheme: light; --paper:#ffffff; --ink:#14151a; --ink-2:#2a2d3a; --mute:#62656f; --mute-2:#9a9ca6; --rule:#dddbd6; --rule-2:#ecebe7; --on-ink:#d6d3cc; --alert:#b0341f; --on-alert:#ffffff; --win:#2c7a5a; --on-win:#ffffff; --desk:#eeede9; }
-    @media (prefers-color-scheme: dark) { html[data-sport="epl"] { color-scheme: dark; --paper:#2a2c32; --ink:#ecebe7; --ink-2:#cfcec9; --mute:#a9abb4; --mute-2:#878a94; --rule:#474a53; --rule-2:#363840; --on-ink:#474a53; --alert:#f29077; --on-alert:#1b1c20; --win:#62c79c; --on-win:#1b1c20; --desk:#212328; } html[data-sport="cbb"] { color-scheme: dark; --paper:#0f1a2b; --ink:#eef1f6; --ink-2:#cdd4e0; --mute:#9ba6b8; --mute-2:#7a869a; --rule:#2b3a52; --rule-2:#1c2a3f; --on-ink:#2b3a52; --alert:#f08a72; --on-alert:#0f1a2b; --win:#5cc196; --on-win:#0f1a2b; --desk:#0a1220; } }
-    html[data-sport="epl"] [data-theme="dark"] { color-scheme: dark; --paper:#2a2c32; --ink:#ecebe7; --ink-2:#cfcec9; --mute:#a9abb4; --mute-2:#878a94; --rule:#474a53; --rule-2:#363840; --on-ink:#474a53; --alert:#f29077; --on-alert:#1b1c20; --win:#62c79c; --on-win:#1b1c20; --desk:#212328; }
-    html[data-sport="cbb"] [data-theme="dark"] { color-scheme: dark; --paper:#0f1a2b; --ink:#eef1f6; --ink-2:#cdd4e0; --mute:#9ba6b8; --mute-2:#7a869a; --rule:#2b3a52; --rule-2:#1c2a3f; --on-ink:#2b3a52; --alert:#f08a72; --on-alert:#0f1a2b; --win:#5cc196; --on-win:#0f1a2b; --desk:#0a1220; }
+    /* One look across all three sites: dark. The Light tweak is for previews. */
+    :root, html[data-sport] { color-scheme: dark; --paper:#14151a; --ink:#f1efe9; --ink-2:#d2d0ca; --mute:#a3a6b1; --mute-2:#80838e; --rule:#3a3d49; --rule-2:#262832; --on-ink:#3a3d49; --alert:#f08a72; --on-alert:#14151a; --win:#5cc196; --on-win:#14151a; --desk:#0d0e12; }
+    [data-theme="light"] { color-scheme: light; --paper:#ffffff; --ink:#14151a; --ink-2:#2a2d3a; --mute:#62656f; --mute-2:#9a9ca6; --rule:#dddbd6; --rule-2:#ecebe7; --on-ink:#d6d3cc; --alert:#b0341f; --on-alert:#ffffff; --win:#2c7a5a; --on-win:#ffffff; --desk:#eeede9; }
     html, body { margin: 0; padding: 0; background: var(--paper); color: var(--ink); font-family: "IBM Plex Sans", Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
     * { box-sizing: border-box; }
     a { color: var(--ink); text-decoration: none; }
@@ -112,7 +108,7 @@
           <div style="display:flex;flex-direction:column;gap:10px;min-width:0;">
             <sc-for list="{{ g.sides }}" as="s" hint-placeholder-count="2">
               <div style="display:flex;align-items:center;gap:12px;">
-                <span aria-hidden="true" style="width:38px;height:38px;border-radius:50%;flex:none;display:grid;place-items:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:13px;background:{{ s.color }};color:{{ s.fg }};">{{ s.abbr }}</span>
+                <span aria-hidden="true" style="position:relative;width:38px;height:38px;border-radius:50%;flex:none;display:grid;place-items:center;overflow:hidden;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:13px;letter-spacing:.02em;background:{{ s.color }};color:{{ s.fg }};box-shadow:0 0 0 1px var(--rule);">{{ s.abbr }}<sc-if value="{{ s.logo }}" hint-placeholder-val="{{ false }}"><img src="{{ s.logo }}" alt="" loading="lazy" decoding="async" onLoad="{{ s.onLogoLoad }}" onError="{{ s.onLogoError }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;padding:5px;" /></sc-if></span>
                 <span style="flex:1;font-weight:600;font-size:16px;min-width:0;">{{ s.name }}</span>
                 <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--mute);text-align:right;"><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);">projected </span>proj {{ s.proj }}</span>
                 <span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:34px;line-height:1;width:44px;text-align:right;color:{{ s.scoreColor }};">{{ s.final }}</span>
@@ -156,7 +152,7 @@
         <h2 id="rprops-h" style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:34px;line-height:1;text-transform:uppercase;letter-spacing:.01em;">Props</h2>
         <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">{{ pr.summaryLine }}</div>
       </div>
-      <p style="margin:0;padding:14px 0;border-bottom:1px solid var(--rule);font-size:15px;line-height:1.5;color:var(--ink-2);max-width:760px;text-wrap:pretty;">Graded apart from team picks. No demonstrated edge in any market.</p>
+      <p style="margin:0;padding:14px 0;border-bottom:1px solid var(--rule);font-size:15px;line-height:1.5;color:var(--ink-2);max-width:760px;text-wrap:pretty;">Graded apart from team picks.</p>
       <sc-if value="{{ pr.hasStrip }}" hint-placeholder-val="{{ true }}">
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:0 24px;border-bottom:1px solid var(--ink);">
           <sc-for list="{{ pr.strip }}" as="c" hint-placeholder-count="2">
@@ -199,7 +195,7 @@
     <section id="due" aria-labelledby="due-h" style="padding-top:48px;">
       <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;border-bottom:3px solid var(--ink);padding-bottom:10px;">
         <h2 id="due-h" style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:34px;line-height:1;text-transform:uppercase;letter-spacing:.01em;">Due List</h2>
-        <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mute);border:1px solid var(--rule);padding:2px 6px;">Not model bets · no stake</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mute);border:1px solid var(--rule);padding:2px 6px;">Not model bets · tracked at 0.25u each</span>
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,160px),1fr));gap:0 24px;border-bottom:1px solid var(--ink);">
         <sc-for list="{{ dl.strip }}" as="c" hint-placeholder-count="5">
@@ -210,6 +206,9 @@
           </div>
         </sc-for>
       </div>
+      <sc-if value="{{ dl.hasNotes }}" hint-placeholder-val="{{ false }}">
+        <p style="margin:0;padding:12px 0;border-bottom:1px solid var(--rule);font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">{{ dl.notes }}</p>
+      </sc-if>
       <sc-if value="{{ dl.empty }}" hint-placeholder-val="{{ false }}">
         <p style="margin:0;padding:18px 0;border-bottom:1px solid var(--rule);font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--mute);">{{ dl.empty }}</p>
       </sc-if>
@@ -238,6 +237,52 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;sport&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;nhl&quot;,&quot;epl&quot;,&quot;cbb&quot;],&quot;default&quot;:&quot;nhl&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Preview&quot;},&quot;scenario&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Normal&quot;,&quot;Props sample&quot;,&quot;Props · no lines&quot;,&quot;Props · abstain&quot;],&quot;default&quot;:&quot;Props sample&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Preview&quot;,&quot;description&quot;:&quot;Off the real domain the props sample is the default; on the domain, Normal.&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Auto&quot;,&quot;Light&quot;,&quot;Dark&quot;],&quot;default&quot;:&quot;Auto&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Preview&quot;}}">
 class Component extends DCLogic {
+  // The builders write run diagnostics into `notice`. Keep only what a visitor needs, in plain words; drop the rest.
+  static plainNotice(text) {
+    const DROP = /git-ignored|artifact|staging|this run|this build|the build|the lab|allowlist|demonstrated edge|recommendation|frozen opinion|ratings were asked|neutral-site|schedule feed|did not generate|root_blocker|could not be fitted|rating at|model's floor|No rating on file|Understat|xG|card's own|reads them off|price reached|provider price|evidence|not the same as the model passing/i;
+    const SAY = [
+      [/^Exhibition slate\./, "Preseason games. Projections and picks start with the regular season."],
+      [/^No Premier League fixture falls in (\S+) [–-] (\S+)\./, "No Premier League matches between $1 and $2."],
+      [/^Nothing on (this|tonight's|this week's) (window|slate|board) clears the bars\./, "Nothing worth a bet $1 $2."],
+      [/^No selection is published:.*$/, "No picks tonight. Projections and odds are shown."],
+      [/^Every pick shown is a frozen opinion.*$/, "Picks shown are the model's side, not bets."],
+      [/^The goals model could not be fitted.*$/, "Projections are unavailable today."],
+      [/^The model's game history.*$/, "Projections are unavailable today; the schedule is shown."],
+      [/^No market price for this league day.*$/, "No odds were posted for today, so no lines or picks are shown."],
+      [/^Projected scores are absent.*$/, "Projected scores are unavailable today."],
+      [/^No provider price reached this run.*$/, "No odds were posted, so only model numbers are shown."],
+      [/^No board was published for.*$/, "No board was published for this date."],
+      [/^No projections were published for the exhibition games.*$/, "No projections for preseason games, so nothing to settle."],
+      [/^The games were played but no final was available.*$/, "Finals were not in yet. Results will settle on the next update."],
+      [/^Yesterday's results could not be settled.*$/, "Yesterday's results could not be settled yet. They will be retried."],
+    ];
+    const out = [];
+    for (let s of String(text || "").split(/(?<=[.!?])\s+(?=[A-Z0-9])/)) {
+      s = s.trim(); if (!s) continue;
+      const hit = SAY.find(([re]) => re.test(s));
+      if (hit) { s = s.replace(hit[0], hit[1]).replace(/this window/, "this week").replace(/tonight's slate|this slate|this board/, "tonight"); out.push(s); continue; }
+      if (DROP.test(s)) continue;
+      out.push(s);
+    }
+    return out.join(" ");
+  }
+  // Plain words for visitors. sports.js is shared and its strings are pinned by the labs' tests, so the page swaps them for display only.
+  static PLAIN = [
+    ["No market clears the edge bar", "Nothing worth a bet"], ["No market is allowlisted for selection", "No markets open for picks yet"],
+    ["model abstains", "no pick"], ["no market price reached this board", "no odds were posted"],
+    ["Recorded, not staked", "Tracked only, no bet"], ["recorded, not staked", "tracked only, no bet"], ["market not allowlisted", "market not open for picks yet"],
+    ["Profit on turnover", "Return on bets"], ["Awaiting results feed", "Waiting on results"], ["played, not yet settled", "played, not graded yet"],
+    ["Time to an answer", "Bets needed to judge"], ["settled bets needed", "graded bets to tell skill from luck"],
+    ["settled opinions needed", "graded picks to tell skill from luck"], ["No settled opinions yet", "No graded picks yet"],
+    [" · ROI", " · return"], ["· 95% ", "· likely range "], ["not in the record", "not counted"],
+    ["priced, nothing selected", "nothing worth a bet"],
+  ];
+  static plain(v) {
+    if (typeof v === "string") return Component.PLAIN.reduce((s, [a, b]) => s.split(a).join(b), v);
+    if (Array.isArray(v)) return v.map(Component.plain);
+    if (v && typeof v === "object" && Object.getPrototypeOf(v) === Object.prototype) { const o = {}; for (const k in v) o[k] = Component.plain(v[k]); return o; }
+    return v;
+  }
   state = { vm: null, feedNotice: null, loadedFor: null };
   async load() {
     const onSite = /(^|\.)maverickhightower\.com$/.test(location.hostname);
@@ -256,9 +301,10 @@ class Component extends DCLogic {
     let data, feedNotice = fixture ? "Sample data." : null;
     try { const r = await fetch(fixture || (deployed ? "./data/results.json" : cfg.sampleResults), { cache: "no-store" }); if (!r.ok) throw new Error(`HTTP ${r.status}`); data = await r.json(); }
     catch (e) { data = await fetch(cfg.sampleResults).then((r) => r.json()); feedNotice = "Live feed unreachable · showing sample data."; }
-    const vm = S.ADAPTERS[sport].results(data);
+    const vm = Component.plain(S.ADAPTERS[sport].results(data));
+    vm.notice = Component.plainNotice(vm.notice) || "Nothing to settle for this date.";
     vm.otherSports = S.ORDER.filter((k) => k !== sport).map((k, i) => ({ name: S.SPORTS[k].name, href: S.SPORTS[k].host, style: `display:inline-flex;align-items:center;min-height:44px;${i === 0 ? "margin-left:6px;padding-left:18px;border-left:1px solid var(--rule);" : ""}` }));
-    const pr = S.ADAPTERS[sport].propResults ? S.ADAPTERS[sport].propResults(data) : null;
+    const pr = S.ADAPTERS[sport].propResults ? Component.plain(S.ADAPTERS[sport].propResults(data)) : null;
     this.setState({ vm, feedNotice, pr, raw: data });
   }
   componentDidMount() { this.load(); }
@@ -275,31 +321,46 @@ class Component extends DCLogic {
     if (!vm) return { games: [], strip: [], otherSports: [], tabs, themeAttr, pr: { rows: [], strip: [] }, dl: { show: false, rows: [], strip: [] } };
     const P = this.state.pr;
     const pr = P ? { ...P, hasStrip: P.status === "ok", rows: P.rows.map((r) => ({ ...r, color2: r.result === "Win" ? "var(--on-win)" : tok(r.color2), bg: tok(r.bg), aria: `${r.player}, ${r.line}, ${r.result}` })) } : { rows: [], strip: [], hasStrip: false, empty: null, summaryLine: "" };
-    const games = vm.games.map((g) => ({ ...g, ariaLabel: `${g.sides[0].name} ${g.sides[0].final}, ${g.sides[1].name} ${g.sides[1].final}`, cells: g.cells.map((c) => ({ ...c, rows: c.rows.map((r) => ({ ...r, weight: r.bold ? 600 : 400, color: r.bold && r.value === "Miss" ? "var(--alert)" : "var(--ink)" })) })), sides: g.sides.map((x) => ({ ...x, scoreColor: tok(x.scoreColor) })), pick: { ...g.pick, color: g.pick.result === "Win" ? "var(--on-win)" : tok(g.pick.color), bg: tok(g.pick.bg) } }));
+    const T = (this.state.raw || {}).teams || {};
+    // Team logos: `teams[abbr].logo` when the builder writes one, else ./logos/<ABBR>.png (the fetch script fills that
+    // folder in every repo). The coloured circle with the abbreviation stays underneath, so a missing file shows the
+    // abbreviation rather than a broken image.
+    const logoOf = (abbr) => { const t = T[abbr] || {}; return t.logo === null ? "" : t.logo || (abbr ? `./logos/${encodeURIComponent(abbr)}.png` : ""); };
+    const hideLogo = (e) => { e.currentTarget.style.display = "none"; };
+    const showLogo = (e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.background = "var(--paper)"; };
+    const withLogo = (s) => ({ ...s, logo: logoOf(s.abbr), onLogoLoad: showLogo, onLogoError: hideLogo });
+    const games = vm.games.map((g) => ({ ...g, sides: g.sides.map(withLogo), ariaLabel: `${g.sides[0].name} ${g.sides[0].final}, ${g.sides[1].name} ${g.sides[1].final}`, cells: g.cells.map((c) => ({ ...c, rows: c.rows.map((r) => ({ ...r, weight: r.bold ? 600 : 400, color: r.bold && r.value === "Miss" ? "var(--alert)" : "var(--ink)" })) })), sides: g.sides.map((x) => ({ ...x, scoreColor: tok(x.scoreColor) })), pick: { ...g.pick, color: g.pick.result === "Win" ? "var(--on-win)" : tok(g.pick.color), bg: tok(g.pick.bg) } }));
     // Props leans, season long, beside the adapter's best-bet cells (sports.js is shared; added here).
     const raw = this.state.raw || {}, RP = raw.props || {}, sgn = (x) => (x > 0 ? "+" : x < 0 ? "−" : "") + Math.abs(x).toFixed(2);
     const rec = (r) => `${r.w || 0}–${r.l || 0}${r.p != null ? `–${r.p}` : ""}`;
     const rate = (r) => { const n = (r.w || 0) + (r.l || 0); return n ? `${Math.round(((r.w || 0) / n) * 100)}% hit` : "—"; };
     if (pr.strip && RP.seasonLeans) pr.strip = [...pr.strip, { label: "Props · leans · season", value: RP.seasonLeans.nights ? rec(RP.seasonLeans) : "—", sub: RP.seasonLeans.nights ? rate(RP.seasonLeans) : "No night settled yet" }];
-    // Due List (results.json dueList): Cooper's list, graded like a prop, never staked, so no units.
+    // Due List (results.json dueList): Cooper's list, graded like a prop and tracked as if 0.25u were bet on every priced entry (nothing is bet).
     const D = raw.dueList, T = raw.teams || {};
     const CAT = { points: ["1+ point", "point", "points"], goals: ["Anytime goal", "goal", "goals"], assists: ["1+ assist", "assist", "assists"] };
     const GW = { win: ["Hit", "var(--win)"], loss: ["Miss", "var(--alert)"], push: ["Push", "var(--ink)"], void: ["Void", "var(--mute)"] };
     const dl = !D ? { show: false, rows: [], strip: [] } : (() => {
       const se = D.season || {}, bm = se.byMarket || {}, su = D.summary;
+      const u = (x) => `${x > 0 ? "+" : x < 0 ? "−" : ""}${Math.abs(x).toFixed(2)} u`;
+      const night = (D.rows || []).reduce((a, x) => (typeof x.units === "number" ? { units: a.units + x.units, n: a.n + 1 } : a), { units: 0, n: 0 });
       const strip = [
-        { label: "Last night", value: su ? rec(su) : "—", sub: su ? rate(su) : "Nothing graded" },
+        { label: "Last night", value: su ? rec(su) : "—", sub: su ? `${rate(su)}${night.n ? ` · ${u(night.units)}` : ""}` : "Nothing graded" },
         { label: "Season", value: se.nights ? rec(se) : "—", sub: se.nights ? `${rate(se)}${typeof se.impliedPct === "number" ? ` · prices implied ${Math.round(se.impliedPct)}%` : ""}` : "No night settled yet" },
-        ...["points", "goals", "assists"].map((k) => ({ label: `${CAT[k][0]} · season`, value: bm[k] ? rec(bm[k]) : "—", sub: bm[k] ? rate(bm[k]) : "" })),
+        { label: `Units · season · ${se.stake || 0.25}u each`, value: se.nights && typeof se.units === "number" ? u(se.units) : "—",
+          sub: se.nights && typeof se.staked === "number" ? `${se.staked.toFixed(2)} u staked${typeof se.returnPct === "number" ? ` · ${se.returnPct > 0 ? "+" : ""}${se.returnPct}%` : ""}${se.unpriced ? ` · ${se.unpriced} unpriced, not counted` : ""}` : "No night settled yet" },
+        ...["points", "goals", "assists"].map((k) => ({ label: `${CAT[k][0]} · season`, value: bm[k] ? rec(bm[k]) : "—", sub: bm[k] ? `${rate(bm[k])}${typeof bm[k].units === "number" ? ` · ${u(bm[k].units)}` : ""}` : "" })),
       ];
+      const notes = [];
+      if ((se.backfilledNights || []).length) notes.push(`Rebuilt after the fact, before the list was first published: ${se.backfilledNights.join(", ")}.`);
+      if (se.cardPriced) notes.push(`${se.cardPriced} entr${se.cardPriced === 1 ? "y was" : "ies were"} listed with no price and graded at the card's price from that morning.`);
       const rows = (D.rows || []).map((x) => {
         const c = CAT[x.market] || [x.market, x.market, x.market], t = T[x.team] || {}, g = GW[x.result] || ["Not graded", "var(--mute)"];
         const fin = typeof x.actual === "number" ? `finished with ${x.actual}` : x.result === "void" ? "did not play" : "no final stat yet";
         return { player: x.player, team: x.team || "", color: t.color || "var(--ink)", fg: t.fg || "var(--paper)", meta: [x.opp ? `vs ${x.opp}` : "", x.drought != null ? `${x.drought} games without` : ""].filter(Boolean).join(" · "),
-          line: `${c[0]} — ${fin}`, priceLine: typeof x.price === "number" ? `${x.price > 0 ? "+" : "−"}${Math.abs(x.price)}${x.book ? ` at ${x.book}` : ""}${x.heavyJuice ? " · heavy juice" : ""}` : "price not posted",
+          line: `${c[0]} — ${fin}`, priceLine: typeof x.price === "number" ? `${x.price > 0 ? "+" : "−"}${Math.abs(x.price)}${x.priceSource === "card" ? " (card's morning price)" : x.book ? ` at ${x.book}` : ""}${x.heavyJuice ? " · heavy juice" : ""}${typeof x.units === "number" ? ` · ${u(x.units)}` : ""}` : "price not posted · not counted in units",
           result: g[0], resultColor: g[1], aria: `${x.player}, ${c[0]}, ${g[0]}` };
       });
-      return { show: true, strip, rows, empty: rows.length ? "" : "Nobody on the Due List for this date." };
+      return { show: true, strip, rows, notes: notes.join(" "), hasNotes: notes.length > 0, empty: rows.length ? "" : "Nobody on the Due List for this date." };
     })();
     return { ...vm, games, tabs, themeAttr, pr, dl, hasProps: !!P, sportLong: vm.sport.longName, hasFeedNotice: !!this.state.feedNotice, feedNotice: this.state.feedNotice || "" };
   }

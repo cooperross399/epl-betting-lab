@@ -153,9 +153,16 @@ def fd_name(espn_name: str) -> str:
     return ESPN_TO_FD.get(cleaned, cleaned)
 
 
+#: `web/fetch_logos.py` fills this; the publish step ships web/ whole.
+LOGOS = Path(__file__).resolve().parent / "logos"
+
+
 def team_entry(fd: str) -> tuple[str, dict]:
     abbr, short, color, fg = TEAMS.get(fd, (fd[:3].upper(), fd, "#14151a", "#FFFFFF"))
-    return abbr, {"name": fd, "short": short, "color": color, "fg": fg}
+    entry = {"name": fd, "short": short, "color": color, "fg": fg}
+    if (LOGOS / f"{abbr}.png").is_file():
+        entry["logo"] = f"./logos/{abbr}.png"
+    return abbr, entry
 
 
 def fetch_json(url: str) -> dict:

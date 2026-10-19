@@ -207,7 +207,26 @@
     "units": 0.1,
     "edgePct": 5.3,
     "modelProb": 0.6
-   }
+   },
+   "drought": [
+    {
+     "player": "Dominic Solanke",
+     "team": "TOT",
+     "market": "goals",
+     "line": 0.5,
+     "lastSeason": 16,
+     "drought": 6,
+     "price": 150,
+     "book": "DraftKings",
+     "heavyJuice": false,
+     "tierBar": 5,
+     "surpriseBar": null,
+     "rule": "tier",
+     "hitRate": 0.38,
+     "rarity": 0.0568,
+     "oneIn": 18
+    }
+   ]
   },
   {
    "id": "2",
@@ -265,7 +284,8 @@
     "modelProb": 0.53,
     "side": "under",
     "line": 2.5
-   }
+   },
+   "drought": []
   },
   {
    "id": "3",
@@ -311,7 +331,43 @@
     "away": 105,
     "homeProb": 0.58
    },
-   "pick": null
+   "pick": null,
+   "drought": [
+    {
+     "player": "Cole Palmer",
+     "team": "CHE",
+     "market": "goals",
+     "line": 0.5,
+     "lastSeason": 22,
+     "drought": 4,
+     "price": 125,
+     "book": "FanDuel",
+     "heavyJuice": false,
+     "tierBar": 4,
+     "surpriseBar": null,
+     "rule": "tier",
+     "hitRate": 0.47,
+     "rarity": 0.0789,
+     "oneIn": 13
+    },
+    {
+     "player": "Bruno Fernandes",
+     "team": "MUN",
+     "market": "assists",
+     "line": 0.5,
+     "lastSeason": 11,
+     "drought": 7,
+     "price": 210,
+     "book": "BetRivers",
+     "heavyJuice": false,
+     "tierBar": 6,
+     "surpriseBar": null,
+     "rule": "tier",
+     "hitRate": 0.3,
+     "rarity": 0.0824,
+     "oneIn": 12
+    }
+   ]
   },
   {
    "id": "4",
@@ -366,7 +422,26 @@
     "edgePct": 0.9,
     "modelProb": 0.54,
     "side": "yes"
-   }
+   },
+   "drought": [
+    {
+     "player": "Ollie Watkins",
+     "team": "AVL",
+     "market": "goals",
+     "line": 0.5,
+     "lastSeason": 17,
+     "drought": 5,
+     "price": 160,
+     "book": "DraftKings",
+     "heavyJuice": false,
+     "tierBar": 5,
+     "surpriseBar": null,
+     "rule": "tier",
+     "hitRate": 0.4,
+     "rarity": 0.0778,
+     "oneIn": 13
+    }
+   ]
   },
   {
    "id": "5",
@@ -422,7 +497,8 @@
     "modelProb": 0.56,
     "side": "over",
     "line": 2.5
-   }
+   },
+   "drought": []
   },
   {
    "id": "6",
@@ -479,7 +555,8 @@
     "edgePct": 4.1,
     "modelProb": 0.58,
     "side": "yes"
-   }
+   },
+   "drought": []
   },
   {
    "id": "7",
@@ -534,7 +611,8 @@
     "edgePct": 0.6,
     "modelProb": 0.6,
     "side": "no"
-   }
+   },
+   "drought": []
   },
   {
    "id": "8",
@@ -588,7 +666,8 @@
     "book": "Fanatics",
     "edgePct": 2.9,
     "modelProb": 0.61
-   }
+   },
+   "drought": []
   },
   {
    "id": "9",
@@ -642,7 +721,8 @@
     "book": "FanDuel",
     "edgePct": 2.4,
     "modelProb": 0.77
-   }
+   },
+   "drought": []
   },
   {
    "id": "10",
@@ -698,7 +778,8 @@
     "modelProb": 0.55,
     "side": "over",
     "line": 2.5
-   }
+   },
+   "drought": []
   }
  ],
  "lineHistory": {
@@ -1382,5 +1463,6 @@
     }
    ]
   }
- }
+ },
+ "droughtNote": "Cooper's Due List, an unstaked list he picks from: a player with 15+ goals or 10+ assists last season whose drought in that category has reached the bar his total sets (goals 20+ → 4, 15-19 → 5; assists 10+ → 6)."
 }

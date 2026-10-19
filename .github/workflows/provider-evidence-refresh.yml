@@ -85,6 +85,11 @@ jobs:
           # The eligibility the allowlist preview reads, printed so it can be
           # read from the log as well as the artifact.
           python -c "import json; p=json.load(open('data/outputs/automated_card_input.json')); print(json.dumps(p.get('eligibility', {}).get('eligible_markets'), indent=2))" || true
+          # The whole card input, so the evidence an approval binds to can be
+          # committed verbatim from the log where the artifact cannot be read.
+          echo "----- BEGIN automated_card_input.json -----"
+          cat data/outputs/automated_card_input.json || true
+          echo "----- END automated_card_input.json -----
 
       - name: Fetch player-prop prices for the evidence
         if: ${{ !inputs.team_totals }}

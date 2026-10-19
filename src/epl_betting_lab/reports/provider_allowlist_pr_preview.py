@@ -30,6 +30,7 @@ from epl_betting_lab.reports.provider_human_acceptance_receipt_verification impo
     VERIFICATION_JSON_FILENAME,
 )
 from epl_betting_lab.staging_provider_policy import load_staging_provider_policy
+from epl_betting_lab.strategies.team_totals import TEAM_TOTAL_MARKETS
 
 
 PREVIEW_JSON_FILENAME = "provider_allowlist_pr_preview.json"
@@ -190,12 +191,51 @@ def _staged_prop_markets_from_evidence(
     return [str(item).strip() for item in markets if str(item).strip()]
 
 
+def _complete_team_total_markets_from_evidence(
+    output_dir: Path | None = None,
+) -> list[str]:
+    """Team-total markets the card input found priced for every fixture.
+
+    A team-total market reads `disabled` until the policy approves it, so it
+    can never appear in `eligible_markets` before the approval that would put
+    it there -- the same position props are in. A line priced for every
+    fixture in the window is the evidence an approval binds to; a line priced
+    for fewer, or for none, is not proposed.
+    """
+    outputs = OUTPUTS_DIR if output_dir is None else Path(output_dir)
+    path = outputs / "automated_card_input.json"
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError):
+        return []
+    eligibility = payload.get("eligibility") if isinstance(payload, Mapping) else None
+    rows = eligibility.get("markets") if isinstance(eligibility, Mapping) else None
+    if not isinstance(rows, list):
+        return []
+    complete: list[str] = []
+    for row in rows:
+        if not isinstance(row, Mapping):
+            continue
+        market = str(row.get("market", "")).strip()
+        if market not in TEAM_TOTAL_MARKETS or row.get("status") not in ("disabled", "eligible"):
+            continue
+        try:
+            expected = int(row.get("fixtures_expected") or 0)
+            covered = int(row.get("fixtures_covered") or 0)
+        except (TypeError, ValueError):
+            continue
+        if expected > 0 and covered == expected:
+            complete.append(market)
+    return complete
+
+
 def _provider_markets_and_limitations(
     provider: object,
     output_dir: Path | None = None,
 ) -> tuple[list[str], list[str]]:
     eligible = _eligible_markets_from_evidence(output_dir)
     props = _staged_prop_markets_from_evidence(output_dir)
+    team_totals = _complete_team_total_markets_from_evidence(output_dir)
     if eligible:
         limitations: list[str] = []
         for market in ("1x2", "total_2_5", "btts"):
@@ -214,11 +254,18 @@ def _provider_markets_and_limitations(
                 "sheet after the card is built. Approving them approves "
                 "that trade-off."
             )
+        if team_totals:
+            limitations.append(
+                "Team totals carry no demonstrated edge: they have never "
+                "been measured against real prices. They are priced off "
+                "the same goal-count ratings as the 2.5 line and BTTS, "
+                "and a line a book does not post stays excluded."
+            )
         limitations.append(
             "Allowlisting does not bypass staging validation, freshness, "
             "completeness, checksum, receipt, or Thursday cutoff gates."
         )
-        return list(dict.fromkeys([*eligible, *props])), limitations
+        return list(dict.fromkeys([*eligible, *props, *team_totals])), limitations
 
     configuration = provider.public_configuration()
     featured = configuration.get("featured_markets_requested", [])

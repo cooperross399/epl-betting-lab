@@ -340,7 +340,7 @@ class Component extends DCLogic {
     const rate = (r) => { const n = (r.w || 0) + (r.l || 0); return n ? `${Math.round(((r.w || 0) / n) * 100)}% hit` : "—"; };
     if (pr.strip && RP.seasonLeans) pr.strip = [...pr.strip, { label: "Props · leans · season", value: RP.seasonLeans.nights ? rec(RP.seasonLeans) : "—", sub: RP.seasonLeans.nights ? rate(RP.seasonLeans) : "No night settled yet" }];
     // Due List (results.json dueList): Cooper's list, graded like a prop and tracked as if 0.25u were bet on every priced entry (nothing is bet).
-    const D = raw.dueList, T = raw.teams || {};
+    const D = raw.dueList;
     const CAT = { points: ["1+ point", "point", "points"], goals: ["Anytime goal", "goal", "goals"], assists: ["1+ assist", "assist", "assists"] };
     const GW = { win: ["Hit", "var(--win)"], loss: ["Miss", "var(--alert)"], push: ["Push", "var(--ink)"], void: ["Void", "var(--mute)"] };
     const dl = !D ? { show: false, rows: [], strip: [] } : (() => {

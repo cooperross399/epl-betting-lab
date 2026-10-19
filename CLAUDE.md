@@ -110,7 +110,11 @@ Use the repo, the reports, and GitHub.
   shared `sports.js` EPL props adapter) all run from `player_props_card.json`;
   the live fetch buys only the selected round's fixtures that have not kicked
   off (`player_props_staging.slate_events`), about 4 credits per fixture per
-  run. No edge is demonstrated.
+  run. No edge is demonstrated. The public record grades every published prop
+  (`web/settle_results.grade_prop`, first published price, 2026-10-19): shots,
+  shots on target, goals, assists, booked, sent off and saves from ESPN's match
+  summary, tackles from the FPL logs carried in `matchday-state`. A player the
+  feed does not name stays ungraded, never void.
 - **Cards, tackles and alternate goalkeeper saves are allowlisted
   (2026-10-19, Cooper: "dont forget about tackles/cards/goalie saves", "find
   goalie saves figure it out"; PR #372, receipt

@@ -443,7 +443,7 @@ function nhlPropResults(data) {
   return { status, rows, strip, empty, summaryLine: rows.length ? `${bets} best bet${bets === 1 ? "" : "s"}${leans ? ` · ${leans} lean${leans === 1 ? "" : "s"}` : ""} settled` : "" };
 }
 
-export const ADAPTERS = { nhl: { board: nhlBoard, results: nhlResults, props: nhlProps, propResults: nhlPropResults }, epl: { board: eplBoard, results: eplResults, props: nhlProps }, cbb: { board: cbbBoard, results: cbbResults } };
+export const ADAPTERS = { nhl: { board: nhlBoard, results: nhlResults, props: nhlProps, propResults: nhlPropResults }, epl: { board: eplBoard, results: eplResults, props: nhlProps, propResults: nhlPropResults }, cbb: { board: cbbBoard, results: cbbResults } };
 
 // One line for the home page.
 export function hubLine(sport, board, results) {

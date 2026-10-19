@@ -29,12 +29,14 @@ played, `void` when he did not. Never a unit, never a stake.
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import re
 import urllib.error
 import urllib.request
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
+import unicodedata
 
 #: NO custom User-Agent, deliberately, and this is the opposite of the rule the
 #: NHL lab pins for api-web.nhle.com. That host refuses urllib's default and
@@ -459,7 +461,135 @@ def due_tallies(rows: list) -> dict:
     return out
 
 
-def settle_day(sport: str, day: date, boards: list[dict]) -> tuple[dict, bool]:
+#: The props card's markets as the board names them (build_board_json.
+#: PROP_MARKET_KEYS) and the ESPN summary statistic each settles on. A tuple is
+#: summed: a booking is any card, so a straight red is booked too. Tackles are
+#: not in ESPN's summary; they come from the FPL logs (`load_fpl_logs`).
+PROP_STATS = {
+    "shots": ("totalShots",),
+    "shots_on_target": ("shotsOnTarget",),
+    "goals": ("totalGoals",),
+    "assists": ("goalAssists",),
+    "booked": ("yellowCards", "redCards"),
+    "sent_off": ("redCards",),
+    "goalie_saves": ("saves",),
+}
+FPL_PROP_STATS = {"tackles": "tackles"}
+
+
+def _plain_key(name: object) -> str:
+    """`_name_key` with accents folded: the props feed writes "Odegaard" for ESPN's "Ødegaard"."""
+    text = unicodedata.normalize("NFKD", _name_key(name).replace("ø", "o").replace("æ", "ae").replace("ß", "ss"))
+    return "".join(c for c in text if not unicodedata.combining(c))
+
+
+def load_fpl_logs(path: Path | None) -> dict:
+    """The props card's FPL per-match logs, keyed (date, team, player); empty if absent.
+
+    Each row is one appearance (minutes above zero), as `providers/fpl_players`
+    writes it. Read with the stdlib because this script is shipped without the lab.
+    """
+    out: dict = {}
+    if path is None or not Path(path).is_file():
+        return out
+    try:
+        with Path(path).open(encoding="utf-8", newline="") as handle:
+            for row in csv.DictReader(handle):
+                key = (str(row.get("date") or "")[:10], _name_key(row.get("team")), _plain_key(row.get("player")))
+                out[key] = row
+    except (OSError, UnicodeError, csv.Error):
+        return {}
+    return out
+
+
+def _payout(price: object, units: float) -> float | None:
+    if not isinstance(price, (int, float)) or isinstance(price, bool) or price == 0:
+        return None
+    return units * (price / 100.0 if price > 0 else 100.0 / abs(price))
+
+
+def published_props(boards: list[dict], playing: dict) -> list[dict]:
+    """Each prop row on a fixture in `playing`, as it was FIRST published (the same rule as the team pick)."""
+    seen: dict = {}
+    for board in boards:
+        block = board.get("props")
+        if not isinstance(block, dict):
+            continue
+        for row in block.get("rows") or []:
+            if not isinstance(row, dict) or str(row.get("gameId")) not in playing:
+                continue
+            key = (str(row.get("gameId")), _plain_key(row.get("player")), row.get("market"), row.get("side"), row.get("line"))
+            seen.setdefault(key, row)
+    return list(seen.values())
+
+
+def grade_prop(row: dict, g: dict, teams: dict, lines: dict | None, fpl: dict, day: date) -> dict:
+    """One published prop, graded against what the player did.
+
+    `void` when he was in his side's squad and never came on (the stake comes
+    back). A player the feed does not name, a statistic it does not carry, or
+    tackles with no FPL row are left `result: None` and never guessed: a name
+    that fails to match is not proof he did not play.
+    """
+    out = {**row, "actual": None, "result": None, "profitUnits": None}
+    home, away = (g.get("home") or {}).get("abbr"), (g.get("away") or {}).get("abbr")
+    side = "home" if row.get("team") == home else "away" if row.get("team") == away else None
+    market, line = str(row.get("market") or ""), row.get("line")
+    if side is None or lines is None or not isinstance(line, (int, float)):
+        return out
+    want = _plain_key(row.get("player"))
+    found = next((p for p in lines.get(side) or [] if _plain_key(p["name"]) == want), None)
+    if found is None:
+        return out
+    appeared = _stat_value(found["stats"], "appearances")
+    if appeared is None:
+        return out
+    if appeared <= 0:
+        out.update(result="void", profitUnits=0.0)
+        return out
+    value: float | None = None
+    if market in PROP_STATS:
+        parts = [_stat_value(found["stats"], name) for name in PROP_STATS[market]]
+        value = None if any(v is None for v in parts) else sum(parts)
+    elif market in FPL_PROP_STATS:
+        team_name = (teams.get(row.get("team")) or {}).get("name") or ""
+        logged = fpl.get((day.isoformat(), _name_key(team_name), want))
+        if logged is not None:
+            try:
+                value = float(logged.get(FPL_PROP_STATS[market]))
+            except (TypeError, ValueError):
+                value = None
+    if value is None:
+        return out
+    over = str(row.get("side") or "over").lower() != "under"
+    res = "push" if value == line else "win" if (value > line) == over else "loss"
+    units = row.get("units") if isinstance(row.get("units"), (int, float)) else 0.0
+    won = _payout(row.get("price"), float(units))
+    out.update(actual=int(value), result=res,
+               profitUnits=0.0 if res == "push" else (-float(units) if res == "loss" else won))
+    return out
+
+
+def prop_tallies(rows: list) -> dict:
+    """A day's staked props in W-L-P and units. Leans and voids are in none of them."""
+    out = {"w": 0, "l": 0, "p": 0, "units": 0.0, "ungraded": 0}
+    for r in rows:
+        if not isinstance(r, dict) or r.get("kind", "bet") != "bet":
+            continue
+        res = r.get("result")
+        if res is None:
+            out["ungraded"] += 1
+            continue
+        if res not in ("win", "loss", "push"):
+            continue
+        out[{"win": "w", "loss": "l", "push": "p"}[res]] += 1
+        if isinstance(r.get("profitUnits"), (int, float)):
+            out["units"] += r["profitUnits"]
+    out["units"] = round(out["units"], 4)
+    return out
+
+
+def settle_day(sport: str, day: date, boards: list[dict], fpl_logs: dict | None = None) -> tuple[dict, bool]:
     """One day's results.json body, and whether anything on it is still to be read.
 
     Raises one of FETCH_ERRORS when that day's scoreboard cannot be fetched;
@@ -485,6 +615,12 @@ def settle_day(sport: str, day: date, boards: list[dict]) -> tuple[dict, bool]:
     teams_out: dict = {}
     ungraded = 0
     due_rows: list | None = None
+    # Props are board-level, not per game: each published row, first price wins.
+    published = published_props(boards, playing) if sport == "epl" else []
+    props_by_game: dict = {}
+    for p in published:
+        props_by_game.setdefault(str(p.get("gameId")), []).append(p)
+    prop_rows: list = []
     for gid, (g, teams) in playing.items():
         f = fin.get(gid)
         if not f:
@@ -557,6 +693,9 @@ def settle_day(sport: str, day: date, boards: list[dict]) -> tuple[dict, bool]:
             if isinstance(tt.get("proj"), (int, float)) and isinstance(tt.get("current"), (int, float)):
                 t = hf + af
                 tots["p" if t == tt["current"] else "w" if (tt["proj"] > tt["current"]) == (t > tt["current"]) else "l"] += 1
+        if sport == "epl" and gid in props_by_game:
+            lines = player_lines(payload())
+            prop_rows.extend(grade_prop(p, g, teams, lines, fpl_logs or {}, day) for p in props_by_game[gid])
         teams_out.update(teams)
         games.append(row)
     summary_out = {"picks": picks, "leans": leans, "ungraded": ungraded}
@@ -576,6 +715,11 @@ def settle_day(sport: str, day: date, boards: list[dict]) -> tuple[dict, bool]:
             due["summary"] = {k: tallies[k] for k in ("w", "l", "p")}
         base["dueList"] = due
         waiting = waiting or tallies["pending"] > 0
+    if published:
+        # A row whose fixture has no final yet is not here; a later build settles it.
+        tallies = prop_tallies(prop_rows)
+        base["props"] = {"status": "ok", "note": "", "rows": prop_rows, "summary": tallies}
+        waiting = waiting or tallies["ungraded"] > 0 or len(prop_rows) < len(published)
     return base, waiting
 
 
@@ -601,6 +745,9 @@ def night_record(results: dict) -> dict:
     due = results.get("dueList")
     if isinstance(due, dict):
         night["dueList"] = due_tallies(due.get("rows") or [])
+    props = results.get("props")
+    if isinstance(props, dict):
+        night["props"] = prop_tallies(props.get("rows") or [])
     return night
 
 
@@ -629,7 +776,7 @@ def kickoff_days(boards: list[dict], through: date) -> list[date]:
 
 
 def season_record(sport: str, day: date, hist: Path, boards: list[dict],
-                  latest: dict | None, latest_waiting: bool) -> dict:
+                  latest: dict | None, latest_waiting: bool, fpl_logs: dict | None = None) -> dict:
     """The season so far: every day a published fixture kicked off, settled and summed.
 
     `day` is the day this run settled and `latest` its results (None when its
@@ -647,6 +794,7 @@ def season_record(sport: str, day: date, hist: Path, boards: list[dict],
     """
     tally = {key: {"w": 0, "l": 0} if key == "straightUp" else {"w": 0, "l": 0, "p": 0} for key in SEASON_KEYS}
     due = {"w": 0, "l": 0, "p": 0, "nights": 0, "byMarket": {m: {"w": 0, "l": 0} for m in DUE_STATS}}
+    props = {"w": 0, "l": 0, "p": 0, "units": 0.0, "nights": 0}
     kept = hist / SETTLED_DIR
     nights, missing, first, last = 0, 0, None, None
     for d in kickoff_days(boards, day):
@@ -661,7 +809,7 @@ def season_record(sport: str, day: date, hist: Path, boards: list[dict],
             night = _kept_night(cached)
             if night is None:
                 try:
-                    settled, waiting = settle_day(sport, d, boards)
+                    settled, waiting = settle_day(sport, d, boards, fpl_logs)
                 except (*FETCH_ERRORS, KeyError, TypeError):
                     missing += 1
                     continue
@@ -680,6 +828,12 @@ def season_record(sport: str, day: date, hist: Path, boards: list[dict],
                 if market in due["byMarket"] and isinstance(split, dict):
                     for k in ("w", "l"):
                         due["byMarket"][market][k] += int(split.get(k) or 0)
+        night_props = night.get("props") if isinstance(night.get("props"), dict) else None
+        if night_props and sum(int(night_props.get(k) or 0) for k in ("w", "l", "p")):
+            props["nights"] += 1
+            for k in ("w", "l", "p"):
+                props[k] += int(night_props.get(k) or 0)
+            props["units"] = round(props["units"] + float(night_props.get("units") or 0.0), 4)
         if not night["games"]:
             # Fixtures kicked off and none has a final yet: not settled, and
             # said so, rather than a day that happened to go 0–0.
@@ -701,6 +855,8 @@ def season_record(sport: str, day: date, hist: Path, boards: list[dict],
     season = {**tally, **span} if nights else dict(span)
     if due["nights"]:
         season["dueList"] = due
+    if props["nights"]:
+        season["props"] = props
     return season
 
 
@@ -717,6 +873,8 @@ def write_season(data: Path, results: dict, season: dict) -> None:
                                    **({"dueList": season["dueList"]} if "dueList" in season else {})}
     if "dueList" in season and isinstance(results.get("dueList"), dict):
         results["dueList"]["season"] = season["dueList"]
+    if "props" in season and isinstance(results.get("props"), dict):
+        results["props"]["season"] = season["props"]
     board_path = data / "board.json"
     try:
         board = json.loads(board_path.read_text(encoding="utf-8"))
@@ -739,7 +897,9 @@ def main(argv=None) -> int:
     ap.add_argument("--data", default="dist/data")
     ap.add_argument("--sport", required=True, choices=list(ESPN))
     ap.add_argument("--date", default="")
+    ap.add_argument("--fpl-logs", default="", help="FPL per-match logs (tackles), from the props card; optional")
     args = ap.parse_args(argv)
+    fpl = load_fpl_logs(Path(args.fpl_logs)) if args.fpl_logs else {}
     data = Path(args.data)
     day = date.fromisoformat(args.date) if args.date else (datetime.now(timezone.utc) - timedelta(days=1)).date()
     boards = frozen_boards(data / "history")
@@ -752,7 +912,7 @@ def main(argv=None) -> int:
         return 0
     latest: dict | None
     try:
-        latest, waiting = settle_day(args.sport, day, boards)
+        latest, waiting = settle_day(args.sport, day, boards, fpl)
     except FETCH_ERRORS as exc:
         # Yesterday's settlement is not today's board. This step runs after the
         # board is built, and an unhandled raise here took the whole publish
@@ -776,7 +936,7 @@ def main(argv=None) -> int:
     else:
         results = {**base, **latest}
     try:
-        season_so_far = season_record(args.sport, day, data / "history", boards, latest, waiting)
+        season_so_far = season_record(args.sport, day, data / "history", boards, latest, waiting, fpl)
     except Exception as exc:  # the season line must never take the day's results or the deploy down
         print(f"the season record could not be summed: {type(exc).__name__}: {exc}")
     else:

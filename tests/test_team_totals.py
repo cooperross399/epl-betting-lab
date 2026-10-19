@@ -213,3 +213,22 @@ def test_the_card_builder_prices_team_totals() -> None:
     join it on the goal-count ratings the 2.5 line and BTTS use."""
     source = (ROOT / "src" / "epl_betting_lab" / "dashboard_actions.py").read_text(encoding="utf-8")
     assert "evaluate_team_totals(totals_projections, odds" in source
+
+
+def test_the_evidence_refresh_can_ask_for_team_totals_before_approval() -> None:
+    """The allowlist preview proposes only markets the card input found
+    eligible, and team totals are not fetched until approved. So the evidence
+    refresh carries an opt-in that asks for the ladder once, prints the
+    eligibility to the log, and skips the prop fetch it does not need."""
+    import subprocess
+    import sys
+
+    text = (ROOT / ".github" / "workflows" / "provider-evidence-refresh.yml").read_text(encoding="utf-8")
+    assert "team_totals:" in text
+    assert "--with-team-totals" in text
+    assert "inputs.team_totals && '--with-team-totals'" in text
+    help_text = subprocess.run(
+        [sys.executable, str(ROOT / "scripts" / "run_provider_shadow_verification.py"), "--help"],
+        capture_output=True, text=True, env={"PYTHONPATH": str(ROOT / "src")}, check=True,
+    ).stdout
+    assert "--with-team-totals" in help_text

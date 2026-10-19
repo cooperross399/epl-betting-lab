@@ -1000,3 +1000,63 @@ def save_provider_market_discovery(
         "json": str(outputs / DISCOVERY_JSON_FILENAME),
         "markdown": str(outputs / DISCOVERY_MARKDOWN_FILENAME),
     }
+
+
+def list_event_market_keys(
+    events: Sequence[Mapping[str, Any]],
+    *,
+    api_key: str,
+    base_url: str = DEFAULT_API_BASE_URL,
+    sport_key: str = "soccer_epl",
+    regions: str = "us",
+    requester: Requester | None = None,
+    timeout_seconds: float = 20.0,
+) -> dict[str, Any]:
+    """Every market key each book carries, from the event-markets endpoint.
+
+    Guessing a key one request at a time cannot separate a market the
+    provider spells differently from one it does not relay at all: both
+    come back empty or 422. `/events/{id}/markets` lists the keys a book
+    actually has for an event, so the provider answers instead. One credit
+    per event, and it returns no prices.
+    """
+    if not api_key:
+        raise DiscoveryError(
+            f"Listing event markets requires `{API_KEY_ENV}` in the environment."
+        )
+    request = requester or _default_requester
+    root = _validate_base_url(base_url)
+    by_book: dict[str, set[str]] = {}
+    listed = 0
+    errors: list[str] = []
+    for event in events:
+        event_id = _clean(event.get("provider_event_id") or event.get("id"))
+        if not event_id:
+            continue
+        response = request(
+            f"{root}/v4/sports/{sport_key}/events/{event_id}/markets",
+            params={"apiKey": api_key, "regions": regions},
+            timeout=timeout_seconds,
+        )
+        status_code = int(getattr(response, "status_code", 0) or 0)
+        if status_code and status_code >= 400:
+            errors.append(f"Event {event_id}: HTTP {status_code}.")
+            continue
+        payload = response.json()
+        if not isinstance(payload, Mapping):
+            errors.append(f"Event {event_id}: the answer is not a JSON object.")
+            continue
+        listed += 1
+        for bookmaker in payload.get("bookmakers") or []:
+            if not isinstance(bookmaker, Mapping):
+                continue
+            book = _clean(bookmaker.get("title") or bookmaker.get("key"))
+            keys = by_book.setdefault(book, set())
+            for market in bookmaker.get("markets") or []:
+                if isinstance(market, Mapping) and _clean(market.get("key")):
+                    keys.add(_clean(market.get("key")))
+    return {
+        "events_listed": listed,
+        "by_book": {book: sorted(keys) for book, keys in sorted(by_book.items())},
+        "errors": [redact(error) for error in errors],
+    }

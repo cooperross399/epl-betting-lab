@@ -19,6 +19,15 @@ on:
         type: boolean
         required: false
         default: false
+      list_event_markets:
+        description: "List every market key each book carries per event (one credit per event, no prices)"
+        type: boolean
+        required: false
+        default: false
+      regions:
+        description: "Regions for the event queries (comma-separated)"
+        required: false
+        default: "us"
       markets:
         description: "Per-event market keys to discover (comma-separated, blank for the default)"
         required: false
@@ -87,6 +96,12 @@ jobs:
           fi
           if [ "${{ inputs.check_event_markets }}" = "true" ]; then
             ARGS="$ARGS --check-event-markets"
+          fi
+          if [ "${{ inputs.list_event_markets }}" = "true" ]; then
+            ARGS="$ARGS --list-event-markets"
+          fi
+          if [ -n "${{ inputs.regions }}" ]; then
+            ARGS="$ARGS --regions ${{ inputs.regions }}"
           fi
           if [ -n "${{ inputs.markets }}" ]; then
             ARGS="$ARGS --markets ${{ inputs.markets }}"

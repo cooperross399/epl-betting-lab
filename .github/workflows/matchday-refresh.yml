@@ -379,6 +379,26 @@ jobs:
         run: |
           python scripts/fetch_data.py
 
+      - name: Fill in finals Football-Data has not published yet
+        # Football-Data publishes a round some time after it is played. Until
+        # then the ratings learn nothing from it and every pick on it reads
+        # "played, waiting on results data": at 12:42 UTC on 2026-10-19 the
+        # dataset held 60 of the season's matches and ESPN had 69 finals.
+        # ESPN's public scoreboard (no key, no quota) fills the gap with the
+        # score, corners and shots; Football-Data's row replaces each one on
+        # the first run after it is published. No odds and no card counts come
+        # from ESPN.
+        #
+        # Runs whatever the Football-Data fetch did: on a day it is down the
+        # restored file is all there is, and it is behind by every match since.
+        # Soft: an ESPN failure leaves the dataset exactly as it was.
+        id: espn_results
+        continue-on-error: true
+        env:
+          PYTHONPATH: src
+        run: |
+          python scripts/supplement_results_from_espn.py
+
       - name: Refresh the upcoming slate
         # The card can only look as far ahead as `upcoming_fixtures.csv` goes.
         # While that file was typed by hand it was a standing appointment

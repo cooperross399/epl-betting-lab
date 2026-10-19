@@ -26,6 +26,7 @@ to write one division's matches over another's file.
 
 from __future__ import annotations
 
+import time
 from pathlib import Path
 from typing import Iterable
 
@@ -59,14 +60,45 @@ def _looks_like_a_results_csv(content: bytes) -> bool:
     return b"hometeam" in head and b"awayteam" in head
 
 
+#: How many times one season's CSV is asked for before the fetch gives up. On
+#: 2026-10-19 one 30-second timeout cost the 08:26 run its fresh results, and
+#: another cost the 12:41 run La Liga and with it the Champions League section.
+#: Each was a single request, asked once.
+FETCH_ATTEMPTS = 3
+RETRY_BACKOFF_SECONDS = 5.0
+
+
+def _get_with_retries(url: str) -> requests.Response:
+    """GET `url`, asking again after a timeout, a dropped connection or a 5xx.
+
+    A 4xx and a redirect page are answers, not failures, and are returned or
+    raised at once: asking again would only repeat them.
+    """
+    for attempt in range(1, FETCH_ATTEMPTS + 1):
+        try:
+            response = requests.get(url, timeout=30)
+            if response.status_code >= 500:
+                response.raise_for_status()
+        except (requests.Timeout, requests.ConnectionError, requests.HTTPError) as exc:
+            server_side = not isinstance(exc, requests.HTTPError) or (
+                exc.response is not None and exc.response.status_code >= 500
+            )
+            if not server_side or attempt == FETCH_ATTEMPTS:
+                raise
+            time.sleep(RETRY_BACKOFF_SECONDS * attempt)
+            continue
+        response.raise_for_status()
+        return response
+    raise AssertionError("unreachable")
+
+
 def fetch_season(season: str, league: str = LEAGUE_CODE, raw_dir: Path = RAW_DIR) -> Path:
     """Download one season CSV and return local path."""
     raw_dir.mkdir(parents=True, exist_ok=True)
     url = football_data_url(season, league)
     dest = raw_dir / f"football_data_{league}_{season}.csv"
 
-    response = requests.get(url, timeout=30)
-    response.raise_for_status()
+    response = _get_with_retries(url)
     if not _looks_like_a_results_csv(response.content):
         raise SeasonNotPublished(
             f"{url} returned HTTP {response.status_code} with "

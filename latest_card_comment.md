@@ -1,14 +1,8 @@
-## Monday 19 October, 08:39 UTC — scheduled run
+## Monday 19 October, 10:19 UTC — scheduled run
 
-Something went wrong in this run.
+Selections changed: 2 dropped, 2 moved section.
 
-### What went wrong
-
-- Historical results could not be refreshed; the model was fitted on the previously stored dataset.
-
-The card below was still built, from whatever evidence was available. Treat it with that in mind.
-
-Provider quota: 67906 (about 67 days at the observed burn)
+Provider quota: 67792 (about 67 days at the observed burn)
 
 Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: none)
 
@@ -16,7 +10,7 @@ Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corner
 
 | Match | Market | Selection | Tier | Edge | Price | Book | Units |
 |:------|:-------|:----------|:-----|-----:|------:|:-----|------:|
-| Tottenham v Coventry | `corners_1x2` | away | C | +7.1% | +400 | DraftKings | 0.1 |
+| Tottenham v Coventry | `corners_1x2` | away | C | +4.9% | +425 | DraftKings | 0.1 |
 
 ### Leans
 
@@ -30,21 +24,28 @@ _Props carry the smallest stake the card uses: the standing measurement demonstr
 
 ### What changed
 
-- **Added:** Tottenham v Coventry 1x2 away
-- **Added:** Tottenham v Coventry 1x2 draw
-- **Added:** Tottenham v Coventry 1x2 home
-- **Added:** Tottenham v Coventry btts no
-- **Added:** Tottenham v Coventry double_chance draw_or_away
-- **Added:** Tottenham v Coventry double_chance home_or_away
-- **Added:** Tottenham v Coventry double_chance home_or_draw
-- **Added:** Tottenham v Coventry draw_no_bet away
-- **Added:** Tottenham v Coventry draw_no_bet home
-- **Dropped:** Nott'm Forest v Arsenal corners_1x2 away
+- **Dropped:** Tottenham v Coventry double_chance draw_or_away
+- **Dropped:** Tottenham v Coventry draw_no_bet away
+- **Moved section:** Tottenham v Coventry corners_total_10_5 over
+- **Moved section:** Tottenham v Coventry corners_total_9_5 over
 
 
 ## Beyond the Premier League
 
 Nothing below has been shown to beat a price. Some of it has been shown not to, and some of it cannot be tested at all. Each section says which. They are staked at 0.1 units for that reason. See `data/outputs/unified_ratings.md` and `data/outputs/european_ratings.md`.
+
+### EFL Cup (Carabao)
+
+Priced on the unified English ratings. Measured out of sample, a club's rating does **not** survive a division change — carrying it across is worse than calling the club average for its new division. What transfers is the division, which the market also knows.
+
+| Match | Market | Selection | Edge | Price | Book | Units |
+|:--|:--|:--|--:|--:|:--|--:|
+| Fulham v Crystal Palace | `btts` | no | +4.8% | +130 | BetMGM | 0.1 |
+| Fulham v Crystal Palace | `total_2_5` | under | +2.2% | +115 | BetMGM | 0.1 |
+
+- 10 fixture(s) dropped as already kicked off: Coventry v Aston Villa, Everton v Wolves, Fleetwood Town v Sheffield United, Ipswich v Arsenal, Liverpool v Tottenham, Man City v Norwich, and 4 more.
+- 1 fixture(s) left out because a club has no rating in the pool: Bradford City v Peterborough United.
+- 1 selection(s) cleared their market rule and were refused because the edge against the posted price is not positive: Sunderland v Brentford total_2_5 under. A refused row always sorts below every positive one, so where 4 or more selections qualify this costs the card nothing; the cap line below is the one that says what was actually withheld.
 
 _Fitted but not bet: UEFA Nations League (0 of 0 fixtures rateable). Their results still bridge the countries in the rating pool — which is most of their value — and they return to the card on their own the run they can price something._
 
@@ -77,6 +78,8 @@ Nobody playing in this round is due.
 
 Each selection is scored at the first price a card offered it, and only rows the card staked are counted — a lean carries no stake and is not a recommendation.
 
+**Beyond the Premier League is not in these numbers.** 2 staked selection(s) from that section are recorded and not yet scored — nothing settles them. The rule above is stated by stake, so without this line the only way to notice would be to total the card by hand.
+
 This is the only out-of-sample evidence this project has. It will take a long time to mean anything: separating a real 5% edge from zero needs roughly 1,500 settled bets.
 
 ---
@@ -85,4 +88,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/39222788509)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/39235469950)

@@ -163,19 +163,18 @@ def _build(tmp_path: Path, *, markets: list[str], staging_rows: list[dict]):
 
 
 class TestHeldByPolicy:
-    def test_the_shipped_policy_holds_every_prop(self, tmp_path: Path) -> None:
-        """Today's real policy approves eight match markets and no props."""
+    def test_the_shipped_policy_approves_every_prop(self, tmp_path: Path) -> None:
+        """Cooper approved the four prop markets on PR #365 (2026-10-19)."""
         summary = build_player_props_card(
             props_staging_path=tmp_path / "absent.csv",
             logs_path=tmp_path / "absent_logs.csv",
             run_at=RUN_AT,
         )
 
-        assert summary["status"] == HELD_STATUS
+        # Approved, so nothing is held; with no staged prices it says so.
+        assert summary["status"] == NO_STAGING_STATUS
         assert summary["picks"] == []
-        assert "no-value" in str(summary["note"]) or "no value" in str(
-            summary["note"]
-        )
+        assert summary.get("held_prop_markets", []) == []
 
     def test_held_still_reports_which_markets_hold_prices(
         self, tmp_path: Path
@@ -306,7 +305,7 @@ class TestReports:
 
 
 class TestApprovability:
-    def test_prop_markets_are_approvable_but_not_approved(self) -> None:
+    def test_prop_markets_are_approvable_and_approved(self) -> None:
         from epl_betting_lab.providers.player_props_staging import (
             PROP_EVENT_MARKETS,
         )
@@ -317,5 +316,5 @@ class TestApprovability:
 
         for market in PROP_EVENT_MARKETS:
             assert market in APPROVABLE_MARKETS
-        # The shipped policy approves none of them.
-        assert approved_prop_markets() == []
+        # The shipped policy approves all of them (PR #365, 2026-10-19).
+        assert sorted(approved_prop_markets()) == sorted(PROP_EVENT_MARKETS)

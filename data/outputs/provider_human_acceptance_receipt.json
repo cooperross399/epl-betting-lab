@@ -5,12 +5,12 @@
     "status": "Passed"
   },
   "checklist_verdict": "Ready for human allowlist review",
-  "created_at": "2026-08-21T11:46:55-04:00",
+  "created_at": "2026-10-19T06:48:21+00:00",
   "decision": "approved_for_allowlist_pr",
   "evidence": {
     "checklist": {
-      "checksum_sha256": "865d4e6ec1c4d1535a96966bba04df89ce3a0643e288cde36a3c5b643aac4b69",
-      "generated_at": "2026-08-21T11:44:26-04:00",
+      "checksum_sha256": "ec5461c17cb7c629263d64f0cbc53b86c70af825d701aeda9ae70f22376dc3da",
+      "generated_at": "2026-10-19T02:10:48+00:00",
       "path": "data/outputs/provider_acceptance_checklist.json",
       "provider_key": "odds_api",
       "provider_name": "the_odds_api",
@@ -25,7 +25,7 @@
       "verdict": "Stable enough for review"
     },
     "provider_policy": {
-      "checksum_sha256": "1a16ba8a70d96ec81ddc6aabd4e7f0e61b0e50982b7893dcc19f178139466dbb",
+      "checksum_sha256": "7a01454f6fc252f39bbe110c8f864fc99d90421876d8c2cb5d22a1d0e68fee3f",
       "path": "data/manual/staging_provider_policy.json",
       "status": "Bound"
     },
@@ -125,9 +125,10 @@
     }
   },
   "github_approval": {
-    "approval_age_hours": 0.01,
+    "activity_source": "github_api",
+    "approval_age_hours": 4.56,
     "approval_phrase": "APPROVED_FOR_ALLOWLIST_PR",
-    "approved_at": "2026-08-21T15:46:30+00:00",
+    "approved_at": "2026-10-19T02:14:54+00:00",
     "approved_markets": [
       "1x2",
       "btts",
@@ -136,34 +137,38 @@
       "corners_total_9_5",
       "double_chance",
       "draw_no_bet",
+      "player_assists",
+      "player_goal_scorer_anytime",
+      "player_shots",
+      "player_shots_on_target",
       "total_2_5"
     ],
     "commit_id": "",
     "decision": "approved_for_allowlist_pr",
     "evidence_checksums_sha256": {
       "automated_card_input.json": "8ba5890b28608444d08b28ea12e42c3f6c5bcdfa442aa87702d455317795d443",
-      "provider_acceptance_checklist.json": "865d4e6ec1c4d1535a96966bba04df89ce3a0643e288cde36a3c5b643aac4b69",
-      "provider_allowlist_evidence_bundle.json": "e6565799cb8d2e674cad2d2b451c70476d209ec8fd91b1a997a4e007d29f0e56",
+      "provider_acceptance_checklist.json": "ec5461c17cb7c629263d64f0cbc53b86c70af825d701aeda9ae70f22376dc3da",
+      "provider_allowlist_evidence_bundle.json": "8f9714d22e847bcc6c6fc54233464f4543bd77737b11dc94b5d08a1c48c9b63d",
       "provider_shadow_verification.json": "e9afa9b87bbbab56915eb2fa336d611975ce7ed81dbdb26777698d947085ead9"
     },
     "evidence_generated_at": "2026-08-21T15:43:44+00:00",
     "excluded_markets": [],
-    "head_sha": "7cccb31532fb4865f0d2d79eea496d48d76e33fa",
-    "pr_number": 224,
+    "head_sha": "25d8d1ee3dbbd4ed280ad2f710aa7f7a83c297dd",
+    "pr_number": 365,
     "provider_name": "the_odds_api",
     "repository": "cooperross399/epl-betting-lab",
     "review_state": "",
     "reviewer_github_login": "cooperross399",
-    "source_id": 5372090952,
+    "source_id": 6258216388,
     "source_kind": "comment",
-    "verified_at": "2026-08-21T15:46:55.473866+00:00"
+    "verified_at": "2026-10-19T06:48:21.671008+00:00"
   },
-  "notes": "Approved in GitHub UI on PR #224 by cooperross399 via comment at 2026-08-21T15:46:30+00:00. Markets: 1x2, btts, corners_1x2, corners_total_10_5, corners_total_9_5, double_chance, draw_no_bet, total_2_5. Excluded: .",
+  "notes": "Approved in GitHub UI on PR #365 by cooperross399 via comment at 2026-10-19T02:14:54+00:00. Markets: 1x2, btts, corners_1x2, corners_total_10_5, corners_total_9_5, double_chance, draw_no_bet, player_assists, player_goal_scorer_anytime, player_shots, player_shots_on_target, total_2_5. Excluded: .",
   "provider_key": "odds_api",
   "provider_name": "the_odds_api",
-  "receipt_id": "odds_api-20260821T114655-0400-20ffa5677988",
+  "receipt_id": "odds_api-20261019T064821+0000-5e5248a72a82",
   "receipt_storage": {
-    "archive_directory": "data/outputs/archive/provider_acceptance_receipts/2026-08-21/114655_odds_api_approved_for_allowlist_pr",
+    "archive_directory": "data/outputs/archive/provider_acceptance_receipts/2026-10-19/064821_odds_api_approved_for_allowlist_pr",
     "latest_csv_path": "data/outputs/provider_human_acceptance_receipt.csv",
     "latest_json_path": "data/outputs/provider_human_acceptance_receipt.json",
     "latest_markdown_path": "data/outputs/provider_human_acceptance_receipt.md"

@@ -17,6 +17,63 @@
     "provider_allowlist_entries": {
       "the_odds_api": {
         "allowlist_status": "allowed",
+        "approved_at": "2026-10-19T06:48:21+00:00",
+        "cutoff_policy": {
+          "day": "Thursday",
+          "time": "10:00",
+          "timezone": "America/New_York"
+        },
+        "evidence_receipt_id": "odds_api-20261019T064821+0000-5e5248a72a82",
+        "known_limitations": [
+          "Player props carry no demonstrated edge: the held-out measurement (data/outputs/player_props_backtest.md) found the corrected model well calibrated and clearing its edge bar about twice a month, and books reprice on the team sheet after the card is built. Approving them approves that trade-off.",
+          "Allowlisting does not bypass staging validation, freshness, completeness, checksum, receipt, or Thursday cutoff gates."
+        ],
+        "max_provider_run_age_hours": 12.0,
+        "provider_key": "odds_api",
+        "provider_name": "the_odds_api",
+        "provider_type": "odds_api",
+        "required_markets": [
+          "1x2",
+          "total_2_5",
+          "btts",
+          "double_chance",
+          "draw_no_bet",
+          "corners_1x2",
+          "corners_total_9_5",
+          "corners_total_10_5",
+          "player_assists",
+          "player_goal_scorer_anytime",
+          "player_shots",
+          "player_shots_on_target"
+        ],
+        "reviewed_at": "2026-10-19T06:48:28+00:00",
+        "reviewer_name": "cooperross399",
+        "verification_report_checksum_sha256": "db780554963c79ef24ba2c489ec35a641c82ef63af8490afda3b89184e39615e",
+        "verification_report_path": "data/outputs/provider_human_acceptance_receipt_verification.json"
+      }
+    },
+    "thursday_cutoff_time": "10:00",
+    "timezone": "America/New_York"
+  },
+  "baseline_actual_diff": "--- preview baseline staging_provider_policy.json\n+++ current staging_provider_policy.json\n@@ -16,14 +16,15 @@\n   \"provider_allowlist_entries\": {\n     \"the_odds_api\": {\n       \"allowlist_status\": \"allowed\",\n-      \"approved_at\": \"2026-08-21T11:46:55-04:00\",\n+      \"approved_at\": \"2026-10-19T06:48:21+00:00\",\n       \"cutoff_policy\": {\n         \"day\": \"Thursday\",\n         \"time\": \"10:00\",\n         \"timezone\": \"America/New_York\"\n       },\n-      \"evidence_receipt_id\": \"odds_api-20260821T114655-0400-20ffa5677988\",\n+      \"evidence_receipt_id\": \"odds_api-20261019T064821+0000-5e5248a72a82\",\n       \"known_limitations\": [\n+        \"Player props carry no demonstrated edge: the held-out measurement (data/outputs/player_props_backtest.md) found the corrected model well calibrated and clearing its edge bar about twice a month, and books reprice on the team sheet after the card is built. Approving them approves that trade-off.\",\n         \"Allowlisting does not bypass staging validation, freshness, completeness, checksum, receipt, or Thursday cutoff gates.\"\n       ],\n       \"max_provider_run_age_hours\": 12.0,\n@@ -39,14 +40,14 @@\n         \"corners_1x2\",\n         \"corners_total_9_5\",\n         \"corners_total_10_5\",\n+        \"player_assists\",\n+        \"player_goal_scorer_anytime\",\n         \"player_shots\",\n-        \"player_shots_on_target\",\n-        \"player_assists\",\n-        \"player_goal_scorer_anytime\"\n+        \"player_shots_on_target\"\n       ],\n-      \"reviewed_at\": \"2026-08-21T11:47:03-04:00\",\n+      \"reviewed_at\": \"2026-10-19T06:48:28+00:00\",\n       \"reviewer_name\": \"cooperross399\",\n-      \"verification_report_checksum_sha256\": \"a5b59887648b80bd03f4ee8e04d7e6f68281497a7e18d3beac80bb77fc3a51fd\",\n+      \"verification_report_checksum_sha256\": \"db780554963c79ef24ba2c489ec35a641c82ef63af8490afda3b89184e39615e\",\n       \"verification_report_path\": \"data/outputs/provider_human_acceptance_receipt_verification.json\"\n     }\n   },",
+  "baseline_policy": {
+    "allow_missing_provenance": false,
+    "allow_unknown_providers": false,
+    "allowed_provider_names": [
+      "manual_reviewed",
+      "the_odds_api"
+    ],
+    "allowed_provider_types": [
+      "manual_upload",
+      "sportsbook_export",
+      "odds_api",
+      "fixture_provider"
+    ],
+    "max_provider_run_age_hours": 12,
+    "max_receipt_age_hours": 12,
+    "provider_allowlist_entries": {
+      "the_odds_api": {
+        "allowlist_status": "allowed",
         "approved_at": "2026-08-21T11:46:55-04:00",
         "cutoff_policy": {
           "day": "Thursday",
@@ -39,65 +96,15 @@
           "draw_no_bet",
           "corners_1x2",
           "corners_total_9_5",
-          "corners_total_10_5"
+          "corners_total_10_5",
+          "player_shots",
+          "player_shots_on_target",
+          "player_assists",
+          "player_goal_scorer_anytime"
         ],
         "reviewed_at": "2026-08-21T11:47:03-04:00",
         "reviewer_name": "cooperross399",
         "verification_report_checksum_sha256": "a5b59887648b80bd03f4ee8e04d7e6f68281497a7e18d3beac80bb77fc3a51fd",
-        "verification_report_path": "data/outputs/provider_human_acceptance_receipt_verification.json"
-      }
-    },
-    "thursday_cutoff_time": "10:00",
-    "timezone": "America/New_York"
-  },
-  "baseline_actual_diff": "--- preview baseline staging_provider_policy.json\n+++ current staging_provider_policy.json\n@@ -16,16 +16,14 @@\n   \"provider_allowlist_entries\": {\n     \"the_odds_api\": {\n       \"allowlist_status\": \"allowed\",\n-      \"approved_at\": \"2026-08-17T16:03:07-04:00\",\n+      \"approved_at\": \"2026-08-21T11:46:55-04:00\",\n       \"cutoff_policy\": {\n         \"day\": \"Thursday\",\n         \"time\": \"10:00\",\n         \"timezone\": \"America/New_York\"\n       },\n-      \"evidence_receipt_id\": \"odds_api-20260817T160307-0400-20fb55e75c14\",\n+      \"evidence_receipt_id\": \"odds_api-20260821T114655-0400-20ffa5677988\",\n       \"known_limitations\": [\n-        \"No market in this system has a demonstrated edge: every measured interval includes zero, `double_chance` measured negative, and `draw_no_bet`'s positive number rests on thirteen bets. Enablement is a reviewed human decision made with that evidence in view, not on it.\",\n-        \"`corners_1x2` can never be profit-backtested: the provider does not retain its history. `btts` carries a known, unfixed calibration bias of roughly nine points and cannot be profit-backtested either.\",\n         \"Allowlisting does not bypass staging validation, freshness, completeness, checksum, receipt, or Thursday cutoff gates.\"\n       ],\n       \"max_provider_run_age_hours\": 12.0,\n@@ -34,17 +32,17 @@\n       \"provider_type\": \"odds_api\",\n       \"required_markets\": [\n         \"1x2\",\n+        \"total_2_5\",\n         \"btts\",\n-        \"total_2_5\",\n         \"double_chance\",\n         \"draw_no_bet\",\n         \"corners_1x2\",\n         \"corners_total_9_5\",\n         \"corners_total_10_5\"\n       ],\n-      \"reviewed_at\": \"2026-08-17T16:03:08-04:00\",\n+      \"reviewed_at\": \"2026-08-21T11:47:03-04:00\",\n       \"reviewer_name\": \"cooperross399\",\n-      \"verification_report_checksum_sha256\": \"22fa32fb6d0316128d6b89c53736ad943d787c6be2828b25c87d0c9982da653a\",\n+      \"verification_report_checksum_sha256\": \"a5b59887648b80bd03f4ee8e04d7e6f68281497a7e18d3beac80bb77fc3a51fd\",\n       \"verification_report_path\": \"data/outputs/provider_human_acceptance_receipt_verification.json\"\n     }\n   },",
-  "baseline_policy": {
-    "allow_missing_provenance": false,
-    "allow_unknown_providers": false,
-    "allowed_provider_names": [
-      "manual_reviewed",
-      "the_odds_api"
-    ],
-    "allowed_provider_types": [
-      "manual_upload",
-      "sportsbook_export",
-      "odds_api",
-      "fixture_provider"
-    ],
-    "max_provider_run_age_hours": 12,
-    "max_receipt_age_hours": 12,
-    "provider_allowlist_entries": {
-      "the_odds_api": {
-        "allowlist_status": "allowed",
-        "approved_at": "2026-08-17T16:03:07-04:00",
-        "cutoff_policy": {
-          "day": "Thursday",
-          "time": "10:00",
-          "timezone": "America/New_York"
-        },
-        "evidence_receipt_id": "odds_api-20260817T160307-0400-20fb55e75c14",
-        "known_limitations": [
-          "No market in this system has a demonstrated edge: every measured interval includes zero, `double_chance` measured negative, and `draw_no_bet`'s positive number rests on thirteen bets. Enablement is a reviewed human decision made with that evidence in view, not on it.",
-          "`corners_1x2` can never be profit-backtested: the provider does not retain its history. `btts` carries a known, unfixed calibration bias of roughly nine points and cannot be profit-backtested either.",
-          "Allowlisting does not bypass staging validation, freshness, completeness, checksum, receipt, or Thursday cutoff gates."
-        ],
-        "max_provider_run_age_hours": 12.0,
-        "provider_key": "odds_api",
-        "provider_name": "the_odds_api",
-        "provider_type": "odds_api",
-        "required_markets": [
-          "1x2",
-          "btts",
-          "total_2_5",
-          "double_chance",
-          "draw_no_bet",
-          "corners_1x2",
-          "corners_total_9_5",
-          "corners_total_10_5"
-        ],
-        "reviewed_at": "2026-08-17T16:03:08-04:00",
-        "reviewer_name": "cooperross399",
-        "verification_report_checksum_sha256": "22fa32fb6d0316128d6b89c53736ad943d787c6be2828b25c87d0c9982da653a",
         "verification_report_path": "data/outputs/provider_human_acceptance_receipt_verification.json"
       }
     },
@@ -152,11 +159,11 @@
       "status": "Match"
     },
     {
-      "actual": "a5b59887648b80bd03f4ee8e04d7e6f68281497a7e18d3beac80bb77fc3a51fd",
+      "actual": "db780554963c79ef24ba2c489ec35a641c82ef63af8490afda3b89184e39615e",
       "baseline": "",
       "category": "Preview evidence",
       "details": "The checker re-hashes the verification report bound by the preview.",
-      "expected": "a5b59887648b80bd03f4ee8e04d7e6f68281497a7e18d3beac80bb77fc3a51fd",
+      "expected": "db780554963c79ef24ba2c489ec35a641c82ef63af8490afda3b89184e39615e",
       "field": "verification_report_checksum_sha256",
       "status": "Match"
     },
@@ -179,11 +186,11 @@
       "status": "Match"
     },
     {
-      "actual": "2026-08-21T11:46:55-04:00",
-      "baseline": "2026-08-17T16:03:07-04:00",
+      "actual": "2026-10-19T06:48:21+00:00",
+      "baseline": "2026-08-21T11:46:55-04:00",
       "category": "Proposed provider fields",
       "details": "Required provider fields must match the preview exactly.",
-      "expected": "2026-08-21T11:46:55-04:00",
+      "expected": "2026-10-19T06:48:21+00:00",
       "field": "provider_allowlist_entries.the_odds_api.approved_at",
       "status": "Match"
     },
@@ -215,20 +222,20 @@
       "status": "Match"
     },
     {
-      "actual": "odds_api-20260821T114655-0400-20ffa5677988",
-      "baseline": "odds_api-20260817T160307-0400-20fb55e75c14",
+      "actual": "odds_api-20261019T064821+0000-5e5248a72a82",
+      "baseline": "odds_api-20260821T114655-0400-20ffa5677988",
       "category": "Proposed provider fields",
       "details": "Required provider fields must match the preview exactly.",
-      "expected": "odds_api-20260821T114655-0400-20ffa5677988",
+      "expected": "odds_api-20261019T064821+0000-5e5248a72a82",
       "field": "provider_allowlist_entries.the_odds_api.evidence_receipt_id",
       "status": "Match"
     },
     {
-      "actual": "[\"Allowlisting does not bypass staging validation, freshness, completeness, checksum, receipt, or Thursday cutoff gates.\"]",
-      "baseline": "[\"No market in this system has a demonstrated edge: every measured interval includes zero, `double_chance` measured negative, and `draw_no_bet`'s positive number rests on thirteen bets. Enablement is a reviewed human decision made with that evidence in view, not on it.\", \"`corners_1x2` can never be profit-backtested: the provider does not retain its history. `btts` carries a known, unfixed calibration bias of roughly nine points and cannot be profit-backtested either.\", \"Allowlisting does not bypass staging validation, freshness, completeness, checksum, receipt, or Thursday cutoff gates.\"]",
+      "actual": "[\"Player props carry no demonstrated edge: the held-out measurement (data/outputs/player_props_backtest.md) found the corrected model well calibrated and clearing its edge bar about twice a month, and books reprice on the team sheet after the card is built. Approving them approves that trade-off.\", \"Allowlisting does not bypass staging validation, freshness, completeness, checksum, receipt, or Thursday cutoff gates.\"]",
+      "baseline": "[\"Allowlisting does not bypass staging validation, freshness, completeness, checksum, receipt, or Thursday cutoff gates.\"]",
       "category": "Proposed provider fields",
       "details": "Required provider fields must match the preview exactly.",
-      "expected": "[\"Allowlisting does not bypass staging validation, freshness, completeness, checksum, receipt, or Thursday cutoff gates.\"]",
+      "expected": "[\"Player props carry no demonstrated edge: the held-out measurement (data/outputs/player_props_backtest.md) found the corrected model well calibrated and clearing its edge bar about twice a month, and books reprice on the team sheet after the card is built. Approving them approves that trade-off.\", \"Allowlisting does not bypass staging validation, freshness, completeness, checksum, receipt, or Thursday cutoff gates.\"]",
       "field": "provider_allowlist_entries.the_odds_api.known_limitations",
       "status": "Match"
     },
@@ -269,20 +276,20 @@
       "status": "Match"
     },
     {
-      "actual": "[\"1x2\", \"total_2_5\", \"btts\", \"double_chance\", \"draw_no_bet\", \"corners_1x2\", \"corners_total_9_5\", \"corners_total_10_5\"]",
-      "baseline": "[\"1x2\", \"btts\", \"total_2_5\", \"double_chance\", \"draw_no_bet\", \"corners_1x2\", \"corners_total_9_5\", \"corners_total_10_5\"]",
+      "actual": "[\"1x2\", \"total_2_5\", \"btts\", \"double_chance\", \"draw_no_bet\", \"corners_1x2\", \"corners_total_9_5\", \"corners_total_10_5\", \"player_assists\", \"player_goal_scorer_anytime\", \"player_shots\", \"player_shots_on_target\"]",
+      "baseline": "[\"1x2\", \"total_2_5\", \"btts\", \"double_chance\", \"draw_no_bet\", \"corners_1x2\", \"corners_total_9_5\", \"corners_total_10_5\", \"player_shots\", \"player_shots_on_target\", \"player_assists\", \"player_goal_scorer_anytime\"]",
       "category": "Proposed provider fields",
       "details": "Required provider fields must match the preview exactly.",
-      "expected": "[\"1x2\", \"total_2_5\", \"btts\", \"double_chance\", \"draw_no_bet\", \"corners_1x2\", \"corners_total_9_5\", \"corners_total_10_5\"]",
+      "expected": "[\"1x2\", \"total_2_5\", \"btts\", \"double_chance\", \"draw_no_bet\", \"corners_1x2\", \"corners_total_9_5\", \"corners_total_10_5\", \"player_assists\", \"player_goal_scorer_anytime\", \"player_shots\", \"player_shots_on_target\"]",
       "field": "provider_allowlist_entries.the_odds_api.required_markets",
       "status": "Match"
     },
     {
-      "actual": "2026-08-21T11:47:03-04:00",
-      "baseline": "2026-08-17T16:03:08-04:00",
+      "actual": "2026-10-19T06:48:28+00:00",
+      "baseline": "2026-08-21T11:47:03-04:00",
       "category": "Proposed provider fields",
       "details": "Required provider fields must match the preview exactly.",
-      "expected": "2026-08-21T11:47:03-04:00",
+      "expected": "2026-10-19T06:48:28+00:00",
       "field": "provider_allowlist_entries.the_odds_api.reviewed_at",
       "status": "Match"
     },
@@ -296,11 +303,11 @@
       "status": "Match"
     },
     {
-      "actual": "a5b59887648b80bd03f4ee8e04d7e6f68281497a7e18d3beac80bb77fc3a51fd",
-      "baseline": "22fa32fb6d0316128d6b89c53736ad943d787c6be2828b25c87d0c9982da653a",
+      "actual": "db780554963c79ef24ba2c489ec35a641c82ef63af8490afda3b89184e39615e",
+      "baseline": "a5b59887648b80bd03f4ee8e04d7e6f68281497a7e18d3beac80bb77fc3a51fd",
       "category": "Proposed provider fields",
       "details": "Required provider fields must match the preview exactly.",
-      "expected": "a5b59887648b80bd03f4ee8e04d7e6f68281497a7e18d3beac80bb77fc3a51fd",
+      "expected": "db780554963c79ef24ba2c489ec35a641c82ef63af8490afda3b89184e39615e",
       "field": "provider_allowlist_entries.the_odds_api.verification_report_checksum_sha256",
       "status": "Match"
     },
@@ -342,14 +349,15 @@
     "provider_allowlist_entries": {
       "the_odds_api": {
         "allowlist_status": "allowed",
-        "approved_at": "2026-08-21T11:46:55-04:00",
+        "approved_at": "2026-10-19T06:48:21+00:00",
         "cutoff_policy": {
           "day": "Thursday",
           "time": "10:00",
           "timezone": "America/New_York"
         },
-        "evidence_receipt_id": "odds_api-20260821T114655-0400-20ffa5677988",
+        "evidence_receipt_id": "odds_api-20261019T064821+0000-5e5248a72a82",
         "known_limitations": [
+          "Player props carry no demonstrated edge: the held-out measurement (data/outputs/player_props_backtest.md) found the corrected model well calibrated and clearing its edge bar about twice a month, and books reprice on the team sheet after the card is built. Approving them approves that trade-off.",
           "Allowlisting does not bypass staging validation, freshness, completeness, checksum, receipt, or Thursday cutoff gates."
         ],
         "max_provider_run_age_hours": 12.0,
@@ -364,26 +372,30 @@
           "draw_no_bet",
           "corners_1x2",
           "corners_total_9_5",
-          "corners_total_10_5"
+          "corners_total_10_5",
+          "player_assists",
+          "player_goal_scorer_anytime",
+          "player_shots",
+          "player_shots_on_target"
         ],
-        "reviewed_at": "2026-08-21T11:47:03-04:00",
+        "reviewed_at": "2026-10-19T06:48:28+00:00",
         "reviewer_name": "cooperross399",
-        "verification_report_checksum_sha256": "a5b59887648b80bd03f4ee8e04d7e6f68281497a7e18d3beac80bb77fc3a51fd",
+        "verification_report_checksum_sha256": "db780554963c79ef24ba2c489ec35a641c82ef63af8490afda3b89184e39615e",
         "verification_report_path": "data/outputs/provider_human_acceptance_receipt_verification.json"
       }
     },
     "thursday_cutoff_time": "10:00",
     "timezone": "America/New_York"
   },
-  "generated_at": "2026-08-21T11:54:40-04:00",
+  "generated_at": "2026-10-19T06:48:42+00:00",
   "policy": {
-    "checksum_sha256": "fbd1a7cbe99930f1c1cde5286ed0149202d619f946324a0b5d31542d85264c9b",
+    "checksum_sha256": "8b83fd66ba56fd3a9afbdcb696c434e489fe1eaa2cdfb6f401c92c22ca9e975e",
     "path": "data/manual/staging_provider_policy.json"
   },
   "preview": {
-    "checksum_sha256": "a5c7969546abfa8fedecb0359017e6c29e73362fc888740a2480d94e7895322f",
-    "current_verification_checksum_sha256": "a5b59887648b80bd03f4ee8e04d7e6f68281497a7e18d3beac80bb77fc3a51fd",
-    "expected_verification_checksum_sha256": "a5b59887648b80bd03f4ee8e04d7e6f68281497a7e18d3beac80bb77fc3a51fd",
+    "checksum_sha256": "bfd6b830c3432e527a5d1a7c5be25cf94bb9e7da3379b87cdbc8ed825c18c819",
+    "current_verification_checksum_sha256": "db780554963c79ef24ba2c489ec35a641c82ef63af8490afda3b89184e39615e",
+    "expected_verification_checksum_sha256": "db780554963c79ef24ba2c489ec35a641c82ef63af8490afda3b89184e39615e",
     "path": "data/outputs/provider_allowlist_pr_preview.json",
     "proposed_allowlist_status": "Allowed",
     "status": "Ready for separate allowlist PR",

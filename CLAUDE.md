@@ -184,10 +184,9 @@ Use the repo, the reports, and GitHub.
   every volume bucket (24.3 predicted vs 24.5 happened; 34.4 vs 34.9). The
   corrected model clears an 8% edge bar four times in two months: it almost
   never disagrees with the one-sided market prices by that much, no edge is
-  demonstrated, and none can be at this sample size. Props reach the card
-  only through the player/line-aware card integration (not built) and a
-  reviewed policy approval, and the measurement above is what that review
-  should weigh.
+  demonstrated, and none can be at this sample size. The card and board
+  integration is built (see the props bullet above); the reviewed policy
+  approval is what is left, and the measurement above is what it weighs.
 - **The card's fixture window moves with the calendar.** It is the round still
   to be played, derived in `src/epl_betting_lab/selected_slate.py` from the
   fixtures in hand, not a pair of dates written down. It used to be hardcoded
@@ -275,8 +274,8 @@ Use the repo, the reports, and GitHub.
   use, adding it is a decision about where he holds money, not a heuristic.
 - **Every bet on the card is the same size: 0.1 units.**
   `PROFIT_BACKTESTABLE_MARKETS` is `{1x2, total_2_5}` — the only two
-  Football-Data ships odds for — and `1x2` is off the card while the anchored
-  rule caps `total_2_5` at C anyway. Tier A was never reached across 162
+  Football-Data ships odds for — and `1x2` is held at C by
+  `FLOOR_ONLY_MARKETS` while the anchored rule caps `total_2_5` at C anyway. Tier A was never reached across 162
   archived best bets, so `UNVERIFIABLE_MARKET_TIER` is a **floor**, not the
   "one tier down, ranking still moves the stake" an earlier commit of mine
   claimed. The tier orders the card; it does not size the bet, and the card

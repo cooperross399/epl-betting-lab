@@ -57,7 +57,10 @@ class TestLeansAreNotStaked:
         assert _suggested_units("C") == 0.1
 
     def test_a_bettable_pick_still_gets_a_stake(self) -> None:
-        tier = _confidence_tier(_row(status="BETTABLE", ranking_score=75.0))
+        # total_2_5 under the plain rule: 1X2 is held at the floor since
+        # 2026-10-19 (FLOOR_ONLY_MARKETS), so it no longer shows the A stake.
+        tier = _confidence_tier(_row(status="BETTABLE", ranking_score=75.0,
+                                     market="total_2_5", selection="over"))
 
         assert tier == "A"
         assert _suggested_units(tier) == 0.5

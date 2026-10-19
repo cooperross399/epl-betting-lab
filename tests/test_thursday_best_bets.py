@@ -128,8 +128,9 @@ def test_build_thursday_best_bets_sections_and_fields() -> None:
     assert "confidence_tier" in report.columns
     assert "risk_flags" in report.columns
     assert report.iloc[0]["home_team"] == "Liverpool"
-    assert report.iloc[0]["confidence_tier"] == "A"
-    assert report.iloc[0]["suggested_units"] == 0.5
+    # The top row is a 1X2 pick, which stakes at the floor (FLOOR_ONLY_MARKETS).
+    assert report.iloc[0]["confidence_tier"] == "C"
+    assert report.iloc[0]["suggested_units"] == 0.1
 
 
 def test_render_thursday_best_bets_includes_checklist_and_prices() -> None:
@@ -260,8 +261,10 @@ def test_a_market_whose_profit_cannot_be_verified_stakes_at_the_floor():
     top = {"status": "BETTABLE", "selection": "over", "ranking_score": 90.0, "calibrated_edge": 0.08}
     assert _confidence_tier(pd.Series({**top, "market": "corners_total_9_5"})) == "C"
     assert _confidence_tier(pd.Series({**top, "market": "btts"})) == "C"
-    # ...while a market with a held-out test behind it keeps its tier.
-    assert _confidence_tier(pd.Series({**top, "market": "1x2"})) == "A"
+    # 1X2 can be profit-backtested, and it lost on every held-out season
+    # (docs/no_edge_out_of_sample.md). It is back on the card at Cooper's
+    # direction, not on evidence, so it stakes at the floor too.
+    assert _confidence_tier(pd.Series({**top, "market": "1x2"})) == "C"
 
 
 def test_every_market_the_card_can_actually_stake_lands_on_one_size():
@@ -283,7 +286,7 @@ def test_every_market_the_card_can_actually_stake_lands_on_one_size():
 
     on_card = [m for m in MARKET_SELECTIONS if m not in CARD_DISABLED_MARKETS]
     verifiable = [m for m in on_card if m in PROFIT_BACKTESTABLE_MARKETS]
-    assert verifiable == ["total_2_5"], verifiable
+    assert verifiable == ["1x2", "total_2_5"], verifiable
 
     for market in on_card:
         row = {"status": "BETTABLE", "market": market, "selection": "over",

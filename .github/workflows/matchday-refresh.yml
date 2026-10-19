@@ -946,6 +946,10 @@ jobs:
             # The Due List, which the board reads from this artifact.
             data/outputs/due_list.md
             data/outputs/due_list.json
+            # The props card, which the board reads from this artifact for
+            # its Props tab.
+            data/outputs/player_props_card.md
+            data/outputs/player_props_card.json
           if-no-files-found: warn
           retention-days: 30
 

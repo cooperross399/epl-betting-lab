@@ -15,9 +15,10 @@ because ordering is not a rate the model measures. A price nothing can
 price is quota spent on nothing.
 
 Cost is stated before it is spent: one credit per market per event, so a
-full ten-fixture slate costs about forty credits. The fetch never runs on a
-schedule from here — it is dispatched deliberately, exactly like the
-historical harvest.
+full ten-fixture slate costs about forty credits. Only the selected round's
+fixtures that have not kicked off are bought (`slate_events`). The Matchday
+Refresh props step calls this only once the reviewed policy approves a prop
+market; until then it spends nothing.
 
 No pick, no card, no ledger, no policy edit, no cron, and the credential is
 never printed or written.
@@ -27,7 +28,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -35,6 +36,7 @@ import pandas as pd
 
 from epl_betting_lab.config import STAGING_DIR
 from epl_betting_lab.providers.team_names import normalize_team_name
+from epl_betting_lab.selected_slate import selected_window
 from epl_betting_lab.reports.provider_market_discovery import (
     DEFAULT_API_BASE_URL,
     Requester,
@@ -160,6 +162,7 @@ def fetch_player_props(
     max_events: int = 0,
     fetched_at: str = "",
     timeout_seconds: float = 30.0,
+    now: datetime | None = None,
 ) -> PropsFetchResult:
     """Fetch live prop prices for the upcoming slate.
 
@@ -188,6 +191,7 @@ def fetch_player_props(
         raise PlayerPropsFetchError("The events list is not a JSON list.")
     result.events_seen = len(events)
 
+    events = slate_events(events, now=now or datetime.now(timezone.utc))
     selected = events[:max_events] if max_events else events
     for event in selected:
         if not isinstance(event, Mapping):
@@ -220,6 +224,41 @@ def fetch_player_props(
             result.events_priced += 1
             result.rows.extend(rows)
     return result
+
+
+def _kickoff(event: object) -> pd.Timestamp | None:
+    if not isinstance(event, Mapping):
+        return None
+    stamp = pd.to_datetime(event.get("commence_time"), utc=True, errors="coerce")
+    return None if pd.isna(stamp) else stamp
+
+
+def slate_events(events: list[Any], *, now: datetime) -> list[Any]:
+    """The events worth buying: not yet kicked off, in the selected round.
+
+    The events list is free and runs a fortnight ahead, while each event's
+    props cost a credit per market. Buying the round after this one as well,
+    fifteen runs a week, roughly doubles the spend for prices the card cannot
+    use yet, and buying a fixture that has kicked off buys nothing at all.
+
+    An event with no readable kick-off is kept: its round cannot be told, and
+    dropping it would silently price fewer fixtures than the card covers.
+    """
+    moment = pd.Timestamp(now)
+    moment = moment.tz_localize("UTC") if moment.tzinfo is None else moment.tz_convert("UTC")
+    upcoming = [e for e in events if (_kickoff(e) is None or _kickoff(e) > moment)]
+    dated = [_kickoff(e) for e in upcoming if _kickoff(e) is not None]
+    window = selected_window(
+        pd.Series([stamp.date().isoformat() for stamp in dated]),
+        today=moment.date(),
+    ) if dated else None
+    if window is None:
+        return upcoming
+    start, end = window
+    return [
+        e for e in upcoming
+        if _kickoff(e) is None or start <= _kickoff(e).date() <= end
+    ]
 
 
 def write_props_staging(

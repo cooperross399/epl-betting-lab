@@ -172,6 +172,63 @@ class TestFetch:
         assert len(result.errors) == 1
 
 
+class TestSlateOnly:
+    """Props are bought for the round the card is about, never the whole list.
+
+    The events list is free and runs a fortnight ahead; each event's props
+    cost a credit per market. Buying the next round as well, fifteen runs a
+    week, would roughly double the spend for prices the card cannot use yet.
+    """
+
+    @staticmethod
+    def _requester(events, calls):
+        def request(url, params=None, timeout=None):
+            calls.append(url)
+            if url.endswith("/events"):
+                return _Response(events)
+            return _Response(_event_payload(url.rsplit("/", 2)[-2]))
+
+        return request
+
+    def test_only_the_selected_round_is_bought(self) -> None:
+        from datetime import datetime, timezone
+
+        events = [
+            {"id": "r1a", "commence_time": "2026-10-24T11:30:00Z"},
+            {"id": "r1b", "commence_time": "2026-10-26T19:00:00Z"},
+            {"id": "r2a", "commence_time": "2026-11-01T15:00:00Z"},
+        ]
+        calls: list[str] = []
+        result = fetch_player_props(
+            api_key="k",
+            requester=self._requester(events, calls),
+            fetched_at="x",
+            now=datetime(2026, 10, 22, 12, 0, tzinfo=timezone.utc),
+        )
+
+        assert result.events_seen == 3
+        assert result.credits_spent == 2 * LIVE_CREDITS_PER_EVENT
+        assert not any("/events/r2a/" in url for url in calls)
+
+    def test_a_fixture_already_kicked_off_is_not_bought(self) -> None:
+        from datetime import datetime, timezone
+
+        events = [
+            {"id": "early", "commence_time": "2026-10-24T11:30:00Z"},
+            {"id": "late", "commence_time": "2026-10-24T16:30:00Z"},
+        ]
+        calls: list[str] = []
+        result = fetch_player_props(
+            api_key="k",
+            requester=self._requester(events, calls),
+            fetched_at="x",
+            now=datetime(2026, 10, 24, 14, 0, tzinfo=timezone.utc),
+        )
+
+        assert result.credits_spent == LIVE_CREDITS_PER_EVENT
+        assert not any("/events/early/" in url for url in calls)
+
+
 class TestStagingFile:
     def test_the_file_lands_beside_but_never_inside_match_staging(
         self, tmp_path: Path

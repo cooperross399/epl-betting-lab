@@ -356,6 +356,9 @@ function picksCell(s) {
 // staked (the pipeline writes such a goalie prop as a pass; the page greys it).
 export const PROP_MARKETS = {
   shots_on_goal: { title: "Shots on goal", one: "shot", many: "shots" },
+  // EPL props (build_board_json.PROP_MARKET_KEYS); the anytime scorer is "goals" over 0.5.
+  shots: { title: "Shots", one: "shot", many: "shots" },
+  shots_on_target: { title: "Shots on target", one: "shot on target", many: "shots on target" },
   points: { title: "Points", one: "point", many: "points" },
   goals: { title: "Goals", one: "goal", many: "goals" },
   assists: { title: "Assists", one: "assist", many: "assists" },
@@ -433,10 +436,10 @@ function nhlPropResults(data) {
   else if (status === "abstain") empty = { tag: "Abstained", title: data.phase === "preseason" ? "Model abstained — preseason" : "Model abstained", body: P.note || "The props model prices regular-season games only." };
   else if (!rows.length) empty = { tag: "No props", title: "No props were recorded for this date", body: P.note || "The props block arrived with no rows." };
   const bets = rows.filter((r) => r.kind === "bet").length, leans = rows.filter((r) => r.kind === "lean").length;
-  return { status, rows, strip, empty, summaryLine: rows.length ? `${bets} best bet${bets === 1 ? "" : "s"} · ${leans} lean${leans === 1 ? "" : "s"} settled` : "" };
+  return { status, rows, strip, empty, summaryLine: rows.length ? `${bets} best bet${bets === 1 ? "" : "s"}${leans ? ` · ${leans} lean${leans === 1 ? "" : "s"}` : ""} settled` : "" };
 }
 
-export const ADAPTERS = { nhl: { board: nhlBoard, results: nhlResults, props: nhlProps, propResults: nhlPropResults }, epl: { board: eplBoard, results: eplResults }, cbb: { board: cbbBoard, results: cbbResults } };
+export const ADAPTERS = { nhl: { board: nhlBoard, results: nhlResults, props: nhlProps, propResults: nhlPropResults }, epl: { board: eplBoard, results: eplResults, props: nhlProps }, cbb: { board: cbbBoard, results: cbbResults } };
 
 // One line for the home page.
 export function hubLine(sport, board, results) {

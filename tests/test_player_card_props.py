@@ -381,15 +381,19 @@ class TestTacklesAndSavesOnTheCard:
         assert summary["picks"] == []
 
 
-def test_every_new_market_is_fetched_settled_and_held() -> None:
+def test_every_new_market_is_fetched_settled_and_approved_but_plain_saves() -> None:
     for market in NEW_MARKETS:
         assert market in PROP_EVENT_MARKETS
         assert market in SETTLEMENT_COLUMNS
     assert SETTLEMENT_COLUMNS["player_tackles_alternate"] == "tackles"
     assert SETTLEMENT_COLUMNS["player_goalie_saves"] == "saves"
     assert SETTLEMENT_COLUMNS["player_goalie_saves_alternate"] == "saves"
+    # PR #372 proposes all but the plain saves line, which no bettable
+    # book staged.
     approved = approved_prop_markets()
-    assert not set(NEW_MARKETS) & set(approved)
+    assert set(NEW_MARKETS) & set(approved) == set(NEW_MARKETS) - {
+        "player_goalie_saves"
+    }
 
 
 @pytest.mark.parametrize(

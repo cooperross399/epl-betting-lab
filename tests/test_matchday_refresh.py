@@ -1699,3 +1699,38 @@ def test_a_failed_email_warns_and_a_failed_publish_fails() -> None:
     assert "exit 1" not in email_branch, "a missed email must not fail the run"
     assert "::error::" in publish_branch
     assert "exit 1" in publish_branch, "a missed card-feed push must fail it"
+
+
+# --- a played fixture reaches the model the day it is played ----------------
+
+
+def _block(step: str) -> str:
+    return _workflow().split(f"- name: {step}", 1)[1].split("- name:", 1)[0]
+
+
+ESPN_STEP = "Fill in finals Football-Data has not published yet"
+
+
+def test_espn_finals_fill_the_dataset_after_football_data_and_before_the_model() -> None:
+    """2026-10-19: Football-Data still lacked the 17-18 October round at
+    12:42 UTC, so the ratings learnt nothing from it and twelve played picks
+    sat as "waiting on results data" while ESPN had every final."""
+    text = _workflow()
+    assert "scripts/supplement_results_from_espn.py" in _block(ESPN_STEP)
+    espn = text.index("supplement_results_from_espn.py")
+    assert text.index("scripts/fetch_data.py") < espn
+    assert espn < text.index("refresh_all_reports.py")
+    assert espn < text.index("name: matchday-state")
+
+
+def test_the_espn_fill_is_soft_and_keyless() -> None:
+    block = _block(ESPN_STEP)
+    assert "continue-on-error: true" in block
+    assert "secrets." not in block
+
+
+def test_the_espn_fill_runs_whether_or_not_football_data_answered() -> None:
+    """It matters most on the day Football-Data is down: the restored file is
+    then all there is, and it is behind by every match since."""
+    block = _block(ESPN_STEP)
+    assert "steps.results" not in block

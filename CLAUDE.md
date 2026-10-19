@@ -228,6 +228,17 @@ Use the repo, the reports, and GitHub.
   mapping and the completeness checks all passed. A green run with no card is
   the signature of that class of fault — check the selected window in
   `data/outputs/automated_card_input.md` first.
+- **A finished fixture reaches the model the day it is played (2026-10-19,
+  Cooper: "make sure the model is learning from each fixture").** Football-Data
+  publishes a round days after it is played; until then the ratings learnt
+  nothing from it and every pick on it read "played, waiting on results data"
+  (12:42 UTC on 2026-10-19: 60 of the season's matches on file, 69 finals at
+  ESPN). `scripts/supplement_results_from_espn.py` runs after `fetch_data.py`
+  and adds ESPN finals (score, corners, shots, fouls; `result_source = espn`)
+  for fixtures Football-Data does not hold; Football-Data's row replaces each
+  on the next run after it is published. No odds and no card counts come from
+  ESPN, so card-count picks still wait for Football-Data. Football-Data
+  fetches now retry a timeout, a dropped connection or a 5xx three times.
 - `data/manual/upcoming_fixtures.csv` is **fetched, not typed**. Every run
   refreshes it from Football-Data's public fixtures feed
   (`scripts/refresh_upcoming_fixtures.py`), so the slate advances on its own.

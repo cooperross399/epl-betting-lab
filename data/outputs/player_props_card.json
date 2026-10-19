@@ -1,0 +1,32 @@
+{
+  "approved_prop_markets": [],
+  "correction": {
+    "fitted_on": 7254,
+    "intercept": -0.2383,
+    "slope": 0.9133
+  },
+  "edge_threshold": 0.08,
+  "generated_at": "2026-10-19T01:57:49+00:00",
+  "held_prop_markets": [
+    "player_shots",
+    "player_shots_on_target",
+    "player_assists",
+    "player_goal_scorer_anytime"
+  ],
+  "markets_with_staged_prices": [
+    "player_assists",
+    "player_goal_scorer_anytime",
+    "player_shots",
+    "player_shots_on_target"
+  ],
+  "note": "Every prop market is held by the reviewed provider policy. Nothing here is a pass or a no-value call: no prop was priced because none is approved, and enabling one is a reviewed decision behind the policy gate.",
+  "picks": [],
+  "safety": {
+    "bets_placed": false,
+    "prices_fabricated": false,
+    "protected_files_written": false,
+    "settlement_applied": false
+  },
+  "status": "Held by policy",
+  "units_per_pick": 0.1
+}

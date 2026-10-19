@@ -38,7 +38,11 @@
         "draw_no_bet",
         "corners_1x2",
         "corners_total_9_5",
-        "corners_total_10_5"
+        "corners_total_10_5",
+        "player_shots",
+        "player_shots_on_target",
+        "player_assists",
+        "player_goal_scorer_anytime"
       ],
       "reviewed_at": "2026-08-21T11:47:03-04:00",
       "reviewer_name": "cooperross399",

@@ -1,0 +1,898 @@
+{
+  "bundle_checksum_sha256": "34169ad3b18eda60c361ed66710ad137c3c16e5e83e9a4cd1aaae2a78eae18e0",
+  "bundle_id": "odds_api-allowlist-evidence-34169ad3b18eda60",
+  "bundle_storage": {
+    "archive_directory": "data/outputs/archive/provider_allowlist_evidence_bundles/2026-10-19/135812_odds_api_34169ad3b18e",
+    "latest_csv_path": "data/outputs/provider_allowlist_evidence_bundle.csv",
+    "latest_json_path": "data/outputs/provider_allowlist_evidence_bundle.json",
+    "latest_markdown_path": "data/outputs/provider_allowlist_evidence_bundle.md"
+  },
+  "checklist_verdict": "Ready for human allowlist review",
+  "conformance_verdict": "Conforms to preview",
+  "evidence": [
+    {
+      "current_checksum_sha256": "ec15c69525eb25b5fc51fbef2bbdc6d95bf9bea133d2c301da5cd6486c3ad101",
+      "details": "Current checksum matches every available binding.",
+      "evidence_path": "data/outputs/provider_allowlist_pr_preview.json",
+      "evidence_type": "provider_allowlist_pr_preview",
+      "expected_checksum_sha256": "",
+      "generated_at": "2026-10-19T13:57:46+00:00",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": "Ready for separate allowlist PR"
+    },
+    {
+      "current_checksum_sha256": "58f17a1557376384f79478d9bcc4cb335ad824aefc2c6122c56155180a06e15a",
+      "details": "Current checksum matches every available binding.",
+      "evidence_path": "data/outputs/provider_human_acceptance_receipt_verification.json",
+      "evidence_type": "provider_human_acceptance_receipt_verification",
+      "expected_checksum_sha256": "58f17a1557376384f79478d9bcc4cb335ad824aefc2c6122c56155180a06e15a",
+      "generated_at": "2026-10-19T13:57:45+00:00",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": "Verified for allowlist PR review"
+    },
+    {
+      "current_checksum_sha256": "5c510a40197532be0ec48bca4a1c3ee3654f3e2e911b02fd7cbc63dc9c071597",
+      "details": "Current checksum matches every available binding.",
+      "evidence_path": "data/outputs/provider_human_acceptance_receipt.json",
+      "evidence_type": "provider_human_acceptance_receipt",
+      "expected_checksum_sha256": "5c510a40197532be0ec48bca4a1c3ee3654f3e2e911b02fd7cbc63dc9c071597",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": "approved_for_allowlist_pr"
+    },
+    {
+      "current_checksum_sha256": "ec5461c17cb7c629263d64f0cbc53b86c70af825d701aeda9ae70f22376dc3da",
+      "details": "Current checksum matches every available binding.",
+      "evidence_path": "data/outputs/provider_acceptance_checklist.json",
+      "evidence_type": "provider_acceptance_checklist",
+      "expected_checksum_sha256": "ec5461c17cb7c629263d64f0cbc53b86c70af825d701aeda9ae70f22376dc3da",
+      "generated_at": "2026-10-19T02:10:48+00:00",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": "Ready for human allowlist review"
+    },
+    {
+      "current_checksum_sha256": "6b2842cbc84eddbecbd3ca435a652bc900f47c2b00999985ce398c47059aa866",
+      "details": "Current checksum matches every available binding. Archive contains 9 file(s).",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154335_odds_api",
+      "evidence_type": "reviewed_shadow_archive_bundle",
+      "expected_checksum_sha256": "6b2842cbc84eddbecbd3ca435a652bc900f47c2b00999985ce398c47059aa866",
+      "generated_at": "2026-08-21T15:43:35+00:00",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": "Shadow ready for review"
+    },
+    {
+      "current_checksum_sha256": "00a8ed2f5e471c240b7333af072afdb4d96ff2bbb3737c3dc661977a52d6f9cc",
+      "details": "Current checksum matches every available binding. Archive-relative path: `archive_metadata.json`.",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154335_odds_api/archive_metadata.json",
+      "evidence_type": "reviewed_shadow_archive_file",
+      "expected_checksum_sha256": "00a8ed2f5e471c240b7333af072afdb4d96ff2bbb3737c3dc661977a52d6f9cc",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": ""
+    },
+    {
+      "current_checksum_sha256": "bef6bd5c9af16226774580da6b204d1cedf055d27834b4241b985d45a747a892",
+      "details": "Current checksum matches every available binding. Archive-relative path: `provider_run_report.json`.",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154335_odds_api/provider_run_report.json",
+      "evidence_type": "reviewed_shadow_archive_file",
+      "expected_checksum_sha256": "bef6bd5c9af16226774580da6b204d1cedf055d27834b4241b985d45a747a892",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": ""
+    },
+    {
+      "current_checksum_sha256": "e58ae4ab3612cbde9043de6445d4b6f24bf1124d5db4e350377ea14b793b2b1a",
+      "details": "Current checksum matches every available binding. Archive-relative path: `provider_run_report.md`.",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154335_odds_api/provider_run_report.md",
+      "evidence_type": "reviewed_shadow_archive_file",
+      "expected_checksum_sha256": "e58ae4ab3612cbde9043de6445d4b6f24bf1124d5db4e350377ea14b793b2b1a",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": ""
+    },
+    {
+      "current_checksum_sha256": "df25ef586a3eb596e5003ee6dce8b1b4decf509876dd5bd8864bb0988167aba4",
+      "details": "Current checksum matches every available binding. Archive-relative path: `provider_shadow_verification.csv`.",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154335_odds_api/provider_shadow_verification.csv",
+      "evidence_type": "reviewed_shadow_archive_file",
+      "expected_checksum_sha256": "df25ef586a3eb596e5003ee6dce8b1b4decf509876dd5bd8864bb0988167aba4",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": ""
+    },
+    {
+      "current_checksum_sha256": "e9afa9b87bbbab56915eb2fa336d611975ce7ed81dbdb26777698d947085ead9",
+      "details": "Current checksum matches every available binding. Archive-relative path: `provider_shadow_verification.json`.",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154335_odds_api/provider_shadow_verification.json",
+      "evidence_type": "reviewed_shadow_archive_file",
+      "expected_checksum_sha256": "e9afa9b87bbbab56915eb2fa336d611975ce7ed81dbdb26777698d947085ead9",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": ""
+    },
+    {
+      "current_checksum_sha256": "478ed0325f094cc5e97e24cb20d0e872183396a2a3d357bc279bb84da9754b2d",
+      "details": "Current checksum matches every available binding. Archive-relative path: `provider_shadow_verification.md`.",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154335_odds_api/provider_shadow_verification.md",
+      "evidence_type": "reviewed_shadow_archive_file",
+      "expected_checksum_sha256": "478ed0325f094cc5e97e24cb20d0e872183396a2a3d357bc279bb84da9754b2d",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": ""
+    },
+    {
+      "current_checksum_sha256": "7df1af4bd9314f2d585e4e1512236957cca48076610127b2f9fb47379a046bb0",
+      "details": "Current checksum matches every available binding. Archive-relative path: `staging_input_validation.csv`.",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154335_odds_api/staging_input_validation.csv",
+      "evidence_type": "reviewed_shadow_archive_file",
+      "expected_checksum_sha256": "7df1af4bd9314f2d585e4e1512236957cca48076610127b2f9fb47379a046bb0",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": ""
+    },
+    {
+      "current_checksum_sha256": "6b06bae57bcdb61f2296012ed70453b20fac85c822136130f129a71d37a3075d",
+      "details": "Current checksum matches every available binding. Archive-relative path: `staging_input_validation.json`.",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154335_odds_api/staging_input_validation.json",
+      "evidence_type": "reviewed_shadow_archive_file",
+      "expected_checksum_sha256": "6b06bae57bcdb61f2296012ed70453b20fac85c822136130f129a71d37a3075d",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": ""
+    },
+    {
+      "current_checksum_sha256": "ba53f53f5554ca9a5387018b1f48a02d15cffb97b6075187289e196c2cace9f5",
+      "details": "Current checksum matches every available binding. Archive-relative path: `staging_input_validation.md`.",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154335_odds_api/staging_input_validation.md",
+      "evidence_type": "reviewed_shadow_archive_file",
+      "expected_checksum_sha256": "ba53f53f5554ca9a5387018b1f48a02d15cffb97b6075187289e196c2cace9f5",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": ""
+    },
+    {
+      "current_checksum_sha256": "539a2672fc06e78616e8235fecd39d85a9c67d697350547a6a20f80d0c197c28",
+      "details": "Current checksum matches every available binding. Archive contains 9 file(s).",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154222_odds_api",
+      "evidence_type": "reviewed_shadow_archive_bundle",
+      "expected_checksum_sha256": "539a2672fc06e78616e8235fecd39d85a9c67d697350547a6a20f80d0c197c28",
+      "generated_at": "2026-08-21T15:42:22+00:00",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": "Shadow ready for review"
+    },
+    {
+      "current_checksum_sha256": "e4a87d50ebc2f7cb5747c10b364363135f30c0c387b203f29ce389d215c5c117",
+      "details": "Current checksum matches every available binding. Archive-relative path: `archive_metadata.json`.",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154222_odds_api/archive_metadata.json",
+      "evidence_type": "reviewed_shadow_archive_file",
+      "expected_checksum_sha256": "e4a87d50ebc2f7cb5747c10b364363135f30c0c387b203f29ce389d215c5c117",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": ""
+    },
+    {
+      "current_checksum_sha256": "b3695687f7cf887af4234784d106698e11ccefa98e342425640d0cdced1d5ff5",
+      "details": "Current checksum matches every available binding. Archive-relative path: `provider_run_report.json`.",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154222_odds_api/provider_run_report.json",
+      "evidence_type": "reviewed_shadow_archive_file",
+      "expected_checksum_sha256": "b3695687f7cf887af4234784d106698e11ccefa98e342425640d0cdced1d5ff5",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": ""
+    },
+    {
+      "current_checksum_sha256": "011c5d2360df796195efa3bbd82fa5a805baaeb570d6cc79e24d335ad3c79741",
+      "details": "Current checksum matches every available binding. Archive-relative path: `provider_run_report.md`.",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154222_odds_api/provider_run_report.md",
+      "evidence_type": "reviewed_shadow_archive_file",
+      "expected_checksum_sha256": "011c5d2360df796195efa3bbd82fa5a805baaeb570d6cc79e24d335ad3c79741",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": ""
+    },
+    {
+      "current_checksum_sha256": "148f77319e90180102c53481c663ac11d88e00f35da708e6f158116b599775e8",
+      "details": "Current checksum matches every available binding. Archive-relative path: `provider_shadow_verification.csv`.",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154222_odds_api/provider_shadow_verification.csv",
+      "evidence_type": "reviewed_shadow_archive_file",
+      "expected_checksum_sha256": "148f77319e90180102c53481c663ac11d88e00f35da708e6f158116b599775e8",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": ""
+    },
+    {
+      "current_checksum_sha256": "9a0413dfe47a92e0178178c86f186205e67d5c1341a2ee0f28f96ec5810d5c99",
+      "details": "Current checksum matches every available binding. Archive-relative path: `provider_shadow_verification.json`.",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154222_odds_api/provider_shadow_verification.json",
+      "evidence_type": "reviewed_shadow_archive_file",
+      "expected_checksum_sha256": "9a0413dfe47a92e0178178c86f186205e67d5c1341a2ee0f28f96ec5810d5c99",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": ""
+    },
+    {
+      "current_checksum_sha256": "1c5fda77240e8f0ed68938927c1ace8cb9396c8d39cc182cb34a0e0c6ae34e48",
+      "details": "Current checksum matches every available binding. Archive-relative path: `provider_shadow_verification.md`.",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154222_odds_api/provider_shadow_verification.md",
+      "evidence_type": "reviewed_shadow_archive_file",
+      "expected_checksum_sha256": "1c5fda77240e8f0ed68938927c1ace8cb9396c8d39cc182cb34a0e0c6ae34e48",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": ""
+    },
+    {
+      "current_checksum_sha256": "7df1af4bd9314f2d585e4e1512236957cca48076610127b2f9fb47379a046bb0",
+      "details": "Current checksum matches every available binding. Archive-relative path: `staging_input_validation.csv`.",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154222_odds_api/staging_input_validation.csv",
+      "evidence_type": "reviewed_shadow_archive_file",
+      "expected_checksum_sha256": "7df1af4bd9314f2d585e4e1512236957cca48076610127b2f9fb47379a046bb0",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": ""
+    },
+    {
+      "current_checksum_sha256": "75def9eb58b441c87aeebc5fa03b12a5118428dc809f559c7cd48645987feeaf",
+      "details": "Current checksum matches every available binding. Archive-relative path: `staging_input_validation.json`.",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154222_odds_api/staging_input_validation.json",
+      "evidence_type": "reviewed_shadow_archive_file",
+      "expected_checksum_sha256": "75def9eb58b441c87aeebc5fa03b12a5118428dc809f559c7cd48645987feeaf",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": ""
+    },
+    {
+      "current_checksum_sha256": "68e866e730e1df7e8db1e507ce0319d16473d902fe585fa2344f7cf5a24c509a",
+      "details": "Current checksum matches every available binding. Archive-relative path: `staging_input_validation.md`.",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154222_odds_api/staging_input_validation.md",
+      "evidence_type": "reviewed_shadow_archive_file",
+      "expected_checksum_sha256": "68e866e730e1df7e8db1e507ce0319d16473d902fe585fa2344f7cf5a24c509a",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": ""
+    },
+    {
+      "current_checksum_sha256": "9525c7de23a88ac19b34b9e812e68b6caa156d5d3483f9360b12edfc3c262935",
+      "details": "Current checksum matches every available binding. Archive contains 9 file(s).",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154019_odds_api",
+      "evidence_type": "reviewed_shadow_archive_bundle",
+      "expected_checksum_sha256": "9525c7de23a88ac19b34b9e812e68b6caa156d5d3483f9360b12edfc3c262935",
+      "generated_at": "2026-08-21T15:40:19+00:00",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": "Shadow ready for review"
+    },
+    {
+      "current_checksum_sha256": "74ab893d1efbde34329b9df97b82803e14967b7e326c519d4f7526b9be2c7038",
+      "details": "Current checksum matches every available binding. Archive-relative path: `archive_metadata.json`.",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154019_odds_api/archive_metadata.json",
+      "evidence_type": "reviewed_shadow_archive_file",
+      "expected_checksum_sha256": "74ab893d1efbde34329b9df97b82803e14967b7e326c519d4f7526b9be2c7038",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": ""
+    },
+    {
+      "current_checksum_sha256": "4536fcca99fe06c8f911231ca49dbd0bcf0ee18983c495d33e782a572dc601d6",
+      "details": "Current checksum matches every available binding. Archive-relative path: `provider_run_report.json`.",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154019_odds_api/provider_run_report.json",
+      "evidence_type": "reviewed_shadow_archive_file",
+      "expected_checksum_sha256": "4536fcca99fe06c8f911231ca49dbd0bcf0ee18983c495d33e782a572dc601d6",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": ""
+    },
+    {
+      "current_checksum_sha256": "527c90d02e1be6b126fa3cd7987ae23097e0b3e067eaf762e3275651a09ae76d",
+      "details": "Current checksum matches every available binding. Archive-relative path: `provider_run_report.md`.",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154019_odds_api/provider_run_report.md",
+      "evidence_type": "reviewed_shadow_archive_file",
+      "expected_checksum_sha256": "527c90d02e1be6b126fa3cd7987ae23097e0b3e067eaf762e3275651a09ae76d",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": ""
+    },
+    {
+      "current_checksum_sha256": "d4c9aa228517a4b0487d82e131110d9bb426bdefa540cc895e36057f14ccd3f2",
+      "details": "Current checksum matches every available binding. Archive-relative path: `provider_shadow_verification.csv`.",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154019_odds_api/provider_shadow_verification.csv",
+      "evidence_type": "reviewed_shadow_archive_file",
+      "expected_checksum_sha256": "d4c9aa228517a4b0487d82e131110d9bb426bdefa540cc895e36057f14ccd3f2",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": ""
+    },
+    {
+      "current_checksum_sha256": "73899e80687c4db501eeaed0a068ffd7dff943b7e0b18e0f7185ff1b685b847b",
+      "details": "Current checksum matches every available binding. Archive-relative path: `provider_shadow_verification.json`.",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154019_odds_api/provider_shadow_verification.json",
+      "evidence_type": "reviewed_shadow_archive_file",
+      "expected_checksum_sha256": "73899e80687c4db501eeaed0a068ffd7dff943b7e0b18e0f7185ff1b685b847b",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": ""
+    },
+    {
+      "current_checksum_sha256": "1d0e3b710dfddb0b0e26cf9e05e14fd83eb4d4be17cfe7bb98d4ecb20f3d04f8",
+      "details": "Current checksum matches every available binding. Archive-relative path: `provider_shadow_verification.md`.",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154019_odds_api/provider_shadow_verification.md",
+      "evidence_type": "reviewed_shadow_archive_file",
+      "expected_checksum_sha256": "1d0e3b710dfddb0b0e26cf9e05e14fd83eb4d4be17cfe7bb98d4ecb20f3d04f8",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": ""
+    },
+    {
+      "current_checksum_sha256": "7df1af4bd9314f2d585e4e1512236957cca48076610127b2f9fb47379a046bb0",
+      "details": "Current checksum matches every available binding. Archive-relative path: `staging_input_validation.csv`.",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154019_odds_api/staging_input_validation.csv",
+      "evidence_type": "reviewed_shadow_archive_file",
+      "expected_checksum_sha256": "7df1af4bd9314f2d585e4e1512236957cca48076610127b2f9fb47379a046bb0",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": ""
+    },
+    {
+      "current_checksum_sha256": "b68af8ad108e0706f1c10c20371c6bbd3ad4f01975b9c8d57406728813c3e08f",
+      "details": "Current checksum matches every available binding. Archive-relative path: `staging_input_validation.json`.",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154019_odds_api/staging_input_validation.json",
+      "evidence_type": "reviewed_shadow_archive_file",
+      "expected_checksum_sha256": "b68af8ad108e0706f1c10c20371c6bbd3ad4f01975b9c8d57406728813c3e08f",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": ""
+    },
+    {
+      "current_checksum_sha256": "ee039aa0ed52cd8f0e8be3efb1e0c163e34a10f8f0e0d2eb9f0b48ecdfa02518",
+      "details": "Current checksum matches every available binding. Archive-relative path: `staging_input_validation.md`.",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154019_odds_api/staging_input_validation.md",
+      "evidence_type": "reviewed_shadow_archive_file",
+      "expected_checksum_sha256": "ee039aa0ed52cd8f0e8be3efb1e0c163e34a10f8f0e0d2eb9f0b48ecdfa02518",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": ""
+    },
+    {
+      "current_checksum_sha256": "0e0aae3c2da51bf78bd25991ad100e5421195356ff9f3fa8bc2c8c1bae411398",
+      "details": "Current checksum matches every available binding. Archive contains 9 file(s).",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153908_odds_api",
+      "evidence_type": "reviewed_shadow_archive_bundle",
+      "expected_checksum_sha256": "0e0aae3c2da51bf78bd25991ad100e5421195356ff9f3fa8bc2c8c1bae411398",
+      "generated_at": "2026-08-21T15:39:08+00:00",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": "Shadow ready for review"
+    },
+    {
+      "current_checksum_sha256": "a960c6e46dde87b7de95ef8a7aecefd7f1216d9bd02fcc8e1ee4285f4a14d659",
+      "details": "Current checksum matches every available binding. Archive-relative path: `archive_metadata.json`.",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153908_odds_api/archive_metadata.json",
+      "evidence_type": "reviewed_shadow_archive_file",
+      "expected_checksum_sha256": "a960c6e46dde87b7de95ef8a7aecefd7f1216d9bd02fcc8e1ee4285f4a14d659",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": ""
+    },
+    {
+      "current_checksum_sha256": "cb8882d430bb3bea56f75705d4cf2c59443e656350d23d833c920ce4a645908a",
+      "details": "Current checksum matches every available binding. Archive-relative path: `provider_run_report.json`.",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153908_odds_api/provider_run_report.json",
+      "evidence_type": "reviewed_shadow_archive_file",
+      "expected_checksum_sha256": "cb8882d430bb3bea56f75705d4cf2c59443e656350d23d833c920ce4a645908a",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": ""
+    },
+    {
+      "current_checksum_sha256": "58dd62e80369e1b6c8f836c488fb3bff15561724523b62cf77a0c3c4100b8a95",
+      "details": "Current checksum matches every available binding. Archive-relative path: `provider_run_report.md`.",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153908_odds_api/provider_run_report.md",
+      "evidence_type": "reviewed_shadow_archive_file",
+      "expected_checksum_sha256": "58dd62e80369e1b6c8f836c488fb3bff15561724523b62cf77a0c3c4100b8a95",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": ""
+    },
+    {
+      "current_checksum_sha256": "3474512ebc0b8ed461ebfbfbc74791e4bed3f4d0db41df17ad8a54ded1923422",
+      "details": "Current checksum matches every available binding. Archive-relative path: `provider_shadow_verification.csv`.",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153908_odds_api/provider_shadow_verification.csv",
+      "evidence_type": "reviewed_shadow_archive_file",
+      "expected_checksum_sha256": "3474512ebc0b8ed461ebfbfbc74791e4bed3f4d0db41df17ad8a54ded1923422",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": ""
+    },
+    {
+      "current_checksum_sha256": "86d1d3c4aa165a282e60bb1f7c569c188d385f9ea9ab8de83564e81d3a3e9b5c",
+      "details": "Current checksum matches every available binding. Archive-relative path: `provider_shadow_verification.json`.",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153908_odds_api/provider_shadow_verification.json",
+      "evidence_type": "reviewed_shadow_archive_file",
+      "expected_checksum_sha256": "86d1d3c4aa165a282e60bb1f7c569c188d385f9ea9ab8de83564e81d3a3e9b5c",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": ""
+    },
+    {
+      "current_checksum_sha256": "9d3ba1d0f3d1272d37b5ebc4ed918fd2e03e4752a065b8968e22ca3b192e28ab",
+      "details": "Current checksum matches every available binding. Archive-relative path: `provider_shadow_verification.md`.",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153908_odds_api/provider_shadow_verification.md",
+      "evidence_type": "reviewed_shadow_archive_file",
+      "expected_checksum_sha256": "9d3ba1d0f3d1272d37b5ebc4ed918fd2e03e4752a065b8968e22ca3b192e28ab",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": ""
+    },
+    {
+      "current_checksum_sha256": "7df1af4bd9314f2d585e4e1512236957cca48076610127b2f9fb47379a046bb0",
+      "details": "Current checksum matches every available binding. Archive-relative path: `staging_input_validation.csv`.",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153908_odds_api/staging_input_validation.csv",
+      "evidence_type": "reviewed_shadow_archive_file",
+      "expected_checksum_sha256": "7df1af4bd9314f2d585e4e1512236957cca48076610127b2f9fb47379a046bb0",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": ""
+    },
+    {
+      "current_checksum_sha256": "362d12f239d270df4011572a035fcfb6a50825c33559629691de3d9339ea077b",
+      "details": "Current checksum matches every available binding. Archive-relative path: `staging_input_validation.json`.",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153908_odds_api/staging_input_validation.json",
+      "evidence_type": "reviewed_shadow_archive_file",
+      "expected_checksum_sha256": "362d12f239d270df4011572a035fcfb6a50825c33559629691de3d9339ea077b",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": ""
+    },
+    {
+      "current_checksum_sha256": "0ec7265f967d329b1d02a8c59e483a159a3f3cf0e4b5ced2ee533b13360673aa",
+      "details": "Current checksum matches every available binding. Archive-relative path: `staging_input_validation.md`.",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153908_odds_api/staging_input_validation.md",
+      "evidence_type": "reviewed_shadow_archive_file",
+      "expected_checksum_sha256": "0ec7265f967d329b1d02a8c59e483a159a3f3cf0e4b5ced2ee533b13360673aa",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": ""
+    },
+    {
+      "current_checksum_sha256": "30f6c1ad63ccda5181ff5fd39a9f9f474e6f0630041d22b3c84b37cd4b564491",
+      "details": "Current checksum matches every available binding. Archive contains 9 file(s).",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153816_odds_api",
+      "evidence_type": "reviewed_shadow_archive_bundle",
+      "expected_checksum_sha256": "30f6c1ad63ccda5181ff5fd39a9f9f474e6f0630041d22b3c84b37cd4b564491",
+      "generated_at": "2026-08-21T15:38:16+00:00",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": "Shadow ready for review"
+    },
+    {
+      "current_checksum_sha256": "de53269f32536f3ddd216d10630266cdfdb4be7846d7fc8763fb4aeb2578ab2b",
+      "details": "Current checksum matches every available binding. Archive-relative path: `archive_metadata.json`.",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153816_odds_api/archive_metadata.json",
+      "evidence_type": "reviewed_shadow_archive_file",
+      "expected_checksum_sha256": "de53269f32536f3ddd216d10630266cdfdb4be7846d7fc8763fb4aeb2578ab2b",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": ""
+    },
+    {
+      "current_checksum_sha256": "75364bae70db3dc0796cac51f3d4bf064e721052c5a82fc0c8986032055f4aa4",
+      "details": "Current checksum matches every available binding. Archive-relative path: `provider_run_report.json`.",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153816_odds_api/provider_run_report.json",
+      "evidence_type": "reviewed_shadow_archive_file",
+      "expected_checksum_sha256": "75364bae70db3dc0796cac51f3d4bf064e721052c5a82fc0c8986032055f4aa4",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": ""
+    },
+    {
+      "current_checksum_sha256": "dfcb4c9b3fa5eec1b9a772e58f0535398362270f79e502df34eb7ed97575e28d",
+      "details": "Current checksum matches every available binding. Archive-relative path: `provider_run_report.md`.",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153816_odds_api/provider_run_report.md",
+      "evidence_type": "reviewed_shadow_archive_file",
+      "expected_checksum_sha256": "dfcb4c9b3fa5eec1b9a772e58f0535398362270f79e502df34eb7ed97575e28d",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": ""
+    },
+    {
+      "current_checksum_sha256": "707d720843d8482ed27cb57c491174476d905e3aea61adbcea798ebee626c62d",
+      "details": "Current checksum matches every available binding. Archive-relative path: `provider_shadow_verification.csv`.",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153816_odds_api/provider_shadow_verification.csv",
+      "evidence_type": "reviewed_shadow_archive_file",
+      "expected_checksum_sha256": "707d720843d8482ed27cb57c491174476d905e3aea61adbcea798ebee626c62d",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": ""
+    },
+    {
+      "current_checksum_sha256": "7f5f2b304c2de115dfdc6bef98857998afdf95650e3ad9e7820a2ad8fe7a1e92",
+      "details": "Current checksum matches every available binding. Archive-relative path: `provider_shadow_verification.json`.",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153816_odds_api/provider_shadow_verification.json",
+      "evidence_type": "reviewed_shadow_archive_file",
+      "expected_checksum_sha256": "7f5f2b304c2de115dfdc6bef98857998afdf95650e3ad9e7820a2ad8fe7a1e92",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": ""
+    },
+    {
+      "current_checksum_sha256": "5c420d25c8410bb71eb993de630a1608befd25de221d8645a04a57d56d1a371b",
+      "details": "Current checksum matches every available binding. Archive-relative path: `provider_shadow_verification.md`.",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153816_odds_api/provider_shadow_verification.md",
+      "evidence_type": "reviewed_shadow_archive_file",
+      "expected_checksum_sha256": "5c420d25c8410bb71eb993de630a1608befd25de221d8645a04a57d56d1a371b",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": ""
+    },
+    {
+      "current_checksum_sha256": "7df1af4bd9314f2d585e4e1512236957cca48076610127b2f9fb47379a046bb0",
+      "details": "Current checksum matches every available binding. Archive-relative path: `staging_input_validation.csv`.",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153816_odds_api/staging_input_validation.csv",
+      "evidence_type": "reviewed_shadow_archive_file",
+      "expected_checksum_sha256": "7df1af4bd9314f2d585e4e1512236957cca48076610127b2f9fb47379a046bb0",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": ""
+    },
+    {
+      "current_checksum_sha256": "2068165022d55730f2ddc30b9aead7bacc9a7202d606558098f9fd18b09f158b",
+      "details": "Current checksum matches every available binding. Archive-relative path: `staging_input_validation.json`.",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153816_odds_api/staging_input_validation.json",
+      "evidence_type": "reviewed_shadow_archive_file",
+      "expected_checksum_sha256": "2068165022d55730f2ddc30b9aead7bacc9a7202d606558098f9fd18b09f158b",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": ""
+    },
+    {
+      "current_checksum_sha256": "fe0fe67740680c5a65e26f858d809f10362112515fbed751bb96f862293958dc",
+      "details": "Current checksum matches every available binding. Archive-relative path: `staging_input_validation.md`.",
+      "evidence_path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153816_odds_api/staging_input_validation.md",
+      "evidence_type": "reviewed_shadow_archive_file",
+      "expected_checksum_sha256": "fe0fe67740680c5a65e26f858d809f10362112515fbed751bb96f862293958dc",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": ""
+    },
+    {
+      "current_checksum_sha256": "81a23e87f4e585b8b1e7b3d25d80a5ad6ff7427f806563d98e22dff2785474e5",
+      "details": "Current checksum matches every available binding.",
+      "evidence_path": "data/outputs/provider_shadow_run_comparison.json",
+      "evidence_type": "provider_shadow_run_comparison",
+      "expected_checksum_sha256": "81a23e87f4e585b8b1e7b3d25d80a5ad6ff7427f806563d98e22dff2785474e5",
+      "generated_at": "2026-08-21T11:44:26-04:00",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": "Stable enough for review"
+    },
+    {
+      "current_checksum_sha256": "f21cca62cc17dde8df2ae5709131ca1b43cbcda9a0bfe56f271e5bed157711e1",
+      "details": "Current checksum matches every available binding.",
+      "evidence_path": "data/outputs/provider_allowlist_pr_conformance.json",
+      "evidence_type": "provider_allowlist_pr_conformance",
+      "expected_checksum_sha256": "",
+      "generated_at": "2026-10-19T13:58:12+00:00",
+      "required": "No",
+      "status": "Included",
+      "verdict": "Conforms to preview"
+    },
+    {
+      "current_checksum_sha256": "febd44f5c80d37e209ee9eae0931e6186f4f41a1c5fb0a80a1e59a0e3a9c63c1",
+      "details": "Current checksum matches every available binding.",
+      "evidence_path": "data/manual/staging_provider_policy.json",
+      "evidence_type": "staging_provider_policy",
+      "expected_checksum_sha256": "febd44f5c80d37e209ee9eae0931e6186f4f41a1c5fb0a80a1e59a0e3a9c63c1",
+      "generated_at": "",
+      "required": "Yes",
+      "status": "Included",
+      "verdict": ""
+    }
+  ],
+  "evidence_file_count": 57,
+  "evidence_manifest": [
+    {
+      "checksum_sha256": "febd44f5c80d37e209ee9eae0931e6186f4f41a1c5fb0a80a1e59a0e3a9c63c1",
+      "path": "data/manual/staging_provider_policy.json"
+    },
+    {
+      "checksum_sha256": "30f6c1ad63ccda5181ff5fd39a9f9f474e6f0630041d22b3c84b37cd4b564491",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153816_odds_api"
+    },
+    {
+      "checksum_sha256": "de53269f32536f3ddd216d10630266cdfdb4be7846d7fc8763fb4aeb2578ab2b",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153816_odds_api/archive_metadata.json"
+    },
+    {
+      "checksum_sha256": "75364bae70db3dc0796cac51f3d4bf064e721052c5a82fc0c8986032055f4aa4",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153816_odds_api/provider_run_report.json"
+    },
+    {
+      "checksum_sha256": "dfcb4c9b3fa5eec1b9a772e58f0535398362270f79e502df34eb7ed97575e28d",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153816_odds_api/provider_run_report.md"
+    },
+    {
+      "checksum_sha256": "707d720843d8482ed27cb57c491174476d905e3aea61adbcea798ebee626c62d",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153816_odds_api/provider_shadow_verification.csv"
+    },
+    {
+      "checksum_sha256": "7f5f2b304c2de115dfdc6bef98857998afdf95650e3ad9e7820a2ad8fe7a1e92",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153816_odds_api/provider_shadow_verification.json"
+    },
+    {
+      "checksum_sha256": "5c420d25c8410bb71eb993de630a1608befd25de221d8645a04a57d56d1a371b",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153816_odds_api/provider_shadow_verification.md"
+    },
+    {
+      "checksum_sha256": "7df1af4bd9314f2d585e4e1512236957cca48076610127b2f9fb47379a046bb0",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153816_odds_api/staging_input_validation.csv"
+    },
+    {
+      "checksum_sha256": "2068165022d55730f2ddc30b9aead7bacc9a7202d606558098f9fd18b09f158b",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153816_odds_api/staging_input_validation.json"
+    },
+    {
+      "checksum_sha256": "fe0fe67740680c5a65e26f858d809f10362112515fbed751bb96f862293958dc",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153816_odds_api/staging_input_validation.md"
+    },
+    {
+      "checksum_sha256": "0e0aae3c2da51bf78bd25991ad100e5421195356ff9f3fa8bc2c8c1bae411398",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153908_odds_api"
+    },
+    {
+      "checksum_sha256": "a960c6e46dde87b7de95ef8a7aecefd7f1216d9bd02fcc8e1ee4285f4a14d659",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153908_odds_api/archive_metadata.json"
+    },
+    {
+      "checksum_sha256": "cb8882d430bb3bea56f75705d4cf2c59443e656350d23d833c920ce4a645908a",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153908_odds_api/provider_run_report.json"
+    },
+    {
+      "checksum_sha256": "58dd62e80369e1b6c8f836c488fb3bff15561724523b62cf77a0c3c4100b8a95",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153908_odds_api/provider_run_report.md"
+    },
+    {
+      "checksum_sha256": "3474512ebc0b8ed461ebfbfbc74791e4bed3f4d0db41df17ad8a54ded1923422",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153908_odds_api/provider_shadow_verification.csv"
+    },
+    {
+      "checksum_sha256": "86d1d3c4aa165a282e60bb1f7c569c188d385f9ea9ab8de83564e81d3a3e9b5c",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153908_odds_api/provider_shadow_verification.json"
+    },
+    {
+      "checksum_sha256": "9d3ba1d0f3d1272d37b5ebc4ed918fd2e03e4752a065b8968e22ca3b192e28ab",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153908_odds_api/provider_shadow_verification.md"
+    },
+    {
+      "checksum_sha256": "7df1af4bd9314f2d585e4e1512236957cca48076610127b2f9fb47379a046bb0",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153908_odds_api/staging_input_validation.csv"
+    },
+    {
+      "checksum_sha256": "362d12f239d270df4011572a035fcfb6a50825c33559629691de3d9339ea077b",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153908_odds_api/staging_input_validation.json"
+    },
+    {
+      "checksum_sha256": "0ec7265f967d329b1d02a8c59e483a159a3f3cf0e4b5ced2ee533b13360673aa",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/153908_odds_api/staging_input_validation.md"
+    },
+    {
+      "checksum_sha256": "9525c7de23a88ac19b34b9e812e68b6caa156d5d3483f9360b12edfc3c262935",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154019_odds_api"
+    },
+    {
+      "checksum_sha256": "74ab893d1efbde34329b9df97b82803e14967b7e326c519d4f7526b9be2c7038",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154019_odds_api/archive_metadata.json"
+    },
+    {
+      "checksum_sha256": "4536fcca99fe06c8f911231ca49dbd0bcf0ee18983c495d33e782a572dc601d6",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154019_odds_api/provider_run_report.json"
+    },
+    {
+      "checksum_sha256": "527c90d02e1be6b126fa3cd7987ae23097e0b3e067eaf762e3275651a09ae76d",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154019_odds_api/provider_run_report.md"
+    },
+    {
+      "checksum_sha256": "d4c9aa228517a4b0487d82e131110d9bb426bdefa540cc895e36057f14ccd3f2",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154019_odds_api/provider_shadow_verification.csv"
+    },
+    {
+      "checksum_sha256": "73899e80687c4db501eeaed0a068ffd7dff943b7e0b18e0f7185ff1b685b847b",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154019_odds_api/provider_shadow_verification.json"
+    },
+    {
+      "checksum_sha256": "1d0e3b710dfddb0b0e26cf9e05e14fd83eb4d4be17cfe7bb98d4ecb20f3d04f8",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154019_odds_api/provider_shadow_verification.md"
+    },
+    {
+      "checksum_sha256": "7df1af4bd9314f2d585e4e1512236957cca48076610127b2f9fb47379a046bb0",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154019_odds_api/staging_input_validation.csv"
+    },
+    {
+      "checksum_sha256": "b68af8ad108e0706f1c10c20371c6bbd3ad4f01975b9c8d57406728813c3e08f",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154019_odds_api/staging_input_validation.json"
+    },
+    {
+      "checksum_sha256": "ee039aa0ed52cd8f0e8be3efb1e0c163e34a10f8f0e0d2eb9f0b48ecdfa02518",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154019_odds_api/staging_input_validation.md"
+    },
+    {
+      "checksum_sha256": "539a2672fc06e78616e8235fecd39d85a9c67d697350547a6a20f80d0c197c28",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154222_odds_api"
+    },
+    {
+      "checksum_sha256": "e4a87d50ebc2f7cb5747c10b364363135f30c0c387b203f29ce389d215c5c117",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154222_odds_api/archive_metadata.json"
+    },
+    {
+      "checksum_sha256": "b3695687f7cf887af4234784d106698e11ccefa98e342425640d0cdced1d5ff5",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154222_odds_api/provider_run_report.json"
+    },
+    {
+      "checksum_sha256": "011c5d2360df796195efa3bbd82fa5a805baaeb570d6cc79e24d335ad3c79741",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154222_odds_api/provider_run_report.md"
+    },
+    {
+      "checksum_sha256": "148f77319e90180102c53481c663ac11d88e00f35da708e6f158116b599775e8",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154222_odds_api/provider_shadow_verification.csv"
+    },
+    {
+      "checksum_sha256": "9a0413dfe47a92e0178178c86f186205e67d5c1341a2ee0f28f96ec5810d5c99",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154222_odds_api/provider_shadow_verification.json"
+    },
+    {
+      "checksum_sha256": "1c5fda77240e8f0ed68938927c1ace8cb9396c8d39cc182cb34a0e0c6ae34e48",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154222_odds_api/provider_shadow_verification.md"
+    },
+    {
+      "checksum_sha256": "7df1af4bd9314f2d585e4e1512236957cca48076610127b2f9fb47379a046bb0",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154222_odds_api/staging_input_validation.csv"
+    },
+    {
+      "checksum_sha256": "75def9eb58b441c87aeebc5fa03b12a5118428dc809f559c7cd48645987feeaf",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154222_odds_api/staging_input_validation.json"
+    },
+    {
+      "checksum_sha256": "68e866e730e1df7e8db1e507ce0319d16473d902fe585fa2344f7cf5a24c509a",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154222_odds_api/staging_input_validation.md"
+    },
+    {
+      "checksum_sha256": "6b2842cbc84eddbecbd3ca435a652bc900f47c2b00999985ce398c47059aa866",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154335_odds_api"
+    },
+    {
+      "checksum_sha256": "00a8ed2f5e471c240b7333af072afdb4d96ff2bbb3737c3dc661977a52d6f9cc",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154335_odds_api/archive_metadata.json"
+    },
+    {
+      "checksum_sha256": "bef6bd5c9af16226774580da6b204d1cedf055d27834b4241b985d45a747a892",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154335_odds_api/provider_run_report.json"
+    },
+    {
+      "checksum_sha256": "e58ae4ab3612cbde9043de6445d4b6f24bf1124d5db4e350377ea14b793b2b1a",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154335_odds_api/provider_run_report.md"
+    },
+    {
+      "checksum_sha256": "df25ef586a3eb596e5003ee6dce8b1b4decf509876dd5bd8864bb0988167aba4",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154335_odds_api/provider_shadow_verification.csv"
+    },
+    {
+      "checksum_sha256": "e9afa9b87bbbab56915eb2fa336d611975ce7ed81dbdb26777698d947085ead9",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154335_odds_api/provider_shadow_verification.json"
+    },
+    {
+      "checksum_sha256": "478ed0325f094cc5e97e24cb20d0e872183396a2a3d357bc279bb84da9754b2d",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154335_odds_api/provider_shadow_verification.md"
+    },
+    {
+      "checksum_sha256": "7df1af4bd9314f2d585e4e1512236957cca48076610127b2f9fb47379a046bb0",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154335_odds_api/staging_input_validation.csv"
+    },
+    {
+      "checksum_sha256": "6b06bae57bcdb61f2296012ed70453b20fac85c822136130f129a71d37a3075d",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154335_odds_api/staging_input_validation.json"
+    },
+    {
+      "checksum_sha256": "ba53f53f5554ca9a5387018b1f48a02d15cffb97b6075187289e196c2cace9f5",
+      "path": "data/outputs/archive/provider_shadow_runs/2026-08-21/154335_odds_api/staging_input_validation.md"
+    },
+    {
+      "checksum_sha256": "ec5461c17cb7c629263d64f0cbc53b86c70af825d701aeda9ae70f22376dc3da",
+      "path": "data/outputs/provider_acceptance_checklist.json"
+    },
+    {
+      "checksum_sha256": "f21cca62cc17dde8df2ae5709131ca1b43cbcda9a0bfe56f271e5bed157711e1",
+      "path": "data/outputs/provider_allowlist_pr_conformance.json"
+    },
+    {
+      "checksum_sha256": "ec15c69525eb25b5fc51fbef2bbdc6d95bf9bea133d2c301da5cd6486c3ad101",
+      "path": "data/outputs/provider_allowlist_pr_preview.json"
+    },
+    {
+      "checksum_sha256": "5c510a40197532be0ec48bca4a1c3ee3654f3e2e911b02fd7cbc63dc9c071597",
+      "path": "data/outputs/provider_human_acceptance_receipt.json"
+    },
+    {
+      "checksum_sha256": "58f17a1557376384f79478d9bcc4cb335ad824aefc2c6122c56155180a06e15a",
+      "path": "data/outputs/provider_human_acceptance_receipt_verification.json"
+    },
+    {
+      "checksum_sha256": "81a23e87f4e585b8b1e7b3d25d80a5ad6ff7427f806563d98e22dff2785474e5",
+      "path": "data/outputs/provider_shadow_run_comparison.json"
+    }
+  ],
+  "generated_at": "2026-10-19T13:58:12+00:00",
+  "preview_verdict": "Ready for separate allowlist PR",
+  "provider_key": "odds_api",
+  "provider_name": "the_odds_api",
+  "receipt_id": "odds_api-20261019T135739+0000-06088e72a437",
+  "receipt_verification_verdict": "Verified for allowlist PR review",
+  "recommended_pr_description": "Updates the reviewed allowlist entry for `the_odds_api` (`odds_api`) to cover 1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5, player_assists, player_goal_scorer_anytime, player_goalie_saves_alternate, player_shots, player_shots_on_target, player_tackles_alternate, player_to_receive_card, player_to_receive_red_card, team_total_home_0_5, team_total_home_1_5, team_total_home_2_5, team_total_away_0_5, team_total_away_1_5, team_total_away_2_5. Binds the policy entry to human acceptance receipt `odds_api-20261019T135739+0000-06088e72a437` and its verified evidence. Known limitations: Player props carry no demonstrated edge: the held-out measurement (data/outputs/player_props_backtest.md) found the corrected model well calibrated and clearing its edge bar about twice a month, and books reprice on the team sheet after the card is built. Approving them approves that trade-off. Team totals carry no demonstrated edge: they have never been measured against real prices. They are priced off the same goal-count ratings as the 2.5 line and BTTS, and a line a book does not post stays excluded. Allowlisting does not bypass staging validation, freshness, completeness, checksum, receipt, or Thursday cutoff gates. This policy-only proposal does not promote staging, run a provider, generate picks, place bets, or enable cron.",
+  "recommended_pr_title": "Update the the_odds_api allowlisted market scope",
+  "safety": {
+    "bets_placed": false,
+    "cron_enabled": false,
+    "picks_generated": false,
+    "protected_files_edited": false,
+    "provider_allowlisted": false,
+    "provider_policy_edited": false,
+    "provider_run": false,
+    "read_only_evidence_bundle": true,
+    "receipt_created": false,
+    "receipt_verified_by_side_effect": false,
+    "staging_promoted": false
+  },
+  "schema_version": 1,
+  "status_counts": {
+    "Included": 57
+  },
+  "verdict": "Evidence bundle ready for PR review"
+}

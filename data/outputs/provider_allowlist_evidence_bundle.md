@@ -6,8 +6,8 @@
 
 - **Evidence bundle ready for PR review**
 - Provider: **the_odds_api** (`odds_api`)
-- Bundle ID: `odds_api-allowlist-evidence-9d3e1ee53f7b7a86`
-- Bundle SHA-256: `9d3e1ee53f7b7a86efe2685238d2a6f01e743b90c81f39650eb98fbd01096d07`
+- Bundle ID: `odds_api-allowlist-evidence-34169ad3b18eda60`
+- Bundle SHA-256: `34169ad3b18eda60c361ed66710ad137c3c16e5e83e9a4cd1aaae2a78eae18e0`
 - Included checksum entries: **57**
 
 ## Review decisions
@@ -15,16 +15,16 @@
 - Preview verdict: **Ready for separate allowlist PR**
 - Conformance verdict: **Conforms to preview**
 - Receipt verification verdict: **Verified for allowlist PR review**
-- Human receipt ID: `odds_api-20261019T131401+0000-968716f836e0`
+- Human receipt ID: `odds_api-20261019T135739+0000-06088e72a437`
 - Checklist verdict: **Ready for human allowlist review**
 
 ## Included evidence and status
 
 | evidence_type                                  | evidence_path                                                                                          | required   | expected_checksum_sha256                                         | current_checksum_sha256                                          | status   | verdict                          | generated_at              | details                                                                                                       |
 |:-----------------------------------------------|:-------------------------------------------------------------------------------------------------------|:-----------|:-----------------------------------------------------------------|:-----------------------------------------------------------------|:---------|:---------------------------------|:--------------------------|:--------------------------------------------------------------------------------------------------------------|
-| provider_allowlist_pr_preview                  | data/outputs/provider_allowlist_pr_preview.json                                                        | Yes        |                                                                  | 35c17ebb00be96a7a204efcee43225cf3682903ee2cc7fb4896473f1b50a693e | Included | Ready for separate allowlist PR  | 2026-10-19T13:14:02+00:00 | Current checksum matches every available binding.                                                             |
-| provider_human_acceptance_receipt_verification | data/outputs/provider_human_acceptance_receipt_verification.json                                       | Yes        | e636f3312444ad2ec13451a2dd5b35303e175cbb7d6c26e7695c15dae1aa65a8 | e636f3312444ad2ec13451a2dd5b35303e175cbb7d6c26e7695c15dae1aa65a8 | Included | Verified for allowlist PR review | 2026-10-19T13:14:01+00:00 | Current checksum matches every available binding.                                                             |
-| provider_human_acceptance_receipt              | data/outputs/provider_human_acceptance_receipt.json                                                    | Yes        | d44f9a7a813e98a77021950e48c6cdeb1807abe28f9b6e602cbf5362eee6e0bf | d44f9a7a813e98a77021950e48c6cdeb1807abe28f9b6e602cbf5362eee6e0bf | Included | approved_for_allowlist_pr        |                           | Current checksum matches every available binding.                                                             |
+| provider_allowlist_pr_preview                  | data/outputs/provider_allowlist_pr_preview.json                                                        | Yes        |                                                                  | ec15c69525eb25b5fc51fbef2bbdc6d95bf9bea133d2c301da5cd6486c3ad101 | Included | Ready for separate allowlist PR  | 2026-10-19T13:57:46+00:00 | Current checksum matches every available binding.                                                             |
+| provider_human_acceptance_receipt_verification | data/outputs/provider_human_acceptance_receipt_verification.json                                       | Yes        | 58f17a1557376384f79478d9bcc4cb335ad824aefc2c6122c56155180a06e15a | 58f17a1557376384f79478d9bcc4cb335ad824aefc2c6122c56155180a06e15a | Included | Verified for allowlist PR review | 2026-10-19T13:57:45+00:00 | Current checksum matches every available binding.                                                             |
+| provider_human_acceptance_receipt              | data/outputs/provider_human_acceptance_receipt.json                                                    | Yes        | 5c510a40197532be0ec48bca4a1c3ee3654f3e2e911b02fd7cbc63dc9c071597 | 5c510a40197532be0ec48bca4a1c3ee3654f3e2e911b02fd7cbc63dc9c071597 | Included | approved_for_allowlist_pr        |                           | Current checksum matches every available binding.                                                             |
 | provider_acceptance_checklist                  | data/outputs/provider_acceptance_checklist.json                                                        | Yes        | ec5461c17cb7c629263d64f0cbc53b86c70af825d701aeda9ae70f22376dc3da | ec5461c17cb7c629263d64f0cbc53b86c70af825d701aeda9ae70f22376dc3da | Included | Ready for human allowlist review | 2026-10-19T02:10:48+00:00 | Current checksum matches every available binding.                                                             |
 | reviewed_shadow_archive_bundle                 | data/outputs/archive/provider_shadow_runs/2026-08-21/154335_odds_api                                   | Yes        | 6b2842cbc84eddbecbd3ca435a652bc900f47c2b00999985ce398c47059aa866 | 6b2842cbc84eddbecbd3ca435a652bc900f47c2b00999985ce398c47059aa866 | Included | Shadow ready for review          | 2026-08-21T15:43:35+00:00 | Current checksum matches every available binding. Archive contains 9 file(s).                                 |
 | reviewed_shadow_archive_file                   | data/outputs/archive/provider_shadow_runs/2026-08-21/154335_odds_api/archive_metadata.json             | Yes        | 00a8ed2f5e471c240b7333af072afdb4d96ff2bbb3737c3dc661977a52d6f9cc | 00a8ed2f5e471c240b7333af072afdb4d96ff2bbb3737c3dc661977a52d6f9cc | Included |                                  |                           | Current checksum matches every available binding. Archive-relative path: `archive_metadata.json`.             |
@@ -77,15 +77,15 @@
 | reviewed_shadow_archive_file                   | data/outputs/archive/provider_shadow_runs/2026-08-21/153816_odds_api/staging_input_validation.json     | Yes        | 2068165022d55730f2ddc30b9aead7bacc9a7202d606558098f9fd18b09f158b | 2068165022d55730f2ddc30b9aead7bacc9a7202d606558098f9fd18b09f158b | Included |                                  |                           | Current checksum matches every available binding. Archive-relative path: `staging_input_validation.json`.     |
 | reviewed_shadow_archive_file                   | data/outputs/archive/provider_shadow_runs/2026-08-21/153816_odds_api/staging_input_validation.md       | Yes        | fe0fe67740680c5a65e26f858d809f10362112515fbed751bb96f862293958dc | fe0fe67740680c5a65e26f858d809f10362112515fbed751bb96f862293958dc | Included |                                  |                           | Current checksum matches every available binding. Archive-relative path: `staging_input_validation.md`.       |
 | provider_shadow_run_comparison                 | data/outputs/provider_shadow_run_comparison.json                                                       | Yes        | 81a23e87f4e585b8b1e7b3d25d80a5ad6ff7427f806563d98e22dff2785474e5 | 81a23e87f4e585b8b1e7b3d25d80a5ad6ff7427f806563d98e22dff2785474e5 | Included | Stable enough for review         | 2026-08-21T11:44:26-04:00 | Current checksum matches every available binding.                                                             |
-| provider_allowlist_pr_conformance              | data/outputs/provider_allowlist_pr_conformance.json                                                    | No         |                                                                  | c2c04df04a59914c2f0c5d1c0136395afeaa3521c039f55f8a6a7d5f1d822bfb | Included | Conforms to preview              | 2026-10-19T13:14:14+00:00 | Current checksum matches every available binding.                                                             |
-| staging_provider_policy                        | data/manual/staging_provider_policy.json                                                               | Yes        | 9ad801b38a4250eb98dac8551845057f893cf295c8adacc6787c0811091b6d4a | 9ad801b38a4250eb98dac8551845057f893cf295c8adacc6787c0811091b6d4a | Included |                                  |                           | Current checksum matches every available binding.                                                             |
+| provider_allowlist_pr_conformance              | data/outputs/provider_allowlist_pr_conformance.json                                                    | No         |                                                                  | f21cca62cc17dde8df2ae5709131ca1b43cbcda9a0bfe56f271e5bed157711e1 | Included | Conforms to preview              | 2026-10-19T13:58:12+00:00 | Current checksum matches every available binding.                                                             |
+| staging_provider_policy                        | data/manual/staging_provider_policy.json                                                               | Yes        | febd44f5c80d37e209ee9eae0931e6186f4f41a1c5fb0a80a1e59a0e3a9c63c1 | febd44f5c80d37e209ee9eae0931e6186f4f41a1c5fb0a80a1e59a0e3a9c63c1 | Included |                                  |                           | Current checksum matches every available binding.                                                             |
 
 ## Checksum manifest
 
 ```json
 [
   {
-    "checksum_sha256": "9ad801b38a4250eb98dac8551845057f893cf295c8adacc6787c0811091b6d4a",
+    "checksum_sha256": "febd44f5c80d37e209ee9eae0931e6186f4f41a1c5fb0a80a1e59a0e3a9c63c1",
     "path": "data/manual/staging_provider_policy.json"
   },
   {
@@ -293,19 +293,19 @@
     "path": "data/outputs/provider_acceptance_checklist.json"
   },
   {
-    "checksum_sha256": "c2c04df04a59914c2f0c5d1c0136395afeaa3521c039f55f8a6a7d5f1d822bfb",
+    "checksum_sha256": "f21cca62cc17dde8df2ae5709131ca1b43cbcda9a0bfe56f271e5bed157711e1",
     "path": "data/outputs/provider_allowlist_pr_conformance.json"
   },
   {
-    "checksum_sha256": "35c17ebb00be96a7a204efcee43225cf3682903ee2cc7fb4896473f1b50a693e",
+    "checksum_sha256": "ec15c69525eb25b5fc51fbef2bbdc6d95bf9bea133d2c301da5cd6486c3ad101",
     "path": "data/outputs/provider_allowlist_pr_preview.json"
   },
   {
-    "checksum_sha256": "d44f9a7a813e98a77021950e48c6cdeb1807abe28f9b6e602cbf5362eee6e0bf",
+    "checksum_sha256": "5c510a40197532be0ec48bca4a1c3ee3654f3e2e911b02fd7cbc63dc9c071597",
     "path": "data/outputs/provider_human_acceptance_receipt.json"
   },
   {
-    "checksum_sha256": "e636f3312444ad2ec13451a2dd5b35303e175cbb7d6c26e7695c15dae1aa65a8",
+    "checksum_sha256": "58f17a1557376384f79478d9bcc4cb335ad824aefc2c6122c56155180a06e15a",
     "path": "data/outputs/provider_human_acceptance_receipt_verification.json"
   },
   {
@@ -320,7 +320,7 @@
 - Title: Update the the_odds_api allowlisted market scope
 - Description:
 
-Updates the reviewed allowlist entry for `the_odds_api` (`odds_api`) to cover 1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5, player_assists, player_goal_scorer_anytime, player_shots, player_shots_on_target, team_total_home_0_5, team_total_home_1_5, team_total_home_2_5, team_total_away_0_5, team_total_away_1_5, team_total_away_2_5. Binds the policy entry to human acceptance receipt `odds_api-20261019T131401+0000-968716f836e0` and its verified evidence. Known limitations: Player props carry no demonstrated edge: the held-out measurement (data/outputs/player_props_backtest.md) found the corrected model well calibrated and clearing its edge bar about twice a month, and books reprice on the team sheet after the card is built. Approving them approves that trade-off. Team totals carry no demonstrated edge: they have never been measured against real prices. They are priced off the same goal-count ratings as the 2.5 line and BTTS, and a line a book does not post stays excluded. Allowlisting does not bypass staging validation, freshness, completeness, checksum, receipt, or Thursday cutoff gates. This policy-only proposal does not promote staging, run a provider, generate picks, place bets, or enable cron.
+Updates the reviewed allowlist entry for `the_odds_api` (`odds_api`) to cover 1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5, player_assists, player_goal_scorer_anytime, player_goalie_saves_alternate, player_shots, player_shots_on_target, player_tackles_alternate, player_to_receive_card, player_to_receive_red_card, team_total_home_0_5, team_total_home_1_5, team_total_home_2_5, team_total_away_0_5, team_total_away_1_5, team_total_away_2_5. Binds the policy entry to human acceptance receipt `odds_api-20261019T135739+0000-06088e72a437` and its verified evidence. Known limitations: Player props carry no demonstrated edge: the held-out measurement (data/outputs/player_props_backtest.md) found the corrected model well calibrated and clearing its edge bar about twice a month, and books reprice on the team sheet after the card is built. Approving them approves that trade-off. Team totals carry no demonstrated edge: they have never been measured against real prices. They are priced off the same goal-count ratings as the 2.5 line and BTTS, and a line a book does not post stays excluded. Allowlisting does not bypass staging validation, freshness, completeness, checksum, receipt, or Thursday cutoff gates. This policy-only proposal does not promote staging, run a provider, generate picks, place bets, or enable cron.
 
 ## Decision boundary
 

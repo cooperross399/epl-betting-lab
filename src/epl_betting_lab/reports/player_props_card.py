@@ -98,6 +98,9 @@ class PropPick:
     away_team: str
     market: str
     player: str
+    #: The player's side, from the model's own rates (the staging row has
+    #: home and away but never says which the player is on).
+    team: str
     selection: str
     model_probability: float
     implied_probability: float
@@ -339,6 +342,7 @@ def build_player_props_card(
                 away_team=str(row["away_team"]),
                 market=market,
                 player=str(row["player"]),
+                team=rates.team,
                 selection=str(row["selection"]),
                 model_probability=round(probability, 4),
                 implied_probability=round(implied, 4),

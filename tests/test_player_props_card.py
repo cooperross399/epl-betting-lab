@@ -206,6 +206,9 @@ class TestApprovedProps:
         assert len(summary["picks"]) == 1
         pick = summary["picks"][0]
         assert pick["player"] == "Alexander Isak"
+        # The board needs whose side the player is on, which the staging row
+        # never says; the model's own player rates do.
+        assert pick["team"] == "Newcastle"
         assert pick["units"] == 0.1
         # Isak's raw SOT expectation is ~3 per match; even corrected, the
         # over-0.5 probability towers over the +150 implied 40%.

@@ -243,6 +243,12 @@ LEAN_TIER = "Lean (no stake)"
 #: the bought provider history covers props and corner totals only.
 PROFIT_BACKTESTABLE_MARKETS: frozenset[str] = frozenset({"1x2", "total_2_5"})
 
+#: Markets that CAN be profit-backtested and lost when they were. `1x2` lost
+#: on every held-out season (docs/no_edge_out_of_sample.md) and is on the card
+#: at Cooper's direction of 2026-10-19, not on evidence, so its ranking score
+#: orders it and never sizes it.
+FLOOR_ONLY_MARKETS: frozenset[str] = frozenset({"1x2"})
+
 #: The stake for a market whose profit can never be verified: the smallest one.
 #:
 #: This was written as "one tier down, not a floor - the ranking still says
@@ -349,6 +355,8 @@ def _confidence_tier(row: pd.Series) -> str:
     # stake the card uses, whatever its ranking score says. Raising this is a
     # decision for the CLV record to earn, not for a score to grant.
     if str(row.get("selection_rule", "")) == "market_anchored" and tier in {"A", "B"}:
+        return "C"
+    if market in FLOOR_ONLY_MARKETS and tier in {"A", "B"}:
         return "C"
     if market and market not in PROFIT_BACKTESTABLE_MARKETS and tier in {"A", "B"}:
         return UNVERIFIABLE_MARKET_TIER

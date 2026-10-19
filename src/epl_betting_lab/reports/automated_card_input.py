@@ -37,14 +37,15 @@ from epl_betting_lab.staging_provider_policy import entry_is_complete_approval
 #: empty: the library judges any market on coverage, and this is the card's own
 #: scope decision layered on top of it.
 #:
-#: `1x2` — removed 2026-08-28. Rules chosen on 2021/22–2024/25 and read on
-#: 2025/26–2026/27 lose in every configuration for both the old and the new
-#: ratings, and training-season CLV is negative in every cell; the historical
-#: +34 units was the calibration filter, tuned on the same pass, removing 272
-#: of 774 raw bets. Evidence: docs/no_edge_out_of_sample.md. Cooper directed the
-#: removal in chat ("yes keep going do everything") after being told it was
-#: his market-scope call; this comment is that record, not a signed receipt.
-CARD_DISABLED_MARKETS: tuple[str, ...] = ("1x2",)
+#: Empty since 2026-10-19. `1x2` was removed on 2026-08-28: rules chosen on
+#: 2021/22–2024/25 and read on 2025/26–2026/27 lose in every configuration for
+#: both the old and the new ratings, and training-season CLV is negative in
+#: every cell (docs/no_edge_out_of_sample.md). Cooper directed it back on
+#: 2026-10-19 ("I want props and every other market we have looked into
+#: included in the model's card"). That evidence has not changed: 1X2 returns
+#: as a scope decision, staked at the floor by
+#: `thursday_best_bets.FLOOR_ONLY_MARKETS`, not because it earned a place.
+CARD_DISABLED_MARKETS: tuple[str, ...] = ()
 
 from epl_betting_lab.market_eligibility import (
     DEFAULT_DISABLED_MARKETS,

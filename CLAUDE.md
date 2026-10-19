@@ -93,14 +93,25 @@ Use the repo, the reports, and GitHub.
   under that rule, the new one bets draws and long-priced away sides for −74
   units. Do not switch the card's ratings without rebuilding the rule and
   passing a held-out-season test: `docs/no_edge_out_of_sample.md`.
-- **1X2 is off the card (2026-08-28).** With rules chosen on 2021/22–2024/25
-  and read on 2025/26–2026/27, every configuration of both models loses, and
-  training-season CLV is negative in every cell. The historical +34 units was
-  created by the calibration filter removing 272 of 774 raw bets, and the
-  filter was tuned on the same pass. Cooper directed the removal in chat after
-  being told it was his market-scope call; `CARD_DISABLED_MARKETS` records
-  it. Put it back only with new held-out evidence, never on a single-pass
-  profit figure.
+- **1X2 is back on the card (2026-10-19), at the floor stake, on Cooper's
+  direction and not on evidence.** It came off on 2026-08-28: with rules chosen
+  on 2021/22–2024/25 and read on 2025/26–2026/27, every configuration of both
+  models loses, and training-season CLV is negative in every cell; the
+  historical +34 units was the calibration filter removing 272 of 774 raw bets
+  on the same pass (`docs/no_edge_out_of_sample.md`). Cooper: "I want props and
+  every other market we have looked into included in the model's card and on
+  the website." `CARD_DISABLED_MARKETS` is empty and
+  `thursday_best_bets.FLOOR_ONLY_MARKETS` holds 1X2 at 0.1u whatever its
+  ranking score, so "every bet is 0.1 units" stays true. Say plainly that 1X2
+  lost out of sample when asked what its picks rest on.
+- **Player props: built, wired to the card and the board, and waiting only on
+  Cooper's approval of the policy PR.** The props card, the card section and
+  the board's Props tab (`web/build_board_json.props_block`, the shared
+  `sports.js` EPL props adapter) all run from `player_props_card.json`; the
+  live fetch buys only the selected round's fixtures that have not kicked off
+  (`player_props_staging.slate_events`), about 4 credits per fixture per run.
+  Approving the four prop markets in `required_markets` is what turns the
+  fetch on.
 - **The card's ranking takes no reliability nudge from the backtest.**
   `_market_reliability_from_backtest` returns `{}`. It used to scale each
   market's in-sample ROI into a ±12 band, which handed `total_2_5` the maximum
@@ -173,10 +184,9 @@ Use the repo, the reports, and GitHub.
   every volume bucket (24.3 predicted vs 24.5 happened; 34.4 vs 34.9). The
   corrected model clears an 8% edge bar four times in two months: it almost
   never disagrees with the one-sided market prices by that much, no edge is
-  demonstrated, and none can be at this sample size. Props reach the card
-  only through the player/line-aware card integration (not built) and a
-  reviewed policy approval, and the measurement above is what that review
-  should weigh.
+  demonstrated, and none can be at this sample size. The card and board
+  integration is built (see the props bullet above); the reviewed policy
+  approval is what is left, and the measurement above is what it weighs.
 - **The card's fixture window moves with the calendar.** It is the round still
   to be played, derived in `src/epl_betting_lab/selected_slate.py` from the
   fixtures in hand, not a pair of dates written down. It used to be hardcoded
@@ -264,8 +274,8 @@ Use the repo, the reports, and GitHub.
   use, adding it is a decision about where he holds money, not a heuristic.
 - **Every bet on the card is the same size: 0.1 units.**
   `PROFIT_BACKTESTABLE_MARKETS` is `{1x2, total_2_5}` — the only two
-  Football-Data ships odds for — and `1x2` is off the card while the anchored
-  rule caps `total_2_5` at C anyway. Tier A was never reached across 162
+  Football-Data ships odds for — and `1x2` is held at C by
+  `FLOOR_ONLY_MARKETS` while the anchored rule caps `total_2_5` at C anyway. Tier A was never reached across 162
   archived best bets, so `UNVERIFIABLE_MARKET_TIER` is a **floor**, not the
   "one tier down, ranking still moves the stake" an earlier commit of mine
   claimed. The tier orders the card; it does not size the bet, and the card

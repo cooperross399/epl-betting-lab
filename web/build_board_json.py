@@ -641,6 +641,79 @@ def due_rows_for(due: dict | None, event_id: str) -> list[dict]:
     return out
 
 
+#: Written by `scripts/run_props_card_refresh.py` in Matchday Refresh and
+#: restored from its `matchday-reports` artifact (`config.PROPS_CARD_JSON`).
+PROPS_CARD_FILE = Path("data/outputs/player_props_card.json")
+
+#: Provider prop keys as the shared page's `PROP_MARKETS` names them.
+PROP_MARKET_KEYS = {
+    "player_shots": "shots",
+    "player_shots_on_target": "shots_on_target",
+    "player_assists": "assists",
+    "player_goal_scorer_anytime": "goals",
+}
+
+#: The props card's status words, as the shared page's props states.
+PROPS_STATUS = {"Props card ready": "ok", "Held by policy": "abstain", "No props staging evidence": "no_lines"}
+
+
+def load_props_card(lab: Path) -> dict | None:
+    """The run's props card, or None when no run wrote one (the board then has no Props tab)."""
+    try:
+        payload = json.loads((lab / PROPS_CARD_FILE).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
+def _prop_line(selection: str) -> tuple[str, float] | None:
+    """`Over@1.5` -> ("over", 1.5); an anytime-scorer `Yes` is over half a goal."""
+    name, _, point = str(selection or "").partition("@")
+    name = name.strip().casefold()
+    if name == "yes" and not point:
+        return "over", 0.5
+    try:
+        return (name, float(point)) if name in ("over", "under") else None
+    except ValueError:
+        return None
+
+
+def props_block(props: dict, games: dict[tuple[str, str], str]) -> dict:
+    """`board.json` `props` in the schema the shared Props tab reads (SCHEMA.md).
+
+    Every row is a pick the props card staked; the card writes nothing below
+    its bar, so every row is a best bet at the card's own units. A pick whose
+    fixture is not on this board is dropped rather than shown without a game.
+    """
+    status = PROPS_STATUS.get(str(props.get("status") or ""), "no_lines")
+    rows = []
+    for p in props.get("picks") or [] if status == "ok" else []:
+        if not isinstance(p, dict):
+            continue
+        home, away = str(p.get("home_team", "")), str(p.get("away_team", ""))
+        game = games.get((home, away))
+        market = PROP_MARKET_KEYS.get(str(p.get("market", "")))
+        line = _prop_line(str(p.get("selection", "")))
+        if game is None or market is None or line is None:
+            continue
+        team = str(p.get("team", ""))
+        opp = away if team == home else home if team == away else ""
+        price = p.get("american_odds")
+        prob = p.get("model_probability")
+        edge = p.get("edge")
+        rows.append({
+            "gameId": game, "player": p.get("player", ""),
+            "team": team_entry(team)[0] if team else "", "opp": team_entry(opp)[0] if opp else "",
+            "market": market, "side": line[0], "line": line[1],
+            "price": int(price) if isinstance(price, (int, float)) else None, "book": p.get("book") or "",
+            "modelProb": prob if isinstance(prob, (int, float)) else None,
+            "fairPrice": to_american(prob) if isinstance(prob, (int, float)) and 0 < prob < 1 else None,
+            "edgePct": round(edge * 100, 1) if isinstance(edge, (int, float)) else None,
+            "kind": "bet", "units": p.get("units"),
+        })
+    return {"status": status, "note": str(props.get("note") or ""), "rows": rows}
+
+
 def build(lab: Path, today: date) -> dict:
     now = datetime.now(timezone.utc)
     card, card_source = read_card(lab, today)
@@ -658,6 +731,7 @@ def build(lab: Path, today: date) -> dict:
 
     excluded = [str(m).lower() for m in card.get("excluded_markets") or []]
     due = load_due_list(lab)
+    props = load_props_card(lab)
     teams, games = {}, []
     for f in fixtures:
         h, a = f["home"]["fd"], f["away"]["fd"]
@@ -768,6 +842,8 @@ def build(lab: Path, today: date) -> dict:
         "cardSource": card_source, "priceSource": price_source,
         "record": load_record(lab), "teams": teams, "games": games,
         **({"droughtNote": due_note(due)} if due is not None else {}),
+        **({"props": props_block(props, {(f["home"]["fd"], f["away"]["fd"]): f["id"] for f in fixtures})}
+           if props is not None else {}),
     }
 
 

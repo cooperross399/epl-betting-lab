@@ -15,6 +15,11 @@ name: Provider Evidence Refresh
 
 on:
   workflow_dispatch:
+    inputs:
+      props_only:
+        description: "Only fetch prop prices for a props approval (skips the match-market shadow run)"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -51,12 +56,14 @@ jobs:
           python -m pip install -e .
 
       - name: Fetch historical results
+        if: ${{ !inputs.props_only }}
         env:
           PYTHONPATH: src
         run: |
           python scripts/fetch_data.py
 
       - name: Run live shadow verification
+        if: ${{ !inputs.props_only }}
         env:
           EPL_ODDS_API_KEY: ${{ secrets.EPL_ODDS_API_KEY }}
           PYTHONPATH: src
@@ -65,10 +72,26 @@ jobs:
             --provider odds_api --live --overwrite-staging --include-event-markets
 
       - name: Build the provider-derived card input
+        if: ${{ !inputs.props_only }}
         env:
           PYTHONPATH: src
         run: |
           python scripts/run_api_first_card_workflow.py
+
+      - name: Fetch player-prop prices for the evidence
+        # A props approval binds to staged prop prices: the allowlist preview
+        # proposes only prop markets the props card reports prices for. This
+        # buys the selected round once (about four credits per fixture) and
+        # writes the Held-by-policy props card that names those markets. It
+        # stages nothing the card reads and picks nothing.
+        env:
+          EPL_ODDS_API_KEY: ${{ secrets.EPL_ODDS_API_KEY }}
+          PYTHONPATH: src
+        run: |
+          python scripts/fetch_player_props_staging.py --overwrite-staging
+          # Printed whole so the evidence can be read from the log as well as
+          # the artifact.
+          python -c "import json; from epl_betting_lab.reports.player_props_card import save_player_props_card; print(json.dumps(save_player_props_card()['summary'], indent=2, sort_keys=True))"
 
       - name: Upload evidence
         if: always()

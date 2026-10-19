@@ -287,16 +287,17 @@ def test_save_writes_outside_manual_and_reports_no_manual_entry(
     assert Path(result["card_input"]).is_file()
 
 
-def test_the_card_does_not_stake_1x2_even_with_full_coverage(tmp_path: Path) -> None:
-    """Card scope, not coverage: 1X2 lost on every held-out season.
+def test_the_card_stakes_1x2_again_at_the_owners_direction(tmp_path: Path) -> None:
+    """1X2 is back on the card from 2026-10-19 because Cooper directed it.
 
-    The library still judges 1X2 on coverage like any market; the card
-    declines it on top. See docs/no_edge_out_of_sample.md.
+    The out-of-sample evidence that took it off (docs/no_edge_out_of_sample.md)
+    has not changed and the card still says so; this is a scope decision, and
+    the stake is held at the floor (see test_thursday_best_bets).
     """
     from epl_betting_lab.reports.automated_card_input import CARD_DISABLED_MARKETS
 
-    assert "1x2" in CARD_DISABLED_MARKETS
-    assert "1x2" not in DEFAULT_DISABLED_MARKETS  # the library default stays neutral
+    assert "1x2" not in CARD_DISABLED_MARKETS
+    assert "1x2" not in DEFAULT_DISABLED_MARKETS
 
     staging_odds = tmp_path / "odds.csv"
     staging_fixtures = tmp_path / "fixtures.csv"
@@ -308,8 +309,8 @@ def test_the_card_does_not_stake_1x2_even_with_full_coverage(tmp_path: Path) -> 
         mapping_verified=True, validation_passed=True, freshness_passed=True,
     )["summary"]
 
-    assert summary["included_markets"] == ["total_2_5"]
-    assert "1x2" in summary["excluded_markets"]
+    assert summary["included_markets"] == ["1x2", "total_2_5"]
+    assert "1x2" not in summary["excluded_markets"]
 
 
 def test_no_manual_odds_file_is_required_anywhere_in_the_flow(tmp_path: Path) -> None:

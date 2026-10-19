@@ -1,10 +1,21 @@
 {
   "blockers": [],
+  "books": {
+    "books_the_card_will_not_price_at": [],
+    "rows_excluded_as_unbettable": 0
+  },
   "card_input_path": "data/staging/automated_card_current_odds.csv",
   "card_input_written": true,
   "eligibility": {
     "any_market_eligible": true,
-    "disabled_markets": [],
+    "disabled_markets": [
+      "team_total_home_0_5",
+      "team_total_home_1_5",
+      "team_total_home_2_5",
+      "team_total_away_0_5",
+      "team_total_away_1_5",
+      "team_total_away_2_5"
+    ],
     "eligible_markets": [
       "1x2",
       "total_2_5",
@@ -15,116 +26,202 @@
       "corners_total_9_5",
       "corners_total_10_5"
     ],
-    "excluded_markets": [],
-    "fixtures_in_window": 10,
+    "excluded_markets": [
+      "team_total_home_0_5",
+      "team_total_home_1_5",
+      "team_total_home_2_5",
+      "team_total_away_0_5",
+      "team_total_away_1_5",
+      "team_total_away_2_5"
+    ],
+    "fixtures_in_window": 1,
     "gate_failures": [],
     "incomplete_markets": [],
     "markets": [
       {
         "bookmaker_count": 11,
         "fabricated": false,
-        "fixtures_covered": 10,
-        "fixtures_expected": 10,
+        "fixtures_covered": 1,
+        "fixtures_expected": 1,
         "market": "1x2",
         "missing_fixtures": [],
-        "reason": "`1x2` covers all 10 fixtures in the selected window with passing mapping, validation, and freshness.",
-        "row_count": 330,
-        "status": "eligible",
-        "usable_for_picks": true
-      },
-      {
-        "bookmaker_count": 11,
-        "fabricated": false,
-        "fixtures_covered": 10,
-        "fixtures_expected": 10,
-        "market": "total_2_5",
-        "missing_fixtures": [],
-        "reason": "`total_2_5` covers all 10 fixtures in the selected window with passing mapping, validation, and freshness.",
-        "row_count": 170,
-        "status": "eligible",
-        "usable_for_picks": true
-      },
-      {
-        "bookmaker_count": 9,
-        "fabricated": false,
-        "fixtures_covered": 10,
-        "fixtures_expected": 10,
-        "market": "btts",
-        "missing_fixtures": [],
-        "reason": "`btts` covers all 10 fixtures in the selected window with passing mapping, validation, and freshness.",
-        "row_count": 166,
+        "reason": "`1x2` covers all 1 fixtures in the selected window with passing mapping, validation, and freshness.",
+        "row_count": 33,
         "status": "eligible",
         "usable_for_picks": true
       },
       {
         "bookmaker_count": 7,
         "fabricated": false,
-        "fixtures_covered": 10,
-        "fixtures_expected": 10,
-        "market": "double_chance",
+        "fixtures_covered": 1,
+        "fixtures_expected": 1,
+        "market": "total_2_5",
         "missing_fixtures": [],
-        "reason": "`double_chance` covers all 10 fixtures in the selected window with passing mapping, validation, and freshness.",
-        "row_count": 183,
-        "status": "eligible",
-        "usable_for_picks": true
-      },
-      {
-        "bookmaker_count": 9,
-        "fabricated": false,
-        "fixtures_covered": 10,
-        "fixtures_expected": 10,
-        "market": "draw_no_bet",
-        "missing_fixtures": [],
-        "reason": "`draw_no_bet` covers all 10 fixtures in the selected window with passing mapping, validation, and freshness.",
-        "row_count": 168,
-        "status": "eligible",
-        "usable_for_picks": true
-      },
-      {
-        "bookmaker_count": 6,
-        "fabricated": false,
-        "fixtures_covered": 10,
-        "fixtures_expected": 10,
-        "market": "corners_1x2",
-        "missing_fixtures": [],
-        "reason": "`corners_1x2` covers all 10 fixtures in the selected window with passing mapping, validation, and freshness.",
-        "row_count": 168,
+        "reason": "`total_2_5` covers all 1 fixtures in the selected window with passing mapping, validation, and freshness.",
+        "row_count": 14,
         "status": "eligible",
         "usable_for_picks": true
       },
       {
         "bookmaker_count": 8,
         "fabricated": false,
-        "fixtures_covered": 10,
-        "fixtures_expected": 10,
-        "market": "corners_total_9_5",
+        "fixtures_covered": 1,
+        "fixtures_expected": 1,
+        "market": "btts",
         "missing_fixtures": [],
-        "reason": "`corners_total_9_5` covers all 10 fixtures in the selected window with passing mapping, validation, and freshness.",
-        "row_count": 124,
+        "reason": "`btts` covers all 1 fixtures in the selected window with passing mapping, validation, and freshness.",
+        "row_count": 16,
+        "status": "eligible",
+        "usable_for_picks": true
+      },
+      {
+        "bookmaker_count": 6,
+        "fabricated": false,
+        "fixtures_covered": 1,
+        "fixtures_expected": 1,
+        "market": "double_chance",
+        "missing_fixtures": [],
+        "reason": "`double_chance` covers all 1 fixtures in the selected window with passing mapping, validation, and freshness.",
+        "row_count": 18,
+        "status": "eligible",
+        "usable_for_picks": true
+      },
+      {
+        "bookmaker_count": 8,
+        "fabricated": false,
+        "fixtures_covered": 1,
+        "fixtures_expected": 1,
+        "market": "draw_no_bet",
+        "missing_fixtures": [],
+        "reason": "`draw_no_bet` covers all 1 fixtures in the selected window with passing mapping, validation, and freshness.",
+        "row_count": 16,
+        "status": "eligible",
+        "usable_for_picks": true
+      },
+      {
+        "bookmaker_count": 6,
+        "fabricated": false,
+        "fixtures_covered": 1,
+        "fixtures_expected": 1,
+        "market": "corners_1x2",
+        "missing_fixtures": [],
+        "reason": "`corners_1x2` covers all 1 fixtures in the selected window with passing mapping, validation, and freshness.",
+        "row_count": 18,
         "status": "eligible",
         "usable_for_picks": true
       },
       {
         "bookmaker_count": 7,
         "fabricated": false,
-        "fixtures_covered": 10,
-        "fixtures_expected": 10,
-        "market": "corners_total_10_5",
+        "fixtures_covered": 1,
+        "fixtures_expected": 1,
+        "market": "corners_total_9_5",
         "missing_fixtures": [],
-        "reason": "`corners_total_10_5` covers all 10 fixtures in the selected window with passing mapping, validation, and freshness.",
-        "row_count": 120,
+        "reason": "`corners_total_9_5` covers all 1 fixtures in the selected window with passing mapping, validation, and freshness.",
+        "row_count": 14,
         "status": "eligible",
         "usable_for_picks": true
+      },
+      {
+        "bookmaker_count": 7,
+        "fabricated": false,
+        "fixtures_covered": 1,
+        "fixtures_expected": 1,
+        "market": "corners_total_10_5",
+        "missing_fixtures": [],
+        "reason": "`corners_total_10_5` covers all 1 fixtures in the selected window with passing mapping, validation, and freshness.",
+        "row_count": 14,
+        "status": "eligible",
+        "usable_for_picks": true
+      },
+      {
+        "bookmaker_count": 6,
+        "fabricated": false,
+        "fixtures_covered": 1,
+        "fixtures_expected": 1,
+        "market": "team_total_home_0_5",
+        "missing_fixtures": [],
+        "reason": "`team_total_home_0_5` is deliberately disabled for automated picks. It is excluded, not treated as a pass or a no-value call.",
+        "row_count": 12,
+        "status": "disabled",
+        "usable_for_picks": false
+      },
+      {
+        "bookmaker_count": 5,
+        "fabricated": false,
+        "fixtures_covered": 1,
+        "fixtures_expected": 1,
+        "market": "team_total_home_1_5",
+        "missing_fixtures": [],
+        "reason": "`team_total_home_1_5` is deliberately disabled for automated picks. It is excluded, not treated as a pass or a no-value call.",
+        "row_count": 10,
+        "status": "disabled",
+        "usable_for_picks": false
+      },
+      {
+        "bookmaker_count": 5,
+        "fabricated": false,
+        "fixtures_covered": 1,
+        "fixtures_expected": 1,
+        "market": "team_total_home_2_5",
+        "missing_fixtures": [],
+        "reason": "`team_total_home_2_5` is deliberately disabled for automated picks. It is excluded, not treated as a pass or a no-value call.",
+        "row_count": 10,
+        "status": "disabled",
+        "usable_for_picks": false
+      },
+      {
+        "bookmaker_count": 5,
+        "fabricated": false,
+        "fixtures_covered": 1,
+        "fixtures_expected": 1,
+        "market": "team_total_away_0_5",
+        "missing_fixtures": [],
+        "reason": "`team_total_away_0_5` is deliberately disabled for automated picks. It is excluded, not treated as a pass or a no-value call.",
+        "row_count": 10,
+        "status": "disabled",
+        "usable_for_picks": false
+      },
+      {
+        "bookmaker_count": 5,
+        "fabricated": false,
+        "fixtures_covered": 1,
+        "fixtures_expected": 1,
+        "market": "team_total_away_1_5",
+        "missing_fixtures": [],
+        "reason": "`team_total_away_1_5` is deliberately disabled for automated picks. It is excluded, not treated as a pass or a no-value call.",
+        "row_count": 10,
+        "status": "disabled",
+        "usable_for_picks": false
+      },
+      {
+        "bookmaker_count": 5,
+        "fabricated": false,
+        "fixtures_covered": 1,
+        "fixtures_expected": 1,
+        "market": "team_total_away_2_5",
+        "missing_fixtures": [],
+        "reason": "`team_total_away_2_5` is deliberately disabled for automated picks. It is excluded, not treated as a pass or a no-value call.",
+        "row_count": 10,
+        "status": "disabled",
+        "usable_for_picks": false
       }
     ],
     "note": "Excluded markets are unavailable, incomplete, or deliberately disabled. They are never reported as passes or no-value calls, and no missing price was invented.",
     "unavailable_markets": [],
     "warnings": [],
-    "window_label": "2026-08-21 through 2026-08-24"
+    "window_label": "2026-10-19 through 2026-10-19"
   },
-  "excluded_markets": [],
-  "fixtures_in_window": 10,
-  "generated_at": "2026-08-21T15:43:44+00:00",
+  "excluded_markets": [
+    "team_total_home_0_5",
+    "team_total_home_1_5",
+    "team_total_home_2_5",
+    "team_total_away_0_5",
+    "team_total_away_1_5",
+    "team_total_away_2_5"
+  ],
+  "fixtures_in_window": 1,
+  "generated_at": "2026-10-19T13:10:57+00:00",
   "included_markets": [
     "1x2",
     "total_2_5",
@@ -137,12 +234,19 @@
   ],
   "manual_entry_required": false,
   "notes": [
-    "Included markets: 1x2, btts, corners_1x2, corners_total_10_5, corners_total_9_5, double_chance, draw_no_bet, total_2_5. Excluded: none.",
-    "190 row(s) derived from real provider quotes. No price was fabricated and no manual entry is required."
+    "Included markets: 1x2, btts, corners_1x2, corners_total_10_5, corners_total_9_5, double_chance, draw_no_bet, total_2_5. Excluded: team_total_home_0_5, team_total_home_1_5, team_total_home_2_5, team_total_away_0_5, team_total_away_1_5, team_total_away_2_5.",
+    "19 row(s) derived from real provider quotes. No price was fabricated and no manual entry is required."
   ],
-  "policy_disabled_markets": [],
+  "policy_disabled_markets": [
+    "team_total_home_0_5",
+    "team_total_home_1_5",
+    "team_total_home_2_5",
+    "team_total_away_0_5",
+    "team_total_away_1_5",
+    "team_total_away_2_5"
+  ],
   "report": "Automated Card Input",
-  "row_count": 190,
+  "row_count": 19,
   "safety": {
     "bets_placed": false,
     "manual_odds_entry_required": false,
@@ -152,5 +256,5 @@
     "settlement_applied": false
   },
   "status": "Card input ready",
-  "window_label": "2026-08-21 through 2026-08-24"
+  "window_label": "2026-10-19 through 2026-10-19"
 }

@@ -94,3 +94,37 @@ def test_eligible_markets_are_lowercased(tmp_path: Path) -> None:
     _card_input(tmp_path, ["1X2", "BTTS"])
 
     assert _eligible_markets_from_evidence(tmp_path) == ["1x2", "btts"]
+
+
+def _card_input_with_assessments(tmp_path: Path, eligible, assessments) -> Path:
+    (tmp_path / "automated_card_input.json").write_text(
+        json.dumps({"eligibility": {
+            "eligible_markets": list(eligible),
+            "markets": [
+                {"market": m, "status": s, "fixtures_expected": e, "fixtures_covered": c}
+                for m, s, e, c in assessments
+            ],
+        }}),
+        encoding="utf-8",
+    )
+    return tmp_path
+
+
+def test_complete_team_totals_held_by_policy_are_proposed(tmp_path: Path) -> None:
+    """Team totals, like props, read `disabled` until approved, so they can
+    never reach `eligible_markets` before the approval that would put them
+    there. A team-total line priced for every fixture is the evidence an
+    approval binds to; one priced for fewer, or for none, is not proposed."""
+    _card_input_with_assessments(tmp_path, ["1x2", "btts"], [
+        ("1x2", "eligible", 1, 1),
+        ("team_total_home_0_5", "disabled", 1, 1),
+        ("team_total_away_2_5", "disabled", 2, 1),
+        ("team_total_away_1_5", "disabled", 0, 0),
+        ("corners_1x2", "disabled", 1, 1),
+    ])
+
+    markets, limitations = _provider_markets_and_limitations(_Adapter(), tmp_path)
+
+    assert markets == ["1x2", "btts", "team_total_home_0_5"]
+    assert "corners_1x2" not in markets
+    assert any("Team totals carry no demonstrated edge" in item for item in limitations)

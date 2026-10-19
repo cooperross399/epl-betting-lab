@@ -89,7 +89,7 @@ jobs:
           # committed verbatim from the log where the artifact cannot be read.
           echo "----- BEGIN automated_card_input.json -----"
           cat data/outputs/automated_card_input.json || true
-          echo "----- END automated_card_input.json -----
+          echo "----- END automated_card_input.json -----"
 
       - name: Fetch player-prop prices for the evidence
         if: ${{ !inputs.team_totals }}

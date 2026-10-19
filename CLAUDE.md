@@ -111,9 +111,11 @@ Use the repo, the reports, and GitHub.
   the live fetch buys only the selected round's fixtures that have not kicked
   off (`player_props_staging.slate_events`), about 4 credits per fixture per
   run. No edge is demonstrated.
-- **Cards, tackles and goalkeeper saves are built and held by policy
+- **Cards, tackles and alternate goalkeeper saves are allowlisted
   (2026-10-19, Cooper: "dont forget about tackles/cards/goalie saves", "find
-  goalie saves figure it out").** Guessed keys (`player_tackles`,
+  goalie saves figure it out"; PR #372, receipt
+  `odds_api-20261019T135739+0000-06088e72a437`).** `player_goalie_saves`
+  (the plain line) stays held: no bettable book staged it. Guessed keys (`player_tackles`,
   `player_goalkeeper_saves`) returned nothing or 422; the provider's own
   event-markets listing (`Provider Market Discovery` -> `list_event_markets`)
   found `player_to_receive_card` / `_red_card` (Bovada, DraftKings),

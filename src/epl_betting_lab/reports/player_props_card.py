@@ -35,6 +35,7 @@ from pathlib import Path
 
 import pandas as pd
 
+from epl_betting_lab.books import bettable_only
 from epl_betting_lab.staging_provider_policy import entry_is_complete_approval
 from epl_betting_lab.config import (
     PROPS_CARD_JSON,
@@ -355,6 +356,9 @@ def build_player_props_card(
         frame["american_odds"], errors="coerce"
     )
     frame = frame.dropna(subset=["american_odds"])
+    # Only a price Cooper can take, and before the staged-market evidence is
+    # read: a market priced only at ReBet or Courtside is not on offer to him.
+    frame = bettable_only(frame)
     frame = frame[frame["date"] >= today]
     frame = drop_started_fixtures(frame, moment)
     # Every prop market holding a live price, approved or not: a held

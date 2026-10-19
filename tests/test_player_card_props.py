@@ -422,3 +422,22 @@ def test_the_fpl_logs_are_fetched_only_for_tackles_or_saves() -> None:
     assert not needs_fpl_logs(["player_shots", "player_to_receive_card"])
     assert needs_fpl_logs(["player_shots", "player_goalie_saves"])
     assert needs_fpl_logs(["player_tackles_alternate"])
+
+
+def test_a_prop_is_never_priced_at_a_book_that_cannot_be_bet(tmp_path: Path) -> None:
+    """ReBet and Courtside carry these markets and are not on
+    `books.BETTABLE_BOOKS`. The props card took the best price across every
+    staged book, so a ReBet price could have been the one on the card."""
+    rows = [
+        _staging_row(american_odds=400, book="ReBet"),
+        _staging_row(american_odds=150, book="FanDuel"),
+    ]
+    summary = _build(tmp_path, markets=["player_shots_on_target"], staging_rows=rows)
+    (pick,) = summary["picks"]
+    assert pick["book"] == "FanDuel"
+
+
+def test_only_unbettable_prices_make_no_pick(tmp_path: Path) -> None:
+    rows = [_staging_row(american_odds=400, book="Courtside")]
+    summary = _build(tmp_path, markets=["player_shots_on_target"], staging_rows=rows)
+    assert summary["picks"] == []

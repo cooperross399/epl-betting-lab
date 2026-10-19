@@ -14,13 +14,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    /* One look per site: NHL dark, EPL gray, CBB white. EPL and CBB darken with the phone's dark mode. */
-    :root, html[data-sport="nhl"] { color-scheme: dark; --paper:#14151a; --ink:#f1efe9; --ink-2:#d2d0ca; --mute:#a3a6b1; --mute-2:#80838e; --rule:#3a3d49; --rule-2:#262832; --on-ink:#3a3d49; --alert:#f08a72; --on-alert:#14151a; --win:#5cc196; --on-win:#14151a; --desk:#0d0e12; }
-    html[data-sport="epl"], html[data-sport="epl"] [data-theme="light"] { color-scheme: light; --paper:#d9dade; --ink:#14151a; --ink-2:#2a2d36; --mute:#50535e; --mute-2:#767984; --rule:#b4b6bd; --rule-2:#c6c8ce; --on-ink:#c6c8ce; --alert:#9e2c19; --on-alert:#f4f4f6; --win:#22664a; --on-win:#f4f4f6; --desk:#c9cbd0; }
-    html[data-sport="cbb"], html[data-sport="cbb"] [data-theme="light"] { color-scheme: light; --paper:#ffffff; --ink:#14151a; --ink-2:#2a2d3a; --mute:#62656f; --mute-2:#9a9ca6; --rule:#dddbd6; --rule-2:#ecebe7; --on-ink:#d6d3cc; --alert:#b0341f; --on-alert:#ffffff; --win:#2c7a5a; --on-win:#ffffff; --desk:#eeede9; }
-    @media (prefers-color-scheme: dark) { html[data-sport="epl"] { color-scheme: dark; --paper:#2a2c32; --ink:#ecebe7; --ink-2:#cfcec9; --mute:#a9abb4; --mute-2:#878a94; --rule:#474a53; --rule-2:#363840; --on-ink:#474a53; --alert:#f29077; --on-alert:#1b1c20; --win:#62c79c; --on-win:#1b1c20; --desk:#212328; } html[data-sport="cbb"] { color-scheme: dark; --paper:#0f1a2b; --ink:#eef1f6; --ink-2:#cdd4e0; --mute:#9ba6b8; --mute-2:#7a869a; --rule:#2b3a52; --rule-2:#1c2a3f; --on-ink:#2b3a52; --alert:#f08a72; --on-alert:#0f1a2b; --win:#5cc196; --on-win:#0f1a2b; --desk:#0a1220; } }
-    html[data-sport="epl"] [data-theme="dark"] { color-scheme: dark; --paper:#2a2c32; --ink:#ecebe7; --ink-2:#cfcec9; --mute:#a9abb4; --mute-2:#878a94; --rule:#474a53; --rule-2:#363840; --on-ink:#474a53; --alert:#f29077; --on-alert:#1b1c20; --win:#62c79c; --on-win:#1b1c20; --desk:#212328; }
-    html[data-sport="cbb"] [data-theme="dark"] { color-scheme: dark; --paper:#0f1a2b; --ink:#eef1f6; --ink-2:#cdd4e0; --mute:#9ba6b8; --mute-2:#7a869a; --rule:#2b3a52; --rule-2:#1c2a3f; --on-ink:#2b3a52; --alert:#f08a72; --on-alert:#0f1a2b; --win:#5cc196; --on-win:#0f1a2b; --desk:#0a1220; }
+    /* One look across all three sites: dark. The Light tweak is for previews. */
+    :root, html[data-sport] { color-scheme: dark; --paper:#14151a; --ink:#f1efe9; --ink-2:#d2d0ca; --mute:#a3a6b1; --mute-2:#80838e; --rule:#3a3d49; --rule-2:#262832; --on-ink:#3a3d49; --alert:#f08a72; --on-alert:#14151a; --win:#5cc196; --on-win:#14151a; --desk:#0d0e12; }
+    [data-theme="light"] { color-scheme: light; --paper:#ffffff; --ink:#14151a; --ink-2:#2a2d3a; --mute:#62656f; --mute-2:#9a9ca6; --rule:#dddbd6; --rule-2:#ecebe7; --on-ink:#d6d3cc; --alert:#b0341f; --on-alert:#ffffff; --win:#2c7a5a; --on-win:#ffffff; --desk:#eeede9; }
     html, body { margin: 0; padding: 0; background: var(--desk); color: var(--ink); font-family: "IBM Plex Sans", Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
     * { box-sizing: border-box; }
     a { color: var(--ink); text-decoration: none; }
@@ -70,13 +66,13 @@
         <div style="display:grid;grid-template-columns:120px 1fr 110px 1fr 230px;gap:0 18px;align-items:center;flex:1;border-bottom:1px solid #d6d3cc;">
           <div style="font-family:'IBM Plex Mono',monospace;font-size:17px;font-weight:600;">{{ g.time }}<div style="font-size:12px;font-weight:400;color:#6b6e7a;margin-top:2px;">{{ g.tv }}</div></div>
           <div style="display:flex;align-items:center;gap:12px;min-width:0;">
-            <span style="width:44px;height:44px;border-radius:50%;flex:none;display:grid;place-items:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:15px;background:{{ g.l.color }};color:{{ g.l.fg }};">{{ g.l.abbr }}</span>
+            <span aria-hidden="true" style="position:relative;width:44px;height:44px;border-radius:50%;flex:none;display:grid;place-items:center;overflow:hidden;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:15px;letter-spacing:.02em;background:{{ g.l.color }};color:{{ g.l.fg }};box-shadow:0 0 0 1px var(--rule);">{{ g.l.abbr }}<sc-if value="{{ g.l.logo }}" hint-placeholder-val="{{ false }}"><img src="{{ g.l.logo }}" alt="" loading="lazy" decoding="async" onLoad="{{ g.l.onLogoLoad }}" onError="{{ g.l.onLogoError }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;padding:5px;" /></sc-if></span>
             <span style="min-width:0;"><span style="display:block;font-weight:600;font-size:19px;">{{ g.l.name }}</span><span style="display:block;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#6b6e7a;">{{ g.l.win }}</span></span>
           </div>
           <div style="text-align:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:38px;line-height:1;">{{ g.score }}</div>
           <div style="display:flex;align-items:center;justify-content:flex-end;gap:12px;min-width:0;text-align:right;">
             <span style="min-width:0;"><span style="display:block;font-weight:600;font-size:19px;">{{ g.r.name }}</span><span style="display:block;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#6b6e7a;">{{ g.r.win }}</span></span>
-            <span style="width:44px;height:44px;border-radius:50%;flex:none;display:grid;place-items:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:15px;background:{{ g.r.color }};color:{{ g.r.fg }};">{{ g.r.abbr }}</span>
+            <span aria-hidden="true" style="position:relative;width:44px;height:44px;border-radius:50%;flex:none;display:grid;place-items:center;overflow:hidden;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:15px;letter-spacing:.02em;background:{{ g.r.color }};color:{{ g.r.fg }};box-shadow:0 0 0 1px var(--rule);">{{ g.r.abbr }}<sc-if value="{{ g.r.logo }}" hint-placeholder-val="{{ false }}"><img src="{{ g.r.logo }}" alt="" loading="lazy" decoding="async" onLoad="{{ g.r.onLogoLoad }}" onError="{{ g.r.onLogoError }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;padding:5px;" /></sc-if></span>
           </div>
           <div style="background:{{ g.pickBg }};color:{{ g.pickFg }};padding:10px 12px;border:1px solid #14151a;">
             <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;line-height:1;text-transform:uppercase;">{{ g.pickLabel }}</div>
@@ -109,7 +105,7 @@ class Component extends DCLogic {
     catch (e) { data = await fetch(cfg.sample).then((r) => r.json()); }
     const vm = S.ADAPTERS[sport].board(data);
     vm.otherSports = S.ORDER.filter((k) => k !== sport).map((k) => ({ name: S.SPORTS[k].name, href: S.SPORTS[k].host }));
-    this.setState({ vm });
+    this.setState({ vm, teams: data.teams || {} });
   }
   componentDidMount() { this.load(); }
   componentDidUpdate() { this.load(); }
@@ -120,8 +116,16 @@ class Component extends DCLogic {
     const tabs = [tab(sk === "epl" ? "This week" : "Tonight", "Board.dc.html"), ...(sk === "nhl" ? [tab("Props", "Board.dc.html#props")] : []), tab("Results", "Results.dc.html", false), ...(sk === "nhl" ? [tab("Season", "Season.dc.html")] : []), tab("Archive", "Archive.dc.html", false)];
     const themeAttr = { Light: "light", Dark: "dark" }[this.props.theme] || "auto";
     if (!vm) return { themeAttr, tabs, rows: [], strip3: [], otherSports: [], title1: "Tonight's", title2: "Board." };
+    const T = this.state.teams || {};
+    // Team logos: `teams[abbr].logo` when the builder writes one, else ./logos/<ABBR>.png (the fetch script fills that
+    // folder in every repo). The coloured circle with the abbreviation stays underneath, so a missing file shows the
+    // abbreviation rather than a broken image.
+    const logoOf = (abbr) => { const t = T[abbr] || {}; return t.logo === null ? "" : t.logo || (abbr ? `./logos/${encodeURIComponent(abbr)}.png` : ""); };
+    const hideLogo = (e) => { e.currentTarget.style.display = "none"; };
+    const showLogo = (e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.background = "var(--paper)"; };
+    const withLogo = (s) => ({ ...s, logo: logoOf(s.abbr), onLogoLoad: showLogo, onLogoError: hideLogo });
     const rows = vm.groups.flatMap((d) => d.games).slice(0, 12).map((g) => ({
-      time: g.time, tv: g.tv, l: g.sides[0], r: g.sides[1], score: g.score,
+      time: g.time, tv: g.tv, l: withLogo(g.sides[0]), r: withLogo(g.sides[1]), score: g.score,
       pickLabel: g.pick.kind === "bet" || g.pick.kind === "lean" ? g.pick.label : g.pick.kind === "pass" ? "Pass" : g.pick.label.split(" · ")[0],
       // A game with no pick carries the adapter's own reason in its label:
       // "Exhibition · model abstains", "Not priced · ...", the allowlist or

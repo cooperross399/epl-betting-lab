@@ -28,6 +28,11 @@ Sources, as they are actually named in this repository:
     git-ignored and rides in no artifact, so a published run normally falls
     back to the prices carried on the card's own rows; `priceSource` says
     which was used.
+  * `data/processed/price_feed.csv`, the `price-feed` branch's record of every
+    observed price (`reports/price_feed.py`), when a run restored it there:
+    each selection's open price (its first capture in the week before
+    kick-off, at the best bettable book) and `lineHistory`, one point per
+    capture. Absent, the board publishes neither; nothing is filled in.
   * The lab's own fitted models, exactly as `dashboard_actions.
     run_thursday_best_bets_report` fits them: `PoissonGoalsModel().fit(
     load_matches(), last_n_matches_per_team=38, config=CARD_RATINGS)` for the
@@ -153,9 +158,16 @@ def fd_name(espn_name: str) -> str:
     return ESPN_TO_FD.get(cleaned, cleaned)
 
 
+#: `web/fetch_logos.py` fills this; the publish step ships web/ whole.
+LOGOS = Path(__file__).resolve().parent / "logos"
+
+
 def team_entry(fd: str) -> tuple[str, dict]:
     abbr, short, color, fg = TEAMS.get(fd, (fd[:3].upper(), fd, "#14151a", "#FFFFFF"))
-    return abbr, {"name": fd, "short": short, "color": color, "fg": fg}
+    entry = {"name": fd, "short": short, "color": color, "fg": fg}
+    if (LOGOS / f"{abbr}.png").is_file():
+        entry["logo"] = f"./logos/{abbr}.png"
+    return abbr, entry
 
 
 def fetch_json(url: str) -> dict:
@@ -331,6 +343,108 @@ def read_prices(lab: Path, card: dict) -> tuple[list[dict], str]:
                 if row is not None:
                     rows.append(row)
     return rows, "the card's own rows" if rows else "no prices on disk"
+
+
+#: The lab's record of every price it observed, one row per book per capture
+#: (`reports/price_feed.py`; columns `observed_at, provider_event_id, date,
+#: home_team, away_team, market, selection, book, american_odds`). It lives on
+#: the `price-feed` branch; Matchday Refresh and Closing Snapshot restore it
+#: to this path before they append to it. A run with no copy here publishes
+#: no open price and no captured line history, rather than an invented one.
+PRICE_FEED_FILE = Path("data/processed/price_feed.csv")
+
+#: "Open" is the first capture in the week before kick-off.
+OPEN_LOOKBACK_DAYS = 7
+
+#: (market, selection) -> (the game block, its open key) on the board.
+OPEN_KEYS = {
+    ("total_2_5", "over"): ("total", "openOver"), ("total_2_5", "under"): ("total", "openUnder"),
+    ("btts", "yes"): ("btts", "openYes"), ("btts", "no"): ("btts", "openNo"),
+    ("draw_no_bet", "home"): ("drawNoBet", "openHome"), ("draw_no_bet", "away"): ("drawNoBet", "openAway"),
+}
+
+#: `lineHistory` series, keyed as `web/site_history.SERIES` and the shared
+#: page (`sports.js` reads total_over, btts_yes, dnb_home) name them.
+LINE_SERIES = {
+    "ml_home": ("1x2", "home"), "total_over": ("total_2_5", "over"),
+    "btts_yes": ("btts", "yes"), "dnb_home": ("draw_no_bet", "home"),
+}
+
+
+def _instant(text: object) -> datetime | None:
+    try:
+        stamp = datetime.fromisoformat(str(text or "").strip().replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    return stamp if stamp.tzinfo is not None else stamp.replace(tzinfo=timezone.utc)
+
+
+def read_price_feed(lab: Path, fixtures: list[dict]) -> dict:
+    """Every capture of every selection on this board, at the best bettable book.
+
+    `{(home, away): {(market, selection): [(observed_at, best price), ...]}}`,
+    oldest capture first, one entry per capture. Only captures in the
+    OPEN_LOOKBACK_DAYS before that fixture's kick-off, and strictly before it,
+    count. Only books on `books.BETTABLE_BOOKS` count, as for the card's own
+    prices; when that list cannot be imported nothing is read (fail closed).
+    """
+    path = lab / PRICE_FEED_FILE
+    if not path.is_file():
+        return {}
+    try:
+        from epl_betting_lab.books import is_bettable
+    except ImportError:
+        return {}
+    kickoffs: dict[tuple[str, str], datetime] = {}
+    for f in fixtures:
+        when = _instant(f.get("kickoff"))
+        if when is not None:
+            kickoffs[(f["home"]["fd"], f["away"]["fd"])] = when
+    best: dict = {}
+    try:
+        with path.open(newline="", encoding="utf-8") as fh:
+            for raw in csv.DictReader(fh):
+                key = (str(raw.get("home_team") or "").strip(), str(raw.get("away_team") or "").strip())
+                kickoff = kickoffs.get(key)
+                if kickoff is None or not is_bettable(raw.get("book")):
+                    continue
+                seen = _instant(raw.get("observed_at"))
+                if seen is None or not (kickoff - timedelta(days=OPEN_LOOKBACK_DAYS) <= seen < kickoff):
+                    continue
+                try:
+                    price = float(raw.get("american_odds"))
+                except (TypeError, ValueError):
+                    continue
+                selection = (str(raw.get("market") or "").strip().casefold(), str(raw.get("selection") or "").strip().casefold())
+                at = best.setdefault(key, {}).setdefault(selection, {})
+                stamp = seen.isoformat().replace("+00:00", "Z")
+                at[stamp] = max(price, at.get(stamp, price))
+    except (OSError, UnicodeError, csv.Error) as exc:
+        print(f"{path.name} could not be read: {exc}")
+        return {}
+    return {
+        key: {sel: [(t, int(p)) for t, p in sorted(caps.items())] for sel, caps in sels.items()}
+        for key, sels in best.items()
+    }
+
+
+def open_prices(captures: dict) -> dict:
+    """`{block: {openKey: price}}` from the first capture of each selection; a selection never captured has none."""
+    out: dict = {}
+    for selection, (block, key) in OPEN_KEYS.items():
+        series = captures.get(selection) or []
+        if series:
+            out.setdefault(block, {})[key] = series[0][1]
+    return out
+
+
+def line_history(captures: dict) -> dict:
+    """`lineHistory[gameId]`: one point per capture, and no series from a single capture."""
+    return {
+        name: [{"t": t, "v": v} for t, v in captures.get(selection) or []]
+        for name, selection in LINE_SERIES.items()
+        if len(captures.get(selection) or []) >= 2
+    }
 
 
 def best_price(rows, home, away, market, selection):
@@ -629,7 +743,8 @@ def due_rows_for(due: dict | None, event_id: str) -> list[dict]:
         rate = row.get("prior_rate")
         drought = int(row.get("drought") or 0)
         out.append({
-            "player": row.get("player", ""), "team": abbr, "market": row.get("market") or "goals", "line": 0.5,
+            "player": row.get("player", ""), "playerId": str(row.get("player_id") or ""),
+            "team": abbr, "market": row.get("market") or "goals", "line": 0.5,
             "lastSeason": row.get("prior_total", row.get("prior_goals")), "drought": drought,
             "price": price if isinstance(price, (int, float)) else None,
             "book": row.get("book") or "", "heavyJuice": isinstance(price, (int, float)) and price <= -160,
@@ -732,6 +847,8 @@ def build(lab: Path, today: date) -> dict:
     excluded = [str(m).lower() for m in card.get("excluded_markets") or []]
     due = load_due_list(lab)
     props = load_props_card(lab)
+    feed = read_price_feed(lab, fixtures)
+    history: dict = {}
     teams, games = {}, []
     for f in fixtures:
         h, a = f["home"]["fd"], f["away"]["fd"]
@@ -753,7 +870,14 @@ def build(lab: Path, today: date) -> dict:
             "drawNoBet": {"home": best_price(prices, h, a, "draw_no_bet", "home"),
                           "away": best_price(prices, h, a, "draw_no_bet", "away")},
             "pick": pick_for(card, h, a),
+            # The 1X2 prices whether or not the card selects from that market.
+            "matchResult": {side: best_price(prices, h, a, "1x2", side) for side in ("home", "draw", "away")},
         }
+        captures = feed.get((h, a)) or {}
+        for block, opens in open_prices(captures).items():
+            row[block].update(opens)
+        if line_history(captures):
+            history[f["id"]] = line_history(captures)
         if due is not None:
             row["drought"] = due_rows_for(due, f["id"])
         pr = project(h, a) if project else None
@@ -841,6 +965,7 @@ def build(lab: Path, today: date) -> dict:
         "excludedMarkets": list(card.get("excluded_markets") or []),
         "cardSource": card_source, "priceSource": price_source,
         "record": load_record(lab), "teams": teams, "games": games,
+        **({"lineHistory": history} if history else {}),
         **({"droughtNote": due_note(due)} if due is not None else {}),
         **({"props": props_block(props, {(f["home"]["fd"], f["away"]["fd"]): f["id"] for f in fixtures})}
            if props is not None else {}),

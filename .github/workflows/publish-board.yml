@@ -220,6 +220,24 @@ jobs:
           rm -f dist/*.py
           touch dist/.nojekyll
 
+      - name: Read the price feed for open prices and line movement
+        # The board's Open column and line history read every capture this
+        # repo has already made, which Matchday Refresh and the Closing
+        # Snapshot append to the price-feed branch. A git read of a public
+        # branch: no provider call, no credit, no write. Soft on purpose: a
+        # feed that cannot be read leaves the open keys absent, exactly as
+        # before, and never takes the board down with it.
+        run: |
+          mkdir -p data/processed
+          if git fetch --no-tags --depth=1 origin +refs/heads/price-feed:refs/price-feed-tip 2>/dev/null \
+             && git show refs/price-feed-tip:price_feed.csv > data/processed/price_feed.csv 2>/dev/null \
+             && [ -s data/processed/price_feed.csv ]; then
+            echo "price feed: $(($(wc -l < data/processed/price_feed.csv) - 1)) observations"
+          else
+            rm -f data/processed/price_feed.csv
+            echo "::notice::price-feed branch not readable; open prices and line history stay absent this run"
+          fi
+
       - name: Build the board
         env:
           PYTHONPATH: src

@@ -25,13 +25,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    /* One look per site: NHL dark, EPL gray, CBB white. EPL and CBB darken with the phone's dark mode. */
-    :root, html[data-sport="nhl"] { color-scheme: dark; --paper:#14151a; --ink:#f1efe9; --ink-2:#d2d0ca; --mute:#a3a6b1; --mute-2:#80838e; --rule:#3a3d49; --rule-2:#262832; --on-ink:#3a3d49; --alert:#f08a72; --on-alert:#14151a; --win:#5cc196; --on-win:#14151a; --desk:#0d0e12; }
-    html[data-sport="epl"], html[data-sport="epl"] [data-theme="light"] { color-scheme: light; --paper:#d9dade; --ink:#14151a; --ink-2:#2a2d36; --mute:#50535e; --mute-2:#767984; --rule:#b4b6bd; --rule-2:#c6c8ce; --on-ink:#c6c8ce; --alert:#9e2c19; --on-alert:#f4f4f6; --win:#22664a; --on-win:#f4f4f6; --desk:#c9cbd0; }
-    html[data-sport="cbb"], html[data-sport="cbb"] [data-theme="light"] { color-scheme: light; --paper:#ffffff; --ink:#14151a; --ink-2:#2a2d3a; --mute:#62656f; --mute-2:#9a9ca6; --rule:#dddbd6; --rule-2:#ecebe7; --on-ink:#d6d3cc; --alert:#b0341f; --on-alert:#ffffff; --win:#2c7a5a; --on-win:#ffffff; --desk:#eeede9; }
-    @media (prefers-color-scheme: dark) { html[data-sport="epl"] { color-scheme: dark; --paper:#2a2c32; --ink:#ecebe7; --ink-2:#cfcec9; --mute:#a9abb4; --mute-2:#878a94; --rule:#474a53; --rule-2:#363840; --on-ink:#474a53; --alert:#f29077; --on-alert:#1b1c20; --win:#62c79c; --on-win:#1b1c20; --desk:#212328; } html[data-sport="cbb"] { color-scheme: dark; --paper:#0f1a2b; --ink:#eef1f6; --ink-2:#cdd4e0; --mute:#9ba6b8; --mute-2:#7a869a; --rule:#2b3a52; --rule-2:#1c2a3f; --on-ink:#2b3a52; --alert:#f08a72; --on-alert:#0f1a2b; --win:#5cc196; --on-win:#0f1a2b; --desk:#0a1220; } }
-    html[data-sport="epl"] [data-theme="dark"] { color-scheme: dark; --paper:#2a2c32; --ink:#ecebe7; --ink-2:#cfcec9; --mute:#a9abb4; --mute-2:#878a94; --rule:#474a53; --rule-2:#363840; --on-ink:#474a53; --alert:#f29077; --on-alert:#1b1c20; --win:#62c79c; --on-win:#1b1c20; --desk:#212328; }
-    html[data-sport="cbb"] [data-theme="dark"] { color-scheme: dark; --paper:#0f1a2b; --ink:#eef1f6; --ink-2:#cdd4e0; --mute:#9ba6b8; --mute-2:#7a869a; --rule:#2b3a52; --rule-2:#1c2a3f; --on-ink:#2b3a52; --alert:#f08a72; --on-alert:#0f1a2b; --win:#5cc196; --on-win:#0f1a2b; --desk:#0a1220; }
+    /* One look across all three sites: dark. The Light tweak is for previews. */
+    :root, html[data-sport] { color-scheme: dark; --paper:#14151a; --ink:#f1efe9; --ink-2:#d2d0ca; --mute:#a3a6b1; --mute-2:#80838e; --rule:#3a3d49; --rule-2:#262832; --on-ink:#3a3d49; --alert:#f08a72; --on-alert:#14151a; --win:#5cc196; --on-win:#14151a; --desk:#0d0e12; }
+    [data-theme="light"] { color-scheme: light; --paper:#ffffff; --ink:#14151a; --ink-2:#2a2d3a; --mute:#62656f; --mute-2:#9a9ca6; --rule:#dddbd6; --rule-2:#ecebe7; --on-ink:#d6d3cc; --alert:#b0341f; --on-alert:#ffffff; --win:#2c7a5a; --on-win:#ffffff; --desk:#eeede9; }
     html, body { margin: 0; padding: 0; background: var(--paper); color: var(--ink); font-family: "IBM Plex Sans", Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
     * { box-sizing: border-box; }
     a { color: var(--ink); text-decoration: none; }
@@ -123,11 +119,7 @@
     </section>
 
     <sc-if value="{{ hasNotice }}" hint-placeholder-val="{{ false }}">
-      <div role="note" style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:20px;align-items:start;padding:18px 0;border-bottom:1px solid var(--ink);">
-        <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase;background:var(--ink);color:var(--paper);padding:5px 9px;">Note</span>
-        <sc-if value="{{ noticeRest }}" hint-placeholder-val="{{ false }}"><details style="min-width:0;font-size:15px;line-height:1.5;color:var(--ink-2);max-width:760px;"><summary style="cursor:pointer;">{{ noticeHead }}</summary><p style="margin:6px 0 0;text-wrap:pretty;">{{ noticeRest }}</p></details></sc-if>
-        <sc-if value="{{ noticeShort }}" hint-placeholder-val="{{ false }}"><p style="margin:0;font-size:15px;line-height:1.5;color:var(--ink-2);max-width:760px;text-wrap:pretty;">{{ noticeHead }}</p></sc-if>
-      </div>
+      <p role="note" style="margin:0;padding:18px 0;border-bottom:1px solid var(--ink);font-size:15px;line-height:1.5;color:var(--ink-2);max-width:760px;text-wrap:pretty;">{{ notice }}</p>
     </sc-if>
     <sc-if value="{{ hasFeedNotice }}" hint-placeholder-val="{{ false }}">
       <div role="status" style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:20px;align-items:start;padding:18px 0;border-bottom:1px solid var(--ink);">
@@ -171,18 +163,19 @@
                     <span style="font-size:10px;color:{{ g.sum.subColor }};letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ g.sum.sub }}</span>
                   </span>
                   <span style="display:flex;align-items:center;gap:5px;min-width:0;font-family:'IBM Plex Mono',monospace;font-size:15px;white-space:nowrap;">
-                    <span aria-hidden="true" style="width:8px;height:8px;border-radius:50%;flex:none;background:{{ g.sum.awayColor }};box-shadow:0 0 0 1px var(--rule);"></span>
+                    <span aria-hidden="true" style="position:relative;width:18px;height:18px;border-radius:50%;flex:none;overflow:hidden;background:{{ g.sum.awayColor }};box-shadow:0 0 0 1px var(--rule);"><sc-if value="{{ g.sum.awayLogo }}" hint-placeholder-val="{{ false }}"><img src="{{ g.sum.awayLogo }}" alt="" loading="lazy" decoding="async" onLoad="{{ g.sum.onLogoLoad }}" onError="{{ g.sum.onLogoError }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;padding:1px;" /></sc-if></span>
                     <span style="font-weight:600;">{{ g.sum.away }}</span>
                     <span style="font-weight:{{ g.sum.awayWeight }};">{{ g.sum.awayScore }}</span>
                     <span style="color:var(--mute);">{{ g.sum.sep }}</span>
                     <span style="font-weight:{{ g.sum.homeWeight }};">{{ g.sum.homeScore }}</span>
                     <span style="font-weight:600;">{{ g.sum.home }}</span>
-                    <span aria-hidden="true" style="width:8px;height:8px;border-radius:50%;flex:none;background:{{ g.sum.homeColor }};box-shadow:0 0 0 1px var(--rule);"></span>
+                    <span aria-hidden="true" style="position:relative;width:18px;height:18px;border-radius:50%;flex:none;overflow:hidden;background:{{ g.sum.homeColor }};box-shadow:0 0 0 1px var(--rule);"><sc-if value="{{ g.sum.homeLogo }}" hint-placeholder-val="{{ false }}"><img src="{{ g.sum.homeLogo }}" alt="" loading="lazy" decoding="async" onLoad="{{ g.sum.onLogoLoad }}" onError="{{ g.sum.onLogoError }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;padding:1px;" /></sc-if></span>
                   </span>
                   <span style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;min-width:0;">
                     <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:17px;line-height:1;text-transform:uppercase;letter-spacing:.02em;white-space:nowrap;color:{{ g.sum.tagColor }};">{{ g.sum.tag }}</span>
                     <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;color:{{ g.sum.kindColor }};">{{ g.sum.kind }}</span>
                     <sc-if value="{{ g.sum.drought }}" hint-placeholder-val="{{ false }}"><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;color:var(--ink-2);border:1px solid var(--rule);padding:1px 4px;">{{ g.sum.drought }}</span></sc-if>
+                    <sc-if value="{{ g.sum.statSide }}" hint-placeholder-val="{{ false }}"><span title="The side the model's win chance favours. Not a pick." style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;color:var(--ink-2);">{{ g.sum.statSide }}</span></sc-if>
                   </span>
                   <span aria-hidden="true" style="font-family:'IBM Plex Mono',monospace;font-size:16px;color:var(--mute);text-align:right;">{{ g.sum.chev }}</span>
                 </button>
@@ -210,7 +203,7 @@
                         </div>
                         <sc-for list="{{ g.sides }}" as="s" hint-placeholder-count="2">
                           <div style="display:flex;align-items:center;gap:12px;">
-                            <span aria-hidden="true" style="width:38px;height:38px;border-radius:50%;flex:none;display:grid;place-items:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:13px;letter-spacing:.02em;background:{{ s.color }};color:{{ s.fg }};box-shadow:0 0 0 1px var(--rule);">{{ s.abbr }}</span>
+                            <span aria-hidden="true" style="position:relative;width:38px;height:38px;border-radius:50%;flex:none;display:grid;place-items:center;overflow:hidden;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:13px;letter-spacing:.02em;background:{{ s.color }};color:{{ s.fg }};box-shadow:0 0 0 1px var(--rule);">{{ s.abbr }}<sc-if value="{{ s.logo }}" hint-placeholder-val="{{ false }}"><img src="{{ s.logo }}" alt="" loading="lazy" decoding="async" onLoad="{{ s.onLogoLoad }}" onError="{{ s.onLogoError }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;padding:5px;" /></sc-if></span>
                             <div style="flex:1;min-width:0;">
                               <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
                                 <span style="font-weight:600;font-size:16px;">{{ s.name }}</span>
@@ -314,7 +307,7 @@
                       <div style="border-top:2px solid var(--ink);padding-top:4px;">
                         <div style="display:flex;justify-content:space-between;align-items:center;gap:4px 12px;flex-wrap:wrap;">
                           <span style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);min-height:44px;display:inline-flex;align-items:center;">Due List · potential bets</span>
-                          <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mute);border:1px solid var(--rule);padding:2px 6px;">Not model bets · no stake</span>
+                          <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mute);border:1px solid var(--rule);padding:2px 6px;">Not model bets · tracked at 0.25u each</span>
                         </div>
                         <sc-for list="{{ g.drought.rows }}" as="r" hint-placeholder-count="0">
                           <article aria-label="{{ r.aria }}" style="display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:4px 12px;padding:12px 0;border-top:1px solid var(--rule-2);align-items:start;">
@@ -329,8 +322,17 @@
                               </div>
                               <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:19px;line-height:1.05;text-transform:uppercase;letter-spacing:.02em;">{{ r.category }}</span>
                               <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.5;color:var(--ink-2);">{{ r.history }}</span>
-                              <sc-if value="{{ r.meta }}" hint-placeholder-val="{{ false }}"><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.5;color:var(--mute);">{{ r.meta }}</span></sc-if>
-                              <sc-if value="{{ r.record }}" hint-placeholder-val="{{ false }}"><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.5;color:var(--mute);">{{ r.record }}</span></sc-if>
+                              <sc-if value="{{ r.hasFacts }}" hint-placeholder-val="{{ false }}">
+                                <dl style="margin:6px 0 0;padding:8px 0 0;border-top:1px dashed var(--rule);display:flex;flex-wrap:wrap;gap:8px 22px;">
+                                  <sc-for list="{{ r.facts }}" as="f" hint-placeholder-count="0">
+                                    <div style="display:flex;flex-direction:column;gap:2px;min-width:0;">
+                                      <dt style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);">{{ f.label }}</dt>
+                                      <dd style="margin:0;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;line-height:1.3;color:var(--ink);">{{ f.value }}</dd>
+                                      <sc-if value="{{ f.sub }}" hint-placeholder-val="{{ false }}"><dd style="margin:0;font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1.3;color:var(--ink-2);">{{ f.sub }}</dd></sc-if>
+                                    </div>
+                                  </sc-for>
+                                </dl>
+                              </sc-if>
                               <sc-if value="{{ r.track.show }}" hint-placeholder-val="{{ false }}">
                                 <div style="display:flex;flex-direction:column;gap:4px;margin-top:3px;">
                                   <sc-if value="{{ r.track.bar }}" hint-placeholder-val="{{ false }}"><div aria-hidden="true" style="height:4px;background:var(--rule);max-width:220px;"><div style="height:4px;width:{{ r.track.pct }};background:{{ r.track.color }};"></div></div></sc-if>
@@ -358,14 +360,16 @@
       <sc-if value="{{ isProps }}" hint-placeholder-val="{{ false }}">
         <section id="props-panel" aria-labelledby="props-h" style="padding-top:40px;">
           <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;border-bottom:3px solid var(--ink);padding-bottom:10px;">
-            <h2 id="props-h" style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:34px;line-height:1;text-transform:uppercase;letter-spacing:.01em;">Player props</h2>
+            <h2 id="props-h" style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:34px;line-height:1;text-transform:uppercase;letter-spacing:.01em;">{{ propsTitle }}</h2>
             <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">{{ headSummary }}</span>
           </div>
+          <sc-if value="{{ hasPropViews }}" hint-placeholder-val="{{ true }}">
           <div style="display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--ink);margin-top:16px;">
             <sc-for list="{{ propViews }}" as="v" hint-placeholder-count="2">
               <button type="button" onClick="{{ v.onClick }}" aria-pressed="{{ v.pressed }}" style="min-height:44px;padding:0 8px;background:{{ v.bg }};color:{{ v.fg }};border:0;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;">{{ v.label }}</button>
             </sc-for>
           </div>
+          </sc-if>
 
           <div style="display:flex;flex-wrap:wrap;gap:4px 20px;padding:10px 0;border-bottom:1px solid var(--rule);font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-2);">
             <sc-for list="{{ propSeason }}" as="x" hint-placeholder-count="3"><span><span style="color:var(--mute);text-transform:uppercase;letter-spacing:.08em;font-size:11px;">{{ x.label }}</span> {{ x.value }}</span></sc-for>
@@ -373,7 +377,7 @@
 
           <sc-if value="{{ isDroughtView }}" hint-placeholder-val="{{ false }}">
             <div role="note" style="display:flex;flex-wrap:wrap;gap:10px 20px;align-items:flex-start;padding:16px 0;border-bottom:1px solid var(--ink);">
-              <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--ink);padding:4px 9px;white-space:nowrap;">Not model bets</span>
+              <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--ink);padding:4px 9px;white-space:nowrap;">Not model bets · tracked at 0.25u each</span>
             </div>
             <sc-if value="{{ dv.empty }}" hint-placeholder-val="{{ false }}">
               <div role="status" style="display:flex;flex-direction:column;gap:8px;padding:24px 0;border-bottom:1px solid var(--rule);">
@@ -399,8 +403,17 @@
                     </div>
                     <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:19px;line-height:1.05;text-transform:uppercase;letter-spacing:.02em;">{{ r.category }}</span>
                     <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.5;color:var(--ink-2);">{{ r.history }}</span>
-                    <sc-if value="{{ r.meta }}" hint-placeholder-val="{{ false }}"><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.5;color:var(--mute);">{{ r.meta }}</span></sc-if>
-                    <sc-if value="{{ r.record }}" hint-placeholder-val="{{ false }}"><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.5;color:var(--mute);">{{ r.record }}</span></sc-if>
+                    <sc-if value="{{ r.hasFacts }}" hint-placeholder-val="{{ false }}">
+                      <dl style="margin:6px 0 0;padding:8px 0 0;border-top:1px dashed var(--rule);display:flex;flex-wrap:wrap;gap:8px 22px;">
+                        <sc-for list="{{ r.facts }}" as="f" hint-placeholder-count="0">
+                          <div style="display:flex;flex-direction:column;gap:2px;min-width:0;">
+                            <dt style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);">{{ f.label }}</dt>
+                            <dd style="margin:0;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;line-height:1.3;color:var(--ink);">{{ f.value }}</dd>
+                            <sc-if value="{{ f.sub }}" hint-placeholder-val="{{ false }}"><dd style="margin:0;font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1.3;color:var(--ink-2);">{{ f.sub }}</dd></sc-if>
+                          </div>
+                        </sc-for>
+                      </dl>
+                    </sc-if>
                     <sc-if value="{{ r.track.show }}" hint-placeholder-val="{{ false }}">
                       <div style="display:flex;flex-direction:column;gap:4px;margin-top:3px;">
                         <sc-if value="{{ r.track.bar }}" hint-placeholder-val="{{ false }}"><div aria-hidden="true" style="height:4px;background:var(--rule);max-width:220px;"><div style="height:4px;width:{{ r.track.pct }};background:{{ r.track.color }};"></div></div></sc-if>
@@ -420,13 +433,6 @@
 
           <sc-if value="{{ isModelView }}" hint-placeholder-val="{{ true }}">
 
-          <div role="note" style="display:flex;flex-wrap:wrap;gap:10px 20px;align-items:flex-start;padding:16px 0;border-bottom:1px solid var(--ink);">
-            <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase;background:var(--ink);color:var(--paper);padding:5px 9px;white-space:nowrap;">No demonstrated edge</span>
-            <p style="margin:0;flex:1 1 280px;font-size:15px;line-height:1.5;color:var(--ink-2);max-width:760px;text-wrap:pretty;">{{ pv.disclosure }}</p>
-          </div>
-          <sc-if value="{{ pv.note }}" hint-placeholder-val="{{ false }}">
-            <p style="margin:0;padding:12px 0;border-bottom:1px solid var(--rule);font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.6;color:var(--mute);">{{ pv.note }}</p>
-          </sc-if>
 
           <sc-if value="{{ pv.hasRows }}" hint-placeholder-val="{{ true }}">
             <div role="search" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));gap:10px;padding:16px 0;border-bottom:1px solid var(--rule);align-items:end;">
@@ -510,6 +516,52 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;sport&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;nhl&quot;,&quot;epl&quot;,&quot;cbb&quot;],&quot;default&quot;:&quot;nhl&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Preview&quot;,&quot;description&quot;:&quot;Ignored when deployed: the subdomain decides.&quot;},&quot;scenario&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Normal&quot;,&quot;Leans only&quot;,&quot;Empty&quot;,&quot;Props · live sample&quot;,&quot;Props · no lines&quot;,&quot;Props · abstain&quot;],&quot;default&quot;:&quot;Props · live sample&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Preview&quot;,&quot;description&quot;:&quot;Off the real domain the props sample is the default; on the domain, Normal.&quot;},&quot;live&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Auto&quot;,&quot;ESPN&quot;,&quot;Fixture&quot;,&quot;Fixture · ESPN down&quot;,&quot;Off&quot;],&quot;default&quot;:&quot;Auto&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Preview&quot;,&quot;description&quot;:&quot;Auto: ESPN on the real domain, the sample feed elsewhere.&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Auto&quot;,&quot;Light&quot;,&quot;Dark&quot;],&quot;default&quot;:&quot;Auto&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Preview&quot;}}">
 class Component extends DCLogic {
+  // The builders write run diagnostics into `notice`. Keep only what a visitor needs, in plain words; drop the rest.
+  static plainNotice(text) {
+    const DROP = /git-ignored|artifact|staging|this run|this build|the build|the lab|allowlist|demonstrated edge|recommendation|frozen opinion|ratings were asked|neutral-site|schedule feed|did not generate|root_blocker|could not be fitted|rating at|model's floor|No rating on file|Understat|xG|card's own|reads them off|price reached|provider price|evidence|not the same as the model passing/i;
+    const SAY = [
+      [/^Exhibition slate\./, "Preseason games. Projections and picks start with the regular season."],
+      [/^No Premier League fixture falls in (\S+) [–-] (\S+)\./, "No Premier League matches between $1 and $2."],
+      [/^Nothing on (this|tonight's|this week's) (window|slate|board) clears the bars\./, "Nothing worth a bet $1 $2."],
+      [/^No selection is published:.*$/, "No picks tonight. Projections and odds are shown."],
+      [/^Every pick shown is a frozen opinion.*$/, "Picks shown are the model's side, not bets."],
+      [/^The goals model could not be fitted.*$/, "Projections are unavailable today."],
+      [/^The model's game history.*$/, "Projections are unavailable today; the schedule is shown."],
+      [/^No market price for this league day.*$/, "No odds were posted for today, so no lines or picks are shown."],
+      [/^Projected scores are absent.*$/, "Projected scores are unavailable today."],
+      [/^No provider price reached this run.*$/, "No odds were posted, so only model numbers are shown."],
+      [/^No board was published for.*$/, "No board was published for this date."],
+      [/^No projections were published for the exhibition games.*$/, "No projections for preseason games, so nothing to settle."],
+      [/^The games were played but no final was available.*$/, "Finals were not in yet. Results will settle on the next update."],
+      [/^Yesterday's results could not be settled.*$/, "Yesterday's results could not be settled yet. They will be retried."],
+    ];
+    const out = [];
+    for (let s of String(text || "").split(/(?<=[.!?])\s+(?=[A-Z0-9])/)) {
+      s = s.trim(); if (!s) continue;
+      const hit = SAY.find(([re]) => re.test(s));
+      if (hit) { s = s.replace(hit[0], hit[1]).replace(/this window/, "this week").replace(/tonight's slate|this slate|this board/, "tonight"); out.push(s); continue; }
+      if (DROP.test(s)) continue;
+      out.push(s);
+    }
+    return out.join(" ");
+  }
+  // Plain words for visitors. sports.js is shared and its strings are pinned by the labs' tests, so the page swaps them for display only.
+  static PLAIN = [
+    ["No market clears the edge bar", "Nothing worth a bet"], ["No market is allowlisted for selection", "No markets open for picks yet"],
+    ["model abstains", "no pick"], ["no market price reached this board", "no odds were posted"],
+    ["Recorded, not staked", "Tracked only, no bet"], ["recorded, not staked", "tracked only, no bet"], ["market not allowlisted", "market not open for picks yet"],
+    ["Profit on turnover", "Return on bets"], ["Awaiting results feed", "Waiting on results"], ["played, not yet settled", "played, not graded yet"],
+    ["Time to an answer", "Bets needed to judge"], ["settled bets needed", "graded bets to tell skill from luck"],
+    ["settled opinions needed", "graded picks to tell skill from luck"], ["No settled opinions yet", "No graded picks yet"],
+    [" · ROI", " · return"], ["· 95% ", "· likely range "], ["not in the record", "not counted"],
+    ["priced, nothing selected", "nothing worth a bet"],
+  ];
+  static plain(v) {
+    if (typeof v === "string") return Component.PLAIN.reduce((s, [a, b]) => s.split(a).join(b), v);
+    if (Array.isArray(v)) return v.map(Component.plain);
+    if (v && typeof v === "object" && Object.getPrototypeOf(v) === Object.prototype) { const o = {}; for (const k in v) o[k] = Component.plain(v[k]); return o; }
+    return v;
+  }
   state = { vm: null, data: null, feedNotice: null, loadedFor: null, sportKey: null, deployed: false,
     tab: "tonight", propView: "model", expanded: {}, allOpen: null, wide: true, f: { q: "", game: "", team: "", market: "", betsOnly: false },
     live: { mode: "off", data: null, at: null, error: null, nextAt: null }, boxes: {}, now: Date.now() };
@@ -552,10 +604,11 @@ class Component extends DCLogic {
       catch (e) { data = await fetch(cfg.sample).then((r) => r.json()); feedNotice = "Live feed unreachable · showing sample data."; }
     }
     if (archived) data.__archived = archived;
-    const vm = S.ADAPTERS[sport].board(data);
+    const vm = Component.plain(S.ADAPTERS[sport].board(data));
+    vm.notice = Component.plainNotice(vm.notice);
     vm.otherSports = S.ORDER.filter((k) => k !== sport).map((k, i) => ({ name: S.SPORTS[k].name, href: S.SPORTS[k].host, style: `display:inline-flex;align-items:center;min-height:44px;${i === 0 ? "margin-left:6px;padding-left:18px;border-left:1px solid var(--rule);" : ""}` }));
-    const pv = S.ADAPTERS[sport].props ? S.ADAPTERS[sport].props(data) : null;
-    this.setState({ vm, data, pv, feedNotice, sportKey: sport, deployed, tab: pv && /^#(props|drought)$/.test(location.hash) ? "props" : "tonight", propView: location.hash === "#drought" ? "drought" : "model" }, () => this.startLive());
+    const pv = S.ADAPTERS[sport].props ? Component.plain(S.ADAPTERS[sport].props(data)) : null;
+    this.setState({ vm, data, pv, feedNotice, sportKey: sport, deployed, tab: (pv && /^#(props|drought)$/.test(location.hash)) || (!pv && location.hash === "#drought" && (data.games || []).some((g) => Array.isArray(g.drought))) ? "props" : "tonight", propView: location.hash === "#drought" || !pv ? "drought" : "model" }, () => this.startLive());
   }
   startLive() {
     const L = this.L, { data, sportKey } = this.state, choice = this.props.live || "Auto";
@@ -644,14 +697,47 @@ class Component extends DCLogic {
     const themeAttr = { Light: "light", Dark: "dark" }[this.props.theme] || "auto";
     const sk = this.state.sportKey || ((/^(nhl|epl|cbb)\./.exec(location.hostname) || [])[1]) || this.props.sport || "nhl";
     const tabLink = (label, href) => ({ label, href, current: undefined, shadow: "none", color: "var(--ink)", badge: "" });
+    // Boards without model props still carry Cooper's Due List (EPL); the tab opens the list view directly.
+    const dueOnly = !this.state.pv && ((this.state.data || {}).games || []).some((g) => Array.isArray(g.drought));
+    const dueBadge = String(((this.state.data || {}).games || []).reduce((n, g) => n + (Array.isArray(g.drought) ? g.drought.filter((x) => x && typeof x === "object").length : 0), 0) || "");
     const tabsFor = (tab, pv) => [
       { label: sk === "epl" ? "This week" : "Tonight", href: links.board, onClick: (e) => { e.preventDefault(); this.setTab("tonight"); }, current: tab === "tonight" ? "page" : undefined, shadow: tab === "tonight" ? "inset 0 -3px 0 var(--ink)" : "none", color: "var(--ink)", badge: "" },
-      ...(pv ? [{ label: "Props", href: `${links.board}#props`, onClick: (e) => { e.preventDefault(); this.setTab("props"); }, current: tab === "props" ? "page" : undefined, shadow: tab === "props" ? "inset 0 -3px 0 var(--ink)" : "none", color: "var(--ink)", badge: pv.status === "ok" && pv.counts.bets + pv.counts.leans ? String(pv.counts.bets + pv.counts.leans) : "" }] : []),
+      ...(pv ? [{ label: "Props", href: `${links.board}#props`, onClick: (e) => { e.preventDefault(); this.setTab("props"); }, current: tab === "props" ? "page" : undefined, shadow: tab === "props" ? "inset 0 -3px 0 var(--ink)" : "none", color: "var(--ink)", badge: pv.status === "ok" && pv.counts.bets + pv.counts.leans ? String(pv.counts.bets + pv.counts.leans) : "" }]
+        : dueOnly ? [{ label: "Due List", href: `${links.board}#drought`, onClick: (e) => { e.preventDefault(); this.setState({ propView: "drought" }); this.setTab("props"); }, current: tab === "props" ? "page" : undefined, shadow: tab === "props" ? "inset 0 -3px 0 var(--ink)" : "none", color: "var(--ink)", badge: dueBadge }] : []),
       tabLink("Results", links.results), ...(sk === "nhl" ? [tabLink("Season", links.season)] : []), tabLink("Archive", links.archive),
     ];
-    if (!vm) return { links, themeAttr, tabs: tabsFor("tonight", null), groups: [], strip: [], otherSports: [], scoreCards: [], showScores: false, isTonight: true, isProps: false, title1: "Tonight's", title2: "Board.", pv: { rows: [] }, propViews: [], dv: { groups: [] }, isModelView: true, isDroughtView: false, propSeason: [] };
+    if (!vm) return { links, themeAttr, tabs: tabsFor("tonight", null), groups: [], strip: [], otherSports: [], scoreCards: [], showScores: false, isTonight: true, isProps: false, title1: "Tonight's", title2: "Board.", pv: { rows: [] }, propViews: [], hasPropViews: false, propsTitle: "Player props", dv: { groups: [] }, isModelView: true, isDroughtView: false, propSeason: [] };
     const L = this.L, F = this.F, S = this.state, live = S.live, now = S.now, data = S.data, T = data.teams || {}, pv = S.pv, nhl = sk === "nhl", epl = sk === "epl";
     const start = (g) => g.startUtc || g.kickoff || g.tip, SL = (e) => L.stateLabelFor(sk, e);
+    // One strip for every sport, in the NHL shape: season W–L records, no return, no "time to an answer".
+    // Reads the NHL-shaped `record` (picks/straightUp/totals/leans) when a builder publishes it; falls back to what the
+    // EPL builder publishes today (settled/won/void → best bets W–L); a tally nobody has made yet is a dash, never 0–0.
+    if (!nhl) {
+      const r = data.record || {}, kept = (x) => x && typeof x === "object" && typeof x.w === "number";
+      const untallied = "Not tallied yet · each day is on Results";
+      const picks = kept(r.picks) ? r.picks : typeof r.settled === "number" && typeof r.won === "number" ? { w: r.won, l: Math.max(0, r.settled - r.won - (r.void || 0)) } : null;
+      const pending = typeof r.pending === "number" && r.pending ? ` · ${r.pending} pending` : "";
+      vm.strip = [
+        { label: "Best bets · season", value: picks ? F.recStr(picks) : "—", sub: picks ? `${F.winRate(picks.w, picks.l)}${pending}` : untallied, fine: "" },
+        { label: epl ? "Favoured side · season" : "Straight up · season", value: kept(r.straightUp) ? F.recStr(r.straightUp) : "—", sub: kept(r.straightUp) ? `${F.winRate(r.straightUp.w, r.straightUp.l)} of ${epl ? "matches" : "games"}` : untallied, fine: "" },
+        { label: epl ? "Total 2.5 · season" : "Totals · season", value: kept(r.totals) ? F.recStr(r.totals) : "—", sub: kept(r.totals) ? "model side of the line" : untallied, fine: "" },
+        { label: "Leans · season", value: kept(r.leans) ? F.recStr(r.leans) : "—", sub: kept(r.leans) ? "tracked only, no bet" : untallied, fine: "" },
+      ];
+    }
+    const fairOf = (p) => (typeof p === "number" && p > 0 && p < 1 ? F.fmtOdds(Math.round(p >= 0.5 ? -100 * p / (1 - p) : 100 * (1 - p) / p)) : "—");
+    const o = (x) => (typeof x === "number" ? F.fmtOdds(x) : "—");
+    const pf = (price, fairP) => (typeof price === "number" ? `${o(price)} · fair ${o(fairP)}` : `fair ${o(fairP)}`);
+    const eplCells = (r) => {
+      const fair = (r.result && r.result.fair) || {}, t = r.total || {}, b = r.btts || {}, d = r.drawNoBet || {}, mr = r.matchResult || {};
+      const rowsOCF = (open, cur, fairP, side) => [{ label: "Open", value: open, bold: false }, { label: "Current", value: cur, bold: false }, { label: "Fair", value: fairP, bold: true }, ...(side ? [{ label: "Model", value: side, bold: false }] : [])];
+      return [
+        { title: "Match result", spark: null, note: "", rows: [
+          { label: "Home", value: pf(mr.home, fair.home), bold: false }, { label: "Draw", value: pf(mr.draw, fair.draw), bold: false }, { label: "Away", value: pf(mr.away, fair.away), bold: false }] },
+        { title: "Total 2.5", spark: null, note: "", rows: rowsOCF(`${o(t.openOver)} / ${o(t.openUnder)}`.replace("— / —", "—"), `${o(t.over)} / ${o(t.under)}`, `${fairOf(t.overProb)} / ${fairOf(typeof t.overProb === "number" ? 1 - t.overProb : null)}`, typeof t.overProb === "number" ? `Over ${Math.round(t.overProb * 100)}%` : "") },
+        { title: "Both teams to score", spark: null, note: "", rows: rowsOCF(`${o(b.openYes)} / ${o(b.openNo)}`.replace("— / —", "—"), `${o(b.yes)} / ${o(b.no)}`, `${fairOf(b.yesProb)} / ${fairOf(typeof b.yesProb === "number" ? 1 - b.yesProb : null)}`, typeof b.yesProb === "number" ? `Yes ${Math.round(b.yesProb * 100)}%` : "") },
+        { title: "Draw no bet", spark: null, note: "", rows: rowsOCF(`${o(d.openHome)} / ${o(d.openAway)}`.replace("— / —", "—"), `${o(d.home)} / ${o(d.away)}`, `${fairOf(d.homeProb)} / ${fairOf(typeof d.homeProb === "number" ? 1 - d.homeProb : null)}`, typeof d.homeProb === "number" ? `Home ${Math.round(d.homeProb * 100)}%` : "") },
+      ];
+    };
     const [p1, p2] = epl ? ["home", "away"] : ["away", "home"];
     const raw = Object.fromEntries((data.games || []).map((g) => [g.id, g]));
     const M = live.data ? L.matchEventsFor(sk, live.data, this.liveGames(), T) : { byGame: {}, unmatched: [] };
@@ -659,7 +745,7 @@ class Component extends DCLogic {
 
     // Cooper's Due List (board.json games[].drought): an unstaked list he picks from. Never styled as a pick, never given units.
     const DROUGHT_UNITS = { points: ["point", "points", "1+ point", "a point"], goals: ["goal", "goals", "Anytime goal", "a goal"], assists: ["assist", "assists", "1+ assist", "an assist"] };
-    const DROUGHT_NOTE = data.droughtNote || "70+ points, 30+ goals or 30+ assists last season, and a drought in that category at the tier bar his total sets or at his own equal-surprise bar.";
+    const DROUGHT_NOTE = data.droughtNote || "70+ points, 25+ goals or 30+ assists last season, and a drought in that category at the tier bar his total sets or, for points and assists, at his own equal-surprise bar.";
     // The seasons the cell records were measured on ("2024-26"), read from the board (SCHEMA.md droughtWindow); a board
     // without it names no window rather than one the record was not measured on.
     const DROUGHT_WINDOW = typeof data.droughtWindow === "string" && data.droughtWindow ? ` ${data.droughtWindow}` : "";
@@ -668,7 +754,7 @@ class Component extends DCLogic {
       const e = M.byGame[r.gameId];
       if (!e || e.state === "pre") return { show: false };
       const msg = (text) => ({ show: true, bar: false, text, textColor: "var(--mute)" });
-      if (!L.PROP_STATS[r.market]) return msg("Live stat unavailable for this market");
+      if (!nhl || !L.PROP_STATS[r.market]) return msg("Live stat unavailable for this market");
       const b = S.boxes[e.id];
       if (!b || (!b.data && !b.error)) return { show: false };
       if (!b.data) return msg("Live stat unavailable · retrying");
@@ -705,8 +791,16 @@ class Component extends DCLogic {
       const meta = [bar != null ? `bar ${bar} · ${x.rule}` : "", forHim].filter(Boolean).join(" · ");
       const c = x.cellRecord, pc = (v) => `${v > 0 ? "+" : ""}${v.toFixed(1)}%`, whole = !!c && typeof c === "object" && [c.wagers, c.returnPct, c.lowPct, c.highPct].every((v) => num(v) != null);
       const record = !("cellRecord" in x) ? "" : whole ? `This cell${DROUGHT_WINDOW}: ${pc(c.returnPct)} over ${c.wagers} (95% ${pc(c.lowPct)} to ${pc(c.highPct)})` : "no record for this cell";
+      // The same facts as labelled cells: the bar and which rule, how rare for him, and the cell's record (plain ink, no tone).
+      const ruleName = { tier: "set by last season's total", surprise: "set by his own scoring rate", both: "by both measures" }[x.rule] || "";
+      const facts = [
+        bar != null ? { label: "Games needed", value: String(bar), sub: ruleName } : null,
+        forHim ? { label: "How rare", value: forHim.replace(/ for him$/, ""), sub: "a drought this long, for him" } : null,
+        !("cellRecord" in x) ? null : whole ? { label: `Past picks like this${DROUGHT_WINDOW}`, value: `${pc(c.returnPct)} over ${c.wagers}`, sub: `likely range ${pc(c.lowPct)} to ${pc(c.highPct)}` }
+          : { label: `Past picks like this${DROUGHT_WINDOW}`, value: "none yet", sub: "" },
+      ].filter(Boolean);
       return { player: x.player, team: x.team || "", color: t.color || "var(--ink)", fg: t.fg || "var(--paper)", streak: x.drought != null ? String(x.drought) : "—", category: u[2],
-        history: `${x.lastSeason ?? "—"} ${u[1]} last season · ${x.drought} straight games without ${u[3]}`, meta, record,
+        history: `${x.lastSeason ?? "—"} ${u[1]} last season · ${x.drought} straight games without ${u[3]}`, meta, record, facts, hasFacts: facts.length > 0,
         price: priced ? F.fmtOdds(x.price) : "—", book: priced ? x.book || "" : "price not posted", priceColor: priced ? "var(--ink)" : "var(--mute)", juice: !!x.heavyJuice,
         track: track({ ...x, gameId: gid, side: "over", line, unitOne: u[0], unitMany: u[1] }),
         aria: `${x.player}, ${u[2]}, ${x.drought} straight games without ${u[3]}, ${priced ? F.fmtOdds(x.price) : "price not posted"}${x.heavyJuice ? ", heavy juice" : ""}${meta ? `, ${meta}` : ""}${record ? `, ${record}` : ""}` };
@@ -736,7 +830,23 @@ class Component extends DCLogic {
       const proj = `${n(t.proj)}${typeof t.overProb === "number" ? ` · O ${Math.round(t.overProb * 100)}%` : ""}`;
       return { ...c, rows: [{ label: "Line", value: line, bold: false }, { label: "Over", value: o(t.overPrice), bold: false }, { label: "Under", value: o(t.underPrice), bold: false }, { label: "Proj", value: proj, bold: true }] };
     };
-    const splitNotice = (t) => { const m = /^(.+?[.!?])\s+(\S[\s\S]*)$/.exec(t || ""); return m ? { noticeHead: m[1], noticeRest: m[2], noticeShort: false } : { noticeHead: t || "", noticeRest: "", noticeShort: !!t }; };
+    // Stat side (Cooper, 2026-10-10: "not only looking for edges but looking
+    // for sides that the stats say should win"): the team the model gives the
+    // larger win chance, from the board's own winProb, on the game's row so it
+    // reads without opening the game. Not a pick: the pick tag beside it is.
+    const statSide = (r) => {
+      const hp = r.home && r.home.winProb, ap = r.away && r.away.winProb;
+      if (typeof hp !== "number" || typeof ap !== "number" || !Number.isFinite(hp) || !Number.isFinite(ap)) return "";
+      const home = hp >= ap;
+      return `Stats: ${home ? r.home.abbr : r.away.abbr} ${Math.round((home ? hp : ap) * 100)}%`;
+    };
+    // Team logos: `teams[abbr].logo` when the builder writes one, else ./logos/<ABBR>.png (the fetch script fills that
+    // folder in every repo). The coloured circle with the abbreviation stays underneath, so a missing file shows the
+    // abbreviation rather than a broken image.
+    const logoOf = (abbr) => { const t = T[abbr] || {}; return t.logo === null ? "" : t.logo || (abbr ? `./logos/${encodeURIComponent(abbr)}.png` : ""); };
+    const hideLogo = (e) => { e.currentTarget.style.display = "none"; };
+    const showLogo = (e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.background = "var(--paper)"; };
+    const withLogo = (s) => ({ ...s, logo: logoOf(s.abbr), onLogoLoad: showLogo, onLogoError: hideLogo });
     const shortNone = (label) => /^Not priced/.test(label) ? "Not priced" : /^Exhibition|^Not a regular/.test(label) ? "Abstains" : "No play";
     const groups = vm.groups.map((d) => ({ ...d, games: d.games.map((g) => {
       const r = raw[g.id] || { away: {}, home: {} }, e = M.byGame[g.id], open = this.isOpen(g.id), a = r.away.abbr, h = r.home.abbr;
@@ -749,13 +859,14 @@ class Component extends DCLogic {
       const shots = bt && sog(bt[a]) != null && sog(bt[h]) != null ? `Shots on goal ${a} ${sog(bt[a])} – ${sog(bt[h])} ${h}` : "";
       const gp = byGameProps[g.id] || [], shown = gp.filter((x) => x.kind !== "pass");
       const dr = droughtRows(r.drought).map((x) => drRow(x, g.id));
-      return { ...g, hasBar: g.bar.length > 0, anchor: `g-${g.id}`, panelId: `p-${g.id}`, expanded: open, expandedAttr: open ? "true" : "false", onToggle: () => this.toggle(g.id),
+      return { ...g, sides: g.sides.map(withLogo), hasBar: g.bar.length > 0, anchor: `g-${g.id}`, panelId: `p-${g.id}`, expanded: open, expandedAttr: open ? "true" : "false", onToggle: () => this.toggle(g.id),
         ariaLabel: `${g.sides[0].name} at ${g.sides[1].name}, ${g.time}`,
         barAria: g.sides.map((s) => `${s.name} ${s.win || ""}`.trim()).join(", "),
-        cells: g.cells.map((c) => totalCell(c, r)).map((c) => ({ ...c, rows: c.rows.map((x) => ({ ...x, weight: x.bold ? 600 : 400 })) })),
+        cells: (epl ? eplCells(r).map((c, i) => ({ ...c, spark: (g.cells[i] || {}).spark || null })) : g.cells.map((c) => totalCell(c, r))).map((c) => ({ ...c, rows: c.rows.map((x) => ({ ...x, weight: x.bold ? 600 : 400 })) })),
         pick: { ...g.pick, isBet: g.pick.kind === "bet", isLean: g.pick.kind === "lean", isNone: g.pick.kind === "none", label: g.pick.kind === "none" ? shortNone(g.pick.label) : g.pick.label, extra: g.pick.kind === "lean" ? "" : g.pick.extra },
         live: liveV,
         sum: { top: st && st.top ? st.top : g.time, sub: st ? (st.tone === "in" ? "Live" : "") : g.tv, subColor: st && st.tone === "in" ? "var(--alert)" : "var(--mute)",
+          statSide: statSide(r), awayLogo: logoOf(r[p1].abbr), homeLogo: logoOf(r[p2].abbr), onLogoLoad: showLogo, onLogoError: hideLogo,
           away: r[p1].abbr, home: r[p2].abbr, awayColor: (T[r[p1].abbr] || {}).color || "var(--ink)", homeColor: (T[r[p2].abbr] || {}).color || "var(--ink)",
           awayScore: scored ? String(e[p1].score) : "", homeScore: scored ? String(e[p2].score) : "", sep: scored ? "–" : epl ? "v" : "@",
           awayWeight: scored && e[p1].score > e[p2].score ? 700 : 400, homeWeight: scored && e[p2].score > e[p1].score ? 700 : 400,
@@ -809,32 +920,32 @@ class Component extends DCLogic {
     const cleared = pv ? pv.counts.bets + pv.counts.leans : 0;
     let empty = pv && pv.empty ? pv.empty : null;
     if (!empty && pv && !rows.length) empty = f.betsOnly && !cleared
-      ? { tag: "Nothing cleared", title: "No props cleared the bar tonight", body: "Every priced prop is a pass. Turn off “Bets & leans only” to see them all." }
+      ? { tag: "Nothing tonight", title: "No props worth a bet tonight", body: "Every priced prop is a pass. Turn off “Bets & leans only” to see them all." }
       : { tag: "No match", title: "No props match these filters", body: "Clear the filters to see every priced prop." };
     const uniq = (xs) => [...new Map(xs).entries()];
     // Drought view: the whole night's list, by game.
-    const dGames = (data.games || []).slice().sort((x, y) => Date.parse(x.startUtc) - Date.parse(y.startUtc));
+    const dGames = (data.games || []).slice().sort((x, y) => Date.parse(start(x)) - Date.parse(start(y)));
     const dHasField = dGames.some((g) => Array.isArray(g.drought));
     const dRegular = data.phase !== "preseason" && dGames.some((g) => g.gameType == null || g.gameType === 2);
     const dGroups = dGames.filter((g) => droughtRows(g.drought).length).map((g) => {
       const e = M.byGame[g.id], st = e ? SL(e) : null, scored = !!e && e.state !== "pre" && e.away.score != null, rows = droughtRows(g.drought);
-      return { title: `${g.away.abbr} @ ${g.home.abbr}`, subColor: st && st.tone === "in" ? "var(--alert)" : "var(--mute)",
-        sub: [st && st.top ? st.top : F.fmtTime(g.startUtc), scored ? `${e.away.score}–${e.home.score}` : "", `${rows.length} listed`].filter(Boolean).join(" · "),
+      return { title: epl ? `${g.home.abbr} v ${g.away.abbr}` : `${g.away.abbr} @ ${g.home.abbr}`, subColor: st && st.tone === "in" ? "var(--alert)" : "var(--mute)",
+        sub: [st && st.top ? st.top : F.fmtTime(start(g)), scored ? (epl ? `${e.home.score}–${e.away.score}` : `${e.away.score}–${e.home.score}`) : "", `${rows.length} listed`].filter(Boolean).join(" · "),
         rows: rows.map((x) => drRow(x, g.id)) };
     });
     const dCount = dGroups.reduce((n, x) => n + x.rows.length, 0);
     const dEmpty = !dRegular ? { tag: "Preseason", title: "Due List starts with the regular season", body: "" }
       : !dHasField ? { tag: "Not on this board", title: "No Due List on this board", body: "" }
-      : !dCount ? { tag: "Nobody tonight", title: "Nobody on the Due List tonight", body: "" } : null;
+      : !dCount ? (epl ? { tag: "Nobody this week", title: "Nobody on the Due List this week", body: "" } : { tag: "Nobody tonight", title: "Nobody on the Due List tonight", body: "" }) : null;
     const isDrought = S.propView === "drought";
     const viewBtn = (key, label) => ({ label, pressed: S.propView === key ? "true" : "false", bg: S.propView === key ? "var(--ink)" : "transparent", fg: S.propView === key ? "var(--paper)" : "var(--ink)", onClick: () => this.setView(key) });
     const view = pv ? { ...pv, rows: rows.map(deco), empty, filtered, hasRows: pv.status === "ok" && all.length > 0,
-      countLine: `${rows.length} of ${all.length}${cleared ? "" : " · none cleared the bar"}`, disclosure: "Picks are recorded so they can be graded, not because they are known winners.",
+      countLine: `${rows.length} of ${all.length}${cleared ? "" : " · none worth a bet"}`,
       summary: pv.status === "ok" ? pv.summary : "" } : { rows: [], hasRows: false };
     return { ...vm, links, themeAttr, groups, sportLong: vm.sport.longName, title1: vm.title[0], title2: vm.title[1],
-      ...splitNotice(vm.notice), hasNotice: !!vm.notice, hasFeedNotice: !!S.feedNotice, feedNotice: S.feedNotice || "",
+      notice: vm.notice, hasNotice: !!vm.notice, hasFeedNotice: !!S.feedNotice, feedNotice: S.feedNotice || "",
       isArchived: !!vm.archived, archivedLabel: vm.archived ? `Board for ${vm.archived.date}${vm.archived.slot ? ` · ${vm.archived.slot} card` : ""}, as published` : "",
-      tabs: tabsFor(S.tab, pv), isTonight: S.tab === "tonight" || !pv, isProps: S.tab === "props" && !!pv,
+      tabs: tabsFor(S.tab, pv), isTonight: S.tab === "tonight" || (!pv && !dueOnly), isProps: S.tab === "props" && (!!pv || dueOnly),
       showScores: !!L.LIVE_SPORTS[sk], scoreCards, noScoreCards: !scoreCards.length, liveLine, liveColor, liveStamp,
       toggleAllLabel: S.allOpen ?? S.wide ? "Collapse all" : "Expand all",
       onToggleAll: () => { const next = !(S.allOpen ?? S.wide); this.setState({ allOpen: next, expanded: {} }, () => this.syncBoxes()); },
@@ -845,12 +956,13 @@ class Component extends DCLogic {
         const u = (x) => (typeof x === "number" ? ` · ${x > 0 ? "+" : x < 0 ? "−" : ""}${Math.abs(x).toFixed(2)} u` : "");
         const hit = (r) => { const n = (r.w || 0) + (r.l || 0); return n ? ` · ${Math.round(((r.w || 0) / n) * 100)}%` : ""; };
         return [
-          { label: "Props best bets · season", value: ok(R.props) ? rec(R.props) + u(R.props.units) : "—" },
-          { label: "Props leans · season", value: ok(R.propLeans) ? rec(R.propLeans) + hit(R.propLeans) : "—" },
-          { label: "Due List · season", value: ok(R.dueList) ? rec(R.dueList) + hit(R.dueList) : "—" },
+          ...(pv ? [{ label: "Props best bets · season", value: ok(R.props) ? rec(R.props) + u(R.props.units) : "—" },
+            { label: "Props leans · season", value: ok(R.propLeans) ? rec(R.propLeans) + hit(R.propLeans) : "—" }] : []),
+          { label: `Due List · season · ${(R.dueList && R.dueList.stake) || 0.25}u each`, value: ok(R.dueList) ? rec(R.dueList) + hit(R.dueList) + u(R.dueList.units) : "—" },
         ];
       })(),
-      propViews: [viewBtn("model", pv && pv.status === "ok" ? `Model props · ${pv.counts.total}` : "Model props"), viewBtn("drought", `Due List · ${dCount}`)],
+      propViews: pv ? [viewBtn("model", pv.status === "ok" ? `Model props · ${pv.counts.total}` : "Model props"), viewBtn("drought", `Due List · ${dCount}`)] : [],
+      hasPropViews: !!pv, propsTitle: pv ? "Player props" : "Due List",
       dv: { groups: dGroups, empty: dEmpty, note: DROUGHT_NOTE }, headSummary: isDrought ? (dCount ? `${dCount} player${dCount === 1 ? "" : "s"} · ${dGroups.length} game${dGroups.length === 1 ? "" : "s"}` : "") : view.summary || "",
       gameOptions: [{ value: "", label: "All games" }, ...(data.games || []).filter((g) => byGameProps[g.id]).map((g) => ({ value: g.id, label: `${g.away.abbr} @ ${g.home.abbr} · ${F.fmtTime(g.startUtc)}` }))],
       teamOptions: [{ value: "", label: "All teams" }, ...uniq(all.map((r) => [r.team, r.teamName])).sort((x, y) => x[1].localeCompare(y[1])).map(([value, label]) => ({ value, label }))],

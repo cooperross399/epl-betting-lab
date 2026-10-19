@@ -1014,6 +1014,9 @@ jobs:
             data/outputs/archive/extra_cards
             data/processed/epl_historical_matches.csv
             data/processed/understat_team_xg.csv
+            # The props card's FPL per-match logs: the public record grades
+            # tackles props from them (web/settle_results.py --fpl-logs).
+            data/processed/fpl_match_logs.csv
           if-no-files-found: warn
           retention-days: 90
 

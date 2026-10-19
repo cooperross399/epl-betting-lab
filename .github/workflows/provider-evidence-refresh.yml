@@ -56,6 +56,7 @@ jobs:
           python -m pip install -e .
 
       - name: Fetch historical results
+        if: ${{ !inputs.props_only }}
         env:
           PYTHONPATH: src
         run: |
@@ -88,7 +89,9 @@ jobs:
           PYTHONPATH: src
         run: |
           python scripts/fetch_player_props_staging.py --overwrite-staging
-          python -c "from epl_betting_lab.reports.player_props_card import save_player_props_card; print(save_player_props_card()['summary']['markets_with_staged_prices'])"
+          # Printed whole so the evidence can be read from the log as well as
+          # the artifact.
+          python -c "import json; from epl_betting_lab.reports.player_props_card import save_player_props_card; print(json.dumps(save_player_props_card()['summary'], indent=2, sort_keys=True))"
 
       - name: Upload evidence
         if: always()

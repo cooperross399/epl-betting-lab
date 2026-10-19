@@ -1,8 +1,10 @@
-## Monday 19 October, 10:19 UTC — scheduled run
+## Monday 19 October, 12:48 UTC — manual run
 
-Selections changed: 2 dropped, 2 moved section.
+Already sent today; same selections (6 price move(s)).
 
-Provider quota: 67792 (about 67 days at the observed burn)
+_This run was started by hand, not by the schedule. If you did not start it, someone was testing._
+
+Provider quota: 67658 (about 67 days at the observed burn)
 
 Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5** (excluded: none)
 
@@ -21,13 +23,6 @@ _None._
 - Tottenham v Coventry — **Jay Dasilva** `player_shots` Over@0.5 at +220 (FanDuel), 0.1u
 
 _Props carry the smallest stake the card uses: the standing measurement demonstrates no edge, and books reprice on the team sheet after this card is built._
-
-### What changed
-
-- **Dropped:** Tottenham v Coventry double_chance draw_or_away
-- **Dropped:** Tottenham v Coventry draw_no_bet away
-- **Moved section:** Tottenham v Coventry corners_total_10_5 over
-- **Moved section:** Tottenham v Coventry corners_total_9_5 over
 
 
 ## Beyond the Premier League
@@ -88,4 +83,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/39235469950)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/39254084713)

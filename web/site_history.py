@@ -8,7 +8,8 @@ Does three things, all inside --data:
      and never overwrites it. That frozen copy is the published opinion.
   2. Appends the current market values to history/lines/<date>.json, one point per
      build, and injects the series into board.json as `lineHistory[gameId][key]`
-     so the page can draw the movement.
+     so the page can draw the movement. A series the builder already put on the
+     board from the lab's own price captures is kept in place of the per-build one.
   3. Rewrites history/index.json, newest first, with game and best-bet counts.
 
 The workflow restores the previous run's history artifact into --data/history before
@@ -26,7 +27,7 @@ from pathlib import Path
 
 #: series key -> candidate paths into a game dict, first numeric hit wins.
 SERIES = {
-    "ml_home": [("moneyline", "current", "home")],
+    "ml_home": [("moneyline", "current", "home"), ("matchResult", "home")],
     "pl_price": [("puckLine", "price")],
     "spread": [("spread", "current")],
     "total": [("total", "current")],
@@ -95,8 +96,16 @@ def main(argv=None) -> int:
             elif pts[-1]["t"] != stamp:
                 pts[-1] = {"t": stamp, "v": v}  # same value, newer confirmation
     dump(lines_path, lines)
-    board["lineHistory"] = {gid: {k: v for k, v in s.items() if len(v) >= 2} for gid, s in lines.items()}
-    board["lineHistory"] = {gid: s for gid, s in board["lineHistory"].items() if s}
+    # A series the builder already published from the lab's own captures
+    # (one point per capture; EPL reads them off the price feed) is the
+    # better record of the line than one point per build, so it wins for
+    # that game and key. Every other key keeps the per-build series.
+    captured = board.get("lineHistory") if isinstance(board.get("lineHistory"), dict) else {}
+    built = {gid: {k: v for k, v in s.items() if len(v) >= 2} for gid, s in lines.items()}
+    for gid, series in captured.items():
+        if isinstance(series, dict):
+            built.setdefault(str(gid), {}).update({k: v for k, v in series.items() if isinstance(v, list) and len(v) >= 2})
+    board["lineHistory"] = {gid: s for gid, s in built.items() if s}
     dump(board_path, board)
 
     # 1. freeze

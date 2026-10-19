@@ -65,7 +65,7 @@ def _event_payload(event_id="e1"):
                         ],
                     },
                     {
-                        "key": "player_to_receive_card",
+                        "key": "player_first_goal_scorer",
                         "outcomes": [
                             {
                                 "name": "Yes",
@@ -101,7 +101,7 @@ class TestExtraction:
         assert scorer["selection"] == "Yes"
 
     def test_unpriceable_markets_are_not_staged(self) -> None:
-        """Cards and match markets are not the model's to price; a price
+        """First scorer and match markets are not the model's to price; a price
         nothing can price is quota spent on nothing, and staging it would
         imply otherwise."""
         rows = extract_prop_rows(
@@ -109,7 +109,7 @@ class TestExtraction:
         )
 
         assert {r["market"] for r in rows} <= set(PROP_EVENT_MARKETS)
-        assert all(r["market"] != "player_to_receive_card" for r in rows)
+        assert all(r["market"] != "player_first_goal_scorer" for r in rows)
 
     def test_team_names_are_canonical(self) -> None:
         rows = extract_prop_rows(

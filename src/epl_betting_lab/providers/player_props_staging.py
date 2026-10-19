@@ -8,11 +8,11 @@ long-form file with a `player` column and the harvest's `Over@line`
 selection convention, reachable by the props tooling and invisible to the
 card pipeline until the day a reviewed policy approval wires them in.
 
-Only the four markets the model can price are fetched — shots, shots on
-target, assists, anytime scorer. Cards are not fetched because the model
-deliberately does not price them, and first/last scorer are not fetched
-because ordering is not a rate the model measures. A price nothing can
-price is quota spent on nothing.
+Only markets the model can price are fetched: shots, shots on target,
+assists, anytime scorer, and since 2026-10-19 (Cooper: "dont forget about
+tackles/cards/goalie saves") cards, tackles and goalkeeper saves. First and
+last scorer are not fetched because ordering is not a rate the model
+measures. A price nothing can price is quota spent on nothing.
 
 Cost is stated before it is spent: one credit per market per event, so a
 full ten-fixture slate costs about forty credits. Only the selected round's
@@ -53,6 +53,13 @@ PROP_EVENT_MARKETS: tuple[str, ...] = (
     "player_shots_on_target",
     "player_assists",
     "player_goal_scorer_anytime",
+    # Found by the provider's own event-markets listing, 2026-10-19: guessed
+    # keys (`player_tackles`, `player_goalkeeper_saves`) return nothing.
+    "player_to_receive_card",
+    "player_to_receive_red_card",
+    "player_tackles_alternate",
+    "player_goalie_saves",
+    "player_goalie_saves_alternate",
 )
 
 #: One credit per market per event on the live per-event endpoint.

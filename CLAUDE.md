@@ -111,6 +111,26 @@ Use the repo, the reports, and GitHub.
   the live fetch buys only the selected round's fixtures that have not kicked
   off (`player_props_staging.slate_events`), about 4 credits per fixture per
   run. No edge is demonstrated.
+- **Cards, tackles and alternate goalkeeper saves are allowlisted
+  (2026-10-19, Cooper: "dont forget about tackles/cards/goalie saves", "find
+  goalie saves figure it out"; PR #372, receipt
+  `odds_api-20261019T135739+0000-06088e72a437`).** `player_goalie_saves`
+  (the plain line) stays held: no bettable book staged it. Guessed keys (`player_tackles`,
+  `player_goalkeeper_saves`) returned nothing or 422; the provider's own
+  event-markets listing (`Provider Market Discovery` -> `list_event_markets`)
+  found `player_to_receive_card` / `_red_card` (Bovada, DraftKings),
+  `player_tackles_alternate` (BetMGM, Caesars, DraftKings) and
+  `player_goalie_saves` / `_alternate` (DraftKings, Fanatics). Bovada's own
+  tackles are not relayed. Cards are rated from the Understat logs' yellow
+  and red cards (`add_card_columns`: booked, sent off); tackles and saves
+  from Fantasy Premier League's per-match Opta numbers
+  (`providers/fpl_players`, keyless, fetched only once one is approved),
+  last season's totals as extra evidence. Uncorrected (the shipped Platt
+  correction was fitted on the four volume markets), and one stake per
+  player per stat however many rungs clear the bar. Never measured against
+  real prices: no demonstrated edge. Before writing "the provider does not
+  offer X", run the event-markets listing; it is the `total_2_5` lesson a
+  third time.
 - **Team totals are allowlisted (2026-10-19, Cooper: "yes build team totals";
   PR #371, receipt `odds_api-20261019T131401+0000-968716f836e0`).** Six markets, one team at one half line
   each (`team_total_home_0_5` ... `team_total_away_2_5`,

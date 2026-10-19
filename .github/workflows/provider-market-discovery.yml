@@ -19,6 +19,15 @@ on:
         type: boolean
         required: false
         default: false
+      list_event_markets:
+        description: "List every market key each book carries per event (one credit per event, no prices)"
+        type: boolean
+        required: false
+        default: false
+      regions:
+        description: "Regions for the event queries (comma-separated)"
+        required: false
+        default: "us"
       markets:
         description: "Per-event market keys to discover (comma-separated, blank for the default)"
         required: false
@@ -39,6 +48,11 @@ on:
         description: "market@line pairs to check per bookmaker, e.g. alternate_totals@2.5"
         required: false
         default: ""
+      fpl_probe:
+        description: "Print the fields Fantasy Premier League's player match history carries (free, no credits)"
+        type: boolean
+        required: false
+        default: false
       dump_shapes:
         description: "Print the raw outcome shape of each market returned, so a parser can be written against reality"
         type: boolean
@@ -88,6 +102,12 @@ jobs:
           if [ "${{ inputs.check_event_markets }}" = "true" ]; then
             ARGS="$ARGS --check-event-markets"
           fi
+          if [ "${{ inputs.list_event_markets }}" = "true" ]; then
+            ARGS="$ARGS --list-event-markets"
+          fi
+          if [ -n "${{ inputs.regions }}" ]; then
+            ARGS="$ARGS --regions ${{ inputs.regions }}"
+          fi
           if [ -n "${{ inputs.markets }}" ]; then
             ARGS="$ARGS --markets ${{ inputs.markets }}"
           fi
@@ -107,6 +127,13 @@ jobs:
             ARGS="$ARGS --dump-outcome-shapes"
           fi
           python scripts/run_provider_market_discovery.py $ARGS
+
+      - name: Probe Fantasy Premier League player data
+        if: ${{ inputs.fpl_probe }}
+        env:
+          PYTHONPATH: src
+        run: |
+          python scripts/probe_fpl_player_data.py
 
       - name: Upload discovery report
         if: always()

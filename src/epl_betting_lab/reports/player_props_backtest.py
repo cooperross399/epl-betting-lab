@@ -50,6 +50,7 @@ from epl_betting_lab.config import OUTPUTS_DIR, PROCESSED_DIR, PROJECT_ROOT
 from epl_betting_lab.models.player_props import (
     PlayerPropsModel,
     PropCalibration,
+    add_card_columns,
 )
 
 BACKTEST_JSON_FILENAME = "player_props_backtest.json"
@@ -62,7 +63,21 @@ SETTLEMENT_COLUMNS = {
     "player_shots": "shots",
     "player_assists": "assists",
     "player_goal_scorer_anytime": "goals",
+    # Derived from the Understat logs' yellow and red cards
+    # (`models.player_props.add_card_columns`).
+    "player_to_receive_card": "booked",
+    "player_to_receive_red_card": "sent_off",
+    # From the Fantasy Premier League logs, not Understat. No historical
+    # price for any of these has been bought, so the backtest finds none.
+    "player_tackles_alternate": "tackles",
+    "player_goalie_saves": "saves",
+    "player_goalie_saves_alternate": "saves",
 }
+
+#: Markets priced as a single Yes, which is over half of their stat.
+YES_MARKETS = frozenset(
+    {"player_goal_scorer_anytime", "player_to_receive_card", "player_to_receive_red_card"}
+)
 
 #: Minimum modelled edge to count a bet, per the flat-stake measurement.
 #: Higher than the card's match-level bar on purpose: the model prices the
@@ -220,9 +235,13 @@ def build_player_props_backtest(
     odds = odds.dropna(subset=["american"])
     odds["date"] = odds["commence_time"].str[:10]
 
-    logs = pd.read_csv(selected_logs, dtype=str)
+    logs = add_card_columns(pd.read_csv(selected_logs, dtype=str))
     for stat in set(SETTLEMENT_COLUMNS.values()) | {"minutes"}:
-        logs[stat] = pd.to_numeric(logs[stat], errors="coerce").fillna(0)
+        if stat in logs.columns:
+            logs[stat] = pd.to_numeric(logs[stat], errors="coerce").fillna(0)
+    # A market whose stat these logs do not carry (tackles and saves live in
+    # the FPL logs) cannot be settled here and is not measured.
+    odds = odds[odds["market"].map(SETTLEMENT_COLUMNS).isin(logs.columns)]
     logs["team_key"] = logs["team"].map(_team_key)
     logs["player_key"] = logs["player"].map(_player_key)
 
@@ -331,9 +350,9 @@ def build_player_props_backtest(
             probability = model.over_probability(
                 model_player, stat, point, opponent=opponent_title, venue=venue
             )
-        elif market == "player_goal_scorer_anytime":
-            probability = model.anytime_scorer_probability(
-                model_player, opponent=opponent_title, venue=venue
+        elif market in YES_MARKETS and name.casefold() == "yes":
+            probability = model.over_probability(
+                model_player, stat, 0.5, opponent=opponent_title, venue=venue
             )
         else:
             probability = None

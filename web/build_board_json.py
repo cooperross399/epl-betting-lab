@@ -775,6 +775,11 @@ PROP_MARKET_KEYS = {
     "player_shots_on_target": "shots_on_target",
     "player_assists": "assists",
     "player_goal_scorer_anytime": "goals",
+    "player_to_receive_card": "booked",
+    "player_to_receive_red_card": "sent_off",
+    "player_tackles_alternate": "tackles",
+    "player_goalie_saves": "goalie_saves",
+    "player_goalie_saves_alternate": "goalie_saves",
 }
 
 #: The props card's status words, as the shared page's props states.
@@ -791,7 +796,8 @@ def load_props_card(lab: Path) -> dict | None:
 
 
 def _prop_line(selection: str) -> tuple[str, float] | None:
-    """`Over@1.5` -> ("over", 1.5); an anytime-scorer `Yes` is over half a goal."""
+    """`Over@1.5` -> ("over", 1.5); a `Yes` (anytime scorer, booked, sent
+    off) is over half of its stat."""
     name, _, point = str(selection or "").partition("@")
     name = name.strip().casefold()
     if name == "yes" and not point:

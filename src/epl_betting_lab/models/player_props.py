@@ -1,4 +1,4 @@
-"""Per-player Poisson rates for shots, shots on target, goals, and assists.
+"""Per-player Poisson rates for shots, shots on target, goals, assists, and cards.
 
 The team models answer "how many will the match produce"; a prop asks "how
 many will this player produce", and that needs player-level rates fitted on
@@ -22,7 +22,10 @@ edges, not a lower one.
 
 **Counts are treated as Poisson.** Shots are close to Poisson; goals close
 enough; cards are not (they cluster, and the referee — the strongest driver —
-is not in the data). This module deliberately prices no card props.
+is not in the data). Cards were left unpriced for that reason until Cooper
+asked for them on 2026-10-19; they are now rated as "booked" and "sent off",
+each a yes/no per match derived from the logs' yellow and red cards, and
+that warning travels with every card price rather than being solved.
 
 **Shots on target inherit the Understat definition** (Goal or SavedShot),
 which is close to, not identical to, the Opta counts books settle against.
@@ -39,6 +42,30 @@ import pandas as pd
 
 #: Stats this model prices, each a column of the player match logs.
 PROP_STATS = ("shots", "shots_on_target", "goals", "assists")
+
+#: Card stats, derived per appearance by `add_card_columns`: booked is any
+#: yellow or red (a second yellow and its red are one booking, which is how a
+#: "to be booked" Yes settles), sent off is any red. Fitted only when the logs
+#: carry `yellow_cards` and `red_cards`; without them the model holds no card
+#: opinion rather than a baseline one.
+CARD_STATS = ("booked", "sent_off")
+
+
+#: Stats the Fantasy Premier League logs carry and Understat does not
+#: (`providers/fpl_players`). Fitted by `PlayerPropsModel(stats=FPL_STATS)`.
+FPL_STATS = ("tackles", "saves")
+
+
+def add_card_columns(logs: pd.DataFrame) -> pd.DataFrame:
+    """`logs` with `booked` and `sent_off`, when it carries card counts."""
+    if not {"yellow_cards", "red_cards"} <= set(logs.columns):
+        return logs
+    frame = logs.copy()
+    yellow = pd.to_numeric(frame["yellow_cards"], errors="coerce").fillna(0)
+    red = pd.to_numeric(frame["red_cards"], errors="coerce").fillna(0)
+    frame["booked"] = ((yellow + red) > 0).astype(int)
+    frame["sent_off"] = (red > 0).astype(int)
+    return frame
 
 #: Position groups, from the first letter of Understat's position strings
 #: ("FW", "MC", "DR", "GK"). Substitute appearances are grouped under the
@@ -160,13 +187,35 @@ class PlayerPropsModel:
     #: "average forward" is not a modelled opinion worth staking.
     MINIMUM_MINUTES = 270
 
-    def __init__(self) -> None:
+    def __init__(self, stats: tuple[str, ...] | None = None) -> None:
+        #: The stats to fit. None means the Understat set: the four volume
+        #: stats, plus the card stats when the logs carry card counts. The
+        #: Fantasy Premier League logs fit `FPL_STATS` instead.
+        self._requested = tuple(stats) if stats else None
         self.players: dict[str, PlayerRates] = {}
         self.baselines: dict[str, dict[str, float]] = {}
         self.opponent_factors: dict[str, dict[str, float]] = {}
         self.venue_factors: dict[str, dict[str, float]] = {}
+        self.stats: tuple[str, ...] = stats
 
-    def fit(self, logs: pd.DataFrame) -> "PlayerPropsModel":
+    def fit(
+        self, logs: pd.DataFrame, *, prior: pd.DataFrame | None = None
+    ) -> "PlayerPropsModel":
+        """Fit per-player rates on `logs`.
+
+        `prior` is optional extra evidence per player — one row of minutes
+        and stat totals, such as last season's — added to the player's own
+        sums before shrinkage. It moves no baseline, opponent or venue
+        factor and no minutes expectation, which only match rows can say.
+        """
+        frame = add_card_columns(logs)
+        if self._requested:
+            stats = self._requested
+        elif set(CARD_STATS) <= set(frame.columns):
+            stats = (*PROP_STATS, *CARD_STATS)
+        else:
+            stats = PROP_STATS
+        self.stats = stats
         required = {
             "player",
             "team",
@@ -176,17 +225,17 @@ class PlayerPropsModel:
             "minutes",
             "date",
             "match_id",
-            *PROP_STATS,
+            *stats,
         }
-        missing = required - set(logs.columns)
+        missing = required - set(frame.columns)
         if missing:
             raise KeyError(
                 f"Player logs are missing columns {sorted(missing)}; refusing "
                 "to model from a partial dataset."
             )
-        frame = logs.copy()
+        frame = frame.copy()
         frame["minutes"] = pd.to_numeric(frame["minutes"], errors="coerce")
-        for stat in PROP_STATS:
+        for stat in stats:
             frame[stat] = pd.to_numeric(frame[stat], errors="coerce").fillna(0)
         frame = frame.dropna(subset=["minutes"])
         frame = frame[frame["minutes"] > 0]
@@ -210,19 +259,19 @@ class PlayerPropsModel:
             minutes = float(rows["minutes"].sum())
             self.baselines[str(group)] = {
                 stat: float(rows[stat].sum()) / minutes * 90.0 if minutes else 0.0
-                for stat in PROP_STATS
+                for stat in stats
             }
 
         # Opponent concession factors: how much of each stat a team allows
         # opposing players, relative to the league, shrunk by evidence.
         self.opponent_factors = {}
         per_match = (
-            frame.groupby(["opponent", "match_id"])[list(PROP_STATS)]
+            frame.groupby(["opponent", "match_id"])[list(stats)]
             .sum()
             .reset_index()
         )
         league_avg = {
-            stat: float(per_match[stat].mean()) for stat in PROP_STATS
+            stat: float(per_match[stat].mean()) for stat in stats
         }
         for team, rows in per_match.groupby("opponent"):
             played = len(rows)
@@ -234,20 +283,20 @@ class PlayerPropsModel:
                     (float(rows[stat].mean()) / league_avg[stat] if league_avg[stat] else 1.0)
                     - 1.0
                 )
-                for stat in PROP_STATS
+                for stat in stats
             }
 
         # Venue factors: league-wide home/away multipliers per stat.
         self.venue_factors = {}
-        per_venue = frame.groupby("venue")[list(PROP_STATS)].sum()
+        per_venue = frame.groupby("venue")[list(stats)].sum()
         minutes_by_venue = frame.groupby("venue")["minutes"].sum()
         overall_per90 = {
             stat: float(frame[stat].sum()) / float(frame["minutes"].sum()) * 90.0
-            for stat in PROP_STATS
+            for stat in stats
         }
         for venue in ("home", "away"):
             if venue not in per_venue.index:
-                self.venue_factors[venue] = {stat: 1.0 for stat in PROP_STATS}
+                self.venue_factors[venue] = {stat: 1.0 for stat in stats}
                 continue
             venue_minutes = float(minutes_by_venue.get(venue, 0.0))
             self.venue_factors[venue] = {
@@ -257,22 +306,32 @@ class PlayerPropsModel:
                     if venue_minutes and overall_per90[stat]
                     else 1.0
                 )
-                for stat in PROP_STATS
+                for stat in stats
             }
 
         # Per-player shrunk rates and a recent-form minutes expectation.
+        prior_by_player: dict[str, dict[str, float]] = {}
+        if prior is not None and not prior.empty and "player" in prior.columns:
+            for _, prior_row in prior.iterrows():
+                prior_by_player[str(prior_row["player"])] = {
+                    column: float(pd.to_numeric(prior_row.get(column), errors="coerce") or 0.0)
+                    for column in ("minutes", *stats)
+                }
+
         self.players = {}
         frame = frame.sort_values(["date", "match_id"])
         for player, rows in frame.groupby("player"):
-            minutes = float(rows["minutes"].sum())
+            extra = prior_by_player.get(str(player), {})
+            minutes = float(rows["minutes"].sum()) + extra.get("minutes", 0.0)
             group = str(rows["group"].iat[0])
             baseline = self.baselines.get(group) or {
-                stat: 0.0 for stat in PROP_STATS
+                stat: 0.0 for stat in stats
             }
             weight = minutes / (minutes + self.SHRINKAGE_MINUTES)
             per90 = {}
-            for stat in PROP_STATS:
-                raw = float(rows[stat].sum()) / minutes * 90.0 if minutes else 0.0
+            for stat in stats:
+                total = float(rows[stat].sum()) + extra.get(stat, 0.0)
+                raw = total / minutes * 90.0 if minutes else 0.0
                 per90[stat] = baseline[stat] + weight * (raw - baseline[stat])
             recent = rows.tail(self.MINUTES_WINDOW)
             self.players[str(player)] = PlayerRates(
@@ -289,8 +348,11 @@ class PlayerPropsModel:
         self, player: str, stat: str, *, opponent: str, venue: str
     ) -> float | None:
         """The Poisson mean, or None when there is no modelled opinion."""
-        if stat not in PROP_STATS:
-            raise KeyError(f"Unknown prop stat {stat!r}. Known: {PROP_STATS}")
+        if stat not in self.stats:
+            if stat in CARD_STATS:
+                # Logs without card counts: no opinion, never a baseline one.
+                return None
+            raise KeyError(f"Unknown prop stat {stat!r}. Known: {self.stats}")
         rates = self.players.get(player)
         if rates is None or rates.minutes_played < self.MINIMUM_MINUTES:
             return None

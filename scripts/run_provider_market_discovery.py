@@ -28,6 +28,7 @@ from epl_betting_lab.reports.provider_market_discovery import (
     estimate_quota_cost,
     save_provider_market_discovery,
     fetch_events_live,
+    list_event_market_keys,
     probe_historical_odds,
     summarize_bulk_response,
 )
@@ -77,6 +78,15 @@ def parse_args() -> argparse.Namespace:
         help=(
             "Query the per-event odds endpoint to determine BTTS availability. "
             "Costs quota (markets x regions per event)."
+        ),
+    )
+    parser.add_argument(
+        "--list-event-markets",
+        action="store_true",
+        help=(
+            "List every market key each book carries per event, from the "
+            "event-markets endpoint (one credit per event, no prices). "
+            "Answers whether a market exists under any spelling."
         ),
     )
     parser.add_argument(
@@ -162,7 +172,10 @@ def main() -> int:
     # guard has now blocked two of them in turn, so it asks the question once:
     # is anything here going to read the archive?
     live_probe = bool(
-        args.probe_totals_regions or args.check_event_markets or args.historical_probe
+        args.probe_totals_regions
+        or args.check_event_markets
+        or args.historical_probe
+        or args.list_event_markets
     )
     if raw_path is None and not live_probe:
         print("BLOCKED: no archived provider response found under data/staging/raw/.")
@@ -208,6 +221,33 @@ def main() -> int:
             print(f"  event       : {sample['id']}  {sample['fixture']}")
         if outcome["detail"]:
             print(f"  detail      : {outcome['detail']}")
+
+    if args.list_event_markets:
+        load_provider_env()
+        api_key = os.environ.get(API_KEY_ENV, "").strip()
+        if not api_key:
+            print(f"BLOCKED: `{API_KEY_ENV}` is not configured.")
+            return 2
+        events = fetch_events_live(api_key=api_key)
+        if args.max_events > 0:
+            events = events[: args.max_events]
+        print(
+            f"Event-markets listing: {len(events)} event(s), about one credit "
+            "each, no prices returned."
+        )
+        listing = list_event_market_keys(
+            events,
+            api_key=api_key,
+            base_url=os.environ.get("EPL_ODDS_API_BASE_URL", DEFAULT_API_BASE_URL),
+            regions=args.regions,
+        )
+        print(f"Events listed: {listing['events_listed']}")
+        every = sorted({k for keys in listing["by_book"].values() for k in keys})
+        print(f"Every market key seen: {', '.join(every) or 'none'}")
+        for book, keys in listing["by_book"].items():
+            print(f"  {book}: {', '.join(keys)}")
+        for error in listing["errors"]:
+            print(f"WARNING: {error}")
 
     event_summary = None
     if args.check_event_markets:

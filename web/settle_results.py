@@ -77,6 +77,9 @@ SUMMARY = {
 #: neither is a test of the other.
 CORNERS_TOTAL = re.compile(r"^corners_total_(\d+)_(\d+)$")
 
+#: `team_total_away_0_5` -> the side and the half line. EPL only.
+TEAM_TOTAL = re.compile(r"^team_total_(home|away)_(\d+)_(\d+)$")
+
 
 def fetch(url, timeout: int = 30):
     req = urllib.request.Request(url)
@@ -214,6 +217,16 @@ def grade_pick(sport, pick, g, hf, af, teams=None, corners=None):
         # Left ungraded when the counts did not arrive, never guessed.
         return grade_corners(m, label, g, teams, corners) if corners else None
     if sport == "epl":
+        team_total = TEAM_TOTAL.match(m)
+        if team_total:
+            # The market names the side and the line; the label says over or
+            # under. A half line cannot push.
+            goals = hf if team_total.group(1) == "home" else af
+            line = float(f"{team_total.group(2)}.{team_total.group(3)}")
+            words = f" {label} "
+            if (" over " in words) == (" under " in words):
+                return None
+            return "win" if (" over " in words) == (goals > line) else "loss"
         if m.startswith("total"):
             return "win" if ("over" in label) == (tot > 2.5) else "loss"
         if m == "btts":

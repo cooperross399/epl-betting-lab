@@ -40,6 +40,7 @@ from epl_betting_lab.providers.derived_market_parsing import (
     UnrecognizedOutcomeError,
     matches_line,
     selection_for,
+    team_total_market,
 )
 from epl_betting_lab.providers.team_names import normalize_team_name
 from epl_betting_lab.market_eligibility import MARKET_SELECTIONS
@@ -131,13 +132,31 @@ DERIVED_PROVIDER_MARKETS: dict[str, tuple[str, ...]] = {
     "alternate_totals": ("total_2_5",),
 }
 
+#: Team totals: the team in `description`, the line in `point`, one project
+#: market per team and line (`team_total_home_1_5`). The featured market posts
+#: one line per team; the alternate ladder posts the rest. Both feed the same
+#: markets and the first price seen for a key is kept, as for the 2.5 line.
+TEAM_TOTAL_PROVIDER_MARKETS: tuple[str, ...] = ("team_totals", "alternate_team_totals")
+
+#: What a run asks for once a team total is approved. A one-fixture probe on
+#: 2026-10-19 (Provider Market Discovery, 2 credits) found the alternate ladder
+#: at 0.5, 1.5 and 2.5 for both teams at BetMGM, BetRivers, Bovada, DraftKings
+#: and FanDuel, while the featured `team_totals` added only one line per team
+#: plus BetOnline.ag and MyBookie.ag. So the ladder alone, at one credit per
+#: event per region; the parser still reads both.
+TEAM_TOTAL_REQUEST_MARKETS: tuple[str, ...] = ("alternate_team_totals",)
+
 #: Everything the normalizer will look at. Anything else in a response is
 #: ignored rather than guessed at.
 ACCEPTED_PROVIDER_MARKETS: frozenset[str] = frozenset(
     {"h2h", "totals", "btts"} | set(DERIVED_PROVIDER_MARKETS)
+    | set(TEAM_TOTAL_PROVIDER_MARKETS)
 )
 
-#: The per-event markets a live run requests by default.
+#: The per-event markets a live run requests by default. Team totals are NOT
+#: here: each costs a credit per event per region, so they are asked for only
+#: once the reviewed policy approves a team-total market (see
+#: `OddsApiStagingProvider.__init__`).
 DEFAULT_EVENT_MARKETS: tuple[str, ...] = ("btts",) + tuple(DERIVED_PROVIDER_MARKETS)
 
 
@@ -342,6 +361,24 @@ def _normalize_provider_events(
                             )
                         normalized_market = "total_2_5"
                         selection = lowered
+                    elif market_key in TEAM_TOTAL_PROVIDER_MARKETS:
+                        try:
+                            target = team_total_market(
+                                outcome,
+                                home_team,
+                                away_team,
+                                provider_home_team,
+                                provider_away_team,
+                            )
+                            if target is None:
+                                # A line on the ladder nobody prices.
+                                continue
+                            selection = selection_for(target, outcome, home_team, away_team)
+                        except UnrecognizedOutcomeError as exc:
+                            raise MalformedProviderResponseError(
+                                f"{exc} (provider event `{event_id}`)"
+                            ) from exc
+                        normalized_market = target
                     elif market_key in DERIVED_PROVIDER_MARKETS:
                         # Named after the teams rather than after positions, so
                         # resolving one needs this fixture's names. The parser
@@ -494,7 +531,8 @@ class OddsApiStagingProvider(BaseStagingProvider):
         bookmakers: str = "",
         timeout_seconds: float = 20.0,
         include_event_markets: bool = False,
-        event_markets: Sequence[str] = DEFAULT_EVENT_MARKETS,
+        event_markets: Sequence[str] | None = None,
+        policy_path: Path | None = None,
     ) -> None:
         self.environment = dict(os.environ if environment is None else environment)
         self.requester = requester or _default_requester
@@ -504,6 +542,16 @@ class OddsApiStagingProvider(BaseStagingProvider):
         self.timeout_seconds = timeout_seconds
         # Event-only markets (BTTS) are opt-in because they cost quota per event.
         self.include_event_markets = bool(include_event_markets)
+        if event_markets is None:
+            # The default list, plus team totals once the reviewed policy
+            # approves one: no credit is spent on a market the card may not use.
+            from epl_betting_lab.strategies.team_totals import (
+                approved_team_total_markets,
+            )
+
+            event_markets = DEFAULT_EVENT_MARKETS
+            if approved_team_total_markets(policy_path):
+                event_markets = event_markets + TEAM_TOTAL_REQUEST_MARKETS
         self.event_markets = tuple(
             market.strip().lower() for market in event_markets if market.strip()
         )

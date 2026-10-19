@@ -223,7 +223,7 @@ function nhlResults(data) {
 }
 
 // ---------- EPL ----------
-const MK = { total_2_5: "Total 2.5", btts: "Both teams to score", double_chance: "Double chance", draw_no_bet: "Draw no bet", corners_1x2: "Corners 1x2", corners_total_9_5: "Corners 9.5", corners_total_10_5: "Corners 10.5", "1x2": "Match result" };
+const MK = { total_2_5: "Total 2.5", btts: "Both teams to score", double_chance: "Double chance", draw_no_bet: "Draw no bet", corners_1x2: "Corners 1x2", corners_total_9_5: "Corners 9.5", corners_total_10_5: "Corners 10.5", "1x2": "Match result", team_total_home_0_5: "Home team total 0.5", team_total_home_1_5: "Home team total 1.5", team_total_home_2_5: "Home team total 2.5", team_total_away_0_5: "Away team total 0.5", team_total_away_1_5: "Away team total 1.5", team_total_away_2_5: "Away team total 2.5" };
 function eplBoard(data) {
   const sport = SPORTS.epl, T = data.teams || {}, LH = data.lineHistory || {}, unit = data.unitDollars ?? 25;
   let bets = 0, leans = 0;

@@ -337,10 +337,15 @@ def test_the_shipped_policy_approves_only_the_reviewed_markets() -> None:
     odds_api-20260821T114655-0400-20ffa5677988. A market missing from the
     policy's required_markets would silently drop off the card, so an empty
     disabled set is the assertion, not an absence of one.
+
+    The six team-total markets (2026-10-19) are priced and not yet approved:
+    they stay off the card until a reviewed receipt names them.
     """
+    from epl_betting_lab.strategies.team_totals import TEAM_TOTAL_MARKETS
+
     disabled = set(_policy_disabled_markets(None))
 
-    assert disabled == set()
+    assert disabled == set(TEAM_TOTAL_MARKETS)
 
 
 def test_a_revoked_entry_disables_the_markets_it_used_to_approve(

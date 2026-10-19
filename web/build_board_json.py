@@ -65,6 +65,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import re
 import sys
 import urllib.error
 import urllib.request
@@ -606,7 +607,15 @@ def selection_label(r: dict, home: str, away: str) -> str:
         return "Corners level" if s == "draw" else f"{side} most corners"
     if m.startswith("corners_total_"):
         return f"{s.capitalize()} {m.rsplit('_', 2)[-2]}.{m.rsplit('_', 1)[-1]} corners"
+    team_total = TEAM_TOTAL.match(m)
+    if team_total:
+        team = home if team_total.group(1) == "home" else away
+        return f"{team} {s} {team_total.group(2)}.{team_total.group(3)} goals"
     return f"{side} {m}"
+
+
+#: `team_total_away_0_5` -> the side and the half line, as the card names it.
+TEAM_TOTAL = re.compile(r"^team_total_(home|away)_(\d+)_(\d+)$")
 
 
 def load_record(lab: Path) -> dict:

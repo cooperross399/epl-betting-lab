@@ -48,6 +48,11 @@ on:
         description: "market@line pairs to check per bookmaker, e.g. alternate_totals@2.5"
         required: false
         default: ""
+      fpl_probe:
+        description: "Print the fields Fantasy Premier League's player match history carries (free, no credits)"
+        type: boolean
+        required: false
+        default: false
       dump_shapes:
         description: "Print the raw outcome shape of each market returned, so a parser can be written against reality"
         type: boolean
@@ -122,6 +127,13 @@ jobs:
             ARGS="$ARGS --dump-outcome-shapes"
           fi
           python scripts/run_provider_market_discovery.py $ARGS
+
+      - name: Probe Fantasy Premier League player data
+        if: ${{ inputs.fpl_probe }}
+        env:
+          PYTHONPATH: src
+        run: |
+          python scripts/probe_fpl_player_data.py
 
       - name: Upload discovery report
         if: always()

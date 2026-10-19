@@ -43,7 +43,13 @@
         "player_assists",
         "player_goal_scorer_anytime",
         "player_shots",
-        "player_shots_on_target"
+        "player_shots_on_target",
+        "team_total_home_0_5",
+        "team_total_home_1_5",
+        "team_total_home_2_5",
+        "team_total_away_0_5",
+        "team_total_away_1_5",
+        "team_total_away_2_5"
       ],
       "reviewed_at": "2026-10-19T06:48:28+00:00",
       "reviewer_name": "cooperross399",

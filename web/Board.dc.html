@@ -214,7 +214,8 @@
                                 <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">{{ s.record }}</span>
                                 <sc-if value="{{ s.flag }}" hint-placeholder-val="{{ false }}"><span title="Back to back" style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;border:1px solid var(--ink);padding:1px 5px;">{{ s.flag }}</span></sc-if>
                               </div>
-                              <div style="font-size:12px;color:var(--mute);">{{ s.role }} <span style="font-family:'IBM Plex Mono',monospace;">{{ s.note }}</span></div>
+                              <div style="font-size:12px;color:var(--mute);">{{ s.role }}</div>
+                              <sc-if value="{{ s.goalie }}" hint-placeholder-val="{{ false }}"><div style="display:flex;align-items:center;gap:6px;margin-top:3px;font-size:12px;color:var(--ink-2);"><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);">G</span><span style="font-weight:600;font-size:13px;">{{ s.goalie }}</span><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mute);">{{ s.goalieStatus }}</span></div></sc-if>
                             </div>
                             <div style="text-align:right;flex:none;">
                               <div style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:22px;line-height:1;">{{ s.proj }}</div>
@@ -851,6 +852,9 @@ class Component extends DCLogic {
     const hideLogo = (e) => { e.currentTarget.style.display = "none"; };
     const showLogo = (e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.background = "var(--paper)"; };
     const withLogo = (s) => ({ ...s, logo: logoOf(s.abbr), onLogoLoad: showLogo, onLogoError: hideLogo });
+    // Starting goalie, from the builder's `away/home.goalie {name, status}` (Daily Faceoff via starting_goalies.csv).
+    // Absent → no line. Status words are shown as the builder wrote them, lower-cased.
+    const goalieOf = (raw) => { const gk = raw && raw.goalie; if (!gk || !gk.name) return { goalie: "", goalieStatus: "" }; return { goalie: gk.name, goalieStatus: String(gk.status || "").toLowerCase() }; };
     const shortNone = (label) => /^Not priced/.test(label) ? "Not priced" : /^Exhibition|^Not a regular/.test(label) ? "Abstains" : "No play";
     const groups = vm.groups.map((d) => ({ ...d, games: d.games.map((g) => {
       const r = raw[g.id] || { away: {}, home: {} }, e = M.byGame[g.id], open = this.isOpen(g.id), a = r.away.abbr, h = r.home.abbr;
@@ -863,7 +867,7 @@ class Component extends DCLogic {
       const shots = bt && sog(bt[a]) != null && sog(bt[h]) != null ? `Shots on goal ${a} ${sog(bt[a])} – ${sog(bt[h])} ${h}` : "";
       const gp = byGameProps[g.id] || [], shown = gp.filter((x) => x.kind !== "pass");
       const dr = droughtRows(r.drought).map((x) => drRow(x, g.id));
-      return { ...g, sides: g.sides.map(withLogo), hasBar: g.bar.length > 0, anchor: `g-${g.id}`, panelId: `p-${g.id}`, expanded: open, expandedAttr: open ? "true" : "false", onToggle: () => this.toggle(g.id),
+      return { ...g, sides: g.sides.map((s, i) => ({ ...withLogo(s), ...goalieOf(i === 0 ? r[p1] : r[p2]) })), hasBar: g.bar.length > 0, anchor: `g-${g.id}`, panelId: `p-${g.id}`, expanded: open, expandedAttr: open ? "true" : "false", onToggle: () => this.toggle(g.id),
         ariaLabel: `${g.sides[0].name} at ${g.sides[1].name}, ${g.time}`,
         barAria: g.sides.map((s) => `${s.name} ${s.win || ""}`.trim()).join(", "),
         cells: (epl ? eplCells(r).map((c, i) => ({ ...c, spark: (g.cells[i] || {}).spark || null })) : g.cells.map((c) => totalCell(c, r))).map((c) => ({ ...c, rows: c.rows.map((x) => ({ ...x, weight: x.bold ? 600 : 400 })) })),

@@ -333,7 +333,7 @@ class Component extends DCLogic {
     const hideLogo = (e) => { e.currentTarget.style.display = "none"; };
     const showLogo = (e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.background = "var(--paper)"; };
     const withLogo = (s) => ({ ...s, logo: logoOf(s.abbr), onLogoLoad: showLogo, onLogoError: hideLogo });
-    const games = vm.games.map((g) => ({ ...g, sides: g.sides.map(withLogo), ariaLabel: `${g.sides[0].name} ${g.sides[0].final}, ${g.sides[1].name} ${g.sides[1].final}`, cells: g.cells.map((c) => ({ ...c, rows: c.rows.map((r) => ({ ...r, weight: r.bold ? 600 : 400, color: r.bold && r.value === "Miss" ? "var(--alert)" : "var(--ink)" })) })), sides: g.sides.map((x) => ({ ...x, scoreColor: tok(x.scoreColor) })), pick: { ...g.pick, color: g.pick.result === "Win" ? "var(--on-win)" : tok(g.pick.color), bg: tok(g.pick.bg) } }));
+    const games = vm.games.map((g) => ({ ...g, sides: g.sides.map(withLogo), ariaLabel: `${g.sides[0].name} ${g.sides[0].final}, ${g.sides[1].name} ${g.sides[1].final}`, cells: g.cells.map((c) => ({ ...c, rows: c.rows.map((r) => ({ ...r, weight: r.bold ? 600 : 400, color: r.bold && r.value === "Miss" ? "var(--alert)" : "var(--ink)" })) })), sides: g.sides.map((x) => ({ ...withLogo(x), scoreColor: tok(x.scoreColor) })), pick: { ...g.pick, color: g.pick.result === "Win" ? "var(--on-win)" : tok(g.pick.color), bg: tok(g.pick.bg) } }));
     // Props leans, season long, beside the adapter's best-bet cells (sports.js is shared; added here).
     const raw = this.state.raw || {}, RP = raw.props || {}, sgn = (x) => (x > 0 ? "+" : x < 0 ? "−" : "") + Math.abs(x).toFixed(2);
     const rec = (r) => `${r.w || 0}–${r.l || 0}${r.p != null ? `–${r.p}` : ""}`;

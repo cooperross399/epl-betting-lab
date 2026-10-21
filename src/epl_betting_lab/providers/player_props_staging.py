@@ -245,7 +245,7 @@ def slate_events(events: list[Any], *, now: datetime) -> list[Any]:
 
     The events list is free and runs a fortnight ahead, while each event's
     props cost a credit per market. Buying the round after this one as well,
-    fifteen runs a week, roughly doubles the spend for prices the card cannot
+    twenty-one runs a week, roughly doubles the spend for prices the card cannot
     use yet, and buying a fixture that has kicked off buys nothing at all.
 
     An event with no readable kick-off is kept: its round cannot be told, and

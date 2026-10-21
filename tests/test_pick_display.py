@@ -425,8 +425,9 @@ class TestQuotaIsAnArgumentNotATableCell:
         # 19,174 was the live figure on 2026-09-29. At the whole schedule —
         # both workflows — that is about a month, and the card said "about 309
         # more runs", which counted one workflow at half its real cost.
-        assert "about 19 days at the observed burn" in self._summary(
-            tmp_path, "19174"
+        # 66,653 was the live figure on 2026-10-19, read at 3,600 a day.
+        assert "about 18 days at the observed burn" in self._summary(
+            tmp_path, "66653"
         )
 
     def test_a_low_quota_says_the_schedule_stops(self, tmp_path: Path) -> None:
@@ -435,7 +436,7 @@ class TestQuotaIsAnArgumentNotATableCell:
         assert "Top this up or the schedule stops" in summary
 
     def test_the_warning_is_absent_when_there_is_plenty(self, tmp_path: Path) -> None:
-        assert "Top this up" not in self._summary(tmp_path, "19174")
+        assert "Top this up" not in self._summary(tmp_path, "66653")
 
     def test_what_used_to_look_healthy_now_warns(self, tmp_path: Path) -> None:
         """5,000 read as eighty healthy runs and is eight days."""

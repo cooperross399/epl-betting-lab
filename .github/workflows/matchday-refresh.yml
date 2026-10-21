@@ -17,13 +17,19 @@ name: Matchday Refresh
 # is the only thing that makes silence safe to read.
 #
 # CADENCE: three runs per day that can hold a match, plus three on Thursday
-# for the planning card. Fifteen triggers a week.
+# for the planning card. Twenty-one triggers a week.
+#
+# Tuesday and Wednesday were added on 2026-10-21. Until then Monday's last run
+# was the card until Thursday morning: a round ends on Monday night, so for two
+# days the card carried only the finished Monday game and none of the coming
+# round, and the midweek European ties it prices were read off Monday's prices.
 #
 # This was briefly Thursday-only, when 500 credits a month meant a second run
 # cost more than an extra market was worth. That trade is gone, but the
-# allowance is no longer roomy either: at 122 requests a run this workflow
-# costs about 7,960 a month, and with the Closing Snapshot's five firings the
-# scheduled total is about 18,800 against a 20,000 plan.
+# allowance is not roomy either: at 122 requests a run this workflow costs
+# about 11,145 a month, and with the Closing Snapshot's five firings the
+# scheduled total is about 22,000 against a 100,000 plan. The plan was 20,000
+# until October 2026; the counter read 99,673 on 2026-10-10.
 #
 # Every figure in this header was wrong until 2026-09-29, and all of them in
 # the direction that makes adding a market look free: one run a day against
@@ -47,6 +53,8 @@ name: Matchday Refresh
 #   Saturday  03:00, 04:30, 09:00 UTC  ~2.5h before a 12:30 UK kick-off
 #   Sunday    03:00, 04:30, 09:00 UTC  covers the afternoon slate
 #   Monday    03:00, 04:30, 09:00 UTC  ~10h before a 20:00 UK kick-off
+#   Tuesday   03:00, 04:30, 09:00 UTC  the next round, and European ties
+#   Wednesday 03:00, 04:30, 09:00 UTC  the next round, and European ties
 #
 # `test_the_header_describes_the_schedule_it_sits_above` builds those rows
 # from the crons below and fails if they drift, because every one of them was
@@ -86,17 +94,18 @@ on:
     # email only fires when the selections change — so a duplicate run is
     # invisible unless it has something new to say.
     #
-    # COST. Fifteen runs a week at about 122 requests each, measured from the
-    # counter across consecutive runs. With the Closing Snapshot's five at
+    # COST. Twenty-one runs a week at about 122 requests each, measured from
+    # the counter across consecutive runs. With the Closing Snapshot's five at
     # about 500 each, the two scheduled workflows come to
-    # about 18,800 a month against an allowance of 20,000.
+    # about 22,000 a month against an allowance of 100,000.
     #
     # The snapshot fired seven times a week until 2026-09-29, which put the
     # scheduled total at 23,200 and over the plan. Cooper chose to lose two
     # near-kickoff observations rather than the cadence here.
     #
-    # The counter itself said about 1,000 a day while that was still true, so
-    # 18,800 is a floor either way: manual dispatches and runs from a laptop
+    # The counter itself said about 1,000 a day while that was still true, and
+    # about 3,600 a day between 2026-10-10 and 10-19, so 22,000 is a floor
+    # either way: manual dispatches and runs from a laptop
     # spend from the same account and no model of this file will ever see them.
     #
     # Every figure above is measured. Earlier notes here were wrong in both
@@ -160,6 +169,12 @@ on:
     - cron: "0 3 * * 1"
     - cron: "30 4 * * 1"
     - cron: "0 9 * * 1"
+    - cron: "0 3 * * 2"
+    - cron: "30 4 * * 2"
+    - cron: "0 9 * * 2"
+    - cron: "0 3 * * 3"
+    - cron: "30 4 * * 3"
+    - cron: "0 9 * * 3"
     # Thursday is the exception, and the tightest day in the schedule. It has no
     # matches, so nothing needs to stay fresh into an evening — but it is fenced
     # on both sides: nothing before 04:00 UTC counts as a Thursday receipt in New

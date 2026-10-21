@@ -605,8 +605,8 @@ class TestTheEmailCarriesQuota:
         assert "Provider quota:" in self._body(tmp_path, "19174")
 
     def test_it_says_how_long_that_lasts(self, tmp_path: Path) -> None:
-        assert "about 19 days at the observed burn" in self._body(
-            tmp_path, "19174"
+        assert "about 18 days at the observed burn" in self._body(
+            tmp_path, "66653"
         )
 
     def test_a_low_quota_warns_in_the_email_too(self, tmp_path: Path) -> None:

@@ -30,7 +30,15 @@ from epl_betting_lab.providers.request_budget import (
 WORKFLOW = PROJECT_ROOT / ".github" / "workflows" / "matchday-refresh.yml"
 
 #: cron day-of-week -> the name the header uses.
-DAYS = {"4": "Thursday", "5": "Friday", "6": "Saturday", "0": "Sunday", "1": "Monday"}
+DAYS = {
+    "4": "Thursday",
+    "5": "Friday",
+    "6": "Saturday",
+    "0": "Sunday",
+    "1": "Monday",
+    "2": "Tuesday",
+    "3": "Wednesday",
+}
 
 
 def _header() -> str:
@@ -83,13 +91,13 @@ def test_the_header_does_not_still_carry_a_dropped_trigger() -> None:
 
 
 def test_every_prose_copy_of_the_firing_count_agrees_with_the_crons() -> None:
-    """Four documents said five or ten. The crons say fifteen.
+    """Four documents said five or ten. The crons say twenty-one.
 
     A session asked whether the schedule can afford another market follows
     CLAUDE.md's reading order, takes five runs a week at 122, and reports
     about 17,000 credits of headroom against a real figure nearer 1,200.
     """
-    words = {5: "five", 10: "ten", 15: "fifteen"}
+    words = {5: "five", 10: "ten", 15: "fifteen", 21: "twenty-one"}
     expected = words[MATCHDAY_RUNS_PER_WEEK]
     stale = {word for count, word in words.items() if count != MATCHDAY_RUNS_PER_WEEK}
 
@@ -99,7 +107,7 @@ def test_every_prose_copy_of_the_firing_count_agrees_with_the_crons() -> None:
         "src/epl_betting_lab/reports/card_notification.py",
     ):
         text = re.sub(r"\s+", " ", (PROJECT_ROOT / relative).read_text(encoding="utf-8"))
-        claims = re.findall(r"(\w+) (?:times|triggers|runs) a week", text)
+        claims = re.findall(r"([\w-]+) (?:times|triggers|runs) a week", text)
         assert claims, f"{relative} no longer states a firing count; re-pin this"
         for claim in claims:
             assert claim not in stale, (

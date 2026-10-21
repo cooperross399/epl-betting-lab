@@ -12,8 +12,9 @@ it.
 ## Read these first
 
 **The card is produced by GitHub Actions, not by anything on Cooper's machine.**
-`.github/workflows/matchday-refresh.yml` runs fifteen times a week — three on
-Thursday and three on every day that can hold a match — and fetches results, fetches prices, rebuilds
+`.github/workflows/matchday-refresh.yml` runs twenty-one times a week — three on
+every day of the week (Tuesday and Wednesday since 2026-10-21, so the next
+round reaches the card after a Monday finish) — and fetches results, fetches prices, rebuilds
 every report, and renders the card on the run page. It needs no laptop, no
 terminal, and no Claude routine. Read it at Actions → Matchday Refresh → latest
 run.

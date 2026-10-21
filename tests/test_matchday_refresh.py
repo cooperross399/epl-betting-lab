@@ -61,7 +61,22 @@ def test_every_matchday_has_a_run() -> None:
         if "- cron:" in line
     }
 
-    assert days == {"4", "5", "6", "0", "1"}
+    assert days == {"4", "5", "6", "0", "1", "2", "3"}
+
+
+def test_the_next_round_reaches_the_card_before_thursday() -> None:
+    """Monday's run was the last card until Thursday, and nothing said so.
+
+    A round ends on Monday night and the next one is priced from then on, but
+    there was no trigger on Tuesday or Wednesday. On 2026-10-21 the card was
+    still Monday 16:33 UTC's: its only Premier League rows were Tottenham v
+    Coventry, played and finished, and the coming round could not appear for
+    another day and a half. Every run had succeeded. Tuesday and Wednesday
+    also hold the Champions League, Europa League and EFL Cup ties the card
+    prices, so they are match days in their own right.
+    """
+    assert _trigger_hours("2"), "no run on Tuesday"
+    assert _trigger_hours("3"), "no run on Wednesday"
 
 
 #: The relay that carries the card to Cooper runs at 07:30 New York (11:30
@@ -91,8 +106,10 @@ LATEST_KICK_OFF_UTC = 20.0
 #: this many hours of the kick-off it is meant to cover.
 STALE_AFTER_H = 12.0
 
-#: Thursday carries the planning card and has no matches of its own.
-MATCH_DAYS = ("5", "6", "0", "1")
+#: Thursday carries the planning card and is held to its policy window instead.
+#: Tuesday and Wednesday hold the European and cup ties, and are the first days
+#: the next Premier League round can reach the card after a Monday finish.
+MATCH_DAYS = ("2", "3", "5", "6", "0", "1")
 
 
 def _trigger_hours(day: str) -> list[float]:
@@ -171,7 +188,7 @@ def test_every_matchday_has_a_backup_trigger() -> None:
         if "- cron:" in line
     ]
 
-    for day in ("4", "5", "6", "0", "1"):
+    for day in ("4",) + MATCH_DAYS:
         assert days.count(day) >= 2, f"day {day} has no backup trigger"
 
 
@@ -270,7 +287,8 @@ def test_the_scheduled_workflows_stay_inside_the_allowance() -> None:
     with a note saying the fix was an operator's trade and that resolving it
     would make the test fail. Cooper took the trade on 2026-09-29: the snapshot
     dropped from seven firings a week to five. So the finding is retired and
-    the `<` guard is back, now at about 18,800 against 20,000.
+    the `<` guard is back, now at about 22,000 against 100,000 since Tuesday
+    and Wednesday runs were added and the plan grew on 2026-10.
 
     It counts both workflows. Counting Matchday Refresh alone it once reported
     5,124 a month while the real scheduled figure was 20,375.
@@ -825,8 +843,8 @@ def test_the_stated_credit_cost_matches_the_schedule() -> None:
 
     # The comment should state a figure within a reasonable distance of truth,
     # and it has to be the WHOLE bill — the snapshot spends the same allowance.
-    assert "about 18,800 a month against an allowance of 20,000" in text
-    assert 18_000 < monthly < 19_500, f"schedule now costs ~{monthly:.0f}"
+    assert "about 22,000 a month against an allowance of 100,000" in text
+    assert 21_500 < monthly < 22_500, f"schedule now costs ~{monthly:.0f}"
     assert monthly < MONTHLY_REQUEST_ALLOWANCE
 
 

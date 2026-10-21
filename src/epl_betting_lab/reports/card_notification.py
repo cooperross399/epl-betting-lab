@@ -1,6 +1,6 @@
 """Decide whether this run's card is worth an email, and write it.
 
-The schedule runs fifteen times a week. Emailing every run would train the
+The schedule runs twenty-one times a week. Emailing every run would train the
 reader to ignore the mail, which is the failure mode that matters most here: an alert
 nobody opens is worse than no alert, because it looks like coverage.
 

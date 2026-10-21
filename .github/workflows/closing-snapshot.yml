@@ -26,13 +26,13 @@ name: Closing Snapshot
 # change what is bet.
 #
 # COST: about 500 requests a run, five runs a week — roughly 10,875 a month.
-# With Matchday Refresh's fifteen at 122 the scheduled total is about 18,800
-# against an allowance of 20,000.
+# With Matchday Refresh's twenty-one at 122 the scheduled total is about 22,000
+# against an allowance of 100,000.
 #
 # It was seven runs a week, which put the scheduled total at 23,200 and over
 # the plan. Before that it was described here as 80 a run against 3,635,487
 # remaining; both halves of that were dead — the figure was never measured, and
-# the plan is 20,000 a month now.
+# the plan was 20,000 a month then. It is 100,000 from October 2026.
 #
 # The two firings that came out cost real CLV coverage. Cooper chose that over
 # a smaller allowance on 2026-09-29.

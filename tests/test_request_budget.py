@@ -33,9 +33,10 @@ from epl_betting_lab.providers.request_budget import (
     scheduled_weekly_requests,
 )
 
-#: The live reading on 2026-09-29, kept as the worked example so the numbers in
-#: these tests are ones the account actually held.
-LIVE_REMAINING = 19_174
+#: The live reading on 2026-10-19, kept as the worked example so the numbers in
+#: these tests are ones the account actually held. The 2026-09-29 reading,
+#: 19,174, gave nineteen days at the rate measured then.
+LIVE_REMAINING = 66_653
 
 
 def test_the_scheduled_floor_counts_both_workflows() -> None:
@@ -44,21 +45,20 @@ def test_the_scheduled_floor_counts_both_workflows() -> None:
     snapshots = CLOSING_SNAPSHOTS_PER_WEEK * REQUESTS_PER_CLOSING_SNAPSHOT
 
     assert scheduled_weekly_requests() == refreshes + snapshots
-    assert snapshots > refreshes, (
-        "The snapshot is the larger half of the bill. If that stops being "
-        "true the comments explaining why it must be counted need rewriting."
-    )
+    # The snapshot was the larger half until Tuesday and Wednesday runs were
+    # added on 2026-10-21; they are now about even, which is the point: the
+    # snapshot is far too big a share of the bill to leave out.
+    assert snapshots > 0.9 * refreshes
 
 
 def test_the_runway_is_what_the_live_account_actually_held() -> None:
-    """Nineteen days, not 309 runs.
+    """Eighteen days, not 66.
 
-    This one assertion kills every variant of the old arithmetic. Refreshes
-    alone at the real cost give 73 days; at the old 62 a run, 157 runs; the
-    scheduled model at its current figures gives 25. Only the counter's own
-    rate gives 19.
+    The card printed "about 66 days" on 2026-10-19 because it still divided by
+    the 1,000 a day measured in September. The counter had fallen 33,020 in
+    the nine days before. Only the counter's own rate gives 18.
     """
-    assert days_of_runway(LIVE_REMAINING) == 19
+    assert days_of_runway(LIVE_REMAINING) == 18
 
 
 def test_the_runway_does_not_come_from_the_schedule_model() -> None:
@@ -83,19 +83,19 @@ def test_counting_only_refreshes_would_flatter_the_reader() -> None:
     assert refresh_only_days > 3 * days_of_runway(LIVE_REMAINING)
 
 
-def test_the_schedule_is_inside_the_plan_and_one_more_snapshot_would_not_be() -> None:
-    """Both halves matter. The first alone would pass on a cadence of nothing.
+def test_the_schedule_is_inside_the_plan() -> None:
+    """The scheduled floor has to fit the plan with room for everything else.
 
     This asserted the overage until 2026-09-29, when Cooper cut the snapshot
-    from seven firings a week to five. The second assertion is the one that
-    says the cut was the smallest one that works: six would still be over.
+    from seven firings a week to five against a 20,000 plan. The plan is
+    100,000 from October 2026, and the schedule, Tuesday and Wednesday
+    included, is under a quarter of it. The rest is what the counter shows
+    going to props, team totals and interactive work.
     """
     weekly_allowance = MONTHLY_REQUEST_ALLOWANCE / request_budget.WEEKS_PER_MONTH
-    refreshes = MATCHDAY_RUNS_PER_WEEK * REQUESTS_PER_MATCHDAY_RUN
 
-    assert scheduled_monthly_requests() < MONTHLY_REQUEST_ALLOWANCE
+    assert scheduled_monthly_requests() < MONTHLY_REQUEST_ALLOWANCE / 4
     assert scheduled_weekly_requests() < weekly_allowance
-    assert refreshes + 6 * REQUESTS_PER_CLOSING_SNAPSHOT > weekly_allowance
 
 
 def test_the_account_still_outspends_the_plan_even_though_the_schedule_does_not() -> None:

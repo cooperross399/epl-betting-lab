@@ -16,8 +16,8 @@ runs from a laptop are in it whether or not anybody modelled them. This is what
 the card quotes, because the card is answering "when does this stop working",
 and the honest answer to that has to include the spending nobody wrote down.
 
-The gap between them is large and is not noise: the model says about 760 a day
-and the counter says about a thousand. `test_the_model_is_a_floor_not_the_bill`
+The gap between them is large and is not noise: the model says about 720 a day
+and the counter says about 3,600. `test_the_model_is_a_floor_not_the_bill`
 holds that gap open on purpose.
 """
 
@@ -50,7 +50,7 @@ REQUESTS_PER_CLOSING_SNAPSHOT = 500
 
 #: How often each fires. Pinned to the workflow files by
 #: `test_the_cost_model_matches_the_schedule_it_models`.
-MATCHDAY_RUNS_PER_WEEK = 15
+MATCHDAY_RUNS_PER_WEEK = 21
 CLOSING_SNAPSHOTS_PER_WEEK = 5
 
 #: The whole account's burn, straight off the counter: 16,439 requests between
@@ -73,11 +73,18 @@ CLOSING_SNAPSHOTS_PER_WEEK = 5
 #: it by model arithmetic would quietly turn it back into the thing it replaced.
 #: It stays at the last measured value, which errs short, until a fortnight of
 #: the new cadence can be differenced.
-OBSERVED_REQUESTS_PER_DAY = 1_000
+#:
+#: RE-MEASURED 2026-10-21 off the card feed's quota line: 99,673 at 2026-10-10
+#: 12:47 UTC and 66,653 at 2026-10-19 16:34 UTC, 33,020 over 9.16 days, 3,606
+#: a day. The card had kept quoting 1,000 and so told Cooper "about 66 days"
+#: when the counter said about 18. Per-event markets, props and team totals all
+#: arrived inside that window, and so did a lot of interactive probing.
+OBSERVED_REQUESTS_PER_DAY = 3_600
 
-#: The plan in use, as the provider reports it: the counter stood at 20,000
-#: with nothing used, and the operating model doc says it resets monthly.
-MONTHLY_REQUEST_ALLOWANCE = 20_000
+#: The plan in use, as the provider reports it. It was 20,000 until October
+#: 2026; the counter then reset to just under 100,000 (99,673 on the first card
+#: of 2026-10-10), so the plan is 100,000 a month.
+MONTHLY_REQUEST_ALLOWANCE = 100_000
 
 #: Below this much runway the card stops reporting and starts arguing. Quota
 #: running dry is one of the ways this automation stops without producing a

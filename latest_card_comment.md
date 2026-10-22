@@ -1,8 +1,8 @@
-## Monday 19 October, 16:33 UTC — scheduled run
+## Thursday 22 October, 09:29 UTC — scheduled run
 
-Selections changed: 6 added, 4 dropped.
+Selections changed: 36 added, 15 dropped.
 
-Provider quota: 66653 (about 66 days at the observed burn)
+Provider quota: 60427 (about 16 days at the observed burn)
 
 Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5, team_total_home_0_5, team_total_home_1_5, team_total_home_2_5, team_total_away_0_5, team_total_away_1_5, team_total_away_2_5** (excluded: none)
 
@@ -10,9 +10,14 @@ Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corner
 
 | Match | Market | Selection | Tier | Edge | Price | Book | Units |
 |:------|:-------|:----------|:-----|-----:|------:|:-----|------:|
-| Tottenham v Coventry | `team_total_home_1_5` | under | C | +5.6% | +152 | Bovada | 0.1 |
-| Tottenham v Coventry | `team_total_away_1_5` | over | C | +4.6% | +265 | FanDuel | 0.1 |
-| Tottenham v Coventry | `corners_1x2` | away | C | +5.0% | +430 | FanDuel | 0.1 |
+| Crystal Palace v Newcastle | `draw_no_bet` | away | C | +7.3% | -124 | FanDuel | 0.1 |
+| Chelsea v Tottenham | `corners_1x2` | home | C | +7.0% | -139 | Bovada | 0.1 |
+| Sunderland v Leeds | `draw_no_bet` | away | C | +5.6% | -130 | Bovada | 0.1 |
+| Coventry v Fulham | `team_total_away_1_5` | under | C | +5.2% | -128 | Bovada | 0.1 |
+| Liverpool v Brighton | `draw_no_bet` | away | C | +6.5% | +138 | Bovada | 0.1 |
+| Man United v Bournemouth | `1x2` | home | C | +5.7% | +103 | BetOnline.ag | 0.1 |
+| Hull v Brentford | `1x2` | home | C | +6.8% | +370 | BetOnline.ag | 0.1 |
+| Hull v Brentford | `double_chance` | home_or_draw | C | +5.6% | +110 | BetRivers | 0.1 |
 
 ### Leans
 
@@ -20,23 +25,73 @@ _None._
 
 ### Player props
 
-- Tottenham v Coventry — **Jay Dasilva** `player_shots` Over@0.5 at +210 (FanDuel), 0.1u
-- Tottenham v Coventry — **Milan van Ewijk** `player_to_receive_card` Yes at +550 (DraftKings), 0.1u
+- Chelsea v Tottenham — **Jordan Henderson** `player_shots` Over@1.5 at +310 (BetRivers), 0.1u
+- Chelsea v Tottenham — **Jordan Henderson** `player_shots_on_target` Over@0.5 at +320 (BetRivers), 0.1u
+- Hull v Brentford — **Regan Slater** `player_shots_on_target` Over@0.5 at +450 (BetRivers), 0.1u
+- Chelsea v Tottenham — **Jordan Henderson** `player_goal_scorer_anytime` Yes at +1100 (Fanatics), 0.1u
+- Crystal Palace v Newcastle — **Adam Wharton** `player_shots` Over@1.5 at +270 (BetRivers), 0.1u
+- Hull v Brentford — **Caoimhin Kelleher** `player_goalie_saves_alternate` Over@2.5 at -105 (DraftKings), 0.1u
+- Crystal Palace v Newcastle — **Adam Wharton** `player_shots_on_target` Over@0.5 at +330 (BetRivers), 0.1u
+- Arsenal v Everton — **Kiernan Dewsbury-Hall** `player_shots` Over@2.5 at +380 (FanDuel), 0.1u
+- Sunderland v Leeds — **Ethan Ampadu** `player_shots_on_target` Over@0.5 at +430 (BetRivers), 0.1u
+- Sunderland v Leeds — **James Trafford** `player_goalie_saves_alternate` Over@3.5 at +175 (Bovada), 0.1u
+- Crystal Palace v Newcastle — **Quinten Timber** `player_shots` Over@1.5 at +190 (BetRivers), 0.1u
 
 _Props carry the smallest stake the card uses: the standing measurement demonstrates no edge, and books reprice on the team sheet after this card is built._
 
 ### What changed
 
-- **Added:** Tottenham v Coventry team_total_away_0_5 over
-- **Added:** Tottenham v Coventry team_total_away_1_5 over
-- **Added:** Tottenham v Coventry team_total_away_2_5 over
-- **Added:** Tottenham v Coventry team_total_home_0_5 under
-- **Added:** Tottenham v Coventry team_total_home_1_5 under
-- **Added:** Tottenham v Coventry team_total_home_2_5 under
-- **Dropped:** Tottenham v Coventry 1x2 away
-- **Dropped:** Tottenham v Coventry btts no
-- **Dropped:** Tottenham v Coventry corners_total_10_5 over
-- **Dropped:** Tottenham v Coventry double_chance home_or_away
+- **Added:** Arsenal v Everton corners_1x2 home
+- **Added:** Aston Villa v Man City 1x2 away
+- **Added:** Aston Villa v Man City corners_1x2 away
+- **Added:** Aston Villa v Man City team_total_away_0_5 under
+- **Added:** Aston Villa v Man City team_total_away_2_5 under
+- **Added:** Chelsea v Tottenham corners_1x2 home
+- **Added:** Chelsea v Tottenham corners_total_9_5 over
+- **Added:** Chelsea v Tottenham double_chance draw_or_away
+- **Added:** Chelsea v Tottenham team_total_away_1_5 over
+- **Added:** Coventry v Fulham btts no
+- **Added:** Coventry v Fulham corners_total_10_5 over
+- **Added:** Coventry v Fulham corners_total_9_5 over
+- **Added:** Coventry v Fulham team_total_away_1_5 under
+- **Added:** Coventry v Fulham team_total_home_1_5 over
+- **Added:** Coventry v Fulham team_total_home_2_5 over
+- **Added:** Crystal Palace v Newcastle draw_no_bet away
+- **Added:** Crystal Palace v Newcastle team_total_home_2_5 over
+- **Added:** Hull v Brentford 1x2 home
+- **Added:** Hull v Brentford double_chance home_or_draw
+- **Added:** Hull v Brentford team_total_away_2_5 under
+- **Added:** Hull v Brentford team_total_home_0_5 over
+- **Added:** Hull v Brentford team_total_home_2_5 over
+- **Added:** Ipswich v Nott'm Forest corners_total_10_5 over
+- **Added:** Ipswich v Nott'm Forest corners_total_9_5 over
+- **Added:** Ipswich v Nott'm Forest double_chance draw_or_away
+- **Added:** Ipswich v Nott'm Forest double_chance home_or_away
+- **Added:** Liverpool v Brighton draw_no_bet away
+- **Added:** Liverpool v Brighton team_total_home_1_5 over
+- **Added:** Liverpool v Brighton team_total_home_2_5 over
+- **Added:** Man United v Bournemouth 1x2 home
+- **Added:** Man United v Bournemouth draw_no_bet home
+- **Added:** Man United v Bournemouth team_total_away_1_5 over
+- **Added:** Man United v Bournemouth team_total_away_2_5 over
+- **Added:** Sunderland v Leeds btts yes
+- **Added:** Sunderland v Leeds draw_no_bet away
+- **Added:** Sunderland v Leeds team_total_home_2_5 over
+- **Dropped:** Tottenham v Coventry 1x2 draw
+- **Dropped:** Tottenham v Coventry 1x2 home
+- **Dropped:** Tottenham v Coventry btts yes
+- **Dropped:** Tottenham v Coventry corners_1x2 away
+- **Dropped:** Tottenham v Coventry corners_1x2 draw
+- **Dropped:** Tottenham v Coventry corners_total_9_5 over
+- **Dropped:** Tottenham v Coventry double_chance home_or_draw
+- **Dropped:** Tottenham v Coventry draw_no_bet home
+- **Dropped:** Tottenham v Coventry team_total_away_0_5 over
+- **Dropped:** Tottenham v Coventry team_total_away_1_5 over
+- **Dropped:** Tottenham v Coventry team_total_away_2_5 over
+- **Dropped:** Tottenham v Coventry team_total_home_0_5 under
+- **Dropped:** Tottenham v Coventry team_total_home_1_5 under
+- **Dropped:** Tottenham v Coventry team_total_home_2_5 under
+- **Dropped:** Tottenham v Coventry total_2_5 under
 
 
 ## Beyond the Premier League
@@ -49,53 +104,13 @@ Priced on the unified English ratings. Measured out of sample, a club's rating d
 
 | Match | Market | Selection | Edge | Price | Book | Units |
 |:--|:--|:--|--:|--:|:--|--:|
-| Fulham v Crystal Palace | `btts` | no | +4.8% | +130 | BetMGM | 0.1 |
-| Fulham v Crystal Palace | `total_2_5` | under | +2.0% | +115 | BetMGM | 0.1 |
+| Fulham v Crystal Palace | `total_2_5` | under | +2.1% | +115 | BetMGM | 0.1 |
+| Sunderland v Brentford | `total_2_5` | under | +1.0% | -102 | Bovada | 0.1 |
 
 - 10 fixture(s) dropped as already kicked off: Coventry v Aston Villa, Everton v Wolves, Fleetwood Town v Sheffield United, Ipswich v Arsenal, Liverpool v Tottenham, Man City v Norwich, and 4 more.
 - 1 fixture(s) left out because a club has no rating in the pool: Bradford City v Peterborough United.
-- 1 selection(s) cleared their market rule and were refused because the edge against the posted price is not positive: Sunderland v Brentford total_2_5 under. A refused row always sorts below every positive one, so where 4 or more selections qualify this costs the card nothing; the cap line below is the one that says what was actually withheld.
 
-### UEFA Champions League
-
-Priced on the European ratings, where 868 European ties bridge eleven leagues onto one scale — 7.45% better than a league-average prior on held-out ties. That scale **overrates clubs who dominate weak leagues**, and those are the clubs it will most often call value.
-
-| Match | Market | Selection | Edge | Price | Book | Units |
-|:--|:--|:--|--:|--:|:--|--:|
-| Man City v AEK | `total_2_5` | under | +10.2% | +265 | BetRivers | 0.1 |
-| Como v Man United | `corners_1x2` | home | +7.1% | -120 | BetRivers | 0.1 |
-| Paris SG v Barcelona | `corners_1x2` | home | +7.1% | +143 | BetRivers | 0.1 |
-| Real Madrid v RB Leipzig | `corners_total_10_5` | under | +7.1% | -125 | BetRivers | 0.1 |
-
-- 18 fixture(s) dropped as already kicked off: AS Roma v Real Madrid, Arsenal v Lille, Aston Villa v Fenerbahce, Atlético Madrid v Man United, Bodø/Glimt v Borussia Dortmund, Feyenoord v Como, and 12 more.
-- 7 fixture(s) left out because a club has no rating in the pool: Aston Villa v Viking FK, Fenerbahce v Slavia Praha, Inter v Shakhtar Donetsk, Napoli v Bodø/Glimt, Roma v ŠK Slovan Bratislava, Sabah FK v Dortmund, Sp Lisbon v LASK.
-- 20 further selection(s) qualified and are not shown: this section prints at most 4 per competition, the highest edges first.
-
-### UEFA Europa League
-
-Same European ratings as the Champions League, and **thinner in both directions**: more clubs come from countries with no domestic feed, so more fixtures are declined, and the ones that are priced rest on a scale calibrated mostly by Champions League ties.
-
-| Match | Market | Selection | Edge | Price | Book | Units |
-|:--|:--|:--|--:|--:|:--|--:|
-| Juventus v Rennes | `draw_no_bet` | away | +6.0% | +310 | FanDuel | 0.1 |
-| OFI Crete v Leverkusen | `btts` | yes | +4.5% | -128 | FanDuel | 0.1 |
-| OFI Crete v Leverkusen | `total_2_5` | under | +1.4% | +200 | FanDuel | 0.1 |
-
-- 36 fixture(s) dropped as already kicked off: AC Milan v Benfica, AZ Alkmaar v Hapoel Be'er Sheva, Anderlecht v Lyon, Bayer Leverkusen v NK Celje, Benfica v Celtic, Besiktas JK v Marseille, and 30 more.
-- 16 fixture(s) left out because a club has no rating in the pool: Besiktas JK v Crystal Palace, Bournemouth v AC Milan, Celtic v Celta Vigo, Dinamo Zagreb v NEC Nijmegen, FC Ararat-Armenia v AZ Alkmaar, Ferencváros TC v Torreense, Jagiellonia Białystok v Anderlecht, Lech Poznań v Sunderland, Lillestrom v Sociedad, NK Celje v Salzburg, Olympiakos Piraeus v Sparta Prague, Omonoia FC v Benfica, SK Sturm Graz v Marseille, St. Gilloise v Hapoel Be'er Sheva, TSG Hoffenheim v Lyon, Viktoria Plzeň v PFC Levski Sofia.
-
-### UEFA Europa Conference League
-
-The thinnest of the three. Only 24 Conference League ties survive club resolution across five seasons, against 701 for the Champions League — both resolved counts, and together with the Europa League's 143 they are the 868-tie bridge. So this competition contributes almost nothing to the scale it is priced on, and most of its fixtures involve a club the pool cannot rate at all.
-
-_No selection this run._
-
-- 18 fixture(s) dropped as already kicked off: Atalanta BC v Pafos FC, Brighton v FK Kauno Žalgiris, FC Copenhagen v SC Braga, FC Lugano v Red Star Belgrade, FC Twente Enschede v FC Thun, Gent v AGF Aarhus, and 12 more.
-- 17 fixture(s) left out because a club has no rating in the pool: AGF Aarhus v KF Egnatia, AS Monaco v SC Freiburg, Ajax v Atalanta BC, FC Iberia 1999 v Mjällby AIF, FC Kairat v Panathinaikos FC, FC Midtjylland v Sint Truiden, FC Nordsjaelland v PFC CSKA Sofia, FC Thun v Hajduk Split, FK Borac Banja Luka v KuPS Kuopio, FK Jablonec v Brighton, FK Kauno Žalgiris v SK Brann, Getafe v FC Lugano, Inter Club d'Escaldes v Universitatea Craiova, Lincoln Red Imps FC v FC Twente Enschede, Pafos FC v Riga FC, Red Star Belgrade v FC Copenhagen, SC Braga v Gent.
-- 1 selection(s) cleared their market rule and were refused because the edge against the posted price is not positive: Trabzonspor v Hearts total_2_5 under. A refused row always sorts below every positive one, so where 4 or more selections qualify this costs the card nothing; the cap line below is the one that says what was actually withheld.
-- None of 4 priced selections cleared the rules with a positive edge against the price offered.
-
-_Fitted but not bet: UEFA Nations League (0 of 0 fixtures rateable). Their results still bridge the countries in the rating pool — which is most of their value — and they return to the card on their own the run they can price something._
+_Fitted but not bet: UEFA Nations League (0 of 0 fixtures rateable), UEFA Champions League (0 of 0 fixtures rateable), UEFA Europa League (0 of 0 fixtures rateable), UEFA Europa Conference League (0 of 0 fixtures rateable). Their results still bridge the countries in the rating pool — which is most of their value — and they return to the card on their own the run they can price something._
 
 
 ### Due List · goals and assists
@@ -106,7 +121,10 @@ Context only: no units, nothing here is a selection, and no edge is shown.
 
 **Being due has meant scoring less often, not more.** Seasons 2022/23 to 2025/26: listed players had a goal in 18.7% of 380 next appearances, against 28.8% for the same qualifiers when not due (n = 2,270; difference -10.2%, 95% -14.5% to -5.8%). No price-based measurement exists: historical player-prop prices were never bought.
 
-Nobody playing in this round is due.
+| Player | Team | Opp | Kickoff (UTC) | Last season | Drought (bar) | 1 in N for him | Status | Price |
+|:--|:--|:--|:--|--:|:--|--:|:--|:--|
+| Harry Wilson | Leeds United | Sunderland | 2026-10-25 16:30 | 10 goals, 28% of apps | 12 (8) | 1 in 50 | — | not posted |
+| Danny Welbeck | Chelsea | Tottenham Hotspur | 2026-10-24 16:30 | 13 goals, 27% of apps | 9 (8) | 1 in 17 | — | not posted |
 
 **1+ assist, over 0.5.** Listed: 7+ Premier League assists last season and a run of league appearances without an assist at the bar his total sets (12+ assists -> 8, 9-11 assists -> 10, 7-8 assists -> 13 straight games).
 
@@ -116,16 +134,16 @@ Nobody playing in this round is due.
 
 ### How the recommendations have done
 
-- Settled: **117** selections, 47 won, 6 returned the stake
-- Staked: 14.55 units
-- Profit: **-1.16 units** (-7.9% on turnover)
-- Still pending: 3
+- Settled: **120** selections, 47 won, 6 returned the stake
+- Staked: 14.85 units
+- Profit: **-1.46 units** (-9.8% on turnover)
+- Still pending: 8
 
 - Stake returned (void): 6 — counted in the settled total above at zero profit, because a push is a bet
 
 Each selection is scored at the first price a card offered it, and only rows the card staked are counted — a lean carries no stake and is not a recommendation.
 
-**Beyond the Premier League is not in these numbers.** 9 staked selection(s) from that section are recorded and not yet scored — nothing settles them. The rule above is stated by stake, so without this line the only way to notice would be to total the card by hand.
+**Beyond the Premier League is not in these numbers.** 2 staked selection(s) from that section are recorded and not yet scored — nothing settles them. The rule above is stated by stake, so without this line the only way to notice would be to total the card by hand.
 
 This is the only out-of-sample evidence this project has. It will take a long time to mean anything: separating a real 5% edge from zero needs roughly 1,500 settled bets.
 
@@ -135,4 +153,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/39284919454)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/39755017369)

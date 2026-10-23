@@ -707,6 +707,38 @@ class TestPlayerPropsSection:
         assert "0.1u" in body
         assert "no edge" in body
 
+    def test_a_saves_pick_names_the_team_not_the_goalkeeper(
+        self, tmp_path: Path
+    ) -> None:
+        """Cooper, 2026-10-23: "for goalie saves just put the team name.
+        Idk goalies names"."""
+        _write(tmp_path, ready=True, comparison=_comparison(added=[{"label": "x"}]))
+        picks = [
+            {
+                "home_team": "Liverpool", "away_team": "Brighton",
+                "market": market, "player": "Bart Verbruggen", "team": "Brighton",
+                "selection": "Over@1.5", "american_odds": -250.0,
+                "book": "Bovada", "units": 0.1,
+            }
+            for market in ("player_goalie_saves_alternate", "player_goalie_saves")
+        ] + [
+            {
+                "home_team": "Liverpool", "away_team": "Brighton",
+                "market": "player_shots", "player": "Mohamed Salah",
+                "team": "Liverpool", "selection": "Over@2.5",
+                "american_odds": 110.0, "book": "FanDuel", "units": 0.1,
+            }
+        ]
+        (tmp_path / "player_props_card.json").write_text(
+            json.dumps({"status": "Props card ready", "picks": picks}),
+            encoding="utf-8",
+        )
+        body = build_notification(output_dir=tmp_path, now=NOW)["body"]
+
+        assert "Verbruggen" not in body
+        assert body.count("**Brighton goalkeeper**") == 2
+        assert "**Mohamed Salah**" in body
+
     def test_no_props_file_means_no_section_and_no_signal(
         self, tmp_path: Path
     ) -> None:

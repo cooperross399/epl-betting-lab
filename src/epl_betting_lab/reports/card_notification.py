@@ -24,6 +24,7 @@ from typing import Any
 
 from epl_betting_lab.reports.scheduled_task_bridge import CARD_TASK_JSON
 from epl_betting_lab.config import AUTOMATED_CARD_JSON, OUTPUTS_DIR, PROPS_CARD_JSON
+from epl_betting_lab.reports.player_props_card import display_player
 from epl_betting_lab.reports.run_summary import _quota_line
 from epl_betting_lab.due_list import DUE_LIST_MD
 from epl_betting_lab.reports.pick_display import (
@@ -277,7 +278,7 @@ def build_notification(
                 lines.append(
                     f"- {_clean(pick.get('home_team'))} v "
                     f"{_clean(pick.get('away_team'))} — "
-                    f"**{_clean(pick.get('player'))}** "
+                    f"**{_clean(display_player(pick))}** "
                     f"`{_clean(pick.get('market'))}` "
                     f"{_clean(pick.get('selection'))} at "
                     f"{float(pick.get('american_odds', 0)):+.0f} "

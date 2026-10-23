@@ -188,6 +188,21 @@ def drop_started_fixtures(frame: pd.DataFrame, moment: datetime) -> pd.DataFrame
     return frame[~(kickoff <= cutoff)]
 
 
+#: Markets whose pick is a goalkeeper. Cooper, 2026-10-23: "for goalie saves
+#: just put the team name. Idk goalies names".
+GOALKEEPER_MARKETS = frozenset({"player_goalie_saves", "player_goalie_saves_alternate"})
+
+
+def display_player(pick: Mapping[str, object]) -> str:
+    """The name a reader sees: "Brighton goalkeeper" for a saves pick, the
+    player otherwise. The pick's `player` field is untouched, because
+    settlement matches on it. With no team recorded the name stays."""
+    team = str(pick.get("team") or "").strip()
+    if str(pick.get("market")) in GOALKEEPER_MARKETS and team:
+        return f"{team} goalkeeper"
+    return str(pick.get("player") or "")
+
+
 def needs_fpl_logs(markets: list[str]) -> bool:
     """Whether any of `markets` is rated on the Fantasy Premier League logs."""
     return any(SETTLEMENT_COLUMNS.get(m) in FPL_STATS for m in markets)
@@ -505,14 +520,26 @@ def save_player_props_card(
         json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
 
+    markdown_path = outputs / CARD_MARKDOWN_FILENAME
+    markdown_path.write_text(render_player_props_markdown(summary), encoding="utf-8")
+
+    return {
+        "summary": summary,
+        "json": str(json_path),
+        "markdown": str(markdown_path),
+    }
+
+
+def render_player_props_markdown(summary: Mapping[str, object]) -> str:
+    """The props card as markdown."""
     lines = [
         "# Player Props Card",
         "",
         f"- Status: **{summary['status']}**",
         f"- Approved prop markets: "
-        f"{', '.join(summary['approved_prop_markets']) or 'none'}",
+        f"{', '.join(summary.get('approved_prop_markets') or []) or 'none'}",
         f"- Held prop markets: "
-        f"{', '.join(summary['held_prop_markets']) or 'none'}",
+        f"{', '.join(summary.get('held_prop_markets') or []) or 'none'}",
         "",
         str(summary.get("note", "")),
         "",
@@ -530,7 +557,7 @@ def save_player_props_card(
         for pick in picks:
             lines.append(
                 f"| {pick['home_team']} v {pick['away_team']} | "
-                f"`{pick['market']}` | {pick['player']} | "
+                f"`{pick['market']}` | {display_player(pick)} | "
                 f"{pick['selection']} | {pick['model_probability']:.1%} | "
                 f"{pick['edge']:+.1%} | {pick['american_odds']:+.0f} | "
                 f"{pick['book']} | {pick['units']} |"
@@ -543,11 +570,4 @@ def save_player_props_card(
         "protected file written.",
         "",
     ]
-    markdown_path = outputs / CARD_MARKDOWN_FILENAME
-    markdown_path.write_text("\n".join(lines), encoding="utf-8")
-
-    return {
-        "summary": summary,
-        "json": str(json_path),
-        "markdown": str(markdown_path),
-    }
+    return "\n".join(lines)

@@ -445,3 +445,29 @@ def test_only_unbettable_prices_make_no_pick(tmp_path: Path) -> None:
     rows = [_staging_row(american_odds=400, book="Courtside")]
     summary = _build(tmp_path, markets=["player_shots_on_target"], staging_rows=rows)
     assert summary["picks"] == []
+
+
+def test_the_props_report_names_the_team_for_saves(tmp_path: Path) -> None:
+    """The props card markdown follows the card: a goalkeeper is his team."""
+    from epl_betting_lab.reports.player_props_card import (
+        display_player,
+        render_player_props_markdown,
+    )
+
+    saves = {
+        "home_team": "Liverpool", "away_team": "Brighton",
+        "market": "player_goalie_saves_alternate", "player": "Bart Verbruggen",
+        "team": "Brighton", "selection": "Over@1.5", "model_probability": 0.8,
+        "edge": 0.06, "american_odds": -250.0, "book": "Bovada", "units": 0.1,
+    }
+    shots = dict(saves, market="player_shots", player="Mohamed Salah",
+                 team="Liverpool")
+    assert display_player(saves) == "Brighton goalkeeper"
+    assert display_player(shots) == "Mohamed Salah"
+    # No team known: the name stays rather than a blank.
+    assert display_player(dict(saves, team="")) == "Bart Verbruggen"
+    markdown = render_player_props_markdown(
+        {"status": "Props card ready", "picks": [saves, shots]}
+    )
+    assert "| Brighton goalkeeper |" in markdown
+    assert "Verbruggen" not in markdown

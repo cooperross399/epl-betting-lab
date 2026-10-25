@@ -1,8 +1,10 @@
-## Sunday 25 October, 09:23 UTC — scheduled run
+## Sunday 25 October, 12:48 UTC — manual run
 
-Selections changed: 4 added, 4 dropped, 1 moved section.
+Selections changed: 8 added, 8 dropped, 2 moved section.
 
-Provider quota: **46978** — about 13 day(s) at the observed burn. **Top this up or the schedule stops.**
+_This run was started by hand, not by the schedule. If you did not start it, someone was testing._
+
+Provider quota: **45725** — about 12 day(s) at the observed burn. **Top this up or the schedule stops.**
 
 Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5, team_total_home_0_5, team_total_home_1_5, team_total_home_2_5, team_total_away_0_5, team_total_away_1_5, team_total_away_2_5** (excluded: none)
 
@@ -10,14 +12,14 @@ Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corner
 
 | Match | Market | Selection | Tier | Edge | Price | Book | Units |
 |:------|:-------|:----------|:-----|-----:|------:|:-----|------:|
-| Man United v Bournemouth | `corners_total_9_5` | over | C | +6.7% | -135 | Bovada | 0.1 |
-| Sunderland v Leeds | `draw_no_bet` | away | C | +6.4% | -125 | Bovada | 0.1 |
+| Sunderland v Leeds | `draw_no_bet` | away | C | +6.6% | -124 | FanDuel | 0.1 |
 | Crystal Palace v Newcastle | `draw_no_bet` | away | C | +6.0% | -130 | Bovada | 0.1 |
-| Liverpool v Brighton | `draw_no_bet` | away | C | +7.0% | +142 | FanDuel | 0.1 |
-| Hull v Brentford | `team_total_away_1_5` | under | C | +6.2% | +132 | FanDuel | 0.1 |
-| Man United v Bournemouth | `corners_total_10_5` | over | C | +5.7% | +115 | Bovada | 0.1 |
+| Liverpool v Brighton | `double_chance` | draw_or_away | C | +5.4% | -130 | Fanatics | 0.1 |
+| Hull v Brentford | `team_total_away_1_5` | under | C | +6.0% | +130 | BetRivers | 0.1 |
 | Hull v Brentford | `team_total_home_1_5` | over | C | +6.1% | +230 | FanDuel | 0.1 |
-| Sunderland v Leeds | `1x2` | away | C | +5.3% | +160 | Bovada | 0.1 |
+| Crystal Palace v Newcastle | `1x2` | away | C | +5.4% | +143 | BetOnline.ag | 0.1 |
+| Sunderland v Leeds | `team_total_home_1_5` | over | C | +5.6% | +200 | FanDuel | 0.1 |
+| Man United v Bournemouth | `team_total_home_1_5` | over | C | +5.1% | +114 | Bovada | 0.1 |
 
 ### Leans
 
@@ -33,20 +35,30 @@ _None._
 - Hull v Brentford — **Brentford goalkeeper** `player_goalie_saves_alternate` Over@2.5 at -105 (DraftKings), 0.1u
 - Crystal Palace v Newcastle — **Adam Wharton** `player_shots_on_target` Over@0.5 at +330 (BetRivers), 0.1u
 - Liverpool v Brighton — **Brighton goalkeeper** `player_goalie_saves_alternate` Over@1.5 at -250 (Bovada), 0.1u
+- Man United v Bournemouth — **Adam Smith** `player_shots` Over@0.5 at +250 (FanDuel), 0.1u
 
 _Props carry the smallest stake the card uses: the standing measurement demonstrates no edge, and books reprice on the team sheet after this card is built._
 
 ### What changed
 
-- **Added:** Hull v Brentford corners_total_10_5 over
-- **Added:** Liverpool v Brighton team_total_away_0_5 under
-- **Added:** Man United v Bournemouth team_total_home_1_5 over
-- **Added:** Sunderland v Leeds 1x2 away
-- **Dropped:** Hull v Brentford btts yes
-- **Dropped:** Liverpool v Brighton double_chance draw_or_away
-- **Dropped:** Man United v Bournemouth double_chance home_or_away
-- **Dropped:** Sunderland v Leeds team_total_home_0_5 over
-- **Moved section:** Liverpool v Brighton team_total_home_1_5 over
+- **Added:** Crystal Palace v Newcastle 1x2 away
+- **Added:** Liverpool v Brighton double_chance draw_or_away
+- **Added:** Man United v Bournemouth btts yes
+- **Added:** Man United v Bournemouth double_chance home_or_away
+- **Added:** Man United v Bournemouth team_total_away_1_5 over
+- **Added:** Man United v Bournemouth team_total_away_2_5 over
+- **Added:** Sunderland v Leeds team_total_home_0_5 over
+- **Added:** Sunderland v Leeds team_total_home_1_5 over
+- **Dropped:** Liverpool v Brighton draw_no_bet away
+- **Dropped:** Liverpool v Brighton team_total_away_0_5 under
+- **Dropped:** Liverpool v Brighton team_total_home_1_5 over
+- **Dropped:** Man United v Bournemouth corners_total_10_5 over
+- **Dropped:** Man United v Bournemouth corners_total_9_5 over
+- **Dropped:** Man United v Bournemouth draw_no_bet home
+- **Dropped:** Man United v Bournemouth team_total_home_2_5 over
+- **Dropped:** Sunderland v Leeds 1x2 away
+- **Moved section:** Liverpool v Brighton team_total_home_2_5 over
+- **Moved section:** Man United v Bournemouth team_total_home_1_5 over
 
 
 ## Beyond the Premier League
@@ -72,13 +84,13 @@ Priced on the European ratings, where 868 European ties bridge eleven leagues on
 | Match | Market | Selection | Edge | Price | Book | Units |
 |:--|:--|:--|--:|--:|:--|--:|
 | AEK v Real Madrid | `total_2_5` | under | +8.7% | +245 | FanDuel | 0.1 |
-| Lens v Como | `corners_total_9_5` | under | +7.6% | -114 | BetRivers | 0.1 |
+| Ath Madrid v Bayern Munich | `corners_total_10_5` | under | +6.8% | -152 | BetRivers | 0.1 |
 | AEK v Real Madrid | `corners_total_10_5` | under | +6.7% | -159 | BetRivers | 0.1 |
-| Ath Madrid v Bayern Munich | `corners_total_10_5` | under | +6.3% | -155 | BetRivers | 0.1 |
+| Man United v Roma | `draw_no_bet` | away | +6.2% | +138 | FanDuel | 0.1 |
 
 - 36 fixture(s) dropped as already kicked off: AS Roma v Real Madrid, AS Roma v ŠK Slovan Bratislava, Arsenal v Lille, Aston Villa v Fenerbahce, Aston Villa v Viking FK, Atlético Madrid v Man United, and 30 more.
 - 5 fixture(s) left out because a club has no rating in the pool: Bodø/Glimt v Lille, LASK v ŠK Slovan Bratislava, Shakhtar Donetsk v Sp Lisbon, Slavia Praha v Arsenal, Viking FK v Sabah FK.
-- 19 further selection(s) qualified and are not shown: this section prints at most 4 per competition, the highest edges first.
+- 18 further selection(s) qualified and are not shown: this section prints at most 4 per competition, the highest edges first.
 
 ### UEFA Europa League
 
@@ -87,7 +99,7 @@ Same European ratings as the Champions League, and **thinner in both directions*
 | Match | Market | Selection | Edge | Price | Book | Units |
 |:--|:--|:--|--:|--:|:--|--:|
 | Sociedad v Lyon | `double_chance` | draw_or_away | +7.1% | -130 | FanDuel | 0.1 |
-| AZ Alkmaar v Juventus | `double_chance` | home_or_draw | +6.6% | -140 | FanDuel | 0.1 |
+| AZ Alkmaar v Juventus | `double_chance` | home_or_draw | +6.6% | -140 | DraftKings | 0.1 |
 
 - 54 fixture(s) dropped as already kicked off: AC Milan v Benfica, AZ Alkmaar v Hapoel Be'er Sheva, Anderlecht v Lyon, Bayer Leverkusen v NK Celje, Benfica v Celtic, Besiktas JK v Crystal Palace, and 48 more.
 - 15 fixture(s) left out because a club has no rating in the pool: AC Milan v Ferencváros TC, Anderlecht v Salzburg, Benfica v Lech Poznań, Celta Vigo v St. Gilloise, Celtic v Besiktas JK, Crystal Palace v TSG Hoffenheim, Hapoel Be'er Sheva v OFI Crete, Lillestrom v Viktoria Plzeň, NEC Nijmegen v Omonoia FC, PFC Levski Sofia v Jagiellonia Białystok, Rennes v Olympiakos Piraeus, SK Sturm Graz v NK Celje, Sparta Prague v Bournemouth, Sunderland v Dinamo Zagreb, Torreense v FC Ararat-Armenia.
@@ -118,7 +130,7 @@ Nobody playing in this round is due.
 - Settled: **126** selections, 50 won, 6 returned the stake
 - Staked: 15.45 units
 - Profit: **-1.43 units** (-9.2% on turnover)
-- Still pending: 12
+- Still pending: 15
 
 - Stake returned (void): 6 — counted in the settled total above at zero profit, because a push is a bet
 
@@ -134,4 +146,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/40180026441)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/40194287871)

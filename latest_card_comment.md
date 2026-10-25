@@ -1,23 +1,23 @@
-## Saturday 24 October, 13:10 UTC — scheduled run
+## Sunday 25 October, 08:23 UTC — scheduled run
 
-Selections changed: 2 added, 7 dropped.
+Selections changed: 17 added, 10 dropped.
 
-Provider quota: **51710** — about 14 day(s) at the observed burn. **Top this up or the schedule stops.**
+Provider quota: **47180** — about 13 day(s) at the observed burn. **Top this up or the schedule stops.**
 
-Markets: **1x2, double_chance, draw_no_bet, corners_1x2, team_total_home_2_5, team_total_away_1_5, team_total_away_2_5** (excluded: total_2_5, btts, corners_total_9_5, corners_total_10_5, team_total_home_0_5, team_total_home_1_5, team_total_away_0_5)
+Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5, team_total_home_0_5, team_total_home_1_5, team_total_home_2_5, team_total_away_0_5, team_total_away_1_5, team_total_away_2_5** (excluded: none)
 
 ### Best bets
 
 | Match | Market | Selection | Tier | Edge | Price | Book | Units |
 |:------|:-------|:----------|:-----|-----:|------:|:-----|------:|
-| Sunderland v Leeds | `draw_no_bet` | away | C | +5.9% | -128 | MyBookie.ag | 0.1 |
-| Coventry v Fulham | `team_total_away_1_5` | under | C | +5.7% | -125 | Bovada | 0.1 |
-| Crystal Palace v Newcastle | `draw_no_bet` | away | C | +5.4% | -134 | FanDuel | 0.1 |
-| Chelsea v Tottenham | `corners_1x2` | home | C | +5.2% | -150 | BetMGM | 0.1 |
-| Hull v Brentford | `team_total_away_1_5` | under | C | +6.0% | +128 | Bovada | 0.1 |
-| Man United v Bournemouth | `1x2` | home | C | +5.8% | +122 | BetOnline.ag | 0.1 |
-| Liverpool v Brighton | `double_chance` | draw_or_away | C | +4.5% | -136 | BetRivers | 0.1 |
-| Coventry v Fulham | `corners_1x2` | home | C | +5.7% | +140 | DraftKings | 0.1 |
+| Man United v Bournemouth | `corners_total_9_5` | over | C | +6.7% | -135 | Bovada | 0.1 |
+| Sunderland v Leeds | `draw_no_bet` | away | C | +6.2% | -126 | FanDuel | 0.1 |
+| Crystal Palace v Newcastle | `draw_no_bet` | away | C | +6.0% | -130 | FanDuel | 0.1 |
+| Liverpool v Brighton | `draw_no_bet` | away | C | +6.3% | +138 | Bovada | 0.1 |
+| Hull v Brentford | `team_total_away_1_5` | under | C | +6.2% | +132 | FanDuel | 0.1 |
+| Man United v Bournemouth | `corners_total_10_5` | over | C | +5.7% | +115 | Bovada | 0.1 |
+| Hull v Brentford | `team_total_home_1_5` | over | C | +6.1% | +230 | FanDuel | 0.1 |
+| Liverpool v Brighton | `double_chance` | draw_or_away | C | +3.7% | -140 | Fanatics | 0.1 |
 
 ### Leans
 
@@ -25,32 +25,47 @@ _None._
 
 ### Player props
 
-- Chelsea v Tottenham — **Jordan Henderson** `player_shots` Over@1.5 at +270 (BetRivers), 0.1u
-- Chelsea v Tottenham — **Jordan Henderson** `player_shots_on_target` Over@0.5 at +350 (BetRivers), 0.1u
-- Chelsea v Tottenham — **Jordan Henderson** `player_goal_scorer_anytime` Yes at +1400 (Fanatics), 0.1u
 - Hull v Brentford — **Regan Slater** `player_shots_on_target` Over@0.5 at +450 (BetRivers), 0.1u
 - Sunderland v Leeds — **Leeds goalkeeper** `player_goalie_saves_alternate` Over@0.5 at -460 (Bovada), 0.1u
-- Hull v Brentford — **Regan Slater** `player_shots` Over@1.5 at +290 (FanDuel), 0.1u
-- Crystal Palace v Newcastle — **Adam Wharton** `player_shots` Over@1.5 at +270 (BetRivers), 0.1u
-- Liverpool v Brighton — **Brighton goalkeeper** `player_goalie_saves_alternate` Over@2.5 at +110 (Bovada), 0.1u
+- Hull v Brentford — **Regan Slater** `player_shots` Over@1.5 at +280 (FanDuel), 0.1u
 - Sunderland v Leeds — **Ethan Ampadu** `player_shots_on_target` Over@0.5 at +450 (BetRivers), 0.1u
-- Arsenal v Everton — **Kiernan Dewsbury-Hall** `player_shots` Over@2.5 at +380 (FanDuel), 0.1u
-- Crystal Palace v Newcastle — **Adam Wharton** `player_shots_on_target` Over@0.5 at +330 (BetRivers), 0.1u
+- Crystal Palace v Newcastle — **Adam Wharton** `player_shots` Over@1.5 at +270 (BetRivers), 0.1u
 - Hull v Brentford — **Brentford goalkeeper** `player_goalie_saves_alternate` Over@2.5 at -105 (DraftKings), 0.1u
+- Crystal Palace v Newcastle — **Adam Wharton** `player_shots_on_target` Over@0.5 at +330 (BetRivers), 0.1u
+- Liverpool v Brighton — **Brighton goalkeeper** `player_goalie_saves_alternate` Over@1.5 at -250 (Bovada), 0.1u
+- Man United v Bournemouth — **Adam Smith** `player_shots` Over@0.5 at +250 (FanDuel), 0.1u
 
 _Props carry the smallest stake the card uses: the standing measurement demonstrates no edge, and books reprice on the team sheet after this card is built._
 
 ### What changed
 
-- **Added:** Coventry v Fulham corners_1x2 home
-- **Added:** Sunderland v Leeds corners_1x2 draw
-- **Dropped:** Arsenal v Everton 1x2 home
-- **Dropped:** Arsenal v Everton corners_total_10_5 over
-- **Dropped:** Coventry v Fulham btts no
-- **Dropped:** Coventry v Fulham team_total_home_1_5 over
-- **Dropped:** Crystal Palace v Newcastle team_total_home_1_5 over
-- **Dropped:** Man United v Bournemouth corners_total_10_5 over
-- **Dropped:** Sunderland v Leeds btts yes
+- **Added:** Crystal Palace v Newcastle corners_1x2 draw
+- **Added:** Crystal Palace v Newcastle double_chance draw_or_away
+- **Added:** Crystal Palace v Newcastle team_total_away_0_5 under
+- **Added:** Crystal Palace v Newcastle team_total_home_1_5 over
+- **Added:** Hull v Brentford btts yes
+- **Added:** Hull v Brentford corners_total_9_5 over
+- **Added:** Hull v Brentford team_total_home_0_5 over
+- **Added:** Hull v Brentford team_total_home_1_5 over
+- **Added:** Liverpool v Brighton draw_no_bet away
+- **Added:** Liverpool v Brighton team_total_home_1_5 over
+- **Added:** Man United v Bournemouth corners_total_10_5 over
+- **Added:** Man United v Bournemouth corners_total_9_5 over
+- **Added:** Man United v Bournemouth double_chance home_or_away
+- **Added:** Man United v Bournemouth team_total_home_2_5 over
+- **Added:** Sunderland v Leeds btts yes
+- **Added:** Sunderland v Leeds team_total_away_2_5 over
+- **Added:** Sunderland v Leeds team_total_home_0_5 over
+- **Dropped:** Arsenal v Everton corners_1x2 home
+- **Dropped:** Chelsea v Tottenham corners_1x2 home
+- **Dropped:** Chelsea v Tottenham team_total_home_2_5 over
+- **Dropped:** Coventry v Fulham corners_1x2 home
+- **Dropped:** Coventry v Fulham double_chance draw_or_away
+- **Dropped:** Coventry v Fulham team_total_away_1_5 under
+- **Dropped:** Coventry v Fulham team_total_away_2_5 under
+- **Dropped:** Coventry v Fulham team_total_home_2_5 over
+- **Dropped:** Man United v Bournemouth 1x2 home
+- **Dropped:** Sunderland v Leeds corners_1x2 away
 
 
 ## Beyond the Premier League
@@ -63,7 +78,7 @@ Priced on the unified English ratings. Measured out of sample, a club's rating d
 
 | Match | Market | Selection | Edge | Price | Book | Units |
 |:--|:--|:--|--:|--:|:--|--:|
-| Fulham v Crystal Palace | `total_2_5` | under | +3.1% | +125 | BetRivers | 0.1 |
+| Fulham v Crystal Palace | `total_2_5` | under | +3.4% | +125 | BetRivers | 0.1 |
 | Sunderland v Brentford | `total_2_5` | under | +0.7% | -102 | Bovada | 0.1 |
 
 - 10 fixture(s) dropped as already kicked off: Coventry v Aston Villa, Everton v Wolves, Fleetwood Town v Sheffield United, Ipswich v Arsenal, Liverpool v Tottenham, Man City v Norwich, and 4 more.
@@ -110,7 +125,6 @@ Context only: no units, nothing here is a selection, and no edge is shown.
 | Player | Team | Opp | Kickoff (UTC) | Last season | Drought (bar) | 1 in N for him | Status | Price |
 |:--|:--|:--|:--|--:|:--|--:|:--|:--|
 | Harry Wilson | Leeds United | Sunderland | 2026-10-25 16:30 | 10 goals, 28% of apps | 12 (8) | 1 in 50 | — | not posted |
-| Danny Welbeck | Chelsea | Tottenham Hotspur | 2026-10-24 16:30 | 13 goals, 27% of apps | 9 (8) | 1 in 17 | — | not posted |
 
 **1+ assist, over 0.5.** Listed: 7+ Premier League assists last season and a run of league appearances without an assist at the bar his total sets (12+ assists -> 8, 9-11 assists -> 10, 7-8 assists -> 13 straight games).
 
@@ -120,11 +134,10 @@ Nobody playing in this round is due.
 
 ### How the recommendations have done
 
-- Settled: **121** selections, 47 won, 6 returned the stake
-- Staked: 14.95 units
-- Profit: **-1.56 units** (-10.4% on turnover)
-- Still pending: 14
-- Played, waiting on results data: **1** — these are settled matches the results feed has not caught up with, so the record above is behind rather than still accumulating.
+- Settled: **126** selections, 50 won, 6 returned the stake
+- Staked: 15.45 units
+- Profit: **-1.43 units** (-9.2% on turnover)
+- Still pending: 11
 
 - Stake returned (void): 6 — counted in the settled total above at zero profit, because a push is a bet
 
@@ -140,4 +153,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/40096554988)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/40175961308)

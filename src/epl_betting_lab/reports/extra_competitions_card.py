@@ -543,6 +543,12 @@ def _pool_for(spec: CompetitionSpec):
         matches = build_pool()
         return matches, UNIFIED_RATINGS, None, None
     pool = build_european_pool()
+    # In the run log, so a club map spelling that costs a bridge is visible.
+    print(
+        f"European pool: {pool.ties} ties bridge the leagues; "
+        f"{len(pool.unrated_clubs)} clubs in them have no domestic rating: "
+        + ", ".join(pool.unrated_clubs)
+    )
     return pool.matches, EUROPEAN_RATINGS, None, None
 
 

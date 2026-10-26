@@ -25,14 +25,17 @@ would leak the result into its own forecast.
 
 from __future__ import annotations
 
+import json
 import re
+import urllib.error
+import urllib.request
 from dataclasses import dataclass
 
 import pandas as pd
 import requests
 
-from epl_betting_lab.config import COUNTRY_TO_LEAGUE
-from epl_betting_lab.data.european_clubs import domestic_name
+from epl_betting_lab.config import COUNTRY_TO_LEAGUE, CURRENT_SEASON
+from epl_betting_lab.data.european_clubs import domestic_name, espn_name
 
 SOURCE_URL = (
     "https://raw.githubusercontent.com/openfootball/champions-league/master/"
@@ -58,17 +61,26 @@ COMPETITION_FILES = {
     "UECL": "conf",
 }
 
-#: Seasons openfootball publishes. 2026-27 is not up yet; asking for it returns
-#: a 404 rather than an empty file, which `fetch_season` reports as absence
-#: rather than as an empty competition.
-SEASONS = (
-    "2019-20",
-    "2020-21",
-    "2021-22",
-    "2022-23",
-    "2023-24",
-    "2024-25",
-    "2025-26",
+#: Every season from 2019-20 through the one being played. This was typed in
+#: and stopped at 2025-26, so the ratings learnt nothing from a European match
+#: of 2026-27. A season openfootball has not published (a 404) is filled from
+#: ESPN instead; see `load_european_ties`.
+def _seasons_through(code: str, first: int = 2019) -> tuple[str, ...]:
+    last = 2000 + int(code[:2])
+    return tuple(f"{year}-{(year + 1) % 100:02d}" for year in range(first, last + 1))
+
+
+SEASONS = _seasons_through(CURRENT_SEASON)
+
+#: ESPN's league slug for each competition, for what openfootball lacks.
+ESPN_LEAGUES = {
+    "UCL": "uefa.champions",
+    "UEL": "uefa.europa",
+    "UECL": "uefa.europa.conf",
+}
+ESPN_SCOREBOARD = (
+    "https://site.api.espn.com/apis/site/v2/sports/soccer/{league}/scoreboard"
+    "?dates={year}&limit=1000"
 )
 
 #: `21:00  SS Lazio (ITA)    v Club Atlético de Madrid (ESP)  1-1 (0-1)`
@@ -169,13 +181,82 @@ def fetch_season(season: str, competition: str = "UCL", *, timeout: int = 30) ->
     return text
 
 
+def fetch_espn_season(season: str, competition: str, *, timeout: int = 30) -> list[dict]:
+    """ESPN's scoreboards for the two calendar years a season spans. Keyless.
+
+    urllib's own User-Agent on purpose: site.api.espn.com refuses descriptive
+    agents (see web/settle_results.py).
+    """
+    start = int(season[:4])
+    payloads: list[dict] = []
+    for year in (start, start + 1):
+        url = ESPN_SCOREBOARD.format(league=ESPN_LEAGUES[competition], year=year)
+        try:
+            with urllib.request.urlopen(url, timeout=timeout) as response:  # noqa: S310 - fixed host
+                payloads.append(json.load(response))
+        except (urllib.error.URLError, OSError, ValueError) as exc:
+            raise EuropeanResultsUnavailable(f"{url} could not be read: {exc}") from exc
+    return payloads
+
+
+def espn_season_ties(payloads: list[dict], season: str, competition: str) -> pd.DataFrame:
+    """Every completed tie of `season` on ESPN's scoreboards, in Football-Data's names.
+
+    Dated by the UTC calendar day of kick-off: every European fixture kicks
+    off between 16:00 and 21:00 UTC, so that is also the local date.
+    """
+    year = int(season[:4])
+    rows: list[dict[str, object]] = []
+    seen: set[str] = set()
+    for payload in payloads:
+        for event in (payload or {}).get("events", []) or []:
+            if ((event.get("season") or {}).get("year")) != year:
+                continue
+            if not ((event.get("status") or {}).get("type") or {}).get("completed"):
+                continue
+            key = str(event.get("id") or event.get("date")) + str(event.get("name", ""))
+            competition_block = (event.get("competitions") or [{}])[0]
+            sides = {c.get("homeAway"): c for c in competition_block.get("competitors", []) or []}
+            home, away = sides.get("home"), sides.get("away")
+            when = pd.to_datetime(event.get("date"), errors="coerce", utc=True)
+            if not home or not away or pd.isna(when):
+                continue
+            try:
+                home_goals, away_goals = int(home.get("score")), int(away.get("score"))
+            except (TypeError, ValueError):
+                continue
+            names = [espn_name(" ".join(str((s.get("team") or {}).get("displayName") or "").split()))
+                     for s in (home, away)]
+            identity = f"{key}|{names[0]}|{names[1]}|{when.date()}"
+            if identity in seen:
+                continue
+            seen.add(identity)
+            rows.append({
+                "date": pd.Timestamp(when.date()),
+                "home_team": names[0],
+                "away_team": names[1],
+                "home_goals": home_goals,
+                "away_goals": away_goals,
+                "competition": competition,
+                "season": season,
+            })
+    columns = ["date", "home_team", "away_team", "home_goals", "away_goals", "competition", "season"]
+    return pd.DataFrame(rows, columns=columns)
+
+
 def load_european_ties(
     seasons: tuple[str, ...] = SEASONS,
     competitions: tuple[str, ...] = tuple(COMPETITION_FILES),
     *,
     fetcher=fetch_season,
+    espn_fetcher=fetch_espn_season,
 ) -> ParsedSeason:
-    """Every resolvable European tie across the seasons and competitions on file."""
+    """Every resolvable European tie across the seasons and competitions on file.
+
+    openfootball first, because its clubs carry a country. ESPN fills a
+    season and competition openfootball has not published, and only those,
+    so no tie is counted twice.
+    """
     frames: list[pd.DataFrame] = []
     unresolved: list[tuple[str, str]] = []
     for season in seasons:
@@ -183,9 +264,15 @@ def load_european_ties(
             try:
                 parsed = parse_season(fetcher(season, competition), season, competition)
             except EuropeanResultsUnavailable as exc:
-                # One file missing costs its own bridges and not the rest. A
-                # season not yet published is the ordinary case.
-                print(f"{season}/{competition}: {exc}")
+                try:
+                    filled = espn_season_ties(espn_fetcher(season, competition), season, competition)
+                except EuropeanResultsUnavailable as espn_exc:
+                    # One file missing costs its own bridges and not the rest.
+                    print(f"{season}/{competition}: {exc}; ESPN: {espn_exc}")
+                    continue
+                print(f"{season}/{competition}: {exc}; {len(filled)} ties from ESPN instead.")
+                if not filled.empty:
+                    frames.append(filled)
                 continue
             frames.append(parsed.matches)
             unresolved.extend(parsed.unresolved)

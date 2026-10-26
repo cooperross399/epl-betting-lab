@@ -109,6 +109,11 @@ class TestParsingATie:
         assert (psg["home_goals"], psg["away_goals"]) == (2, 0)
 
 
+def _no_espn(season: str, competition: str) -> list[dict]:
+    """ESPN fills what openfootball lacks; these tests are about both failing."""
+    raise EuropeanResultsUnavailable("ESPN is not reachable either")
+
+
 class TestAFailedFetchIsNotAnEmptySeason:
     def test_every_season_failing_raises(self) -> None:
         """An empty frame would remove every bridge and leave the countries
@@ -118,7 +123,7 @@ class TestAFailedFetchIsNotAnEmptySeason:
             raise EuropeanResultsUnavailable(f"{season}/{competition} is not there")
 
         with pytest.raises(EuropeanResultsUnavailable, match="no country can be linked"):
-            load_european_ties(("2023-24",), ("UCL",), fetcher=broken)
+            load_european_ties(("2023-24",), ("UCL",), fetcher=broken, espn_fetcher=_no_espn)
 
     def test_one_season_failing_costs_only_its_own_bridges(self) -> None:
         def sometimes(season: str, competition: str = "UCL") -> str:
@@ -126,7 +131,9 @@ class TestAFailedFetchIsNotAnEmptySeason:
                 raise EuropeanResultsUnavailable("not published yet")
             return SEASON_TEXT
 
-        parsed = load_european_ties(("2023-24", "2024-25"), ("UCL",), fetcher=sometimes)
+        parsed = load_european_ties(
+            ("2023-24", "2024-25"), ("UCL",), fetcher=sometimes, espn_fetcher=_no_espn
+        )
         assert not parsed.matches.empty
         assert set(parsed.matches["season"]) == {"2023-24"}
 
@@ -139,7 +146,9 @@ class TestAFailedFetchIsNotAnEmptySeason:
                 raise EuropeanResultsUnavailable("no el.txt this season")
             return SEASON_TEXT
 
-        parsed = load_european_ties(("2023-24",), ("UCL", "UEL"), fetcher=partial)
+        parsed = load_european_ties(
+            ("2023-24",), ("UCL", "UEL"), fetcher=partial, espn_fetcher=_no_espn
+        )
         assert set(parsed.matches["competition"]) == {"UCL"}
 
     def test_each_competition_is_tagged_with_its_own_name(self) -> None:

@@ -576,7 +576,7 @@ class Component extends DCLogic {
     this.setState({ loadedFor: want });
     const [S, F, L] = await Promise.all([import("./lib/sports.js"), import("./lib/format.js"), import("./lib/live.js")]);
     this.S = S; this.F = F; this.L = L;
-    const { sport, deployed } = await S.detectSport(this.props.sport || "nhl");
+    const { sport, deployed, pages } = await S.detectSport(this.props.sport || "nhl");
     if (typeof document !== "undefined") { document.documentElement.setAttribute("data-sport", sport); { const p = getComputedStyle(document.documentElement).getPropertyValue("--paper").trim(), m = document.querySelector('meta[name="theme-color"]'); if (m && p) m.setAttribute("content", p); } }
     const cfg = S.SPORTS[sport];
     const q = new URLSearchParams(location.search);
@@ -611,7 +611,7 @@ class Component extends DCLogic {
     vm.notice = Component.plainNotice(vm.notice);
     vm.otherSports = S.ORDER.filter((k) => k !== sport).map((k, i) => ({ name: S.SPORTS[k].name, href: S.SPORTS[k].host, style: `display:inline-flex;align-items:center;min-height:44px;${i === 0 ? "margin-left:6px;padding-left:18px;border-left:1px solid var(--rule);" : ""}` }));
     const pv = S.ADAPTERS[sport].props ? Component.plain(S.ADAPTERS[sport].props(data)) : null;
-    this.setState({ vm, data, pv, feedNotice, sportKey: sport, deployed, tab: (pv && /^#(props|drought)$/.test(location.hash)) || (!pv && location.hash === "#drought" && (data.games || []).some((g) => Array.isArray(g.drought))) ? "props" : "tonight", propView: location.hash === "#drought" || !pv ? "drought" : "model" }, () => this.startLive());
+    this.setState({ vm, data, pv, feedNotice, sportKey: sport, deployed, pages, tab: (pv && /^#(props|drought)$/.test(location.hash)) || (!pv && location.hash === "#drought" && (data.games || []).some((g) => Array.isArray(g.drought))) ? "props" : "tonight", propView: location.hash === "#drought" || !pv ? "drought" : "model" }, () => this.startLive());
   }
   startLive() {
     const L = this.L, { data, sportKey } = this.state, choice = this.props.live || "Auto";
@@ -699,6 +699,7 @@ class Component extends DCLogic {
     const links = { board: "Board.dc.html", results: "Results.dc.html", archive: "Archive.dc.html", graphic: "Graphic.dc.html", season: "Season.dc.html" };
     const themeAttr = { Light: "light", Dark: "dark" }[this.props.theme] || "auto";
     const sk = this.state.sportKey || ((/^(nhl|epl|cbb)\./.exec(location.hostname) || [])[1]) || this.props.sport || "nhl";
+    const hasPage = (k) => this.state.pages instanceof Set && this.state.pages.has(k);
     const tabLink = (label, href) => ({ label, href, current: undefined, shadow: "none", color: "var(--ink)", badge: "" });
     // Boards without model props still carry Cooper's Due List (EPL); the tab opens the list view directly.
     const dueOnly = !this.state.pv && ((this.state.data || {}).games || []).some((g) => Array.isArray(g.drought));
@@ -707,10 +708,11 @@ class Component extends DCLogic {
       { label: sk === "epl" ? "This week" : "Tonight", href: links.board, onClick: (e) => { e.preventDefault(); this.setTab("tonight"); }, current: tab === "tonight" ? "page" : undefined, shadow: tab === "tonight" ? "inset 0 -3px 0 var(--ink)" : "none", color: "var(--ink)", badge: "" },
       ...(pv ? [{ label: "Props", href: `${links.board}#props`, onClick: (e) => { e.preventDefault(); this.setTab("props"); }, current: tab === "props" ? "page" : undefined, shadow: tab === "props" ? "inset 0 -3px 0 var(--ink)" : "none", color: "var(--ink)", badge: pv.status === "ok" && pv.counts.bets + pv.counts.leans ? String(pv.counts.bets + pv.counts.leans) : "" }]
         : dueOnly ? [{ label: "Due List", href: `${links.board}#drought`, onClick: (e) => { e.preventDefault(); this.setState({ propView: "drought" }); this.setTab("props"); }, current: tab === "props" ? "page" : undefined, shadow: tab === "props" ? "inset 0 -3px 0 var(--ink)" : "none", color: "var(--ink)", badge: dueBadge }] : []),
-      tabLink("Results", links.results), ...(sk === "nhl" ? [tabLink("Season", links.season), tabLink("Record", "Record.dc.html"), tabLink("Tracker", "Tracker.dc.html")] : [tabLink("Archive", links.archive)]),
+      tabLink("Results", links.results), ...(hasPage("season") ? [tabLink("Season", links.season)] : []), ...(hasPage("record") ? [tabLink("Record", "Record.dc.html")] : []), ...(hasPage("tracker") ? [tabLink("Tracker", "Tracker.dc.html")] : [tabLink("Archive", links.archive)]),
     ];
-    // Game pages, Track record and Methods exist on the NHL site only; the shared Board stays one file.
-    const hasMethods = sk === "nhl";
+    // Game pages, Track record and Methods exist only where the lab's site.json lists them; the shared Board stays one file.
+    const hasMethods = hasPage("methods");
+    const hasGame = hasPage("game");
     if (!vm) return { links, themeAttr, hasMethods, brief: "", tabs: tabsFor("tonight", null), groups: [], strip: [], otherSports: [], scoreCards: [], showScores: false, isTonight: true, isProps: false, title1: "Tonight's", title2: "Board.", pv: { rows: [] }, propViews: [], hasPropViews: false, propsTitle: "Player props", dv: { groups: [] }, isModelView: true, isDroughtView: false, propSeason: [] };
     const L = this.L, F = this.F, S = this.state, live = S.live, now = S.now, data = S.data, T = data.teams || {}, pv = S.pv, nhl = sk === "nhl", epl = sk === "epl";
     const start = (g) => g.startUtc || g.kickoff || g.tip, SL = (e) => L.stateLabelFor(sk, e);
@@ -858,7 +860,7 @@ class Component extends DCLogic {
     const shortNone = (label) => /^Not priced/.test(label) ? "Not priced" : /^Exhibition|^Not a regular/.test(label) ? "Abstains" : "No play";
     // "?" on each cell title opens the matching Methods entry. NHL only; the shared Board stays one file.
     const HELP = { Moneyline: ["Methods.dc.html#fair", "Open, current and our fair price"], "Puck line": ["Methods.dc.html#proj-goals", "How the puck line is priced"], Total: ["Methods.dc.html#proj-goals", "Projected goals and the total"] };
-    const withHelp = (c) => (nhl && HELP[c.title] ? { ...c, help: HELP[c.title][0], helpTitle: HELP[c.title][1] } : { ...c, help: "", helpTitle: "" });
+    const withHelp = (c) => (hasMethods && HELP[c.title] ? { ...c, help: HELP[c.title][0], helpTitle: HELP[c.title][1] } : { ...c, help: "", helpTitle: "" });
     const groups = vm.groups.map((d) => ({ ...d, games: d.games.map((g) => {
       const r = raw[g.id] || { away: {}, home: {} }, e = M.byGame[g.id], open = this.isOpen(g.id), a = r.away.abbr, h = r.home.abbr;
       const st = e ? SL(e) : null, scored = !!e && e.state !== "pre" && e.away.score != null && e.home.score != null;
@@ -870,14 +872,14 @@ class Component extends DCLogic {
       const shots = bt && sog(bt[a]) != null && sog(bt[h]) != null ? `Shots on goal ${a} ${sog(bt[a])} – ${sog(bt[h])} ${h}` : "";
       const gp = byGameProps[g.id] || [], shown = gp.filter((x) => x.kind !== "pass");
       const dr = droughtRows(r.drought).map((x) => drRow(x, g.id));
-      return { ...g, whyHref: nhl && typeof (r.home || {}).winProb === "number" ? `Game.dc.html?id=${encodeURIComponent(g.id)}` : "",
+      return { ...g, whyHref: hasGame && typeof (r.home || {}).winProb === "number" ? `Game.dc.html?id=${encodeURIComponent(g.id)}` : "",
         // Hand the game to Game.dc.html so it paints before its own fetch lands.
         onWhy: () => { try { sessionStorage.setItem("mh.game." + g.id, JSON.stringify({ at: Date.now(), generatedAt: data.generatedAt, teams: data.teams || {}, game: r })); } catch (_) { /* quota */ } },
         sides: g.sides.map((s, i) => ({ ...withLogo(s), ...goalieOf(i === 0 ? r[p1] : r[p2]) })), hasBar: g.bar.length > 0, anchor: `g-${g.id}`, panelId: `p-${g.id}`, expanded: open, expandedAttr: open ? "true" : "false", onToggle: () => this.toggle(g.id),
         ariaLabel: `${g.sides[0].name} at ${g.sides[1].name}, ${g.time}`,
         barAria: g.sides.map((s) => `${s.name} ${s.win || ""}`.trim()).join(", "),
         cells: (epl ? eplCells(r).map((c, i) => ({ ...c, spark: (g.cells[i] || {}).spark || null })) : g.cells.map((c) => totalCell(c, r))).map((c) => withHelp({ ...c, rows: c.rows.map((x) => ({ ...x, weight: x.bold ? 600 : 400 })) })),
-        pick: { ...g.pick, help: nhl ? "Methods.dc.html#bet-lean" : "", isBet: g.pick.kind === "bet", isLean: g.pick.kind === "lean", isNone: g.pick.kind === "none", label: g.pick.kind === "none" ? shortNone(g.pick.label) : g.pick.label, extra: g.pick.kind === "lean" ? "" : g.pick.extra },
+        pick: { ...g.pick, help: hasMethods ? "Methods.dc.html#bet-lean" : "", isBet: g.pick.kind === "bet", isLean: g.pick.kind === "lean", isNone: g.pick.kind === "none", label: g.pick.kind === "none" ? shortNone(g.pick.label) : g.pick.label, extra: g.pick.kind === "lean" ? "" : g.pick.extra },
         live: liveV,
         sum: { top: st && st.top ? st.top : g.time, sub: st ? (st.tone === "in" ? "Live" : "") : g.tv, subColor: st && st.tone === "in" ? "var(--alert)" : "var(--mute)",
           statSide: statSide(r), awayLogo: logoOf(r[p1].abbr), homeLogo: logoOf(r[p2].abbr), onLogoLoad: showLogo, onLogoError: hideLogo,

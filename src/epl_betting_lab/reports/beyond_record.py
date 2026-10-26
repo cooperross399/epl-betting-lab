@@ -127,14 +127,28 @@ def extra_time_fixtures(payload: Mapping[str, Any], competition: str) -> set[tup
     return found
 
 
-def _corners(side: Mapping[str, Any]) -> int | None:
+def _stat(side: Mapping[str, Any], name: str) -> int | None:
     for stat in side.get("statistics", []) or []:
-        if stat.get("name") == "wonCorners":
+        if stat.get("name") == name:
             try:
                 return int(float(stat.get("displayValue")))
             except (TypeError, ValueError):
                 return None
     return None
+
+
+def _corners(sides: tuple[Mapping, Mapping]) -> list[int | None]:
+    """Both sides' corners, or blanks when ESPN recorded no statistics.
+
+    ESPN writes "0" for every statistic of a match it holds none for, and
+    zero corners would settle every under as a win. Zero corners and zero
+    shots for both sides is that pattern, never a match.
+    """
+    corners = [_stat(side, "wonCorners") for side in sides]
+    shots = [_stat(side, "totalShots") for side in sides]
+    if corners == [0, 0] and shots in ([0, 0], [None, None]):
+        return [None, None]
+    return corners
 
 
 def finals_from_scoreboard(payload: Mapping[str, Any], competition: str) -> pd.DataFrame:
@@ -151,7 +165,7 @@ def finals_from_scoreboard(payload: Mapping[str, Any], competition: str) -> pd.D
             continue
         if pd.isna(when):
             continue
-        corners = [_corners(s) for s in sides]
+        corners = _corners(sides)
         rows.append({
             "date": pd.Timestamp(when.date()),
             "home_team": _name((sides[0].get("team") or {}).get("displayName"), competition),

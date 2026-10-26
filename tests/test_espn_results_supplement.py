@@ -288,3 +288,19 @@ def test_an_empty_answer_keeps_earlier_rows_but_never_beside_football_data() -> 
     assert added == 1
     assert len(merged[merged["home_team"] == "Bournemouth"]) == 1
     assert len(merged[merged["home_team"] == "Nott'm Forest"]) == 1
+
+
+def test_a_final_with_no_statistics_recorded_is_blank_not_zero() -> None:
+    """ESPN writes "0" for every team statistic of a match it has no data for:
+    83 of the 2022/23 season's finals read 0 corners and 0 shots for both
+    sides. Read as numbers, each would settle a corners under as a win and
+    teach the corner ratings a match nobody won a corner in."""
+    event = _event("7", "2026-10-18T13:00Z", "Everton", "Fulham", (1, 0), (0, 0))
+    for side in event["competitions"][0]["competitors"]:
+        for stat in side["statistics"]:
+            stat["displayValue"] = "0"
+    rows = espn_results.finals_from_scoreboard({"events": [event]}, season_year=2026)
+    row = rows.iloc[0]
+    assert (row["home_goals"], row["away_goals"]) == (1, 0)
+    for column in ("HC", "AC", "HS", "AS", "HST", "AST", "HF", "AF"):
+        assert pd.isna(row[column]), column

@@ -252,6 +252,9 @@ Use the repo, the reports, and GitHub.
   on the next run after it is published. No odds and no card counts come from
   ESPN, so card-count picks still wait for Football-Data. Football-Data
   fetches now retry a timeout, a dropped connection or a 5xx three times.
+  ESPN writes "0" for every statistic of a final it holds none for (83 of
+  2022/23's EPL finals); all-zero statistics are read as blank, never as a
+  0-corner match that would settle every corner under (2026-10-26).
 - **This season's European results reach the European ratings (2026-10-26).**
   The European pool's ties came from openfootball over a typed season list that
   stopped at 2025-26; openfootball has no 2025-26 Europa or Conference League
@@ -327,6 +330,13 @@ Use the repo, the reports, and GitHub.
   by checks on a generated league that run everywhere). Good calibration
   is a precondition and cannot license a stake; a bad number there would be a
   reason to stake less, never a licence to fit the model until it moves.
+  **Calibrated is not informative (2026-10-26):** held out on 2025/26-2026/27
+  (460 ESPN matches), the corner model's log loss at 9.5 is 0.6908 against
+  0.6916 for one league-wide rate for every match, and no variant tried
+  (recency half-life, opponent adjustment, a shots blend) moved it by more
+  than 0.003. Team corner rates barely beat the league average, so a corner
+  pick's "edge" is mostly the price disagreeing with an average. Nothing was
+  shipped: none beat the current model by more than noise.
 - **Each pick carries a "bet down to" price, and the card shows it instead of
   the tier.** `_bet_down_to` in `reports/thursday_best_bets.py`: the price at
   which the edge falls to that market's own bar, so the line can drift that far

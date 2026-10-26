@@ -24,15 +24,41 @@ export const SPORTS = {
 export const ORDER = ["nhl", "epl", "cbb"];
 export const SITE = { name: "Maverick Hightower", handle: "@mavhightower", hub: "https://maverickhightower.com/", about: "https://maverickhightower.com/about.html", image: "https://maverickhightower.com/share.png" };
 
+// The pages a lab may publish beside the shared Board / Results / Archive / Graphic. Each lab names the ones it
+// has in its own site.json (`{"sport":"epl","pages":["season","record","tracker","methods","game"]}`), and the shared
+// pages show a tab, a header link or a per-game link only for a page that is listed. A site.json with no `pages` list
+// keeps the NHL site whole (it had every page before the list existed) and every other lab at none.
+export const PAGE_KEYS = ["season", "record", "tracker", "methods", "game"];
+export function pagesFor(sport, listed) {
+  const keys = Array.isArray(listed) ? listed.map((k) => String(k).toLowerCase()) : sport === "nhl" ? PAGE_KEYS : [];
+  return new Set(keys.filter((k) => PAGE_KEYS.includes(k)));
+}
+
 // Which sport this deployment is: site.json on the same host, else the subdomain, else the fallback.
+// `pages` is the set of extra pages the deployment has (see `pagesFor`).
 export async function detectSport(fallback) {
   try {
     const r = await fetch("./site.json", { cache: "no-store" });
-    if (r.ok) { const j = await r.json(); if (SPORTS[j.sport]) return { sport: j.sport, deployed: true }; }
+    if (r.ok) { const j = await r.json(); if (SPORTS[j.sport]) return { sport: j.sport, deployed: true, pages: pagesFor(j.sport, j.pages) }; }
   } catch (_) { /* not deployed */ }
   const m = /^(nhl|epl|cbb)\./.exec(location.hostname);
-  if (m) return { sport: m[1], deployed: true };
-  return { sport: SPORTS[fallback] ? fallback : "nhl", deployed: false };
+  if (m) return { sport: m[1], deployed: true, pages: pagesFor(m[1]) };
+  const sport = SPORTS[fallback] ? fallback : "nhl";
+  return { sport, deployed: false, pages: pagesFor(sport) };
+}
+
+// The tab bar every shared page draws: the board, props or the Due List where the board has them, Results, then the
+// lab's extra pages. Archive is a tab only where there is no Tracker (which links to the archive itself).
+export function pageTabs(sport, pages, current, tab) {
+  const has = (k) => pages instanceof Set && pages.has(k);
+  return [
+    tab(sport === "epl" ? "This week" : "Tonight", "Board.dc.html", current === "tonight"),
+    ...(sport === "nhl" ? [tab("Props", "Board.dc.html#props", current === "props")] : []),
+    tab("Results", "Results.dc.html", current === "results"),
+    ...(has("season") ? [tab("Season", "Season.dc.html", current === "season")] : []),
+    ...(has("record") ? [tab("Record", "Record.dc.html", current === "record")] : []),
+    ...(has("tracker") ? [tab("Tracker", "Tracker.dc.html", current === "tracker")] : [tab("Archive", "Archive.dc.html", current === "archive")]),
+  ];
 }
 
 export const HOW_TO_READ = [

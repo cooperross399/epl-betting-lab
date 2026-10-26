@@ -23,6 +23,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from epl_betting_lab.config import PROCESSED_DIR
+from epl_betting_lab.data.loaders import load_matches
+from epl_betting_lab.data.referee_appointments import (
+    APPOINTMENTS_FILENAME,
+    refresh_appointments,
+)
 from epl_betting_lab.providers.env_file import load_provider_env
 from epl_betting_lab.providers.player_props_staging import (
     PlayerPropsFetchError,
@@ -98,6 +103,16 @@ def _refresh_fpl_logs() -> str:
     return note
 
 
+def _refresh_referees() -> str:
+    """Appointed referees and their card factors. Keyless and soft: without
+    them the card props are priced as before, with no referee."""
+    try:
+        matches = load_matches()
+    except (FileNotFoundError, OSError, ValueError) as exc:
+        return f"WARNING: no results to rate referees on: {exc}"
+    return refresh_appointments(Path(PROCESSED_DIR) / APPOINTMENTS_FILENAME, matches=matches)
+
+
 def main() -> int:
     print("EPL Betting Lab - Props Card Refresh")
     approved = approved_prop_markets()
@@ -123,6 +138,7 @@ def main() -> int:
     # bootstrap carries who is injured, suspended or doubtful, and the card
     # withholds those players. Keyless; no odds credit is spent.
     print(_refresh_fpl_logs())
+    print(_refresh_referees())
     fetched_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     try:
         fetch_result = fetch_player_props(

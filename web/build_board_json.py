@@ -808,17 +808,44 @@ def _prop_line(selection: str) -> tuple[str, float] | None:
         return None
 
 
-def props_block(props: dict, games: dict[tuple[str, str], str]) -> dict:
+#: Written by `scripts/check_lineups.py` after each Closing Snapshot and read
+#: back off the card-feed branch by Publish Board.
+LINEUP_CHECK_FILE = Path("data/outputs/lineup_check.json")
+
+
+def load_withdrawn(lab: Path) -> list[dict]:
+    """Props the latest lineup check found not starting; empty without a check."""
+    try:
+        payload = json.loads((lab / LINEUP_CHECK_FILE).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return []
+    rows = payload.get("withdrawn") if isinstance(payload, dict) else None
+    return [r for r in rows or [] if isinstance(r, dict)]
+
+
+def _prop_identity(p: dict) -> tuple[str, ...]:
+    return tuple(str(p.get(k, "")) for k in ("player", "home_team", "away_team", "market", "selection"))
+
+
+def props_block(
+    props: dict, games: dict[tuple[str, str], str], withdrawn: list[dict] | None = None
+) -> dict:
     """`board.json` `props` in the schema the shared Props tab reads (SCHEMA.md).
 
     Every row is a pick the props card staked; the card writes nothing below
     its bar, so every row is a best bet at the card's own units. A pick whose
     fixture is not on this board is dropped rather than shown without a game.
+    A pick the lineup check found not starting is dropped and named in the note.
     """
     status = PROPS_STATUS.get(str(props.get("status") or ""), "no_lines")
+    out = {_prop_identity(w): w for w in withdrawn or []}
+    pulled: list[str] = []
     rows = []
     for p in props.get("picks") or [] if status == "ok" else []:
         if not isinstance(p, dict):
+            continue
+        if _prop_identity(p) in out:
+            pulled.append(f"{p.get('player', '')} ({out[_prop_identity(p)].get('state', 'not starting')})")
             continue
         home, away = str(p.get("home_team", "")), str(p.get("away_team", ""))
         game = games.get((home, away))
@@ -841,7 +868,10 @@ def props_block(props: dict, games: dict[tuple[str, str], str]) -> dict:
             "edgePct": round(edge * 100, 1) if isinstance(edge, (int, float)) else None,
             "kind": "bet", "units": p.get("units"),
         })
-    return {"status": status, "note": str(props.get("note") or ""), "rows": rows}
+    note = str(props.get("note") or "")
+    if pulled:
+        note = " ".join(filter(None, [note, "Withdrawn at the lineup check, not starting: " + ", ".join(pulled) + "."]))
+    return {"status": status, "note": note, "rows": rows}
 
 
 def build(lab: Path, today: date) -> dict:
@@ -982,7 +1012,8 @@ def build(lab: Path, today: date) -> dict:
         "record": load_record(lab), "teams": teams, "games": games,
         **({"lineHistory": history} if history else {}),
         **({"droughtNote": due_note(due)} if due is not None else {}),
-        **({"props": props_block(props, {(f["home"]["fd"], f["away"]["fd"]): f["id"] for f in fixtures})}
+        **({"props": props_block(props, {(f["home"]["fd"], f["away"]["fd"]): f["id"] for f in fixtures},
+                                withdrawn=load_withdrawn(lab))}
            if props is not None else {}),
     }
 

@@ -44,7 +44,9 @@ from epl_betting_lab.config import (
     PROJECT_ROOT,
     STAGING_DIR,
 )
+from epl_betting_lab.data.referee_appointments import APPOINTMENTS_FILENAME
 from epl_betting_lab.models.player_props import (
+    CARD_STATS,
     FPL_STATS,
     PlayerPropsModel,
     PlayerRates,
@@ -133,6 +135,10 @@ class PropPick:
     american_odds: float
     book: str
     units: float
+    #: The appointed referee and his card factor, on booked and sent-off
+    #: props only; blank and 1.0 before the appointment is announced.
+    referee: str = ""
+    referee_factor: float = 1.0
 
 
 def approved_prop_markets(policy_path: Path | None = None) -> list[str]:
@@ -269,6 +275,23 @@ def _load_unavailable(path: Path) -> list[dict[str, str]]:
     return out
 
 
+def _load_referees(path: Path) -> dict[tuple[str, str], tuple[str, float]]:
+    """(home, away) -> (referee, card factor) from the appointments file."""
+    if not path.is_file():
+        return {}
+    try:
+        table = pd.read_csv(path, dtype=str).fillna("")
+    except (OSError, UnicodeError, pd.errors.ParserError, pd.errors.EmptyDataError):
+        return {}
+    out: dict[tuple[str, str], tuple[str, float]] = {}
+    for row in table.to_dict("records"):
+        factor = pd.to_numeric(row.get("card_factor"), errors="coerce")
+        referee = str(row.get("referee") or "").strip()
+        if referee and not pd.isna(factor) and factor > 0:
+            out[(str(row.get("home_team")), str(row.get("away_team")))] = (referee, float(factor))
+    return out
+
+
 def _unavailable_match(
     unavailable: list[dict[str, str]], name: str, home: str, away: str
 ) -> dict[str, str] | None:
@@ -316,6 +339,7 @@ def build_player_props_card(
     fpl_logs_path: Path | None = None,
     fpl_prior_path: Path | None = None,
     availability_path: Path | None = None,
+    referees_path: Path | None = None,
     policy_path: Path | None = None,
     run_at: datetime | None = None,
     edge_threshold: float = PROPS_EDGE_THRESHOLD,
@@ -345,6 +369,11 @@ def build_player_props_card(
         Path(availability_path)
         if availability_path
         else Path(fpl_logs_file).parent / FPL_AVAILABILITY_FILENAME
+    )
+    referees_file = (
+        Path(referees_path)
+        if referees_path
+        else Path(PROCESSED_DIR) / APPOINTMENTS_FILENAME
     )
     moment = run_at or datetime.now().astimezone()
     today = moment.strftime("%Y-%m-%d")
@@ -489,6 +518,8 @@ def build_player_props_card(
 
     # FPL's fitness flags: a player unlikely to play is not priced at all.
     unavailable = _load_unavailable(availability_file)
+    # The appointed referee scales the booked and sent-off rates.
+    referees = _load_referees(referees_file)
     withheld: dict[str, dict[str, str]] = {}
 
     picks: list[PropPick] = []
@@ -521,14 +552,21 @@ def build_player_props_card(
             # The logs know this player under another team: a transfer the
             # data has not caught up with. No opinion is the honest answer.
             continue
+        referee, multiplier = "", 1.0
+        if stat in CARD_STATS:
+            referee, multiplier = referees.get(
+                (str(row["home_team"]), str(row["away_team"])), ("", 1.0)
+            )
         name, point = _parse_selection(str(row["selection"]))
         if name.casefold() == "over" and point is not None:
             raw = source.over_probability(
-                rates.player, stat, point, opponent=opponent, venue=venue
+                rates.player, stat, point, opponent=opponent, venue=venue,
+                multiplier=multiplier,
             )
         elif market in YES_MARKETS and name.casefold() == "yes":
             raw = source.over_probability(
-                rates.player, stat, 0.5, opponent=opponent, venue=venue
+                rates.player, stat, 0.5, opponent=opponent, venue=venue,
+                multiplier=multiplier,
             )
         else:
             raw = None
@@ -558,6 +596,8 @@ def build_player_props_card(
                 american_odds=american,
                 book=str(row["book"]),
                 units=PROPS_UNITS,
+                referee=referee,
+                referee_factor=round(multiplier, 4),
             )
         )
 
@@ -630,6 +670,19 @@ def render_player_props_markdown(summary: Mapping[str, object]) -> str:
                 f"{pick['book']} | {pick['units']} |"
             )
         lines.append("")
+        refereed = sorted({
+            (p["home_team"], p["away_team"], p.get("referee"), p.get("referee_factor"))
+            for p in picks if p.get("referee")
+        })
+        if refereed:
+            lines += [
+                "Card props are priced with the appointed referee's card "
+                "factor (his bookings against what the two sides usually "
+                "collect, shrunk toward 1):",
+                "",
+            ]
+            lines += [f"- {h} v {a}: {r}, x{f:.2f}" for h, a, r, f in refereed]
+            lines.append("")
     withheld = summary.get("withheld_unavailable") or []
     if withheld:
         lines += [

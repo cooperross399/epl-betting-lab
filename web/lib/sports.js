@@ -152,10 +152,11 @@ function nhlBoard(data) {
   // this strip printed for weeks while nothing tallied anything. Pinned by
   // tests/test_site_invents_no_season_record.py.
   //
-  // The forward ledger is not on this strip (owner's call, 2026-10-05). Its
-  // size stays in board.json; its return stays sealed until 2027-04-25
-  // (docs/when_this_ends.md) and must never be added here. Pinned by
-  // tests/test_site_publishes_no_forward_return.py.
+  // The forward ledger is not on this strip. It was sealed until 2027-04-25
+  // by the owner's call of 2026-10-05; Cooper lifted that on 2026-10-26, and
+  // units, records and return for every graded best bet are now on All
+  // results (Tracker.dc.html, tracker.json), not here
+  // (docs/when_this_ends.md).
   const kept = (rec) => rec && typeof rec === "object";
   const untallied = "No night settled yet · each night is on Results";
   const nights = typeof season.nights === "number" ? `${season.nights} night${season.nights === 1 ? "" : "s"}` : "";

@@ -42,8 +42,9 @@ def test_the_builder_knows_every_club_of_the_season_and_the_relegated_three() ->
 def test_every_club_has_a_real_logo_file(fd: str, row: tuple) -> None:
     path = WEB / "logos" / f"{row[0]}.png"
     assert path.is_file(), f"{fd}: {path} is missing"
-    assert FETCH.png_problem(path.read_bytes()) is None, (fd, FETCH.png_problem(path.read_bytes()))
-    assert FETCH.png_size(path.read_bytes()) == (500, 500), fd
+    problem = FETCH.png_problem(path.read_bytes(), FETCH.PUBLISHED_MIN_BYTES)
+    assert problem is None, (fd, problem)
+    assert FETCH.png_size(path.read_bytes()) == (FETCH.PUBLISHED_PX, FETCH.PUBLISHED_PX), fd
 
 
 @pytest.mark.parametrize(("fd", "row"), CLUBS, ids=[fd for fd, _ in CLUBS])

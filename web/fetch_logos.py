@@ -68,6 +68,33 @@ SOURCES = LOGOS / "SOURCES.md"
 SIZE = 500
 MIN_BYTES = 2048
 
+
+#: Committed and published at this size (2026-10-26): a 500-px crest drawn in
+#: a small circle cost about 1.5 MB on a full board. A download is still
+#: checked at its source size above, then shrunk before it is written.
+PUBLISHED_PX = 128
+PUBLISHED_MIN_BYTES = 1024
+
+
+def shrink(data: bytes) -> bytes:
+    """The logo fitted inside a transparent PUBLISHED_PX square, centred and
+    optimised. Needs Pillow (`pip install pillow`); only this hand-run fetch
+    does, so nothing the workflows or the suite import requires it."""
+    import io
+
+    try:
+        from PIL import Image
+    except ImportError as exc:  # pragma: no cover - a hand-run step
+        raise SystemExit("web/fetch_logos.py needs Pillow to shrink logos: pip install pillow") from exc
+    image = Image.open(io.BytesIO(data)).convert("RGBA")
+    image.thumbnail((PUBLISHED_PX, PUBLISHED_PX), Image.LANCZOS)
+    canvas = Image.new("RGBA", (PUBLISHED_PX, PUBLISHED_PX))
+    canvas.paste(image, ((PUBLISHED_PX - image.width) // 2, (PUBLISHED_PX - image.height) // 2))
+    out = io.BytesIO()
+    canvas.save(out, format="PNG", optimize=True)
+    return out.getvalue()
+
+
 ESPN_TEAMS = (
     "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams",
     "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.2/teams",
@@ -96,9 +123,9 @@ def get(url: str, agent: str | None = None, tries: int = 3) -> bytes:
     raise RuntimeError("unreachable")
 
 
-def png_problem(data: bytes) -> str | None:
+def png_problem(data: bytes, min_bytes: int = MIN_BYTES) -> str | None:
     """Why `data` is not a usable PNG, or None when it is."""
-    if len(data) <= MIN_BYTES:
+    if len(data) <= min_bytes:
         return f"{len(data)} bytes"
     if data[:8] != b"\x89PNG\r\n\x1a\n":
         return "not a PNG signature"
@@ -272,6 +299,7 @@ def main() -> int:
         if data is None:
             missing.append(abbr)
             continue
+        data = shrink(data)
         (LOGOS / f"{abbr}.png").write_bytes(data)
         sources[f"{abbr}.png"] = url
         w, h = png_size(data)

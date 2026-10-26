@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 set -u
-python scripts/fetch_data.py || echo "fetch_data failed"
-python scripts/supplement_results_from_espn.py || true
-python scripts/fetch_understat_xg.py || echo "understat failed"
-echo "===== R5 referee"; python research/r5_referee.py || echo "r5 failed"
-echo "===== R5 appointments probe"
-curl -sS -m 30 -H "Origin: https://www.premierleague.com" "https://footballapi.pulselive.com/football/fixtures?comps=1&page=0&pageSize=3&sort=asc&statuses=U&altIds=true" | head -c 1500; echo
-curl -sS -m 30 "https://sdp-prem-prod.premier-league-prod.pulselive.com/api/v2/matches?competition=8&season=2026&pageSize=3" | head -c 1500; echo
-echo "===== R1 out of sample"; python scripts/run_out_of_sample.py || echo "r1 failed"
-for f in data/outputs/out_of_sample_*.md; do echo "----- $f"; cat "$f"; done
+git fetch -q origin odds-history
+python scripts/fetch_data.py >/dev/null || echo "fetch_data failed"
+python scripts/fetch_understat_xg.py >/dev/null || echo "understat failed"
+echo "===== R1b"; python research/r1b_derived_on_xg.py 2>&1 | grep -v Warning || echo "r1b failed"
+echo "===== officials probe"
+H='Origin: https://www.premierleague.com'
+for id in 129006; do
+  curl -sS -m 30 -H "$H" "https://footballapi.pulselive.com/football/fixtures/$id" | python -c "import json,sys; d=json.load(sys.stdin); print(sorted(d.keys())); print(json.dumps(d.get('matchOfficials'))[:800])"
+done
+curl -sS -m 30 -H "$H" "https://footballapi.pulselive.com/football/fixtures?comps=1&compSeasons=841&page=0&pageSize=2&sort=desc&statuses=C" | python -c "import json,sys; d=json.load(sys.stdin); f=d['content'][0]; print(f['id'], sorted(f.keys())); print(json.dumps(f.get('matchOfficials'))[:600])"

@@ -57,6 +57,7 @@
         </span>
       </a>
       <nav aria-label="Site" style="display:flex;gap:0 18px;font-size:13px;letter-spacing:.1em;text-transform:uppercase;font-weight:500;flex-wrap:wrap;">
+        <sc-if value="{{ hasMethods }}" hint-placeholder-val="{{ false }}"><a href="Methods.dc.html" style="display:inline-flex;align-items:center;min-height:44px;">Methods</a></sc-if>
         <a href="https://maverickhightower.com/about.html" style="display:inline-flex;align-items:center;min-height:44px;">About</a>
         <sc-for list="{{ otherSports }}" as="s" hint-placeholder-count="2">
           <a href="{{ s.href }}" style="{{ s.style }}">{{ s.name }}</a>
@@ -145,6 +146,10 @@
     <div id="main">
       <sc-if value="{{ isTonight }}" hint-placeholder-val="{{ true }}">
         <section aria-labelledby="projections-h" style="padding-top:40px;">
+          <sc-if value="{{ brief }}" hint-placeholder-val="{{ false }}">
+            <p style="margin:14px 0 0;font-size:15px;line-height:1.5;color:var(--ink-2);max-width:720px;text-wrap:pretty;"><span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);margin-right:8px;">Tonight in 60 seconds</span>{{ brief }}</p>
+          </sc-if>
+
           <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;border-bottom:3px solid var(--ink);padding-bottom:10px;">
             <h2 id="projections-h" style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:34px;line-height:1;text-transform:uppercase;letter-spacing:.01em;">Projections</h2>
             <div style="display:flex;align-items:center;gap:4px 16px;flex-wrap:wrap;">
@@ -235,7 +240,7 @@
                       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,128px),1fr));gap:14px 18px;min-width:0;">
                         <sc-for list="{{ g.cells }}" as="c" hint-placeholder-count="3">
                           <div style="border-top:2px solid var(--ink);padding-top:8px;">
-                            <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);">{{ c.title }}</div>
+                            <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;"><span style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);">{{ c.title }}</span><sc-if value="{{ c.help }}" hint-placeholder-val="{{ false }}"><a href="{{ c.help }}" title="{{ c.helpTitle }}" aria-label="{{ c.helpTitle }}" style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--mute);border:1px solid var(--rule);width:18px;height:18px;display:inline-grid;place-items:center;text-decoration:none;flex:none;">?</a></sc-if></div>
                             <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;line-height:1.7;margin-top:6px;">
                               <sc-for list="{{ c.rows }}" as="r" hint-placeholder-count="3">
                                 <div style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:0 8px;align-items:baseline;"><span style="color:var(--mute);white-space:nowrap;">{{ r.label }}</span><span style="text-align:right;font-weight:{{ r.weight }};">{{ r.value }}</span></div>
@@ -252,7 +257,7 @@
                         </sc-for>
 
                         <div style="border-top:2px solid var(--ink);padding-top:8px;grid-column:1 / -1;">
-                          <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);">{{ g.pick.heading }}</div>
+                          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;"><span style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);">{{ g.pick.heading }}</span><sc-if value="{{ g.pick.help }}" hint-placeholder-val="{{ false }}"><a href="{{ g.pick.help }}" title="What a best bet and a lean mean" aria-label="What a best bet and a lean mean" style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--mute);border:1px solid var(--rule);width:18px;height:18px;display:inline-grid;place-items:center;text-decoration:none;flex:none;">?</a></sc-if></div>
                           <sc-if value="{{ g.pick.isBet }}" hint-placeholder-val="{{ true }}">
                             <div style="margin-top:8px;background:var(--ink);color:var(--paper);padding:8px 10px;">
                               <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:20px;line-height:1;text-transform:uppercase;letter-spacing:.02em;">{{ g.pick.label }}</div>
@@ -275,6 +280,9 @@
                           </sc-if>
                           <sc-if value="{{ g.live.has }}" hint-placeholder-val="{{ false }}">
                             <div style="margin-top:6px;font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.5;color:{{ g.live.color }};"><span style="text-transform:uppercase;letter-spacing:.08em;font-weight:600;">Live · {{ g.live.word }}</span> · {{ g.live.detail }}</div>
+                          </sc-if>
+                          <sc-if value="{{ g.whyHref }}" hint-placeholder-val="{{ false }}">
+                            <a href="{{ g.whyHref }}" onClick="{{ g.onWhy }}" style="display:inline-flex;align-items:center;min-height:44px;margin-top:2px;font-family:'IBM Plex Mono',monospace;font-size:12px;text-decoration:underline;text-decoration-color:var(--rule);text-underline-offset:3px;">Where the number comes from →</a>
                           </sc-if>
                         </div>
                       </div>
@@ -709,9 +717,11 @@ class Component extends DCLogic {
       { label: sk === "epl" ? "This week" : "Tonight", href: links.board, onClick: (e) => { e.preventDefault(); this.setTab("tonight"); }, current: tab === "tonight" ? "page" : undefined, shadow: tab === "tonight" ? "inset 0 -3px 0 var(--ink)" : "none", color: "var(--ink)", badge: "" },
       ...(pv ? [{ label: "Props", href: `${links.board}#props`, onClick: (e) => { e.preventDefault(); this.setTab("props"); }, current: tab === "props" ? "page" : undefined, shadow: tab === "props" ? "inset 0 -3px 0 var(--ink)" : "none", color: "var(--ink)", badge: pv.status === "ok" && pv.counts.bets + pv.counts.leans ? String(pv.counts.bets + pv.counts.leans) : "" }]
         : dueOnly ? [{ label: "Due List", href: `${links.board}#drought`, onClick: (e) => { e.preventDefault(); this.setState({ propView: "drought" }); this.setTab("props"); }, current: tab === "props" ? "page" : undefined, shadow: tab === "props" ? "inset 0 -3px 0 var(--ink)" : "none", color: "var(--ink)", badge: dueBadge }] : []),
-      tabLink("Results", links.results), ...(sk === "nhl" ? [tabLink("Season", links.season)] : []), tabLink("Archive", links.archive),
+      tabLink("Results", links.results), ...(sk === "nhl" ? [tabLink("Season", links.season), tabLink("Record", "Record.dc.html")] : []), (sk === "nhl" ? tabLink("Tracker", "Tracker.html") : tabLink("Archive", links.archive)),
     ];
-    if (!vm) return { links, themeAttr, tabs: tabsFor("tonight", null), groups: [], strip: [], otherSports: [], scoreCards: [], showScores: false, isTonight: true, isProps: false, title1: "Tonight's", title2: "Board.", pv: { rows: [] }, propViews: [], hasPropViews: false, propsTitle: "Player props", dv: { groups: [] }, isModelView: true, isDroughtView: false, propSeason: [] };
+    // Game pages, Track record and Methods exist on the NHL site only; the shared Board stays one file.
+    const hasMethods = sk === "nhl";
+    if (!vm) return { links, themeAttr, hasMethods, brief: "", tabs: tabsFor("tonight", null), groups: [], strip: [], otherSports: [], scoreCards: [], showScores: false, isTonight: true, isProps: false, title1: "Tonight's", title2: "Board.", pv: { rows: [] }, propViews: [], hasPropViews: false, propsTitle: "Player props", dv: { groups: [] }, isModelView: true, isDroughtView: false, propSeason: [] };
     const L = this.L, F = this.F, S = this.state, live = S.live, now = S.now, data = S.data, T = data.teams || {}, pv = S.pv, nhl = sk === "nhl", epl = sk === "epl";
     const start = (g) => g.startUtc || g.kickoff || g.tip, SL = (e) => L.stateLabelFor(sk, e);
     // One strip for every sport, in the NHL shape: season W–L records, no return, no "time to an answer".
@@ -856,6 +866,9 @@ class Component extends DCLogic {
     // Absent → no line. Status words are shown as the builder wrote them, lower-cased.
     const goalieOf = (raw) => { const gk = raw && raw.goalie; if (!gk || !gk.name) return { goalie: "", goalieStatus: "" }; return { goalie: gk.name, goalieStatus: String(gk.status || "").toLowerCase() }; };
     const shortNone = (label) => /^Not priced/.test(label) ? "Not priced" : /^Exhibition|^Not a regular/.test(label) ? "Abstains" : "No play";
+    // "?" on each cell title opens the matching Methods entry. NHL only; the shared Board stays one file.
+    const HELP = { Moneyline: ["Methods.dc.html#fair", "Open, current and our fair price"], "Puck line": ["Methods.dc.html#proj-goals", "How the puck line is priced"], Total: ["Methods.dc.html#proj-goals", "Projected goals and the total"] };
+    const withHelp = (c) => (nhl && HELP[c.title] ? { ...c, help: HELP[c.title][0], helpTitle: HELP[c.title][1] } : { ...c, help: "", helpTitle: "" });
     const groups = vm.groups.map((d) => ({ ...d, games: d.games.map((g) => {
       const r = raw[g.id] || { away: {}, home: {} }, e = M.byGame[g.id], open = this.isOpen(g.id), a = r.away.abbr, h = r.home.abbr;
       const st = e ? SL(e) : null, scored = !!e && e.state !== "pre" && e.away.score != null && e.home.score != null;
@@ -867,11 +880,14 @@ class Component extends DCLogic {
       const shots = bt && sog(bt[a]) != null && sog(bt[h]) != null ? `Shots on goal ${a} ${sog(bt[a])} – ${sog(bt[h])} ${h}` : "";
       const gp = byGameProps[g.id] || [], shown = gp.filter((x) => x.kind !== "pass");
       const dr = droughtRows(r.drought).map((x) => drRow(x, g.id));
-      return { ...g, sides: g.sides.map((s, i) => ({ ...withLogo(s), ...goalieOf(i === 0 ? r[p1] : r[p2]) })), hasBar: g.bar.length > 0, anchor: `g-${g.id}`, panelId: `p-${g.id}`, expanded: open, expandedAttr: open ? "true" : "false", onToggle: () => this.toggle(g.id),
+      return { ...g, whyHref: nhl && typeof (r.home || {}).winProb === "number" ? `Game.dc.html?id=${encodeURIComponent(g.id)}` : "",
+        // Hand the game to Game.dc.html so it paints before its own fetch lands.
+        onWhy: () => { try { sessionStorage.setItem("mh.game." + g.id, JSON.stringify({ at: Date.now(), generatedAt: data.generatedAt, teams: data.teams || {}, game: r })); } catch (_) { /* quota */ } },
+        sides: g.sides.map((s, i) => ({ ...withLogo(s), ...goalieOf(i === 0 ? r[p1] : r[p2]) })), hasBar: g.bar.length > 0, anchor: `g-${g.id}`, panelId: `p-${g.id}`, expanded: open, expandedAttr: open ? "true" : "false", onToggle: () => this.toggle(g.id),
         ariaLabel: `${g.sides[0].name} at ${g.sides[1].name}, ${g.time}`,
         barAria: g.sides.map((s) => `${s.name} ${s.win || ""}`.trim()).join(", "),
-        cells: (epl ? eplCells(r).map((c, i) => ({ ...c, spark: (g.cells[i] || {}).spark || null })) : g.cells.map((c) => totalCell(c, r))).map((c) => ({ ...c, rows: c.rows.map((x) => ({ ...x, weight: x.bold ? 600 : 400 })) })),
-        pick: { ...g.pick, isBet: g.pick.kind === "bet", isLean: g.pick.kind === "lean", isNone: g.pick.kind === "none", label: g.pick.kind === "none" ? shortNone(g.pick.label) : g.pick.label, extra: g.pick.kind === "lean" ? "" : g.pick.extra },
+        cells: (epl ? eplCells(r).map((c, i) => ({ ...c, spark: (g.cells[i] || {}).spark || null })) : g.cells.map((c) => totalCell(c, r))).map((c) => withHelp({ ...c, rows: c.rows.map((x) => ({ ...x, weight: x.bold ? 600 : 400 })) })),
+        pick: { ...g.pick, help: nhl ? "Methods.dc.html#bet-lean" : "", isBet: g.pick.kind === "bet", isLean: g.pick.kind === "lean", isNone: g.pick.kind === "none", label: g.pick.kind === "none" ? shortNone(g.pick.label) : g.pick.label, extra: g.pick.kind === "lean" ? "" : g.pick.extra },
         live: liveV,
         sum: { top: st && st.top ? st.top : g.time, sub: st ? (st.tone === "in" ? "Live" : "") : g.tv, subColor: st && st.tone === "in" ? "var(--alert)" : "var(--mute)",
           statSide: statSide(r), awayLogo: logoOf(r[p1].abbr), homeLogo: logoOf(r[p2].abbr), onLogoLoad: showLogo, onLogoError: hideLogo,
@@ -950,7 +966,22 @@ class Component extends DCLogic {
     const view = pv ? { ...pv, rows: rows.map(deco), empty, filtered, hasRows: pv.status === "ok" && all.length > 0,
       countLine: `${rows.length} of ${all.length}${cleared ? "" : " · none worth a bet"}`,
       summary: pv.status === "ok" ? pv.summary : "" } : { rows: [], hasRows: false };
-    return { ...vm, links, themeAttr, groups, sportLong: vm.sport.longName, title1: vm.title[0], title2: vm.title[1],
+    // One plain paragraph written from the data. NHL only; nothing here is a number the cards don't already show.
+    let brief = "";
+    if (nhl && Array.isArray(data.games) && data.games.length) {
+      const gs = data.games, priced = gs.filter((g) => g.priced !== false && g.moneyline && g.moneyline.current), bets = gs.filter((g) => g.pick && g.pick.kind === "bet"), leans = gs.filter((g) => g.pick && g.pick.kind === "lean");
+      const top = bets.slice().sort((x, y) => (y.pick.edgePct || 0) - (x.pick.edgePct || 0))[0];
+      const fav = gs.filter((g) => g.home && typeof g.home.winProb === "number").sort((x, y) => Math.max(y.home.winProb, y.away.winProb) - Math.max(x.home.winProb, x.away.winProb))[0];
+      const close = gs.filter((g) => g.home && typeof g.home.winProb === "number").sort((x, y) => Math.abs(x.home.winProb - 0.5) - Math.abs(y.home.winProb - 0.5))[0];
+      const unconfirmed = gs.flatMap((g) => [g.home, g.away]).filter((s) => s && (!s.goalie || !s.goalie.name || String(s.goalie.status).toLowerCase() !== "confirmed")).length;
+      const parts = [`${gs.length} game${gs.length === 1 ? "" : "s"}, ${priced.length} priced.`];
+      parts.push(bets.length ? `${bets.length} best bet${bets.length === 1 ? "" : "s"}${leans.length ? ` and ${leans.length} lean${leans.length === 1 ? "" : "s"}` : ""}${top ? `; the biggest edge is ${top.pick.label} at ${F.fmtSigned(top.pick.edgePct, 1)}%` : ""}.` : leans.length ? `No best bet; ${leans.length} lean${leans.length === 1 ? "" : "s"}.` : priced.length ? "Nothing clears the bar tonight." : "");
+      if (fav) { const fs = fav.home.winProb >= fav.away.winProb ? fav.home : fav.away; parts.push(`Strongest favourite ${fs.abbr} at ${Math.round(Math.max(fav.home.winProb, fav.away.winProb) * 100)}%`); }
+      if (close && close !== fav) parts[parts.length - 1] += `; closest to a coin flip ${close.away.abbr} @ ${close.home.abbr}.`; else if (fav) parts[parts.length - 1] += ".";
+      if (unconfirmed) parts.push(`${unconfirmed} starting goalie${unconfirmed === 1 ? "" : "s"} still unconfirmed.`);
+      brief = parts.filter(Boolean).join(" ");
+    }
+    return { ...vm, links, themeAttr, hasMethods, brief, groups, sportLong: vm.sport.longName, title1: vm.title[0], title2: vm.title[1],
       notice: vm.notice, hasNotice: !!vm.notice, hasFeedNotice: !!S.feedNotice, feedNotice: S.feedNotice || "",
       isArchived: !!vm.archived, archivedLabel: vm.archived ? `Board for ${vm.archived.date}${vm.archived.slot ? ` · ${vm.archived.slot} card` : ""}, as published` : "",
       tabs: tabsFor(S.tab, pv), isTonight: S.tab === "tonight" || (!pv && !dueOnly), isProps: S.tab === "props" && (!!pv || dueOnly),

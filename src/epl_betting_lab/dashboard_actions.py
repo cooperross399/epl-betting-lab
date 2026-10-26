@@ -4,9 +4,18 @@ from pathlib import Path
 
 import pandas as pd
 
-from epl_betting_lab.config import MANUAL_DIR, MAX_DEFAULT_JUICE, MIN_EDGE, OUTPUTS_DIR, STAGING_DIR
+from epl_betting_lab.config import (
+    MANUAL_DIR,
+    MAX_DEFAULT_JUICE,
+    MIN_EDGE,
+    OUTPUTS_DIR,
+    PROCESSED_DIR,
+    STAGING_DIR,
+)
 from epl_betting_lab.data.loaders import load_current_odds, load_matches, load_matches_with_xg, load_upcoming_fixtures
+from epl_betting_lab.models.match_context import build_match_context, load_availability
 from epl_betting_lab.models.poisson_goals import CARD_RATINGS, TOTALS_RATINGS, PoissonGoalsModel
+from epl_betting_lab.providers.fpl_players import FPL_AVAILABILITY_FILENAME
 from epl_betting_lab.reports.bet_ledger import load_bet_ledger, save_bet_ledger_reports
 from epl_betting_lab.reports.bet_ledger_health import save_bet_ledger_health_check
 from epl_betting_lab.reports.bet_settlement import build_settlement_preview, save_settlement_preview
@@ -729,6 +738,8 @@ def run_thursday_best_bets_report(
     overwrite_archive: bool = False,
     matches_path: Path | None = None,
     fixtures_path: Path | None = None,
+    match_context: bool = True,
+    availability_path: Path | None = None,
 ) -> dict[str, Path]:
     odds_path = current_odds_path or MANUAL_DIR / "current_odds.csv"
     output_dir = output_dir or OUTPUTS_DIR
@@ -761,13 +772,32 @@ def run_thursday_best_bets_report(
 
     odds = load_current_odds(odds_path)
 
-    model = PoissonGoalsModel().fit(matches, last_n_matches_per_team=38, config=CARD_RATINGS)
-    projections = model.project_fixtures(fixtures)
     # The 2.5 line is priced on its own ratings: opponent-adjusted, decayed,
     # fitted on xG where Understat has it and goals where it does not. Every
     # other market keeps CARD_RATINGS, whose bet rules were tuned to them.
     totals_matches = load_matches_with_xg(matches_path) if matches_path is not None else load_matches_with_xg()
-    totals_projections = PoissonGoalsModel().fit(totals_matches, config=TOTALS_RATINGS).project_fixtures(fixtures)
+    # What this fixture adds to the season ratings (models/match_context.py):
+    # each club's own home edge, its last five, and who is missing from the
+    # fantasy game's availability list. One context moves both fits' expected
+    # goals, so the result markets and the goal markets move together. Switched
+    # off (`match_context=False`), every market prices on the ratings alone,
+    # which is how every committed measurement was made.
+    context = None
+    if match_context:
+        availability_file = (
+            Path(availability_path) if availability_path is not None
+            else PROCESSED_DIR / FPL_AVAILABILITY_FILENAME
+        )
+        context = build_match_context(
+            totals_matches,
+            load_availability(availability_file),
+            availability_source=str(availability_file) if availability_file.is_file() else "",
+        )
+    model = PoissonGoalsModel().fit(matches, last_n_matches_per_team=38, config=CARD_RATINGS)
+    projections = model.project_fixtures(fixtures, context=context)
+    totals_projections = PoissonGoalsModel().fit(totals_matches, config=TOTALS_RATINGS).project_fixtures(
+        fixtures, context=context
+    )
     # Per-book prices for a consensus line; absent, the rule says so per row.
     staging_odds_path = STAGING_DIR / "current_odds_staging.csv"
     market_odds = load_current_odds(staging_odds_path) if staging_odds_path.exists() else None

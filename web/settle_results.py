@@ -708,6 +708,17 @@ def settle_day(sport: str, day: date, boards: list[dict], fpl_logs: dict | None 
     base.update(windowLabel=window, notice=None if games else "The games were played but no final was available when this ran; the next build settles them.",
                 summary=summary_out, teams=teams_out, games=games)
     waiting = len(games) < len(playing) or ungraded > 0
+    # What the Track record, Game and All results pages read of this day:
+    # each settled fixture's final beside the chances the board froze, and
+    # every graded best bet at the card's stake. Built from the same rows
+    # as the tallies above, so the pages and the strip cannot disagree.
+    lines = published_lines(boards, playing)
+    base["graded"] = {
+        row["id"]: graded_entry(playing[row["id"]][0], row["home"]["final"], row["away"]["final"], row["finish"],
+                                (row.get("pick") or {}).get("result") if row.get("pick") else None, lines)
+        for row in games if row["id"] in playing
+    }
+    base["bets"] = bet_rows(day, games, playing, prop_rows)
     if due_rows is not None:
         tallies = due_tallies(due_rows)
         due = {"rows": due_rows}
@@ -740,7 +751,15 @@ PATIENCE_DAYS = 14
 
 
 def night_record(results: dict) -> dict:
-    """What the season keeps of one settled day."""
+    """What the season keeps of one settled day.
+
+    `graded` (one entry per settled fixture: the final, the pick's grade and
+    the frozen chances, for the Track record and Game pages) and `bets`
+    (every graded best bet at the stake the card carried, for All results)
+    ride along since 2026-10-26. A night kept before then lacks them and is
+    settled once more by `season_record`, which is the only reason a kept
+    night is ever re-read from the scoreboard.
+    """
     night = {"games": len(results.get("games") or []), "summary": results.get("summary") or {}}
     due = results.get("dueList")
     if isinstance(due, dict):
@@ -748,7 +767,131 @@ def night_record(results: dict) -> dict:
     props = results.get("props")
     if isinstance(props, dict):
         night["props"] = prop_tallies(props.get("rows") or [])
+    if isinstance(results.get("graded"), dict):
+        night["graded"] = results["graded"]
+    if isinstance(results.get("bets"), list):
+        night["bets"] = results["bets"]
     return night
+
+
+def _profit(units: float, price: object, result: str) -> float | None:
+    """Flat-stake profit in units: the payout on a win, the stake on a loss, nothing on a push."""
+    if result == "win":
+        won = _payout(price, units)
+        return None if won is None else round(won, 4)
+    if result == "loss":
+        return round(-units, 4)
+    return 0.0
+
+
+def _no_vig_1x2(prices: dict | None) -> list[float] | None:
+    """The market's three chances with the margin scaled out, from the frozen 1X2 prices."""
+    if not isinstance(prices, dict):
+        return None
+    implied = []
+    for side in ("home", "draw", "away"):
+        p = prices.get(side)
+        if not isinstance(p, (int, float)) or isinstance(p, bool) or p == 0:
+            return None
+        implied.append(100.0 / (p + 100.0) if p > 0 else abs(p) / (abs(p) + 100.0))
+    total = sum(implied)
+    return [round(x / total, 4) for x in implied] if total > 0 else None
+
+
+def _series_ends(board_lines: dict | None, gid: str, key: str) -> list | None:
+    """The first and last value of one frozen line series, when it moved at all."""
+    if not isinstance(board_lines, dict):
+        return None
+    series = (board_lines.get(gid) or {}).get(key) if isinstance(board_lines.get(gid), dict) else None
+    if not isinstance(series, list) or len(series) < 2:
+        return None
+    first, last = series[0], series[-1]
+    if not (isinstance(first, dict) and isinstance(last, dict)):
+        return None
+    if not all(isinstance(x.get("v"), (int, float)) for x in (first, last)):
+        return None
+    return [first["v"], last["v"]]
+
+
+def published_lines(boards: list[dict], playing: dict) -> dict:
+    """Each playing fixture's longest frozen line series, from whichever board carried it."""
+    out: dict = {}
+    for board in boards:
+        lines = board.get("lineHistory")
+        if not isinstance(lines, dict):
+            continue
+        for gid, series in lines.items():
+            if str(gid) not in playing or not isinstance(series, dict):
+                continue
+            kept = out.setdefault(str(gid), {})
+            for key, pts in series.items():
+                if isinstance(pts, list) and len(pts) > len(kept.get(key) or []):
+                    kept[key] = pts
+    return out
+
+
+def graded_entry(g: dict, hf: int, af: int, finish: str, res: str | None, lines: dict | None) -> dict:
+    """One fixture as the Track record and Game pages read it: the final,
+    the pick's grade, and the chances the board froze, never re-priced."""
+    pick = g.get("pick") if isinstance(g.get("pick"), dict) else None
+    home, away = g.get("home") or {}, g.get("away") or {}
+    probs = [home.get("winProb"), g.get("drawProb"), away.get("winProb")]
+    entry: dict = {
+        "home": hf, "away": af, "finish": finish, "pickResult": res,
+        "homeAbbr": home.get("abbr"), "awayAbbr": away.get("abbr"), "kickoff": g.get("kickoff"),
+        "probs": probs if all(isinstance(p, (int, float)) for p in probs) else None,
+        "market": _no_vig_1x2(g.get("matchResult")),
+        "overProb": (g.get("total") or {}).get("overProb"),
+        "bttsProb": (g.get("btts") or {}).get("yesProb"),
+    }
+    if pick:
+        entry["pick"] = {k: pick.get(k) for k in ("kind", "market", "label", "side", "line", "price", "units")}
+        entry["pick"]["result"] = res
+    ml = _series_ends(lines, str(g.get("id")), "ml_home")
+    if ml:
+        entry["mlHome"] = ml
+    return entry
+
+
+def bet_rows(day: date, results_games: list[dict], playing: dict, prop_rows: list[dict]) -> list[dict]:
+    """Every graded best bet of the day at the stake the card carried: the
+    rows All results sums. A lean, a void and an ungraded pick are not bets.
+    A team pick frozen without a stake counts at one unit and says so."""
+    rows: list[dict] = []
+    for row in results_games:
+        pick = row.get("pick") if isinstance(row.get("pick"), dict) else None
+        if not pick or pick.get("kind", "bet") != "bet" or pick.get("result") not in ("win", "loss", "push"):
+            continue
+        g = (playing.get(str(row.get("id"))) or (None, None))[0] or {}
+        units = pick.get("units")
+        assumed = not isinstance(units, (int, float)) or isinstance(units, bool)
+        staked = 1.0 if assumed else float(units)
+        home, away = (row.get("home") or {}).get("abbr"), (row.get("away") or {}).get("abbr")
+        side = pick.get("side")
+        rows.append({
+            "date": day.isoformat(), "group": "team", "market": pick.get("market"), "label": pick.get("label"),
+            "team": home if side == "home" else away if side == "away" else None, "teams": [home, away],
+            "side": side, "line": pick.get("line"), "price": pick.get("price"), "result": pick["result"],
+            "staked": staked, "units": _profit(staked, pick.get("price"), pick["result"]),
+            **({"stakeAssumed": True} if assumed else {}), "gameId": str(row.get("id")),
+            "kickoff": g.get("kickoff"),
+        })
+    for p in prop_rows:
+        if p.get("result") not in ("win", "loss", "push"):
+            continue
+        units = p.get("units")
+        if not isinstance(units, (int, float)) or isinstance(units, bool):
+            continue
+        rows.append({
+            "date": day.isoformat(), "group": "props", "market": p.get("market"), "propType": p.get("market"),
+            "label": f"{p.get('player', '')} {p.get('side', '')} {p.get('line', '')}".strip(),
+            "player": p.get("player"), "team": p.get("team"), "opp": p.get("opp"),
+            "side": p.get("side"), "line": p.get("line"), "price": p.get("price"), "result": p["result"],
+            "staked": float(units),
+            "units": p.get("profitUnits") if isinstance(p.get("profitUnits"), (int, float)) else _profit(float(units), p.get("price"), p["result"]),
+            "gameId": str(p.get("gameId")),
+        })
+    return rows
 
 
 def _kept_night(path: Path) -> dict | None:
@@ -807,18 +950,27 @@ def season_record(sport: str, day: date, hist: Path, boards: list[dict],
             night, waiting = night_record(latest), latest_waiting
         else:
             night = _kept_night(cached)
-            if night is None:
+            # A night kept before the pages' rows existed (no `bets`) is
+            # settled once more so the Track record and All results reach
+            # back to the first board; if its scoreboard will not answer
+            # today, the kept tallies stand and the next run tries again.
+            stale = night is not None and "bets" not in night
+            if night is None or stale:
                 try:
                     settled, waiting = settle_day(sport, d, boards, fpl_logs)
                 except (*FETCH_ERRORS, KeyError, TypeError):
-                    missing += 1
-                    continue
-                night = night_record(settled)
-                patient = d > day - timedelta(days=PATIENCE_DAYS)
-                if d <= day - timedelta(days=1) and not (waiting and patient):
-                    kept.mkdir(parents=True, exist_ok=True)
-                    cached.write_text(json.dumps({"resultsDate": d.isoformat(), **night}, indent=1), encoding="utf-8")
-                waiting = waiting and patient
+                    if night is None:
+                        missing += 1
+                        continue
+                    waiting = False
+                else:
+                    night = night_record(settled)
+                    patient = d > day - timedelta(days=PATIENCE_DAYS)
+                    if d <= day - timedelta(days=1) and not (waiting and patient):
+                        kept.mkdir(parents=True, exist_ok=True)
+                        cached.write_text(json.dumps({"resultsDate": d.isoformat(), **night}, indent=1), encoding="utf-8")
+                    waiting = waiting and patient
+        write_graded(hist, d, night)
         night_due = night.get("dueList") if isinstance(night.get("dueList"), dict) else None
         if night_due and sum(int(night_due.get(k) or 0) for k in ("w", "l", "p")):
             due["nights"] += 1
@@ -858,6 +1010,30 @@ def season_record(sport: str, day: date, hist: Path, boards: list[dict],
     if props["nights"]:
         season["props"] = props
     return season
+
+
+GRADED_DIR = "graded"
+
+
+def write_graded(hist: Path, d: date, night: dict) -> None:
+    """history/graded/<day>.json, `{id: {home, away, finish, pickResult}}`:
+    the final beside each frozen board, which the Game page reads for a past
+    game. Written whenever the night carries finals; nothing on a night that
+    does not, so an old file is never emptied by a day the feed missed."""
+    graded = night.get("graded") if isinstance(night, dict) else None
+    if not isinstance(graded, dict) or not graded:
+        return
+    out = {gid: {k: e.get(k) for k in ("home", "away", "finish", "pickResult")}
+           for gid, e in graded.items() if isinstance(e, dict)}
+    path = hist / GRADED_DIR / f"{d.isoformat()}.json"
+    try:
+        current = json.loads(path.read_text(encoding="utf-8")) if path.is_file() else None
+    except (OSError, UnicodeError, json.JSONDecodeError):
+        current = None
+    if current == out:
+        return
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(out, indent=1), encoding="utf-8")
 
 
 def write_season(data: Path, results: dict, season: dict) -> None:

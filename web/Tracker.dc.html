@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <title>All results — Maverick Hightower</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Every graded EPL bet of the season with units and return, by market, club, player, price band and month.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Maverick Hightower">
+  <meta property="og:title" content="All results — Maverick Hightower">
+  <meta property="og:image" content="https://maverickhightower.com/share.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@mavhightower">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root, html[data-sport="nhl"] { color-scheme: dark; --paper:#14151a; --ink:#f1efe9; --ink-2:#d2d0ca; --mute:#a3a6b1; --mute-2:#80838e; --rule:#3a3d49; --rule-2:#262832; --on-ink:#3a3d49; --alert:#f08a72; --on-alert:#14151a; --win:#5cc196; --on-win:#14151a; --desk:#0d0e12; }
+    html[data-sport="epl"], html[data-sport="epl"] [data-theme="light"] { color-scheme: light; --paper:#d9dade; --ink:#14151a; --ink-2:#2a2d36; --mute:#50535e; --mute-2:#767984; --rule:#b4b6bd; --rule-2:#c6c8ce; --on-ink:#c6c8ce; --alert:#9e2c19; --on-alert:#f4f4f6; --win:#22664a; --on-win:#f4f4f6; --desk:#c9cbd0; }
+    @media (prefers-color-scheme: dark) { html[data-sport="epl"] { color-scheme: dark; --paper:#2a2c32; --ink:#ecebe7; --ink-2:#cfcec9; --mute:#a9abb4; --mute-2:#878a94; --rule:#474a53; --rule-2:#363840; --on-ink:#474a53; --alert:#f29077; --on-alert:#1b1c20; --win:#62c79c; --on-win:#1b1c20; --desk:#212328; } }
+    html[data-sport="epl"] [data-theme="dark"] { color-scheme: dark; --paper:#2a2c32; --ink:#ecebe7; --ink-2:#cfcec9; --mute:#a9abb4; --mute-2:#878a94; --rule:#474a53; --rule-2:#363840; --on-ink:#474a53; --alert:#f29077; --on-alert:#1b1c20; --win:#62c79c; --on-win:#1b1c20; --desk:#212328; }
+    html, body { margin: 0; padding: 0; background: var(--paper); color: var(--ink); font-family: "IBM Plex Sans", Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+    * { box-sizing: border-box; }
+    a { color: var(--ink); text-decoration: none; }
+    a:hover { color: var(--ink-2); text-decoration: underline; text-underline-offset: 3px; }
+    a:focus-visible, button:focus-visible, input:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+    .skip { position: absolute; left: 12px; top: -60px; background: var(--ink); color: var(--paper); padding: 10px 14px; z-index: 10; font-size: 14px; }
+    .skip:focus { top: 12px; }
+    @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; scroll-behavior: auto !important; } }
+  </style>
+  <meta name="theme-color" content="#d9dade">
+  <script>(function(){document.documentElement.setAttribute("data-sport","epl");})();</script>
+</helmet>
+<div data-screen-label="All results" style="min-height:100vh;background:var(--paper);color:var(--ink);">
+  <a href="#main" class="skip">Skip to the results</a>
+  <div style="max-width:1240px;margin:0 auto;padding:0 clamp(16px,3vw,24px) 80px;">
+
+    <header style="border-top:4px solid var(--ink);padding:10px 0 4px;display:flex;align-items:center;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;">
+      <a href="https://maverickhightower.com/" aria-label="Maverick Hightower home" style="display:flex;align-items:center;gap:12px;min-height:44px;">
+        <span aria-hidden="true" style="width:36px;height:36px;background:var(--ink);color:var(--paper);display:grid;place-items:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:18px;letter-spacing:.04em;">MH</span>
+        <span style="display:flex;flex-direction:column;line-height:1.1;">
+          <span style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);">Maverick Hightower</span>
+          <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;letter-spacing:.02em;text-transform:uppercase;">EPL Projections</span>
+        </span>
+      </a>
+      <nav aria-label="Site" style="display:flex;gap:0 18px;font-size:13px;letter-spacing:.1em;text-transform:uppercase;font-weight:500;flex-wrap:wrap;">
+        <a href="Methods.dc.html" style="display:inline-flex;align-items:center;min-height:44px;">Methods</a>
+        <a href="https://maverickhightower.com/about.html" style="display:inline-flex;align-items:center;min-height:44px;">About</a>
+        <a href="https://nhl.maverickhightower.com/" style="display:inline-flex;align-items:center;min-height:44px;">NHL</a>
+        <a href="https://cbb.maverickhightower.com/" style="display:inline-flex;align-items:center;min-height:44px;">CBB</a>
+      </nav>
+    </header>
+
+    <nav aria-label="Board sections" style="position:sticky;top:0;z-index:5;background:var(--paper);border-bottom:1px solid var(--ink);display:flex;overflow-x:auto;scrollbar-width:none;">
+      <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5">
+        <a href="{{ t.href }}" aria-current="{{ t.current }}" style="flex:1 1 0;max-width:150px;min-width:56px;display:flex;align-items:center;justify-content:center;min-height:48px;padding:0 4px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;white-space:nowrap;text-decoration:none;box-shadow:{{ t.shadow }};color:{{ t.color }};">{{ t.label }}</a>
+      </sc-for>
+    </nav>
+
+    <sc-if value="{{ isSample }}" hint-placeholder-val="{{ false }}">
+      <div role="status" style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:start;padding:14px 0;border-bottom:1px solid var(--ink);">
+        <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--ink);padding:4px 9px;">Sample</span>
+        <p style="margin:0;font-size:14px;line-height:1.5;color:var(--ink-2);max-width:760px;text-wrap:pretty;">Sample data. On the live site this page reads every graded bet of the season.</p>
+      </div>
+    </sc-if>
+
+    <section style="padding:36px 0 26px;border-bottom:1px solid var(--ink);">
+      <div style="font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin-bottom:10px;">{{ kicker }}</div>
+      <h1 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:clamp(56px,9vw,112px);line-height:.9;letter-spacing:-.01em;text-transform:uppercase;">All<br>results</h1>
+      <p style="margin:18px 0 0;font-size:clamp(17px,2.4vw,22px);line-height:1.35;font-weight:500;max-width:760px;text-wrap:pretty;">{{ headline }}</p>
+    </section>
+
+    <sc-if value="{{ empty }}" hint-placeholder-val="{{ false }}">
+      <section id="main" style="padding:40px 0;">
+        <div style="border:1px dashed var(--mute);padding:16px 18px;max-width:760px;">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;line-height:1;text-transform:uppercase;color:var(--mute);">No bet has been graded yet</div>
+          <p style="margin:8px 0 0;font-size:14px;line-height:1.5;color:var(--ink-2);text-wrap:pretty;">The first rows land the morning after the first fixtures on the board are played. Until then, <a href="Board.dc.html" style="text-decoration:underline;text-underline-offset:3px;">this week's board</a> has the picks that will be graded.</p>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ ready }}" hint-placeholder-val="{{ true }}">
+
+      <section id="main" aria-label="Season by group" style="padding:22px 0 26px;border-bottom:1px solid var(--ink);">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:14px 24px;">
+          <sc-for list="{{ cards }}" as="c" hint-placeholder-count="2">
+            <div style="border-top:3px solid var(--ink);padding-top:10px;display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:4px 12px;align-items:end;">
+              <div style="min-width:0;">
+                <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);">{{ c.label }}</div>
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(34px,5vw,44px);font-weight:600;line-height:1;margin-top:8px;color:{{ c.color }};">{{ c.units }}</div>
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-2);margin-top:6px;line-height:1.5;">{{ c.sub }}</div>
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mute);">{{ c.note }}</div>
+              </div>
+              <svg viewBox="0 0 110 48" aria-hidden="true" style="width:110px;height:48px;display:block;overflow:visible;">
+                <line x1="0" y1="{{ c.zeroY }}" x2="110" y2="{{ c.zeroY }}" stroke="var(--rule)" stroke-width="1" stroke-dasharray="2 3"></line>
+                <polyline points="{{ c.points }}" fill="none" stroke="{{ c.color }}" stroke-width="1.5" stroke-linejoin="round"></polyline>
+              </svg>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+
+      <div style="position:sticky;top:48px;z-index:4;background:var(--paper);padding:10px 0;border-bottom:1px solid var(--rule);display:flex;align-items:center;gap:8px 16px;flex-wrap:wrap;">
+        <div role="tablist" aria-label="Filter" style="display:flex;border:1px solid var(--ink);max-width:100%;overflow-x:auto;scrollbar-width:none;">
+          <sc-for list="{{ filters }}" as="f" hint-placeholder-count="3">
+            <button type="button" role="tab" aria-selected="{{ f.selected }}" onClick="{{ f.onClick }}" style="min-height:44px;padding:0 14px;background:{{ f.bg }};color:{{ f.fg }};border:0;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;">{{ f.label }}</button>
+          </sc-for>
+        </div>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">{{ filterLine }}</span>
+      </div>
+
+      <sc-if value="{{ filterEmpty }}" hint-placeholder-val="{{ false }}">
+        <section style="padding:40px 0;">
+          <div style="border:1px dashed var(--mute);padding:16px 18px;max-width:760px;">
+            <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;line-height:1;text-transform:uppercase;color:var(--mute);">Nothing graded here yet</div>
+            <p style="margin:8px 0 0;font-size:14px;line-height:1.5;color:var(--ink-2);">{{ filterEmptyNote }}</p>
+          </div>
+        </section>
+      </sc-if>
+
+      <sc-if value="{{ hasRows }}" hint-placeholder-val="{{ true }}">
+
+      <section aria-labelledby="wl-h" style="padding:28px 0 26px;border-bottom:1px solid var(--ink);">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;">
+          <h2 id="wl-h" style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:28px;line-height:1;text-transform:uppercase;letter-spacing:.01em;">Where we win and lose</h2>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">10 or more bets to qualify</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:18px 32px;margin-top:14px;">
+          <sc-for list="{{ panels }}" as="p" hint-placeholder-count="3">
+            <div style="border-top:2px solid var(--ink);min-width:0;">
+              <div style="padding:8px 0 4px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);">{{ p.title }}</div>
+              <sc-for list="{{ p.halves }}" as="h" hint-placeholder-count="2">
+                <div style="margin-top:8px;">
+                  <div style="display:flex;align-items:center;gap:8px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;letter-spacing:.08em;text-transform:uppercase;color:{{ h.color }};"><span aria-hidden="true" style="width:10px;height:10px;background:{{ h.color }};"></span>{{ h.title }}</div>
+                  <sc-if value="{{ h.none }}" hint-placeholder-val="{{ false }}"><div style="padding:8px 0;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);border-top:1px solid var(--rule-2);margin-top:4px;">{{ h.noneText }}</div></sc-if>
+                  <sc-for list="{{ h.rows }}" as="r" hint-placeholder-count="3">
+                    <div style="display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:0 12px;padding:7px 0;border-top:1px solid var(--rule-2);align-items:baseline;">
+                      <span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px;font-weight:500;">{{ r.name }}</span>
+                      <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">{{ r.record }} · {{ r.bets }}</span>
+                      <span style="font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600;color:{{ r.color }};">{{ r.units }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-for>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+
+      <section aria-labelledby="chart-h" style="padding:28px 0 26px;border-bottom:1px solid var(--ink);">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;">
+          <h2 id="chart-h" style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:28px;line-height:1;text-transform:uppercase;letter-spacing:.01em;">Units over the season</h2>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">{{ chart.stamp }}</span>
+        </div>
+        <svg viewBox="0 0 640 240" role="img" aria-label="{{ chart.aria }}" style="width:100%;height:auto;display:block;margin-top:14px;font-family:'IBM Plex Mono',monospace;max-width:900px;">
+          <sc-for list="{{ chart.grid }}" as="g" hint-placeholder-count="5">
+            <line x1="44" y1="{{ g.y }}" x2="632" y2="{{ g.y }}" stroke="{{ g.stroke }}" stroke-width="{{ g.w }}"></line>
+            <text x="38" y="{{ g.ty }}" text-anchor="end" font-size="10" fill="var(--mute)">{{ g.label }}</text>
+          </sc-for>
+          <sc-for list="{{ chart.xs }}" as="x" hint-placeholder-count="4">
+            <text x="{{ x.x }}" y="232" text-anchor="middle" font-size="10" fill="var(--mute)">{{ x.label }}</text>
+          </sc-for>
+          <sc-for list="{{ chart.lines }}" as="l" hint-placeholder-count="2">
+            <polyline points="{{ l.points }}" fill="none" stroke="{{ l.stroke }}" stroke-width="{{ l.w }}" stroke-dasharray="{{ l.dash }}" stroke-linejoin="round"></polyline>
+            <text x="{{ l.lx }}" y="{{ l.ly }}" font-size="10" fill="{{ l.stroke }}" font-weight="600">{{ l.label }}</text>
+          </sc-for>
+        </svg>
+        <div style="display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:8px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-2);">
+          <sc-for list="{{ chart.legend }}" as="l" hint-placeholder-count="2"><span style="display:inline-flex;align-items:center;gap:6px;"><span aria-hidden="true" style="width:14px;height:0;border-top:2px {{ l.style }} {{ l.stroke }};"></span>{{ l.text }}</span></sc-for>
+        </div>
+      </section>
+
+      <sc-for list="{{ tables }}" as="t" hint-placeholder-count="6">
+        <section id="{{ t.id }}" aria-labelledby="{{ t.hid }}" style="padding:28px 0 26px;border-bottom:1px solid var(--ink);scroll-margin-top:120px;">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;">
+            <h2 id="{{ t.hid }}" style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:28px;line-height:1;text-transform:uppercase;letter-spacing:.01em;">{{ t.title }}</h2>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">{{ t.stamp }}</span>
+          </div>
+          <sc-if value="{{ t.searchable }}" hint-placeholder-val="{{ false }}">
+            <input type="search" value="{{ t.query }}" onInput="{{ t.onSearch }}" placeholder="Search players" aria-label="Search players" style="margin-top:12px;width:100%;max-width:360px;min-height:44px;padding:0 12px;background:var(--paper);color:var(--ink);border:1px solid var(--ink);font-family:inherit;font-size:14px;">
+          </sc-if>
+          <sc-if value="{{ t.noMatch }}" hint-placeholder-val="{{ false }}"><p style="margin:12px 0 0;font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--mute);">{{ t.noMatchText }}</p></sc-if>
+          <sc-if value="{{ t.hasRows }}" hint-placeholder-val="{{ true }}">
+          <div style="margin-top:12px;overflow-x:auto;scrollbar-width:thin;margin-left:calc(-1 * clamp(16px,3vw,24px));margin-right:calc(-1 * clamp(16px,3vw,24px));padding:0 clamp(16px,3vw,24px);">
+            <div role="table" style="min-width:600px;border-top:2px solid var(--ink);">
+              <div role="row" style="display:grid;grid-template-columns:minmax(190px,2fr) 90px 60px 80px minmax(130px,1.4fr) 80px;gap:0 10px;">
+                <sc-for list="{{ t.cols }}" as="c" hint-placeholder-count="6">
+                  <button type="button" role="columnheader" aria-sort="{{ c.sort }}" onClick="{{ c.onClick }}" style="min-height:44px;padding:0;background:var(--paper);border:0;color:{{ c.color }};font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;text-align:{{ c.align }};cursor:pointer;position:{{ c.pos }};left:0;">{{ c.label }}{{ c.arrow }}</button>
+                </sc-for>
+              </div>
+              <sc-for list="{{ t.rows }}" as="r" hint-placeholder-count="8">
+                <div role="row" style="display:grid;grid-template-columns:minmax(190px,2fr) 90px 60px 80px minmax(130px,1.4fr) 80px;gap:0 10px;padding:7px 0;border-top:1px solid var(--rule-2);align-items:center;font-family:'IBM Plex Mono',monospace;font-size:13px;opacity:{{ r.opacity }};">
+                  <span role="cell" style="position:sticky;left:0;background:var(--paper);display:flex;align-items:center;gap:8px;min-width:0;">
+                    <sc-if value="{{ r.logo }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="position:relative;width:20px;height:20px;border-radius:50%;flex:none;overflow:hidden;background:{{ r.color }};box-shadow:0 0 0 1px var(--rule);"><img src="{{ r.logo }}" alt="" loading="lazy" decoding="async" onLoad="{{ r.onLogoLoad }}" onError="{{ r.onLogoError }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;padding:1px;"></span></sc-if>
+                    <span style="font-family:'IBM Plex Sans',sans-serif;font-weight:500;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ r.name }}</span>
+                    <sc-if value="{{ r.few }}" hint-placeholder-val="{{ false }}"><span title="Fewer than 10 bets: too few to read" style="font-size:10px;color:var(--mute);border:1px solid var(--rule);padding:0 4px;white-space:nowrap;flex:none;">few</span></sc-if>
+                  </span>
+                  <span role="cell" style="text-align:right;">{{ r.record }}</span>
+                  <span role="cell" style="text-align:right;">{{ r.bets }}</span>
+                  <span role="cell" style="text-align:right;color:var(--ink-2);">{{ r.staked }}</span>
+                  <span role="cell" style="position:relative;display:grid;grid-template-columns:1fr auto;align-items:center;min-height:22px;">
+                    <span aria-hidden="true" style="position:absolute;top:3px;bottom:3px;left:50%;width:1px;background:var(--rule);"></span>
+                    <span aria-hidden="true" style="position:absolute;top:3px;bottom:3px;left:{{ r.barLeft }};width:{{ r.barWidth }};background:{{ r.barColor }};opacity:.45;"></span>
+                    <span></span><span style="position:relative;text-align:right;font-weight:600;color:{{ r.unitsColor }};padding-left:6px;">{{ r.units }}</span>
+                  </span>
+                  <span role="cell" style="text-align:right;color:{{ r.unitsColor }};">{{ r.ret }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <sc-if value="{{ t.fewNote }}" hint-placeholder-val="{{ false }}"><p style="margin:8px 0 0;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mute);">Faded rows have fewer than 10 bets: too few to read. {{ t.extra }}</p></sc-if>
+          </sc-if>
+        </section>
+      </sc-for>
+
+      <section id="log" aria-labelledby="log-h" style="padding:28px 0 26px;border-bottom:1px solid var(--ink);scroll-margin-top:120px;">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;">
+          <h2 id="log-h" style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:28px;line-height:1;text-transform:uppercase;letter-spacing:.01em;">Every bet</h2>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">{{ log.stamp }}</span>
+        </div>
+        <input type="search" value="{{ log.query }}" onInput="{{ log.onSearch }}" placeholder="Search a club, player or market" aria-label="Search bets" style="margin-top:12px;width:100%;max-width:420px;min-height:44px;padding:0 12px;background:var(--paper);color:var(--ink);border:1px solid var(--ink);font-family:inherit;font-size:14px;">
+        <sc-if value="{{ log.noMatch }}" hint-placeholder-val="{{ false }}"><p style="margin:12px 0 0;font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--mute);">{{ log.noMatchText }}</p></sc-if>
+        <sc-if value="{{ log.hasRows }}" hint-placeholder-val="{{ true }}">
+        <div style="margin-top:12px;overflow-x:auto;scrollbar-width:thin;margin-left:calc(-1 * clamp(16px,3vw,24px));margin-right:calc(-1 * clamp(16px,3vw,24px));padding:0 clamp(16px,3vw,24px);">
+          <div role="table" style="min-width:680px;border-top:2px solid var(--ink);">
+            <div role="row" style="display:grid;grid-template-columns:92px 72px minmax(220px,2fr) 64px 56px 68px 72px;gap:0 10px;padding:6px 0;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);">
+              <span style="position:sticky;left:0;background:var(--paper);">Date</span><span>Type</span><span>The bet</span><span style="text-align:right;">Price</span><span style="text-align:right;">Stake</span><span style="text-align:center;">Result</span><span style="text-align:right;">Units</span>
+            </div>
+            <sc-for list="{{ log.rows }}" as="r" hint-placeholder-count="12">
+              <div role="row" style="display:grid;grid-template-columns:92px 72px minmax(220px,2fr) 64px 56px 68px 72px;gap:0 10px;padding:8px 0;border-top:1px solid var(--rule-2);align-items:center;font-family:'IBM Plex Mono',monospace;font-size:13px;">
+                <span style="position:sticky;left:0;background:var(--paper);color:var(--ink-2);">{{ r.date }}</span>
+                <span style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);">{{ r.type }}</span>
+                <span style="font-family:'IBM Plex Sans',sans-serif;min-width:0;"><span style="font-weight:600;">{{ r.main }}</span> <span style="color:var(--mute);font-size:12px;">{{ r.sub }}</span></span>
+                <span style="text-align:right;">{{ r.price }}</span>
+                <span style="text-align:right;color:var(--ink-2);">{{ r.stake }}</span>
+                <span style="text-align:center;"><span style="display:inline-block;min-width:48px;padding:2px 6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:.08em;text-transform:uppercase;background:{{ r.chipBg }};color:{{ r.chipFg }};border:1px solid {{ r.chipBorder }};">{{ r.result }}</span></span>
+                <span style="text-align:right;font-weight:600;color:{{ r.unitsColor }};">{{ r.units }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;margin-top:10px;">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">{{ log.pageLine }}</span>
+          <span style="display:flex;gap:2px;">
+            <button type="button" onClick="{{ log.onPrev }}" disabled="{{ log.prevDisabled }}" style="min-width:44px;min-height:44px;background:transparent;border:1px solid var(--rule);color:{{ log.prevColor }};font-family:'IBM Plex Mono',monospace;font-size:16px;cursor:pointer;">‹</button>
+            <button type="button" onClick="{{ log.onNext }}" disabled="{{ log.nextDisabled }}" style="min-width:44px;min-height:44px;background:transparent;border:1px solid var(--rule);color:{{ log.nextColor }};font-family:'IBM Plex Mono',monospace;font-size:16px;cursor:pointer;">›</button>
+          </span>
+        </div>
+        </sc-if>
+      </section>
+
+      </sc-if>
+
+      <section aria-labelledby="read-h" style="padding:28px 0 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:20px 40px;align-items:start;">
+        <div style="border:1px solid var(--ink);padding:16px 18px;">
+          <h2 id="read-h" style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;letter-spacing:.14em;text-transform:uppercase;">How to read this</h2>
+          <ul style="margin:10px 0 0;padding-left:18px;font-size:14px;line-height:1.55;color:var(--ink-2);display:flex;flex-direction:column;gap:6px;text-wrap:pretty;">
+            <li>Best bets only, at the stake the card carried that week. Rows marked * were posted before the stake was recorded and count at {{ defaultUnits }}u.</li>
+            <li>Leans, voids and unpriced entries are not counted. The Due List is a watch list, never a bet, and is not here.</li>
+            <li>Small samples swing. A club at +3u after 11 bets is one bad weekend from zero. Faded rows are too few to read.</li>
+          </ul>
+        </div>
+        <div style="font-size:14px;line-height:1.55;color:var(--ink-2);display:flex;flex-direction:column;gap:10px;text-wrap:pretty;">
+          <p style="margin:0;"><a href="Archive.dc.html" style="text-decoration:underline;text-underline-offset:3px;">Every week's board</a>, frozen as it was posted. Each bet here can be traced to one.</p>
+          <p style="margin:0;"><a href="Results.dc.html" style="text-decoration:underline;text-underline-offset:3px;">Last weekend's results</a> and the season win–loss by market.</p>
+          <p style="margin:0;"><a href="Methods.dc.html#graded" style="text-decoration:underline;text-underline-offset:3px;">How a pick is graded</a>, and what counts as a void.</p>
+          <p style="margin:0;color:var(--mute);">The site recommends; it never places bets.</p>
+        </div>
+      </section>
+
+    </sc-if>
+
+    <footer style="border-top:1px solid var(--ink);margin-top:40px;padding:18px 0 0;display:flex;flex-wrap:wrap;gap:6px 24px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">
+      <span>© 2026 Maverick Hightower</span>
+      <a href="Board.dc.html" style="display:inline-flex;align-items:center;min-height:44px;">Board</a>
+      <a href="Record.dc.html" style="display:inline-flex;align-items:center;min-height:44px;">Track record</a>
+      <a href="Methods.dc.html" style="display:inline-flex;align-items:center;min-height:44px;">Methods</a>
+      <a href="https://maverickhightower.com/about.html" style="display:inline-flex;align-items:center;min-height:44px;">About</a>
+      <a href="https://x.com/mavhightower" style="display:inline-flex;align-items:center;min-height:44px;">@mavhightower</a>
+    </footer>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;scenario&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Sample season&quot;,&quot;No bet graded yet&quot;],&quot;default&quot;:&quot;Sample season&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Preview&quot;}}">
+class Component extends DCLogic {
+  state = { data: null, teams: {}, loadedFor: null, isSample: false, err: "", filter: "all", sorts: {}, queries: {}, logQuery: "", page: 0 };
+  onSite() { return /(^|\.)maverickhightower\.com$/.test(location.hostname); }
+  async load() {
+    const want = this.props.scenario || "";
+    if (this.state.loadedFor === want) return;
+    this.setState({ loadedFor: want });
+    const [S, F] = await Promise.all([import("./lib/sports.js"), import("./lib/format.js")]);
+    this.F = F;
+    const { deployed } = await S.detectSport("epl");
+    const scenario = this.onSite() ? "Normal" : this.props.scenario || "Sample season";
+    const live = this.onSite() || scenario === "Normal"; void deployed;
+    const url = live ? "./data/tracker.json" : scenario === "No bet graded yet" ? "./data/sample/tracker_empty.json" : "./data/sample/tracker.json";
+    const get = async (u) => { try { const r = await fetch(u, { cache: "no-store" }); return r.ok ? await r.json() : null; } catch (_) { return null; } };
+    const [data, board] = await Promise.all([get(url), get(live ? "./data/board.json" : "./data/sample/board_game.json")]);
+    this.setState({ data, teams: (board && board.teams) || {}, isSample: !live, err: data ? "" : "unreachable" });
+  }
+  componentDidMount() { this.load(); }
+  componentDidUpdate() { this.load(); }
+  sort(tid, k) { this.setState((s) => { const cur = s.sorts[tid] || { k: "units", dir: -1 }; return { sorts: { ...s.sorts, [tid]: { k, dir: cur.k === k ? -cur.dir : k === "name" ? 1 : -1 } } }; }); }
+  renderVals() {
+    const F = this.F, d = this.state.data, T = this.state.teams;
+    const tabsList = [["This week", "Board.dc.html"], ["Results", "Results.dc.html"], ["Season", "Season.dc.html"], ["Record", "Record.dc.html"], ["Tracker", "Tracker.dc.html"]];
+    const tabs = tabsList.map(([label, href]) => ({ label, href, current: label === "Tracker" ? "page" : undefined, shadow: label === "Tracker" ? "inset 0 -3px 0 var(--ink)" : "none", color: label === "Tracker" ? "var(--ink)" : "var(--mute)" }));
+    const base = { tabs, isSample: !!this.state.isSample, kicker: "EPL · 2026–27", headline: "", defaultUnits: "1" };
+    if (!d) return { ...base, ready: false, empty: !!this.state.err, kicker: this.state.err ? "EPL · tracker unreachable" : base.kicker };
+    const all = Array.isArray(d.rows) ? d.rows : [];
+    base.defaultUnits = String(d.teamPickDefaultUnits ?? 1);
+    if (!all.length) return { ...base, ready: false, empty: true, kicker: "EPL · 0 matchdays graded", headline: "Nothing graded yet. The record starts the morning after the first fixtures on the board." };
+
+    const u2 = (n) => `${n > 0 ? "+" : n < 0 ? "−" : ""}${Math.abs(n).toFixed(2)}u`, u1 = (n) => `${n > 0 ? "+" : n < 0 ? "−" : ""}${Math.abs(n).toFixed(1)}%`;
+    const colorOf = (n) => (n > 0.004 ? "var(--win)" : n < -0.004 ? "var(--alert)" : "var(--ink-2)");
+    const agg = (rs) => { const o = { w: 0, l: 0, p: 0, bets: rs.length, staked: 0, units: 0 }; for (const r of rs) { o[r.result === "win" ? "w" : r.result === "loss" ? "l" : "p"]++; o.staked += r.staked || 0; o.units += r.units || 0; } o.ret = o.staked ? (100 * o.units) / o.staked : 0; return o; };
+    const rec = (o) => `${o.w}–${o.l}${o.p ? `–${o.p}` : ""}`;
+    const GROUPS = [["team", "Team picks"], ["props", "Player props"]];
+    const gLabel = Object.fromEntries(GROUPS);
+    const ov = agg(all), first = d.firstDate || all[all.length - 1].date, last = d.lastDate || all[0].date;
+    const headline = `${rec(ov)} over ${ov.bets} graded bets from ${F.fmtDateOnly(first)} to ${F.fmtDateOnly(last)}: ${u2(ov.units)} on ${ov.staked.toFixed(1)}u staked, a ${u1(ov.ret)} return.`;
+
+    // Cumulative series by date, oldest first.
+    const series = (rs) => { const by = new Map(); for (const r of rs) by.set(r.date, (by.get(r.date) || 0) + (r.units || 0)); const ds = [...by.keys()].sort(); let c = 0; return ds.map((dt) => ({ date: dt, v: (c += by.get(dt)) })); };
+    const spark = (rs) => { const s = series(rs); if (s.length < 2) return { points: "", zeroY: "24" }; const vs = s.map((p) => p.v), lo = Math.min(0, ...vs), hi = Math.max(0, ...vs), span = hi - lo || 1; const Y = (v) => 44 - ((v - lo) / span) * 40; return { points: s.map((p, i) => `${((i / (s.length - 1)) * 110).toFixed(1)},${Y(p.v).toFixed(1)}`).join(" "), zeroY: Y(0).toFixed(1) }; };
+    const cards = GROUPS.map(([key, label]) => { const rs = all.filter((r) => r.group === key), o = agg(rs), sp = spark(rs); return { label, units: rs.length ? u2(o.units) : "—", color: rs.length ? colorOf(o.units) : "var(--mute)", sub: rs.length ? `${rec(o)} · ${o.bets} bets · ${u1(o.ret)} on ${o.staked.toFixed(1)}u` : "No bets graded", note: "Best bets at the card's stake", ...sp }; });
+
+    // Filter
+    const f = this.state.filter, rows = f === "all" ? all : all.filter((r) => r.group === f);
+    const filters = [["all", "Everything"], ...GROUPS].map(([key, label]) => ({ label, selected: f === key ? "true" : "false", bg: f === key ? "var(--ink)" : "transparent", fg: f === key ? "var(--paper)" : "var(--ink)", onClick: () => this.setState({ filter: key, page: 0 }) }));
+    const fo = agg(rows);
+    const filterLine = rows.length ? `${rows.length} bets · ${rec(fo)} · ${u2(fo.units)}` : "";
+    const filterEmpty = rows.length === 0, filterEmptyNote = `No ${(gLabel[f] || "").toLowerCase()} have settled yet.`;
+
+    // Where we win and lose
+    const groupBy = (rs, keyFn, labelFn) => { const m = new Map(); for (const r of rs) for (const k of [].concat(keyFn(r)).filter(Boolean)) { if (!m.has(k)) m.set(k, { key: k, label: labelFn(k, r), rs: [] }); m.get(k).rs.push(r); } return [...m.values()].map((g) => ({ ...g, ...agg(g.rs) })); };
+    const teamName = (k) => k;
+    const byTeam = groupBy(rows, (r) => (r.group === "team" ? (r.team ? [r.team] : r.teams || []) : [r.team]), teamName);
+    const byPlayer = groupBy(rows.filter((r) => r.playerId || r.player), (r) => String(r.playerId || r.player), (k, r) => `${r.player} (${r.team})`);
+    const byMarket = groupBy(rows, (r) => (r.group === "team" ? `team:${r.market}` : `${r.market}:${r.side || ""}`), (k, r) => (r.group === "team" ? r.market : `${r.propType || r.market} ${r.side || ""}`.trim()));
+    const half = (list, good) => { const q = list.filter((x) => x.bets >= 10 && (good ? x.units > 0 : x.units < 0)).sort((a, b) => (good ? b.units - a.units : a.units - b.units)).slice(0, 3); return { title: good ? "Treating us right" : "Treating us wrong", color: good ? "var(--win)" : "var(--alert)", none: q.length === 0, noneText: list.some((x) => x.bets >= 10) ? `Nobody in the ${good ? "black" : "red"} yet` : "Nobody has 10 bets yet", rows: q.map((x) => ({ name: x.label, record: rec(x), bets: `${x.bets} bets`, units: u2(x.units), color: colorOf(x.units) })) }; };
+    const panels = [["Clubs", byTeam], ["Players", byPlayer], ["Markets", byMarket]].map(([title, list]) => ({ title, halves: [half(list, true), half(list, false)] }));
+
+    // Cumulative chart, both groups regardless of filter (the filter picks the emphasised line).
+    const L = 44, R = 632, TOP = 14, BOT = 216;
+    const dates = [...new Set(all.map((r) => r.date))].sort();
+    const lines0 = GROUPS.map(([key, label]) => ({ key, label, s: series(all.filter((r) => r.group === key)) })).filter((l) => l.s.length);
+    const allV = lines0.flatMap((l) => l.s.map((p) => p.v)), vLo = Math.min(0, ...allV), vHi = Math.max(0, ...allV), vSpan = vHi - vLo || 1;
+    const X = (dt) => L + ((dates.indexOf(dt)) / Math.max(1, dates.length - 1)) * (R - L), Y = (v) => BOT - ((v - vLo) / vSpan) * (BOT - TOP);
+    const step = Math.max(1, Math.ceil(vSpan / 5)), ticks = []; for (let v = Math.ceil(vLo / step) * step; v <= vHi; v += step) ticks.push(v);
+    const grid = ticks.map((v) => ({ y: Y(v).toFixed(1), ty: (Y(v) + 3.5).toFixed(1), label: `${v > 0 ? "+" : ""}${v}`, stroke: v === 0 ? "var(--mute)" : "var(--rule-2)", w: v === 0 ? "1.5" : "1" }));
+    const STYLE = { team: ["var(--ink)", ""], props: ["var(--mute)", "4 3"] };
+    const lines = lines0.map((l) => { const lastP = l.s[l.s.length - 1]; return { label: `${l.label} ${u2(lastP.v)}`, points: l.s.map((p) => `${X(p.date).toFixed(1)},${Y(p.v).toFixed(1)}`).join(" "), stroke: STYLE[l.key][0], dash: STYLE[l.key][1], w: f === l.key ? "2.5" : "1.5", lx: (Math.min(X(lastP.date), R - 110) + 4).toFixed(1), ly: (Y(lastP.v) - 6).toFixed(1) }; });
+    const xs = dates.filter((_, i) => i === 0 || i === dates.length - 1 || i % Math.ceil(dates.length / 4) === 0).map((dt) => ({ x: X(dt).toFixed(1), label: F.fmtDateOnly(dt).replace(/,.*$/, "") }));
+    const chart = { stamp: `${dates.length} matchdays · zero line marked`, aria: `Cumulative units by group: ${lines.map((l) => l.label).join("; ")}`, grid, xs, lines, legend: lines0.map((l) => ({ text: l.label, stroke: STYLE[l.key][0], style: STYLE[l.key][1] ? "dashed" : "solid" })) };
+
+    // Tables
+    const logoOf = (abbr) => { const t = T[abbr] || {}; return t.logo === null ? "" : t.logo || `./logos/${encodeURIComponent(abbr)}.png`; };
+    const hideLogo = (e) => { e.currentTarget.style.display = "none"; }, showLogo = (e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.background = "var(--paper)"; };
+    const COLS = [["name", "Name", "left"], ["record", "Record", "right"], ["bets", "Bets", "right"], ["staked", "Staked", "right"], ["units", "Units", "right"], ["ret", "Return", "right"]];
+    const mkTable = (id, title, list, opts = {}) => {
+      const st = this.state.sorts[id] || { k: "units", dir: -1 };
+      const q = (this.state.queries[id] || "").trim().toLowerCase();
+      const filtered = q ? list.filter((x) => x.label.toLowerCase().includes(q)) : list;
+      const sorted = filtered.slice().sort((a, b) => (st.k === "name" ? a.label.localeCompare(b.label) * st.dir : st.k === "record" ? ((a.w - a.l) - (b.w - b.l)) * st.dir : ((a[st.k] || 0) - (b[st.k] || 0)) * st.dir));
+      const maxU = Math.max(0.01, ...filtered.map((x) => Math.abs(x.units)));
+      const rowsT = sorted.map((x) => { const w = (Math.abs(x.units) / maxU) * 50; return { name: x.label, record: rec(x), bets: String(x.bets), staked: `${x.staked.toFixed(2)}u`, units: u2(x.units), ret: `${u1(x.ret)}`, unitsColor: colorOf(x.units), few: x.bets < 10, opacity: x.bets < 10 ? ".5" : "1",
+        barLeft: x.units >= 0 ? "50%" : `${(50 - w).toFixed(1)}%`, barWidth: `${w.toFixed(1)}%`, barColor: colorOf(x.units), logo: opts.logos ? logoOf(x.key) : "", color: (T[x.key] || {}).color || "var(--rule)", onLogoLoad: showLogo, onLogoError: hideLogo }; });
+      return { id, hid: `${id}-h`, title, stamp: `${list.length} ${opts.noun || "rows"} · ${list.reduce((s, x) => s + x.bets, 0)} bets`, searchable: !!opts.search, query: this.state.queries[id] || "", onSearch: (e) => { const v = e.target.value; this.setState((s) => ({ queries: { ...s.queries, [id]: v } })); },
+        noMatch: filtered.length === 0, noMatchText: q ? `No player matches "${q}".` : "Nothing here under this filter.", hasRows: filtered.length > 0, fewNote: rowsT.some((r) => r.few), extra: opts.extra || "",
+        cols: COLS.map(([k, label, align]) => ({ label, align, sort: st.k === k ? (st.dir > 0 ? "ascending" : "descending") : "none", arrow: st.k === k ? (st.dir > 0 ? " ↑" : " ↓") : "", color: st.k === k ? "var(--ink)" : "var(--mute)", pos: k === "name" ? "sticky" : "static", onClick: () => this.sort(id, k) })), rows: rowsT };
+    };
+    const byPropType = groupBy(rows.filter((r) => r.group !== "team"), (r) => `${r.market}:${r.side || ""}`, (k, r) => `${r.propType || r.market} · ${r.side || ""}`.trim());
+    const band = (p) => (p <= -200 ? "−200 and shorter" : p < -110 ? "−199 to −111" : p <= 110 ? "−110 to +110" : p < 200 ? "+111 to +199" : "+200 and longer");
+    const byPrice = groupBy(rows, (r) => band(r.price), (k) => k), byMonth = groupBy(rows, (r) => r.date.slice(0, 7), (k) => new Date(`${k}-15T12:00:00Z`).toLocaleString(undefined, { month: "long", year: "numeric" }));
+    const byMarketTeam = groupBy(rows.filter((r) => r.group === "team"), (r) => r.market, (k) => k);
+    const tables = [
+      ...(byMarketTeam.length ? [mkTable("by-market", "By market", byMarketTeam, { noun: "markets" })] : []),
+      ...(byPropType.length ? [mkTable("by-prop", "By prop type", byPropType, { noun: "prop sides", extra: "Over and under are separate rows; sort by name to pair them." })] : []),
+      mkTable("by-team", "By club", byTeam, { logos: true, noun: "clubs", extra: "A total or both-teams-to-score counts under both clubs." }),
+      ...(byPlayer.length ? [mkTable("by-player", "By player", byPlayer, { search: true, noun: "players" })] : []),
+      mkTable("by-price", "By price band", byPrice, { noun: "bands" }),
+      mkTable("by-month", "By month", byMonth, { noun: "months" }),
+    ];
+
+    // Log
+    const lq = this.state.logQuery.trim().toLowerCase();
+    const text = (r) => `${r.date} ${r.group} ${r.market} ${r.label || ""} ${r.player || ""} ${r.team || ""} ${r.opp || ""} ${(r.teams || []).join(" ")} ${r.propType || ""} ${r.side || ""}`.toLowerCase();
+    const lrows = lq ? rows.filter((r) => text(r).includes(lq)) : rows;
+    const PER = 25, pages = Math.max(1, Math.ceil(lrows.length / PER)), page = Math.min(this.state.page, pages - 1);
+    const CHIP = { win: ["Win", "var(--win)", "var(--on-win)", "var(--win)"], loss: ["Loss", "transparent", "var(--alert)", "var(--alert)"], push: ["Push", "transparent", "var(--mute)", "var(--rule)"] };
+    const logRows = lrows.slice(page * PER, page * PER + PER).map((r) => { const c = CHIP[r.result] || CHIP.push; const prop = r.player ? { main: r.player, sub: `${r.team} v ${r.opp} · ${r.propType || r.market} ${r.side || ""} ${r.line ?? ""}`.replace(/\s+/g, " ").trim() } : { main: r.label, sub: r.teams ? `${r.teams[0]} v ${r.teams[1]} · ${String(r.market || "").replace(/_/g, " ")}` : String(r.market || "").replace(/_/g, " ") };
+      return { date: r.date, type: r.group === "team" ? "Team" : "Prop", ...prop, price: F.fmtOdds(r.price), stake: `${(r.staked || 0).toFixed(2)}u${r.stakeAssumed ? "*" : ""}`, result: c[0], chipBg: c[1], chipFg: c[2], chipBorder: c[3], units: u2(r.units || 0), unitsColor: colorOf(r.units || 0) }; });
+    const log = { stamp: `${rows.length} bets · newest first`, query: this.state.logQuery, onSearch: (e) => this.setState({ logQuery: e.target.value, page: 0 }), noMatch: lrows.length === 0, noMatchText: `No bet matches "${lq}".`, hasRows: lrows.length > 0,
+      rows: logRows, pageLine: `${page * PER + 1}–${Math.min(lrows.length, (page + 1) * PER)} of ${lrows.length}`, onPrev: () => this.setState({ page: Math.max(0, page - 1) }), onNext: () => this.setState({ page: Math.min(pages - 1, page + 1) }), prevDisabled: page === 0, nextDisabled: page >= pages - 1, prevColor: page === 0 ? "var(--rule)" : "var(--ink)", nextColor: page >= pages - 1 ? "var(--rule)" : "var(--ink)" };
+
+    return { ...base, ready: true, empty: false, kicker: `EPL · ${d.nights || dates.length} matchdays graded · ${F.fmtDateOnly(first)} to ${F.fmtDateOnly(last)}`, headline, cards, filters, filterLine, filterEmpty, filterEmptyNote, hasRows: rows.length > 0, panels, chart, tables, log };
+  }
+}
+</script>
+</body>
+</html>

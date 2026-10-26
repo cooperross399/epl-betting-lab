@@ -45,7 +45,13 @@ FPL_AVAILABILITY_FILENAME = "fpl_availability.csv"
 #: Each player's fitness as FPL publishes it: status `a` available, `d`
 #: doubtful, `i` injured, `s` suspended, `u` unavailable, `n` not eligible;
 #: the chance of playing the next round in percent (blank when no flag).
-AVAILABILITY_FIELDS = ("player", "player_id", "team", "status", "chance_next_round", "news")
+#: The last four say how much he matters to his club (the match context
+#: weighs an attacker by his expected goal involvement and a defender by his
+#: minutes); a file written before they were added reads as zero for each.
+AVAILABILITY_FIELDS = (
+    "player", "player_id", "team", "status", "chance_next_round", "news",
+    "position", "minutes", "total_points", "expected_goal_involvements",
+)
 
 LOG_FIELDS = (
     "date",
@@ -137,10 +143,14 @@ def build_fpl_logs(
 
 def build_fpl_availability(bootstrap: Mapping[str, Any]) -> pd.DataFrame:
     """Every player's status, chance of playing the next round, and the news behind it."""
-    teams, _, _ = _lookups(bootstrap)
+    teams, positions, _ = _lookups(bootstrap)
     rows = []
     for element in bootstrap.get("elements") or []:
         chance = element.get("chance_of_playing_next_round")
+        try:
+            xgi = float(element.get("expected_goal_involvements") or 0.0)
+        except (TypeError, ValueError):
+            xgi = 0.0
         rows.append({
             "player": _name(element),
             "player_id": str(element.get("id", "")),
@@ -148,6 +158,10 @@ def build_fpl_availability(bootstrap: Mapping[str, Any]) -> pd.DataFrame:
             "status": str(element.get("status") or ""),
             "chance_next_round": None if chance is None else _int(chance),
             "news": " ".join(str(element.get("news") or "").split()),
+            "position": positions.get(element.get("element_type"), ""),
+            "minutes": _int(element.get("minutes")),
+            "total_points": _int(element.get("total_points")),
+            "expected_goal_involvements": round(xgi, 2),
         })
     return pd.DataFrame(rows, columns=list(AVAILABILITY_FIELDS))
 

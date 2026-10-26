@@ -1,0 +1,25 @@
+{
+ "generatedAt": "2026-10-23T09:40:00Z",
+ "nights": 0,
+ "firstDate": null,
+ "lastDate": null,
+ "teamPickDefaultUnits": 1.0,
+ "dueStake": null,
+ "overall": {
+  "w": 0,
+  "l": 0,
+  "p": 0,
+  "bets": 0,
+  "staked": 0.0,
+  "units": 0.0,
+  "returnPct": 0.0
+ },
+ "byGroup": [],
+ "byMarket": [],
+ "byPropType": [],
+ "byTeam": [],
+ "byPlayer": [],
+ "byPrice": [],
+ "byMonth": [],
+ "rows": []
+}

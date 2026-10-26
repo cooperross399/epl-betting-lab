@@ -341,6 +341,9 @@ class PoissonGoalsModel:
         home_xg, away_xg = self.expected_goals(
             home_team, away_team, allow_unrated=allow_unrated
         )
+        return self.score_matrix_from_xg(home_xg, away_xg)
+
+    def score_matrix_from_xg(self, home_xg: float, away_xg: float) -> pd.DataFrame:
         rows = []
         for hg in range(self.max_goals + 1):
             for ag in range(self.max_goals + 1):
@@ -351,7 +354,24 @@ class PoissonGoalsModel:
     def match_probabilities(
         self, home_team: str, away_team: str, *, allow_unrated: bool = False
     ) -> dict:
-        mat = self.score_matrix(home_team, away_team, allow_unrated=allow_unrated)
+        home_xg, away_xg = self.expected_goals(
+            home_team, away_team, allow_unrated=allow_unrated
+        )
+        return self.probabilities_from_xg(home_team, away_team, home_xg, away_xg)
+
+    def probabilities_from_xg(
+        self, home_team: str, away_team: str, home_xg: float, away_xg: float
+    ) -> dict:
+        """Every market off one pair of expected goals.
+
+        `match_probabilities` asks the ratings for the pair; the match
+        context (`models/match_context.py`) hands in a pair it has already
+        moved for the fixture. Both end here, so a context can change the
+        expectations and nothing else: one score matrix prices every market,
+        and no two markets on a fixture can disagree.
+        """
+        home_xg, away_xg = round(float(home_xg), 3), round(float(away_xg), 3)
+        mat = self.score_matrix_from_xg(home_xg, away_xg)
         home_win = mat.loc[mat.home_goals > mat.away_goals, "prob"].sum()
         draw = mat.loc[mat.home_goals == mat.away_goals, "prob"].sum()
         away_win = mat.loc[mat.home_goals < mat.away_goals, "prob"].sum()
@@ -375,9 +395,6 @@ class PoissonGoalsModel:
         else:
             dnb_home = dnb_away = 0.0
 
-        home_xg, away_xg = self.expected_goals(
-            home_team, away_team, allow_unrated=allow_unrated
-        )
         top_scores = mat.sort_values("prob", ascending=False).head(5).copy()
         top_scores["score"] = top_scores["home_goals"].astype(str) + "-" + top_scores["away_goals"].astype(str)
 
@@ -419,8 +436,25 @@ class PoissonGoalsModel:
                 columns[f"team_total_{side}_under_{tag}"] = round(float(under), 4)
         return columns
 
-    def project_fixtures(self, fixtures: pd.DataFrame) -> pd.DataFrame:
+    def project_fixtures(self, fixtures: pd.DataFrame, context=None) -> pd.DataFrame:
+        """One row of probabilities per fixture.
+
+        With a `context` (`models/match_context.MatchContext`), each
+        fixture's expected goals are moved for its home edge, form and who is
+        missing before the markets are priced, and the row carries the two
+        multipliers as `home_context` and `away_context`. Without one, the
+        ratings alone price it, as every committed measurement does.
+        """
         records = []
         for _, row in fixtures.iterrows():
-            records.append(self.match_probabilities(row["home_team"], row["away_team"]))
+            home, away = row["home_team"], row["away_team"]
+            if context is None:
+                records.append(self.match_probabilities(home, away))
+                continue
+            home_xg, away_xg = self.expected_goals(home, away)
+            moved = context.adjust(home, away, home_xg, away_xg)
+            record = self.probabilities_from_xg(home, away, moved.home_xg, moved.away_xg)
+            record["home_context"] = round(float(moved.home_factor), 4)
+            record["away_context"] = round(float(moved.away_factor), 4)
+            records.append(record)
         return pd.DataFrame(records)

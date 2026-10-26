@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <title>Track record — Maverick Hightower</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="How the EPL model's match-result chances have held up: calibration by bucket, model against market, and whether the line followed our picks.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Maverick Hightower">
+  <meta property="og:title" content="Track record — Maverick Hightower">
+  <meta property="og:image" content="https://maverickhightower.com/share.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@mavhightower">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root, html[data-sport="nhl"] { color-scheme: dark; --paper:#14151a; --ink:#f1efe9; --ink-2:#d2d0ca; --mute:#a3a6b1; --mute-2:#80838e; --rule:#3a3d49; --rule-2:#262832; --on-ink:#3a3d49; --alert:#f08a72; --on-alert:#14151a; --win:#5cc196; --on-win:#14151a; --desk:#0d0e12; }
+    html[data-sport="epl"], html[data-sport="epl"] [data-theme="light"] { color-scheme: light; --paper:#d9dade; --ink:#14151a; --ink-2:#2a2d36; --mute:#50535e; --mute-2:#767984; --rule:#b4b6bd; --rule-2:#c6c8ce; --on-ink:#c6c8ce; --alert:#9e2c19; --on-alert:#f4f4f6; --win:#22664a; --on-win:#f4f4f6; --desk:#c9cbd0; }
+    @media (prefers-color-scheme: dark) { html[data-sport="epl"] { color-scheme: dark; --paper:#2a2c32; --ink:#ecebe7; --ink-2:#cfcec9; --mute:#a9abb4; --mute-2:#878a94; --rule:#474a53; --rule-2:#363840; --on-ink:#474a53; --alert:#f29077; --on-alert:#1b1c20; --win:#62c79c; --on-win:#1b1c20; --desk:#212328; } }
+    html[data-sport="epl"] [data-theme="dark"] { color-scheme: dark; --paper:#2a2c32; --ink:#ecebe7; --ink-2:#cfcec9; --mute:#a9abb4; --mute-2:#878a94; --rule:#474a53; --rule-2:#363840; --on-ink:#474a53; --alert:#f29077; --on-alert:#1b1c20; --win:#62c79c; --on-win:#1b1c20; --desk:#212328; }
+    html, body { margin: 0; padding: 0; background: var(--paper); color: var(--ink); font-family: "IBM Plex Sans", Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+    * { box-sizing: border-box; }
+    a { color: var(--ink); text-decoration: none; }
+    a:hover { color: var(--ink-2); text-decoration: underline; text-underline-offset: 3px; }
+    a:focus-visible, button:focus-visible, select:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+    .skip { position: absolute; left: 12px; top: -60px; background: var(--ink); color: var(--paper); padding: 10px 14px; z-index: 10; font-size: 14px; }
+    .skip:focus { top: 12px; }
+    @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; scroll-behavior: auto !important; } }
+  </style>
+  <meta name="theme-color" content="#d9dade">
+  <script>(function(){document.documentElement.setAttribute("data-sport","epl");})();</script>
+</helmet>
+<div data-screen-label="Track record" style="min-height:100vh;background:var(--paper);color:var(--ink);">
+  <a href="#main" class="skip">Skip to the record</a>
+  <div style="max-width:1240px;margin:0 auto;padding:0 clamp(16px,3vw,24px) 80px;">
+
+    <header style="border-top:4px solid var(--ink);padding:10px 0 4px;display:flex;align-items:center;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;">
+      <a href="https://maverickhightower.com/" aria-label="Maverick Hightower home" style="display:flex;align-items:center;gap:12px;min-height:44px;">
+        <span aria-hidden="true" style="width:36px;height:36px;background:var(--ink);color:var(--paper);display:grid;place-items:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:18px;letter-spacing:.04em;">MH</span>
+        <span style="display:flex;flex-direction:column;line-height:1.1;">
+          <span style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);">Maverick Hightower</span>
+          <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;letter-spacing:.02em;text-transform:uppercase;">EPL Projections</span>
+        </span>
+      </a>
+      <nav aria-label="Site" style="display:flex;gap:0 18px;font-size:13px;letter-spacing:.1em;text-transform:uppercase;font-weight:500;flex-wrap:wrap;">
+        <a href="Methods.dc.html" style="display:inline-flex;align-items:center;min-height:44px;">Methods</a>
+        <a href="https://maverickhightower.com/about.html" style="display:inline-flex;align-items:center;min-height:44px;">About</a>
+        <a href="https://nhl.maverickhightower.com/" style="display:inline-flex;align-items:center;min-height:44px;">NHL</a>
+        <a href="https://cbb.maverickhightower.com/" style="display:inline-flex;align-items:center;min-height:44px;">CBB</a>
+      </nav>
+    </header>
+
+    <nav aria-label="Board sections" style="position:sticky;top:0;z-index:5;background:var(--paper);border-bottom:1px solid var(--ink);display:flex;overflow-x:auto;scrollbar-width:none;">
+      <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5">
+        <a href="{{ t.href }}" aria-current="{{ t.current }}" style="flex:1 1 0;max-width:150px;min-width:72px;display:flex;align-items:center;justify-content:center;min-height:48px;padding:0 4px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;white-space:nowrap;text-decoration:none;box-shadow:{{ t.shadow }};color:{{ t.color }};">{{ t.label }}</a>
+      </sc-for>
+    </nav>
+
+    <sc-if value="{{ isSample }}" hint-placeholder-val="{{ false }}">
+      <div role="status" style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:start;padding:14px 0;border-bottom:1px solid var(--ink);">
+        <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--ink);padding:4px 9px;">Sample</span>
+        <p style="margin:0;font-size:14px;line-height:1.5;color:var(--ink-2);max-width:760px;text-wrap:pretty;">Sample data. On the live site this page reads the season's settled matchdays.</p>
+      </div>
+    </sc-if>
+
+    <section style="padding:36px 0 28px;border-bottom:1px solid var(--ink);">
+      <div style="font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin-bottom:10px;">{{ kicker }}</div>
+      <h1 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:clamp(56px,9vw,112px);line-height:.9;letter-spacing:-.01em;text-transform:uppercase;">Track<br>record</h1>
+      <p style="margin:18px 0 0;font-size:15px;line-height:1.5;color:var(--ink-2);max-width:640px;text-wrap:pretty;">When the model gives a side a 60% chance, does that side win about 60% of the time? That is the only thing this page measures. Win–loss records, units and return for every graded bet are on <a href="Tracker.dc.html" style="text-decoration:underline;text-underline-offset:3px;">All results</a>.</p>
+    </section>
+
+    <sc-if value="{{ empty }}" hint-placeholder-val="{{ false }}">
+      <section id="main" style="padding:40px 0;">
+        <div style="border:1px dashed var(--mute);padding:16px 18px;max-width:760px;">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;line-height:1;text-transform:uppercase;color:var(--mute);">No matchday settled yet</div>
+          <p style="margin:8px 0 0;font-size:14px;line-height:1.5;color:var(--ink-2);text-wrap:pretty;">The first calibration numbers appear the morning after the first fixtures on the board are played. Each settled matchday adds its games to the buckets below.</p>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ ready }}" hint-placeholder-val="{{ true }}">
+
+      <section id="main" aria-labelledby="cal-h" style="padding:28px 0 26px;border-bottom:1px solid var(--ink);">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;">
+          <h2 id="cal-h" style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:28px;line-height:1;text-transform:uppercase;letter-spacing:.01em;">Calibration</h2>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">{{ calStamp }}</span>
+        </div>
+        <p style="margin:12px 0 0;font-size:clamp(18px,2.6vw,24px);line-height:1.3;font-weight:500;max-width:720px;text-wrap:pretty;">{{ headline }}</p>
+        <p style="margin:10px 0 0;font-size:14px;line-height:1.5;color:var(--ink-2);max-width:720px;text-wrap:pretty;">Each match is filed by the chance we gave the favourite, which in a three-way market can be the draw. The dot is how often that favourite actually came in; the line through it is the range the true rate could plausibly sit in given so few matches. Dots on the diagonal mean the number means what it says.</p>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:20px 40px;margin-top:18px;align-items:start;">
+          <figure style="margin:0;min-width:0;">
+            <svg viewBox="0 0 340 320" role="img" aria-label="{{ chartAria }}" style="width:100%;height:auto;display:block;font-family:'IBM Plex Mono',monospace;">
+              <line x1="40" y1="10" x2="40" y2="280" stroke="var(--rule)" stroke-width="1"></line>
+              <line x1="40" y1="280" x2="330" y2="280" stroke="var(--rule)" stroke-width="1"></line>
+              <sc-for list="{{ grid }}" as="t" hint-placeholder-count="8">
+                <line x1="40" y1="{{ t.y }}" x2="330" y2="{{ t.y }}" stroke="var(--rule-2)" stroke-width="1"></line>
+                <text x="34" y="{{ t.yText }}" text-anchor="end" font-size="10" fill="var(--mute)">{{ t.label }}</text>
+                <text x="{{ t.x }}" y="296" text-anchor="middle" font-size="10" fill="var(--mute)">{{ t.label }}</text>
+              </sc-for>
+              <line x1="40" y1="280" x2="330" y2="10" stroke="var(--mute)" stroke-width="1" stroke-dasharray="4 4"></line>
+              <text x="328" y="24" text-anchor="end" font-size="10" fill="var(--mute)">perfect</text>
+              <sc-if value="{{ week.show }}" hint-placeholder-val="{{ false }}">
+                <rect x="{{ week.x }}" y="10" width="{{ week.w }}" height="270" fill="var(--ink)" fill-opacity="0.07"></rect>
+                <text x="{{ week.tx }}" y="20" text-anchor="middle" font-size="9" fill="var(--ink-2)" letter-spacing="1">THIS WEEK</text>
+              </sc-if>
+              <sc-for list="{{ dots }}" as="d" hint-placeholder-count="5">
+                <line x1="{{ d.x }}" y1="{{ d.yLo }}" x2="{{ d.x }}" y2="{{ d.yHi }}" stroke="var(--ink)" stroke-width="1.5"></line>
+                <circle cx="{{ d.x }}" cy="{{ d.y }}" r="{{ d.r }}" fill="{{ d.fill }}" stroke="var(--ink)" stroke-width="2"></circle>
+                <text x="{{ d.x }}" y="{{ d.labelY }}" text-anchor="middle" font-size="10" fill="var(--ink-2)">{{ d.n }}</text>
+              </sc-for>
+              <text x="185" y="314" text-anchor="middle" font-size="10" fill="var(--mute)" letter-spacing="1">PREDICTED CHANCE (FAVOURITE)</text>
+              <text x="12" y="145" text-anchor="middle" font-size="10" fill="var(--mute)" letter-spacing="1" transform="rotate(-90 12 145)">ACTUAL RATE</text>
+            </svg>
+            <figcaption style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mute);margin-top:4px;">Dot size: matches in the bucket. Line: 95% range.</figcaption>
+          </figure>
+
+          <div style="min-width:0;border-top:2px solid var(--ink);">
+            <div style="display:grid;grid-template-columns:minmax(0,1.2fr) 0.7fr 1fr 1fr 1.3fr;gap:0 8px;padding:6px 0;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);">
+              <span>We said</span><span style="text-align:right;">Matches</span><span style="text-align:right;">Avg said</span><span style="text-align:right;">Came in</span><span style="text-align:right;">95% range</span>
+            </div>
+            <sc-for list="{{ rows }}" as="r" hint-placeholder-count="5">
+              <div style="display:grid;grid-template-columns:minmax(0,1.2fr) 0.7fr 1fr 1fr 1.3fr;gap:0 8px;padding:9px 0;border-top:1px solid var(--rule-2);font-family:'IBM Plex Mono',monospace;font-size:13px;align-items:baseline;">
+                <span style="font-weight:500;">{{ r.range }}</span><span style="text-align:right;">{{ r.games }}</span><span style="text-align:right;color:var(--ink-2);">{{ r.predicted }}</span><span style="text-align:right;font-weight:600;color:{{ r.actualColor }};">{{ r.actual }}</span><span style="text-align:right;color:var(--mute);">{{ r.interval }}</span>
+              </div>
+            </sc-for>
+            <div style="padding:9px 0;border-top:2px solid var(--ink);font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">{{ rowsFoot }}</div>
+            <sc-if value="{{ week.show }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:8px;border:1px solid var(--ink);padding:10px 12px;display:flex;flex-direction:column;gap:4px;">
+                <span style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);">This week</span>
+                <span style="font-size:14px;line-height:1.45;color:var(--ink-2);text-wrap:pretty;">{{ week.text }}</span>
+                <a href="{{ week.href }}" style="display:inline-flex;align-items:center;min-height:44px;font-family:'IBM Plex Mono',monospace;font-size:12px;text-decoration:underline;text-decoration-color:var(--rule);text-underline-offset:3px;">{{ week.link }}</a>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="mk-h" style="padding:28px 0 26px;border-bottom:1px solid var(--ink);">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;">
+          <h2 id="mk-h" style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:28px;line-height:1;text-transform:uppercase;letter-spacing:.01em;">Goals and both teams to score</h2>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">Same test, other markets</span>
+        </div>
+        <p style="margin:6px 0 0;font-size:14px;line-height:1.5;color:var(--ink-2);max-width:720px;text-wrap:pretty;">The result is not the only thing the model prices. The chance of three or more goals, and of both sides scoring, is filed the same way and checked against what happened.</p>
+        <sc-if value="{{ mkts.none }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-top:14px;border:1px dashed var(--mute);padding:14px 16px;max-width:760px;font-family:'IBM Plex Mono',monospace;font-size:13px;line-height:1.5;color:var(--mute);">Appears once priced matches have settled. Until then only the result is tracked above, and that is all this page claims.</div>
+        </sc-if>
+        <sc-if value="{{ mkts.show }}" hint-placeholder-val="{{ true }}">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:18px 40px;margin-top:14px;">
+            <sc-for list="{{ mkts.list }}" as="k" hint-placeholder-count="2">
+              <div style="border-top:2px solid var(--ink);min-width:0;">
+                <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:8px 0 4px;"><span style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);">{{ k.title }}</span><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mute);">{{ k.games }} matches</span></div>
+                <div style="display:grid;grid-template-columns:minmax(0,1.2fr) 0.7fr 1fr 1fr;gap:0 8px;padding:4px 0;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);"><span>We said</span><span style="text-align:right;">N</span><span style="text-align:right;">Hit</span><span style="text-align:right;">Range</span></div>
+                <sc-for list="{{ k.rows }}" as="r" hint-placeholder-count="4">
+                  <div style="display:grid;grid-template-columns:minmax(0,1.2fr) 0.7fr 1fr 1fr;gap:0 8px;padding:8px 0;border-top:1px solid var(--rule-2);font-family:'IBM Plex Mono',monospace;font-size:13px;align-items:baseline;"><span style="font-weight:500;">{{ r.range }}</span><span style="text-align:right;">{{ r.games }}</span><span style="text-align:right;font-weight:600;color:{{ r.actualColor }};">{{ r.actual }}</span><span style="text-align:right;color:var(--mute);">{{ r.interval }}</span></div>
+                </sc-for>
+                <div style="padding:8px 0 0;font-size:13px;line-height:1.5;color:var(--ink-2);text-wrap:pretty;">{{ k.verdict }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </section>
+
+      <section aria-labelledby="brier-h" style="padding:28px 0 26px;border-bottom:1px solid var(--ink);">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;">
+          <h2 id="brier-h" style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:28px;line-height:1;text-transform:uppercase;letter-spacing:.01em;">Model vs market</h2>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">Brier score · lower is better · a three-way shrug scores 0.667</span>
+        </div>
+        <sc-if value="{{ brier.show }}" hint-placeholder-val="{{ true }}">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:12px 24px;margin-top:14px;max-width:760px;">
+            <sc-for list="{{ brier.cells }}" as="c" hint-placeholder-count="3">
+              <div style="border-top:2px solid var(--ink);padding-top:8px;">
+                <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);">{{ c.label }}</div>
+                <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:44px;line-height:1;margin-top:8px;">{{ c.value }}</div>
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-2);margin-top:6px;">{{ c.sub }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div aria-hidden="true" style="margin-top:16px;max-width:760px;">
+            <div style="position:relative;height:10px;background:var(--rule-2);">
+              <div style="position:absolute;top:-4px;bottom:-4px;left:{{ brier.modelX }};width:2px;background:var(--ink);"></div>
+              <div style="position:absolute;top:-4px;bottom:-4px;left:{{ brier.marketX }};width:2px;background:var(--mute);"></div>
+              <div style="position:absolute;top:0;bottom:0;left:{{ brier.coinX }};width:1px;background:var(--rule);"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mute);margin-top:6px;"><span>0.500 better</span><span>0.667 three-way shrug</span><span>0.750 worse</span></div>
+          </div>
+          <p style="margin:14px 0 0;font-size:14px;line-height:1.5;color:var(--ink-2);max-width:720px;text-wrap:pretty;">{{ brier.verdict }}</p>
+        </sc-if>
+        <sc-if value="{{ brier.none }}" hint-placeholder-val="{{ false }}">
+          <p style="margin:12px 0 0;font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--mute);">Appears once matches with a match-result price have settled.</p>
+        </sc-if>
+      </section>
+
+      <section aria-labelledby="mv-h" style="padding:28px 0 26px;border-bottom:1px solid var(--ink);">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;">
+          <h2 id="mv-h" style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:28px;line-height:1;text-transform:uppercase;letter-spacing:.01em;">Did the market follow?</h2>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">{{ mv.stamp }}</span>
+        </div>
+        <p style="margin:6px 0 0;font-size:14px;line-height:1.5;color:var(--ink-2);max-width:720px;text-wrap:pretty;">Of the match-result picks we posted, how often did the price move toward our side before kick-off? Movement toward us is weak evidence the market saw the same thing. It is not a win.</p>
+        <sc-if value="{{ mv.show }}" hint-placeholder-val="{{ true }}">
+          <div role="img" aria-label="{{ mv.aria }}" style="display:flex;height:28px;margin-top:16px;max-width:760px;background:var(--rule-2);">
+            <sc-for list="{{ mv.segs }}" as="s" hint-placeholder-count="3">
+              <div style="width:{{ s.width }};background:{{ s.bg }};border-right:2px solid var(--paper);"></div>
+            </sc-for>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 16px;margin-top:10px;max-width:760px;">
+            <sc-for list="{{ mv.segs }}" as="s" hint-placeholder-count="3">
+              <div style="display:flex;flex-direction:column;gap:2px;min-width:0;">
+                <span style="display:flex;align-items:center;gap:6px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);"><span aria-hidden="true" style="width:10px;height:10px;background:{{ s.bg }};flex:none;"></span>{{ s.label }}</span>
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:600;line-height:1;">{{ s.n }}</span>
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-2);">{{ s.pct }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <p style="margin:14px 0 0;font-size:14px;line-height:1.5;color:var(--ink-2);max-width:720px;text-wrap:pretty;">{{ mv.verdict }}</p>
+        </sc-if>
+        <sc-if value="{{ mv.none }}" hint-placeholder-val="{{ false }}">
+          <p style="margin:12px 0 0;font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--mute);">No match-result picks with a recorded line yet.</p>
+        </sc-if>
+      </section>
+
+      <section aria-labelledby="sure-h" style="padding:28px 0 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:20px 40px;align-items:start;">
+        <div style="border:1px solid var(--ink);padding:16px 18px;">
+          <h2 id="sure-h" style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;letter-spacing:.14em;text-transform:uppercase;">How sure are we</h2>
+          <p style="margin:10px 0 0;font-size:14px;line-height:1.55;color:var(--ink-2);text-wrap:pretty;">{{ sureText }}</p>
+        </div>
+        <div style="font-size:14px;line-height:1.55;color:var(--ink-2);display:flex;flex-direction:column;gap:10px;text-wrap:pretty;">
+          <p style="margin:0;"><a href="Tracker.dc.html" style="text-decoration:underline;text-underline-offset:3px;">All results</a> has every graded bet with units and return, by team, player, market, price and month. <a href="Results.dc.html" style="text-decoration:underline;text-underline-offset:3px;">Results</a> has the last matchday.</p>
+          <p style="margin:0;"><a href="Methods.dc.html#graded" style="text-decoration:underline;text-underline-offset:3px;">Methods</a> explains how a pick is graded and what counts as a void.</p>
+          <p style="margin:0;color:var(--mute);">This page measures whether the numbers mean what they say. Profit and loss live on <a href="Tracker.dc.html" style="text-decoration:underline;text-underline-offset:3px;">All results</a>.</p>
+        </div>
+      </section>
+
+      <sc-if value="{{ due.show }}" hint-placeholder-val="{{ false }}">
+      <section aria-labelledby="due-h" style="padding:28px 0 0;">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;">
+          <h2 id="due-h" style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:28px;line-height:1;text-transform:uppercase;letter-spacing:.01em;">Due List, on the same terms</h2>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">Cooper's picks · not the model · never staked</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,160px),1fr));gap:12px 24px;margin-top:14px;max-width:760px;">
+          <sc-for list="{{ due.cells }}" as="c" hint-placeholder-count="3">
+            <div style="border-top:2px solid var(--ink);padding-top:8px;">
+              <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);">{{ c.label }}</div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:600;line-height:1;margin-top:6px;">{{ c.value }}</div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);margin-top:4px;">{{ c.sub }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <p style="margin:12px 0 0;font-size:14px;line-height:1.5;color:var(--ink-2);max-width:720px;text-wrap:pretty;">{{ due.verdict }}</p>
+      </section>
+      </sc-if>
+
+    </sc-if>
+
+    <footer style="border-top:1px solid var(--ink);margin-top:40px;padding:18px 0 0;display:flex;flex-wrap:wrap;gap:6px 24px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">
+      <span>© 2026 Maverick Hightower</span>
+      <a href="Board.dc.html" style="display:inline-flex;align-items:center;min-height:44px;">Board</a>
+      <a href="Record.dc.html" style="display:inline-flex;align-items:center;min-height:44px;">Track record</a>
+      <a href="Methods.dc.html" style="display:inline-flex;align-items:center;min-height:44px;">Methods</a>
+      <a href="https://maverickhightower.com/about.html" style="display:inline-flex;align-items:center;min-height:44px;">About</a>
+      <a href="https://x.com/mavhightower" style="display:inline-flex;align-items:center;min-height:44px;">@mavhightower</a>
+    </footer>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;scenario&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Sample season&quot;,&quot;No matchday settled yet&quot;],&quot;default&quot;:&quot;Sample season&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Preview&quot;}}">
+class Component extends DCLogic {
+  state = { data: null, loadedFor: null, isSample: false, err: "" };
+  onSite() { return /(^|\.)maverickhightower\.com$/.test(location.hostname); }
+  async load() {
+    const want = this.props.scenario || "";
+    if (this.state.loadedFor === want) return;
+    this.setState({ loadedFor: want });
+    const [S, F] = await Promise.all([import("./lib/sports.js"), import("./lib/format.js")]);
+    this.F = F;
+    const { deployed } = await S.detectSport("epl");
+    const scenario = this.onSite() ? "Normal" : this.props.scenario || "Sample season";
+    const live = this.onSite() || scenario === "Normal"; void deployed;
+    const url = live ? "./data/record.json" : scenario === "No matchday settled yet" ? "./data/sample/record_empty.json" : "./data/sample/record.json";
+    const get = async (u) => { try { const r = await fetch(u, { cache: "no-store" }); return r.ok ? await r.json() : null; } catch (_) { return null; } };
+    const [data, board] = await Promise.all([get(url), get(live ? "./data/board.json" : "./data/sample/board_game.json")]);
+    this.setState({ data, board, isSample: !live, err: data ? "" : "unreachable" });
+  }
+  componentDidMount() { this.load(); }
+  componentDidUpdate() { this.load(); }
+  renderVals() {
+    const F = this.F, d = this.state.data;
+    const tabsList = [["This week", "Board.dc.html"], ["Results", "Results.dc.html"], ["Season", "Season.dc.html"], ["Record", "Record.dc.html"], ["Tracker", "Tracker.dc.html"]];
+    const tabs = tabsList.map(([label, href]) => ({ label, href, current: label === "Record" ? "page" : undefined, shadow: label === "Record" ? "inset 0 -3px 0 var(--ink)" : "none", color: label === "Record" ? "var(--ink)" : "var(--mute)" }));
+    const base = { tabs, isSample: !!this.state.isSample, kicker: "EPL · 2026–27", week: { show: false }, headline: "", mkts: { show: false, none: true, list: [] }, due: { show: false } };
+    if (!d) return { ...base, ready: false, empty: !!this.state.err, kicker: this.state.err ? "EPL · record unreachable" : base.kicker };
+    const nights = d.nights || 0, games = d.games || 0, buckets = (d.buckets || []).filter((b) => b.games > 0);
+    if (!nights || !buckets.length) return { ...base, ready: false, empty: true, kicker: `EPL · ${nights} matchdays settled` };
+
+    const pct0 = (p) => `${Math.round(p * 100)}%`, pct1 = (p) => `${(p * 100).toFixed(1)}%`;
+    // Chart geometry: x 40..330 and y 280..10 both span 30%..100%, because a three-way favourite starts lower than a two-way one.
+    const LO = 0.3, X = (p) => 40 + ((p - LO) / (1 - LO)) * 290, Y = (p) => 280 - ((p - LO) / (1 - LO)) * 270;
+    const maxN = Math.max(...buckets.map((b) => b.games));
+    // This week's biggest favourite on the board, and the bucket it falls in.
+    const bg = ((this.state.board || {}).games || []).filter((g) => g.home && g.away && typeof g.home.winProb === "number" && typeof g.away.winProb === "number");
+    let top = null, topP = 0;
+    for (const g of bg) { const p = Math.max(g.home.winProb, g.away.winProb, typeof g.drawProb === "number" ? g.drawProb : 0); if (p > topP) { topP = p; top = g; } }
+    const tb = top ? buckets.find((b) => topP >= b.low && topP < b.high) : null;
+    const favName = (g, p) => (g.home.winProb === p ? g.home.abbr : g.away.winProb === p ? g.away.abbr : "the draw");
+    const week = top && tb ? { show: true, x: X(tb.low).toFixed(1), w: (X(Math.min(tb.high, 1)) - X(tb.low)).toFixed(1), tx: ((X(tb.low) + X(Math.min(tb.high, 1))) / 2).toFixed(1), href: `Game.dc.html?id=${encodeURIComponent(top.id)}`,
+      text: `Our biggest favourite this week is ${favName(top, topP)} at ${pct1(topP)}. Favourites we rated ${pct0(tb.low)}–${tb.high >= 1 ? "100%" : pct0(tb.high)} have come in ${pct1(tb.actual)} of ${tb.games} matches, with a plausible range of ${pct0(tb.interval[0])}–${pct0(tb.interval[1])}.`,
+      link: `${top.home.abbr} v ${top.away.abbr} match page →` } : { show: false };
+    const dots = buckets.map((b) => { const r = 5 + 9 * Math.sqrt(b.games / maxN); const y = Y(b.actual); return { x: X(b.predicted).toFixed(1), y: y.toFixed(1), r: r.toFixed(1), fill: tb === b ? "var(--paper)" : "var(--ink)", yLo: Y(Math.max(LO, b.interval[0])).toFixed(1), yHi: Y(Math.min(1, b.interval[1])).toFixed(1), n: `${b.games}`, labelY: (y + r + 12 > 276 ? y - r - 6 : y + r + 12).toFixed(1) }; });
+    // One sentence a reader who skips the chart still gets: the largest bucket, said plainly.
+    const big = buckets.slice().sort((x, y) => y.games - x.games)[0];
+    const gap = big.actual - big.predicted;
+    const headline = `Favourites we rated ${pct0(big.low)}–${big.high >= 1 ? "100%" : pct0(big.high)} have come in ${pct0(big.actual)} of the time${Math.abs(gap) < 0.03 ? ", about what we said" : gap > 0 ? ", a little more than we said" : ", a little less than we said"}. ${games} matches in, the numbers are holding up but the ranges are still wide.`;
+    const grid = [0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0].map((p) => ({ y: Y(p).toFixed(1), yText: (Y(p) + 3.5).toFixed(1), x: X(p).toFixed(1), label: pct0(p) }));
+    const rows = buckets.map((b) => ({ range: `${pct0(b.low)}–${b.high >= 1 ? "100%" : pct0(b.high)}`, games: String(b.games), predicted: pct1(b.predicted), actual: pct1(b.actual), interval: `${pct0(b.interval[0])}–${pct0(b.interval[1])}`,
+      actualColor: b.actual >= b.interval[0] && b.actual <= b.interval[1] ? "var(--ink)" : "var(--alert)" }));
+    const within = buckets.filter((b) => b.predicted >= b.interval[0] && b.predicted <= b.interval[1]).length;
+    const rowsFoot = `${games} matches over ${nights} matchdays · the predicted rate sits inside the range in ${within} of ${buckets.length} buckets`;
+    const chartAria = `Calibration chart. ${buckets.map((b) => `Bucket ${pct0(b.low)} to ${pct0(b.high)}: predicted ${pct1(b.predicted)}, actual ${pct1(b.actual)}, ${b.games} matches`).join(". ")}.`;
+
+    const br = d.brier;
+    let brier = { show: false, none: true };
+    if (br && typeof br.model === "number" && typeof br.market === "number") {
+      const diff = br.model - br.market, abs = Math.abs(diff), base3 = typeof br.baseline === "number" ? br.baseline : 0.6667;
+      const BX = (v) => `${Math.max(0, Math.min(100, ((v - 0.5) / 0.25) * 100)).toFixed(1)}%`;
+      const verdict = abs < 0.003 ? `A gap of ${abs.toFixed(4)} over ${br.games} matches is noise. The model and the market are, so far, indistinguishable at calling results.`
+        : diff > 0 ? `The market is ahead by ${abs.toFixed(4)} over ${br.games} matches. That gap is small enough to flip over a few weeks, but as of today the market price has been the better forecast.`
+        : `The model is ahead by ${abs.toFixed(4)} over ${br.games} matches. That gap is small enough to flip over a few weeks; it is not evidence of an edge.`;
+      brier = { show: true, none: false, modelX: BX(br.model), marketX: BX(br.market), coinX: BX(base3), verdict,
+        cells: [{ label: "Model", value: br.model.toFixed(4), sub: `${br.games} priced matches · three-way` }, { label: "Market", value: br.market.toFixed(4), sub: "best price, vig removed" }, { label: "Gap", value: (diff > 0 ? "+" : diff < 0 ? "−" : "") + abs.toFixed(4), sub: diff > 0 ? "market better" : diff < 0 ? "model better" : "even" }] };
+    }
+
+    const m = d.movement || {}, picks = m.picks || 0;
+    let mv = { show: false, none: true, stamp: "" };
+    if (picks > 0) {
+      const seg = (label, n, bg) => ({ label, n: String(n), pct: pct0(n / picks), width: `${((n / picks) * 100).toFixed(1)}%`, bg });
+      const segs = [seg("Toward us", m.toward || 0, "var(--ink)"), seg("Against us", m.against || 0, "var(--mute-2)"), seg("Flat", m.flat || 0, "var(--rule)")];
+      const tw = (m.toward || 0) / picks;
+      mv = { show: true, none: false, stamp: `${picks} match-result picks`, segs, aria: `${m.toward} of ${picks} picks moved toward us, ${m.against} against, ${m.flat} flat`,
+        verdict: picks < 30 ? `${picks} picks is too few to read anything into. Check back after a month.` : tw >= 0.55 ? `${pct0(tw)} moved our way. Mildly encouraging, and consistent with the model leaning on the same public inputs the market does.` : tw <= 0.45 ? `Only ${pct0(tw)} moved our way. The market has more often disagreed with us after we posted.` : `Close to half moved each way. The market has not consistently followed or faded us.` };
+    }
+
+    // Optional blocks. markets: {over25: {games, buckets}, btts: {...}}; dueList: {entries, hitRate, voids}.
+    const mkRows = (bs) => (bs || []).filter((b) => b.games > 0).map((b) => ({ range: `${pct0(b.low)}–${b.high >= 1 ? "100%" : pct0(b.high)}`, games: String(b.games), actual: pct1(b.actual), interval: `${pct0(b.interval[0])}–${pct0(b.interval[1])}`, actualColor: b.predicted >= b.interval[0] && b.predicted <= b.interval[1] ? "var(--ink)" : "var(--alert)" }));
+    const mkVerdict = (name, m) => { const bs = (m.buckets || []).filter((b) => b.games > 0); if (!bs.length) return ""; const inside = bs.filter((b) => b.predicted >= b.interval[0] && b.predicted <= b.interval[1]).length; return m.games < 60 ? `${m.games} ${name} is too few to judge; the ranges say so.` : inside === bs.length ? `Every bucket's prediction sits inside its range. No sign the ${name} number is off.` : `${bs.length - inside} of ${bs.length} buckets sit outside their range. Worth watching; not yet a finding.`; };
+    const M = d.markets || {};
+    const mkList = [["Over 2.5 goals", "matches", M.over25], ["Both teams to score", "matches", M.btts]].filter(([, , m]) => m && m.games > 0).map(([title, name, m]) => ({ title, games: String(m.games), rows: mkRows(m.buckets), verdict: mkVerdict(name, m) }));
+    const mkts = { show: mkList.length > 0, none: mkList.length === 0, list: mkList };
+    const dl = d.dueList;
+    const due = dl && dl.entries > 0 ? { show: true, cells: [
+        { label: "Graded entries", value: String(dl.entries), sub: typeof dl.voids === "number" && dl.voids ? `${dl.voids} void, did not play` : "goals and assists" },
+        { label: "Hit rate", value: typeof dl.hitRate === "number" ? pct1(dl.hitRate) : "—", sub: "one or more in the category" },
+        { label: "Stake", value: "none", sub: "a list, not a bet" }],
+      verdict: typeof dl.hitRate === "number" ? (dl.entries < 40 ? `${dl.entries} entries is too few to judge. The hit rate is what to watch; no price or stake is attached to it.` : `Hitting ${pct1(dl.hitRate)} over ${dl.entries} entries. The list is Cooper's, tracked for its hit rate and never counted as a bet.`) : "" } : { show: false };
+    const sureText = nights < 10 ? `${nights} matchdays and ${games} matches. The ranges above are wide because the sample is small; one bucket can swing ten points on a single weekend. Treat every number on this page as provisional until the sample passes a couple of hundred matches.`
+      : nights < 30 ? `${nights} matchdays and ${games} matches. Enough to see whether the numbers are badly off, not enough to tell a 48% from a 52%. The 95% ranges are the honest statement of what we know; the dots are the best guess inside them.`
+      : `${nights} matchdays and ${games} matches. The buckets are now large enough that a dot outside its range would be a real finding. None of this measures profit; that is on All results.`;
+
+    return { ...base, ready: true, empty: false, kicker: `EPL · ${nights} matchdays · ${games} matches`, calStamp: d.generatedAt ? `Through ${F.fmtUpdated(d.generatedAt)}` : "",
+      dots, grid, rows, rowsFoot, chartAria, brier, mv, sureText, week, headline, mkts, due };
+  }
+}
+</script>
+</body>
+</html>

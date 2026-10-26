@@ -373,6 +373,58 @@ Use the repo, the reports, and GitHub.
      matches it improved every bookings forecast (o4.5 log loss 0.6641 ->
      0.6557). No appointment, no adjustment. Football-Data's `Referee`
      column is kept in the processed results for it.
+- **The match context is on the card, and the site has every page the NHL
+  site has (2026-10-26, Cooper: "transform the EPL and CBB sections of the
+  website like we have for the NHL portion ... Both models should be evolved
+  in a way that the NHL one was"; the scope here is EPL).** What the model
+  gained, each a multiplier on the two expected-goal figures and nothing else
+  (`models/match_context.py`), so every market priced off the score matrix
+  moves together: each club's own **home edge** against the league's (its
+  last 76 league matches, shrunk at 40 home matches, clamped 0.9-1.1); its
+  **last five** against its own level over the fit window (venue-normalised,
+  shrunk at 15 games so five keep a quarter of the move, clamped 0.9-1.1);
+  and **who is missing** (the fantasy game's injury and suspension list,
+  `scripts/fetch_fpl_availability.py`, written to
+  `data/processed/fpl_availability.csv` by Matchday Refresh's "Fetch who is
+  missing" step and carried in `matchday-state`), weighted by each regular's
+  share of his club's expected goal involvement (attackers) or minutes
+  (defenders and goalkeepers): half the missing share comes off the attack,
+  floored at 0.85, and half the defensive share goes onto what the club
+  concedes, capped at 1.15. `run_thursday_best_bets_report(match_context=True)`
+  builds one context from the xG matches and the list and hands it to both
+  fits (`PoissonGoalsModel.project_fixtures(fixtures, context=...)`, which
+  also records `home_context`/`away_context` on each row); `match_context=False`
+  prices on the ratings alone, as every committed measurement was made.
+  Constants are this lab's choice, made before any price was read, and the
+  walk-forwards do not apply the context, so every committed measurement
+  stands; whether it helps is a backtest away. (Rest and fixture congestion
+  were tested the same day and are deliberately not in it, above.) The
+  public board prices the same context (`web/build_board_json.Projector`,
+  `games[].factors` priced one layer at a time ending at the board's own
+  number, `games[].ratings`, and `ratings.json` from the same fit).
+  **Site:** five pages beside the shared four, EPL-themed, in `web/`:
+  `Game.dc.html` (one match: the call in plain words, the three-way bar, the
+  main reasons, the step table, head to head, who is missing, the odds with
+  the pick tagged, the result once settled, `?id=`/`?date=`),
+  `Record.dc.html` (calibration of the published favourite by bucket, over
+  2.5 and both teams to score the same way, Brier against the frozen no-vig
+  market, whether the 1X2 line moved toward our picks, the Due List as a hit
+  rate and never a stake), `Tracker.dc.html` ("All results": every graded
+  best bet at the card's stake, by group, market, prop type, club, player,
+  price band and month, with units and return), `Methods.dc.html` (club
+  ratings table, who is missing, twelve entries in the card's order, a
+  changelog) and `Season.dc.html` (the table and a 5,000-run projection of
+  the remaining fixtures on the board's own goal expectations). Their feeds:
+  `web/settle_results.py` keeps `graded` and `bets` on every settled night
+  (`night_record`, `graded_entry`, `bet_rows`) and writes
+  `history/graded/<day>.json`; `web/build_site_pages.py` writes record.json,
+  tracker.json and season.json after settlement; Publish Board runs it in
+  "Build the board" and writes `dist/site.json` as
+  `{"sport":"epl","pages":[...]}` so the shared tab strip can list the pages
+  (the shared pages read `pages` from betting-lab-shared v5 onward; until the
+  lock moves, the new pages link each other directly). No page names a
+  reference site, and every one states that no market shows a demonstrated
+  edge. `tests/test_the_epl_site_has_every_page_the_nhl_site_has.py`.
 - **The European sections vanished on 2026-10-19 because four league feeds
   timed out (Serie A, Ligue 1, Greece, Scotland).** The European pool needs
   every domestic league, so Champions, Europa and Conference League could not

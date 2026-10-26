@@ -220,7 +220,8 @@ jobs:
             shift
             for NAME in "$@"; do
               TMP=$(mktemp)
-              if git show "refs/price-feed-tip:$NAME" > "$TMP" 2>/dev/null && [ -s "$TMP" ]; then
+              # One file per day on the branch; scripts/price_feed_branch.py.
+              if python scripts/price_feed_branch.py show refs/price-feed-tip "$NAME" > "$TMP" 2>/dev/null && [ -s "$TMP" ]; then
                 mv "$TMP" "data/processed/$DEST"
                 if [ "$NAME" = "$DEST" ]; then
                   wc -l < "data/processed/$DEST" | xargs echo "restored $DEST rows:"
@@ -310,7 +311,10 @@ jobs:
           # a first EFL run cannot be mistaken for "nothing to publish".
           # The retired name is listed so the old file leaves the branch once its
           # rows have been migrated into the new one.
-          REPLACING="price_feed.csv|price_feed_extra.csv|price_feed_efl.csv"
+          # The directories hold one file per day; the plain names are the
+          # single files they replaced, the first of which reached 52 MB of
+          # GitHub's 100 MB limit on 2026-10-26.
+          REPLACING="price_feed.csv|price_feed|price_feed_extra.csv|price_feed_extra|price_feed_efl.csv"
           # Start from whatever the branch already holds and replace only the
           # files this run produced. `git mktree` builds a tree from exactly
           # the entries it is given, so a tree built from one file IS a commit
@@ -350,13 +354,13 @@ jobs:
               NOW_ROWS=$(wc -l < "data/processed/$FEED" | tr -d ' ')
               WAS_ROWS=0
               if [ -n "$PARENT" ]; then
-                WAS_ROWS=$(git show "$PARENT:$FEED" 2>/dev/null | wc -l | tr -d ' ')
+                WAS_ROWS=$(python scripts/price_feed_branch.py show "$PARENT" "$FEED" 2>/dev/null | wc -l | tr -d ' ')
               fi
               if [ "$NOW_ROWS" -lt "$WAS_ROWS" ]; then
                 SHRANK="${SHRANK}${FEED} ${WAS_ROWS}->${NOW_ROWS}; "
               fi
-              B=$(git hash-object -w "data/processed/$FEED")
-              ENTRIES="${ENTRIES}100644 blob ${B}\t${FEED}\n"
+              E=$(python scripts/price_feed_branch.py entry "data/processed/$FEED")
+              ENTRIES="${ENTRIES}${E}\n"
             fi
           done
           if [ -n "$SHRANK" ]; then

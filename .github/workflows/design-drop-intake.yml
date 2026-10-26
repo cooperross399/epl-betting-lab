@@ -1,0 +1,80 @@
+name: Design Drop Intake
+
+# Claude Design cannot push a branch, so it hands a drop over as a zip at a
+# public URL. This lab has no Design Drop pin, merge or fan-out of its own:
+# the NHL lab is the editing home for the shared pages (Board, Results,
+# Archive, Graphic, the libraries, the logos), which reach this lab through
+# its shared-sync pull requests. So this only takes a drop of this lab's OWN
+# pages in. Dispatched with `zip_url`, it downloads the zip, unpacks the page
+# files (`ALLOWED` in scripts/design_drop.py, never a file the shared lock
+# pins), refuses a drop built on old copies of the pages, and pushes them to a
+# design/<date>-<slug>-<hash> branch cut from the dispatched ref. A Claude
+# Code session then opens and merges the pull request (a pull request opened
+# with the workflow's own token starts no checks). It fetches no odds, spends
+# no credit, edits no policy and places no bet.
+
+on:
+  workflow_dispatch:
+    inputs:
+      zip_url:
+        description: Public URL of the drop (a zip, or a tarball of drop-staging/)
+        required: true
+      slug:
+        description: Short name for the branch
+        required: false
+        default: drop
+
+permissions:
+  contents: write
+
+concurrency:
+  group: design-drop-intake
+  cancel-in-progress: false
+
+jobs:
+  intake:
+    name: Take a drop in from a zip
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      ZIP_URL: ${{ inputs.zip_url }}
+      SLUG: ${{ inputs.slug || 'drop' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Unpack the drop onto a design branch
+        run: |
+          zip="$RUNNER_TEMP/drop.zip"
+          curl -fsSL --max-filesize 52428800 --retry 3 -o "$zip" "$ZIP_URL"
+          hash=$(sha256sum "$zip" | cut -c1-8)
+          if git ls-remote --heads origin | grep -q "refs/heads/design/.*-$hash\$"; then
+            echo "A drop from this zip ($hash) is already open."
+            exit 0
+          fi
+          slug=$(printf '%s' "$SLUG" | tr 'A-Z' 'a-z' | tr -cs 'a-z0-9' '-' | sed 's/^-*//; s/-*$//' | cut -c1-40)
+          branch="design/$(date -u +%F)-${slug:-drop}-$hash"
+          git checkout --quiet -b "$branch"
+          python scripts/design_drop.py intake --zip "$zip"
+          git add web
+          if git diff --cached --quiet; then
+            echo "The zip's pages already match this branch: nothing to drop."
+            exit 0
+          fi
+          # A drop built on an old copy of a page would undo what changed
+          # since; refuse it rather than push a branch that looks finished.
+          changed=$(git diff --cached --name-only)
+          if ! python scripts/design_drop.py stale $changed; then
+            echo "::error::This drop was built on old copies of the pages above. Ask Claude Design to rebuild them from main's current files and republish."
+            exit 1
+          fi
+          git config user.name "design-drop[bot]"
+          git config user.email "design-drop@users.noreply.github.com"
+          git commit --quiet -m "Pages from Claude Design ($slug, $hash)"
+          git push --quiet origin "HEAD:refs/heads/$branch"
+          echo "Pushed $branch with: $changed" | tee -a "$GITHUB_STEP_SUMMARY"

@@ -230,7 +230,7 @@ jobs:
         run: |
           mkdir -p data/processed
           if git fetch --no-tags --depth=1 origin +refs/heads/price-feed:refs/price-feed-tip 2>/dev/null \
-             && git show refs/price-feed-tip:price_feed.csv > data/processed/price_feed.csv 2>/dev/null \
+             && python scripts/price_feed_branch.py show refs/price-feed-tip price_feed.csv > data/processed/price_feed.csv 2>/dev/null \
              && [ -s data/processed/price_feed.csv ]; then
             echo "price feed: $(($(wc -l < data/processed/price_feed.csv) - 1)) observations"
           else

@@ -378,6 +378,12 @@ Use the repo, the reports, and GitHub.
     not recoverable.
   - A late snapshot is safe: `live_clv` only reads observations strictly before
     kick-off, so a delayed cron is ignored rather than trusted.
+  - The branch keeps each feed as one file per observation day
+    (`price_feed/2026-10-26.csv`, `price_feed_extra/...`) through
+    `scripts/price_feed_branch.py` (`show` to restore, `entry` to publish).
+    The single `price_feed.csv` reached 52 MB of GitHub's 100 MB file limit on
+    2026-10-26. Locally it is still one `data/processed/price_feed.csv`. Never
+    `git show` a feed off the branch directly: the day files are not there.
 - **The Due List (goals and assists) sits beside the card, never in it
   (2026-10-18, Cooper: "a due goalscorer feature ... like we have our Due
   list for nhl and the nfl TD scorers", then "Add assists to that due list",

@@ -595,7 +595,8 @@ jobs:
             # freshly collected observations once already.
             for FEED in price_feed.csv price_feed_extra.csv; do
               TMP=$(mktemp)
-              if git show "refs/price-feed-tip:$FEED" > "$TMP" 2>/dev/null && [ -s "$TMP" ]; then
+              # One file per day on the branch; scripts/price_feed_branch.py.
+              if python scripts/price_feed_branch.py show refs/price-feed-tip "$FEED" > "$TMP" 2>/dev/null && [ -s "$TMP" ]; then
                 mv "$TMP" "data/processed/$FEED"
               else
                 rm -f "$TMP"
@@ -785,7 +786,12 @@ jobs:
           PARENT=""
           if git fetch "$REMOTE" +refs/heads/price-feed:refs/price-feed-tip 2>/dev/null; then
             PARENT=$(git rev-parse refs/price-feed-tip)
-            git show refs/price-feed-tip:price_feed.csv > data/processed/price_feed.csv 2>/dev/null || true
+            TMP=$(mktemp)
+            if python scripts/price_feed_branch.py show refs/price-feed-tip price_feed.csv > "$TMP" 2>/dev/null && [ -s "$TMP" ]; then
+              mv "$TMP" data/processed/price_feed.csv
+            else
+              rm -f "$TMP"
+            fi
           fi
           python scripts/append_price_snapshot.py --feed data/processed/price_feed.csv
           if [ ! -s data/processed/price_feed.csv ]; then
@@ -793,7 +799,10 @@ jobs:
             echo "state=nothing-to-publish" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          REPLACING="price_feed.csv"
+          # `price_feed/` holds one file per day; `price_feed.csv` is the
+          # single file it replaced, which reached 52 MB of GitHub's 100 MB
+          # limit on 2026-10-26 and leaves the branch on the first publish.
+          REPLACING="price_feed.csv|price_feed"
           # Start from whatever the branch already holds and replace only the
           # files this run produced. `git mktree` builds a tree from exactly
           # the entries it is given, so a tree built from one file IS a commit
@@ -811,8 +820,7 @@ jobs:
           if [ -n "$PARENT" ]; then
             KEEP=$(git ls-tree "$PARENT" | grep -vE "	($REPLACING)$" || true)
           fi
-          BLOB=$(git hash-object -w data/processed/price_feed.csv)
-          ENTRIES=$(printf '100644 blob %s\tprice_feed.csv' "$BLOB")
+          ENTRIES=$(python scripts/price_feed_branch.py entry data/processed/price_feed.csv)
           TREE=$(printf '%s\n%s\n' "$KEEP" "$ENTRIES" | grep -v '^$' | git mktree)
           if [ -n "$PARENT" ] && [ "$(git rev-parse "$PARENT^{tree}")" = "$TREE" ]; then
             echo "Feed unchanged; nothing to commit."

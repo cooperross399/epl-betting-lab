@@ -170,7 +170,10 @@ class TestAFeedMayNotShrink:
     def test_the_publish_step_compares_against_the_parent(self) -> None:
         script = self._append_script()
 
-        assert 'git show "$PARENT:$FEED"' in script, (
+        # Through the reader that understands the branch's day files
+        # (scripts/price_feed_branch.py); a plain `git show "$PARENT:$FEED"`
+        # finds nothing there and would count the parent as empty.
+        assert 'scripts/price_feed_branch.py show "$PARENT" "$FEED"' in script, (
             "nothing reads the branch's own row count, so a truncated feed "
             "publishes as a fast-forward and is accepted"
         )

@@ -1,0 +1,116 @@
+name: Lineup Check
+
+# Checks the card's picks against the confirmed lineups, just before kick-off.
+#
+# WHY: every pick is made hours or days before the teams are named. A shots
+# or tackles over on a player who starts on the bench is mostly a losing
+# ticket, and books void only a player who never comes on. ESPN's keyless
+# match summary carries each side's eleven and bench about an hour before
+# kick-off, so the check runs straight after each Closing Snapshot, which
+# waits for its slot and finishes about twenty minutes before it.
+#
+# WHAT IT DOES: reads the latest props card and archived card from the newest
+# Matchday Refresh that carries them, checks every pick kicking off within
+# three hours (src/epl_betting_lab/reports/lineup_check.py), prints the check
+# on the run page and uploads it. Publish Board runs after it and drops a
+# withdrawn prop from the public board with the reason named.
+#
+# SCOPE: ESPN only. No odds provider call, no credit, no push to any branch,
+# no protected file, no stake changed. A team pick on a rotated side is named
+# for a second look and stays on the card.
+#
+# COVERAGE: after each Closing Snapshot (Saturday 12:30 and 15:00, Sunday
+# 14:00, Friday and Monday 20:00 UK), and on its own clock for everything
+# else, midweek rounds included (Cooper, 2026-10-26: "Do 2 and 3"). The
+# scheduled runs fire every two hours from 06:00 UTC; each waits for the next
+# pick's kick-off within five and a half hours and checks 35 minutes before
+# it. GitHub starts scheduled runs hours late, which is why there are seven.
+# A run with nothing due ends in seconds and uploads nothing, so it never
+# replaces a real check on the board.
+
+on:
+  schedule:
+    - cron: "0 6,8,10,12,14,16,18 * * *"
+  workflow_run:
+    workflows: ["Closing Snapshot"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: lineup-check
+  cancel-in-progress: false
+
+jobs:
+  check:
+    name: Lineup Check
+    runs-on: ubuntu-latest
+    # Room for the wait before a kick-off (at most 5.5 hours) and the check.
+    timeout-minutes: 350
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install project
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install -e .
+
+      - name: Restore the latest card and props card
+        # Walk back over completed runs, never pin to the newest: a run that
+        # died before its upload carries nothing (see publish-board.yml).
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -u
+          mkdir -p data data/outputs
+          restored=""
+          for candidate in $(gh run list --workflow matchday-refresh.yml \
+            --limit 10 --json databaseId --jq '.[].databaseId'); do
+            if gh run download "$candidate" --name matchday-reports --dir data/outputs 2>/dev/null; then
+              restored="$candidate"
+              gh run download "$candidate" --name matchday-state --dir data 2>/dev/null \
+                || echo "Run $candidate carried reports but no state."
+              break
+            fi
+          done
+          if [ -n "$restored" ]; then
+            echo "Restored the card from run $restored."
+          else
+            echo "::warning::No recent Matchday Refresh carried reports; nothing to check."
+          fi
+
+      - name: Check the picks against the lineups
+        id: check
+        env:
+          PYTHONPATH: src
+        run: |
+          set -o pipefail
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            python scripts/check_lineups.py --wait-for-next-kickoff | tee -a "$GITHUB_STEP_SUMMARY"
+          else
+            python scripts/check_lineups.py | tee -a "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload the check
+        if: steps.check.outputs.checked == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: lineup-check
+          path: |
+            data/outputs/lineup_check.md
+            data/outputs/lineup_check.json
+          retention-days: 30

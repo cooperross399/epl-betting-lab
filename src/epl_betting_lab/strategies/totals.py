@@ -139,9 +139,16 @@ def _implied(american: float) -> float:
 
 
 def market_probability_over(
-    home_team: str, away_team: str, odds: pd.DataFrame, market_odds: pd.DataFrame | None
+    home_team: str,
+    away_team: str,
+    odds: pd.DataFrame,
+    market_odds: pd.DataFrame | None,
+    market: str = "total_2_5",
 ) -> tuple[float | None, str]:
-    """De-vigged probability of over 2.5 as the market prices it.
+    """De-vigged probability of the over as the market prices it.
+
+    `market` names the line: the 2.5 goals line by default, a corner total
+    for the corner rule.
 
     From every book's over and under when the per-book staging is on hand —
     the consensus — and otherwise from the single best over and best under
@@ -159,7 +166,7 @@ def market_probability_over(
         frame = bettable_only(frame)
         if frame.empty:
             continue
-        rows = frame[(frame.home_team == home_team) & (frame.away_team == away_team) & (frame.market == "total_2_5")]
+        rows = frame[(frame.home_team == home_team) & (frame.away_team == away_team) & (frame.market == market)]
         over = rows[rows.selection == "over"]["american_odds"].map(_implied)
         under = rows[rows.selection == "under"]["american_odds"].map(_implied)
         if over.empty or under.empty:

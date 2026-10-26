@@ -48,6 +48,7 @@ uninterpretable.
 from __future__ import annotations
 
 import json
+from collections.abc import Mapping
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -933,8 +934,15 @@ def build_extra_card(
     )
 
 
-def render_extra_card(cards: dict[str, ExtraCard]) -> list[str]:
-    """Markdown for the competitions beyond the Premier League."""
+def render_extra_card(
+    cards: dict[str, ExtraCard], *, unbuilt: Mapping[str, str] | None = None
+) -> list[str]:
+    """Markdown for the competitions beyond the Premier League.
+
+    `unbuilt` names each competition whose pool could not be built, with the
+    reason. On 2026-10-19 four league feeds timed out and the three European
+    sections vanished from the card with the reason only in the run log.
+    """
     lines: list[str] = [f"## {BEYOND_SECTION_NAME}", ""]
     # Deliberately count-free. This read "Neither competition below" and was
     # written when there were two; it survived the Europa League, the
@@ -993,6 +1001,17 @@ def render_extra_card(cards: dict[str, ExtraCard]) -> list[str]:
             "countries in the rating pool — which is most of their value — and "
             "they return to the card on their own the run they can price "
             "something._",
+            "",
+        ]
+    if unbuilt:
+        described = "; ".join(
+            f"{COMPETITIONS[key].name if key in COMPETITIONS else key} ({reason})"
+            for key, reason in unbuilt.items()
+        )
+        lines += [
+            f"_Could not be built this run: {described}. Not a quiet week: "
+            "the ratings behind it could not be assembled, so nothing was "
+            "priced._",
             "",
         ]
     return lines

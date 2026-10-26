@@ -813,6 +813,7 @@ def run_thursday_best_bets_report(
                     odds,
                     min_edge=MIN_EDGE,
                     max_juice=MAX_DEFAULT_JUICE,
+                    market_odds=market_odds,
                 )
             )
 

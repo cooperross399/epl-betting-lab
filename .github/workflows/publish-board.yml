@@ -12,7 +12,9 @@ on:
   schedule:
     - cron: "30 8 * * *"   # 08:30 UTC daily, before the card
   workflow_run:
-    workflows: ["Matchday Refresh"]
+    # After the Lineup Check too, so a prop on a player who is not starting
+    # comes off the board before kick-off rather than at the next refresh.
+    workflows: ["Matchday Refresh", "Lineup Check"]
     types: [completed]
   workflow_dispatch:
     inputs:
@@ -254,6 +256,29 @@ jobs:
             rm -f data/processed/price_feed.csv
             echo "::notice::price-feed branch not readable; open prices and line history stay absent this run"
           fi
+
+      - name: Read the latest lineup check
+        # Every recent Lineup Check's artifact (lineup-check.yml, ESPN only),
+        # each in its own folder: runs check different kick-offs, so the
+        # newest is not the only one that counts. A withdrawn prop is matched
+        # on player, fixture, market and selection, so a check from an earlier
+        # round withdraws nothing on this one. Soft: without any the board
+        # shows every prop, exactly as before the check.
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -u
+          mkdir -p data/outputs/lineup_checks
+          found=0
+          for candidate in $(gh run list --workflow lineup-check.yml \
+            --limit 15 --json databaseId --jq '.[].databaseId'); do
+            if gh run download "$candidate" --name lineup-check \
+              --dir "data/outputs/lineup_checks/$candidate" 2>/dev/null; then
+              found=$((found + 1))
+            fi
+          done
+          echo "Lineup checks restored: $found."
 
       - name: Build the board
         env:

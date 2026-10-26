@@ -37,6 +37,7 @@ ids were recorded are three different things and are counted as three.
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
@@ -261,6 +262,78 @@ def summarize_live_clv(frame: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows).sort_values("picks", ascending=False).reset_index(drop=True)
 
 
+#: Picks with a closing consensus a market needs before it is judged.
+MIN_PICKS_FOR_VERDICT = 50
+VERDICTS_FILENAME = "live_clv_verdicts.json"
+BEHIND = "behind the close"
+AHEAD = "ahead of the close"
+NO_SIGNAL = "no signal yet"
+TOO_FEW = "too few to judge"
+
+
+def market_verdicts(frame: pd.DataFrame) -> list[dict[str, Any]]:
+    """Per market: mean consensus CLV, its 95% interval, and what it says.
+
+    Consensus CLV, the stricter measure, on captured picks only. A market is
+    behind (or ahead of) the close only when the whole interval is below (or
+    above) zero; under `MIN_PICKS_FOR_VERDICT` it is not judged at all.
+    Cutting or raising a market stays Cooper's call.
+    """
+    if frame.empty or "clv_points_consensus" not in frame.columns:
+        return []
+    out = []
+    for market, group in frame.groupby("market"):
+        values = pd.to_numeric(
+            group.loc[group["state"] == CAPTURED, "clv_points_consensus"], errors="coerce"
+        ).dropna()
+        row: dict[str, Any] = {"market": str(market), "picks": int(len(values))}
+        if len(values) < MIN_PICKS_FOR_VERDICT:
+            row["verdict"] = TOO_FEW
+        else:
+            mean = float(values.mean())
+            half = 1.96 * float(values.std(ddof=1)) / len(values) ** 0.5
+            row.update({
+                "clv_mean": round(mean, 3),
+                "clv_low": round(mean - half, 3),
+                "clv_high": round(mean + half, 3),
+            })
+            row["verdict"] = (
+                BEHIND if mean + half < 0 else AHEAD if mean - half > 0 else NO_SIGNAL
+            )
+        out.append(row)
+    return sorted(out, key=lambda r: (-r["picks"], r["market"]))
+
+
+def render_verdicts(verdicts: Sequence[Mapping[str, Any]]) -> list[str]:
+    """The market check, as card lines. Empty when nothing is on file."""
+    if not verdicts:
+        return []
+    lines = [
+        "### Closing-line check by market",
+        "",
+        f"Consensus CLV on each market's picks, judged once it has "
+        f"{MIN_PICKS_FOR_VERDICT} with a closing price. Cutting or raising a "
+        "market is your call; this says where the evidence points.",
+        "",
+    ]
+    for row in verdicts:
+        name = f"`{row['market']}`"
+        if row["verdict"] == TOO_FEW:
+            lines.append(f"- {name}: {row['picks']} of {MIN_PICKS_FOR_VERDICT} picks needed, not judged yet.")
+            continue
+        figures = (
+            f"{row['clv_mean']:+.2f} points over {row['picks']} picks "
+            f"(95% {row['clv_low']:+.2f} to {row['clv_high']:+.2f})"
+        )
+        if row["verdict"] == BEHIND:
+            lines.append(f"- {name}: **behind the close**, {figures}. A candidate to cut.")
+        elif row["verdict"] == AHEAD:
+            lines.append(f"- {name}: **ahead of the close**, {figures}. May earn more than the floor stake.")
+        else:
+            lines.append(f"- {name}: no signal yet, {figures}.")
+    return lines + [""]
+
+
 def render_live_clv(
     frame: pd.DataFrame, summary: pd.DataFrame, *, feed_rows: int | None = None
 ) -> str:
@@ -323,11 +396,15 @@ def save_live_clv_reports(
         "detail": output_dir / "live_clv_bets.csv",
         "summary": output_dir / "live_clv_by_market.csv",
         "markdown": output_dir / "live_clv_report.md",
+        "verdicts": output_dir / VERDICTS_FILENAME,
     }
+    verdicts = market_verdicts(frame)
+    paths["verdicts"].write_text(json.dumps(verdicts, indent=2), encoding="utf-8")
     frame.to_csv(paths["detail"], index=False)
     summary.to_csv(paths["summary"], index=False)
     paths["markdown"].write_text(
-        render_live_clv(frame, summary, feed_rows=0 if feed is None else len(feed)),
+        render_live_clv(frame, summary, feed_rows=0 if feed is None else len(feed))
+        + "\n".join(render_verdicts(verdicts)),
         encoding="utf-8",
     )
     return paths

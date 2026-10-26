@@ -25,6 +25,15 @@ from epl_betting_lab.models.calibration import (
 )
 from epl_betting_lab.models.poisson_counts import PoissonCountModel
 from epl_betting_lab.models.value import grade_edge
+from epl_betting_lab.strategies.totals import (
+    ANCHOR_THRESHOLD,
+    MODEL_WEIGHT,
+    SELECTION_RULE,
+    _implied,
+    _logit,
+    _sigmoid,
+    market_probability_over,
+)
 
 
 #: market -> (counted event, line, kind). `kind` is "total" or "1x2".
@@ -47,6 +56,19 @@ UNAVAILABLE_MARKETS: frozenset[str] = frozenset(
 
 #: Extra edge demanded before a card market is believed. See the module note.
 CARDS_MIN_EDGE = 0.06
+
+#: Events whose total lines are priced under the market-anchored rule, the
+#: 2.5 line's rule with the 2.5 line's constants (`strategies.totals`).
+#:
+#: Held out on 2025/26-2026/27 the corner model's log loss at 9.5 was 0.6908
+#: against 0.6916 for one league-wide rate: team corner rates barely beat the
+#: average, so a corner "edge" was mostly the price disagreeing with an average.
+#: On the 2025/26 corner prices bought at bettable books, the 0.5 blend was the
+#: most accurate of model, market and blend (log loss 0.6819 against 0.6826
+#: and 0.6840 over 760 lines) and bet 181 times at +6.6% against the old
+#: rule's 178 at +5.4%, both intervals wide. The constants were not tuned on
+#: those prices. Cards keep the old rule: no book offers them.
+ANCHORED_EVENTS: frozenset[str] = frozenset({"corners"})
 
 
 def minimum_edge_for(market: str, default_min_edge: float) -> float:
@@ -89,14 +111,22 @@ def evaluate_count_market(
     odds: pd.DataFrame,
     min_edge: float = 0.035,
     max_juice: int = -160,
+    market_odds: pd.DataFrame | None = None,
 ) -> pd.DataFrame:
-    """Grade one counted market for every fixture that has a price."""
+    """Grade one counted market for every fixture that has a price.
+
+    A total line of an event in `ANCHORED_EVENTS` is graded under the
+    market-anchored rule against `market_odds`, the per-book prices; every
+    other market keeps the calibrated-edge rule.
+    """
     if market not in COUNT_MARKETS or fixtures.empty or odds.empty:
         return pd.DataFrame()
-    event, _, _ = COUNT_MARKETS[market]
+    event, _, kind = COUNT_MARKETS[market]
     model = models.get(event)
     if model is None:
         return pd.DataFrame()
+    if event in ANCHORED_EVENTS and kind == "total":
+        return _evaluate_anchored_total(market, model, fixtures, odds, market_odds, max_juice)
 
     market_min_edge = minimum_edge_for(market, min_edge)
     rows: list[dict[str, object]] = []
@@ -157,6 +187,85 @@ def evaluate_count_market(
                     "calibrated_min_edge": market_min_edge,
                     **calibration,
                     **grade,
+                }
+            )
+    if not rows:
+        return pd.DataFrame()
+    return pd.DataFrame(rows).sort_values(["status", "edge"], ascending=[True, False])
+
+
+def _evaluate_anchored_total(
+    market: str,
+    model: PoissonCountModel,
+    fixtures: pd.DataFrame,
+    odds: pd.DataFrame,
+    market_odds: pd.DataFrame | None,
+    max_juice: int,
+) -> pd.DataFrame:
+    """A total line under the market-anchored rule; see `ANCHORED_EVENTS`."""
+    rows: list[dict[str, object]] = []
+    for _, fixture in fixtures.iterrows():
+        home_team = fixture["home_team"]
+        away_team = fixture["away_team"]
+        game_odds = odds[
+            (odds.home_team == home_team)
+            & (odds.away_team == away_team)
+            & (odds.market == market)
+        ]
+        if game_odds.empty:
+            continue
+        p_market_over, source = market_probability_over(
+            home_team, away_team, odds, market_odds, market=market
+        )
+        if p_market_over is None:
+            continue
+        probabilities = probabilities_for(market, model, home_team, away_team)
+        for selection, p_model in probabilities.items():
+            line = game_odds[game_odds.selection == selection]
+            if line.empty:
+                continue
+            american = float(line.iloc[0].american_odds)
+            p_market = p_market_over if selection == "over" else 1.0 - p_market_over
+            p_final = _sigmoid(
+                MODEL_WEIGHT * _logit(p_model) + (1 - MODEL_WEIGHT) * _logit(p_market)
+            )
+            lift = p_final - p_market
+            grade = grade_edge(p_final, american, min_edge=0.0, max_default_juice=max_juice)
+            # Lift over the consensus decides, and the posted price must still
+            # pay: a row the blend calls negative at this price is not staked.
+            if str(grade["status"]).startswith("PASS - "):
+                status = grade["status"]
+            elif lift > ANCHOR_THRESHOLD and grade["edge"] > 0:
+                status = "BETTABLE"
+            else:
+                status = "PASS"
+            rows.append(
+                {
+                    **grade,
+                    "home_team": home_team,
+                    "away_team": away_team,
+                    "market": market,
+                    "selection": selection,
+                    "american_odds": american,
+                    "book": _book_of(line),
+                    "opening_american_odds": american,
+                    "opening_implied_probability": round(_implied(american), 4),
+                    "closing_american_odds": line.iloc[0].get(
+                        "closing_american_odds", pd.NA
+                    ),
+                    "raw_model_prob": round(float(p_model), 4),
+                    "market_prob": round(p_market, 4),
+                    "market_prob_source": source,
+                    "calibrated_model_prob": round(p_final, 4),
+                    "raw_edge": round(float(p_model) - _implied(american), 4),
+                    "calibrated_edge": grade["edge"],
+                    "anchor_lift": round(lift, 4),
+                    "raw_status": status,
+                    "calibrated_status": status,
+                    "status": status,
+                    "selection_rule": SELECTION_RULE,
+                    "model_weight": MODEL_WEIGHT,
+                    "anchor_threshold": ANCHOR_THRESHOLD,
                 }
             )
     if not rows:

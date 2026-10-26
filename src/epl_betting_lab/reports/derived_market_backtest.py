@@ -365,6 +365,18 @@ def _corner_bets(odds: pd.DataFrame, matches: pd.DataFrame) -> list[dict[str, ob
                 "book": best["book"].to_numpy(),
             }
         )
+        # Every bettable book's price, not only the best: the corner rule is
+        # anchored on their de-vigged consensus, as it is on the live card.
+        per_book = pd.DataFrame(
+            {
+                "home_team": day_odds["home_team"].to_numpy(),
+                "away_team": day_odds["away_team"].to_numpy(),
+                "market": day_odds["card_market"].to_numpy(),
+                "selection": day_odds["side"].to_numpy(),
+                "american_odds": day_odds["american"].to_numpy(),
+                "book": day_odds["book"].to_numpy(),
+            }
+        )
         fixtures = priced[["home_team", "away_team"]].drop_duplicates()
         for market in sorted(priced["market"].unique()):
             graded = evaluate_count_market(
@@ -374,6 +386,7 @@ def _corner_bets(odds: pd.DataFrame, matches: pd.DataFrame) -> list[dict[str, ob
                 priced,
                 min_edge=MIN_EDGE,
                 max_juice=MAX_DEFAULT_JUICE,
+                market_odds=per_book,
             )
             if graded.empty:
                 continue

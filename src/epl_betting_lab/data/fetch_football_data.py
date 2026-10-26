@@ -118,6 +118,9 @@ def load_season(path: Path, season: str) -> pd.DataFrame:
     desired = [
         "season", "Div", "Date", "Time", "HomeTeam", "AwayTeam", "FTHG", "FTAG", "FTR",
         "HTHG", "HTAG", "HTR", "HS", "AS", "HST", "AST", "HC", "AC", "HF", "AF", "HY", "AY", "HR", "AR",
+        # Who refereed: the strongest single driver of bookings, and the card
+        # props' referee factor is fitted on it (models/referee.py).
+        "Referee",
         "B365H", "B365D", "B365A", "AvgH", "AvgD", "AvgA", "MaxH", "MaxD", "MaxA",
         "B365>2.5", "B365<2.5", "Avg>2.5", "Avg<2.5", "Max>2.5", "Max<2.5",
         "AHh", "B365AHH", "B365AHA", "AvgAHH", "AvgAHA",
@@ -167,7 +170,7 @@ def load_season(path: Path, season: str) -> pd.DataFrame:
     # never noticed; only something that read a date could.
     non_numeric = {
         "season", "Div", "Date", "Time", "HomeTeam", "AwayTeam",
-        "FTR", "HTR", "home_team", "away_team", "result", "date",
+        "FTR", "HTR", "Referee", "home_team", "away_team", "result", "date",
     }
     for col in df.columns:
         if col not in non_numeric:

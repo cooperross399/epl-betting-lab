@@ -344,6 +344,42 @@ Use the repo, the reports, and GitHub.
   log loss on 2025/26-2026/27 (440 matches) 1.0322 without, 1.0323 with. The
   tuning-season effects ran the wrong way for fatigue (a home side on short
   rest conceded 6% fewer than expected) and did not hold. Not shipped.
+- **Five changes on 2026-10-26 (Cooper: "What else ... to make the model more
+  current and good", then "Yes do all 5").**
+  1. The better ratings were re-tested held out (2025/26-2026/27) and still
+     lose on 1X2 in every cell (-5.5% to -16% ROI, training CLV negative), so
+     `CARD_RATINGS` stays legacy. Nothing switched.
+  2. Corner totals run under the 2.5 line's market-anchored rule
+     (`count_markets.ANCHORED_EVENTS`, weight 0.5, lift 0.03, constants not
+     re-tuned): on the bought 2025/26 corner prices the blend was the most
+     accurate probability (log loss 0.6819 vs market 0.6826, model 0.6840)
+     and bet 181 times at +6.6% against the old rule's 178 at +5.4%, both
+     intervals wide. Not evidence of edge.
+  3. A **Lineup Check** runs after each Closing Snapshot
+     (`.github/workflows/lineup-check.yml`, `reports/lineup_check.py`, ESPN
+     only, no credits, no push): a prop on a player not in the eleven is
+     withdrawn from the board, a team pick on a side with 4+ changes is named.
+     It also runs on its own clock (every two hours 06:00-18:00 UTC, Cooper:
+     "Do 2 and 3"), each run waiting for the next pick's kick-off, so midweek
+     rounds are covered. A run with nothing due uploads nothing; the board
+     reads every recent check, not only the newest.
+  4. `live_clv_report.md` and the card judge each market by consensus CLV
+     once it has 50 captured picks: behind the close (cut candidate), ahead
+     (may earn more than 0.1u) or no signal. Cutting or raising stays
+     Cooper's call.
+  5. Booked and sent-off props are scaled by the appointed referee's card
+     factor (`models/referee.py`, K=20; appointments from the Premier
+     League's keyless feed, `data/referee_appointments.py`). Held out on 450
+     matches it improved every bookings forecast (o4.5 log loss 0.6641 ->
+     0.6557). No appointment, no adjustment. Football-Data's `Referee`
+     column is kept in the processed results for it.
+- **The European sections vanished on 2026-10-19 because four league feeds
+  timed out (Serie A, Ligue 1, Greece, Scotland).** The European pool needs
+  every domestic league, so Champions, Europa and Conference League could not
+  be built and the card dropped them with the reason only in the run log.
+  The leagues' datasets now travel in `matchday-state`, so a failed feed falls
+  back to the previous run's file, and a competition that still cannot be
+  built is named on the card with the reason (`render_extra_card(unbuilt=)`).
 - **Each pick carries a "bet down to" price, and the card shows it instead of
   the tier.** `_bet_down_to` in `reports/thursday_best_bets.py`: the price at
   which the edge falls to that market's own bar, so the line can drift that far

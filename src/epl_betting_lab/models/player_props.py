@@ -21,11 +21,13 @@ every prop, and it is why prop edges must clear a higher bar than match-level
 edges, not a lower one.
 
 **Counts are treated as Poisson.** Shots are close to Poisson; goals close
-enough; cards are not (they cluster, and the referee — the strongest driver —
-is not in the data). Cards were left unpriced for that reason until Cooper
-asked for them on 2026-10-19; they are now rated as "booked" and "sent off",
-each a yes/no per match derived from the logs' yellow and red cards, and
-that warning travels with every card price rather than being solved.
+enough; cards are not (they cluster around the referee, the strongest
+driver). Cards were left unpriced for that reason until Cooper asked for
+them on 2026-10-19; they are now rated as "booked" and "sent off", each a
+yes/no per match derived from the logs' yellow and red cards. Since
+2026-10-26 the props card scales those rates by the appointed referee's card
+factor (`models/referee.py`) once the appointment is announced; before it,
+the warning stands.
 
 **Shots on target inherit the Understat definition** (Goal or SavedShot),
 which is close to, not identical to, the Opta counts books settle against.
@@ -345,9 +347,13 @@ class PlayerPropsModel:
         return self
 
     def expected_count(
-        self, player: str, stat: str, *, opponent: str, venue: str
+        self, player: str, stat: str, *, opponent: str, venue: str, multiplier: float = 1.0
     ) -> float | None:
-        """The Poisson mean, or None when there is no modelled opinion."""
+        """The Poisson mean, or None when there is no modelled opinion.
+
+        `multiplier` scales the mean for something the logs cannot see, such
+        as the appointed referee on a card stat.
+        """
         if stat not in self.stats:
             if stat in CARD_STATS:
                 # Logs without card counts: no opinion, never a baseline one.
@@ -363,13 +369,17 @@ class PlayerPropsModel:
             * (rates.expected_minutes / 90.0)
             * opponent_factor
             * venue_factor
+            * multiplier
         )
 
     def over_probability(
-        self, player: str, stat: str, line: float, *, opponent: str, venue: str
+        self, player: str, stat: str, line: float, *, opponent: str, venue: str,
+        multiplier: float = 1.0,
     ) -> float | None:
         """P(count > line), or None when there is no modelled opinion."""
-        lam = self.expected_count(player, stat, opponent=opponent, venue=venue)
+        lam = self.expected_count(
+            player, stat, opponent=opponent, venue=venue, multiplier=multiplier
+        )
         if lam is None:
             return None
         threshold = math.floor(line)

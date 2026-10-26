@@ -1044,6 +1044,12 @@ jobs:
             # The props card's FPL per-match logs: the public record grades
             # tackles props from them (web/settle_results.py --fpl-logs).
             data/processed/fpl_match_logs.csv
+            # The cup and European leagues' datasets. A Football-Data feed that
+            # times out then falls back to the previous run's file instead of
+            # costing every European section: on 2026-10-19 four leagues timed
+            # out and the Champions, Europa and Conference League sections all
+            # vanished from the card.
+            data/processed/football_data_*_matches.csv
           if-no-files-found: warn
           retention-days: 90
 

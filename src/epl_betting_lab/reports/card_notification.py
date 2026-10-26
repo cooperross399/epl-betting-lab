@@ -178,6 +178,18 @@ def read_degraded(path: Path | str | None) -> list[str]:
     return [line.strip() for line in text.splitlines() if line.strip()]
 
 
+def closing_line_check(outputs: Path) -> list[str]:
+    """The per-market closing-line verdicts `live_clv` wrote, as card lines."""
+    from epl_betting_lab.reports.live_clv import VERDICTS_FILENAME, render_verdicts
+
+    path = Path(outputs) / VERDICTS_FILENAME
+    try:
+        verdicts = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return []
+    return render_verdicts(verdicts if isinstance(verdicts, list) else [])
+
+
 def build_notification(
     *,
     output_dir: Path | None = None,
@@ -371,6 +383,8 @@ def build_notification(
             )
     except Exception:
         pass
+
+    lines += closing_line_check(outputs)
 
     lines += [
         "---",

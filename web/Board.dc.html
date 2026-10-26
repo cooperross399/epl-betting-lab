@@ -113,13 +113,8 @@
         <h1 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:clamp(56px,9vw,112px);line-height:.9;letter-spacing:-.01em;text-transform:uppercase;">{{ title1 }}<br>{{ title2 }}</h1>
       </div>
       <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.7;color:var(--mute);display:flex;flex-wrap:wrap;gap:4px 24px;align-items:baseline;">
-        <span style="text-transform:uppercase;letter-spacing:.1em;white-space:nowrap;">Board built</span>
-        <span style="color:var(--ink);">{{ updated }}</span>
         <span style="white-space:nowrap;">Times in {{ tz }}</span>
         <sc-if value="{{ showScores }}" hint-placeholder-val="{{ true }}"><span style="white-space:nowrap;">Live scores {{ liveStamp }}</span></sc-if>
-        <sc-if value="{{ stale }}" hint-placeholder-val="{{ false }}">
-          <span role="status" style="background:var(--alert);color:var(--on-alert);padding:2px 8px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;font-size:12px;white-space:nowrap;">{{ staleLabel }}</span>
-        </sc-if>
       </div>
     </section>
 
@@ -146,10 +141,6 @@
     <div id="main">
       <sc-if value="{{ isTonight }}" hint-placeholder-val="{{ true }}">
         <section aria-labelledby="projections-h" style="padding-top:40px;">
-          <sc-if value="{{ brief }}" hint-placeholder-val="{{ false }}">
-            <p style="margin:14px 0 0;font-size:15px;line-height:1.5;color:var(--ink-2);max-width:720px;text-wrap:pretty;"><span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);margin-right:8px;">Tonight in 60 seconds</span>{{ brief }}</p>
-          </sc-if>
-
           <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;border-bottom:3px solid var(--ink);padding-bottom:10px;">
             <h2 id="projections-h" style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:34px;line-height:1;text-transform:uppercase;letter-spacing:.01em;">Projections</h2>
             <div style="display:flex;align-items:center;gap:4px 16px;flex-wrap:wrap;">
@@ -200,7 +191,6 @@
                         </div>
                         <div style="font-family:'IBM Plex Mono',monospace;font-size:16px;font-weight:600;">{{ g.box.score }}</div>
                         <sc-if value="{{ g.box.shots }}" hint-placeholder-val="{{ false }}"><div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-2);">{{ g.box.shots }}</div></sc-if>
-                        <sc-if value="{{ g.box.pick }}" hint-placeholder-val="{{ false }}"><div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:{{ g.box.pickColor }};">{{ g.box.pick }}</div></sc-if>
                       </div>
                     </sc-if>
 
@@ -279,10 +269,10 @@
                             <div style="margin-top:6px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);text-transform:uppercase;letter-spacing:.08em;">Started · not a play</div>
                           </sc-if>
                           <sc-if value="{{ g.live.has }}" hint-placeholder-val="{{ false }}">
-                            <div style="margin-top:6px;font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.5;color:{{ g.live.color }};"><span style="text-transform:uppercase;letter-spacing:.08em;font-weight:600;">Live · {{ g.live.word }}</span> · {{ g.live.detail }}</div>
+                            <div style="margin-top:6px;font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.5;color:{{ g.live.color }};"><span style="text-transform:uppercase;letter-spacing:.08em;font-weight:600;">Live · {{ g.live.word }}</span></div>
                           </sc-if>
                           <sc-if value="{{ g.whyHref }}" hint-placeholder-val="{{ false }}">
-                            <a href="{{ g.whyHref }}" onClick="{{ g.onWhy }}" style="display:inline-flex;align-items:center;min-height:44px;margin-top:2px;font-family:'IBM Plex Mono',monospace;font-size:12px;text-decoration:underline;text-decoration-color:var(--rule);text-underline-offset:3px;">Where the number comes from →</a>
+                            <a href="{{ g.whyHref }}" onClick="{{ g.onWhy }}" style="display:inline-flex;align-items:center;min-height:44px;margin-top:2px;font-family:'IBM Plex Mono',monospace;font-size:12px;text-decoration:underline;text-decoration-color:var(--rule);text-underline-offset:3px;text-transform:uppercase;letter-spacing:.08em;font-weight:600;">Full game preview →</a>
                           </sc-if>
                         </div>
                       </div>

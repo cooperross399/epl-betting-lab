@@ -337,6 +337,13 @@ Use the repo, the reports, and GitHub.
   than 0.003. Team corner rates barely beat the league average, so a corner
   pick's "edge" is mostly the price disagreeing with an average. Nothing was
   shipped: none beat the current model by more than noise.
+- **Rest and fixture congestion were tested and add nothing (2026-10-26).**
+  Days since each club's previous match in any competition (EPL, Champions,
+  Europa and Conference League, EFL Cup, FA Cup; ESPN scoreboards), bucketed
+  3 or fewer / 4-5 / 6+, as goal multipliers fitted on 2019/20-2024/25: 1X2
+  log loss on 2025/26-2026/27 (440 matches) 1.0322 without, 1.0323 with. The
+  tuning-season effects ran the wrong way for fatigue (a home side on short
+  rest conceded 6% fewer than expected) and did not hold. Not shipped.
 - **Each pick carries a "bet down to" price, and the card shows it instead of
   the tier.** `_bet_down_to` in `reports/thursday_best_bets.py`: the price at
   which the edge falls to that market's own bar, so the line can drift that far

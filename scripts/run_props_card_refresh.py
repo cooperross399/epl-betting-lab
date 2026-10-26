@@ -41,7 +41,6 @@ from epl_betting_lab.providers.understat_players import (
 from epl_betting_lab.reports.player_props_card import (
     HELD_STATUS,
     approved_prop_markets,
-    needs_fpl_logs,
     save_player_props_card,
 )
 
@@ -120,8 +119,10 @@ def main() -> int:
 
     print(f"Approved prop markets: {', '.join(approved)}")
     print(_refresh_player_logs())
-    if needs_fpl_logs(approved):
-        print(_refresh_fpl_logs())
+    # Every approved prop needs FPL now, not only tackles and saves: the
+    # bootstrap carries who is injured, suspended or doubtful, and the card
+    # withholds those players. Keyless; no odds credit is spent.
+    print(_refresh_fpl_logs())
     fetched_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     try:
         fetch_result = fetch_player_props(

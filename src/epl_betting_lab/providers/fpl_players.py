@@ -40,6 +40,12 @@ FPL_BASE_URL = "https://fantasy.premierleague.com/api"
 
 FPL_LOGS_FILENAME = "fpl_match_logs.csv"
 FPL_PRIOR_FILENAME = "fpl_prior.csv"
+FPL_AVAILABILITY_FILENAME = "fpl_availability.csv"
+
+#: Each player's fitness as FPL publishes it: status `a` available, `d`
+#: doubtful, `i` injured, `s` suspended, `u` unavailable, `n` not eligible;
+#: the chance of playing the next round in percent (blank when no flag).
+AVAILABILITY_FIELDS = ("player", "player_id", "team", "status", "chance_next_round", "news")
 
 LOG_FIELDS = (
     "date",
@@ -129,6 +135,23 @@ def build_fpl_logs(
     return pd.DataFrame(rows, columns=list(LOG_FIELDS))
 
 
+def build_fpl_availability(bootstrap: Mapping[str, Any]) -> pd.DataFrame:
+    """Every player's status, chance of playing the next round, and the news behind it."""
+    teams, _, _ = _lookups(bootstrap)
+    rows = []
+    for element in bootstrap.get("elements") or []:
+        chance = element.get("chance_of_playing_next_round")
+        rows.append({
+            "player": _name(element),
+            "player_id": str(element.get("id", "")),
+            "team": teams.get(element.get("team"), ""),
+            "status": str(element.get("status") or ""),
+            "chance_next_round": None if chance is None else _int(chance),
+            "news": " ".join(str(element.get("news") or "").split()),
+        })
+    return pd.DataFrame(rows, columns=list(AVAILABILITY_FIELDS))
+
+
 def build_fpl_prior(
     bootstrap: Mapping[str, Any],
     summaries: Mapping[Any, Mapping[str, Any]],
@@ -183,6 +206,9 @@ class FplFetchResult:
     logs: pd.DataFrame = field(default_factory=lambda: pd.DataFrame(columns=list(LOG_FIELDS)))
     prior: pd.DataFrame = field(default_factory=lambda: pd.DataFrame(columns=list(PRIOR_FIELDS)))
     errors: list[str] = field(default_factory=list)
+    availability: pd.DataFrame = field(
+        default_factory=lambda: pd.DataFrame(columns=list(AVAILABILITY_FIELDS))
+    )
 
 
 def fetch_fpl_player_data(
@@ -227,6 +253,7 @@ def fetch_fpl_player_data(
             summaries[player_id] = summary
     result.players_fetched = len(summaries)
     result.logs = build_fpl_logs(bootstrap, summaries)
+    result.availability = build_fpl_availability(bootstrap)
     result.prior = build_fpl_prior(
         bootstrap, summaries, season=previous_season_name(today or date.today())
     )
@@ -241,4 +268,6 @@ def write_fpl_data(result: FplFetchResult, directory: Path) -> tuple[Path, Path]
     prior_path = directory / FPL_PRIOR_FILENAME
     result.logs.to_csv(logs_path, index=False)
     result.prior.to_csv(prior_path, index=False)
+    if not result.availability.empty:
+        result.availability.to_csv(directory / FPL_AVAILABILITY_FILENAME, index=False)
     return logs_path, prior_path

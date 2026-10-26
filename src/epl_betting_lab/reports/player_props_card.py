@@ -52,6 +52,7 @@ from epl_betting_lab.models.player_props import (
     add_card_columns,
 )
 from epl_betting_lab.providers.fpl_players import (
+    FPL_AVAILABILITY_FILENAME,
     FPL_LOGS_FILENAME,
     FPL_PRIOR_FILENAME,
 )
@@ -236,6 +237,54 @@ def _resolve_player(
     return found[0] if len(found) == 1 else None
 
 
+#: At or below this chance of playing the next round, a player is not priced.
+#: FPL publishes 0, 25, 50 and 75: 75 is a knock the player usually plays
+#: through, and pricing him down for it would be a guess about minutes.
+UNAVAILABLE_CHANCE = 50
+UNAVAILABLE_STATUSES = frozenset({"i", "s", "u", "n"})
+
+
+def _load_unavailable(path: Path) -> list[dict[str, str]]:
+    """Players FPL says will probably not play the next round."""
+    if not path.is_file():
+        return []
+    try:
+        table = pd.read_csv(path, dtype=str).fillna("")
+    except (OSError, UnicodeError, pd.errors.ParserError, pd.errors.EmptyDataError):
+        return []
+    out = []
+    for row in table.to_dict("records"):
+        chance = pd.to_numeric(row.get("chance_next_round"), errors="coerce")
+        status = str(row.get("status") or "").strip().casefold()
+        if (not pd.isna(chance) and chance <= UNAVAILABLE_CHANCE) or (
+            pd.isna(chance) and status in UNAVAILABLE_STATUSES
+        ):
+            out.append({
+                "player": str(row.get("player") or ""),
+                "team": str(row.get("team") or ""),
+                "status": status,
+                "chance_next_round": "" if pd.isna(chance) else str(int(chance)),
+                "news": str(row.get("news") or ""),
+            })
+    return out
+
+
+def _unavailable_match(
+    unavailable: list[dict[str, str]], name: str, home: str, away: str
+) -> dict[str, str] | None:
+    """The FPL entry for a book's spelling, by the same token rule as `_resolve_player`."""
+    tokens = frozenset(_player_key(name).split())
+    if not tokens:
+        return None
+    found = [
+        entry for entry in unavailable
+        if entry["team"] in (home, away)
+        and (entry_tokens := frozenset(_player_key(entry["player"]).split()))
+        and (entry_tokens <= tokens or tokens <= entry_tokens)
+    ]
+    return found[0] if len(found) == 1 else None
+
+
 def _one_stake_per_outcome(picks: list[PropPick]) -> list[PropPick]:
     """Keep the best-edge rung of each player's outcome.
 
@@ -266,6 +315,7 @@ def build_player_props_card(
     logs_path: Path | None = None,
     fpl_logs_path: Path | None = None,
     fpl_prior_path: Path | None = None,
+    availability_path: Path | None = None,
     policy_path: Path | None = None,
     run_at: datetime | None = None,
     edge_threshold: float = PROPS_EDGE_THRESHOLD,
@@ -291,6 +341,11 @@ def build_player_props_card(
         if fpl_prior_path
         else Path(fpl_logs_file).parent / FPL_PRIOR_FILENAME
     )
+    availability_file = (
+        Path(availability_path)
+        if availability_path
+        else Path(fpl_logs_file).parent / FPL_AVAILABILITY_FILENAME
+    )
     moment = run_at or datetime.now().astimezone()
     today = moment.strftime("%Y-%m-%d")
 
@@ -310,6 +365,7 @@ def build_player_props_card(
         },
         "markets_with_staged_prices": [],
         "picks": [],
+        "withheld_unavailable": [],
         "safety": {
             "prices_fabricated": False,
             "bets_placed": False,
@@ -431,8 +487,18 @@ def build_player_props_card(
         ):
             best[key] = row.to_dict()
 
+    # FPL's fitness flags: a player unlikely to play is not priced at all.
+    unavailable = _load_unavailable(availability_file)
+    withheld: dict[str, dict[str, str]] = {}
+
     picks: list[PropPick] = []
     for row in best.values():
+        flagged = _unavailable_match(
+            unavailable, str(row["player"]), str(row["home_team"]), str(row["away_team"])
+        )
+        if flagged is not None:
+            withheld.setdefault(flagged["player"], flagged)
+            continue
         market = str(row["market"])
         stat = SETTLEMENT_COLUMNS.get(market)
         if stat is None:
@@ -499,6 +565,7 @@ def build_player_props_card(
     picks.sort(key=lambda p: -p.edge)
     summary["status"] = READY_STATUS
     summary["picks"] = [p.__dict__ for p in picks]
+    summary["withheld_unavailable"] = sorted(withheld.values(), key=lambda e: e["player"])
     summary["note"] = (
         "The standing measurement demonstrates no edge in these markets; "
         "these picks clear a deliberately high bar and carry the smallest "
@@ -561,6 +628,23 @@ def render_player_props_markdown(summary: Mapping[str, object]) -> str:
                 f"{pick['selection']} | {pick['model_probability']:.1%} | "
                 f"{pick['edge']:+.1%} | {pick['american_odds']:+.0f} | "
                 f"{pick['book']} | {pick['units']} |"
+            )
+        lines.append("")
+    withheld = summary.get("withheld_unavailable") or []
+    if withheld:
+        lines += [
+            "## Not priced: unlikely to play",
+            "",
+            "Fantasy Premier League gives these players a 50% chance of "
+            "playing or less, so none of their props is priced.",
+            "",
+        ]
+        for entry in withheld:
+            chance = entry.get("chance_next_round")
+            lines.append(
+                f"- {entry['player']} ({entry['team']})"
+                + (f", {chance}%" if chance not in (None, "") else "")
+                + (f": {entry['news']}" if entry.get("news") else "")
             )
         lines.append("")
     lines += [

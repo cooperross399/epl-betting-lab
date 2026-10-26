@@ -983,6 +983,10 @@ jobs:
             # backtests it — so losing it with the runner loses it for good.
             data/outputs/beyond_clv_report.md
             data/outputs/beyond_clv_bets.csv
+            # The Beyond section's win/loss record, graded against ESPN finals.
+            data/outputs/beyond_record.md
+            data/outputs/beyond_record.json
+            data/outputs/beyond_record_bets.csv
             # The freshness verdict, so "did a stale selection ship" can be
             # answered from the artifact rather than recomputed from the cards.
             data/outputs/card_freshness.json

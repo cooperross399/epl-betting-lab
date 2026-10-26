@@ -1115,7 +1115,20 @@ def uncounted_beyond(output_dir: Path | None = None) -> "UncountedSection | None
             staked += 1
     if staked <= 0:
         return None
-    return UncountedSection(name=BEYOND_SECTION_NAME, staked=staked)
+    from epl_betting_lab.reports.beyond_record import SUMMARY_FILENAME
+
+    try:
+        graded = json.loads((outputs / SUMMARY_FILENAME).read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        graded = {}
+    return UncountedSection(
+        name=BEYOND_SECTION_NAME,
+        staked=staked,
+        settled=int(graded.get("settled") or 0),
+        won=int(graded.get("won") or 0),
+        pushed=int(graded.get("pushed") or 0),
+        profit_units=float(graded.get("profit_units") or 0.0),
+    )
 
 
 def save_extra_card_record(

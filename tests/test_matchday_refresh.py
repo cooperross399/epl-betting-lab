@@ -1168,9 +1168,11 @@ def _workflow_dir():
 def test_only_the_matchday_refresh_can_write_to_the_repository() -> None:
     """`contents: write` is the one permission that can rewrite this repo.
 
-    Three workflows hold it, for three append-only refs: `card-feed`,
-    `price-feed` and `odds-history`. Any other workflow granting it would be
-    able to move main without a pull request.
+    Three workflows hold it for three append-only refs: `card-feed`,
+    `price-feed` and `odds-history`. A fourth, Design Drop Intake, holds it to
+    push a Claude Design drop to a `design/<date>-<slug>-<hash>` branch (the
+    test below pins that it can push nowhere else). Any other workflow
+    granting it would be able to move main without a pull request.
 
     `odds-history` was added on 2026-09-02 to hold purchased historical prices,
     which had been living only in a 90-day artifact - about 26,000 credits of
@@ -1186,9 +1188,31 @@ def test_only_the_matchday_refresh_can_write_to_the_repository() -> None:
 
     assert granted == [
         "closing-snapshot.yml",
+        "design-drop-intake.yml",
         "harvest-historical-btts.yml",
         "matchday-refresh.yml",
     ], granted
+
+
+def test_the_drop_intake_can_only_push_to_a_design_branch() -> None:
+    """It takes a zip from a public URL; it must never be able to move main.
+
+    Every push names `$branch`, and `$branch` is only ever assigned a name
+    under `design/`, so the one ref it can move is the drop's own branch; the
+    pull request from there still needs `Full test suite` like any other.
+    """
+    text = (_workflow_dir() / "design-drop-intake.yml").read_text(encoding="utf-8")
+    pushes = [line.strip() for line in text.splitlines() if "git push" in line]
+
+    assert pushes, "the intake should push the drop's branch"
+    for line in pushes:
+        assert line.endswith(':refs/heads/$branch"'), line
+    assignments = [
+        line.strip() for line in text.splitlines() if line.strip().startswith("branch=")
+    ]
+    assert assignments == ['branch="design/$(date -u +%F)-${slug:-drop}-$hash"'], assignments
+    assert "contents: write" in text
+    assert "pull-requests" not in text, "it opens no pull request of its own"
 
 
 def test_the_harvest_can_only_push_to_the_odds_history_branch() -> None:

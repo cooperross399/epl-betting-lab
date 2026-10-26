@@ -143,7 +143,7 @@ class Component extends DCLogic {
     const vm = this.state.vm;
     const sk = (vm && vm.sport.key) || ((/^(nhl|epl|cbb)\./.exec(location.hostname) || [])[1]) || this.props.sport || "nhl";
     const tab = (label, href, on) => ({ label, href, current: on ? "page" : undefined, shadow: on ? "inset 0 -3px 0 var(--ink)" : "none" });
-    const tabs = [tab(sk === "epl" ? "This week" : "Tonight", "Board.dc.html"), ...(sk === "nhl" ? [tab("Props", "Board.dc.html#props")] : []), tab("Results", "Results.dc.html", false), ...(sk === "nhl" ? [tab("Season", "Season.dc.html")] : []), (sk === "nhl" ? tab("Tracker", "Tracker.html", false) : tab("Archive", "Archive.dc.html", false))];
+    const tabs = [tab(sk === "epl" ? "This week" : "Tonight", "Board.dc.html"), ...(sk === "nhl" ? [tab("Props", "Board.dc.html#props")] : []), tab("Results", "Results.dc.html", false), ...(sk === "nhl" ? [tab("Season", "Season.dc.html"), tab("Record", "Record.dc.html", false), tab("Tracker", "Tracker.dc.html", false)] : [tab("Archive", "Archive.dc.html", false)])];
     const themeAttr = { Light: "light", Dark: "dark" }[this.props.theme] || "auto";
     if (!vm) return { themeAttr, tabs, rows: [], strip3: [], otherSports: [], title1: "Tonight's", title2: "Board.", feat: { show: false } };
     const T = this.state.teams || {};

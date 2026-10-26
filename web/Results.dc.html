@@ -318,7 +318,7 @@ class Component extends DCLogic {
     const themeAttr = { Light: "light", Dark: "dark" }[this.props.theme] || "auto";
     const sk = (this.state.vm && this.state.vm.sport.key) || ((/^(nhl|epl|cbb)\./.exec(location.hostname) || [])[1]) || this.props.sport || "nhl";
     const tab = (label, href, on) => ({ label, href, current: on ? "page" : undefined, shadow: on ? "inset 0 -3px 0 var(--ink)" : "none" });
-    const tabs = [tab(sk === "epl" ? "This week" : "Tonight", "Board.dc.html"), ...(sk === "nhl" ? [tab("Props", "Board.dc.html#props")] : []), tab("Results", "Results.dc.html", true), ...(sk === "nhl" ? [tab("Season", "Season.dc.html")] : []), (sk === "nhl" ? tab("Tracker", "Tracker.html", false) : tab("Archive", "Archive.dc.html", false))];
+    const tabs = [tab(sk === "epl" ? "This week" : "Tonight", "Board.dc.html"), ...(sk === "nhl" ? [tab("Props", "Board.dc.html#props")] : []), tab("Results", "Results.dc.html", true), ...(sk === "nhl" ? [tab("Season", "Season.dc.html"), tab("Record", "Record.dc.html", false), tab("Tracker", "Tracker.dc.html", false)] : [tab("Archive", "Archive.dc.html", false)])];
     // sports.js hands back light-theme hex; map them onto the theme tokens.
     const TOK = { "#14151a": "var(--ink)", "#f4f2ee": "var(--paper)", "#6b6e7a": "var(--mute)", "#9a9ca6": "var(--mute-2)", "#b0341f": "var(--alert)", "#2c7a5a": "var(--win)" };
     const tok = (c) => TOK[c] || c;

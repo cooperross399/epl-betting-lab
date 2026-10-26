@@ -717,7 +717,7 @@ class Component extends DCLogic {
       { label: sk === "epl" ? "This week" : "Tonight", href: links.board, onClick: (e) => { e.preventDefault(); this.setTab("tonight"); }, current: tab === "tonight" ? "page" : undefined, shadow: tab === "tonight" ? "inset 0 -3px 0 var(--ink)" : "none", color: "var(--ink)", badge: "" },
       ...(pv ? [{ label: "Props", href: `${links.board}#props`, onClick: (e) => { e.preventDefault(); this.setTab("props"); }, current: tab === "props" ? "page" : undefined, shadow: tab === "props" ? "inset 0 -3px 0 var(--ink)" : "none", color: "var(--ink)", badge: pv.status === "ok" && pv.counts.bets + pv.counts.leans ? String(pv.counts.bets + pv.counts.leans) : "" }]
         : dueOnly ? [{ label: "Due List", href: `${links.board}#drought`, onClick: (e) => { e.preventDefault(); this.setState({ propView: "drought" }); this.setTab("props"); }, current: tab === "props" ? "page" : undefined, shadow: tab === "props" ? "inset 0 -3px 0 var(--ink)" : "none", color: "var(--ink)", badge: dueBadge }] : []),
-      tabLink("Results", links.results), ...(sk === "nhl" ? [tabLink("Season", links.season), tabLink("Record", "Record.dc.html")] : []), (sk === "nhl" ? tabLink("Tracker", "Tracker.html") : tabLink("Archive", links.archive)),
+      tabLink("Results", links.results), ...(sk === "nhl" ? [tabLink("Season", links.season), tabLink("Record", "Record.dc.html"), tabLink("Tracker", "Tracker.dc.html")] : [tabLink("Archive", links.archive)]),
     ];
     // Game pages, Track record and Methods exist on the NHL site only; the shared Board stays one file.
     const hasMethods = sk === "nhl";

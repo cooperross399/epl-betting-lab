@@ -202,6 +202,22 @@ jobs:
           cards=$(ls -1 data/outputs/archive/automated_cards/*/*/automated_card.json 2>/dev/null | wc -l | tr -d ' ')
           echo "archived cards restored: $cards"
 
+      - name: Copy in the shared pages at the pinned tag
+        # Board, Results, Archive, Graphic, lib/live.js, lib/format.js,
+        # lib/sports.js and the logos come from cooperross399/betting-lab-shared
+        # at the tag web/shared.lock.json pins, checked byte for byte against
+        # the lock (web/sync_shared.py). A clone that fails leaves the committed
+        # copies, which the suite holds to the same lock; a tag whose bytes
+        # differ from the lock fails the run.
+        run: |
+          tag=$(python -c 'import json; print(json.load(open("web/shared.lock.json"))["tag"])')
+          if git clone --quiet --depth 1 --branch "$tag" https://github.com/cooperross399/betting-lab-shared.git "$RUNNER_TEMP/shared"; then
+            python web/sync_shared.py --from "$RUNNER_TEMP/shared"
+          else
+            echo "::warning::betting-lab-shared@$tag could not be cloned; publishing the committed copies, which match the lock."
+            python web/sync_shared.py --check
+          fi
+
       - name: Assemble the site
         # This subdomain now serves the BOARD, not just its feed. web/ holds
         # the page, support.js, lib/ and the bundled sample data; the build
@@ -214,6 +230,7 @@ jobs:
         run: |
           mkdir -p dist
           cp -R web/. dist/
+          rm -f dist/shared.lock.json
           # Every generator, for the reason above: site_history.py and
           # settle_results.py arrived with the shared pages and would
           # otherwise be served as source next to what they produced.
@@ -335,6 +352,12 @@ jobs:
           path: dist/data/history
           if-no-files-found: warn
           retention-days: 400
+
+      - name: Name the scripts by their content
+        # GitHub Pages caches every file for ten minutes and cannot be told
+        # otherwise; hashed names make any longer cache in front of it safe
+        # (web/hash_assets.py). The plain names stay beside them.
+        run: python web/hash_assets.py dist
 
       - name: Upload the site
         uses: actions/upload-pages-artifact@v3

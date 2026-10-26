@@ -163,6 +163,7 @@
               <div style="font-size:13px;margin-top:6px;line-height:1.5;color:var(--ink-2);">The prices are close to what we think is fair, so there is nothing worth betting.</div>
             </div>
           </sc-if>
+          <p style="margin:12px 0 0;font-size:12px;line-height:1.5;color:var(--mute);max-width:720px;text-wrap:pretty;">Measured against real prices, no market shows a demonstrated edge. Picks are recorded so they can be graded, not because they are known winners.</p>
         </div>
       </section>
 
@@ -173,7 +174,10 @@
           <sc-for list="{{ why }}" as="w" hint-placeholder-count="3">
             <li style="display:grid;grid-template-columns:10px minmax(0,1fr);gap:12px;padding:10px 0;border-top:1px solid var(--rule-2);">
               <span aria-hidden="true" style="background:{{ w.color }};"></span>
-              <span style="font-size:15px;line-height:1.5;text-wrap:pretty;"><strong style="font-weight:600;">{{ w.label }}.</strong> {{ w.text }}</span>
+              <span style="min-width:0;">
+                <span style="display:flex;align-items:baseline;gap:8px 12px;flex-wrap:wrap;"><a href="{{ w.href }}" style="font-weight:600;font-size:15px;text-decoration:underline;text-decoration-color:var(--rule);text-underline-offset:3px;">{{ w.label }}</a><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-2);">{{ w.delta }}</span></span>
+                <span style="display:block;font-size:15px;line-height:1.5;text-wrap:pretty;margin-top:2px;">{{ w.text }}</span>
+              </span>
             </li>
           </sc-for>
         </ul>
@@ -219,16 +223,17 @@
       <sc-if value="{{ priced }}" hint-placeholder-val="{{ true }}">
       <section aria-labelledby="mk-h" style="padding:28px 0 26px;border-bottom:1px solid var(--ink);">
         <h2 id="mk-h" style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:28px;line-height:1;text-transform:uppercase;letter-spacing:.01em;">The odds</h2>
-        <p style="margin:6px 0 0;font-size:13px;color:var(--mute);max-width:640px;">Our chance next to the best price we found. A pick shows up only when our chance beats the price by enough.</p>
+        <p style="margin:6px 0 0;font-size:13px;color:var(--mute);max-width:640px;">Our chance, that chance as a fair price with no margin, and the best price we found with open → current where it moved. A pick shows up only when our chance beats the price by enough.</p>
         <div style="margin-top:12px;border-top:2px solid var(--ink);max-width:560px;">
-          <div style="display:grid;grid-template-columns:minmax(0,1fr) 92px 92px;gap:0 10px;padding:6px 0;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);">
-            <span>Bet</span><span style="text-align:right;">Our chance</span><span style="text-align:right;">Best price</span>
+          <div style="display:grid;grid-template-columns:minmax(0,1fr) 72px 72px 92px;gap:0 10px;padding:6px 0;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);">
+            <span>Bet</span><span style="text-align:right;">Our chance</span><span style="text-align:right;">Our fair</span><span style="text-align:right;">Best price</span>
           </div>
           <sc-for list="{{ markets }}" as="m" hint-placeholder-count="9">
-            <div style="display:grid;grid-template-columns:minmax(0,1fr) 92px 92px;gap:0 10px;padding:9px 0;border-top:1px solid {{ m.ruleColor }};align-items:baseline;">
+            <div style="display:grid;grid-template-columns:minmax(0,1fr) 72px 72px 92px;gap:0 10px;padding:9px 0;border-top:1px solid {{ m.ruleColor }};align-items:baseline;">
               <span style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;min-width:0;"><span style="font-size:15px;font-weight:{{ m.weight }};">{{ m.label }}</span><sc-if value="{{ m.tag }}" hint-placeholder-val="{{ false }}"><span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:1px 5px;background:{{ m.tagBg }};color:{{ m.tagFg }};border:1px {{ m.tagStyle }} var(--ink);white-space:nowrap;">{{ m.tag }}</span></sc-if><sc-if value="{{ m.move }}" hint-placeholder-val="{{ false }}"><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mute);white-space:nowrap;">{{ m.move }}</span></sc-if></span>
               <span style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:15px;">{{ m.chance }}</span>
-              <span style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;">{{ m.best }}</span>
+              <span style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:15px;color:var(--ink-2);">{{ m.fair }}</span>
+              <span style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;">{{ m.best }}<sc-if value="{{ m.book }}" hint-placeholder-val="{{ false }}"><span style="display:block;font-size:10px;font-weight:400;color:var(--mute);letter-spacing:.04em;">{{ m.book }}</span></sc-if></span>
             </div>
           </sc-for>
         </div>
@@ -388,7 +393,7 @@ class Component extends DCLogic {
     let prevW = null;
     const ranked = facts.map((f) => { const dl = num(f.delta) ? f.delta : prevW === null ? 0 : f.homeWin - prevW; prevW = f.homeWin; return { f, dl }; })
       .filter((x) => !tiny(x.dl)).sort((x, y) => Math.abs(y.dl) - Math.abs(x.dl)).slice(0, 3);
-    const why = hasWin ? ranked.map(({ f, dl }) => ({ label: PLAIN[f.key] || f.label, text: reason({ ...f, delta: dl }), color: dl > 0 ? hColor : aColor })) : [];
+    const why = hasWin ? ranked.map(({ f, dl }) => ({ label: PLAIN[f.key] || f.label, href: HREF[f.key] || "Methods.dc.html", delta: `${F.fmtSigned(Math.abs(dl) * 100, 1)} pts to ${lead(dl)}`, text: reason({ ...f, delta: dl }), color: dl > 0 ? hColor : aColor })) : [];
 
     // Head to head, every row as "% better than an average side", so plus always reads as good.
     const hasRatings = num(rh.attack) && num(ra.attack);
@@ -409,18 +414,18 @@ class Component extends DCLogic {
       return { abbr: s.abbr, color, headline: `${names.length} regular${names.length === 1 ? "" : "s"} out`, nameColor: "var(--ink)", names: names.join(", "), tag: av !== null ? `Attack at ${pct0(av)} of full strength` : "" };
     };
     const absences = [absenceCard(h, rh, hColor), absenceCard(a, ra, aColor)];
-    const missIntro = (R.home || R.away) ? "Regulars the official fantasy game lists as injured, suspended or doubtful, weighed by how much of the club's attack they carry. Read before kick-off; a late team-sheet change is not in it." : "The availability list did not reach this board, so every club is priced at full strength.";
+    const missIntro = (R.home || R.away) ? "Regulars listed as injured, suspended or doubtful, weighed by how much of the club's attack they carry. The list is read before kick-off; a late team-sheet change is not in it." : "The availability list did not reach this board, so every club is priced at full strength.";
 
     // Markets
     const isPick = (market, sideKey) => p.kind !== "none" && p.market === market && p.side === sideKey;
     const tagOf = (market, sideKey) => (isPick(market, sideKey) ? (p.kind === "bet" ? { tag: "Best bet", tagBg: "var(--ink)", tagFg: "var(--paper)", tagStyle: "solid" } : { tag: "Lean", tagBg: "transparent", tagFg: "var(--ink)", tagStyle: "dashed" }) : { tag: "" });
     const moveOf = (o, c) => (num(o) && num(c) && o !== c ? `${odds(o)} → ${odds(c)}` : "");
-    const row = (label, chance, best, market, sideKey, first, open) => ({ label, chance: num(chance) ? pct1(chance) : "—", best: odds(best), move: moveOf(open, best), ...tagOf(market, sideKey), weight: isPick(market, sideKey) ? 600 : 500, ruleColor: first ? "var(--ink)" : "var(--rule-2)" });
+    const row = (label, chance, best, market, sideKey, first, open, fairP) => ({ label, chance: num(chance) ? pct1(chance) : "—", fair: num(fairP) ? odds(fairP) : num(chance) ? odds(toAm(chance)) : "—", best: odds(best), book: isPick(market, sideKey) && p.book ? p.book : "", move: moveOf(open, best), ...tagOf(market, sideKey), weight: isPick(market, sideKey) ? 600 : 500, ruleColor: first ? "var(--ink)" : "var(--rule-2)" });
     const markets = [];
     if (priced) {
-      markets.push(row(`${h.abbr} to win`, hw, mr.home, "1x2", "home", false, null));
-      markets.push(row("Draw", dw, mr.draw, "1x2", "draw", false, null));
-      markets.push(row(`${a.abbr} to win`, aw, mr.away, "1x2", "away", false, null));
+      markets.push(row(`${h.abbr} to win`, hw, mr.home, "1x2", "home", false, null, fair.home));
+      markets.push(row("Draw", dw, mr.draw, "1x2", "draw", false, null, fair.draw));
+      markets.push(row(`${a.abbr} to win`, aw, mr.away, "1x2", "away", false, null, fair.away));
       if (num(dnb.home) || num(dnb.away)) {
         markets.push(row(`${h.abbr} draw no bet`, dnb.homeProb, dnb.home, "draw_no_bet", "home", true, dnb.openHome));
         markets.push(row(`${a.abbr} draw no bet`, num(dnb.homeProb) ? 1 - dnb.homeProb : null, dnb.away, "draw_no_bet", "away", false, dnb.openAway));

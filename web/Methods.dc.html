@@ -138,7 +138,7 @@
             <h2 id="miss-h" style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:28px;line-height:1;text-transform:uppercase;letter-spacing:.01em;">Who is missing</h2>
             <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">{{ missStamp }}</span>
           </div>
-          <p style="margin:6px 0 0;font-size:14px;line-height:1.5;color:var(--ink-2);max-width:720px;text-wrap:pretty;">Regulars the official fantasy game lists as injured, suspended or doubtful, read before each board is built. A club missing a large share of its attack is priced down; one at full strength is unchanged. Feeds the availability step.</p>
+          <p style="margin:6px 0 0;font-size:14px;line-height:1.5;color:var(--ink-2);max-width:720px;text-wrap:pretty;">Regulars listed as injured, suspended or doubtful on the public availability list, read before each board is built. A club missing a large share of its attack is priced down; one at full strength is unchanged. Feeds the availability step.</p>
           <sc-if value="{{ noMiss }}" hint-placeholder-val="{{ false }}">
             <div style="margin-top:14px;border:1px dashed var(--mute);padding:14px 16px;max-width:760px;">
               <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:20px;line-height:1;text-transform:uppercase;color:var(--mute);">{{ noMissTitle }}</div>
@@ -241,7 +241,7 @@ class Component extends DCLogic {
       formula: "form = shrink(last_five / expected, 5 of 20), clamped 0.9–1.1",
       sure: "Least sure of the strength steps. Five matches is a tiny sample and most of what it catches is noise; the weight was set small on purpose and has not been shown to make money." },
     { id: "availability", updated: "2026-10-26", title: "Who is missing", def: "Regulars listed as injured, suspended or doubtful, weighed by how much of the club's attack they carry.",
-      build: "The official fantasy game publishes each player's availability and the chance he plays. A club's regulars are the players with a large share of its minutes this season; the share of the club's goal involvement carried by regulars who are out is the missing share. Half of it comes off the attack, floored so that no club is priced below 85% of its strength, and half of the defensive share goes onto what it concedes. A club the list does not name is at full strength.",
+      build: "A public availability list gives each player's status and the chance he plays. A club's regulars are the players with a large share of its minutes this season; the share of the club's goal involvement carried by regulars who are out is the missing share. Half of it comes off the attack, floored so that no club is priced below 85% of its strength, and half of the defensive share goes onto what it concedes. A club the list does not name is at full strength.",
       formula: "attack × (1 − 0.5 × missing_share), floored at 0.85",
       sure: "Sure about the direction. The size is a guess made before any price was read, and the list is read hours before kick-off, so a late team-sheet surprise is not in it." },
     { id: "proj-goals", updated: "2026-10-26", title: "Projected goals", def: "The expected score for each side, which is what every chance on the board is read from.",
@@ -350,7 +350,7 @@ class Component extends DCLogic {
     const noMissTitle = listed ? "Nobody listed out this week" : "No availability list reached this build";
     const noMissText = listed ? "Every club is priced at full strength because the list names no regular as out." : "The availability step moved nothing; every club is priced at full strength until the list is read again.";
     return { ...base, through: d.through ? `Through ${d.through}` : "", noTeams: !teams.length, hasTeams: teams.length > 0, cols7, teamRows, hasWeek, filters,
-      hasMiss, noMiss: !hasMiss, noMissTitle, noMissText, missStamp: hasMiss ? `${missRows.length} clubs with regulars out · ${d.availabilitySource || "fantasy availability feed"}` : (d.availabilitySource || "") };
+      hasMiss, noMiss: !hasMiss, noMissTitle, noMissText, missStamp: hasMiss ? `${missRows.length} clubs with regulars out · ${d.availabilityListed ? "availability list read before the build" : "availability list"}` : "" };
   }
 }
 </script>

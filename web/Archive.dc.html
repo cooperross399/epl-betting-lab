@@ -85,6 +85,13 @@
         <h2 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:34px;line-height:1;text-transform:uppercase;letter-spacing:.01em;">Published boards</h2>
         <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">{{ count }} boards · newest first</div>
       </div>
+      <sc-if value="{{ hasYears }}" hint-placeholder-val="{{ false }}">
+        <div role="tablist" aria-label="Season" style="display:flex;gap:0;margin-top:14px;border:1px solid var(--ink);width:max-content;max-width:100%;">
+          <sc-for list="{{ years }}" as="y" hint-placeholder-count="2">
+            <button type="button" role="tab" aria-selected="{{ y.selected }}" onClick="{{ y.onClick }}" style="min-height:44px;padding:0 14px;background:{{ y.bg }};color:{{ y.fg }};border:0;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;">{{ y.label }}</button>
+          </sc-for>
+        </div>
+      </sc-if>
       <sc-for list="{{ months }}" as="m" hint-placeholder-count="1">
         <div style="display:flex;align-items:baseline;gap:14px;padding:26px 0 10px;border-bottom:1px solid var(--ink);">
           <h3 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:26px;text-transform:uppercase;letter-spacing:.02em;">{{ m.label }}</h3>
@@ -131,7 +138,7 @@ class Component extends DCLogic {
     const by = new Map();
     for (const d of dates) {
       const [y, m, dd] = d.date.split("-").map(Number), dt = new Date(y, m - 1, dd), k = `${y}-${m}`;
-      if (!by.has(k)) by.set(k, { label: mf.format(dt), items: [] });
+      if (!by.has(k)) by.set(k, { key: k, label: mf.format(dt), items: [] });
       by.get(k).items.push({ href: `Board.dc.html?date=${encodeURIComponent(d.file || d.date)}`, label: F.fmtDateOnly(d.date), slot: d.slot ? `${d.slot} card` : d.note || "",
         games: typeof d.games === "number" ? `${d.games} ${sport === "epl" ? "fixtures" : "games"}` : "", bets: typeof d.bets === "number" ? `${d.bets} best bet${d.bets === 1 ? "" : "s"}` : d.bets === null ? "not priced" : "" });
     }
@@ -143,11 +150,17 @@ class Component extends DCLogic {
   componentDidUpdate() { this.load(); }
   renderVals() {
     const s = this.state;
+    // Season selector appears once the archive spans more than one season (Sept–Aug).
+    const seasonOf = (m) => { const [y, mo] = String(m.key || m.label).split("-").map(Number); return Number.isFinite(mo) ? (mo >= 9 ? y : y - 1) : y; };
+    const seasons = [...new Set(s.months.map(seasonOf))].filter(Number.isFinite).sort((a, b) => b - a);
+    const sel = seasons.includes(s.season) ? s.season : seasons[0];
+    const years = seasons.length > 1 ? seasons.map((y) => ({ label: `${y}–${String(y + 1).slice(2)}`, selected: y === sel ? "true" : "false", bg: y === sel ? "var(--ink)" : "transparent", fg: y === sel ? "var(--paper)" : "var(--ink)", onClick: () => this.setState({ season: y }) })) : [];
+    const months = seasons.length > 1 ? s.months.filter((m) => seasonOf(m) === sel) : s.months;
     const sk = (s.sport && s.sport.key) || ((/^(nhl|epl|cbb)\./.exec(location.hostname) || [])[1]) || this.props.sport || "nhl";
     const tab = (label, href, on) => ({ label, href, current: on ? "page" : undefined, shadow: on ? "inset 0 -3px 0 var(--ink)" : "none" });
-    const tabs = [tab(sk === "epl" ? "This week" : "Tonight", "Board.dc.html"), ...(sk === "nhl" ? [tab("Props", "Board.dc.html#props")] : []), tab("Results", "Results.dc.html", false), ...(sk === "nhl" ? [tab("Season", "Season.dc.html")] : []), tab("Archive", "Archive.dc.html", true)];
+    const tabs = [tab(sk === "epl" ? "This week" : "Tonight", "Board.dc.html"), ...(sk === "nhl" ? [tab("Props", "Board.dc.html#props")] : []), tab("Results", "Results.dc.html", false), ...(sk === "nhl" ? [tab("Season", "Season.dc.html")] : []), (sk === "nhl" ? tab("Tracker", "Tracker.html", false) : tab("Archive", "Archive.dc.html", true))];
     const themeAttr = { Light: "light", Dark: "dark" }[this.props.theme] || "auto";
-    return { themeAttr, tabs, months: s.months, count: s.count, isEmpty: s.loadedFor && s.count === 0, hasFeedNotice: !!s.feedNotice, feedNotice: s.feedNotice || "", otherSports: s.otherSports,
+    return { themeAttr, tabs, months, years, hasYears: years.length > 0, count: s.count, isEmpty: s.loadedFor && s.count === 0, hasFeedNotice: !!s.feedNotice, feedNotice: s.feedNotice || "", otherSports: s.otherSports,
       sportLong: s.sport ? s.sport.longName : "", sportName: s.sport ? s.sport.name : "" };
   }
 }

@@ -824,7 +824,7 @@ class TestTheCardPricesWithTheCompetitionsOwnBaseline:
         )
         monkeypatch.setattr(
             "epl_betting_lab.reports.extra_competitions_card.build_european_pool",
-            lambda: SimpleNamespace(matches=frame),
+            lambda: SimpleNamespace(matches=frame, ties=0, unrated_clubs=[]),
         )
         monkeypatch.setattr(
             "epl_betting_lab.reports.extra_competitions_card.build_pool",

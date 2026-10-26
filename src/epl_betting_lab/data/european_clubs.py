@@ -199,3 +199,60 @@ def provider_name(club: str) -> str:
     needs no entry and a club that is genuinely unrateable stays visibly so.
     """
     return PROVIDER_CLUB_NAMES.get(club, club)
+
+
+#: ESPN's name -> Football-Data's name, for the ties ESPN fills in.
+#:
+#: A fourth spelling of the same clubs: "Internazionale", "Feyenoord
+#: Rotterdam", "Union St.-Gilloise", "Sint-Truidense". Written from the names
+#: ESPN gave every 2025-26 and 2026-27 European final on 2026-10-26. Unmapped
+#: names pass through unchanged, and a name the pool does not hold costs its tie
+#: and is named in `EuropeanPool.unrated_clubs`, so a wrong spelling here drops
+#: a bridge loudly rather than rating a different club.
+ESPN_CLUB_NAMES: dict[str, str] = {
+    "AC Milan": "Milan",
+    "AEK Athens": "AEK",
+    "AFC Bournemouth": "Bournemouth",
+    "AS Monaco": "Monaco",
+    "AS Roma": "Roma",
+    "Ajax Amsterdam": "Ajax",
+    "Athletic Club": "Ath Bilbao",
+    "Atlético Madrid": "Ath Madrid",
+    "Bayer Leverkusen": "Leverkusen",
+    "Borussia Dortmund": "Dortmund",
+    "Braga": "Sp Braga",
+    "Brighton & Hove Albion": "Brighton",
+    "Celta Vigo": "Celta",
+    "Eintracht Frankfurt": "Ein Frankfurt",
+    "FC Porto": "Porto",
+    "FC Twente": "Twente",
+    "FC Utrecht": "Utrecht",
+    "Feyenoord Rotterdam": "Feyenoord",
+    "Heart of Midlothian": "Hearts",
+    "Internazionale": "Inter",
+    "KAA Gent": "Gent",
+    "Manchester City": "Man City",
+    "Manchester United": "Man United",
+    "NEC Nijmegen": "Nijmegen",
+    "Newcastle United": "Newcastle",
+    "Nottingham Forest": "Nott'm Forest",
+    "Olympiacos": "Olympiakos",
+    "Paris Saint-Germain": "Paris SG",
+    "Racing Genk": "Genk",
+    "Rayo Vallecano": "Vallecano",
+    "Real Betis": "Betis",
+    "Real Sociedad": "Sociedad",
+    "SC Freiburg": "Freiburg",
+    "Sint-Truidense": "St Truiden",
+    "Sporting CP": "Sp Lisbon",
+    "Stade Rennais": "Rennes",
+    "TSG Hoffenheim": "Hoffenheim",
+    "Tottenham Hotspur": "Tottenham",
+    "Union St.-Gilloise": "St. Gilloise",
+    "VfB Stuttgart": "Stuttgart",
+}
+
+
+def espn_name(club: str) -> str:
+    """Football-Data's name for a club as ESPN writes it; unmapped names pass through."""
+    return ESPN_CLUB_NAMES.get(club, club)

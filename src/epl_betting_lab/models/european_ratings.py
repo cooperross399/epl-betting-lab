@@ -116,6 +116,10 @@ class EuropeanPool:
     domestic: int = 0
     ties: int = 0
     unresolved: list[tuple[str, str]] = field(default_factory=list)
+    #: Clubs named in a European tie that no domestic league here holds, so
+    #: their ties were left out. Mostly clubs from countries Football-Data
+    #: does not publish; a name spelt wrong in a club map shows up here too.
+    unrated_clubs: list[str] = field(default_factory=list)
 
 
 def build_european_pool(
@@ -161,7 +165,11 @@ def build_european_pool(
         ties, unresolved = parsed.matches, parsed.unresolved
     else:
         unresolved = []
-    ties = ties[ties["home_team"].isin(country_of) & ties["away_team"].isin(country_of)]
+    rated = ties["home_team"].isin(country_of) & ties["away_team"].isin(country_of)
+    unrated_clubs = sorted(
+        (set(ties["home_team"]) | set(ties["away_team"])) - set(country_of)
+    )
+    ties = ties[rated]
 
     # A European tie has no corner count in openfootball, which publishes
     # scores only. They join as blanks rather than zeros: a blank is missing,
@@ -175,6 +183,7 @@ def build_european_pool(
         domestic=len(domestic),
         ties=len(ties),
         unresolved=unresolved,
+        unrated_clubs=unrated_clubs,
     )
 
 

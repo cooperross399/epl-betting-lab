@@ -18,6 +18,7 @@ from __future__ import annotations
 import json
 from datetime import datetime, timezone
 
+import pandas as pd
 import pytest
 
 from epl_betting_lab.reports import beyond_record
@@ -188,3 +189,13 @@ def _settled_board():
         fixture_date="2026-09-20", home_team="Arsenal", away_team="Chelsea", market="1x2",
         selection="home", american_odds=-110, stake_units=1.0, first_seen="2026-09-19",
         won=True, profit_units=0.91)])
+
+
+def test_a_final_with_no_statistics_recorded_settles_no_corner_pick() -> None:
+    """ESPN writes "0" for a match it has no statistics for; zero corners
+    would settle every under as a win."""
+    blank = _event("Paris Saint-Germain", "Internazionale", (2, 1), (0, 0))
+    for side in blank["competitions"][0]["competitors"]:
+        side["statistics"].append({"name": "totalShots", "displayValue": "0"})
+    finals = beyond_record.finals_from_scoreboard({"events": [blank]}, "UCL")
+    assert pd.isna(finals.iloc[0]["HC"]) and pd.isna(finals.iloc[0]["AC"])

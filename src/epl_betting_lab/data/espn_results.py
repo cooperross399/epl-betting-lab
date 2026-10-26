@@ -177,6 +177,14 @@ def finals_from_scoreboard(
             for name, columns in STATISTICS.items():
                 value = _number(stats.get(name))
                 row[columns[index]] = float("nan") if value is None else value
+        # ESPN writes "0" for every statistic of a match it holds none for (83
+        # of 2022/23's finals). No side of a played match takes zero shots and
+        # wins zero corners alongside a side that does the same, so that
+        # pattern is missing data: blank, never a settled zero.
+        stat_columns = [column for pair in STATISTICS.values() for column in pair]
+        if all(row[column] == 0 for column in stat_columns):
+            for column in stat_columns:
+                row[column] = float("nan")
         rows.append(row)
     if not rows:
         return empty_finals()

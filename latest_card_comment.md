@@ -1,8 +1,10 @@
-## Monday 26 October, 10:30 UTC — scheduled run
+## Monday 26 October, 12:55 UTC — manual run
 
-Selections changed: 1 added, 5 dropped, 2 moved section.
+Selections changed: 2 added, 2 dropped.
 
-Provider quota: **43268** — about 12 day(s) at the observed burn. **Top this up or the schedule stops.**
+_This run was started by hand, not by the schedule. If you did not start it, someone was testing._
+
+Provider quota: **43101** — about 11 day(s) at the observed burn. **Top this up or the schedule stops.**
 
 Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5, team_total_home_0_5, team_total_home_1_5, team_total_home_2_5, team_total_away_0_5, team_total_away_1_5, team_total_away_2_5** (excluded: none)
 
@@ -27,7 +29,7 @@ _None._
 
 - Chelsea v Man United — **Jordan Henderson** `player_shots_on_target` Over@0.5 at +310 (BetRivers), 0.1u
 - Hull v Ipswich — **Regan Slater** `player_shots_on_target` Over@0.5 at +380 (BetRivers), 0.1u
-- Chelsea v Man United — **Jordan Henderson** `player_goal_scorer_anytime` Yes at +860 (MyBookie.ag), 0.1u
+- Chelsea v Man United — **Jordan Henderson** `player_goal_scorer_anytime` Yes at +890 (MyBookie.ag), 0.1u
 - Tottenham v Crystal Palace — **Adam Wharton** `player_shots_on_target` Over@0.5 at +450 (BetRivers), 0.1u
 - Bournemouth v Leeds — **Ethan Ampadu** `player_shots_on_target` Over@0.5 at +480 (BetRivers), 0.1u
 
@@ -35,14 +37,10 @@ _Props carry the smallest stake the card uses: the standing measurement demonstr
 
 ### What changed
 
-- **Added:** Bournemouth v Leeds corners_1x2 away
-- **Dropped:** Bournemouth v Leeds corners_total_10_5 under
-- **Dropped:** Hull v Ipswich corners_1x2 home
-- **Dropped:** Hull v Ipswich corners_total_10_5 over
-- **Dropped:** Hull v Ipswich corners_total_9_5 over
-- **Dropped:** Tottenham v Crystal Palace team_total_away_0_5 over
-- **Moved section:** Chelsea v Man United corners_total_9_5 over
-- **Moved section:** Coventry v Sunderland corners_1x2 home
+- **Added:** Tottenham v Crystal Palace btts yes
+- **Added:** Tottenham v Crystal Palace team_total_away_0_5 over
+- **Dropped:** Aston Villa v Fulham draw_no_bet away
+- **Dropped:** Liverpool v Arsenal corners_total_10_5 under
 
 
 ## Beyond the Premier League
@@ -132,4 +130,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/40307149467)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/40325208393)

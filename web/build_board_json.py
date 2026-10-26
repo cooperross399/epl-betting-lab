@@ -811,16 +811,24 @@ def _prop_line(selection: str) -> tuple[str, float] | None:
 #: Written by `scripts/check_lineups.py` after each Closing Snapshot and read
 #: back off the card-feed branch by Publish Board.
 LINEUP_CHECK_FILE = Path("data/outputs/lineup_check.json")
+#: One folder per recent Lineup Check run. Runs check different kick-offs (a
+#: scheduled run started at 06:00 may check the 19:45), so the newest run is
+#: not the only one that matters: every recent check's withdrawals count.
+LINEUP_CHECKS_DIR = Path("data/outputs/lineup_checks")
 
 
 def load_withdrawn(lab: Path) -> list[dict]:
-    """Props the latest lineup check found not starting; empty without a check."""
-    try:
-        payload = json.loads((lab / LINEUP_CHECK_FILE).read_text(encoding="utf-8"))
-    except (OSError, ValueError):
-        return []
-    rows = payload.get("withdrawn") if isinstance(payload, dict) else None
-    return [r for r in rows or [] if isinstance(r, dict)]
+    """Props any recent lineup check found not starting; empty without one."""
+    paths = [lab / LINEUP_CHECK_FILE, *sorted((lab / LINEUP_CHECKS_DIR).glob("*/lineup_check.json"))]
+    out: list[dict] = []
+    for path in paths:
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        rows = payload.get("withdrawn") if isinstance(payload, dict) else None
+        out += [r for r in rows or [] if isinstance(r, dict)]
+    return out
 
 
 def _prop_identity(p: dict) -> tuple[str, ...]:

@@ -173,7 +173,6 @@ def test_the_check_runs_after_each_closing_snapshot_and_spends_nothing() -> None
     flow = _workflow("lineup-check.yml")
     trigger = flow[True]  # PyYAML reads the key `on` as True
     assert trigger["workflow_run"]["workflows"] == ["Closing Snapshot"]
-    assert "schedule" not in trigger
     assert flow["permissions"] == {"contents": "read", "actions": "read"}
     text = (Path(__file__).parents[1] / ".github" / "workflows" / "lineup-check.yml").read_text()
     assert "ODDS_API" not in text and "secrets." not in text and "git push" not in text
@@ -188,7 +187,7 @@ def test_the_board_rebuilds_after_the_check_and_reads_it() -> None:
     names = [s["name"] for s in steps]
     read = names.index("Read the latest lineup check")
     assert read < names.index("Build the board")
-    assert "--name lineup-check" in steps[read]["run"]
+    assert "--name lineup-check" in steps[read]["run"] and "lineup_checks/" in steps[read]["run"]
     assert steps[read].get("continue-on-error") is True
 
 
@@ -206,3 +205,59 @@ def test_the_script_reads_the_props_card_and_the_latest_archived_card(tmp_path) 
         (archive / day / "080000" / "automated_card.json").write_text(json.dumps({"label": label}))
     assert script.latest_card(archive) == {"label": "new"}
     assert script.latest_card(tmp_path / "absent") == {}
+
+
+# ----- midweek: the check runs on its own clock too (Cooper, 2026-10-26: "Do 2 and 3") -----
+
+def _script():
+    import importlib.util
+    from pathlib import Path
+
+    spec = importlib.util.spec_from_file_location(
+        "check_lineups_wait", Path(__file__).parents[1] / "scripts" / "check_lineups.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_the_next_kickoff_is_the_earliest_one_far_enough_ahead() -> None:
+    from datetime import timedelta
+
+    script = _script()
+    picks = [
+        {"kickoff_time": "2026-10-31T12:20:00Z"},  # 30 minutes away: its check time has passed
+        {"kickoff_time": "2026-10-31T15:00:00Z"},
+        {"kickoff_time": "2026-10-31T19:45:00Z"},
+    ]
+    now = datetime(2026, 10, 31, 11, 50, tzinfo=timezone.utc)
+    nxt = script.next_kickoff(picks, now=now)
+    assert nxt == datetime(2026, 10, 31, 15, 0, tzinfo=timezone.utc)
+    assert script.check_at(nxt) == nxt - timedelta(minutes=35)
+    # Beyond what one job may wait, nothing.
+    assert script.next_kickoff([{"kickoff_time": "2026-11-01T12:00:00Z"}], now=now) is None
+
+
+def test_the_check_runs_on_its_own_clock_for_midweek_rounds() -> None:
+    flow = _workflow("lineup-check.yml")
+    crons = [entry["cron"] for entry in flow[True]["schedule"]]
+    assert crons, "a schedule covers kick-offs no Closing Snapshot reaches"
+    runs = " ".join(s.get("run", "") for s in flow["jobs"]["check"]["steps"])
+    assert "--wait-for-next-kickoff" in runs
+    upload = next(s for s in flow["jobs"]["check"]["steps"] if s["name"] == "Upload the check")
+    # A run with nothing due must not replace a real check on the board.
+    assert "checked == 'true'" in upload["if"]
+
+
+def test_every_recent_check_counts_not_only_the_newest(tmp_path) -> None:
+    import importlib.util
+    from pathlib import Path
+
+    spec = importlib.util.spec_from_file_location(
+        "build_board_json_checks", Path(__file__).parents[1] / "web" / "build_board_json.py")
+    board = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(board)
+    for run, player in (("101", "Cole Palmer"), ("102", "Pedro Neto")):
+        folder = tmp_path / board.LINEUP_CHECKS_DIR / run
+        folder.mkdir(parents=True)
+        (folder / "lineup_check.json").write_text(json.dumps({"withdrawn": [{"player": player}]}))
+    assert {w["player"] for w in board.load_withdrawn(tmp_path)} == {"Cole Palmer", "Pedro Neto"}

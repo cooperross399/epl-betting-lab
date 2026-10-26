@@ -43,6 +43,7 @@ def main() -> int:
         return 0
 
     cards = {}
+    unbuilt: dict[str, str] = {}
     # One moment for the whole run. The freshness gate's cutoff and the
     # record's `generated_at` have to be the same instant, or an audit asking
     # "did any selection kick off before the card that priced it" compares a
@@ -55,12 +56,14 @@ def main() -> int:
             # One competition failing must not cost the other. A pool that
             # could not be built is a missing section, not a broken card.
             print(f"{key}: could not be built ({exc}).")
-    if not cards:
-        print("No competition could be built; no section written.")
-        return 0
+            # On the card too, not only here: a section that vanished reads
+            # exactly like a week with no fixtures.
+            unbuilt[key] = str(exc).split(". ")[0]
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
-    args.out.write_text("\n".join(render_extra_card(cards)), encoding="utf-8")
+    args.out.write_text(
+        "\n".join(render_extra_card(cards, unbuilt=unbuilt)), encoding="utf-8"
+    )
     # The markdown is for a reader; this is the record something can score.
     # Until it existed these selections were rendered to a comment and nowhere
     # else, so closing-line value could never be computed for any of them —

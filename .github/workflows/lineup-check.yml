@@ -19,11 +19,18 @@ name: Lineup Check
 # no protected file, no stake changed. A team pick on a rotated side is named
 # for a second look and stays on the card.
 #
-# COVERAGE: the Closing Snapshot's five slots a week (Saturday 12:30 and
-# 15:00, Sunday 14:00, Friday and Monday 20:00 UK). A midweek round has no
-# snapshot and so no lineup check.
+# COVERAGE: after each Closing Snapshot (Saturday 12:30 and 15:00, Sunday
+# 14:00, Friday and Monday 20:00 UK), and on its own clock for everything
+# else, midweek rounds included (Cooper, 2026-10-26: "Do 2 and 3"). The
+# scheduled runs fire every two hours from 06:00 UTC; each waits for the next
+# pick's kick-off within five and a half hours and checks 35 minutes before
+# it. GitHub starts scheduled runs hours late, which is why there are seven.
+# A run with nothing due ends in seconds and uploads nothing, so it never
+# replaces a real check on the board.
 
 on:
+  schedule:
+    - cron: "0 6,8,10,12,14,16,18 * * *"
   workflow_run:
     workflows: ["Closing Snapshot"]
     types: [completed]
@@ -41,7 +48,8 @@ jobs:
   check:
     name: Lineup Check
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    # Room for the wait before a kick-off (at most 5.5 hours) and the check.
+    timeout-minutes: 350
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -86,12 +94,19 @@ jobs:
           fi
 
       - name: Check the picks against the lineups
+        id: check
         env:
           PYTHONPATH: src
         run: |
-          python scripts/check_lineups.py | tee -a "$GITHUB_STEP_SUMMARY"
+          set -o pipefail
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            python scripts/check_lineups.py --wait-for-next-kickoff | tee -a "$GITHUB_STEP_SUMMARY"
+          else
+            python scripts/check_lineups.py | tee -a "$GITHUB_STEP_SUMMARY"
+          fi
 
       - name: Upload the check
+        if: steps.check.outputs.checked == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: lineup-check

@@ -359,7 +359,10 @@ Use the repo, the reports, and GitHub.
      (`.github/workflows/lineup-check.yml`, `reports/lineup_check.py`, ESPN
      only, no credits, no push): a prop on a player not in the eleven is
      withdrawn from the board, a team pick on a side with 4+ changes is named.
-     Only the snapshot's five slots are covered; midweek rounds are not.
+     It also runs on its own clock (every two hours 06:00-18:00 UTC, Cooper:
+     "Do 2 and 3"), each run waiting for the next pick's kick-off, so midweek
+     rounds are covered. A run with nothing due uploads nothing; the board
+     reads every recent check, not only the newest.
   4. `live_clv_report.md` and the card judge each market by consensus CLV
      once it has 50 captured picks: behind the close (cut candidate), ahead
      (may earn more than 0.1u) or no signal. Cutting or raising stays
@@ -370,6 +373,13 @@ Use the repo, the reports, and GitHub.
      matches it improved every bookings forecast (o4.5 log loss 0.6641 ->
      0.6557). No appointment, no adjustment. Football-Data's `Referee`
      column is kept in the processed results for it.
+- **The European sections vanished on 2026-10-19 because four league feeds
+  timed out (Serie A, Ligue 1, Greece, Scotland).** The European pool needs
+  every domestic league, so Champions, Europa and Conference League could not
+  be built and the card dropped them with the reason only in the run log.
+  The leagues' datasets now travel in `matchday-state`, so a failed feed falls
+  back to the previous run's file, and a competition that still cannot be
+  built is named on the card with the reason (`render_extra_card(unbuilt=)`).
 - **Each pick carries a "bet down to" price, and the card shows it instead of
   the tier.** `_bet_down_to` in `reports/thursday_best_bets.py`: the price at
   which the edge falls to that market's own bar, so the line can drift that far

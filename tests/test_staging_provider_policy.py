@@ -119,6 +119,10 @@ def test_receipt_after_thursday_cutoff_is_blocked_in_policy_timezone(
         _provenance(),
         receipt_generated_at=after_cutoff,
         evaluated_at=after_cutoff,
+        # Pinned, not read from GITHUB_EVENT_NAME: a manually dispatched CI
+        # run sets that to workflow_dispatch, which is exempt from the cutoff,
+        # and this test is about the scheduled run the cutoff exists for.
+        run_trigger="schedule",
     )
 
     assert result["receipt_age_status"] == "Within age limit"

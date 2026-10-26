@@ -1479,6 +1479,7 @@ def test_every_report_the_refresh_produces_is_uploaded() -> None:
 
     published = {
         "beyond_clv": "beyond_clv_report.md",
+        "beyond_record": "beyond_record.md",
         "card_input": "automated_card_input.md",
         "automated_card": "automated_card.md",
         "card_comparison": "automated_card_comparison.md",

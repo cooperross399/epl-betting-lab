@@ -74,6 +74,7 @@ def _steps() -> list[tuple[str, str, Callable[[Path], Any]]]:
         walk_forward_counts,
     )
     from epl_betting_lab.reports.beyond_clv import save_beyond_clv_reports
+    from epl_betting_lab.reports.beyond_record import save_beyond_record
     from epl_betting_lab.reports.live_clv import save_live_clv_reports
     from epl_betting_lab.reports.price_feed import load_feed
     from epl_betting_lab.reports.card_history import (
@@ -109,6 +110,11 @@ def _steps() -> list[tuple[str, str, Callable[[Path], Any]]]:
                 load_feed(PROCESSED_DIR / "price_feed_extra.csv"),
                 outputs,
             ),
+        ),
+        (
+            "beyond_record",
+            "Grade the Beyond the Premier League picks against ESPN finals",
+            lambda outputs: save_beyond_record(_beyond_records(), outputs),
         ),
         (
             "card_input",

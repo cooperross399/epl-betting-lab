@@ -440,12 +440,17 @@ class UncountedSection:
     explaining the gap.
 
     Naming the section and its count is the smallest honest fix. Scoring those
-    rows is the real one, and it is not this: nothing settles international
-    fixtures reliably yet.
+    rows is the real one, and since 2026-10-26 `reports/beyond_record.py` does
+    it against ESPN finals, on a record of its own; the fields below carry
+    that record's totals so the line can quote them.
     """
 
     name: str
     staked: int
+    settled: int = 0
+    won: int = 0
+    pushed: int = 0
+    profit_units: float = 0.0
 
 
 def render_scoreboard(
@@ -532,12 +537,21 @@ def render_scoreboard(
     for section in uncounted:
         if section.staked <= 0:
             continue
+        if section.settled:
+            graded = (
+                f"It is graded on a record of its own (`beyond_record.md`): "
+                f"{section.settled} settled, {section.won} won"
+                + (f", {section.pushed} returned the stake" if section.pushed else "")
+                + f", {section.profit_units:+.2f} units."
+            )
+        else:
+            graded = "Its own record (`beyond_record.md`) has nothing settled yet."
         lines += [
             f"**{section.name} is not in these numbers.** "
-            f"{section.staked} staked selection(s) from that section are "
-            "recorded and not yet scored — nothing settles them. The rule "
-            "above is stated by stake, so without this line the only way to "
-            "notice would be to total the card by hand.",
+            f"{section.staked} staked selection(s) from that section are on "
+            f"this card. {graded} The rule above is stated by stake, so "
+            "without this line the only way to notice would be to total the "
+            "card by hand.",
             "",
         ]
     lines += [

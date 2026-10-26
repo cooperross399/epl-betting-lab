@@ -187,6 +187,16 @@ def month_codes(start: date, end: date) -> list[str]:
     return codes
 
 
+def _score(value: object) -> int | None:
+    """ESPN's competitor score, which arrives as a string ("2") or a number."""
+    if isinstance(value, bool) or value is None:
+        return None
+    try:
+        return int(float(str(value).strip()))
+    except ValueError:
+        return None
+
+
 def fetch_fixtures(months: list[str]) -> tuple[list[dict], list[str]]:
     """Every EPL fixture ESPN lists in those months, plus any month that failed.
 
@@ -209,15 +219,22 @@ def fetch_fixtures(months: list[str]) -> tuple[list[dict], list[str]]:
             h, a = sides.get("home", {}), sides.get("away", {})
             names = {b.get("names", [""])[0] for b in comp.get("broadcasts", []) if b.get("names")}
             kickoff = str(ev.get("date") or "")
-            out.append({
+            state = ((ev.get("status") or {}).get("type") or {}).get("state", "pre")
+            fixture = {
                 "id": str(ev.get("id")), "kickoff": kickoff, "date": kickoff[:10],
                 "venue": (comp.get("venue") or {}).get("fullName", ""),
                 "city": ((comp.get("venue") or {}).get("address") or {}).get("city", ""),
                 "tv": " / ".join(sorted(names)) or "—",
-                "state": ((ev.get("status") or {}).get("type") or {}).get("state", "pre"),
+                "state": state,
                 "home": {"fd": fd_name((h.get("team") or {}).get("displayName", "")), "form": h.get("form", "")},
                 "away": {"fd": fd_name((a.get("team") or {}).get("displayName", "")), "form": a.get("form", "")},
-            })
+            }
+            # A played fixture carries its score, for the season table. Only
+            # a final counts; a score mid-match is not a result.
+            hs, as_ = _score(h.get("score")), _score(a.get("score"))
+            if state == "post" and hs is not None and as_ is not None:
+                fixture["homeGoals"], fixture["awayGoals"] = hs, as_
+            out.append(fixture)
     out.sort(key=lambda f: (f["kickoff"], f["id"]))
     return out, failed
 
@@ -470,20 +487,82 @@ class Projector:
     values are identical to `TOTALS_RATINGS` anyway.
     """
 
-    def __init__(self, result_model, goals_model, unrated_error):
+    def __init__(self, result_model, goals_model, unrated_error, context=None, through: str = ""):
         self._result = result_model
         self._goals = goals_model
         self._unrated_error = unrated_error
+        #: The match context the card prices with (`models/match_context`):
+        #: each club's home edge, last-five form and who is missing. None
+        #: prices on the ratings alone, as every committed measurement does.
+        self._context = context
+        #: The last match date the fit saw, for the ratings page.
+        self.through = through
         #: Clubs the fit has never seen. `expected_goals` refuses them rather
         #: than substituting an average side, and so does this.
         self.unrated: set[str] = set()
         #: Clubs whose rating is the floor rather than a measurement.
         self.clamped: set[str] = set()
 
+    def _price(self, model, home: str, away: str) -> dict:
+        """One fit's probabilities for the fixture, moved for the context
+        exactly as `PoissonGoalsModel.project_fixtures(context=...)` moves
+        them, so the board and the card read one number."""
+        if self._context is None:
+            return model.match_probabilities(home, away)
+        home_xg, away_xg = model.expected_goals(home, away)
+        moved = self._context.adjust(home, away, home_xg, away_xg)
+        return model.probabilities_from_xg(home, away, moved.home_xg, moved.away_xg)
+
+    def factors(self, home: str, away: str) -> list[dict] | None:
+        """The home win chance built one layer at a time (`games[].factors`):
+        season strength, then home edge, last five and who is missing. The
+        last layer is the board's own number. None without a context or for
+        a club the fit has never seen."""
+        if self._context is None:
+            return None
+        try:
+            home_xg, away_xg = self._result.expected_goals(home, away)
+        except self._unrated_error:
+            return None
+        return self._context.layers(
+            home, away, home_xg, away_xg,
+            lambda xh, xa: self._result.probabilities_from_xg(home, away, xh, xa),
+        )
+
+    def ratings(self, team: str) -> dict | None:
+        """One club's ratings as the pages read them (`games[].ratings`,
+        ratings.json): attack and defence multipliers from the result fit,
+        and the context's multipliers where there is one."""
+        out: dict = {}
+        strength = self._result.team_strengths.get(team)
+        if strength is not None:
+            out.update(attack=round(float(strength.attack), 3), defence=round(float(strength.defense), 3))
+        if self._context is not None:
+            t = self._context.team(team)
+            out.update(
+                homeEdge=round(float(t.home_edge), 3),
+                formAttack=round(float(t.attack_form), 3), formDefence=round(float(t.defence_form), 3),
+                attackAvailable=round(float(t.attack_available), 3),
+                defenceAvailable=round(float(t.defence_available), 3),
+                missing=list(t.missing), formGames=int(t.form_games), homeMatches=int(t.home_matches),
+            )
+        return out or None
+
+    def ratings_table(self) -> list[dict]:
+        """Every rated club, for ratings.json."""
+        rows = []
+        for team in sorted(self._result.team_strengths):
+            r = self.ratings(team)
+            if not r:
+                continue
+            abbr, entry = team_entry(team)
+            rows.append({"abbr": abbr, "name": entry["name"], **r})
+        return rows
+
     def __call__(self, home: str, away: str) -> dict | None:
         try:
-            result = self._result.match_probabilities(home, away)
-            goals = self._goals.match_probabilities(home, away)
+            result = self._price(self._result, home, away)
+            goals = self._price(self._goals, home, away)
         except self._unrated_error:
             for team in (home, away):
                 if team not in self._result.team_strengths or team not in self._goals.team_strengths:
@@ -533,13 +612,38 @@ def load_model(lab: Path) -> tuple[Projector | None, str]:
     except Exception as exc:  # the site must never fail the deploy over the model
         return None, f"the goals model could not be fitted ({type(exc).__name__}: {exc})"
 
-    note = ""
+    notes = []
     if not xg_path.is_file():
-        note = (
+        notes.append(
             "Understat xG was not restored with this run, so the 2.5-goals and "
             "both-teams-to-score ratings fell back to goals for every match."
         )
-    return Projector(result_model, goals_model, UnratedTeam), note
+    # The card prices every fixture with the match context (home edge, last
+    # five, who is missing) since 2026-10-26; the board reads the same one so
+    # the two agree. A context that cannot be built is a note, never a
+    # failed deploy: the ratings alone still price the board.
+    context, through = None, ""
+    try:
+        from epl_betting_lab.models.match_context import build_match_context, load_availability
+
+        matches = load_matches_with_xg(matches_path, xg_path)
+        if "date" in matches.columns and len(matches):
+            through = str(matches["date"].max())[:10]
+        availability_path = processed / "fpl_availability.csv"
+        context = build_match_context(
+            matches, load_availability(availability_path),
+            availability_source="the FPL availability feed" if availability_path.is_file() else "",
+        )
+        if not availability_path.is_file():
+            notes.append(
+                "No availability list was restored with this run, so projections "
+                "assume every club at full strength."
+            )
+    except ImportError:
+        notes.append("The match context (home edge, form, who is missing) is not in this lab version; ratings alone price the board.")
+    except Exception as exc:
+        notes.append(f"The match context could not be built ({type(exc).__name__}: {exc}); ratings alone price the board.")
+    return Projector(result_model, goals_model, UnratedTeam, context=context, through=through), " ".join(notes)
 
 
 def pick_for(card: dict, home: str, away: str) -> dict | None:
@@ -954,6 +1058,15 @@ def build(lab: Path, today: date) -> dict:
             row["drawNoBet"]["homeProb"] = round(pr["dnbHome"], 4)
             row["total"]["overProb"] = round(pr["over25"], 4)
             row["btts"]["yesProb"] = round(pr["btts"], 4)
+            # The game page's "why": the home win chance built layer by
+            # layer, and each side's ratings. Descriptive only; the price,
+            # the pick and the stake above are untouched by either.
+            layers = project.factors(h, a)
+            if layers:
+                row["factors"] = layers
+            rh, ra = project.ratings(h), project.ratings(a)
+            if rh and ra:
+                row["ratings"] = {"home": rh, "away": ra}
         games.append(row)
 
     notices = []
@@ -1026,6 +1139,17 @@ def build(lab: Path, today: date) -> dict:
     }
 
 
+def ratings_feed(lab: Path, generated_at: str) -> dict:
+    """ratings.json: every rated club's multipliers, from the board's own fit."""
+    project, note = load_model(lab)
+    return {
+        "generatedAt": generated_at, "season": SEASON,
+        "through": project.through if project else "",
+        "note": note or None,
+        "teams": project.ratings_table() if project else [],
+    }
+
+
 def due_note(due: dict) -> str:
     """Each category's rule and measurement, for the board's Due List block."""
     parts = [f"{c.get('rule', '')} {c.get('headline', '')}" for c in (due.get("categories") or {}).values()
@@ -1044,6 +1168,13 @@ def main(argv=None) -> int:
     out.mkdir(parents=True, exist_ok=True)
     board = build(Path(args.lab).resolve(), today)
     (out / "board.json").write_text(json.dumps(board, indent=1, ensure_ascii=False), encoding="utf-8")
+    # The ratings every page reads (Methods, Game). Written from the same
+    # fit as the board, so the two agree; empty when no model was fitted,
+    # and the page says so rather than showing stale numbers.
+    (out / "ratings.json").write_text(
+        json.dumps(ratings_feed(Path(args.lab).resolve(), board["generatedAt"]), indent=1, ensure_ascii=False),
+        encoding="utf-8",
+    )
     # The frozen copy is NOT written here. `web/site_history.py` runs straight
     # after this and freezes the same board under `board_date()`, which is the
     # window the fixtures belong to; this used `today`, the date the board was

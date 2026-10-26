@@ -1,0 +1,71 @@
+{
+ "generatedAt": "2026-10-23T09:40:00Z",
+ "nights": 0,
+ "games": 0,
+ "buckets": [
+  {
+   "low": 0.3,
+   "high": 0.4,
+   "games": 0,
+   "predicted": null,
+   "actual": null,
+   "interval": null
+  },
+  {
+   "low": 0.4,
+   "high": 0.45,
+   "games": 0,
+   "predicted": null,
+   "actual": null,
+   "interval": null
+  },
+  {
+   "low": 0.45,
+   "high": 0.5,
+   "games": 0,
+   "predicted": null,
+   "actual": null,
+   "interval": null
+  },
+  {
+   "low": 0.5,
+   "high": 0.55,
+   "games": 0,
+   "predicted": null,
+   "actual": null,
+   "interval": null
+  },
+  {
+   "low": 0.55,
+   "high": 0.6,
+   "games": 0,
+   "predicted": null,
+   "actual": null,
+   "interval": null
+  },
+  {
+   "low": 0.6,
+   "high": 0.7,
+   "games": 0,
+   "predicted": null,
+   "actual": null,
+   "interval": null
+  },
+  {
+   "low": 0.7,
+   "high": 1.0,
+   "games": 0,
+   "predicted": null,
+   "actual": null,
+   "interval": null
+  }
+ ],
+ "brier": null,
+ "movement": {
+  "toward": 0,
+  "against": 0,
+  "flat": 0,
+  "picks": 0
+ },
+ "markets": {}
+}

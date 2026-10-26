@@ -644,6 +644,21 @@ jobs:
         run: |
           python scripts/build_due_list.py
 
+      - name: Fetch who is missing
+        # The fantasy game's injury and suspension list, one keyless request,
+        # for the card's match context (models/match_context.py): the missing
+        # regulars come off each club's attack and defence. Soft: a failure
+        # leaves the previous file, and with none the card reads nobody as
+        # missing and says so. Before "Rebuild every report" because that is
+        # where the card is built.
+        if: always()
+        continue-on-error: true
+        timeout-minutes: 3
+        env:
+          PYTHONPATH: src
+        run: |
+          python scripts/fetch_fpl_availability.py
+
       - name: Rebuild every report
         # Soft: refresh_all_reports already continues past a failed step and
         # exits non-zero at the end, so letting it stop the job here would
@@ -1044,6 +1059,9 @@ jobs:
             # The props card's FPL per-match logs: the public record grades
             # tackles props from them (web/settle_results.py --fpl-logs).
             data/processed/fpl_match_logs.csv
+            # Who is missing, as the card read it: the public board prices
+            # its projections on the same context the card did.
+            data/processed/fpl_availability.csv
             # The cup and European leagues' datasets. A Football-Data feed that
             # times out then falls back to the previous run's file instead of
             # costing every European section: on 2026-10-19 four leagues timed

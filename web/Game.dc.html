@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <title>Match — Maverick Hightower</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Where this week's number comes from: the model's chances for one Premier League match, built up step by step from the season ratings.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Maverick Hightower">
+  <meta property="og:title" content="Match — Maverick Hightower">
+  <meta property="og:image" content="https://maverickhightower.com/share.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@mavhightower">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root, html[data-sport="nhl"] { color-scheme: dark; --paper:#14151a; --ink:#f1efe9; --ink-2:#d2d0ca; --mute:#a3a6b1; --mute-2:#80838e; --rule:#3a3d49; --rule-2:#262832; --on-ink:#3a3d49; --alert:#f08a72; --on-alert:#14151a; --win:#5cc196; --on-win:#14151a; --desk:#0d0e12; }
+    html[data-sport="epl"], html[data-sport="epl"] [data-theme="light"] { color-scheme: light; --paper:#d9dade; --ink:#14151a; --ink-2:#2a2d36; --mute:#50535e; --mute-2:#767984; --rule:#b4b6bd; --rule-2:#c6c8ce; --on-ink:#c6c8ce; --alert:#9e2c19; --on-alert:#f4f4f6; --win:#22664a; --on-win:#f4f4f6; --desk:#c9cbd0; }
+    @media (prefers-color-scheme: dark) { html[data-sport="epl"] { color-scheme: dark; --paper:#2a2c32; --ink:#ecebe7; --ink-2:#cfcec9; --mute:#a9abb4; --mute-2:#878a94; --rule:#474a53; --rule-2:#363840; --on-ink:#474a53; --alert:#f29077; --on-alert:#1b1c20; --win:#62c79c; --on-win:#1b1c20; --desk:#212328; } }
+    html[data-sport="epl"] [data-theme="dark"] { color-scheme: dark; --paper:#2a2c32; --ink:#ecebe7; --ink-2:#cfcec9; --mute:#a9abb4; --mute-2:#878a94; --rule:#474a53; --rule-2:#363840; --on-ink:#474a53; --alert:#f29077; --on-alert:#1b1c20; --win:#62c79c; --on-win:#1b1c20; --desk:#212328; }
+    html, body { margin: 0; padding: 0; background: var(--paper); color: var(--ink); font-family: "IBM Plex Sans", Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+    * { box-sizing: border-box; }
+    a { color: var(--ink); text-decoration: none; }
+    a:hover { color: var(--ink-2); text-decoration: underline; text-underline-offset: 3px; }
+    a:focus-visible, button:focus-visible, select:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+    .skip { position: absolute; left: 12px; top: -60px; background: var(--ink); color: var(--paper); padding: 10px 14px; z-index: 10; font-size: 14px; }
+    .skip:focus { top: 12px; }
+    @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; scroll-behavior: auto !important; } }
+  </style>
+  <meta name="theme-color" content="#d9dade">
+  <script>(function(){document.documentElement.setAttribute("data-sport","epl");})();</script>
+</helmet>
+<div data-screen-label="Match" style="min-height:100vh;background:var(--paper);color:var(--ink);">
+  <a href="#main" class="skip">Skip to our call</a>
+  <div style="max-width:1240px;margin:0 auto;padding:0 clamp(16px,3vw,24px) 80px;">
+
+    <header style="border-top:4px solid var(--ink);padding:10px 0 4px;display:flex;align-items:center;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;">
+      <a href="https://maverickhightower.com/" aria-label="Maverick Hightower home" style="display:flex;align-items:center;gap:12px;min-height:44px;">
+        <span aria-hidden="true" style="width:36px;height:36px;background:var(--ink);color:var(--paper);display:grid;place-items:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:18px;letter-spacing:.04em;">MH</span>
+        <span style="display:flex;flex-direction:column;line-height:1.1;">
+          <span style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);">Maverick Hightower</span>
+          <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;letter-spacing:.02em;text-transform:uppercase;">EPL Projections</span>
+        </span>
+      </a>
+      <nav aria-label="Site" style="display:flex;gap:0 18px;font-size:13px;letter-spacing:.1em;text-transform:uppercase;font-weight:500;flex-wrap:wrap;">
+        <a href="Methods.dc.html" style="display:inline-flex;align-items:center;min-height:44px;">Methods</a>
+        <a href="https://maverickhightower.com/about.html" style="display:inline-flex;align-items:center;min-height:44px;">About</a>
+        <a href="https://nhl.maverickhightower.com/" style="display:inline-flex;align-items:center;min-height:44px;">NHL</a>
+        <a href="https://cbb.maverickhightower.com/" style="display:inline-flex;align-items:center;min-height:44px;">CBB</a>
+      </nav>
+    </header>
+
+    <nav aria-label="Board sections" style="position:sticky;top:0;z-index:5;background:var(--paper);border-bottom:1px solid var(--ink);display:flex;overflow-x:auto;scrollbar-width:none;">
+      <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5">
+        <a href="{{ t.href }}" aria-current="{{ t.current }}" style="flex:1 1 0;max-width:150px;min-width:72px;display:flex;align-items:center;justify-content:center;min-height:48px;padding:0 4px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;white-space:nowrap;text-decoration:none;box-shadow:{{ t.shadow }};color:{{ t.color }};">{{ t.label }}</a>
+      </sc-for>
+    </nav>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;padding:6px 0;border-bottom:1px solid var(--rule);font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">
+      <a href="{{ boardHref }}" style="display:inline-flex;align-items:center;min-height:44px;">{{ boardLabel }}</a>
+      <span style="display:flex;align-items:center;gap:4px 14px;flex-wrap:wrap;">
+        <span>{{ builtLine }}</span>
+        <sc-if value="{{ nav.show }}" hint-placeholder-val="{{ false }}">
+          <span style="display:flex;align-items:center;gap:2px;">
+            <a href="{{ nav.prevHref }}" aria-label="{{ nav.prevAria }}" aria-disabled="{{ nav.prevDisabled }}" style="display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;border:1px solid var(--rule);color:{{ nav.prevColor }};pointer-events:{{ nav.prevEvents }};">‹</a>
+            <span style="min-width:72px;text-align:center;color:var(--ink);">{{ nav.label }}</span>
+            <a href="{{ nav.nextHref }}" aria-label="{{ nav.nextAria }}" aria-disabled="{{ nav.nextDisabled }}" style="display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;border:1px solid var(--rule);color:{{ nav.nextColor }};pointer-events:{{ nav.nextEvents }};">›</a>
+          </span>
+        </sc-if>
+      </span>
+    </div>
+
+    <sc-if value="{{ isSample }}" hint-placeholder-val="{{ false }}">
+      <div role="status" style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:start;padding:14px 0;border-bottom:1px solid var(--ink);">
+        <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--ink);padding:4px 9px;">Sample</span>
+        <p style="margin:0;font-size:14px;line-height:1.5;color:var(--ink-2);max-width:760px;text-wrap:pretty;">Sample data. On the live site this page reads this week's board.</p>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ missing }}" hint-placeholder-val="{{ false }}">
+      <section style="padding:60px 0;">
+        <h1 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:clamp(40px,8vw,72px);line-height:.95;text-transform:uppercase;">Match not on<br>this week's board</h1>
+        <p style="margin:16px 0 0;font-size:15px;line-height:1.5;color:var(--ink-2);max-width:560px;">{{ missingNote }}</p>
+        <a href="{{ boardHref }}" style="display:inline-flex;align-items:center;min-height:44px;margin-top:8px;font-family:'IBM Plex Mono',monospace;font-size:13px;">← Back to the board</a>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ ready }}" hint-placeholder-val="{{ true }}">
+
+      <section aria-label="Fixture" style="padding:28px 0 22px;border-bottom:1px solid var(--ink);">
+        <div style="font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);">{{ kicker }}</div>
+        <div style="display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:12px;align-items:center;margin-top:14px;">
+          <sc-for list="{{ sides }}" as="s" hint-placeholder-count="2">
+            <div style="display:flex;flex-direction:column;align-items:{{ s.align }};text-align:{{ s.textAlign }};gap:8px;min-width:0;border-top:4px solid {{ s.color }};padding-top:12px;">
+              <span aria-hidden="true" style="position:relative;width:64px;height:64px;border-radius:50%;display:grid;place-items:center;overflow:hidden;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:20px;background:{{ s.color }};color:{{ s.fg }};box-shadow:0 0 0 1px var(--rule),0 0 0 4px {{ s.ring }};"><span>{{ s.abbr }}</span><sc-if value="{{ s.hasLogo }}" hint-placeholder-val="{{ false }}"><img src="{{ s.logo }}" alt="" loading="lazy" decoding="async" onLoad="{{ s.onLogoLoad }}" onError="{{ s.onLogoError }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;padding:8px;"></sc-if></span>
+              <span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:clamp(30px,6vw,56px);line-height:.95;text-transform:uppercase;letter-spacing:-.01em;">{{ s.abbr }}</span>
+              <span style="font-size:14px;font-weight:600;line-height:1.25;text-wrap:pretty;">{{ s.name }}</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">{{ s.meta }}</span>
+            </div>
+          </sc-for>
+          <div style="grid-column:2;grid-row:1;display:flex;flex-direction:column;align-items:center;gap:4px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);text-align:center;padding:0 4px;">
+            <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;color:var(--mute-2);">v</span>
+            <span style="color:var(--ink);font-weight:600;font-size:15px;white-space:nowrap;">{{ time }}</span>
+            <span style="white-space:nowrap;">{{ tz }}</span>
+          </div>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px 18px;margin-top:14px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">
+          <span>{{ venueLine }}</span><span>{{ tvLine }}</span>
+        </div>
+      </section>
+
+      <section id="main" aria-labelledby="verdict-h" style="padding:28px 0 26px;border-bottom:1px solid var(--ink);">
+        <h2 id="verdict-h" style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:28px;line-height:1;text-transform:uppercase;letter-spacing:.01em;">Our call</h2>
+
+        <sc-if value="{{ hasWin }}" hint-placeholder-val="{{ true }}">
+          <p style="margin:14px 0 0;font-size:clamp(20px,3.4vw,26px);line-height:1.3;font-weight:600;max-width:760px;text-wrap:pretty;">{{ headline }}</p>
+          <p style="margin:6px 0 0;font-family:'IBM Plex Mono',monospace;font-size:14px;color:var(--ink-2);">{{ scoreLine }}</p>
+          <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:baseline;gap:12px;font-family:'IBM Plex Mono',monospace;margin-top:18px;">
+            <span style="font-size:clamp(24px,5vw,36px);font-weight:600;line-height:1;">{{ homeAbbr }} {{ homeWin }}</span>
+            <span style="font-size:clamp(16px,3vw,22px);font-weight:500;line-height:1;color:var(--mute);text-align:center;">Draw {{ drawWin }}</span>
+            <span style="font-size:clamp(24px,5vw,36px);font-weight:600;line-height:1;text-align:right;">{{ awayWin }} {{ awayAbbr }}</span>
+          </div>
+          <div role="img" aria-label="{{ barAria }}" style="position:relative;height:14px;display:flex;margin-top:8px;background:var(--rule);">
+            <div style="width:{{ homePct }};background:{{ homeColor }};"></div>
+            <div style="width:{{ drawPct }};background:var(--mute-2);"></div>
+            <div style="flex:1;background:{{ awayColor }};"></div>
+          </div>
+          <div style="margin-top:6px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mute);text-align:center;">Chance of each result after ninety minutes · {{ bandNote }}</div>
+        </sc-if>
+
+        <div style="margin-top:22px;max-width:560px;">
+          <sc-if value="{{ unpriced }}" hint-placeholder-val="{{ false }}">
+            <div style="border:1px dashed var(--mute);padding:12px 14px;">
+              <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;line-height:1;text-transform:uppercase;">Not priced</div>
+              <div style="font-size:13px;margin-top:6px;line-height:1.5;color:var(--ink-2);">No betting line reached the board for this match, so there is no pick.</div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ pick.isBet }}" hint-placeholder-val="{{ true }}">
+            <div style="background:var(--ink);color:var(--paper);padding:12px 14px;">
+              <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;">Best bet</div>
+              <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:30px;line-height:1;text-transform:uppercase;letter-spacing:.02em;margin-top:4px;">{{ pick.label }}</div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;margin-top:6px;color:var(--on-ink);">{{ pick.sub }}</div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ pick.isLean }}" hint-placeholder-val="{{ false }}">
+            <div style="border:1px dashed var(--ink);padding:12px 14px;">
+              <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);">Lean, not a bet</div>
+              <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:30px;line-height:1;text-transform:uppercase;letter-spacing:.02em;margin-top:4px;">{{ pick.label }}</div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;margin-top:6px;color:var(--mute);">{{ pick.sub }}</div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ pick.isNone }}" hint-placeholder-val="{{ false }}">
+            <div style="border:1px dashed var(--mute);padding:12px 14px;">
+              <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;line-height:1;text-transform:uppercase;color:var(--mute);">No bet on this match</div>
+              <div style="font-size:13px;margin-top:6px;line-height:1.5;color:var(--ink-2);">The prices are close to what we think is fair, so there is nothing worth betting.</div>
+            </div>
+          </sc-if>
+        </div>
+      </section>
+
+      <sc-if value="{{ hasWhy }}" hint-placeholder-val="{{ true }}">
+      <section aria-labelledby="why-h" style="padding:28px 0 26px;border-bottom:1px solid var(--ink);">
+        <h2 id="why-h" style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:28px;line-height:1;text-transform:uppercase;letter-spacing:.01em;">Why</h2>
+        <ul style="list-style:none;margin:14px 0 0;padding:0;max-width:760px;">
+          <sc-for list="{{ why }}" as="w" hint-placeholder-count="3">
+            <li style="display:grid;grid-template-columns:10px minmax(0,1fr);gap:12px;padding:10px 0;border-top:1px solid var(--rule-2);">
+              <span aria-hidden="true" style="background:{{ w.color }};"></span>
+              <span style="font-size:15px;line-height:1.5;text-wrap:pretty;"><strong style="font-weight:600;">{{ w.label }}.</strong> {{ w.text }}</span>
+            </li>
+          </sc-for>
+        </ul>
+        <a href="Methods.dc.html#result" style="display:inline-flex;align-items:center;min-height:44px;margin-top:4px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">How the model works →</a>
+      </section>
+      </sc-if>
+
+
+      <sc-if value="{{ hasRatings }}" hint-placeholder-val="{{ true }}">
+      <section aria-labelledby="cmp-h" style="padding:28px 0 26px;border-bottom:1px solid var(--ink);">
+        <h2 id="cmp-h" style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:28px;line-height:1;text-transform:uppercase;letter-spacing:.01em;">Head to head</h2>
+        <p style="margin:6px 0 0;font-size:13px;color:var(--mute);">Compared with an average Premier League side. Plus is better.</p>
+        <div style="margin-top:12px;border-top:2px solid var(--ink);max-width:560px;">
+          <div style="display:grid;grid-template-columns:minmax(0,1fr) 84px 84px;gap:0 10px;padding:6px 0;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);">
+            <span></span><span style="text-align:right;">{{ homeAbbr }}</span><span style="text-align:right;">{{ awayAbbr }}</span>
+          </div>
+          <sc-for list="{{ cmp }}" as="r" hint-placeholder-count="4">
+            <div style="display:grid;grid-template-columns:minmax(0,1fr) 84px 84px;gap:0 10px;padding:9px 0;border-top:1px solid var(--rule-2);align-items:baseline;">
+              <span style="font-size:15px;font-weight:500;">{{ r.label }}</span>
+              <span style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:{{ r.homeWeight }};color:{{ r.homeColor }};">{{ r.home }}</span>
+              <span style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:{{ r.awayWeight }};color:{{ r.awayColor }};">{{ r.away }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+      </sc-if>
+
+      <section aria-labelledby="miss-h" style="padding:28px 0 26px;border-bottom:1px solid var(--ink);">
+        <h2 id="miss-h" style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:28px;line-height:1;text-transform:uppercase;letter-spacing:.01em;">Who is missing</h2>
+        <p style="margin:6px 0 0;font-size:13px;color:var(--mute);max-width:640px;">{{ missIntro }}</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:12px 24px;margin-top:14px;max-width:760px;">
+          <sc-for list="{{ absences }}" as="k" hint-placeholder-count="2">
+            <div style="border-left:6px solid {{ k.color }};padding:4px 0 4px 12px;">
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);">{{ k.abbr }}</div>
+              <div style="font-size:18px;font-weight:600;line-height:1.2;margin-top:2px;color:{{ k.nameColor }};">{{ k.headline }}</div>
+              <div style="font-size:13px;color:var(--ink-2);margin-top:4px;line-height:1.5;">{{ k.names }}</div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);margin-top:4px;">{{ k.tag }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+
+      <sc-if value="{{ priced }}" hint-placeholder-val="{{ true }}">
+      <section aria-labelledby="mk-h" style="padding:28px 0 26px;border-bottom:1px solid var(--ink);">
+        <h2 id="mk-h" style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:28px;line-height:1;text-transform:uppercase;letter-spacing:.01em;">The odds</h2>
+        <p style="margin:6px 0 0;font-size:13px;color:var(--mute);max-width:640px;">Our chance next to the best price we found. A pick shows up only when our chance beats the price by enough.</p>
+        <div style="margin-top:12px;border-top:2px solid var(--ink);max-width:560px;">
+          <div style="display:grid;grid-template-columns:minmax(0,1fr) 92px 92px;gap:0 10px;padding:6px 0;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);">
+            <span>Bet</span><span style="text-align:right;">Our chance</span><span style="text-align:right;">Best price</span>
+          </div>
+          <sc-for list="{{ markets }}" as="m" hint-placeholder-count="9">
+            <div style="display:grid;grid-template-columns:minmax(0,1fr) 92px 92px;gap:0 10px;padding:9px 0;border-top:1px solid {{ m.ruleColor }};align-items:baseline;">
+              <span style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;min-width:0;"><span style="font-size:15px;font-weight:{{ m.weight }};">{{ m.label }}</span><sc-if value="{{ m.tag }}" hint-placeholder-val="{{ false }}"><span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:1px 5px;background:{{ m.tagBg }};color:{{ m.tagFg }};border:1px {{ m.tagStyle }} var(--ink);white-space:nowrap;">{{ m.tag }}</span></sc-if><sc-if value="{{ m.move }}" hint-placeholder-val="{{ false }}"><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mute);white-space:nowrap;">{{ m.move }}</span></sc-if></span>
+              <span style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:15px;">{{ m.chance }}</span>
+              <span style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;">{{ m.best }}</span>
+            </div>
+          </sc-for>
+        </div>
+        <sc-if value="{{ oddsNote }}" hint-placeholder-val="{{ false }}"><p style="margin:10px 0 0;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);max-width:560px;">{{ oddsNote }}</p></sc-if>
+      </section>
+      </sc-if>
+
+      <section aria-labelledby="after-h" style="padding:28px 0 26px;">
+        <h2 id="after-h" style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:28px;line-height:1;text-transform:uppercase;letter-spacing:.01em;">After the match</h2>
+        <sc-if value="{{ after.pending }}" hint-placeholder-val="{{ true }}">
+          <div style="margin-top:14px;border:1px dashed var(--mute);padding:14px 16px;max-width:760px;font-family:'IBM Plex Mono',monospace;font-size:13px;line-height:1.5;color:var(--mute);">{{ after.note }}</div>
+        </sc-if>
+        <sc-if value="{{ after.done }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-top:14px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px 24px;max-width:900px;">
+            <div style="border-top:2px solid var(--ink);padding-top:8px;">
+              <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);">Final</div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:28px;font-weight:600;line-height:1;margin-top:6px;">{{ after.score }}</div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);margin-top:4px;">Projected {{ after.projected }}</div>
+            </div>
+            <div style="border-top:2px solid var(--ink);padding-top:8px;">
+              <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);">Model pick</div>
+              <div style="display:flex;align-items:center;gap:10px;margin-top:6px;flex-wrap:wrap;">
+                <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:24px;line-height:1;text-transform:uppercase;">{{ after.pickLabel }}</span>
+                <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;background:{{ after.gradeBg }};color:{{ after.gradeFg }};">{{ after.grade }}</span>
+              </div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);margin-top:4px;">{{ after.pickSub }}</div>
+            </div>
+            <div style="border-top:2px solid var(--ink);padding-top:8px;">
+              <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);">Chance we gave the result</div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:28px;font-weight:600;line-height:1;margin-top:6px;">{{ after.resultProb }}</div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);margin-top:4px;">{{ after.resultNote }}</div>
+            </div>
+          </div>
+        </sc-if>
+      </section>
+
+    </sc-if>
+
+    <footer style="border-top:1px solid var(--ink);padding:18px 0 0;display:flex;flex-wrap:wrap;gap:6px 24px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">
+      <span>© 2026 Maverick Hightower</span>
+      <a href="Board.dc.html" style="display:inline-flex;align-items:center;min-height:44px;">Board</a>
+      <a href="Record.dc.html" style="display:inline-flex;align-items:center;min-height:44px;">Track record</a>
+      <a href="Methods.dc.html" style="display:inline-flex;align-items:center;min-height:44px;">Methods</a>
+      <a href="https://maverickhightower.com/about.html" style="display:inline-flex;align-items:center;min-height:44px;">About</a>
+      <a href="https://x.com/mavhightower" style="display:inline-flex;align-items:center;min-height:44px;">@mavhightower</a>
+    </footer>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;scenario&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Sample week&quot;],&quot;default&quot;:&quot;Sample week&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Preview&quot;},&quot;game&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ARS v LIV · best bet&quot;,&quot;BRE v TOT · lean&quot;,&quot;MCI v CHE · no pick&quot;,&quot;NEW v WOL · not priced&quot;],&quot;default&quot;:&quot;ARS v LIV · best bet&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Preview&quot;},&quot;afterGame&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Preview&quot;}}">
+class Component extends DCLogic {
+  state = { data: null, record: null, err: "", loadedFor: null };
+  onSite() { return /(^|\.)maverickhightower\.com$/.test(location.hostname); }
+  async load() {
+    const want = [this.props.scenario || "", location.search].join("|");
+    if (this.state.loadedFor === want) return;
+    this.setState({ loadedFor: want });
+    const [S, F] = await Promise.all([import("./lib/sports.js"), import("./lib/format.js")]);
+    this.S = S; this.F = F;
+    const { deployed } = await S.detectSport("epl");
+    // On the real domain this page always reads the real board. Off it, the sample week.
+    const scenario = this.onSite() ? "Normal" : this.props.scenario || "Sample week";
+    const live = this.onSite() || scenario === "Normal"; void deployed;
+    let url = live ? "./data/board.json" : "./data/sample/board_game.json";
+    const rurl = live ? "./data/record.json" : "./data/sample/record.json";
+    const get = async (u) => { try { const r = await fetch(u, { cache: "no-store" }); return r.ok ? await r.json() : null; } catch (_) { return null; } };
+    // ?date=YYYY-MM-DD (or an archive file name) resolves as Board.dc.html?date= does, against the frozen board.
+    const date = new URLSearchParams(location.search).get("date");
+    let archived = null, err = "";
+    if (date) {
+      const idx = (await get("./data/history/index.json")) || { dates: [] };
+      const hit = (idx.dates || []).find((d) => d.date === date || d.file === date);
+      if (hit) { url = `./data/history/${hit.file}`; archived = hit; } else err = `No archived board for ${date}.`;
+    }
+    // Paint from the Board's hand-off first (sessionStorage, written on the card link), then replace with the fetch.
+    const gid = new URLSearchParams(location.search).get("id");
+    if (!date && gid && !this.state.data) { try { const c = JSON.parse(sessionStorage.getItem("mh.game." + gid) || "null"); if (c && c.game && Date.now() - c.at < 6 * 3600e3) this.setState({ data: { generatedAt: c.generatedAt, teams: c.teams, games: [c.game] }, isSample: !live }); } catch (_) { /* ignore */ } }
+    const [data, record, graded] = await Promise.all([err ? null : get(url), get(rurl), archived ? get(`./data/history/graded/${archived.date}.json`) : null]);
+    // A past match's final is kept beside its frozen board (history/graded/<day>.json, {id: final}).
+    if (data && graded && typeof graded === "object") for (const x of data.games || []) if (!x.final && graded[String(x.id)]) x.final = graded[String(x.id)];
+    this.setState({ data, record, archived, dateParam: date || "", isSample: !live, err: err || (data ? "" : "Board unreachable") });
+  }
+  componentDidMount() { this.load(); }
+  componentDidUpdate() { this.load(); }
+  renderVals() {
+    const F = this.F, d = this.state.data, dateQ = this.state.dateParam ? `&date=${encodeURIComponent(this.state.dateParam)}` : "", boardHref = this.state.dateParam ? `Board.dc.html?date=${encodeURIComponent(this.state.dateParam)}` : "Board.dc.html";
+    const tabsList = [["This week", "Board.dc.html"], ["Results", "Results.dc.html"], ["Season", "Season.dc.html"], ["Record", "Record.dc.html"], ["Tracker", "Tracker.dc.html"]];
+    const tabs = tabsList.map(([label, href]) => ({ label, href, current: undefined, shadow: "none", color: "var(--mute)" }));
+    const base = { tabs, boardHref, boardLabel: this.state.dateParam ? "← Archived board" : "← This week's board", isSample: !!this.state.isSample, builtLine: "", nav: { show: false } };
+    if (!d) return { ...base, ready: false, missing: !!this.state.err, missingNote: this.state.err ? "The board could not be loaded. Try again in a minute." : "" };
+    const q = new URLSearchParams(location.search);
+    const games = d.games || [];
+    const PREVIEW = { "ARS v LIV · best bet": "401751", "BRE v TOT · lean": "401752", "MCI v CHE · no pick": "401753", "NEW v WOL · not priced": "401754" };
+    const wantId = q.get("id") || (this.state.isSample ? PREVIEW[this.props.game] || PREVIEW["ARS v LIV · best bet"] : null) || (games[0] || {}).id;
+    const g = games.find((x) => String(x.id) === String(wantId));
+    const arc = this.state.archived;
+    const builtLine = arc ? `Archived · board for ${arc.date}, as published` : d.generatedAt ? `Board built ${F.fmtUpdated(d.generatedAt)}` : "";
+    if (!g) return { ...base, builtLine, ready: false, missing: true, missingNote: `No match with id ${wantId || "—"} is on the board built ${d.generatedAt ? F.fmtUpdated(d.generatedAt) : "this week"}. Past boards are kept in the archive.` };
+
+    const T = d.teams || {}, h = g.home || {}, a = g.away || {}, th = T[h.abbr] || {}, ta = T[a.abbr] || {};
+    const pct1 = (p) => `${(p * 100).toFixed(1)}%`, pct0 = (p) => `${Math.round(p * 100)}%`;
+    const num = (p) => typeof p === "number" && Number.isFinite(p);
+    const odds = (n) => (num(n) ? F.fmtOdds(n) : "—");
+    const toAm = (p) => (!num(p) || p <= 0 || p >= 1 ? null : p >= 0.5 ? -Math.round((100 * p) / (1 - p)) : Math.round((100 * (1 - p)) / p));
+    const logoOf = (abbr) => { const t = T[abbr] || {}; return t.logo === null ? "" : t.logo || `./logos/${encodeURIComponent(abbr)}.png`; };
+    const hideLogo = (e) => { e.currentTarget.style.display = "none"; };
+    const showLogo = (e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.background = "var(--paper)"; };
+    const hColor = th.color || "#6b6e7a", aColor = ta.color || "#6b6e7a";
+    // Dark club colours vanish on the paper; a muted ring keeps the circle visible.
+    const lum = (hex) => { const m = /^#?([0-9a-f]{6})$/i.exec(hex || ""); if (!m) return 1; const n = parseInt(m[1], 16); return (0.2126 * ((n >> 16) & 255) + 0.7152 * ((n >> 8) & 255) + 0.0722 * (n & 255)) / 255; };
+    const side = (s, t, role, color, align, textAlign) => ({ abbr: s.abbr, name: t.name || s.abbr, meta: [s.record ? `Form ${s.record}` : "", role].filter(Boolean).join(" · "), color, fg: t.fg || "#fff", align, textAlign, logo: logoOf(s.abbr), hasLogo: !!logoOf(s.abbr), onLogoLoad: showLogo, onLogoError: hideLogo, ring: lum(color) < 0.12 ? "var(--rule)" : "transparent" });
+    // Prev / next match on the same board, in kick-off order.
+    const ordered = games.slice().sort((x, y) => Date.parse(x.kickoff) - Date.parse(y.kickoff) || String(x.id).localeCompare(String(y.id)));
+    const idx = ordered.findIndex((x) => String(x.id) === String(g.id)), prevG = ordered[idx - 1], nextG = ordered[idx + 1];
+    const navLink = (x, dirWord) => x ? { href: `Game.dc.html?id=${encodeURIComponent(x.id)}${dateQ}`, aria: `${dirWord} match: ${x.home.abbr} v ${x.away.abbr}`, color: "var(--ink)", events: "auto", disabled: undefined } : { href: "#", aria: `No ${dirWord.toLowerCase()} match`, color: "var(--rule)", events: "none", disabled: "true" };
+    const pv = navLink(prevG, "Previous"), nx = navLink(nextG, "Next");
+    const nav = { show: ordered.length > 1, label: `${idx + 1} of ${ordered.length}`, prevHref: pv.href, prevAria: pv.aria, prevColor: pv.color, prevEvents: pv.events, prevDisabled: pv.disabled, nextHref: nx.href, nextAria: nx.aria, nextColor: nx.color, nextEvents: nx.events, nextDisabled: nx.disabled };
+    const sides = [side(h, th, "Home", hColor, "flex-start", "left"), side(a, ta, "Away", aColor, "flex-end", "right")];
+    const mr = g.matchResult || {}, tot = g.total || {}, bt = g.btts || {}, dnb = g.drawNoBet || {}, res = g.result || {}, fair = res.fair || {};
+    const priced = [mr.home, mr.draw, mr.away, tot.over, tot.under, bt.yes, bt.no, dnb.home, dnb.away].some(num);
+    const hasWin = num(h.winProb) && num(a.winProb) && num(g.drawProb);
+    const hw = hasWin ? h.winProb : 1 / 3, aw = hasWin ? a.winProb : 1 / 3, dw = hasWin ? g.drawProb : 1 / 3;
+
+    // Uncertainty note: the calibration bucket this match's favourite falls in, from record.json.
+    const rec = this.state.record, fav = Math.max(hw, aw, dw), bucket = rec && (rec.buckets || []).find((b) => b.games > 0 && fav >= b.low && fav < b.high);
+    const bandNote = hasWin && bucket && bucket.interval ? `favourites rated ${pct0(bucket.low)}–${bucket.high >= 1 ? "100%" : pct0(bucket.high)} have come in ${pct0(bucket.interval[0])}–${pct0(bucket.interval[1])} of the time (${bucket.games} matches)` : rec && rec.nights === 0 ? "ranges appear once matchdays settle" : "point estimate";
+
+    // Verdict lines
+    const p = g.pick && g.pick.kind !== "pass" ? g.pick : { kind: "none" };
+    const pick = { isBet: p.kind === "bet", isLean: p.kind === "lean", isNone: priced && p.kind !== "bet" && p.kind !== "lean", label: p.label || "",
+      sub: p.kind === "bet" ? `${odds(p.price)}${p.book ? ` at ${p.book}` : ""}${num(p.units) ? ` · ${p.units} ${p.units === 1 ? "unit" : "units"}` : ""}${num(p.edgePct) ? ` · ${F.fmtSigned(p.edgePct, 1)}% edge` : ""}` : p.kind === "lean" ? `${odds(p.price)}${p.book ? ` at ${p.book}` : ""} · a small edge, not enough to bet` : "" };
+
+    // The layers: strength → home edge → last five → who is missing, each with the three chances after it.
+    const facts = Array.isArray(g.factors) ? g.factors : [];
+    const hasFactors = hasWin && facts.length > 0;
+    const HREF = { strength: "Methods.dc.html#strength", home_edge: "Methods.dc.html#home-edge", form: "Methods.dc.html#form", availability: "Methods.dc.html#availability" };
+    const PLAIN = { strength: "Season strength", home_edge: "Home edge", form: "Last five", availability: "Who is missing" };
+    const R = g.ratings || {}, rh = R.home || {}, ra = R.away || {};
+    const lead = (dl) => (dl > 0 ? h.abbr : a.abbr), lag = (dl) => (dl > 0 ? a.abbr : h.abbr), tiny = (dl) => Math.abs(dl) < 0.003;
+    const missingOf = (r) => (Array.isArray(r.missing) ? r.missing.filter(Boolean) : []);
+    const reason = (f) => {
+      const dl = f.delta || 0;
+      switch (f.key) {
+        case "strength": return `${lead(dl)} has been the stronger side this season, scoring more and conceding less than ${lag(dl)} once the opposition is accounted for.`;
+        case "home_edge": return dl >= 0 ? `${h.abbr} is at home, and its own record at home is worth ${num(rh.homeEdge) ? `about ${(Math.abs(rh.homeEdge) * 100).toFixed(0)}% more goals` : "a little"} than a neutral ground.` : `${h.abbr} is at home, but its home record is weaker than most clubs', so the home edge is small.`;
+        case "form": return `${lead(dl)} has played better over its last five matches than its season rating says.`;
+        case "availability": { const ml = missingOf(lag(dl) === h.abbr ? rh : ra); return ml.length ? `${lag(dl)} is missing ${ml.slice(0, 3).join(", ")}${ml.length > 3 ? ` and ${ml.length - 3} more` : ""}.` : `${lag(dl)} is missing regulars, or ${lead(dl)} has players back.`; }
+        default: return "";
+      }
+    };
+
+    // Our call, in words, and the biggest reasons.
+    const order = [["home", hw, th.name || h.abbr], ["away", aw, ta.name || a.abbr], ["draw", dw, "the draw"]].sort((x, y) => y[1] - x[1]);
+    const [favKey, favP, favName] = order[0];
+    const headline = !hasWin ? "" : favKey === "draw" ? `Nothing to split them. The draw is our most likely result at ${pct0(favP)}.` : favP < 0.42 ? `Close to a three-way toss-up. We give ${favName} a slight edge at ${pct0(favP)}.` : favP < 0.55 ? `We lean ${favName}, ${pct0(favP)} to win, with the draw at ${pct0(dw)}.` : `We like ${favName} to win. We give them a ${pct0(favP)} chance.`;
+    const scoreLine = num(h.projGoals) && num(a.projGoals) ? `Projected score: ${h.abbr} ${h.projGoals.toFixed(1)} – ${a.projGoals.toFixed(1)} ${a.abbr}` : "";
+    let prevW = null;
+    const ranked = facts.map((f) => { const dl = num(f.delta) ? f.delta : prevW === null ? 0 : f.homeWin - prevW; prevW = f.homeWin; return { f, dl }; })
+      .filter((x) => !tiny(x.dl)).sort((x, y) => Math.abs(y.dl) - Math.abs(x.dl)).slice(0, 3);
+    const why = hasWin ? ranked.map(({ f, dl }) => ({ label: PLAIN[f.key] || f.label, text: reason({ ...f, delta: dl }), color: dl > 0 ? hColor : aColor })) : [];
+
+    // Head to head, every row as "% better than an average side", so plus always reads as good.
+    const hasRatings = num(rh.attack) && num(ra.attack);
+    const better = (label, ka, lowerBetter) => {
+      const hv = rh[ka], av = ra[ka]; if (!num(hv) || !num(av)) return null;
+      const sc = (v) => (lowerBetter ? 1 - v : v - 1) * 100, sh = sc(hv), sa = sc(av), r = (x) => Math.round(x);
+      const win = r(sh) === r(sa) ? null : sh > sa ? "home" : "away";
+      const show = (x) => (r(x) === 0 ? "Avg" : `${r(x) > 0 ? "+" : "−"}${Math.abs(r(x))}%`);
+      return { label, home: show(sh), away: show(sa), homeWeight: win === "home" ? 600 : 400, awayWeight: win === "away" ? 600 : 400, homeColor: win === "away" ? "var(--mute)" : "var(--ink)", awayColor: win === "home" ? "var(--mute)" : "var(--ink)" };
+    };
+    const cmp = hasRatings ? [better("Scoring", "attack", false), better("Keeping it out", "defence", true), better("Last five, attack", "formAttack", false), better("Last five, defence", "formDefence", true), better("Strength available", "attackAvailable", false)].filter(Boolean) : [];
+
+    // Who is missing
+    const absenceCard = (s, r, color) => {
+      const names = missingOf(r), av = num(r.attackAvailable) ? r.attackAvailable : null;
+      if (!R.home && !R.away) return { abbr: s.abbr, color, headline: "Not checked", nameColor: "var(--mute)", names: "", tag: "No availability list reached this board" };
+      if (!names.length) return { abbr: s.abbr, color, headline: "Nobody listed out", nameColor: "var(--ink)", names: "", tag: "Full strength, as far as the list knows" };
+      return { abbr: s.abbr, color, headline: `${names.length} regular${names.length === 1 ? "" : "s"} out`, nameColor: "var(--ink)", names: names.join(", "), tag: av !== null ? `Attack at ${pct0(av)} of full strength` : "" };
+    };
+    const absences = [absenceCard(h, rh, hColor), absenceCard(a, ra, aColor)];
+    const missIntro = (R.home || R.away) ? "Regulars the official fantasy game lists as injured, suspended or doubtful, weighed by how much of the club's attack they carry. Read before kick-off; a late team-sheet change is not in it." : "The availability list did not reach this board, so every club is priced at full strength.";
+
+    // Markets
+    const isPick = (market, sideKey) => p.kind !== "none" && p.market === market && p.side === sideKey;
+    const tagOf = (market, sideKey) => (isPick(market, sideKey) ? (p.kind === "bet" ? { tag: "Best bet", tagBg: "var(--ink)", tagFg: "var(--paper)", tagStyle: "solid" } : { tag: "Lean", tagBg: "transparent", tagFg: "var(--ink)", tagStyle: "dashed" }) : { tag: "" });
+    const moveOf = (o, c) => (num(o) && num(c) && o !== c ? `${odds(o)} → ${odds(c)}` : "");
+    const row = (label, chance, best, market, sideKey, first, open) => ({ label, chance: num(chance) ? pct1(chance) : "—", best: odds(best), move: moveOf(open, best), ...tagOf(market, sideKey), weight: isPick(market, sideKey) ? 600 : 500, ruleColor: first ? "var(--ink)" : "var(--rule-2)" });
+    const markets = [];
+    if (priced) {
+      markets.push(row(`${h.abbr} to win`, hw, mr.home, "1x2", "home", false, null));
+      markets.push(row("Draw", dw, mr.draw, "1x2", "draw", false, null));
+      markets.push(row(`${a.abbr} to win`, aw, mr.away, "1x2", "away", false, null));
+      if (num(dnb.home) || num(dnb.away)) {
+        markets.push(row(`${h.abbr} draw no bet`, dnb.homeProb, dnb.home, "draw_no_bet", "home", true, dnb.openHome));
+        markets.push(row(`${a.abbr} draw no bet`, num(dnb.homeProb) ? 1 - dnb.homeProb : null, dnb.away, "draw_no_bet", "away", false, dnb.openAway));
+      }
+      if (num(tot.over) || num(tot.under)) {
+        markets.push(row(`Over ${(tot.line || 2.5).toFixed(1)} goals`, tot.overProb, tot.over, "total_2_5", "over", true, tot.openOver));
+        markets.push(row(`Under ${(tot.line || 2.5).toFixed(1)} goals`, num(tot.overProb) ? 1 - tot.overProb : null, tot.under, "total_2_5", "under", false, tot.openUnder));
+      }
+      if (num(bt.yes) || num(bt.no)) {
+        markets.push(row("Both teams to score", bt.yesProb, bt.yes, "btts", "yes", true, bt.openYes));
+        markets.push(row("Not both to score", num(bt.yesProb) ? 1 - bt.yesProb : null, bt.no, "btts", "no", false, bt.openNo));
+      }
+    }
+    const oddsNote = p.kind !== "none" && !markets.some((m) => m.tag) ? `The pick on this match, ${p.label}, is on a market not listed here (${String(p.market || "").replace(/_/g, " ")}).` : res.excluded ? "The match-result market is excluded from selection this week; its chances are shown for the record." : res.fairUnavailable ? `No fair price: ${res.fairUnavailable}.` : "";
+
+    // After the match: `g.final {home, away, finish, pickResult}` when the builder writes it; the preview toggle shows the shape.
+    let fin = g.final;
+    if (!fin && this.state.isSample && this.props.afterGame) fin = { home: 2, away: 1, finish: "REG", pickResult: p.kind === "none" ? null : p.side === "home" || p.side === "over" || p.side === "yes" ? "win" : "loss" };
+    const GR = { win: ["Win", "var(--win)", "var(--on-win)"], loss: ["Loss", "var(--alert)", "var(--on-alert)"], push: ["Push", "var(--rule)", "var(--ink)"], void: ["Void", "var(--rule)", "var(--ink)"] };
+    let after;
+    if (fin && num(fin.home) && num(fin.away)) {
+      const resKey = fin.home > fin.away ? "home" : fin.home < fin.away ? "away" : "draw", rp = resKey === "home" ? hw : resKey === "away" ? aw : dw, resName = resKey === "home" ? h.abbr : resKey === "away" ? a.abbr : "the draw";
+      const gr = GR[fin.pickResult] || ["Not graded", "transparent", "var(--mute)"];
+      after = { pending: false, done: true, score: `${h.abbr} ${fin.home} – ${fin.away} ${a.abbr}`, projected: num(h.projGoals) && num(a.projGoals) ? `${h.projGoals.toFixed(2)} – ${a.projGoals.toFixed(2)}` : "—",
+        pickLabel: p.kind === "none" ? "No play" : p.label, grade: p.kind === "none" ? "Not graded" : gr[0], gradeBg: p.kind === "none" ? "transparent" : gr[1], gradeFg: p.kind === "none" ? "var(--mute)" : gr[2], pickSub: p.kind === "none" ? "Nothing cleared the bar, so nothing was graded." : `${String(p.market || "").replace(/_/g, " ")} · ${odds(p.price)}`,
+        resultProb: hasWin ? pct1(rp) : "—", resultNote: hasWin ? (resKey === favKey ? `${resName} was our favourite` : `${resName} was not our favourite`) : "" };
+    } else {
+      const started = Date.parse(g.kickoff) < Date.now();
+      after = { pending: true, done: false, note: started ? "In progress or awaiting the final. The score and the pick's grade land here the morning after, with the Results page." : `Kick-off ${F.fmtTime(g.kickoff)}. The final score and whether the pick won land here the morning after, with the Results page.` };
+    }
+
+    return { ...base, builtLine, ready: true, missing: false,
+      kicker: `${F.fmtDayLong(g.kickoff)} · Premier League`,
+      sides, time: F.fmtTime(g.kickoff), tz: F.tzName(), venueLine: [g.venue, g.city].filter(Boolean).join(" · ") || "Venue TBA", tvLine: g.tv ? `TV ${g.tv}` : "",
+      unpriced: !priced, priced, hasWin, headline, scoreLine, why, hasWhy: why.length > 0, homeWin: pct1(hw), drawWin: pct1(dw), awayWin: pct1(aw), homePct: `${(hw * 100).toFixed(1)}%`, drawPct: `${(dw * 100).toFixed(1)}%`, homeColor: hColor, awayColor: aColor, homeAbbr: h.abbr, awayAbbr: a.abbr,
+      barAria: `${th.name || h.abbr} ${pct1(hw)}, draw ${pct1(dw)}, ${ta.name || a.abbr} ${pct1(aw)}`, bandNote, nav, pick,
+      hasFactors, hasRatings, cmp, absences, missIntro, markets, oddsNote, after };
+  }
+}
+</script>
+</body>
+</html>

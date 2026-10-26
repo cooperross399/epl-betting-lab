@@ -1,0 +1,972 @@
+{
+ "generatedAt": "2026-10-23T09:40:00Z",
+ "season": "2026–27",
+ "windowLabel": "Sat 24 Oct through Mon 26 Oct",
+ "windowStart": "2026-10-24",
+ "windowEnd": "2026-10-26",
+ "notice": null,
+ "unitDollars": 25.0,
+ "includedMarkets": [
+  "1x2",
+  "draw_no_bet",
+  "total_2_5",
+  "btts"
+ ],
+ "excludedMarkets": [],
+ "record": {
+  "settled": 63,
+  "won": 30,
+  "stakedUnits": 9.15,
+  "profitUnits": -0.16,
+  "roiPct": -1.7,
+  "pending": 4,
+  "awaitingResults": 0,
+  "void": 4,
+  "clvPct": null,
+  "betsToAnswer": 1500
+ },
+ "teams": {
+  "ARS": {
+   "name": "Arsenal",
+   "short": "Arsenal",
+   "color": "#EF0107",
+   "fg": "#fff"
+  },
+  "EVE": {
+   "name": "Everton",
+   "short": "Everton",
+   "color": "#003399",
+   "fg": "#fff"
+  },
+  "LIV": {
+   "name": "Liverpool",
+   "short": "Liverpool",
+   "color": "#C8102E",
+   "fg": "#fff"
+  },
+  "CRY": {
+   "name": "Crystal Palace",
+   "short": "Crystal Palace",
+   "color": "#1B458F",
+   "fg": "#fff"
+  },
+  "BOU": {
+   "name": "Bournemouth",
+   "short": "Bournemouth",
+   "color": "#DA291C",
+   "fg": "#fff"
+  },
+  "FUL": {
+   "name": "Fulham",
+   "short": "Fulham",
+   "color": "#111111",
+   "fg": "#fff"
+  },
+  "MCI": {
+   "name": "Man City",
+   "short": "Man City",
+   "color": "#6CABDD",
+   "fg": "#000"
+  },
+  "BUR": {
+   "name": "Burnley",
+   "short": "Burnley",
+   "color": "#6C1D45",
+   "fg": "#fff"
+  },
+  "NEW": {
+   "name": "Newcastle",
+   "short": "Newcastle",
+   "color": "#241F20",
+   "fg": "#fff"
+  },
+  "WOL": {
+   "name": "Wolves",
+   "short": "Wolves",
+   "color": "#FDB913",
+   "fg": "#000"
+  },
+  "CHE": {
+   "name": "Chelsea",
+   "short": "Chelsea",
+   "color": "#034694",
+   "fg": "#fff"
+  },
+  "BHA": {
+   "name": "Brighton",
+   "short": "Brighton",
+   "color": "#0057B8",
+   "fg": "#fff"
+  },
+  "BRE": {
+   "name": "Brentford",
+   "short": "Brentford",
+   "color": "#E30613",
+   "fg": "#fff"
+  },
+  "TOT": {
+   "name": "Tottenham",
+   "short": "Tottenham",
+   "color": "#132257",
+   "fg": "#fff"
+  },
+  "AVL": {
+   "name": "Aston Villa",
+   "short": "Aston Villa",
+   "color": "#670E36",
+   "fg": "#fff"
+  },
+  "WHU": {
+   "name": "West Ham",
+   "short": "West Ham",
+   "color": "#7A263A",
+   "fg": "#fff"
+  },
+  "LEE": {
+   "name": "Leeds",
+   "short": "Leeds",
+   "color": "#FFCD00",
+   "fg": "#000"
+  },
+  "SUN": {
+   "name": "Sunderland",
+   "short": "Sunderland",
+   "color": "#EB172B",
+   "fg": "#fff"
+  },
+  "MUN": {
+   "name": "Man United",
+   "short": "Man United",
+   "color": "#DA291C",
+   "fg": "#fff"
+  },
+  "NFO": {
+   "name": "Nott'm Forest",
+   "short": "Nott'm Forest",
+   "color": "#DD0000",
+   "fg": "#fff"
+  }
+ },
+ "games": [
+  {
+   "id": "401751",
+   "kickoff": "2026-10-24T16:30:00Z",
+   "venue": "Emirates Stadium",
+   "city": "London",
+   "tv": "NBC",
+   "started": false,
+   "home": {
+    "abbr": "ARS",
+    "record": "W5 D2 L1",
+    "projGoals": 1.47,
+    "winProb": 0.351
+   },
+   "away": {
+    "abbr": "LIV",
+    "record": "W4 D3 L1",
+    "projGoals": 1.61,
+    "winProb": 0.41
+   },
+   "drawProb": 0.239,
+   "result": {
+    "fair": {
+     "home": 185,
+     "draw": 319,
+     "away": 144
+    },
+    "excluded": false
+   },
+   "total": {
+    "line": 2.5,
+    "overProb": 0.594,
+    "over": -154,
+    "under": 139,
+    "openOver": -159,
+    "openUnder": 142
+   },
+   "btts": {
+    "yesProb": 0.616,
+    "yes": -165,
+    "no": 153,
+    "openYes": -161,
+    "openNo": 151
+   },
+   "drawNoBet": {
+    "homeProb": 0.462,
+    "home": 115,
+    "away": -119,
+    "openHome": 119,
+    "openAway": -122
+   },
+   "pick": {
+    "kind": "bet",
+    "market": "1x2",
+    "label": "Arsenal to win",
+    "price": 185,
+    "book": "DraftKings",
+    "tier": "B",
+    "units": 0.5,
+    "edgePct": 1.1,
+    "modelProb": 0.351,
+    "betDownTo": 173,
+    "side": "home",
+    "line": null
+   },
+   "factors": [
+    {
+     "key": "strength",
+     "label": "Season strength",
+     "homeWin": 0.4339,
+     "draw": 0.2407,
+     "awayWin": 0.3255,
+     "delta": null,
+     "homeGoals": 1.63,
+     "awayGoals": 1.38
+    },
+    {
+     "key": "home_edge",
+     "label": "Home edge",
+     "homeWin": 0.3734,
+     "draw": 0.2431,
+     "awayWin": 0.3835,
+     "delta": -0.0604,
+     "homeGoals": 1.49,
+     "awayGoals": 1.51
+    },
+    {
+     "key": "form",
+     "label": "Last five",
+     "homeWin": 0.3657,
+     "draw": 0.2369,
+     "awayWin": 0.3974,
+     "delta": -0.0077,
+     "homeGoals": 1.53,
+     "awayGoals": 1.6
+    },
+    {
+     "key": "availability",
+     "label": "Who is missing",
+     "homeWin": 0.3513,
+     "draw": 0.2388,
+     "awayWin": 0.4099,
+     "delta": -0.0144,
+     "homeGoals": 1.47,
+     "awayGoals": 1.61
+    }
+   ],
+   "ratings": {
+    "home": {
+     "attack": 1.38,
+     "defence": 0.72,
+     "homeEdge": -0.036,
+     "formAttack": 1.0,
+     "formDefence": 1.002,
+     "attackAvailable": 0.945,
+     "defenceAvailable": 1.033,
+     "missing": [
+      "Bukayo Saka",
+      "Gabriel"
+     ],
+     "formGames": 5,
+     "homeMatches": 38
+    },
+    "away": {
+     "attack": 1.42,
+     "defence": 0.78,
+     "homeEdge": 0.005,
+     "formAttack": 1.06,
+     "formDefence": 1.029,
+     "attackAvailable": 0.97,
+     "defenceAvailable": 1.018,
+     "missing": [
+      "Alisson"
+     ],
+     "formGames": 5,
+     "homeMatches": 38
+    }
+   },
+   "drought": [],
+   "matchResult": {
+    "home": 185,
+    "draw": 287,
+    "away": 137
+   }
+  },
+  {
+   "id": "401752",
+   "kickoff": "2026-10-24T14:00:00Z",
+   "venue": "Gtech Community Stadium",
+   "city": "London",
+   "tv": "Peacock",
+   "started": false,
+   "home": {
+    "abbr": "BRE",
+    "record": "W5 D2 L1",
+    "projGoals": 1.81,
+    "winProb": 0.48
+   },
+   "away": {
+    "abbr": "TOT",
+    "record": "W4 D3 L1",
+    "projGoals": 1.36,
+    "winProb": 0.291
+   },
+   "drawProb": 0.229,
+   "result": {
+    "fair": {
+     "home": 108,
+     "draw": 336,
+     "away": 244
+    },
+    "excluded": false
+   },
+   "total": {
+    "line": 2.5,
+    "overProb": 0.615,
+    "over": -168,
+    "under": 152,
+    "openOver": -173,
+    "openUnder": 155
+   },
+   "btts": {
+    "yesProb": 0.623,
+    "yes": -169,
+    "no": 157,
+    "openYes": -165,
+    "openNo": 155
+   },
+   "drawNoBet": {
+    "homeProb": 0.623,
+    "home": -169,
+    "away": 163,
+    "openHome": -165,
+    "openAway": 160
+   },
+   "pick": {
+    "kind": "lean",
+    "market": "total_2_5",
+    "label": "Over 2.5 goals",
+    "price": -168,
+    "book": "FanDuel",
+    "tier": "LEAN",
+    "units": 0,
+    "edgePct": 2.1,
+    "modelProb": 0.615,
+    "betDownTo": null,
+    "side": "over",
+    "line": 2.5
+   },
+   "factors": [
+    {
+     "key": "strength",
+     "label": "Season strength",
+     "homeWin": 0.3689,
+     "draw": 0.2366,
+     "awayWin": 0.3945,
+     "delta": null,
+     "homeGoals": 1.54,
+     "awayGoals": 1.6
+    },
+    {
+     "key": "home_edge",
+     "label": "Home edge",
+     "homeWin": 0.4375,
+     "draw": 0.2343,
+     "awayWin": 0.3282,
+     "delta": 0.0687,
+     "homeGoals": 1.7,
+     "awayGoals": 1.45
+    },
+    {
+     "key": "form",
+     "label": "Last five",
+     "homeWin": 0.433,
+     "draw": 0.2322,
+     "awayWin": 0.3348,
+     "delta": -0.0045,
+     "homeGoals": 1.72,
+     "awayGoals": 1.49
+    },
+    {
+     "key": "availability",
+     "label": "Who is missing",
+     "homeWin": 0.4801,
+     "draw": 0.2294,
+     "awayWin": 0.2906,
+     "delta": 0.0471,
+     "homeGoals": 1.81,
+     "awayGoals": 1.36
+    }
+   ],
+   "ratings": {
+    "home": {
+     "attack": 1.04,
+     "defence": 1.04,
+     "homeEdge": 0.04,
+     "formAttack": 1.014,
+     "formDefence": 0.964,
+     "attackAvailable": 1.0,
+     "defenceAvailable": 1.0,
+     "missing": [],
+     "formGames": 5,
+     "homeMatches": 38
+    },
+    "away": {
+     "attack": 1.14,
+     "defence": 0.98,
+     "homeEdge": 0.0,
+     "formAttack": 1.068,
+     "formDefence": 0.997,
+     "attackAvailable": 0.915,
+     "defenceAvailable": 1.051,
+     "missing": [
+      "James Maddison",
+      "Dejan Kulusevski",
+      "Dominic Solanke"
+     ],
+     "formGames": 5,
+     "homeMatches": 38
+    }
+   },
+   "drought": [],
+   "matchResult": {
+    "home": 108,
+    "draw": 303,
+    "away": 234
+   }
+  },
+  {
+   "id": "401753",
+   "kickoff": "2026-10-25T15:30:00Z",
+   "venue": "Etihad Stadium",
+   "city": "Manchester",
+   "tv": "USA Network",
+   "started": false,
+   "home": {
+    "abbr": "MCI",
+    "record": "W5 D2 L1",
+    "projGoals": 1.83,
+    "winProb": 0.504
+   },
+   "away": {
+    "abbr": "CHE",
+    "record": "W4 D3 L1",
+    "projGoals": 1.28,
+    "winProb": 0.268
+   },
+   "drawProb": 0.229,
+   "result": {
+    "fair": {
+     "home": -101,
+     "draw": 337,
+     "away": 273
+    },
+    "excluded": false
+   },
+   "total": {
+    "line": 2.5,
+    "overProb": 0.601,
+    "over": -158,
+    "under": 143,
+    "openOver": -163,
+    "openUnder": 146
+   },
+   "btts": {
+    "yesProb": 0.606,
+    "yes": -158,
+    "no": 146,
+    "openYes": -154,
+    "openNo": 144
+   },
+   "drawNoBet": {
+    "homeProb": 0.653,
+    "home": -193,
+    "away": 185,
+    "openHome": -189,
+    "openAway": 182
+   },
+   "pick": {
+    "kind": "pass",
+    "market": "1x2",
+    "label": "No bet",
+    "price": -101,
+    "book": null,
+    "tier": "Pass",
+    "units": 0,
+    "edgePct": -1.4,
+    "modelProb": 0.504,
+    "betDownTo": null,
+    "side": null,
+    "line": null
+   },
+   "factors": [
+    {
+     "key": "strength",
+     "label": "Season strength",
+     "homeWin": 0.5325,
+     "draw": 0.2237,
+     "awayWin": 0.2438,
+     "delta": null,
+     "homeGoals": 1.9,
+     "awayGoals": 1.22
+    },
+    {
+     "key": "home_edge",
+     "label": "Home edge",
+     "homeWin": 0.5657,
+     "draw": 0.2158,
+     "awayWin": 0.2185,
+     "delta": 0.0332,
+     "homeGoals": 1.99,
+     "awayGoals": 1.16
+    },
+    {
+     "key": "form",
+     "label": "Last five",
+     "homeWin": 0.5214,
+     "draw": 0.2246,
+     "awayWin": 0.254,
+     "delta": -0.0443,
+     "homeGoals": 1.89,
+     "awayGoals": 1.26
+    },
+    {
+     "key": "availability",
+     "label": "Who is missing",
+     "homeWin": 0.5035,
+     "draw": 0.2287,
+     "awayWin": 0.2678,
+     "delta": -0.0179,
+     "homeGoals": 1.83,
+     "awayGoals": 1.28
+    }
+   ],
+   "ratings": {
+    "home": {
+     "attack": 1.46,
+     "defence": 0.74,
+     "homeEdge": 0.019,
+     "formAttack": 0.924,
+     "formDefence": 1.03,
+     "attackAvailable": 0.97,
+     "defenceAvailable": 1.018,
+     "missing": [
+      "Rodri"
+     ],
+     "formGames": 5,
+     "homeMatches": 38
+    },
+    "away": {
+     "attack": 1.22,
+     "defence": 0.86,
+     "homeEdge": 0.004,
+     "formAttack": 1.05,
+     "formDefence": 1.026,
+     "attackAvailable": 1.0,
+     "defenceAvailable": 1.0,
+     "missing": [],
+     "formGames": 5,
+     "homeMatches": 38
+    }
+   },
+   "drought": [],
+   "matchResult": {
+    "home": -101,
+    "draw": 304,
+    "away": 263
+   }
+  },
+  {
+   "id": "401754",
+   "kickoff": "2026-10-26T20:00:00Z",
+   "venue": "St James' Park",
+   "city": "Newcastle",
+   "tv": "USA Network",
+   "started": false,
+   "home": {
+    "abbr": "NEW",
+    "record": "W5 D2 L1",
+    "projGoals": 2.17,
+    "winProb": 0.683
+   },
+   "away": {
+    "abbr": "WOL",
+    "record": "W4 D3 L1",
+    "projGoals": 0.82,
+    "winProb": 0.129
+   },
+   "drawProb": 0.188,
+   "result": {
+    "fair": {
+     "home": -215,
+     "draw": 431,
+     "away": 676
+    },
+    "excluded": false,
+    "fairUnavailable": false
+   },
+   "total": {
+    "line": 2.5,
+    "overProb": 0.576
+   },
+   "btts": {
+    "yesProb": 0.497
+   },
+   "drawNoBet": {
+    "homeProb": 0.841
+   },
+   "pick": null,
+   "factors": [
+    {
+     "key": "strength",
+     "label": "Season strength",
+     "homeWin": 0.6134,
+     "draw": 0.2085,
+     "awayWin": 0.1781,
+     "delta": null,
+     "homeGoals": 2.03,
+     "awayGoals": 1.0
+    },
+    {
+     "key": "home_edge",
+     "label": "Home edge",
+     "homeWin": 0.6461,
+     "draw": 0.1972,
+     "awayWin": 0.1567,
+     "delta": 0.0327,
+     "homeGoals": 2.14,
+     "awayGoals": 0.95
+    },
+    {
+     "key": "form",
+     "label": "Last five",
+     "homeWin": 0.6855,
+     "draw": 0.1861,
+     "awayWin": 0.1284,
+     "delta": 0.0394,
+     "homeGoals": 2.2,
+     "awayGoals": 0.83
+    },
+    {
+     "key": "availability",
+     "label": "Who is missing",
+     "homeWin": 0.6828,
+     "draw": 0.1882,
+     "awayWin": 0.1289,
+     "delta": -0.0027,
+     "homeGoals": 2.17,
+     "awayGoals": 0.82
+    }
+   ],
+   "ratings": {
+    "home": {
+     "attack": 1.16,
+     "defence": 0.84,
+     "homeEdge": 0.02,
+     "formAttack": 1.0,
+     "formDefence": 0.946,
+     "attackAvailable": 0.97,
+     "defenceAvailable": 1.018,
+     "missing": [
+      "Alexander Isak"
+     ],
+     "formGames": 5,
+     "homeMatches": 38
+    },
+    "away": {
+     "attack": 0.88,
+     "defence": 1.16,
+     "homeEdge": -0.035,
+     "formAttack": 0.928,
+     "formDefence": 1.029,
+     "attackAvailable": 0.97,
+     "defenceAvailable": 1.018,
+     "missing": [
+      "Matheus Cunha"
+     ],
+     "formGames": 5,
+     "homeMatches": 38
+    }
+   },
+   "drought": [],
+   "matchResult": {
+    "home": null,
+    "draw": null,
+    "away": null
+   }
+  }
+ ],
+ "lineHistory": {
+  "401751": {
+   "ml_home": [
+    {
+     "t": "2026-10-21T08:00:00Z",
+     "v": 195
+    },
+    {
+     "t": "2026-10-21T14:00:00Z",
+     "v": 191
+    },
+    {
+     "t": "2026-10-21T20:00:00Z",
+     "v": 188
+    },
+    {
+     "t": "2026-10-22T02:00:00Z",
+     "v": 188
+    },
+    {
+     "t": "2026-10-22T08:00:00Z",
+     "v": 185
+    }
+   ],
+   "total_over": [
+    {
+     "t": "2026-10-21T08:00:00Z",
+     "v": -159
+    },
+    {
+     "t": "2026-10-21T14:00:00Z",
+     "v": -157
+    },
+    {
+     "t": "2026-10-21T20:00:00Z",
+     "v": -157
+    },
+    {
+     "t": "2026-10-22T02:00:00Z",
+     "v": -154
+    },
+    {
+     "t": "2026-10-22T08:00:00Z",
+     "v": -154
+    }
+   ],
+   "btts_yes": [
+    {
+     "t": "2026-10-21T08:00:00Z",
+     "v": -161
+    },
+    {
+     "t": "2026-10-21T14:00:00Z",
+     "v": -163
+    },
+    {
+     "t": "2026-10-21T20:00:00Z",
+     "v": -165
+    },
+    {
+     "t": "2026-10-22T02:00:00Z",
+     "v": -165
+    },
+    {
+     "t": "2026-10-22T08:00:00Z",
+     "v": -165
+    }
+   ],
+   "dnb_home": [
+    {
+     "t": "2026-10-21T08:00:00Z",
+     "v": 119
+    },
+    {
+     "t": "2026-10-21T14:00:00Z",
+     "v": 117
+    },
+    {
+     "t": "2026-10-21T20:00:00Z",
+     "v": 117
+    },
+    {
+     "t": "2026-10-22T02:00:00Z",
+     "v": 115
+    },
+    {
+     "t": "2026-10-22T08:00:00Z",
+     "v": 115
+    }
+   ]
+  },
+  "401752": {
+   "ml_home": [
+    {
+     "t": "2026-10-21T08:00:00Z",
+     "v": 118
+    },
+    {
+     "t": "2026-10-21T14:00:00Z",
+     "v": 114
+    },
+    {
+     "t": "2026-10-21T20:00:00Z",
+     "v": 111
+    },
+    {
+     "t": "2026-10-22T02:00:00Z",
+     "v": 111
+    },
+    {
+     "t": "2026-10-22T08:00:00Z",
+     "v": 108
+    }
+   ],
+   "total_over": [
+    {
+     "t": "2026-10-21T08:00:00Z",
+     "v": -173
+    },
+    {
+     "t": "2026-10-21T14:00:00Z",
+     "v": -171
+    },
+    {
+     "t": "2026-10-21T20:00:00Z",
+     "v": -171
+    },
+    {
+     "t": "2026-10-22T02:00:00Z",
+     "v": -168
+    },
+    {
+     "t": "2026-10-22T08:00:00Z",
+     "v": -168
+    }
+   ],
+   "btts_yes": [
+    {
+     "t": "2026-10-21T08:00:00Z",
+     "v": -165
+    },
+    {
+     "t": "2026-10-21T14:00:00Z",
+     "v": -167
+    },
+    {
+     "t": "2026-10-21T20:00:00Z",
+     "v": -169
+    },
+    {
+     "t": "2026-10-22T02:00:00Z",
+     "v": -169
+    },
+    {
+     "t": "2026-10-22T08:00:00Z",
+     "v": -169
+    }
+   ],
+   "dnb_home": [
+    {
+     "t": "2026-10-21T08:00:00Z",
+     "v": -165
+    },
+    {
+     "t": "2026-10-21T14:00:00Z",
+     "v": -167
+    },
+    {
+     "t": "2026-10-21T20:00:00Z",
+     "v": -167
+    },
+    {
+     "t": "2026-10-22T02:00:00Z",
+     "v": -169
+    },
+    {
+     "t": "2026-10-22T08:00:00Z",
+     "v": -169
+    }
+   ]
+  },
+  "401753": {
+   "ml_home": [
+    {
+     "t": "2026-10-21T08:00:00Z",
+     "v": -91
+    },
+    {
+     "t": "2026-10-21T14:00:00Z",
+     "v": -95
+    },
+    {
+     "t": "2026-10-21T20:00:00Z",
+     "v": -98
+    },
+    {
+     "t": "2026-10-22T02:00:00Z",
+     "v": -98
+    },
+    {
+     "t": "2026-10-22T08:00:00Z",
+     "v": -101
+    }
+   ],
+   "total_over": [
+    {
+     "t": "2026-10-21T08:00:00Z",
+     "v": -163
+    },
+    {
+     "t": "2026-10-21T14:00:00Z",
+     "v": -161
+    },
+    {
+     "t": "2026-10-21T20:00:00Z",
+     "v": -161
+    },
+    {
+     "t": "2026-10-22T02:00:00Z",
+     "v": -158
+    },
+    {
+     "t": "2026-10-22T08:00:00Z",
+     "v": -158
+    }
+   ],
+   "btts_yes": [
+    {
+     "t": "2026-10-21T08:00:00Z",
+     "v": -154
+    },
+    {
+     "t": "2026-10-21T14:00:00Z",
+     "v": -156
+    },
+    {
+     "t": "2026-10-21T20:00:00Z",
+     "v": -158
+    },
+    {
+     "t": "2026-10-22T02:00:00Z",
+     "v": -158
+    },
+    {
+     "t": "2026-10-22T08:00:00Z",
+     "v": -158
+    }
+   ],
+   "dnb_home": [
+    {
+     "t": "2026-10-21T08:00:00Z",
+     "v": -189
+    },
+    {
+     "t": "2026-10-21T14:00:00Z",
+     "v": -191
+    },
+    {
+     "t": "2026-10-21T20:00:00Z",
+     "v": -191
+    },
+    {
+     "t": "2026-10-22T02:00:00Z",
+     "v": -193
+    },
+    {
+     "t": "2026-10-22T08:00:00Z",
+     "v": -193
+    }
+   ]
+  }
+ },
+ "droughtNote": ""
+}

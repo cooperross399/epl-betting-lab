@@ -290,7 +290,14 @@ jobs:
           # the matchday-state artifact; absent, those props stay ungraded.
           python web/settle_results.py --data dist/data --sport epl \
             --fpl-logs data/processed/fpl_match_logs.csv
-          printf '{"sport":"epl"}' > dist/site.json
+          # The pages beyond the shared four read their own feeds, built after
+          # settlement from the kept nights and the board's own fit: record.json
+          # (Track record, Game), tracker.json (All results), season.json
+          # (Season). No odds are fetched and no credit is spent.
+          python web/build_site_pages.py --lab . --out dist/data
+          # `pages` tells the shared pages' tab strip which pages this site
+          # publishes, in the vocabulary lib/sports.js reads.
+          printf '{"sport":"epl","pages":["season","record","tracker","methods","game"]}' > dist/site.json
 
       - name: The history must not shrink
         # HARD, and deliberately before both the upload and the Pages deploy.

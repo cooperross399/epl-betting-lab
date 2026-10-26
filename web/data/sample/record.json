@@ -1,0 +1,190 @@
+{
+ "generatedAt": "2026-10-23T09:40:00Z",
+ "nights": 18,
+ "games": 90,
+ "buckets": [
+  {
+   "low": 0.3,
+   "high": 0.4,
+   "games": 12,
+   "predicted": 0.386,
+   "actual": 0.417,
+   "interval": [
+    0.193,
+    0.68
+   ]
+  },
+  {
+   "low": 0.4,
+   "high": 0.45,
+   "games": 18,
+   "predicted": 0.427,
+   "actual": 0.333,
+   "interval": [
+    0.163,
+    0.563
+   ]
+  },
+  {
+   "low": 0.45,
+   "high": 0.5,
+   "games": 17,
+   "predicted": 0.466,
+   "actual": 0.588,
+   "interval": [
+    0.36,
+    0.784
+   ]
+  },
+  {
+   "low": 0.5,
+   "high": 0.55,
+   "games": 18,
+   "predicted": 0.525,
+   "actual": 0.556,
+   "interval": [
+    0.337,
+    0.754
+   ]
+  },
+  {
+   "low": 0.55,
+   "high": 0.6,
+   "games": 12,
+   "predicted": 0.574,
+   "actual": 0.583,
+   "interval": [
+    0.32,
+    0.807
+   ]
+  },
+  {
+   "low": 0.6,
+   "high": 0.7,
+   "games": 12,
+   "predicted": 0.643,
+   "actual": 0.75,
+   "interval": [
+    0.468,
+    0.911
+   ]
+  },
+  {
+   "low": 0.7,
+   "high": 1.0,
+   "games": 1,
+   "predicted": 0.705,
+   "actual": 1.0,
+   "interval": [
+    0.207,
+    1.0
+   ]
+  }
+ ],
+ "brier": {
+  "games": 90,
+  "model": 0.5875,
+  "market": 0.5858,
+  "baseline": 0.6667
+ },
+ "movement": {
+  "toward": 6,
+  "against": 11,
+  "flat": 12,
+  "picks": 29
+ },
+ "markets": {
+  "over25": {
+   "games": 90,
+   "buckets": [
+    {
+     "low": 0.45,
+     "high": 0.5,
+     "games": 10,
+     "predicted": 0.478,
+     "actual": 0.5,
+     "interval": [
+      0.237,
+      0.763
+     ]
+    },
+    {
+     "low": 0.5,
+     "high": 0.55,
+     "games": 29,
+     "predicted": 0.522,
+     "actual": 0.621,
+     "interval": [
+      0.44,
+      0.773
+     ]
+    },
+    {
+     "low": 0.55,
+     "high": 0.6,
+     "games": 38,
+     "predicted": 0.571,
+     "actual": 0.658,
+     "interval": [
+      0.499,
+      0.788
+     ]
+    },
+    {
+     "low": 0.6,
+     "high": 0.7,
+     "games": 13,
+     "predicted": 0.624,
+     "actual": 0.692,
+     "interval": [
+      0.424,
+      0.873
+     ]
+    }
+   ]
+  },
+  "btts": {
+   "games": 90,
+   "buckets": [
+    {
+     "low": 0.45,
+     "high": 0.55,
+     "games": 35,
+     "predicted": 0.527,
+     "actual": 0.571,
+     "interval": [
+      0.409,
+      0.72
+     ]
+    },
+    {
+     "low": 0.55,
+     "high": 0.6,
+     "games": 44,
+     "predicted": 0.572,
+     "actual": 0.636,
+     "interval": [
+      0.489,
+      0.762
+     ]
+    },
+    {
+     "low": 0.6,
+     "high": 0.65,
+     "games": 11,
+     "predicted": 0.618,
+     "actual": 0.909,
+     "interval": [
+      0.623,
+      0.984
+     ]
+    }
+   ]
+  }
+ },
+ "dueList": {
+  "entries": 90,
+  "hitRate": 0.4,
+  "voids": 0
+ }
+}

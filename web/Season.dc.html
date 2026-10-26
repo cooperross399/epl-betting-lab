@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <title>Season — Maverick Hightower</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="The Premier League table as it stands and where the model expects each club to finish: projected points, title, top four, top six and relegation chances.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Maverick Hightower">
+  <meta property="og:title" content="Season — Maverick Hightower">
+  <meta property="og:image" content="https://maverickhightower.com/share.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@mavhightower">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root, html[data-sport="nhl"] { color-scheme: dark; --paper:#14151a; --ink:#f1efe9; --ink-2:#d2d0ca; --mute:#a3a6b1; --mute-2:#80838e; --rule:#3a3d49; --rule-2:#262832; --on-ink:#3a3d49; --alert:#f08a72; --on-alert:#14151a; --win:#5cc196; --on-win:#14151a; --desk:#0d0e12; }
+    html[data-sport="epl"], html[data-sport="epl"] [data-theme="light"] { color-scheme: light; --paper:#d9dade; --ink:#14151a; --ink-2:#2a2d36; --mute:#50535e; --mute-2:#767984; --rule:#b4b6bd; --rule-2:#c6c8ce; --on-ink:#c6c8ce; --alert:#9e2c19; --on-alert:#f4f4f6; --win:#22664a; --on-win:#f4f4f6; --desk:#c9cbd0; }
+    @media (prefers-color-scheme: dark) { html[data-sport="epl"] { color-scheme: dark; --paper:#2a2c32; --ink:#ecebe7; --ink-2:#cfcec9; --mute:#a9abb4; --mute-2:#878a94; --rule:#474a53; --rule-2:#363840; --on-ink:#474a53; --alert:#f29077; --on-alert:#1b1c20; --win:#62c79c; --on-win:#1b1c20; --desk:#212328; } }
+    html[data-sport="epl"] [data-theme="dark"] { color-scheme: dark; --paper:#2a2c32; --ink:#ecebe7; --ink-2:#cfcec9; --mute:#a9abb4; --mute-2:#878a94; --rule:#474a53; --rule-2:#363840; --on-ink:#474a53; --alert:#f29077; --on-alert:#1b1c20; --win:#62c79c; --on-win:#1b1c20; --desk:#212328; }
+    html, body { margin: 0; padding: 0; background: var(--paper); color: var(--ink); font-family: "IBM Plex Sans", Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+    * { box-sizing: border-box; }
+    a { color: var(--ink); text-decoration: none; }
+    a:hover { color: var(--ink-2); text-decoration: underline; text-underline-offset: 3px; }
+    a:focus-visible, button:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+    .skip { position: absolute; left: 12px; top: -60px; background: var(--ink); color: var(--paper); padding: 10px 14px; z-index: 10; font-size: 14px; }
+    .skip:focus { top: 12px; }
+    @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; scroll-behavior: auto !important; } }
+  </style>
+  <meta name="theme-color" content="#d9dade">
+  <script>(function(){document.documentElement.setAttribute("data-sport","epl");})();</script>
+</helmet>
+<div data-screen-label="Season" style="min-height:100vh;background:var(--paper);color:var(--ink);">
+  <a href="#main" class="skip">Skip to the table</a>
+  <div style="max-width:1240px;margin:0 auto;padding:0 clamp(16px,3vw,24px) 80px;">
+
+    <header style="border-top:4px solid var(--ink);padding:10px 0 4px;display:flex;align-items:center;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;">
+      <a href="https://maverickhightower.com/" aria-label="Maverick Hightower home" style="display:flex;align-items:center;gap:12px;min-height:44px;">
+        <span aria-hidden="true" style="width:36px;height:36px;background:var(--ink);color:var(--paper);display:grid;place-items:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:18px;letter-spacing:.04em;">MH</span>
+        <span style="display:flex;flex-direction:column;line-height:1.1;">
+          <span style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);">Maverick Hightower</span>
+          <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;letter-spacing:.02em;text-transform:uppercase;">EPL Projections</span>
+        </span>
+      </a>
+      <nav aria-label="Site" style="display:flex;gap:0 18px;font-size:13px;letter-spacing:.1em;text-transform:uppercase;font-weight:500;flex-wrap:wrap;">
+        <a href="Methods.dc.html" style="display:inline-flex;align-items:center;min-height:44px;">Methods</a>
+        <a href="https://maverickhightower.com/about.html" style="display:inline-flex;align-items:center;min-height:44px;">About</a>
+        <a href="https://nhl.maverickhightower.com/" style="display:inline-flex;align-items:center;min-height:44px;">NHL</a>
+        <a href="https://cbb.maverickhightower.com/" style="display:inline-flex;align-items:center;min-height:44px;">CBB</a>
+      </nav>
+    </header>
+
+    <nav aria-label="Board sections" style="position:sticky;top:0;z-index:5;background:var(--paper);border-bottom:1px solid var(--ink);display:flex;overflow-x:auto;scrollbar-width:none;">
+      <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5">
+        <a href="{{ t.href }}" aria-current="{{ t.current }}" style="flex:1 1 0;max-width:150px;min-width:72px;display:flex;align-items:center;justify-content:center;min-height:48px;padding:0 4px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;white-space:nowrap;text-decoration:none;box-shadow:{{ t.shadow }};color:{{ t.color }};">{{ t.label }}</a>
+      </sc-for>
+    </nav>
+
+    <sc-if value="{{ isSample }}" hint-placeholder-val="{{ false }}">
+      <div role="status" style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:start;padding:14px 0;border-bottom:1px solid var(--ink);">
+        <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--ink);padding:4px 9px;">Sample</span>
+        <p style="margin:0;font-size:14px;line-height:1.5;color:var(--ink-2);max-width:760px;text-wrap:pretty;">Sample data. On the live site this page reads the table and the model's projection, rebuilt with every board.</p>
+      </div>
+    </sc-if>
+
+    <section style="padding:36px 0 28px;border-bottom:1px solid var(--ink);">
+      <div style="font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin-bottom:10px;">{{ kicker }}</div>
+      <h1 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:clamp(56px,9vw,112px);line-height:.9;letter-spacing:-.01em;text-transform:uppercase;">Season</h1>
+      <p style="margin:18px 0 0;font-size:15px;line-height:1.5;color:var(--ink-2);max-width:640px;text-wrap:pretty;">{{ intro }}</p>
+    </section>
+
+    <sc-if value="{{ unavailable }}" hint-placeholder-val="{{ false }}">
+      <section id="main" style="padding:40px 0;">
+        <div style="border:1px dashed var(--mute);padding:16px 18px;max-width:760px;">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;line-height:1;text-transform:uppercase;color:var(--mute);">{{ unavailableTitle }}</div>
+          <p style="margin:8px 0 0;font-size:14px;line-height:1.5;color:var(--ink-2);text-wrap:pretty;">{{ unavailableText }}</p>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ ready }}" hint-placeholder-val="{{ true }}">
+
+      <section id="main" aria-label="Season at a glance" style="padding:22px 0 26px;border-bottom:1px solid var(--ink);">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:12px 24px;">
+          <sc-for list="{{ cells }}" as="c" hint-placeholder-count="4">
+            <div style="border-top:3px solid var(--ink);padding-top:10px;">
+              <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);">{{ c.label }}</div>
+              <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:40px;line-height:1;margin-top:8px;">{{ c.value }}</div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-2);margin-top:6px;line-height:1.5;">{{ c.sub }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <sc-if value="{{ notice }}" hint-placeholder-val="{{ false }}">
+          <p style="margin:14px 0 0;font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.5;color:var(--mute);max-width:760px;">{{ notice }}</p>
+        </sc-if>
+      </section>
+
+      <section aria-labelledby="table-h" style="padding:28px 0 26px;border-bottom:1px solid var(--ink);">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;">
+          <h2 id="table-h" style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:28px;line-height:1;text-transform:uppercase;letter-spacing:.01em;">The table, and where it is heading</h2>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">{{ tableStamp }}</span>
+        </div>
+        <p style="margin:6px 0 0;font-size:14px;line-height:1.5;color:var(--ink-2);max-width:720px;text-wrap:pretty;">{{ tableIntro }}</p>
+        <div style="display:flex;gap:0;margin-top:14px;border:1px solid var(--ink);width:max-content;max-width:100%;">
+          <sc-for list="{{ views }}" as="v" hint-placeholder-count="2">
+            <button type="button" onClick="{{ v.onClick }}" aria-pressed="{{ v.pressed }}" style="min-height:44px;padding:0 14px;background:{{ v.bg }};color:{{ v.fg }};border:0;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;">{{ v.label }}</button>
+          </sc-for>
+        </div>
+        <div style="margin-top:14px;overflow-x:auto;scrollbar-width:thin;margin-left:calc(-1 * clamp(16px,3vw,24px));margin-right:calc(-1 * clamp(16px,3vw,24px));padding:0 clamp(16px,3vw,24px);">
+          <div role="table" style="min-width:{{ minWidth }};border-top:2px solid var(--ink);">
+            <div role="row" style="display:grid;grid-template-columns:{{ gridCols }};gap:0 8px;">
+              <sc-for list="{{ cols }}" as="c" hint-placeholder-count="10">
+                <button type="button" role="columnheader" aria-sort="{{ c.sort }}" onClick="{{ c.onClick }}" title="{{ c.title }}" style="min-height:44px;padding:0;background:var(--paper);border:0;color:{{ c.color }};font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;text-align:{{ c.align }};cursor:pointer;position:{{ c.pos }};left:0;white-space:nowrap;">{{ c.label }}{{ c.arrow }}</button>
+              </sc-for>
+            </div>
+            <sc-for list="{{ rows }}" as="r" hint-placeholder-count="20">
+              <div role="row" style="display:grid;grid-template-columns:{{ gridCols }};gap:0 8px;padding:7px 0;border-top:1px solid {{ r.rule }};align-items:center;font-family:'IBM Plex Mono',monospace;font-size:13px;">
+                <span role="cell" style="position:sticky;left:0;background:var(--paper);display:flex;align-items:center;gap:8px;min-width:0;">
+                  <span style="width:22px;text-align:right;color:var(--mute);font-size:12px;">{{ r.rank }}</span>
+                  <span aria-hidden="true" style="position:relative;width:22px;height:22px;border-radius:50%;flex:none;overflow:hidden;background:{{ r.color }};box-shadow:0 0 0 1px var(--rule);"><sc-if value="{{ r.logo }}" hint-placeholder-val="{{ false }}"><img src="{{ r.logo }}" alt="" loading="lazy" decoding="async" onLoad="{{ r.onLogoLoad }}" onError="{{ r.onLogoError }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;padding:2px;"></sc-if></span>
+                  <span style="font-family:'IBM Plex Sans',sans-serif;font-weight:600;font-size:13px;">{{ r.abbr }}</span>
+                  <span style="font-family:'IBM Plex Sans',sans-serif;font-size:12px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ r.name }}</span>
+                </span>
+                <sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="9"><span role="cell" style="text-align:right;font-weight:{{ c.weight }};color:{{ c.color }};white-space:nowrap;">{{ c.v }}</span></sc-for>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:10px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mute);">
+          <span>Thick rule: the line between fourth and fifth, and between seventeenth and eighteenth, on today's table.</span>
+        </div>
+      </section>
+
+      <sc-if value="{{ hasProjection }}" hint-placeholder-val="{{ true }}">
+      <section aria-labelledby="pts-h" style="padding:28px 0 26px;border-bottom:1px solid var(--ink);">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;">
+          <h2 id="pts-h" style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:28px;line-height:1;text-transform:uppercase;letter-spacing:.01em;">Projected points</h2>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">Bar: the middle 80% of simulated seasons · mark: today's points</span>
+        </div>
+        <div style="margin-top:14px;max-width:900px;">
+          <sc-for list="{{ bars }}" as="b" hint-placeholder-count="20">
+            <div style="display:grid;grid-template-columns:minmax(120px,160px) minmax(0,1fr) 56px;gap:0 10px;padding:5px 0;border-top:1px solid var(--rule-2);align-items:center;">
+              <span style="display:flex;align-items:center;gap:8px;min-width:0;font-family:'IBM Plex Sans',sans-serif;font-size:13px;"><span aria-hidden="true" style="width:4px;height:16px;background:{{ b.color }};flex:none;"></span><span style="font-weight:600;">{{ b.abbr }}</span><span style="color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ b.name }}</span></span>
+              <span role="img" aria-label="{{ b.aria }}" style="position:relative;height:16px;background:var(--rule-2);min-width:0;">
+                <span style="position:absolute;top:0;bottom:0;left:{{ b.left }};width:{{ b.width }};background:{{ b.color }};opacity:.55;"></span>
+                <span style="position:absolute;top:-3px;bottom:-3px;left:{{ b.mid }};width:2px;background:var(--ink);"></span>
+                <span style="position:absolute;top:2px;bottom:2px;left:{{ b.now }};width:2px;background:var(--paper);outline:1px solid var(--ink);"></span>
+              </span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;text-align:right;">{{ b.proj }}</span>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mute);margin-top:6px;max-width:900px;"><span>{{ axisLo }} pts</span><span>{{ axisHi }} pts</span></div>
+      </section>
+      </sc-if>
+
+      <section aria-labelledby="read-h" style="padding:28px 0 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:20px 40px;align-items:start;">
+        <div style="border:1px solid var(--ink);padding:16px 18px;">
+          <h2 id="read-h" style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;letter-spacing:.14em;text-transform:uppercase;">How the projection is made</h2>
+          <p style="margin:10px 0 0;font-size:14px;line-height:1.55;color:var(--ink-2);text-wrap:pretty;">{{ method }}</p>
+        </div>
+        <div style="font-size:14px;line-height:1.55;color:var(--ink-2);display:flex;flex-direction:column;gap:10px;text-wrap:pretty;">
+          <p style="margin:0;">The same ratings price <a href="Board.dc.html" style="text-decoration:underline;text-underline-offset:3px;">this week's board</a>; the <a href="Methods.dc.html#strength" style="text-decoration:underline;text-underline-offset:3px;">Methods</a> page says how they are built.</p>
+          <p style="margin:0;">Projected finishes are not bets. No season-long market is priced here, and the chances above are not an edge against any price.</p>
+          <p style="margin:0;color:var(--mute);">Points to date come from the official results; ties on points are broken on goal difference, then goals scored.</p>
+        </div>
+      </section>
+
+    </sc-if>
+
+    <footer style="border-top:1px solid var(--ink);margin-top:40px;padding:18px 0 0;display:flex;flex-wrap:wrap;gap:6px 24px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">
+      <span>© 2026 Maverick Hightower</span>
+      <a href="Board.dc.html" style="display:inline-flex;align-items:center;min-height:44px;">Board</a>
+      <a href="Record.dc.html" style="display:inline-flex;align-items:center;min-height:44px;">Track record</a>
+      <a href="Methods.dc.html" style="display:inline-flex;align-items:center;min-height:44px;">Methods</a>
+      <a href="https://maverickhightower.com/about.html" style="display:inline-flex;align-items:center;min-height:44px;">About</a>
+      <a href="https://x.com/mavhightower" style="display:inline-flex;align-items:center;min-height:44px;">@mavhightower</a>
+    </footer>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;scenario&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Sample season&quot;,&quot;Not projected yet&quot;],&quot;default&quot;:&quot;Sample season&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Preview&quot;}}">
+class Component extends DCLogic {
+  state = { data: null, teams: {}, loadedFor: null, isSample: false, err: "", view: "table", sortKey: "", dir: 1 };
+  onSite() { return /(^|\.)maverickhightower\.com$/.test(location.hostname); }
+  async load() {
+    const want = this.props.scenario || "";
+    if (this.state.loadedFor === want) return;
+    this.setState({ loadedFor: want });
+    const [S, F] = await Promise.all([import("./lib/sports.js"), import("./lib/format.js")]);
+    this.F = F;
+    const { deployed } = await S.detectSport("epl");
+    const scenario = this.onSite() ? "Normal" : this.props.scenario || "Sample season";
+    const live = this.onSite() || scenario === "Normal"; void deployed;
+    const url = live ? "./data/season.json" : scenario === "Not projected yet" ? "./data/sample/season_empty.json" : "./data/sample/season.json";
+    const get = async (u) => { try { const r = await fetch(u, { cache: "no-store" }); return r.ok ? await r.json() : null; } catch (_) { return null; } };
+    const [data, board] = await Promise.all([get(url), get(live ? "./data/board.json" : "./data/sample/board_game.json")]);
+    this.setState({ data, teams: (board && board.teams) || {}, isSample: !live, err: data ? "" : "unreachable" });
+  }
+  componentDidMount() { this.load(); }
+  componentDidUpdate() { this.load(); }
+  sortBy(k) { this.setState((s) => ({ sortKey: s.sortKey === k && s.dir === -1 ? "" : k, dir: s.sortKey === k ? -s.dir : (k === "name" || k === "rank" || k === "projRank" || k === "relegation" ? 1 : -1) })); }
+  renderVals() {
+    const F = this.F, d = this.state.data, T = this.state.teams;
+    const tabsList = [["This week", "Board.dc.html"], ["Results", "Results.dc.html"], ["Season", "Season.dc.html"], ["Record", "Record.dc.html"], ["Tracker", "Tracker.dc.html"]];
+    const tabs = tabsList.map(([label, href]) => ({ label, href, current: label === "Season" ? "page" : undefined, shadow: label === "Season" ? "inset 0 -3px 0 var(--ink)" : "none", color: label === "Season" ? "var(--ink)" : "var(--mute)" }));
+    const base = { tabs, isSample: !!this.state.isSample, kicker: "EPL · 2026–27", intro: "The table as it stands, and where the model expects each club to finish once the remaining fixtures are played out thousands of times on this week's ratings." };
+    if (!d) return { ...base, ready: false, unavailable: !!this.state.err, unavailableTitle: "Season table unreachable", unavailableText: "The table could not be loaded. Try again in a minute.", kicker: this.state.err ? "EPL · season unreachable" : base.kicker };
+    const teams = Array.isArray(d.teams) ? d.teams : [];
+    if (!teams.length) return { ...base, ready: false, unavailable: true, unavailableTitle: "No results yet", unavailableText: d.notice || "The table fills in after the first weekend of the season.", kicker: `EPL · ${d.season || "2026–27"}` };
+
+    const num = (v) => typeof v === "number" && Number.isFinite(v);
+    const pct0 = (p) => `${Math.round(p * 100)}%`, pctS = (p) => (!num(p) ? "—" : p < 0.005 ? "<1%" : p > 0.995 ? ">99%" : pct0(p));
+    const hasProjection = !!d.projected && teams.some((t) => num(t.projPoints));
+    const played = num(d.played) ? d.played : teams.reduce((s, t) => s + (t.played || 0), 0) / 2;
+    const leader = teams.slice().sort((x, y) => (x.rank || 99) - (y.rank || 99))[0];
+    const titleFav = hasProjection ? teams.slice().sort((x, y) => (y.title || 0) - (x.title || 0))[0] : null;
+    const relFav = hasProjection ? teams.slice().sort((x, y) => (y.relegation || 0) - (x.relegation || 0))[0] : null;
+    const cells = [
+      { label: "Matches played", value: String(Math.round(played)), sub: num(d.remaining) ? `${d.remaining} still to play` : "" },
+      { label: "Top of the table", value: leader ? leader.abbr : "—", sub: leader ? `${leader.points} pts from ${leader.played}` : "" },
+      ...(hasProjection ? [{ label: "Title favourite", value: titleFav.abbr, sub: `${pctS(titleFav.title)} of simulated seasons` }, { label: "Most likely to go down", value: relFav.abbr, sub: `${pctS(relFav.relegation)} of simulated seasons` }] : [{ label: "Projection", value: "—", sub: "Not available this build" }]),
+    ];
+    const kicker = `EPL · ${d.season || "2026–27"} · ${d.through ? `through ${F.fmtDateOnly(d.through)}` : ""}`.replace(/ · $/, "");
+
+    // The table, sortable; the default order is today's rank in the table view and projected rank in the projection view.
+    const view = this.state.view;
+    const views = [["table", "Today's table"], ["proj", "Projected finish"]].map(([k, label]) => ({ label, pressed: view === k ? "true" : "false", bg: view === k ? "var(--ink)" : "transparent", fg: view === k ? "var(--paper)" : "var(--ink)", onClick: () => this.setState({ view: k, sortKey: "" }) }));
+    const TABLE_COLS = [["name", "Club", "left", ""], ["played", "P", "right", "Played"], ["won", "W", "right", "Won"], ["drawn", "D", "right", "Drawn"], ["lost", "L", "right", "Lost"], ["gf", "GF", "right", "Goals for"], ["ga", "GA", "right", "Goals against"], ["gd", "GD", "right", "Goal difference"], ["points", "Pts", "right", "Points"], ["projPoints", "Proj", "right", "Projected points"]];
+    const PROJ_COLS = [["name", "Club", "left", ""], ["points", "Pts", "right", "Points today"], ["projPoints", "Proj pts", "right", "Projected points, mean of simulated seasons"], ["range", "80% range", "right", "Middle 80% of simulated seasons"], ["projRank", "Proj pos", "right", "Average finishing position"], ["title", "Title", "right", "Chance of finishing first"], ["top4", "Top 4", "right", "Chance of a top-four finish"], ["top6", "Top 6", "right", "Chance of a top-six finish"], ["relegation", "Down", "right", "Chance of finishing in the bottom three"]];
+    const colsDef = view === "proj" && hasProjection ? PROJ_COLS : TABLE_COLS.filter(([k]) => k !== "projPoints" || hasProjection);
+    const sk = this.state.sortKey, dir = this.state.dir;
+    const cols = colsDef.map(([k, label, align, title]) => ({ label, align, title, sort: sk === k ? (dir > 0 ? "ascending" : "descending") : "none", arrow: sk === k ? (dir > 0 ? " ↑" : " ↓") : "", color: sk === k ? "var(--ink)" : "var(--mute)", pos: k === "name" ? "sticky" : "static", onClick: () => this.sortBy(k) }));
+    const gridCols = `minmax(210px,2fr) repeat(${colsDef.length - 1},minmax(52px,1fr))`, minWidth = `${210 + (colsDef.length - 1) * 60}px`;
+    const defaultKey = view === "proj" && hasProjection ? "projRank" : "rank";
+    const sortVal = (t, k) => (k === "range" ? (t.p90 || 0) - (t.p10 || 0) : k === "name" ? String(t.name || "") : t[k]);
+    const sorted = teams.slice().sort((x, y) => { const k = sk || defaultKey, dd = sk ? dir : 1; const a = sortVal(x, k), b = sortVal(y, k); if (k === "name") return String(a).localeCompare(String(b)) * dd; return ((num(a) ? a : 1e9) - (num(b) ? b : 1e9)) * dd; });
+    const logoOf = (abbr) => { const t = T[abbr] || {}; return t.logo === null ? "" : t.logo || `./logos/${encodeURIComponent(abbr)}.png`; };
+    const hideLogo = (e) => { e.currentTarget.style.display = "none"; }, showLogo = (e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.background = "var(--paper)"; };
+    const sgn = (v) => (!num(v) ? "—" : `${v > 0 ? "+" : v < 0 ? "−" : ""}${Math.abs(v)}`);
+    const f1 = (v) => (num(v) ? v.toFixed(1) : "—");
+    const cellOf = (t, k) => {
+      const w = sk === k ? 600 : 400;
+      switch (k) {
+        case "gd": return { v: sgn(t.gd), weight: w, color: t.gd > 0 ? "var(--ink)" : t.gd < 0 ? "var(--mute)" : "var(--ink-2)" };
+        case "points": return { v: String(t.points ?? "—"), weight: 600, color: "var(--ink)" };
+        case "projPoints": return { v: f1(t.projPoints), weight: view === "proj" ? 600 : w, color: "var(--ink)" };
+        case "range": return { v: num(t.p10) && num(t.p90) ? `${t.p10}–${t.p90}` : "—", weight: w, color: "var(--mute)" };
+        case "projRank": return { v: f1(t.projRank), weight: w, color: "var(--ink-2)" };
+        case "title": case "top4": case "top6": case "relegation": { const p = t[k]; return { v: pctS(p), weight: w, color: !num(p) || p < 0.005 ? "var(--mute)" : k === "relegation" ? (p >= 0.25 ? "var(--alert)" : "var(--ink-2)") : (p >= 0.25 ? "var(--ink)" : "var(--ink-2)") }; }
+        default: return { v: String(t[k] ?? "—"), weight: w, color: "var(--ink-2)" };
+      }
+    };
+    const rows = sorted.map((t, i) => { const prevT = sorted[i - 1]; const boundary = !sk && view !== "proj" && prevT && ((prevT.rank === 4 && t.rank === 5) || (prevT.rank === 17 && t.rank === 18)); return { rank: String(view === "proj" && hasProjection && !sk ? i + 1 : t.rank ?? i + 1), abbr: t.abbr, name: t.name, color: (T[t.abbr] || {}).color || "var(--rule)", logo: logoOf(t.abbr), onLogoLoad: showLogo, onLogoError: hideLogo, rule: boundary ? "var(--ink)" : "var(--rule-2)", cells: colsDef.slice(1).map(([k]) => cellOf(t, k)) }; });
+    const tableStamp = `${teams.length} clubs · ${num(d.simulations) && d.simulations ? `${d.simulations.toLocaleString()} simulated seasons` : "no projection"}`;
+    const tableIntro = hasProjection ? "Today's table on the left, with projected points beside it; switch to the projected finish for the chances. Tap a column to sort; tap again to reverse." : "Today's table. The projected finish appears once the model has priced the remaining fixtures.";
+
+    // Projected points bars on a shared axis.
+    let bars = [], axisLo = "", axisHi = "";
+    if (hasProjection) {
+      const lo = Math.max(0, Math.floor(Math.min(...teams.map((t) => Math.min(t.p10 ?? t.projPoints, t.points || 0))) / 5) * 5), hi = Math.min(114, Math.ceil(Math.max(...teams.map((t) => Math.max(t.p90 ?? t.projPoints, t.points || 0))) / 5) * 5);
+      const X = (v) => `${Math.max(0, Math.min(100, ((v - lo) / (hi - lo || 1)) * 100)).toFixed(1)}%`;
+      bars = teams.slice().sort((x, y) => (y.projPoints || 0) - (x.projPoints || 0)).map((t) => ({ abbr: t.abbr, name: t.name, color: (T[t.abbr] || {}).color || "var(--mute-2)", left: X(t.p10 ?? t.projPoints), width: `${Math.max(0.5, parseFloat(X(t.p90 ?? t.projPoints)) - parseFloat(X(t.p10 ?? t.projPoints))).toFixed(1)}%`, mid: X(t.projPoints), now: X(t.points || 0), proj: f1(t.projPoints), aria: `${t.name}: ${t.points} points today, projected ${f1(t.projPoints)}, range ${t.p10}–${t.p90}` }));
+      axisLo = String(lo); axisHi = String(hi);
+    }
+    const method = hasProjection ? `Every remaining fixture is scored ${num(d.simulations) ? d.simulations.toLocaleString() : "thousands of"} times from the same projected goals that price the board, with home edge, last-five form and who is missing applied as they stand this week. Each simulated season is added to today's table and ranked. Projected points are the average; the range is the middle 80%; the chances are how often each club finished first, top four, top six or in the bottom three. Form and availability are frozen at today's values, so the projection is confident about the next month and vaguer about May.` : "Every remaining fixture is played out thousands of times on the same projected goals that price the board, then each simulated season is added to today's table and ranked. The projection appears once the model has priced the remaining fixtures.";
+
+    return { ...base, ready: true, unavailable: false, kicker, cells, notice: d.notice || "", tableStamp, tableIntro, views, cols, rows, gridCols, minWidth, hasProjection, bars, axisLo, axisHi, method };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <title>Methods — Maverick Hightower</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="How the EPL model builds every number on the board: season strength, home edge, last-five form, who is missing, projected goals, match-result chances, fair prices and edges.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Maverick Hightower">
+  <meta property="og:title" content="Methods — Maverick Hightower">
+  <meta property="og:image" content="https://maverickhightower.com/share.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@mavhightower">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root, html[data-sport="nhl"] { color-scheme: dark; --paper:#14151a; --ink:#f1efe9; --ink-2:#d2d0ca; --mute:#a3a6b1; --mute-2:#80838e; --rule:#3a3d49; --rule-2:#262832; --on-ink:#3a3d49; --alert:#f08a72; --on-alert:#14151a; --win:#5cc196; --on-win:#14151a; --desk:#0d0e12; }
+    html[data-sport="epl"], html[data-sport="epl"] [data-theme="light"] { color-scheme: light; --paper:#d9dade; --ink:#14151a; --ink-2:#2a2d36; --mute:#50535e; --mute-2:#767984; --rule:#b4b6bd; --rule-2:#c6c8ce; --on-ink:#c6c8ce; --alert:#9e2c19; --on-alert:#f4f4f6; --win:#22664a; --on-win:#f4f4f6; --desk:#c9cbd0; }
+    @media (prefers-color-scheme: dark) { html[data-sport="epl"] { color-scheme: dark; --paper:#2a2c32; --ink:#ecebe7; --ink-2:#cfcec9; --mute:#a9abb4; --mute-2:#878a94; --rule:#474a53; --rule-2:#363840; --on-ink:#474a53; --alert:#f29077; --on-alert:#1b1c20; --win:#62c79c; --on-win:#1b1c20; --desk:#212328; } }
+    html[data-sport="epl"] [data-theme="dark"] { color-scheme: dark; --paper:#2a2c32; --ink:#ecebe7; --ink-2:#cfcec9; --mute:#a9abb4; --mute-2:#878a94; --rule:#474a53; --rule-2:#363840; --on-ink:#474a53; --alert:#f29077; --on-alert:#1b1c20; --win:#62c79c; --on-win:#1b1c20; --desk:#212328; }
+    html, body { margin: 0; padding: 0; background: var(--paper); color: var(--ink); font-family: "IBM Plex Sans", Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+    * { box-sizing: border-box; }
+    a { color: var(--ink); text-decoration: none; }
+    a:hover { color: var(--ink-2); text-decoration: underline; text-underline-offset: 3px; }
+    a:focus-visible, button:focus-visible, select:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+    .skip { position: absolute; left: 12px; top: -60px; background: var(--ink); color: var(--paper); padding: 10px 14px; z-index: 10; font-size: 14px; }
+    .skip:focus { top: 12px; }
+    @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; scroll-behavior: auto !important; } }
+  </style>
+  <meta name="theme-color" content="#d9dade">
+  <script>(function(){document.documentElement.setAttribute("data-sport","epl");})();</script>
+</helmet>
+<div data-screen-label="Methods" style="min-height:100vh;background:var(--paper);color:var(--ink);">
+  <a href="#main" class="skip">Skip to the methods</a>
+  <div style="max-width:1240px;margin:0 auto;padding:0 clamp(16px,3vw,24px) 80px;">
+
+    <header style="border-top:4px solid var(--ink);padding:10px 0 4px;display:flex;align-items:center;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;">
+      <a href="https://maverickhightower.com/" aria-label="Maverick Hightower home" style="display:flex;align-items:center;gap:12px;min-height:44px;">
+        <span aria-hidden="true" style="width:36px;height:36px;background:var(--ink);color:var(--paper);display:grid;place-items:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:18px;letter-spacing:.04em;">MH</span>
+        <span style="display:flex;flex-direction:column;line-height:1.1;">
+          <span style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);">Maverick Hightower</span>
+          <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;letter-spacing:.02em;text-transform:uppercase;">EPL Projections</span>
+        </span>
+      </a>
+      <nav aria-label="Site" style="display:flex;gap:0 18px;font-size:13px;letter-spacing:.1em;text-transform:uppercase;font-weight:500;flex-wrap:wrap;">
+        <a href="Methods.dc.html" aria-current="page" style="display:inline-flex;align-items:center;min-height:44px;box-shadow:inset 0 -2px 0 var(--ink);">Methods</a>
+        <a href="https://maverickhightower.com/about.html" style="display:inline-flex;align-items:center;min-height:44px;">About</a>
+        <a href="https://nhl.maverickhightower.com/" style="display:inline-flex;align-items:center;min-height:44px;">NHL</a>
+        <a href="https://cbb.maverickhightower.com/" style="display:inline-flex;align-items:center;min-height:44px;">CBB</a>
+      </nav>
+    </header>
+
+    <nav aria-label="Board sections" style="position:sticky;top:0;z-index:5;background:var(--paper);border-bottom:1px solid var(--ink);display:flex;overflow-x:auto;scrollbar-width:none;">
+      <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5">
+        <a href="{{ t.href }}" style="flex:1 1 0;max-width:150px;min-width:72px;display:flex;align-items:center;justify-content:center;min-height:48px;padding:0 4px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;white-space:nowrap;text-decoration:none;color:var(--mute);">{{ t.label }}</a>
+      </sc-for>
+    </nav>
+
+    <section style="padding:36px 0 28px;border-bottom:1px solid var(--ink);">
+      <div style="font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin-bottom:10px;">EPL · how the number is built</div>
+      <h1 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:clamp(56px,9vw,112px);line-height:.9;letter-spacing:-.01em;text-transform:uppercase;">Methods</h1>
+      <p style="margin:18px 0 0;font-size:15px;line-height:1.5;color:var(--ink-2);max-width:640px;text-wrap:pretty;">Every number on the board comes from the steps below, in this order. Each entry says what the thing is, how it is built, and how much to trust it. Measured against real prices, no market shows a demonstrated edge.</p>
+    </section>
+
+    <sc-if value="{{ isSample }}" hint-placeholder-val="{{ false }}">
+      <div role="status" style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:start;padding:14px 0;border-bottom:1px solid var(--ink);">
+        <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--ink);padding:4px 9px;">Sample</span>
+        <p style="margin:0;font-size:14px;line-height:1.5;color:var(--ink-2);max-width:760px;text-wrap:pretty;">Sample ratings. On the live site the table reads the model's current ratings file.</p>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ narrow }}" hint-placeholder-val="{{ false }}">
+      <div style="position:sticky;top:49px;z-index:4;background:var(--paper);padding:8px 0;border-bottom:1px solid var(--rule);">
+        <label style="display:flex;align-items:center;gap:10px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">
+          <span style="letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;">Jump to</span>
+          <select onChange="{{ onJump }}" value="{{ jumpValue }}" style="flex:1;min-height:44px;background:var(--paper);color:var(--ink);border:1px solid var(--ink);font-family:inherit;font-size:13px;padding:0 10px;">
+            <sc-for list="{{ toc }}" as="t" hint-placeholder-count="5"><option value="{{ t.id }}">{{ t.label }}</option></sc-for>
+          </select>
+        </label>
+      </div>
+    </sc-if>
+
+    <div id="main" style="display:grid;grid-template-columns:{{ cols }};gap:0 48px;align-items:start;">
+      <sc-if value="{{ wide }}" hint-placeholder-val="{{ true }}">
+        <nav aria-label="Contents" style="position:sticky;top:64px;padding:24px 0;max-height:calc(100vh - 64px);overflow-y:auto;scrollbar-width:thin;">
+          <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin-bottom:8px;">Contents</div>
+          <sc-for list="{{ toc }}" as="t" hint-placeholder-count="12">
+            <a href="{{ t.href }}" style="display:block;padding:7px 0;font-size:13px;line-height:1.3;color:{{ t.color }};border-top:1px solid var(--rule-2);">{{ t.label }}</a>
+          </sc-for>
+        </nav>
+      </sc-if>
+
+      <div style="min-width:0;">
+
+        <section id="ratings" aria-labelledby="ratings-h" style="padding:28px 0 26px;border-bottom:1px solid var(--ink);scroll-margin-top:110px;">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;">
+            <h2 id="ratings-h" style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:28px;line-height:1;text-transform:uppercase;letter-spacing:.01em;">Club ratings</h2>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">{{ through }}</span>
+          </div>
+          <p style="margin:6px 0 0;font-size:14px;line-height:1.5;color:var(--ink-2);max-width:720px;text-wrap:pretty;">Multipliers on the league average of 1.00. Attack above 1 scores more; defence below 1 concedes less. Net is attack minus defence. Home edge is each club's own, roughly a percentage of goals. Available is how much of the usual attack is fit to play. Tap a column to sort.</p>
+          <sc-if value="{{ noTeams }}" hint-placeholder-val="{{ false }}"><p style="margin:12px 0 0;font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--mute);">Ratings file unavailable.</p></sc-if>
+          <sc-if value="{{ hasTeams }}" hint-placeholder-val="{{ true }}">
+          <sc-if value="{{ hasWeek }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;gap:0;margin-top:14px;border:1px solid var(--ink);width:max-content;max-width:100%;">
+              <sc-for list="{{ filters }}" as="f" hint-placeholder-count="2">
+                <button type="button" onClick="{{ f.onClick }}" aria-pressed="{{ f.pressed }}" style="min-height:44px;padding:0 14px;background:{{ f.bg }};color:{{ f.fg }};border:0;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;">{{ f.label }}</button>
+              </sc-for>
+            </div>
+          </sc-if>
+          <div style="margin-top:14px;overflow-x:auto;scrollbar-width:thin;margin-left:calc(-1 * clamp(16px,3vw,24px));margin-right:calc(-1 * clamp(16px,3vw,24px));padding:0 clamp(16px,3vw,24px);">
+            <div role="table" style="min-width:700px;border-top:2px solid var(--ink);">
+              <div role="row" style="display:grid;grid-template-columns:minmax(230px,2fr) repeat(7,minmax(60px,1fr));gap:0 8px;">
+                <sc-for list="{{ cols7 }}" as="c" hint-placeholder-count="8">
+                  <button type="button" role="columnheader" aria-sort="{{ c.sort }}" onClick="{{ c.onClick }}" style="min-height:44px;padding:0;background:var(--paper);border:0;color:{{ c.color }};font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;text-align:{{ c.align }};cursor:pointer;position:{{ c.pos }};left:0;">{{ c.label }}{{ c.arrow }}</button>
+                </sc-for>
+              </div>
+              <sc-for list="{{ teamRows }}" as="r" hint-placeholder-count="20">
+                <div role="row" style="display:grid;grid-template-columns:minmax(230px,2fr) repeat(7,minmax(60px,1fr));gap:0 8px;padding:7px 0;border-top:1px solid var(--rule-2);align-items:center;font-family:'IBM Plex Mono',monospace;font-size:13px;">
+                  <span role="cell" style="position:sticky;left:0;background:var(--paper);display:flex;align-items:center;gap:8px;min-width:0;"><span aria-hidden="true" style="width:4px;height:18px;background:{{ r.color }};flex:none;"></span><span style="font-family:'IBM Plex Sans',sans-serif;font-weight:600;font-size:13px;">{{ r.abbr }}</span><span style="font-family:'IBM Plex Sans',sans-serif;font-size:12px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ r.name }}</span><sc-if value="{{ r.gameHref }}" hint-placeholder-val="{{ false }}"><a href="{{ r.gameHref }}" title="{{ r.gameTitle }}" style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-2);border:1px solid var(--rule);padding:1px 6px;white-space:nowrap;flex:none;">{{ r.gameLabel }}</a></sc-if></span>
+                  <sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="7"><span role="cell" style="text-align:right;font-weight:{{ c.weight }};color:{{ c.color }};">{{ c.v }}</span></sc-for>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          </sc-if>
+        </section>
+
+        <section id="missing" aria-labelledby="miss-h" style="padding:28px 0 26px;border-bottom:1px solid var(--ink);scroll-margin-top:110px;">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;">
+            <h2 id="miss-h" style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:28px;line-height:1;text-transform:uppercase;letter-spacing:.01em;">Who is missing</h2>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">{{ missStamp }}</span>
+          </div>
+          <p style="margin:6px 0 0;font-size:14px;line-height:1.5;color:var(--ink-2);max-width:720px;text-wrap:pretty;">Regulars the official fantasy game lists as injured, suspended or doubtful, read before each board is built. A club missing a large share of its attack is priced down; one at full strength is unchanged. Feeds the availability step.</p>
+          <sc-if value="{{ noMiss }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:14px;border:1px dashed var(--mute);padding:14px 16px;max-width:760px;">
+              <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:20px;line-height:1;text-transform:uppercase;color:var(--mute);">{{ noMissTitle }}</div>
+              <p style="margin:8px 0 0;font-size:14px;line-height:1.5;color:var(--ink-2);text-wrap:pretty;">{{ noMissText }}</p>
+            </div>
+          </sc-if>
+          <sc-if value="{{ hasMiss }}" hint-placeholder-val="{{ true }}">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:12px 40px;margin-top:14px;">
+              <sc-for list="{{ missRows }}" as="r" hint-placeholder-count="8">
+                <div style="display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:0 10px;padding:8px 0;border-top:1px solid var(--rule-2);align-items:baseline;">
+                  <span style="font-family:'IBM Plex Sans',sans-serif;font-weight:600;font-size:14px;">{{ r.abbr }}</span>
+                  <span style="font-size:13px;line-height:1.5;color:var(--ink-2);min-width:0;">{{ r.names }}</span>
+                  <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:{{ r.color }};">{{ r.available }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+        </section>
+
+        <sc-for list="{{ entries }}" as="e" hint-placeholder-count="12">
+          <article id="{{ e.id }}" aria-labelledby="{{ e.hid }}" style="padding:28px 0 26px;border-bottom:1px solid var(--ink);scroll-margin-top:110px;">
+            <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;">
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">{{ e.n }}</span>
+              <h2 id="{{ e.hid }}" style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:28px;line-height:1;text-transform:uppercase;letter-spacing:.01em;">{{ e.title }}</h2>
+              <span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mute);white-space:nowrap;">changed {{ e.updated }}</span>
+            </div>
+            <p style="margin:10px 0 0;font-size:17px;line-height:1.4;font-weight:500;max-width:720px;text-wrap:pretty;">{{ e.def }}</p>
+            <sc-if value="{{ e.collapsed }}" hint-placeholder-val="{{ false }}">
+              <button type="button" onClick="{{ e.onToggle }}" aria-expanded="false" aria-controls="{{ e.bodyId }}" style="margin-top:8px;min-height:44px;padding:0;background:transparent;border:0;color:var(--mute);font-family:'IBM Plex Mono',monospace;font-size:12px;text-decoration:underline;text-decoration-color:var(--rule);text-underline-offset:3px;cursor:pointer;">How it's built · how sure we are +</button>
+            </sc-if>
+            <sc-if value="{{ e.open }}" hint-placeholder-val="{{ true }}">
+            <div id="{{ e.bodyId }}" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:18px 40px;margin-top:14px;align-items:start;">
+              <div style="min-width:0;">
+                <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);">How it's built</div>
+                <p style="margin:6px 0 0;font-size:14px;line-height:1.55;color:var(--ink-2);text-wrap:pretty;">{{ e.build }}</p>
+                <sc-if value="{{ e.formula }}" hint-placeholder-val="{{ false }}">
+                  <pre style="margin:12px 0 0;padding:10px 12px;border:1px solid var(--rule);font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.6;color:var(--ink);white-space:pre-wrap;overflow-wrap:anywhere;">{{ e.formula }}</pre>
+                </sc-if>
+              </div>
+              <div style="border:1px solid var(--ink);padding:12px 14px;">
+                <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase;">How sure are we</div>
+                <p style="margin:8px 0 0;font-size:14px;line-height:1.55;color:var(--ink-2);text-wrap:pretty;">{{ e.sure }}</p>
+              </div>
+            </div>
+            <sc-if value="{{ e.canCollapse }}" hint-placeholder-val="{{ false }}">
+              <button type="button" onClick="{{ e.onToggle }}" aria-expanded="true" aria-controls="{{ e.bodyId }}" style="margin-top:8px;min-height:44px;padding:0;background:transparent;border:0;color:var(--mute);font-family:'IBM Plex Mono',monospace;font-size:12px;cursor:pointer;">Less −</button>
+            </sc-if>
+            </sc-if>
+          </article>
+        </sc-for>
+
+        <section id="changelog" aria-labelledby="cl-h" style="padding:28px 0 0;scroll-margin-top:110px;">
+          <h2 id="cl-h" style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:28px;line-height:1;text-transform:uppercase;letter-spacing:.01em;">Changelog</h2>
+          <p style="margin:6px 0 0;font-size:14px;line-height:1.5;color:var(--ink-2);max-width:720px;">Every change to the model, with what a reader would see move.</p>
+          <div style="margin-top:14px;border-top:2px solid var(--ink);max-width:900px;">
+            <sc-for list="{{ changelog }}" as="c" hint-placeholder-count="3">
+              <div style="display:grid;grid-template-columns:110px minmax(0,1fr);gap:4px 16px;padding:12px 0;border-top:1px solid var(--rule-2);">
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);padding-top:2px;">{{ c.date }}</span>
+                <div style="min-width:0;">
+                  <div style="font-size:14px;font-weight:600;line-height:1.4;">{{ c.what }}</div>
+                  <div style="font-size:13px;line-height:1.5;color:var(--ink-2);margin-top:2px;text-wrap:pretty;"><span style="color:var(--mute);">You'd see:</span> {{ c.see }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+
+      </div>
+    </div>
+
+    <footer style="border-top:1px solid var(--ink);margin-top:40px;padding:18px 0 0;display:flex;flex-wrap:wrap;gap:6px 24px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">
+      <span>© 2026 Maverick Hightower</span>
+      <a href="Board.dc.html" style="display:inline-flex;align-items:center;min-height:44px;">Board</a>
+      <a href="Record.dc.html" style="display:inline-flex;align-items:center;min-height:44px;">Track record</a>
+      <a href="Methods.dc.html" style="display:inline-flex;align-items:center;min-height:44px;">Methods</a>
+      <a href="https://maverickhightower.com/about.html" style="display:inline-flex;align-items:center;min-height:44px;">About</a>
+      <a href="https://x.com/mavhightower" style="display:inline-flex;align-items:center;min-height:44px;">@mavhightower</a>
+    </footer>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;scenario&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Sample ratings&quot;,&quot;No availability list&quot;],&quot;default&quot;:&quot;Sample ratings&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Preview&quot;}}">
+class Component extends DCLogic {
+  state = { data: null, board: null, loadedFor: null, isSample: false, sortKey: "net", dir: -1, wide: true, hash: "", open: {}, weekOnly: false };
+  static ENTRIES = [
+    { id: "strength", updated: "2026-10-26", title: "Season strength", def: "Each club's attack and defence, fitted from its last 38 league matches so that one full season of evidence is always in view.",
+      build: "A Poisson goals model gives every club an attack rating and a defence rating, with a league-wide home advantage, chosen so that the expected goals in every past match best explain the goals that were actually scored. Recent matches count for more than old ones and the fit is re-run before every board. The match-result ratings use goals; the totals and both-teams-to-score ratings use the expected-goals blend in the next entry.",
+      formula: "λ_home = attack_home × defence_away × league_rate × home_adv\nλ_away = attack_away × defence_home × league_rate",
+      sure: "Fairly sure about the ordering of clubs, less about the decimals. A 38-match window is long enough to settle but slow to notice a club that has changed since August, which is what the form and availability steps are for." },
+    { id: "xg", updated: "2026-10-26", title: "Expected goals", def: "The chance that a shot becomes a goal, given where and how it was taken. Summed over a match it says how many goals a side deserved.",
+      build: "Each shot in a match is scored by a public expected-goals model from its position and type. For the totals and both-teams-to-score ratings a club's recent goals are blended with its expected goals at 70% expected to 30% actual, opponent-adjusted, with the weight of a match halving every 365 days. Expected goals settle faster than goals: a side can outscore its chances for a month, not for a season.",
+      formula: "goal_source = 0.7 × xG + 0.3 × goals",
+      sure: "Sure the blend is a better reading of chance creation than goals alone. Public expected-goals models disagree with each other by five to ten percent on a club's season total, so the decimal is not to be trusted." },
+    { id: "home-edge", updated: "2026-10-26", title: "Home edge", def: "Each club's own home advantage, not one league-wide number.",
+      build: "The league-wide home advantage inside the strength fit is the average. On top of it, each club's goals scored and conceded at home are compared with the same away, over the season of matches in the fit, and the difference is shrunk hard toward zero so that a club with few home matches barely moves. The result is applied to the club's attack at home and to what it concedes.",
+      formula: "home_edge = shrink(log(home_rate / away_rate), n_home)",
+      sure: "Sure the league average is real and worth a few points of win chance. Not very sure about any one club's deviation from it; the shrinkage keeps the largest ones to a few percent of goals." },
+    { id: "form", updated: "2026-10-26", title: "Last five", def: "A club's last five league matches, blended in at about a quarter of the weight of its season rating.",
+      build: "A separate attack and defence read is taken from the last five matches only, against the opposition faced, and compared with what the season rating expected of those same matches. The gap is shrunk as if five matches were worth five out of twenty, so a hot or cold run moves the rating by a fraction of what the raw five would. The factor is clamped so no run can move a club by more than a tenth.",
+      formula: "form = shrink(last_five / expected, 5 of 20), clamped 0.9–1.1",
+      sure: "Least sure of the strength steps. Five matches is a tiny sample and most of what it catches is noise; the weight was set small on purpose and has not been shown to make money." },
+    { id: "availability", updated: "2026-10-26", title: "Who is missing", def: "Regulars listed as injured, suspended or doubtful, weighed by how much of the club's attack they carry.",
+      build: "The official fantasy game publishes each player's availability and the chance he plays. A club's regulars are the players with a large share of its minutes this season; the share of the club's goal involvement carried by regulars who are out is the missing share. Half of it comes off the attack, floored so that no club is priced below 85% of its strength, and half of the defensive share goes onto what it concedes. A club the list does not name is at full strength.",
+      formula: "attack × (1 − 0.5 × missing_share), floored at 0.85",
+      sure: "Sure about the direction. The size is a guess made before any price was read, and the list is read hours before kick-off, so a late team-sheet surprise is not in it." },
+    { id: "proj-goals", updated: "2026-10-26", title: "Projected goals", def: "The expected score for each side, which is what every chance on the board is read from.",
+      build: "The home attack is multiplied against the away defence and the league rate, then the home edge, last-five and availability factors are applied; the away side the same way without the home edge. The two numbers are the means of two Poisson distributions, from which the chance of every exact scoreline is read.",
+      formula: "λ = strength × home_edge × form × availability",
+      sure: "Sure to within about a quarter of a goal on a given match, which is enough to turn a lean into a pass. The projected total is more trustworthy than either side's share of it." },
+    { id: "result", updated: "2026-10-26", title: "Match result %", def: "The chance of a home win, a draw and an away win after ninety minutes.",
+      build: "Every scoreline up to a high ceiling gets a probability from the two projected-goal distributions. Home win is the sum over scorelines where the home side scores more, the draw the sum over level scorelines, the away win the rest. A small correction lifts the draw and the low scorelines, which a plain Poisson under-counts. The match page lists the steps that moved these numbers most, in plain words.",
+      formula: "P(home) = Σ P(h, a) for h > a;  P(draw) = Σ P(h, h)",
+      sure: "The ranges on the Track record page are the honest answer. The draw is the hardest of the three to call and the model is only ever mildly confident in it." },
+    { id: "totals", updated: "2026-10-26", title: "Over 2.5 and both teams to score", def: "The chance of three or more goals, and of each side scoring at least once, from the same scoreline grid.",
+      build: "Over 2.5 is the sum of every scoreline with three or more goals; both teams to score is the sum of every scoreline where neither side is on zero. Both are read from the expected-goals blend rather than the goals-only ratings, because chance creation predicts goal counts better than past goals do. Draw no bet is the home win chance with the draw taken out.",
+      formula: "P(over 2.5) = Σ P(h, a) for h + a ≥ 3\nP(BTTS) = Σ P(h, a) for h ≥ 1 and a ≥ 1",
+      sure: "About as sure as the projected goals they come from. Both markets are priced tightly by the books and the measured edge on them is nil." },
+    { id: "fair", updated: "2026-10-26", title: "Fair price", def: "Our chance written as an American price with no bookmaker margin.",
+      build: "A probability above 50% becomes a negative number (the stake needed to win 100); below 50% a positive one (the win on a 100 stake). The fair price is what the market would charge if it agreed with us exactly and took no cut. It is a translation of the chance, not an extra opinion, and it is withheld when a club's rating sits at the model's floor.",
+      formula: "p ≥ 0.5:  −100 × p / (1 − p)\np < 0.5:  +100 × (1 − p) / p",
+      sure: "Exactly as sure as the chance it comes from. No more." },
+    { id: "edge", updated: "2026-10-26", title: "Edge %", def: "How much better our chance is than the chance implied by the best price on the board, after the margin is removed.",
+      build: "The best available price on each outcome is converted to an implied probability, the bookmaker's margin is stripped by scaling the outcomes to sum to one, and our calibrated probability is compared with the result. A positive edge means we think the outcome comes in more often than the price says. It is reported in points of probability, and a team-market pick needs 3.5 points to clear the bar; a player prop needs 6.",
+      formula: "edge = p_model − p_market(no vig)",
+      sure: "Not sure at all that a positive edge means profit. Measured on seasons of real prices, no market shows a demonstrated edge. The number is published because it is the honest basis for the pick; whether it has paid is on All results." },
+    { id: "bet-lean", updated: "2026-10-26", title: "Best bet vs lean", def: "A best bet clears the edge bar on an allowed market. A lean has a positive edge that does not.",
+      build: "Clear the bar on a market open for selection and the pick is a best bet, shown solid, with a tier (A, B or C) and a stake from how far it cleared. Positive but under the bar, or on a market not open for selection that week, and it is a lean, shown dashed with no stake. When nothing is positive the match reads 'no bet'. A match with no price at all reads 'not priced', which is not a pass: nothing was judged. Heavy prices, worse than about −160, are avoided.",
+      formula: "",
+      sure: "The bars are fitted on past seasons and will drift. A lean is shown so the reasoning is visible, not as a weaker recommendation to act on." },
+    { id: "graded", updated: "2026-10-26", title: "How picks are graded", def: "Every pick is frozen at publication and settled the morning after against the final score.",
+      build: "Match result settles on the ninety-minute score, extra time and penalties excluded. Draw no bet is void on a draw and the stake returned. Over and under 2.5 cannot push. Both teams to score settles on whether each side scored. Corners markets settle on the match summary's corner count. A pick is void if the match is postponed. Results carries last weekend and the season win–loss record per market; All results carries every graded bet with units and return; Track record carries calibration.",
+      formula: "",
+      sure: "Fully sure. Grading is mechanical and the frozen boards are in the archive, so any grade can be checked." },
+  ];
+  static CHANGELOG = [
+    { date: "2026-10-26", what: "Home edge, last-five form and who-is-missing factors added to the card and the board; match pages, Season, Track record, Methods and All results published.", see: "A match page behind every fixture card: our call in plain words, the main reasons, who is missing and the odds. Calibration by bucket on Track record; the projected table on Season." },
+    { date: "2026-10-19", what: "Player props on the board.", see: "A Props tab with the card's staked prop picks, graded the morning after." },
+  ];
+  onSite() { return /(^|\.)maverickhightower\.com$/.test(location.hostname); }
+  async load() {
+    const want = this.props.scenario || "";
+    if (this.state.loadedFor === want) return;
+    this.setState({ loadedFor: want });
+    const S = await import("./lib/sports.js");
+    const { deployed } = await S.detectSport("epl");
+    const scenario = this.onSite() ? "Normal" : this.props.scenario || "Sample ratings";
+    const live = this.onSite() || scenario === "Normal"; void deployed;
+    const url = live ? "./data/ratings.json" : scenario === "No availability list" ? "./data/sample/ratings_nolist.json" : "./data/sample/ratings.json";
+    const get = async (u) => { try { const r = await fetch(u, { cache: "no-store" }); return r.ok ? await r.json() : null; } catch (_) { return null; } };
+    const [data, board] = await Promise.all([get(url), get(live ? "./data/board.json" : "./data/sample/board_game.json")]);
+    this.setState({ data, board, isSample: !live });
+  }
+  componentDidMount() {
+    this.mq = matchMedia("(min-width: 900px)");
+    this.onMq = () => this.setState({ wide: this.mq.matches });
+    this.mq.addEventListener("change", this.onMq); this.onMq();
+    // Arriving on a hash opens that entry on mobile too.
+    this.onHash = () => { const h = location.hash.replace("#", ""); this.setState((s) => ({ hash: h, open: h ? { ...s.open, [h]: true } : s.open })); };
+    addEventListener("hashchange", this.onHash); this.onHash();
+    // Scroll-spy: the section whose top is nearest above the sticky offset is current.
+    this.onScroll = () => { if (this.raf) return; this.raf = requestAnimationFrame(() => { this.raf = 0;
+      const ids = ["ratings", "missing", ...this.constructor.ENTRIES.map((e) => e.id), "changelog"];
+      let cur = ids[0];
+      for (const id of ids) { const el = document.getElementById(id); if (el && el.getBoundingClientRect().top <= 130) cur = id; }
+      if (cur !== this.state.hash) this.setState({ hash: cur }); }); };
+    document.addEventListener("scroll", this.onScroll, { capture: true, passive: true });
+    this.load().then(() => this.onScroll());
+  }
+  componentWillUnmount() { if (this.mq) this.mq.removeEventListener("change", this.onMq); removeEventListener("hashchange", this.onHash); document.removeEventListener("scroll", this.onScroll, { capture: true }); }
+  toggle(id) { this.setState((s) => ({ open: { ...s.open, [id]: !s.open[id] } })); }
+  componentDidUpdate() { this.load(); }
+  sortBy(k) { this.setState((s) => ({ sortKey: k, dir: s.sortKey === k ? -s.dir : (k === "defence" || k === "formDefence" || k === "name" ? 1 : -1) })); }
+  renderVals() {
+    const C = this.constructor, d = this.state.data, wide = this.state.wide;
+    const tabs = [["This week", "Board.dc.html"], ["Results", "Results.dc.html"], ["Season", "Season.dc.html"], ["Record", "Record.dc.html"], ["Tracker", "Tracker.dc.html"]].map(([label, href]) => ({ label, href }));
+    const hash = this.state.hash;
+    const tocItems = [{ id: "ratings", label: "Club ratings" }, { id: "missing", label: "Who is missing" }, ...C.ENTRIES.map((e, i) => ({ id: e.id, label: `${i + 1}. ${e.title}` })), { id: "changelog", label: "Changelog" }];
+    const toc = tocItems.map((t) => ({ ...t, href: `#${t.id}`, color: hash === t.id ? "var(--ink)" : "var(--mute)" }));
+    const onJump = (e) => { const id = e.target.value; if (location.hash === `#${id}`) this.onHash(); else location.hash = id; };
+    // On phones the definition stays visible and the long parts fold; on desktop everything is open.
+    const entries = C.ENTRIES.map((e, i) => { const isOpen = wide || !!this.state.open[e.id]; return { ...e, n: String(i + 1).padStart(2, "0"), hid: `${e.id}-h`, bodyId: `${e.id}-body`, open: isOpen, collapsed: !isOpen, canCollapse: !wide && isOpen, onToggle: () => this.toggle(e.id) }; });
+    const base = { tabs, toc, onJump, jumpValue: hash || "ratings", entries, changelog: C.CHANGELOG, wide, narrow: !wide, cols: wide ? "220px minmax(0,1fr)" : "minmax(0,1fr)", isSample: !!this.state.isSample };
+    if (!d) return { ...base, through: "", noTeams: false, hasTeams: false, hasWeek: false, filters: [], noMiss: false, hasMiss: false, missStamp: "", noMissTitle: "", noMissText: "", cols7: [], teamRows: [], missRows: [] };
+
+    const teams = (d.teams || []).map((t) => ({ ...t, net: (t.attack || 0) - (t.defence || 0) }));
+    const keys = [["name", "Club", "left"], ["attack", "Attack", "right"], ["defence", "Defence", "right"], ["net", "Net", "right"], ["formAttack", "Form att", "right"], ["formDefence", "Form def", "right"], ["homeEdge", "Home edge", "right"], ["attackAvailable", "Available", "right"]];
+    const sk = this.state.sortKey, dir = this.state.dir;
+    const cols7 = keys.map(([k, label, align]) => ({ label, align, sort: sk === k ? (dir > 0 ? "ascending" : "descending") : "none", arrow: sk === k ? (dir > 0 ? " ↑" : " ↓") : "", color: sk === k ? "var(--ink)" : "var(--mute)", pos: k === "name" ? "sticky" : "static", onClick: () => this.sortBy(k) }));
+    // This week's fixtures, for the filter chip and the per-club link.
+    const T = ((this.state.board || {}).teams) || {};
+    const weekBy = {};
+    for (const g of ((this.state.board || {}).games || [])) { if (!g.home || !g.away) continue; const lbl = `${g.home.abbr} v ${g.away.abbr}`; weekBy[g.home.abbr] = { id: g.id, label: lbl, vs: `v ${g.away.abbr}` }; weekBy[g.away.abbr] = { id: g.id, label: lbl, vs: `@ ${g.home.abbr}` }; }
+    const hasWeek = Object.keys(weekBy).length > 0, wOnly = hasWeek && this.state.weekOnly;
+    const filters = [{ label: `All ${teams.length}`, on: !wOnly, v: false }, { label: `This week · ${Object.keys(weekBy).length}`, on: wOnly, v: true }].map((f) => ({ label: f.label, pressed: f.on ? "true" : "false", bg: f.on ? "var(--ink)" : "transparent", fg: f.on ? "var(--paper)" : "var(--ink)", onClick: () => this.setState({ weekOnly: f.v }) }));
+    const sorted = teams.filter((t) => !wOnly || weekBy[t.abbr]).slice().sort((x, y) => (sk === "name" ? String(x.name).localeCompare(String(y.name)) * dir : ((x[sk] || 0) - (y[sk] || 0)) * dir));
+    const f2 = (v) => (typeof v === "number" ? v.toFixed(2) : "—"), fs = (v) => (typeof v === "number" ? (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(2) : "—"), fp = (v) => (typeof v === "number" ? `${v > 0 ? "+" : v < 0 ? "−" : ""}${Math.abs(v * 100).toFixed(1)}%` : "—"), fa = (v) => (typeof v === "number" ? `${Math.round(v * 100)}%` : "—");
+    const good = (v, lowerBetter) => (typeof v !== "number" ? "var(--mute)" : (lowerBetter ? v < 0.97 : v > 1.03) ? "var(--ink)" : (lowerBetter ? v > 1.03 : v < 0.97) ? "var(--mute)" : "var(--ink-2)");
+    const teamRows = sorted.map((t) => ({ abbr: t.abbr, name: t.name, color: (T[t.abbr] || {}).color || "var(--rule)",
+      gameHref: weekBy[t.abbr] ? `Game.dc.html?id=${encodeURIComponent(weekBy[t.abbr].id)}` : "", gameLabel: weekBy[t.abbr] ? weekBy[t.abbr].vs : "", gameTitle: weekBy[t.abbr] ? `This week: ${weekBy[t.abbr].label}. Open the match page.` : "", cells: [
+      { v: f2(t.attack), weight: sk === "attack" ? 600 : 400, color: good(t.attack, false) }, { v: f2(t.defence), weight: sk === "defence" ? 600 : 400, color: good(t.defence, true) },
+      { v: fs(t.net), weight: sk === "net" ? 600 : 400, color: t.net > 0.03 ? "var(--ink)" : t.net < -0.03 ? "var(--mute)" : "var(--ink-2)" },
+      { v: f2(t.formAttack), weight: sk === "formAttack" ? 600 : 400, color: good(t.formAttack, false) }, { v: f2(t.formDefence), weight: sk === "formDefence" ? 600 : 400, color: good(t.formDefence, true) },
+      { v: fp(t.homeEdge), weight: sk === "homeEdge" ? 600 : 400, color: "var(--ink-2)" }, { v: fa(t.attackAvailable), weight: sk === "attackAvailable" ? 600 : 400, color: typeof t.attackAvailable === "number" && t.attackAvailable < 0.97 ? "var(--alert)" : "var(--ink-2)" }] }));
+    // Who is missing, from the ratings file: clubs with anyone listed, most affected first.
+    const listed = !!d.availabilityListed || teams.some((t) => Array.isArray(t.missing) && t.missing.length);
+    const missRows = teams.filter((t) => Array.isArray(t.missing) && t.missing.length).sort((x, y) => (x.attackAvailable || 1) - (y.attackAvailable || 1) || String(x.abbr).localeCompare(String(y.abbr)))
+      .map((t) => ({ abbr: t.abbr, names: t.missing.join(", "), available: fa(t.attackAvailable), color: typeof t.attackAvailable === "number" && t.attackAvailable < 0.9 ? "var(--alert)" : "var(--ink)" }));
+    const hasMiss = missRows.length > 0;
+    const noMissTitle = listed ? "Nobody listed out this week" : "No availability list reached this build";
+    const noMissText = listed ? "Every club is priced at full strength because the list names no regular as out." : "The availability step moved nothing; every club is priced at full strength until the list is read again.";
+    return { ...base, through: d.through ? `Through ${d.through}` : "", noTeams: !teams.length, hasTeams: teams.length > 0, cols7, teamRows, hasWeek, filters,
+      hasMiss, noMiss: !hasMiss, noMissTitle, noMissText, missStamp: hasMiss ? `${missRows.length} clubs with regulars out · ${d.availabilitySource || "fantasy availability feed"}` : (d.availabilitySource || "") };
+  }
+}
+</script>
+</body>
+</html>

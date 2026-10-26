@@ -1,3 +1,4 @@
+// Shared formatting helpers for every lab's pages.
 export const fmtOdds = (n) => (n > 0 ? `+${n}` : `−${Math.abs(n)}`);
 export const fmtSigned = (n, d = 1) => (n > 0 ? `+${n.toFixed(d)}` : n < 0 ? `−${Math.abs(n).toFixed(d)}` : n.toFixed(d));
 export const pct = (p) => `${Math.round(p * 100)}%`;

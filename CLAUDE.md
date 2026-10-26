@@ -116,6 +116,14 @@ Use the repo, the reports, and GitHub.
   shots on target, goals, assists, booked, sent off and saves from ESPN's match
   summary, tackles from the FPL logs carried in `matchday-state`. A player the
   feed does not name stays ungraded, never void.
+- **A player FPL says will probably not play is not priced (2026-10-26).** The
+  props refresh reads FPL's bootstrap on every run (keyless) into
+  `fpl_availability.csv`; a chance of playing the next round of 50% or less,
+  or status injured/suspended/unavailable, withholds all that player's props,
+  and the props card names them with FPL's news line. A 75% knock keeps his
+  normal rate. The frozen Platt correction is NOT refitted: one graded week of
+  live props cannot move a fit made on two months, and refitting on it would
+  be fitting noise.
 - **Cards, tackles and alternate goalkeeper saves are allowlisted
   (2026-10-19, Cooper: "dont forget about tackles/cards/goalie saves", "find
   goalie saves figure it out"; PR #372, receipt

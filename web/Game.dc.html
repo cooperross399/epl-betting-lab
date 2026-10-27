@@ -311,9 +311,15 @@ class Component extends DCLogic {
     // Paint from the Board's hand-off first (sessionStorage, written on the card link), then replace with the fetch.
     const gid = new URLSearchParams(location.search).get("id");
     if (!date && gid && !this.state.data) { try { const c = JSON.parse(sessionStorage.getItem("mh.game." + gid) || "null"); if (c && c.game && Date.now() - c.at < 6 * 3600e3) this.setState({ data: { generatedAt: c.generatedAt, teams: c.teams, games: [c.game] }, isSample: !live }); } catch (_) { /* ignore */ } }
-    const [data, record, graded] = await Promise.all([err ? null : get(url), get(rurl), archived ? get(`./data/history/graded/${archived.date}.json`) : null]);
-    // A past match's final is kept beside its frozen board (history/graded/<day>.json, {id: final}).
-    if (data && graded && typeof graded === "object") for (const x of data.games || []) if (!x.final && graded[String(x.id)]) x.final = graded[String(x.id)];
+    const [data, record] = await Promise.all([err ? null : get(url), get(rurl)]);
+    // A past match's final is kept beside its frozen board (history/graded/<day>.json, {id: final}),
+    // filed by the day the match was PLAYED. A board spans a whole round, so a Sunday match on a
+    // Saturday board has its final in Sunday's file: every kickoff day on the board is read.
+    if (data && archived) {
+      const days = new Set([archived.date, ...(data.games || []).map((x) => String(x.kickoff || "").slice(0, 10))].filter((s) => /^\d{4}-\d{2}-\d{2}$/.test(s)));
+      const files = await Promise.all([...days].map((day) => get(`./data/history/graded/${day}.json`)));
+      for (const graded of files) if (graded && typeof graded === "object") for (const x of data.games || []) if (!x.final && graded[String(x.id)]) x.final = graded[String(x.id)];
+    }
     this.setState({ data, record, archived, dateParam: date || "", isSample: !live, err: err || (data ? "" : "Board unreachable") });
   }
   componentDidMount() { this.load(); }
@@ -362,7 +368,9 @@ class Component extends DCLogic {
     const bandNote = hasWin && bucket && bucket.interval ? `favourites rated ${pct0(bucket.low)}–${bucket.high >= 1 ? "100%" : pct0(bucket.high)} have come in ${pct0(bucket.interval[0])}–${pct0(bucket.interval[1])} of the time (${bucket.games} matches)` : rec && rec.nights === 0 ? "ranges appear once matchdays settle" : "point estimate";
 
     // Verdict lines
-    const p = g.pick && g.pick.kind !== "pass" ? g.pick : { kind: "none" };
+    // A pick frozen before `kind` was written (boards before 2026-10-26) was a best bet, as the archive index counts it.
+    const p0 = g.pick && typeof g.pick === "object" ? { ...g.pick, kind: g.pick.kind || (g.pick.label ? "bet" : "none") } : null;
+    const p = p0 && p0.kind !== "pass" ? p0 : { kind: "none" };
     const pick = { isBet: p.kind === "bet", isLean: p.kind === "lean", isNone: priced && p.kind !== "bet" && p.kind !== "lean", label: p.label || "",
       sub: p.kind === "bet" ? `${odds(p.price)}${p.book ? ` at ${p.book}` : ""}${num(p.units) ? ` · ${p.units} ${p.units === 1 ? "unit" : "units"}` : ""}${num(p.edgePct) ? ` · ${F.fmtSigned(p.edgePct, 1)}% edge` : ""}` : p.kind === "lean" ? `${odds(p.price)}${p.book ? ` at ${p.book}` : ""} · a small edge, not enough to bet` : "" };
 
@@ -459,7 +467,7 @@ class Component extends DCLogic {
 
     return { ...base, builtLine, ready: true, missing: false,
       kicker: `${F.fmtDayLong(g.kickoff)} · Premier League`,
-      sides, time: F.fmtTime(g.kickoff), tz: F.tzName(), venueLine: [g.venue, g.city].filter(Boolean).join(" · ") || "Venue TBA", tvLine: g.tv ? `TV ${g.tv}` : "",
+      sides, time: F.fmtTime(g.kickoff), tz: F.tzName(), venueLine: [g.venue, g.city].filter(Boolean).join(" · ") || "Venue TBA", tvLine: g.tv && g.tv !== "—" ? `TV ${g.tv}` : "",
       unpriced: !priced, priced, hasWin, headline, scoreLine, why, hasWhy: why.length > 0, homeWin: pct1(hw), drawWin: pct1(dw), awayWin: pct1(aw), homePct: `${(hw * 100).toFixed(1)}%`, drawPct: `${(dw * 100).toFixed(1)}%`, homeColor: hColor, awayColor: aColor, homeAbbr: h.abbr, awayAbbr: a.abbr,
       barAria: `${th.name || h.abbr} ${pct1(hw)}, draw ${pct1(dw)}, ${ta.name || a.abbr} ${pct1(aw)}`, bandNote, nav, pick,
       hasFactors, hasRatings, cmp, absences, missIntro, markets, oddsNote, after };

@@ -443,14 +443,18 @@ def grade_due_entry(entry: dict, g: dict, lines: dict | None) -> dict:
 
 
 def due_tallies(rows: list) -> dict:
-    """A day's Due List in W-L-P, with what is still ungraded. Voids are in none of them."""
-    out = {"w": 0, "l": 0, "p": 0, "byMarket": {m: {"w": 0, "l": 0} for m in DUE_STATS}, "pending": 0}
+    """A day's Due List in W-L-P, with what is still ungraded. A void (the
+    player did not play) is counted under `void`, apart from the record."""
+    out = {"w": 0, "l": 0, "p": 0, "void": 0, "byMarket": {m: {"w": 0, "l": 0} for m in DUE_STATS}, "pending": 0}
     for r in rows:
         if not isinstance(r, dict):
             continue
         res = r.get("result")
         if res is None:
             out["pending"] += 1
+            continue
+        if res == "void":
+            out["void"] += 1
             continue
         if res not in ("win", "loss", "push"):
             continue
@@ -904,6 +908,16 @@ def _kept_night(path: Path) -> dict | None:
     return night if isinstance(night, dict) and isinstance(night.get("summary"), dict) else None
 
 
+def _games_settled(night: dict) -> int:
+    """How much a night record holds: the matches it graded (the `graded`
+    entries where kept, else the `games` count)."""
+    graded = night.get("graded")
+    if isinstance(graded, dict) and graded:
+        return len(graded)
+    games = night.get("games")
+    return len(games) if isinstance(games, list) else int(games or 0)
+
+
 def kickoff_days(boards: list[dict], through: date) -> list[date]:
     """Every date a published fixture kicked off on, up to and including `through`."""
     days: set[date] = set()
@@ -936,7 +950,7 @@ def season_record(sport: str, day: date, hist: Path, boards: list[dict],
     a stake, and none of it is in `picks`; nor is a lean.
     """
     tally = {key: {"w": 0, "l": 0} if key == "straightUp" else {"w": 0, "l": 0, "p": 0} for key in SEASON_KEYS}
-    due = {"w": 0, "l": 0, "p": 0, "nights": 0, "byMarket": {m: {"w": 0, "l": 0} for m in DUE_STATS}}
+    due = {"w": 0, "l": 0, "p": 0, "void": 0, "nights": 0, "byMarket": {m: {"w": 0, "l": 0} for m in DUE_STATS}}
     props = {"w": 0, "l": 0, "p": 0, "units": 0.0, "nights": 0}
     kept = hist / SETTLED_DIR
     nights, missing, first, last = 0, 0, None, None
@@ -964,17 +978,25 @@ def season_record(sport: str, day: date, hist: Path, boards: list[dict],
                         continue
                     waiting = False
                 else:
-                    night = night_record(settled)
-                    patient = d > day - timedelta(days=PATIENCE_DAYS)
-                    if d <= day - timedelta(days=1) and not (waiting and patient):
-                        kept.mkdir(parents=True, exist_ok=True)
-                        cached.write_text(json.dumps({"resultsDate": d.isoformat(), **night}, indent=1), encoding="utf-8")
-                    waiting = waiting and patient
+                    fresh = night_record(settled)
+                    if night is not None and _games_settled(fresh) < _games_settled(night):
+                        # A scoreboard that answers with less than the kept night
+                        # holds (an outage serving no finals for an old day) does
+                        # not replace it: the kept tallies stand, and the next
+                        # run tries again.
+                        waiting = False
+                    else:
+                        night = fresh
+                        patient = d > day - timedelta(days=PATIENCE_DAYS)
+                        if d <= day - timedelta(days=1) and not (waiting and patient):
+                            kept.mkdir(parents=True, exist_ok=True)
+                            cached.write_text(json.dumps({"resultsDate": d.isoformat(), **night}, indent=1), encoding="utf-8")
+                        waiting = waiting and patient
         write_graded(hist, d, night)
         night_due = night.get("dueList") if isinstance(night.get("dueList"), dict) else None
-        if night_due and sum(int(night_due.get(k) or 0) for k in ("w", "l", "p")):
+        if night_due and sum(int(night_due.get(k) or 0) for k in ("w", "l", "p", "void")):
             due["nights"] += 1
-            for k in ("w", "l", "p"):
+            for k in ("w", "l", "p", "void"):
                 due[k] += int(night_due.get(k) or 0)
             for market, split in (night_due.get("byMarket") or {}).items():
                 if market in due["byMarket"] and isinstance(split, dict):

@@ -647,10 +647,12 @@ jobs:
       - name: Fetch who is missing
         # The fantasy game's injury and suspension list, one keyless request,
         # for the card's match context (models/match_context.py): the missing
-        # regulars come off each club's attack and defence. Soft: a failure
-        # leaves the previous file, and with none the card reads nobody as
-        # missing and says so. Before "Rebuild every report" because that is
-        # where the card is built.
+        # regulars come off each club's attack and defence. Soft: a failure is
+        # a ::warning:: and leaves the previous file; the reader refuses a file
+        # older than its bound, and with no usable list the card prices every
+        # club at full strength (the public board's notes say why; the card's
+        # own markdown does not yet). Before "Rebuild every report" because
+        # that is where the card is built.
         if: always()
         continue-on-error: true
         timeout-minutes: 3

@@ -203,7 +203,13 @@ def track_record(hist: Path, now: str) -> dict:
             if _num(entry.get("bttsProb")):
                 btts_rows.append((float(entry["bttsProb"]), hf > 0 and af > 0))
             pick, ml = entry.get("pick"), entry.get("mlHome")
-            if isinstance(pick, dict) and str(pick.get("market") or "").lower() == "1x2" and pick.get("side") in ("home", "away") \
+            # Line movement is read after the match-result picks the board
+            # posted: best bets and leans. A pass is the board declining the
+            # market, not a pick, and `graded_entry` keeps it only so the
+            # Game page can say so. A pick frozen before `kind` was written
+            # (before 2026-10-26) was a best bet, as the archive index reads it.
+            posted = isinstance(pick, dict) and str(pick.get("kind") or "bet") in ("bet", "lean")
+            if posted and str(pick.get("market") or "").lower() == "1x2" and pick.get("side") in ("home", "away") \
                     and isinstance(ml, list) and len(ml) == 2:
                 first, last = _implied(ml[0]), _implied(ml[1])
                 if first is not None and last is not None:
@@ -220,8 +226,8 @@ def track_record(hist: Path, now: str) -> dict:
             games += night_games
         night_due = night.get("dueList")
         if isinstance(night_due, dict):
-            for k in ("w", "l", "p"):
-                due[k] += int(night_due.get(k) or 0)
+            for k in ("w", "l", "p", "void"):
+                due[k] = due.get(k, 0) + int(night_due.get(k) or 0)
     brier = None
     if brier_model:
         brier = {"games": len(brier_model), "model": round(sum(brier_model) / len(brier_model), 4),
@@ -237,7 +243,9 @@ def track_record(hist: Path, now: str) -> dict:
     }
     entries = due["w"] + due["l"]
     if entries:
-        out["dueList"] = {"entries": entries, "hitRate": round(due["w"] / entries, 4), "voids": due["p"]}
+        # `voids` are entries whose player did not play (`settle_results.
+        # due_tallies` counts them under `void`); a push is `p` and is not one.
+        out["dueList"] = {"entries": entries, "hitRate": round(due["w"] / entries, 4), "voids": due.get("void", 0)}
     return out
 
 
@@ -316,7 +324,13 @@ def tracker(hist: Path, now: str) -> dict:
 # ---------- the season ----------
 
 def season_table(fixtures: list[dict], team_entry) -> tuple[dict, list[dict]]:
-    """The table from the played fixtures, and the fixtures still to play."""
+    """The table from the played fixtures, and the fixtures still to play.
+
+    A fixture is played when it carries a final score, which `fetch_fixtures`
+    attaches only to a completed match; everything else, including a
+    postponed fixture (ESPN files it as "post" with no result until it is
+    given a new date), is still to play and is simulated, never a 0-0.
+    """
     table: dict = {}
     remaining: list[dict] = []
 
@@ -328,7 +342,7 @@ def season_table(fixtures: list[dict], team_entry) -> tuple[dict, list[dict]]:
     for f in fixtures:
         h, a = row(f["home"]["fd"]), row(f["away"]["fd"])
         hg, ag = f.get("homeGoals"), f.get("awayGoals")
-        if f.get("state") == "post" and _num(hg) and _num(ag):
+        if _num(hg) and _num(ag) and f.get("completed", True):
             for side, mine, theirs in ((h, hg, ag), (a, ag, hg)):
                 side["played"] += 1
                 side["gf"] += int(mine)
@@ -336,7 +350,7 @@ def season_table(fixtures: list[dict], team_entry) -> tuple[dict, list[dict]]:
                 side["gd"] = side["gf"] - side["ga"]
                 side["won" if mine > theirs else "drawn" if mine == theirs else "lost"] += 1
                 side["points"] += 3 if mine > theirs else 1 if mine == theirs else 0
-        elif f.get("state") != "post":
+        else:
             remaining.append(f)
     return table, remaining
 
@@ -392,7 +406,11 @@ def simulate_season(table: dict, remaining: list[dict], project, *, sims: int = 
             gd[:, ai] += ag - hg
             gf[:, hi] += hg
             gf[:, ai] += ag
-        score = pts * 1_000_000 + (gd + 1000) * 1000 + gf
+        # Points, then goal difference, then goals scored; an exact tie on all
+        # three is broken at random in each simulation, so a shared finish is
+        # split between the clubs rather than always handed to the one the
+        # fixture list named first.
+        score = (pts * 1_000_000 + (gd + 1000) * 1000 + gf).astype(np.float64) + rng.random((sims, n))
         order = np.argsort(-score, axis=1, kind="stable")
         ranks = np.empty_like(order)
         rows = np.arange(sims)[:, None]
@@ -422,7 +440,7 @@ def simulate_season(table: dict, remaining: list[dict], project, *, sims: int = 
                 gd[ai] += ag - hg
                 gf[hi] += hg
                 gf[ai] += ag
-            order = sorted(range(n), key=lambda t: (-pts[t], -gd[t], -gf[t], abbrs[t]))
+            order = sorted(range(n), key=lambda t: (-pts[t], -gd[t], -gf[t], rnd.random()))
             for r, t in enumerate(order):
                 finishes[t][r] += 1
                 points_sims[t].append(pts[t])

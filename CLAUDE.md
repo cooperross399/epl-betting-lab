@@ -425,6 +425,51 @@ Use the repo, the reports, and GitHub.
   lock moves, the new pages link each other directly). No page names a
   reference site, and every one states that no market shows a demonstrated
   edge. `tests/test_the_epl_site_has_every_page_the_nhl_site_has.py`.
+- **2026-10-26, later: an adversarial review of that change found defects in
+  the model's inputs and the pages, fixed forward in one PR
+  (`tests/test_the_review_findings_stay_fixed.py`).** In the model's inputs:
+  the fantasy game spells Manchester United "Man Utd", which no alias
+  mapped, so United's injury list keyed a club no fixture asks for and every
+  United fixture was priced at full strength while every other club was
+  adjusted (`team_names.PROVIDER_TEAM_ALIASES`; a test now runs every
+  current club's fantasy spelling through the mapper). The availability
+  list had no age: the fetch is soft and the file is carried from run to
+  run, so a list fetched a week ago priced the card as today's. Every row
+  now carries `retrieved_at`, `match_context.read_availability` refuses a
+  list older than `AVAILABILITY_MAX_AGE_HOURS` (48) or without a stamp, and
+  returns the reason (`availability_note`), which the card's context and the
+  board's notes carry; the card's own markdown does not yet print it (an
+  owner item). The list is read for the round the fixtures belong to: after
+  a gameweek's deadline FPL's "next round" is the following week's, so the
+  fetch records `round_in_progress` (the current gameweek has passed its
+  deadline and is not finished) and `chance_this_round`, and the context
+  reads this round's chance when so. An attacker's weight is his expected
+  goal involvement floored at `ATTACK_WEIGHT_FLOOR` (0.05), never his
+  fantasy points: the points fallback let a regular with 0.00 involvement
+  outweigh the striker five to one. Not changed, an owner's call: a long-term
+  absentee is removed twice, by the ratings that no longer see him and again
+  by the context. On the site: `homeEdge` is published as the deviation from
+  one (the multiplier read as "+98.4%" on every club); a postponed fixture,
+  which ESPN files as "post" with "0" on both sides, is no longer a played
+  0-0 (`fetch_fixtures` records `completed` and only a completed match
+  carries a score; `season_table` simulates the rest); the Game page reads
+  each kickoff day's `graded` file, since a board spans a round and a Sunday
+  final lived in Sunday's file; a pick frozen before `kind` existed is a best
+  bet; line movement counts best bets and leans and never a pass; a Due List
+  void is counted apart from a push (`due_tallies` and `season_record` carry
+  `void`, record.json's `voids` reads it); clubs level on points, goal
+  difference and goals scored split a simulated finish at random instead of
+  the first-named always winning; `ratings.json` carries
+  `availabilityListed` and `availabilitySource`, which the Methods page
+  reads; no builder note names an outside site; a re-settlement that grades
+  fewer matches than a kept night does not replace it; and the smaller page
+  defects the review named (the calibration table coloured the observed
+  rate against its own interval, so it could never fire; the Methods prop
+  bar said 6 where the card's is 8; a bet without a price fell in the
+  "−110 to +110" band and printed "−NaN"; the results chart's axis printed
+  whole weekday names; a descending-first column could not be reversed; an
+  unreachable feed showed the "nothing settled yet" copy; "TV —"). No
+  measurement, bar, stake or market moved.
 - **The European sections vanished on 2026-10-19 because four league feeds
   timed out (Serie A, Ligue 1, Greece, Scotland).** The European pool needs
   every domestic league, so Champions, Europa and Conference League could not

@@ -18,12 +18,18 @@ team totals) moves together and none can disagree with another:
                 a quarter of the move, clamped to `FORM_CLAMP`
   availability  who is missing (the official fantasy game's injury and
                 suspension list, which is Opta's), weighted by each player's
-                share of his club's expected goal involvement (attackers) or
-                minutes (defenders and goalkeepers) among the club's regulars;
-                half the missing share comes off the attack, floored at
-                `AVAILABILITY_FLOOR`, and half the missing defensive share
-                goes onto what the club concedes, capped at
-                `AVAILABILITY_CEILING`
+                share of his club's expected goal involvement (attackers,
+                floored at `ATTACK_WEIGHT_FLOOR` so a regular with none yet
+                still counts a little and never by his points, which are
+                another unit) or minutes (defenders and goalkeepers) among
+                the club's regulars; half the missing share comes off the
+                attack, floored at `AVAILABILITY_FLOOR`, and half the missing
+                defensive share goes onto what the club concedes, capped at
+                `AVAILABILITY_CEILING`. The list is read for the round the
+                fixtures belong to (`round_in_progress`, see
+                `providers/fpl_players.AVAILABILITY_FIELDS`) and refused once
+                it is older than `AVAILABILITY_MAX_AGE_HOURS`, so a stale
+                flag never prices a card as today's
 
 Every constant is this lab's choice, made before any price was read, and the
 walk-forward measurements do not apply the context unless asked, so every
@@ -39,6 +45,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from pathlib import Path
 
 import numpy as np
@@ -56,6 +63,16 @@ FORM_CLAMP = (0.9, 1.1)
 AVAILABILITY_WEIGHT = 0.5
 AVAILABILITY_FLOOR = 0.85
 AVAILABILITY_CEILING = 1.15
+#: An attacking regular's weight is his expected goal involvement, never less
+#: than this (in the same unit), so a holding midfielder with 0.00 so far
+#: counts as a small part of the attack rather than falling back to his
+#: points, which once gave him the largest weight in the club.
+ATTACK_WEIGHT_FLOOR = 0.05
+#: An availability list fetched longer ago than this is refused, and the
+#: card prices every club at full strength and says so. The fetch runs before
+#: every card; two days covers a run whose fetch failed without letting a
+#: week-old suspension price a Friday card.
+AVAILABILITY_MAX_AGE_HOURS = 48
 #: A regular is a player with at least this share of his club's most-used
 #: player's minutes. Squads carry thirty names; the sheet carries eleven.
 REGULAR_MINUTES_SHARE = 0.4
@@ -165,9 +182,11 @@ class MatchContext:
         return rows
 
     def table(self) -> list[dict]:
-        """Every club's multipliers, for the ratings page."""
+        """Every club's multipliers, for the ratings page. `homeEdge` is the
+        club's deviation from the league's home edge (multiplier minus one),
+        which is what the pages print as a signed percent."""
         return [
-            {"team": team, "homeEdge": round(t.home_edge, 3), "attackForm": round(t.attack_form, 3),
+            {"team": team, "homeEdge": round(t.home_edge - 1.0, 3), "attackForm": round(t.attack_form, 3),
              "defenceForm": round(t.defence_form, 3), "attackAvailable": round(t.attack_available, 3),
              "defenceAvailable": round(t.defence_available, 3), "missing": list(t.missing),
              "formGames": t.form_games, "homeMatches": t.home_matches}
@@ -272,19 +291,41 @@ def form_factors(matches: pd.DataFrame, *, games: int = FORM_GAMES, window: int 
     return out
 
 
-def _chance(row: pd.Series) -> float:
-    """How likely a player is to play, from the fantasy game's flag and stated chance."""
-    status = str(row.get("status") or "").strip().lower()
-    chance = row.get("chance_next_round")
+def _stated(value: object) -> float | None:
     try:
-        chance = None if chance is None or pd.isna(chance) else float(chance) / 100.0
+        return None if value is None or pd.isna(value) else float(value) / 100.0
     except (TypeError, ValueError):
-        chance = None
+        return None
+
+
+def _chance(row: pd.Series, this_round: bool = False) -> float:
+    """How likely a player is to play, from the fantasy game's flag and stated
+    chance. With `this_round` the chance for the round in progress is read
+    where the list carries one; a list written before that column existed
+    falls back to the next round's figure."""
+    status = str(row.get("status") or "").strip().lower()
+    chance = _stated(row.get("chance_this_round")) if this_round else None
+    if chance is None:
+        chance = _stated(row.get("chance_next_round"))
     if status in ("", "a"):
         return 1.0 if chance is None else min(max(chance, 0.0), 1.0)
     if chance is not None:
         return min(max(chance, 0.0), 1.0)
     return DOUBTFUL_DEFAULT_CHANCE if status == "d" else 0.0
+
+
+def _round_in_progress(df: pd.DataFrame) -> bool:
+    """What the fetch recorded: True when the fixtures still to play belong
+    to the gameweek FPL calls current, so `chance_this_round` is the one."""
+    if "round_in_progress" not in df.columns or df.empty:
+        return False
+    value = df["round_in_progress"].iloc[0]
+    if isinstance(value, str):
+        return value.strip().lower() in ("true", "1", "yes")
+    try:
+        return bool(value) and not pd.isna(value)
+    except (TypeError, ValueError):
+        return False
 
 
 def availability_factors(availability: pd.DataFrame, *, weight: float = AVAILABILITY_WEIGHT,
@@ -295,11 +336,14 @@ def availability_factors(availability: pd.DataFrame, *, weight: float = AVAILABI
 
     The regulars are the players with at least `regular_share` of the club's
     most-used player's minutes. An attacker (midfielder or forward) weighs
-    his expected goal involvement this season, falling back to his points;
-    a defender or goalkeeper weighs his minutes. The missing share is the
-    weight of the regulars who will not play, pro rata for a stated chance,
-    over the weight of every regular. Half of it comes off the club's attack
-    and half of the defensive share goes onto what it concedes.
+    his expected goal involvement this season, never less than
+    `ATTACK_WEIGHT_FLOOR` (one unit for every attacker: his points were once
+    the fallback, and a regular with 0.00 involvement then outweighed the
+    striker five to one); a defender or goalkeeper weighs his minutes. The
+    missing share is the weight of the regulars who will not play, pro rata
+    for a stated chance in the round the fixtures belong to, over the weight
+    of every regular. Half of it comes off the club's attack and half of the
+    defensive share goes onto what it concedes.
     """
     if availability is None or availability.empty or "team" not in availability.columns:
         return {}
@@ -307,6 +351,7 @@ def availability_factors(availability: pd.DataFrame, *, weight: float = AVAILABI
     for col in ("minutes", "total_points", "expected_goal_involvements"):
         df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0.0) if col in df.columns else 0.0
     df["position"] = df["position"].astype(str).str.upper() if "position" in df.columns else ""
+    this_round = _round_in_progress(df)
     out: dict[str, tuple[float, float, tuple[str, ...]]] = {}
     for team, squad in df.groupby("team"):
         team = str(team).strip()
@@ -319,10 +364,10 @@ def availability_factors(availability: pd.DataFrame, *, weight: float = AVAILABI
         attack_w = defence_w = attack_out = defence_out = 0.0
         missing: list[str] = []
         for _, row in regulars.iterrows():
-            chance = _chance(row)
+            chance = _chance(row, this_round)
             pos = row["position"]
             if pos in ATTACK_POSITIONS:
-                w = float(row["expected_goal_involvements"]) or max(float(row["total_points"]), 0.0) or 1.0
+                w = max(float(row["expected_goal_involvements"]), ATTACK_WEIGHT_FLOOR)
                 attack_w += w
                 attack_out += w * (1.0 - chance)
             elif pos in DEFENCE_POSITIONS:
@@ -345,11 +390,13 @@ def availability_factors(availability: pd.DataFrame, *, weight: float = AVAILABI
 
 def build_match_context(matches: pd.DataFrame, availability: pd.DataFrame | None = None, *,
                         parts: tuple[str, ...] = ("home_edge", "form", "availability"),
-                        availability_source: str = "") -> MatchContext:
+                        availability_source: str = "", availability_note: str = "") -> MatchContext:
     """The context for every club the matches name, from the played matches
     (expected goals joined where the data has them) and the availability
     list. A club the list does not name has nobody missing; a part asked
-    for without its data multiplies by one."""
+    for without its data multiplies by one. `availability_note` is why no
+    list was read (`read_availability` supplies it); with none given and no
+    list, the note says so in general terms."""
     edges = home_edge_factors(matches) if "home_edge" in parts else {}
     form = form_factors(matches) if "form" in parts else {}
     avail = availability_factors(availability) if "availability" in parts and availability is not None else {}
@@ -364,17 +411,65 @@ def build_match_context(matches: pd.DataFrame, availability: pd.DataFrame | None
                                 missing=missing, form_games=n_form, home_matches=n_home)
     note = ""
     if "availability" in parts and (availability is None or availability.empty):
-        note = "No availability list reached this run, so nobody is read as missing."
+        note = availability_note or "No availability list reached this run, so nobody is read as missing."
     return MatchContext(teams=out, parts=tuple(parts), availability_source=availability_source,
                         availability_note=note)
 
 
-def load_availability(path: Path | None) -> pd.DataFrame | None:
-    """The availability list on disk, or None when there is none or it cannot be read."""
-    if path is None or not Path(path).is_file():
+NO_LIST_NOTE = "No availability list reached this run, so nobody is read as missing."
+
+
+def availability_stamp(frame: pd.DataFrame | None) -> str:
+    """When the list was fetched (`retrieved_at`, UTC ISO 8601), or "" for a
+    list written before the stamp existed."""
+    if frame is None or frame.empty or "retrieved_at" not in frame.columns:
+        return ""
+    value = frame["retrieved_at"].dropna()
+    return str(value.iloc[0]).strip() if len(value) else ""
+
+
+def _parse_stamp(stamp: str) -> datetime | None:
+    try:
+        parsed = datetime.fromisoformat(stamp.replace("Z", "+00:00"))
+    except ValueError:
         return None
+    return parsed if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
+
+
+def read_availability(path: Path | None, *, now: datetime | None = None,
+                      max_age_hours: float = AVAILABILITY_MAX_AGE_HOURS) -> tuple[pd.DataFrame | None, str]:
+    """The availability list on disk and why it was not read, as `(frame, note)`.
+
+    `(frame, "")` for a list fetched within `max_age_hours` of `now`. Otherwise
+    `(None, note)`: no file, a file that cannot be read, a file without a
+    fetch stamp (written before `retrieved_at` existed, so its age is
+    unknown), or one older than the bound. The fetch is soft and the file is
+    carried from run to run, so without this a list fetched a week ago would
+    price a card as today's; the note names the age so the card can say so.
+    """
+    if path is None or not Path(path).is_file():
+        return None, NO_LIST_NOTE
     try:
         frame = pd.read_csv(path)
     except (OSError, UnicodeError, ValueError, pd.errors.ParserError):
-        return None
-    return frame if "team" in frame.columns and "player" in frame.columns else None
+        return None, "The availability list on disk could not be read, so nobody is read as missing."
+    if "team" not in frame.columns or "player" not in frame.columns:
+        return None, "The availability list on disk is not in the expected shape, so nobody is read as missing."
+    stamp = availability_stamp(frame)
+    fetched = _parse_stamp(stamp) if stamp else None
+    if fetched is None:
+        return None, "The availability list on disk carries no fetch time, so its age is unknown and nobody is read as missing."
+    moment = now or datetime.now(timezone.utc)
+    if moment.tzinfo is None:
+        moment = moment.replace(tzinfo=timezone.utc)
+    age_hours = (moment - fetched).total_seconds() / 3600.0
+    if age_hours > max_age_hours:
+        return None, (f"The availability list was fetched {age_hours:.0f} hours ago ({stamp}), past the "
+                      f"{max_age_hours:.0f}-hour bound, so nobody is read as missing.")
+    return frame, ""
+
+
+def load_availability(path: Path | None, *, now: datetime | None = None) -> pd.DataFrame | None:
+    """`read_availability` without the note: the list, or None when it is
+    missing, unreadable, unstamped or older than `AVAILABILITY_MAX_AGE_HOURS`."""
+    return read_availability(path, now=now)[0]

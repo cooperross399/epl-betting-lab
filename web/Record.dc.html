@@ -80,8 +80,8 @@
     <sc-if value="{{ empty }}" hint-placeholder-val="{{ false }}">
       <section id="main" style="padding:40px 0;">
         <div style="border:1px dashed var(--mute);padding:16px 18px;max-width:760px;">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;line-height:1;text-transform:uppercase;color:var(--mute);">No matchday settled yet</div>
-          <p style="margin:8px 0 0;font-size:14px;line-height:1.5;color:var(--ink-2);text-wrap:pretty;">The first calibration numbers appear the morning after the first fixtures on the board are played. Each settled matchday adds its games to the buckets below.</p>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;line-height:1;text-transform:uppercase;color:var(--mute);">{{ emptyTitle }}</div>
+          <p style="margin:8px 0 0;font-size:14px;line-height:1.5;color:var(--ink-2);text-wrap:pretty;">{{ emptyNote }}</p>
         </div>
       </section>
     </sc-if>
@@ -295,8 +295,10 @@ class Component extends DCLogic {
     const F = this.F, d = this.state.data;
     const tabsList = [["This week", "Board.dc.html"], ["Results", "Results.dc.html"], ["Season", "Season.dc.html"], ["Record", "Record.dc.html"], ["Tracker", "Tracker.dc.html"]];
     const tabs = tabsList.map(([label, href]) => ({ label, href, current: label === "Record" ? "page" : undefined, shadow: label === "Record" ? "inset 0 -3px 0 var(--ink)" : "none", color: label === "Record" ? "var(--ink)" : "var(--mute)" }));
-    const base = { tabs, isSample: !!this.state.isSample, kicker: "EPL · 2026–27", week: { show: false }, headline: "", mkts: { show: false, none: true, list: [] }, due: { show: false } };
-    if (!d) return { ...base, ready: false, empty: !!this.state.err, kicker: this.state.err ? "EPL · record unreachable" : base.kicker };
+    const NOT_YET = { emptyTitle: "No matchday settled yet", emptyNote: "The first calibration numbers appear the morning after the first fixtures on the board are played. Each settled matchday adds its games to the buckets below." };
+    const base = { tabs, isSample: !!this.state.isSample, kicker: "EPL · 2026–27", week: { show: false }, headline: "", mkts: { show: false, none: true, list: [] }, due: { show: false }, ...NOT_YET };
+    // A record that could not be fetched is not an empty record: the page says which.
+    if (!d) return { ...base, ready: false, empty: !!this.state.err, kicker: this.state.err ? "EPL · record unreachable" : base.kicker, emptyTitle: "Record unreachable", emptyNote: "The track record could not be loaded. Try again in a minute." };
     const nights = d.nights || 0, games = d.games || 0, buckets = (d.buckets || []).filter((b) => b.games > 0);
     if (!nights || !buckets.length) return { ...base, ready: false, empty: true, kicker: `EPL · ${nights} matchdays settled` };
 
@@ -320,7 +322,8 @@ class Component extends DCLogic {
     const headline = `Favourites we rated ${pct0(big.low)}–${big.high >= 1 ? "100%" : pct0(big.high)} have come in ${pct0(big.actual)} of the time${Math.abs(gap) < 0.03 ? ", about what we said" : gap > 0 ? ", a little more than we said" : ", a little less than we said"}. ${games} matches in, the numbers are holding up but the ranges are still wide.`;
     const grid = [0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0].map((p) => ({ y: Y(p).toFixed(1), yText: (Y(p) + 3.5).toFixed(1), x: X(p).toFixed(1), label: pct0(p) }));
     const rows = buckets.map((b) => ({ range: `${pct0(b.low)}–${b.high >= 1 ? "100%" : pct0(b.high)}`, games: String(b.games), predicted: pct1(b.predicted), actual: pct1(b.actual), interval: `${pct0(b.interval[0])}–${pct0(b.interval[1])}`,
-      actualColor: b.actual >= b.interval[0] && b.actual <= b.interval[1] ? "var(--ink)" : "var(--alert)" }));
+      // The range is around the observed rate, so what it tests is the PREDICTED rate; the observed rate is always inside it.
+      actualColor: b.predicted >= b.interval[0] && b.predicted <= b.interval[1] ? "var(--ink)" : "var(--alert)" }));
     const within = buckets.filter((b) => b.predicted >= b.interval[0] && b.predicted <= b.interval[1]).length;
     const rowsFoot = `${games} matches over ${nights} matchdays · the predicted rate sits inside the range in ${within} of ${buckets.length} buckets`;
     const chartAria = `Calibration chart. ${buckets.map((b) => `Bucket ${pct0(b.low)} to ${pct0(b.high)}: predicted ${pct1(b.predicted)}, actual ${pct1(b.actual)}, ${b.games} matches`).join(". ")}.`;

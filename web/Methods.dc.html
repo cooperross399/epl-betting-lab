@@ -261,7 +261,7 @@ class Component extends DCLogic {
       formula: "p ≥ 0.5:  −100 × p / (1 − p)\np < 0.5:  +100 × (1 − p) / p",
       sure: "Exactly as sure as the chance it comes from. No more." },
     { id: "edge", updated: "2026-10-26", title: "Edge %", def: "How much better our chance is than the chance implied by the best price on the board, after the margin is removed.",
-      build: "The best available price on each outcome is converted to an implied probability, the bookmaker's margin is stripped by scaling the outcomes to sum to one, and our calibrated probability is compared with the result. A positive edge means we think the outcome comes in more often than the price says. It is reported in points of probability, and a team-market pick needs 3.5 points to clear the bar; a player prop needs 6.",
+      build: "The best available price on each outcome is converted to an implied probability, the bookmaker's margin is stripped by scaling the outcomes to sum to one, and our calibrated probability is compared with the result. A positive edge means we think the outcome comes in more often than the price says. It is reported in points of probability, and a team-market pick needs 3.5 points to clear the bar; a player prop needs 8.",
       formula: "edge = p_model − p_market(no vig)",
       sure: "Not sure at all that a positive edge means profit. Measured on seasons of real prices, no market shows a demonstrated edge. The number is published because it is the honest basis for the pick; whether it has paid is on All results." },
     { id: "bet-lean", updated: "2026-10-26", title: "Best bet vs lean", def: "A best bet clears the edge bar on an allowed market. A lean has a positive edge that does not.",

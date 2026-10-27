@@ -47,13 +47,21 @@ export async function detectSport(fallback) {
   return { sport, deployed: false, pages: pagesFor(sport) };
 }
 
-// The tab bar every shared page draws: the board, props or the Due List where the board has them, Results, then the
-// lab's extra pages. Archive is a tab only where there is no Tracker (which links to the archive itself).
+// Whether this lab's adapter prices player props: the Props tab, and the props block behind it, exist only where
+// it does. `ADAPTERS` is declared further down; every caller runs after the module has evaluated.
+export function hasProps(sport) {
+  const a = ADAPTERS[sport];
+  return !!(a && a.props);
+}
+
+// The tab bar every shared page draws: the board, then Props where the lab's adapter prices props (the board's
+// props view and the Due List live under it), Results, then the lab's extra pages. Archive is a tab only where
+// there is no Tracker (which links to the archive itself).
 export function pageTabs(sport, pages, current, tab) {
   const has = (k) => pages instanceof Set && pages.has(k);
   return [
     tab(sport === "epl" ? "This week" : "Tonight", "Board.dc.html", current === "tonight"),
-    ...(sport === "nhl" ? [tab("Props", "Board.dc.html#props", current === "props")] : []),
+    ...(hasProps(sport) ? [tab("Props", "Board.dc.html#props", current === "props")] : []),
     tab("Results", "Results.dc.html", current === "results"),
     ...(has("season") ? [tab("Season", "Season.dc.html", current === "season")] : []),
     ...(has("record") ? [tab("Record", "Record.dc.html", current === "record")] : []),

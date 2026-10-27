@@ -484,6 +484,13 @@ Use the repo, the reports, and GitHub.
   2026-27 twenty (it ran 2025-26's, so Coventry, Hull and Ipswich were never
   checked), the season's void sum is pinned by behaviour and not by a
   source grep, and two docstrings were brought back to what the code does.
+  The props card, the list's second READER, read `chance_next_round`
+  whatever the round, so during a gameweek in progress a player out
+  tonight and back next week (0 / 100) was priced; it now reads this
+  round's chance while the round is in progress, as the context does
+  (`player_props_card._load_unavailable`). Still open, an owner's call:
+  the props card applies no age bound to the list, where the context
+  refuses one older than 48 hours.
 - **The European sections vanished on 2026-10-19 because four league feeds
   timed out (Serie A, Ligue 1, Greece, Scotland).** The European pool needs
   every domestic league, so Champions, Europa and Conference League could not

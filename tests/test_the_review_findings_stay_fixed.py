@@ -291,6 +291,26 @@ def test_the_props_card_refresh_writes_a_stamped_list_the_reader_accepts(tmp_pat
     assert fetch_stamp(datetime(2026, 10, 27, 9, 0)) == given, "a naive instant is read as UTC"
 
 
+def test_the_props_card_withholds_on_this_rounds_chance_while_the_round_is_in_progress(tmp_path: Path) -> None:
+    """The props card is the list's second reader; it read `chance_next_round`
+    whatever the round, so a player out tonight and back next week (0 / 100)
+    was priced during a gameweek in progress."""
+    from epl_betting_lab.reports.player_props_card import _load_unavailable
+    in_progress = tmp_path / "in_progress.csv"
+    build_fpl_availability(BOOTSTRAP, retrieved_at="2026-10-26T12:00:00+00:00").to_csv(in_progress, index=False)
+    (entry,) = _load_unavailable(in_progress)
+    assert entry["player"] == "Bruno Fernandes" and entry["chance"] == "0" and entry["chance_next_round"] == "100"
+    between = tmp_path / "between.csv"
+    finished = {**BOOTSTRAP, "events": [{"id": 9, "is_current": True, "finished": True}, {"id": 10, "is_next": True}]}
+    build_fpl_availability(finished, retrieved_at="2026-10-26T12:00:00+00:00").to_csv(between, index=False)
+    assert _load_unavailable(between) == [], "between gameweeks the next round's 100 keeps him priced"
+    # A list written before the round columns existed reads as before.
+    legacy = tmp_path / "legacy.csv"
+    pd.DataFrame([{"player": "Old Row", "team": "Man United", "status": "i", "chance_next_round": 25, "news": "x"}]).to_csv(legacy, index=False)
+    (old,) = _load_unavailable(legacy)
+    assert old["chance"] == "25" and old["chance_next_round"] == "25"
+
+
 def test_a_player_out_this_round_but_back_next_is_missing_only_while_this_round_is_in_progress() -> None:
     base = {"team": "Man United", "player": "Bruno Fernandes", "position": "FWD", "status": "d",
             "chance_this_round": 0, "chance_next_round": 100, "minutes": 900, "total_points": 60,

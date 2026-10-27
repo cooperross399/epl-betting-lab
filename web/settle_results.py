@@ -1064,6 +1064,8 @@ def write_season(data: Path, results: dict, season: dict) -> None:
     Nothing is written for a tally nobody has made: before a day has settled
     there is no `seasonRecord` and the board's record keeps only the keys it
     already carried, so the page shows a dash and "Not tallied yet", never 0–0.
+    The props' season line (`record.props`) and the Due List's are written
+    only once a night that carried them has settled, for the same reason.
     """
     if season.get("nights"):
         span = {k: season[k] for k in ("nights", "firstDate", "lastDate", "missingNights")}
@@ -1086,6 +1088,10 @@ def write_season(data: Path, results: dict, season: dict) -> None:
         record["season"] = {k: v for k, v in season.items() if k != "dueList"}
     if "dueList" in season:
         record["dueList"] = {k: season["dueList"][k] for k in ("w", "l", "p", "nights")}
+    if "props" in season:
+        # The board's "Props best bets · season" line, as the NHL board
+        # carries it: the staked props' W-L-P, units and nights settled.
+        record["props"] = {k: season["props"][k] for k in ("w", "l", "p", "units", "nights")}
     board["record"] = record
     board_path.write_text(json.dumps(board, indent=1, ensure_ascii=False), encoding="utf-8")
 

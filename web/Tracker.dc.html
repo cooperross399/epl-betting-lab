@@ -312,7 +312,7 @@ class Component extends DCLogic {
   sort(tid, k) { this.setState((s) => { const cur = s.sorts[tid] || { k: "units", dir: -1 }; return { sorts: { ...s.sorts, [tid]: { k, dir: cur.k === k ? -cur.dir : k === "name" ? 1 : -1 } } }; }); }
   renderVals() {
     const F = this.F, d = this.state.data, T = this.state.teams;
-    const tabsList = [["This week", "Board.dc.html"], ["Results", "Results.dc.html"], ["Season", "Season.dc.html"], ["Record", "Record.dc.html"], ["Tracker", "Tracker.dc.html"]];
+    const tabsList = [["This week", "Board.dc.html"], ["Props", "Board.dc.html#props"], ["Results", "Results.dc.html"], ["Season", "Season.dc.html"], ["Record", "Record.dc.html"], ["Tracker", "Tracker.dc.html"]];
     const tabs = tabsList.map(([label, href]) => ({ label, href, current: label === "Tracker" ? "page" : undefined, shadow: label === "Tracker" ? "inset 0 -3px 0 var(--ink)" : "none", color: label === "Tracker" ? "var(--ink)" : "var(--mute)" }));
     const base = { tabs, isSample: !!this.state.isSample, kicker: "EPL · 2026–27", headline: "", defaultUnits: "1",
       emptyTitle: "No bet has been graded yet", emptyNote: "The first rows land the morning after the first fixtures on the board are played.", emptyLink: true };

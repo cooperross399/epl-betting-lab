@@ -251,7 +251,16 @@ UNAVAILABLE_STATUSES = frozenset({"i", "s", "u", "n"})
 
 
 def _load_unavailable(path: Path) -> list[dict[str, str]]:
-    """Players FPL says will probably not play the next round."""
+    """Players FPL says will probably not play the round the fixtures belong to.
+
+    While a gameweek is in progress (`round_in_progress`, recorded by the
+    fetch) the fixtures still to play are THIS round and the stated chance
+    read is `chance_this_round`; between gameweeks it is `chance_next_round`,
+    as the match context reads it. Reading the next round's chance during a
+    round in progress priced a player suspended for tonight, whose chance for
+    the following week reads 100. `chance` is the one the decision used;
+    `chance_next_round` is kept as the next round's figure.
+    """
     if not path.is_file():
         return []
     try:
@@ -260,7 +269,10 @@ def _load_unavailable(path: Path) -> list[dict[str, str]]:
         return []
     out = []
     for row in table.to_dict("records"):
-        chance = pd.to_numeric(row.get("chance_next_round"), errors="coerce")
+        in_progress = str(row.get("round_in_progress") or "").strip().casefold() in ("true", "1")
+        next_chance = pd.to_numeric(row.get("chance_next_round"), errors="coerce")
+        this_chance = pd.to_numeric(row.get("chance_this_round"), errors="coerce")
+        chance = this_chance if in_progress and not pd.isna(this_chance) else next_chance
         status = str(row.get("status") or "").strip().casefold()
         if (not pd.isna(chance) and chance <= UNAVAILABLE_CHANCE) or (
             pd.isna(chance) and status in UNAVAILABLE_STATUSES
@@ -269,7 +281,8 @@ def _load_unavailable(path: Path) -> list[dict[str, str]]:
                 "player": str(row.get("player") or ""),
                 "team": str(row.get("team") or ""),
                 "status": status,
-                "chance_next_round": "" if pd.isna(chance) else str(int(chance)),
+                "chance": "" if pd.isna(chance) else str(int(chance)),
+                "chance_next_round": "" if pd.isna(next_chance) else str(int(next_chance)),
                 "news": str(row.get("news") or ""),
             })
     return out
@@ -693,7 +706,7 @@ def render_player_props_markdown(summary: Mapping[str, object]) -> str:
             "",
         ]
         for entry in withheld:
-            chance = entry.get("chance_next_round")
+            chance = entry.get("chance", entry.get("chance_next_round"))
             lines.append(
                 f"- {entry['player']} ({entry['team']})"
                 + (f", {chance}%" if chance not in (None, "") else "")

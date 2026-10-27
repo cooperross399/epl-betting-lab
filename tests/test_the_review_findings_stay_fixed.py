@@ -151,12 +151,28 @@ def test_a_postponed_fixture_carries_no_score_and_stays_to_be_played(monkeypatch
 
 # ---------- the fantasy game's spellings reach the context ----------
 
-FPL_SHORT_NAMES = ("Arsenal", "Aston Villa", "Bournemouth", "Brentford", "Brighton", "Burnley", "Chelsea",
-                   "Crystal Palace", "Everton", "Fulham", "Leeds", "Liverpool", "Man City", "Man Utd",
-                   "Newcastle", "Nott'm Forest", "Sunderland", "Spurs", "West Ham", "Wolves")
+#: The fantasy game's `teams[].name` for the twenty clubs of 2026-27 (Coventry,
+#: Hull and Ipswich came up; Burnley, West Ham and Wolves went down, and are
+#: checked apart because the settled record still names them). The first
+#: version of this list was 2025-26's, so the three promoted clubs were never
+#: run through the mapper.
+FPL_SHORT_NAMES = ("Arsenal", "Aston Villa", "Bournemouth", "Brentford", "Brighton", "Chelsea", "Coventry",
+                   "Crystal Palace", "Everton", "Fulham", "Hull", "Ipswich", "Leeds", "Liverpool", "Man City",
+                   "Man Utd", "Newcastle", "Nott'm Forest", "Sunderland", "Spurs")
+RELEGATED_2026 = ("Burnley", "West Ham", "Wolves")
 
 
-@pytest.mark.parametrize("name", FPL_SHORT_NAMES)
+def test_the_club_list_is_this_seasons_twenty() -> None:
+    import importlib.util as iu
+    spec = iu.spec_from_file_location("board_clubs", WEB / "build_board_json.py")
+    board = iu.module_from_spec(spec)
+    spec.loader.exec_module(board)
+    current = {fd for fd, (_abbr, _short, _c, _ink) in board.TEAMS.items()} - set(normalize_team_name(n) for n in RELEGATED_2026)
+    assert len(FPL_SHORT_NAMES) == 20
+    assert {normalize_team_name(n) for n in FPL_SHORT_NAMES} == current, "the fantasy spellings cover exactly the board's twenty"
+
+
+@pytest.mark.parametrize("name", FPL_SHORT_NAMES + RELEGATED_2026)
 def test_every_fantasy_game_short_name_maps_to_a_club_the_model_knows(name: str) -> None:
     assert is_mapped_team_name(name), name
 
@@ -246,6 +262,53 @@ def test_the_fetch_records_which_round_the_fixtures_belong_to_and_when_it_ran() 
     assert float(row["expected_goal_involvements"]) == 5.0 and row["player"] == "Bruno Fernandes" and row["status"] == "d"
     assert bool(row["round_in_progress"]) is True and row["retrieved_at"] == "2026-10-26T12:00:00+00:00"
     assert list(table.columns) == list(AVAILABILITY_FIELDS)
+
+
+def test_the_props_card_refresh_writes_a_stamped_list_the_reader_accepts(tmp_path: Path) -> None:
+    """`fetch_fpl_player_data` is the availability file's second producer, and
+    the props-card refresh runs it after the dedicated fetch; its table used
+    to carry no `retrieved_at`, so the public board read an unstamped list."""
+    from epl_betting_lab.providers.fpl_players import FPL_AVAILABILITY_FILENAME, fetch_fpl_player_data, fetch_stamp, write_fpl_data
+
+    def requester(url: str):
+        if url.endswith("/bootstrap-static/"):
+            return BOOTSTRAP
+        assert "/element-summary/10/" in url, url
+        return {"history": [], "history_past": []}
+
+    result = fetch_fpl_player_data(requester=requester, today=date(2026, 10, 27), workers=1)
+    assert result.players_fetched == 1 and not result.errors
+    stamp = result.availability["retrieved_at"].iloc[0]
+    assert stamp and datetime.fromisoformat(stamp).tzinfo is not None, "stamped, in UTC, by default"
+    write_fpl_data(result, tmp_path)
+    frame, note = mc.read_availability(tmp_path / FPL_AVAILABILITY_FILENAME, now=datetime.fromisoformat(stamp))
+    assert frame is not None and note == "" and list(frame["team"]) == ["Man United"]
+    # A given stamp is kept, and the one helper formats every producer's stamp.
+    given = fetch_stamp(datetime(2026, 10, 27, 9, 0, tzinfo=timezone.utc))
+    assert given == "2026-10-27T09:00:00+00:00"
+    again = fetch_fpl_player_data(requester=requester, today=date(2026, 10, 27), workers=1, retrieved_at=given)
+    assert set(again.availability["retrieved_at"]) == {given}
+    assert fetch_stamp(datetime(2026, 10, 27, 9, 0)) == given, "a naive instant is read as UTC"
+
+
+def test_the_props_card_withholds_on_this_rounds_chance_while_the_round_is_in_progress(tmp_path: Path) -> None:
+    """The props card is the list's second reader; it read `chance_next_round`
+    whatever the round, so a player out tonight and back next week (0 / 100)
+    was priced during a gameweek in progress."""
+    from epl_betting_lab.reports.player_props_card import _load_unavailable
+    in_progress = tmp_path / "in_progress.csv"
+    build_fpl_availability(BOOTSTRAP, retrieved_at="2026-10-26T12:00:00+00:00").to_csv(in_progress, index=False)
+    (entry,) = _load_unavailable(in_progress)
+    assert entry["player"] == "Bruno Fernandes" and entry["chance"] == "0" and entry["chance_next_round"] == "100"
+    between = tmp_path / "between.csv"
+    finished = {**BOOTSTRAP, "events": [{"id": 9, "is_current": True, "finished": True}, {"id": 10, "is_next": True}]}
+    build_fpl_availability(finished, retrieved_at="2026-10-26T12:00:00+00:00").to_csv(between, index=False)
+    assert _load_unavailable(between) == [], "between gameweeks the next round's 100 keeps him priced"
+    # A list written before the round columns existed reads as before.
+    legacy = tmp_path / "legacy.csv"
+    pd.DataFrame([{"player": "Old Row", "team": "Man United", "status": "i", "chance_next_round": 25, "news": "x"}]).to_csv(legacy, index=False)
+    (old,) = _load_unavailable(legacy)
+    assert old["chance"] == "25" and old["chance_next_round"] == "25"
 
 
 def test_a_player_out_this_round_but_back_next_is_missing_only_while_this_round_is_in_progress() -> None:
@@ -419,6 +482,17 @@ def test_a_due_list_void_is_counted_apart_from_the_record_and_a_push(tmp_path: P
     assert P.track_record(hist, "2026-10-20T09:00:00Z")["dueList"]["voids"] == 0
     src = (WEB / "settle_results.py").read_text(encoding="utf-8")
     assert '"void": 0, "nights": 0' in src and 'for k in ("w", "l", "p", "void")' in src, "season_record sums voids too"
+    # And behaviourally, through season_record itself: a kept night carrying
+    # two voids (and `bets`, so it is not settled again) sums to two voids in
+    # the season's Due List, beside its wins, losses and pushes.
+    kept = _write_nights(tmp_path / "season", {
+        "2026-10-17": _night("2026-10-17", due={"w": 1, "l": 1, "p": 1, "void": 2}),
+        "2026-10-18": _night("2026-10-18", due={"w": 2, "l": 0, "p": 0, "void": 1}),
+    })
+    boards = [{"games": [{"id": "1", "kickoff": "2026-10-17T14:00:00Z"}, {"id": "2", "kickoff": "2026-10-18T14:00:00Z"}]}]
+    season = S.season_record("epl", date(2026, 10, 27), kept, boards, None, False)
+    assert (season["dueList"]["w"], season["dueList"]["l"], season["dueList"]["p"], season["dueList"]["void"]) == (3, 1, 1, 3)
+    assert season["dueList"]["nights"] == 2 and season["nights"] == 2
 
 
 # ---------- a simulated tie is split ----------

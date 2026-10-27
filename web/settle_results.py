@@ -945,7 +945,7 @@ def season_record(sport: str, day: date, hist: Path, boards: list[dict],
     is left out and counted in `missingNights`, and the next run tries again.
 
     The four tallies are absent until a day has settled; so is `dueList`
-    (`{w, l, p, nights, byMarket}`), which sums the graded Due List entries
+    (`{w, l, p, void, nights, byMarket}`), which sums the graded Due List entries
     of every settled day whose board carried the list. It is never a unit or
     a stake, and none of it is in `picks`; nor is a lean.
     """

@@ -460,8 +460,9 @@ Use the repo, the reports, and GitHub.
   `void`, record.json's `voids` reads it); clubs level on points, goal
   difference and goals scored split a simulated finish at random instead of
   the first-named always winning; `ratings.json` carries
-  `availabilityListed` and `availabilitySource`, which the Methods page
-  reads; no builder note names an outside site; a re-settlement that grades
+  `availabilityListed`, which the Methods page reads, and
+  `availabilitySource` (the list's fetch time, for the record; no page reads
+  it yet); no builder note names an outside site; a re-settlement that grades
   fewer matches than a kept night does not replace it; and the smaller page
   defects the review named (the calibration table coloured the observed
   rate against its own interval, so it could never fire; the Methods prop
@@ -470,6 +471,26 @@ Use the repo, the reports, and GitHub.
   whole weekday names; a descending-first column could not be reversed; an
   unreachable feed showed the "nothing settled yet" copy; "TV —"). No
   measurement, bar, stake or market moved.
+  **2026-10-27, the review of that fix found one more:** the availability
+  file has TWO producers, and the fix stamped one. The props-card refresh
+  (`run_props_card_refresh.py` -> `fetch_fpl_player_data` -> `write_fpl_data`)
+  runs AFTER "Fetch who is missing" and rewrote `fpl_availability.csv`
+  without `retrieved_at`, so the card read a stamped list and the public
+  board, built from the carried state, read an unstamped one the reader
+  refuses: every club at full strength on the board, with a note saying the
+  list was unusable. Both producers now stamp through `fpl_players.fetch_stamp`,
+  and a test runs the fetch with a stubbed requester and reads the written
+  file back through `read_availability`. The club-spelling test now runs the
+  2026-27 twenty (it ran 2025-26's, so Coventry, Hull and Ipswich were never
+  checked), the season's void sum is pinned by behaviour and not by a
+  source grep, and two docstrings were brought back to what the code does.
+  The props card, the list's second READER, read `chance_next_round`
+  whatever the round, so during a gameweek in progress a player out
+  tonight and back next week (0 / 100) was priced; it now reads this
+  round's chance while the round is in progress, as the context does
+  (`player_props_card._load_unavailable`). Still open, an owner's call:
+  the props card applies no age bound to the list, where the context
+  refuses one older than 48 hours.
 - **The European sections vanished on 2026-10-19 because four league feeds
   timed out (Serie A, Ligue 1, Greece, Scotland).** The European pool needs
   every domestic league, so Champions, Europa and Conference League could not

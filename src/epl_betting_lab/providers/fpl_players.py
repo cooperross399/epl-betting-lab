@@ -27,7 +27,7 @@ from __future__ import annotations
 from collections.abc import Callable, Mapping
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
-from datetime import date
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -254,17 +254,32 @@ class FplFetchResult:
     )
 
 
+def fetch_stamp(now: datetime | None = None) -> str:
+    """The instant an availability list was fetched, as every producer of
+    `fpl_availability.csv` writes it: UTC ISO 8601 to the second. The reader
+    (`models/match_context.read_availability`) refuses a list without one."""
+    moment = now or datetime.now(timezone.utc)
+    if moment.tzinfo is None:
+        moment = moment.replace(tzinfo=timezone.utc)
+    return moment.astimezone(timezone.utc).isoformat(timespec="seconds")
+
+
 def fetch_fpl_player_data(
     *,
     requester: Requester | None = None,
     base_url: str = FPL_BASE_URL,
     today: date | None = None,
     workers: int = 4,
+    retrieved_at: str | None = None,
 ) -> FplFetchResult:
     """Every player who has played this season, his matches and last season.
 
     Players with no minutes this season are not asked for: they have no
-    appearance to rate and no team sheet to be on.
+    appearance to rate and no team sheet to be on. The availability table
+    is stamped with `retrieved_at` (now, unless given): this fetch runs in
+    the props-card refresh AFTER the dedicated availability fetch and
+    `write_fpl_data` replaces the same file, so an unstamped table here would
+    hand the public board a list its reader refuses.
     """
     request = requester or _default_requester
     bootstrap = request(f"{base_url}/bootstrap-static/")
@@ -296,7 +311,7 @@ def fetch_fpl_player_data(
             summaries[player_id] = summary
     result.players_fetched = len(summaries)
     result.logs = build_fpl_logs(bootstrap, summaries)
-    result.availability = build_fpl_availability(bootstrap)
+    result.availability = build_fpl_availability(bootstrap, retrieved_at=retrieved_at or fetch_stamp())
     result.prior = build_fpl_prior(
         bootstrap, summaries, season=previous_season_name(today or date.today())
     )

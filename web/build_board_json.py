@@ -219,20 +219,25 @@ def fetch_fixtures(months: list[str]) -> tuple[list[dict], list[str]]:
             h, a = sides.get("home", {}), sides.get("away", {})
             names = {b.get("names", [""])[0] for b in comp.get("broadcasts", []) if b.get("names")}
             kickoff = str(ev.get("date") or "")
-            state = ((ev.get("status") or {}).get("type") or {}).get("state", "pre")
+            status_type = (ev.get("status") or {}).get("type") or {}
+            state = status_type.get("state", "pre")
+            completed = bool(status_type.get("completed"))
             fixture = {
                 "id": str(ev.get("id")), "kickoff": kickoff, "date": kickoff[:10],
                 "venue": (comp.get("venue") or {}).get("fullName", ""),
                 "city": ((comp.get("venue") or {}).get("address") or {}).get("city", ""),
                 "tv": " / ".join(sorted(names)) or "—",
-                "state": state,
+                "state": state, "completed": completed,
                 "home": {"fd": fd_name((h.get("team") or {}).get("displayName", "")), "form": h.get("form", "")},
                 "away": {"fd": fd_name((a.get("team") or {}).get("displayName", "")), "form": a.get("form", "")},
             }
             # A played fixture carries its score, for the season table. Only
-            # a final counts; a score mid-match is not a result.
+            # a final counts: a score mid-match is not a result, and neither
+            # is the "0" ESPN leaves on a postponed or cancelled fixture,
+            # whose state is also "post" but which is not `completed` (the
+            # same gate `settle_results.finals` uses).
             hs, as_ = _score(h.get("score")), _score(a.get("score"))
-            if state == "post" and hs is not None and as_ is not None:
+            if state == "post" and completed and hs is not None and as_ is not None:
                 fixture["homeGoals"], fixture["awayGoals"] = hs, as_
             out.append(fixture)
     out.sort(key=lambda f: (f["kickoff"], f["id"]))
@@ -532,7 +537,11 @@ class Projector:
     def ratings(self, team: str) -> dict | None:
         """One club's ratings as the pages read them (`games[].ratings`,
         ratings.json): attack and defence multipliers from the result fit,
-        and the context's multipliers where there is one."""
+        and the context's multipliers where there is one. `homeEdge` is the
+        club's deviation from the league's home edge (the multiplier minus
+        one, so -0.1 .. +0.1), which the pages print as a signed percent; the
+        multiplier itself was published until 2026-10-26 and read as
+        "+98.4%" on every club."""
         out: dict = {}
         strength = self._result.team_strengths.get(team)
         if strength is not None:
@@ -540,7 +549,7 @@ class Projector:
         if self._context is not None:
             t = self._context.team(team)
             out.update(
-                homeEdge=round(float(t.home_edge), 3),
+                homeEdge=round(float(t.home_edge) - 1.0, 3),
                 formAttack=round(float(t.attack_form), 3), formDefence=round(float(t.defence_form), 3),
                 attackAvailable=round(float(t.attack_available), 3),
                 defenceAvailable=round(float(t.defence_available), 3),
@@ -612,10 +621,12 @@ def load_model(lab: Path) -> tuple[Projector | None, str]:
     except Exception as exc:  # the site must never fail the deploy over the model
         return None, f"the goals model could not be fitted ({type(exc).__name__}: {exc})"
 
+    # Every note here can reach a public page (season.json's `notice`,
+    # ratings.json's `note`), so none names an outside site.
     notes = []
     if not xg_path.is_file():
         notes.append(
-            "Understat xG was not restored with this run, so the 2.5-goals and "
+            "The expected-goals table was not restored with this run, so the 2.5-goals and "
             "both-teams-to-score ratings fell back to goals for every match."
         )
     # The card prices every fixture with the match context (home edge, last
@@ -624,21 +635,22 @@ def load_model(lab: Path) -> tuple[Projector | None, str]:
     # failed deploy: the ratings alone still price the board.
     context, through = None, ""
     try:
-        from epl_betting_lab.models.match_context import build_match_context, load_availability
+        from epl_betting_lab.models.match_context import availability_stamp, build_match_context, read_availability
 
         matches = load_matches_with_xg(matches_path, xg_path)
         if "date" in matches.columns and len(matches):
             through = str(matches["date"].max())[:10]
         availability_path = processed / "fpl_availability.csv"
+        # Missing, unreadable, unstamped or older than the reader's bound: the
+        # note says which, and every club is priced at full strength.
+        availability, availability_note = read_availability(availability_path)
         context = build_match_context(
-            matches, load_availability(availability_path),
-            availability_source="the FPL availability feed" if availability_path.is_file() else "",
+            matches, availability,
+            availability_source=f"availability list, {availability_stamp(availability)}" if availability is not None else "",
+            availability_note=availability_note,
         )
-        if not availability_path.is_file():
-            notes.append(
-                "No availability list was restored with this run, so projections "
-                "assume every club at full strength."
-            )
+        if availability is None:
+            notes.append(f"{availability_note} Projections assume every club at full strength.")
     except ImportError:
         notes.append("The match context (home edge, form, who is missing) is not in this lab version; ratings alone price the board.")
     except Exception as exc:
@@ -1140,12 +1152,22 @@ def build(lab: Path, today: date) -> dict:
 
 
 def ratings_feed(lab: Path, generated_at: str) -> dict:
-    """ratings.json: every rated club's multipliers, from the board's own fit."""
+    """ratings.json: every rated club's multipliers, from the board's own fit.
+
+    `availabilityListed` says whether an availability list was read for this
+    build (so a build where nobody is missing is not mistaken for one with no
+    list), and `availabilitySource` names it with its fetch time; both are
+    null-safe for the Methods page, which reads them.
+    """
     project, note = load_model(lab)
+    context = getattr(project, "_context", None) if project is not None else None
+    listed = bool(context is not None and getattr(context, "availability_source", ""))
     return {
         "generatedAt": generated_at, "season": SEASON,
         "through": project.through if project else "",
         "note": note or None,
+        "availabilityListed": listed,
+        "availabilitySource": context.availability_source if listed else None,
         "teams": project.ratings_table() if project else [],
     }
 

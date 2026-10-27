@@ -80,8 +80,8 @@
     <sc-if value="{{ empty }}" hint-placeholder-val="{{ false }}">
       <section id="main" style="padding:40px 0;">
         <div style="border:1px dashed var(--mute);padding:16px 18px;max-width:760px;">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;line-height:1;text-transform:uppercase;color:var(--mute);">No bet has been graded yet</div>
-          <p style="margin:8px 0 0;font-size:14px;line-height:1.5;color:var(--ink-2);text-wrap:pretty;">The first rows land the morning after the first fixtures on the board are played. Until then, <a href="Board.dc.html" style="text-decoration:underline;text-underline-offset:3px;">this week's board</a> has the picks that will be graded.</p>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;line-height:1;text-transform:uppercase;color:var(--mute);">{{ emptyTitle }}</div>
+          <p style="margin:8px 0 0;font-size:14px;line-height:1.5;color:var(--ink-2);text-wrap:pretty;">{{ emptyNote }} <sc-if value="{{ emptyLink }}" hint-placeholder-val="{{ true }}">Until then, <a href="Board.dc.html" style="text-decoration:underline;text-underline-offset:3px;">this week's board</a> has the picks that will be graded.</sc-if></p>
         </div>
       </section>
     </sc-if>
@@ -314,8 +314,10 @@ class Component extends DCLogic {
     const F = this.F, d = this.state.data, T = this.state.teams;
     const tabsList = [["This week", "Board.dc.html"], ["Results", "Results.dc.html"], ["Season", "Season.dc.html"], ["Record", "Record.dc.html"], ["Tracker", "Tracker.dc.html"]];
     const tabs = tabsList.map(([label, href]) => ({ label, href, current: label === "Tracker" ? "page" : undefined, shadow: label === "Tracker" ? "inset 0 -3px 0 var(--ink)" : "none", color: label === "Tracker" ? "var(--ink)" : "var(--mute)" }));
-    const base = { tabs, isSample: !!this.state.isSample, kicker: "EPL · 2026–27", headline: "", defaultUnits: "1" };
-    if (!d) return { ...base, ready: false, empty: !!this.state.err, kicker: this.state.err ? "EPL · tracker unreachable" : base.kicker };
+    const base = { tabs, isSample: !!this.state.isSample, kicker: "EPL · 2026–27", headline: "", defaultUnits: "1",
+      emptyTitle: "No bet has been graded yet", emptyNote: "The first rows land the morning after the first fixtures on the board are played.", emptyLink: true };
+    // A feed that could not be fetched is not an empty record: the page says which.
+    if (!d) return { ...base, ready: false, empty: !!this.state.err, kicker: this.state.err ? "EPL · tracker unreachable" : base.kicker, emptyTitle: "Results unreachable", emptyNote: "The results could not be loaded. Try again in a minute.", emptyLink: false };
     const all = Array.isArray(d.rows) ? d.rows : [];
     base.defaultUnits = String(d.teamPickDefaultUnits ?? 1);
     if (!all.length) return { ...base, ready: false, empty: true, kicker: "EPL · 0 matchdays graded", headline: "Nothing graded yet. The record starts the morning after the first fixtures on the board." };
@@ -360,7 +362,9 @@ class Component extends DCLogic {
     const grid = ticks.map((v) => ({ y: Y(v).toFixed(1), ty: (Y(v) + 3.5).toFixed(1), label: `${v > 0 ? "+" : ""}${v}`, stroke: v === 0 ? "var(--mute)" : "var(--rule-2)", w: v === 0 ? "1.5" : "1" }));
     const STYLE = { team: ["var(--ink)", ""], props: ["var(--mute)", "4 3"] };
     const lines = lines0.map((l) => { const lastP = l.s[l.s.length - 1]; return { label: `${l.label} ${u2(lastP.v)}`, points: l.s.map((p) => `${X(p.date).toFixed(1)},${Y(p.v).toFixed(1)}`).join(" "), stroke: STYLE[l.key][0], dash: STYLE[l.key][1], w: f === l.key ? "2.5" : "1.5", lx: (Math.min(X(lastP.date), R - 110) + 4).toFixed(1), ly: (Y(lastP.v) - 6).toFixed(1) }; });
-    const xs = dates.filter((_, i) => i === 0 || i === dates.length - 1 || i % Math.ceil(dates.length / 4) === 0).map((dt) => ({ x: X(dt).toFixed(1), label: F.fmtDateOnly(dt).replace(/,.*$/, "") }));
+    // Short axis labels ("Oct 17"): the shared long date ("Saturday, October 17, 2026") overlaps its neighbours at five ticks.
+    const shortDay = (dt) => new Date(`${dt}T12:00:00Z`).toLocaleString(undefined, { month: "short", day: "numeric", timeZone: "UTC" });
+    const xs = dates.filter((_, i) => i === 0 || i === dates.length - 1 || i % Math.ceil(dates.length / 4) === 0).map((dt) => ({ x: X(dt).toFixed(1), label: shortDay(dt) }));
     const chart = { stamp: `${dates.length} matchdays · zero line marked`, aria: `Cumulative units by group: ${lines.map((l) => l.label).join("; ")}`, grid, xs, lines, legend: lines0.map((l) => ({ text: l.label, stroke: STYLE[l.key][0], style: STYLE[l.key][1] ? "dashed" : "solid" })) };
 
     // Tables
@@ -380,8 +384,9 @@ class Component extends DCLogic {
         cols: COLS.map(([k, label, align]) => ({ label, align, sort: st.k === k ? (st.dir > 0 ? "ascending" : "descending") : "none", arrow: st.k === k ? (st.dir > 0 ? " ↑" : " ↓") : "", color: st.k === k ? "var(--ink)" : "var(--mute)", pos: k === "name" ? "sticky" : "static", onClick: () => this.sort(id, k) })), rows: rowsT };
     };
     const byPropType = groupBy(rows.filter((r) => r.group !== "team"), (r) => `${r.market}:${r.side || ""}`, (k, r) => `${r.propType || r.market} · ${r.side || ""}`.trim());
-    const band = (p) => (p <= -200 ? "−200 and shorter" : p < -110 ? "−199 to −111" : p <= 110 ? "−110 to +110" : p < 200 ? "+111 to +199" : "+200 and longer");
-    const byPrice = groupBy(rows, (r) => band(r.price), (k) => k), byMonth = groupBy(rows, (r) => r.date.slice(0, 7), (k) => new Date(`${k}-15T12:00:00Z`).toLocaleString(undefined, { month: "long", year: "numeric" }));
+    // A row without a numeric price (a void, or a bet frozen without one) belongs to no band rather than to a "null" band.
+    const band = (p) => (typeof p !== "number" || !Number.isFinite(p) ? null : p <= -200 ? "−200 and shorter" : p < -110 ? "−199 to −111" : p <= 110 ? "−110 to +110" : p < 200 ? "+111 to +199" : "+200 and longer");
+    const byPrice = groupBy(rows.filter((r) => band(r.price) !== null), (r) => band(r.price), (k) => k), byMonth = groupBy(rows, (r) => r.date.slice(0, 7), (k) => new Date(`${k}-15T12:00:00Z`).toLocaleString(undefined, { month: "long", year: "numeric" }));
     const byMarketTeam = groupBy(rows.filter((r) => r.group === "team"), (r) => r.market, (k) => k);
     const tables = [
       ...(byMarketTeam.length ? [mkTable("by-market", "By market", byMarketTeam, { noun: "markets" })] : []),
@@ -399,7 +404,9 @@ class Component extends DCLogic {
     const PER = 25, pages = Math.max(1, Math.ceil(lrows.length / PER)), page = Math.min(this.state.page, pages - 1);
     const CHIP = { win: ["Win", "var(--win)", "var(--on-win)", "var(--win)"], loss: ["Loss", "transparent", "var(--alert)", "var(--alert)"], push: ["Push", "transparent", "var(--mute)", "var(--rule)"] };
     const logRows = lrows.slice(page * PER, page * PER + PER).map((r) => { const c = CHIP[r.result] || CHIP.push; const prop = r.player ? { main: r.player, sub: `${r.team} v ${r.opp} · ${r.propType || r.market} ${r.side || ""} ${r.line ?? ""}`.replace(/\s+/g, " ").trim() } : { main: r.label, sub: r.teams ? `${r.teams[0]} v ${r.teams[1]} · ${String(r.market || "").replace(/_/g, " ")}` : String(r.market || "").replace(/_/g, " ") };
-      return { date: r.date, type: r.group === "team" ? "Team" : "Prop", ...prop, price: F.fmtOdds(r.price), stake: `${(r.staked || 0).toFixed(2)}u${r.stakeAssumed ? "*" : ""}`, result: c[0], chipBg: c[1], chipFg: c[2], chipBorder: c[3], units: u2(r.units || 0), unitsColor: colorOf(r.units || 0) }; });
+      const numeric = (v) => typeof v === "number" && Number.isFinite(v);
+      // A missing price or unit count prints as a dash, never as "−NaN" or a zero that reads as a push.
+      return { date: r.date, type: r.group === "team" ? "Team" : "Prop", ...prop, price: numeric(r.price) ? F.fmtOdds(r.price) : "—", stake: `${(r.staked || 0).toFixed(2)}u${r.stakeAssumed ? "*" : ""}`, result: c[0], chipBg: c[1], chipFg: c[2], chipBorder: c[3], units: numeric(r.units) ? u2(r.units) : "—", unitsColor: colorOf(numeric(r.units) ? r.units : 0) }; });
     const log = { stamp: `${rows.length} bets · newest first`, query: this.state.logQuery, onSearch: (e) => this.setState({ logQuery: e.target.value, page: 0 }), noMatch: lrows.length === 0, noMatchText: `No bet matches "${lq}".`, hasRows: lrows.length > 0,
       rows: logRows, pageLine: `${page * PER + 1}–${Math.min(lrows.length, (page + 1) * PER)} of ${lrows.length}`, onPrev: () => this.setState({ page: Math.max(0, page - 1) }), onNext: () => this.setState({ page: Math.min(pages - 1, page + 1) }), prevDisabled: page === 0, nextDisabled: page >= pages - 1, prevColor: page === 0 ? "var(--rule)" : "var(--ink)", nextColor: page >= pages - 1 ? "var(--rule)" : "var(--ink)" };
 

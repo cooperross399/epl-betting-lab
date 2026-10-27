@@ -13,7 +13,7 @@ from epl_betting_lab.config import (
     STAGING_DIR,
 )
 from epl_betting_lab.data.loaders import load_current_odds, load_matches, load_matches_with_xg, load_upcoming_fixtures
-from epl_betting_lab.models.match_context import build_match_context, load_availability
+from epl_betting_lab.models.match_context import build_match_context, read_availability
 from epl_betting_lab.models.poisson_goals import CARD_RATINGS, TOTALS_RATINGS, PoissonGoalsModel
 from epl_betting_lab.providers.fpl_players import FPL_AVAILABILITY_FILENAME
 from epl_betting_lab.reports.bet_ledger import load_bet_ledger, save_bet_ledger_reports
@@ -788,10 +788,15 @@ def run_thursday_best_bets_report(
             Path(availability_path) if availability_path is not None
             else PROCESSED_DIR / FPL_AVAILABILITY_FILENAME
         )
+        # A list that is missing, unreadable or older than the reader's
+        # bound is refused with a note saying why; the card then prices
+        # every club at full strength (the board's notes carry the reason).
+        availability, availability_note = read_availability(availability_file)
         context = build_match_context(
             totals_matches,
-            load_availability(availability_file),
-            availability_source=str(availability_file) if availability_file.is_file() else "",
+            availability,
+            availability_source=str(availability_file) if availability is not None else "",
+            availability_note=availability_note,
         )
     model = PoissonGoalsModel().fit(matches, last_n_matches_per_team=38, config=CARD_RATINGS)
     projections = model.project_fixtures(fixtures, context=context)

@@ -202,7 +202,9 @@ def test_record_json_files_the_favourite_by_bucket_and_reads_the_market_from_the
 
 def test_record_json_counts_the_due_list_as_a_hit_rate_and_never_a_stake(tmp_path: Path) -> None:
     P = _load("build_site_pages.py", "bsp_due")
-    hist = _write_nights(tmp_path, {"2026-10-17": _night("2026-10-17", due={"w": 3, "l": 1, "p": 2})})
+    # A push (`p`) is graded and is not a void; a void is an entry whose
+    # player did not play, which `settle_results.due_tallies` counts apart.
+    hist = _write_nights(tmp_path, {"2026-10-17": _night("2026-10-17", due={"w": 3, "l": 1, "p": 1, "void": 2})})
     out = P.track_record(hist, "2026-10-20T09:00:00Z")
     assert out["dueList"] == {"entries": 4, "hitRate": 0.75, "voids": 2}
     assert "units" not in json.dumps(out["dueList"])

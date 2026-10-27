@@ -45,12 +45,26 @@ FPL_AVAILABILITY_FILENAME = "fpl_availability.csv"
 #: Each player's fitness as FPL publishes it: status `a` available, `d`
 #: doubtful, `i` injured, `s` suspended, `u` unavailable, `n` not eligible;
 #: the chance of playing the next round in percent (blank when no flag).
-#: The last four say how much he matters to his club (the match context
-#: weighs an attacker by his expected goal involvement and a defender by his
-#: minutes); a file written before they were added reads as zero for each.
+#: `position` to `expected_goal_involvements` say how much he matters to his
+#: club (the match context weighs an attacker by his expected goal
+#: involvement and a defender by his minutes); a file written before they
+#: were added reads as zero for each.
+#:
+#: FPL keeps two chances. `chance_of_playing_this_round` is for the gameweek
+#: FPL calls current (`events[].is_current`), `chance_of_playing_next_round`
+#: for the one after it (`is_next`). Before a gameweek's deadline the
+#: fixtures still to come are the NEXT round; once the deadline has passed
+#: and the gameweek is in progress they are THIS round, and a player
+#: suspended for it can read 100 for the next. `round_in_progress` records
+#: which case the fetch saw (the current event exists and is not finished),
+#: so the reader (`models/match_context._chance`) takes `chance_this_round`
+#: then and `chance_next_round` otherwise. `retrieved_at` is when this lab
+#: fetched the list, UTC ISO 8601; the reader refuses a list older than its
+#: bound rather than pricing a week-old flag as today's.
 AVAILABILITY_FIELDS = (
     "player", "player_id", "team", "status", "chance_next_round", "news",
     "position", "minutes", "total_points", "expected_goal_involvements",
+    "chance_this_round", "round_in_progress", "retrieved_at",
 )
 
 LOG_FIELDS = (
@@ -141,12 +155,24 @@ def build_fpl_logs(
     return pd.DataFrame(rows, columns=list(LOG_FIELDS))
 
 
-def build_fpl_availability(bootstrap: Mapping[str, Any]) -> pd.DataFrame:
-    """Every player's status, chance of playing the next round, and the news behind it."""
+def round_in_progress(bootstrap: Mapping[str, Any]) -> bool:
+    """True when FPL's current gameweek has passed its deadline and is not
+    finished, so the fixtures still to play belong to THIS round."""
+    for event in bootstrap.get("events") or []:
+        if isinstance(event, Mapping) and event.get("is_current"):
+            return not bool(event.get("finished"))
+    return False
+
+
+def build_fpl_availability(bootstrap: Mapping[str, Any], *, retrieved_at: str = "") -> pd.DataFrame:
+    """Every player's status, both stated chances of playing, and the news
+    behind it; `retrieved_at` stamps every row with the fetch instant."""
     teams, positions, _ = _lookups(bootstrap)
+    in_progress = round_in_progress(bootstrap)
     rows = []
     for element in bootstrap.get("elements") or []:
         chance = element.get("chance_of_playing_next_round")
+        this_chance = element.get("chance_of_playing_this_round")
         try:
             xgi = float(element.get("expected_goal_involvements") or 0.0)
         except (TypeError, ValueError):
@@ -162,6 +188,9 @@ def build_fpl_availability(bootstrap: Mapping[str, Any]) -> pd.DataFrame:
             "minutes": _int(element.get("minutes")),
             "total_points": _int(element.get("total_points")),
             "expected_goal_involvements": round(xgi, 2),
+            "chance_this_round": None if this_chance is None else _int(this_chance),
+            "round_in_progress": in_progress,
+            "retrieved_at": str(retrieved_at or ""),
         })
     return pd.DataFrame(rows, columns=list(AVAILABILITY_FIELDS))
 

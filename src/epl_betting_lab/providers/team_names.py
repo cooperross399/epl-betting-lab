@@ -84,6 +84,10 @@ PROVIDER_TEAM_ALIASES: dict[str, str] = {
     "leicester city": "Leicester",
     "liverpool fc": "Liverpool",
     "luton town": "Luton",
+    # Fantasy Premier League's short name (bootstrap-static `teams[].name`).
+    # Every other FPL spelling already matched; this one did not, so Manchester
+    # United's injury list never reached the match context (found 2026-10-26).
+    "man utd": "Man United",
     "manchester utd": "Man United",
     "newcastle utd": "Newcastle",
     "norwich city": "Norwich",

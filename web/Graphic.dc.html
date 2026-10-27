@@ -135,7 +135,7 @@ class Component extends DCLogic {
     catch (e) { data = await fetch(cfg.sample).then((r) => r.json()); }
     const vm = S.ADAPTERS[sport].board(data);
     vm.otherSports = S.ORDER.filter((k) => k !== sport).map((k) => ({ name: S.SPORTS[k].name, href: S.SPORTS[k].host }));
-    this.setState({ vm, teams: data.teams || {}, raw: data, pages });
+    this.setState({ vm, teams: data.teams || {}, raw: data, pages, propsTab: S.hasProps(sport) });
   }
   componentDidMount() { this.load(); }
   componentDidUpdate() { this.load(); }
@@ -144,7 +144,7 @@ class Component extends DCLogic {
     const sk = (vm && vm.sport.key) || ((/^(nhl|epl|cbb)\./.exec(location.hostname) || [])[1]) || this.props.sport || "nhl";
     const tab = (label, href, on) => ({ label, href, current: on ? "page" : undefined, shadow: on ? "inset 0 -3px 0 var(--ink)" : "none" });
     const hasPage = (k) => this.state.pages instanceof Set && this.state.pages.has(k);
-    const tabs = [tab(sk === "epl" ? "This week" : "Tonight", "Board.dc.html"), ...(sk === "nhl" ? [tab("Props", "Board.dc.html#props")] : []), tab("Results", "Results.dc.html", false), ...(hasPage("season") ? [tab("Season", "Season.dc.html")] : []), ...(hasPage("record") ? [tab("Record", "Record.dc.html", false)] : []), ...(hasPage("tracker") ? [tab("Tracker", "Tracker.dc.html", false)] : [tab("Archive", "Archive.dc.html", false)])];
+    const tabs = [tab(sk === "epl" ? "This week" : "Tonight", "Board.dc.html"), ...(this.state.propsTab ? [tab("Props", "Board.dc.html#props")] : []), tab("Results", "Results.dc.html", false), ...(hasPage("season") ? [tab("Season", "Season.dc.html")] : []), ...(hasPage("record") ? [tab("Record", "Record.dc.html", false)] : []), ...(hasPage("tracker") ? [tab("Tracker", "Tracker.dc.html", false)] : [tab("Archive", "Archive.dc.html", false)])];
     const themeAttr = { Light: "light", Dark: "dark" }[this.props.theme] || "auto";
     if (!vm) return { themeAttr, tabs, rows: [], strip3: [], otherSports: [], title1: "Tonight's", title2: "Board.", feat: { show: false } };
     const T = this.state.teams || {};

@@ -144,7 +144,7 @@ class Component extends DCLogic {
     }
     const months = [...by.values()].map((m) => ({ ...m, countLabel: `${m.items.length} board${m.items.length === 1 ? "" : "s"}` }));
     const otherSports = S.ORDER.filter((k) => k !== sport).map((k, i) => ({ name: S.SPORTS[k].name, href: S.SPORTS[k].host, style: `display:inline-flex;align-items:center;min-height:44px;${i === 0 ? "margin-left:6px;padding-left:18px;border-left:1px solid var(--rule);" : ""}` }));
-    this.setState({ months, count: dates.length, feedNotice, sport: cfg, otherSports, pages });
+    this.setState({ months, count: dates.length, feedNotice, sport: cfg, otherSports, pages, propsTab: S.hasProps(sport) });
   }
   componentDidMount() { this.load(); }
   componentDidUpdate() { this.load(); }
@@ -159,7 +159,7 @@ class Component extends DCLogic {
     const sk = (s.sport && s.sport.key) || ((/^(nhl|epl|cbb)\./.exec(location.hostname) || [])[1]) || this.props.sport || "nhl";
     const tab = (label, href, on) => ({ label, href, current: on ? "page" : undefined, shadow: on ? "inset 0 -3px 0 var(--ink)" : "none" });
     const hasPage = (k) => s.pages instanceof Set && s.pages.has(k);
-    const tabs = [tab(sk === "epl" ? "This week" : "Tonight", "Board.dc.html"), ...(sk === "nhl" ? [tab("Props", "Board.dc.html#props")] : []), tab("Results", "Results.dc.html", false), ...(hasPage("season") ? [tab("Season", "Season.dc.html")] : []), ...(hasPage("record") ? [tab("Record", "Record.dc.html", false)] : []), ...(hasPage("tracker") ? [tab("Tracker", "Tracker.dc.html", true)] : [tab("Archive", "Archive.dc.html", true)])];
+    const tabs = [tab(sk === "epl" ? "This week" : "Tonight", "Board.dc.html"), ...(s.propsTab ? [tab("Props", "Board.dc.html#props")] : []), tab("Results", "Results.dc.html", false), ...(hasPage("season") ? [tab("Season", "Season.dc.html")] : []), ...(hasPage("record") ? [tab("Record", "Record.dc.html", false)] : []), ...(hasPage("tracker") ? [tab("Tracker", "Tracker.dc.html", true)] : [tab("Archive", "Archive.dc.html", true)])];
     const themeAttr = { Light: "light", Dark: "dark" }[this.props.theme] || "auto";
     return { themeAttr, tabs, months, years, hasYears: years.length > 0, count: s.count, isEmpty: s.loadedFor && s.count === 0, hasFeedNotice: !!s.feedNotice, feedNotice: s.feedNotice || "", otherSports: s.otherSports,
       sportLong: s.sport ? s.sport.longName : "", sportName: s.sport ? s.sport.name : "" };

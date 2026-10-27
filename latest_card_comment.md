@@ -1,8 +1,10 @@
-## Tuesday 27 October, 10:06 UTC — scheduled run
+## Tuesday 27 October, 13:01 UTC — manual run
 
-Already sent today; same selections (0 price move(s)).
+Selections changed: 4 added, 4 dropped, 1 moved section.
 
-Provider quota: **40740** — about 11 day(s) at the observed burn. **Top this up or the schedule stops.**
+_This run was started by hand, not by the schedule. If you did not start it, someone was testing._
+
+Provider quota: **40566** — about 11 day(s) at the observed burn. **Top this up or the schedule stops.**
 
 Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5, team_total_home_0_5, team_total_home_1_5, team_total_home_2_5, team_total_away_0_5, team_total_away_1_5, team_total_away_2_5** (excluded: none)
 
@@ -10,14 +12,14 @@ Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corner
 
 | Match | Market | Selection | Tier | Edge | Price | Book | Units |
 |:------|:-------|:----------|:-----|-----:|------:|:-----|------:|
-| Liverpool v Arsenal | `team_total_away_1_5` | under | C | +6.4% | -125 | Bovada | 0.1 |
 | Newcastle v Everton | `draw_no_bet` | home | C | +5.9% | -140 | FanDuel | 0.1 |
 | Coventry v Sunderland | `corners_1x2` | home | C | +5.3% | -118 | BetRivers | 0.1 |
-| Chelsea v Man United | `double_chance` | draw_or_away | C | +5.2% | -105 | Fanatics | 0.1 |
+| Liverpool v Arsenal | `team_total_away_1_5` | under | C | +5.2% | -136 | Bovada | 0.1 |
+| Chelsea v Man United | `team_total_away_1_5` | over | C | +6.8% | +174 | FanDuel | 0.1 |
+| Chelsea v Man United | `double_chance` | draw_or_away | C | +5.4% | +100 | FanDuel | 0.1 |
 | Tottenham v Crystal Palace | `team_total_away_1_5` | over | C | +6.9% | +250 | Bovada | 0.1 |
 | Liverpool v Arsenal | `draw_no_bet` | away | C | +4.7% | -142 | FanDuel | 0.1 |
-| Liverpool v Arsenal | `team_total_away_0_5` | under | C | +6.9% | +345 | Bovada | 0.1 |
-| Liverpool v Arsenal | `corners_1x2` | home | C | +5.7% | +114 | Bovada | 0.1 |
+| Coventry v Sunderland | `team_total_home_1_5` | over | C | +6.0% | +168 | FanDuel | 0.1 |
 
 ### Leans
 
@@ -26,12 +28,24 @@ _None._
 ### Player props
 
 - Chelsea v Man United — **Jordan Henderson** `player_shots_on_target` Over@0.5 at +310 (BetRivers), 0.1u
+- Chelsea v Man United — **Jordan Henderson** `player_goal_scorer_anytime` Yes at +1050 (Fanatics), 0.1u
 - Hull v Ipswich — **Regan Slater** `player_shots_on_target` Over@0.5 at +380 (BetRivers), 0.1u
-- Chelsea v Man United — **Jordan Henderson** `player_goal_scorer_anytime` Yes at +900 (Fanatics), 0.1u
-- Tottenham v Crystal Palace — **Adam Wharton** `player_shots_on_target` Over@0.5 at +450 (BetRivers), 0.1u
+- Tottenham v Crystal Palace — **Adam Wharton** `player_shots_on_target` Over@0.5 at +475 (BetRivers), 0.1u
 - Bournemouth v Leeds — **Ethan Ampadu** `player_shots_on_target` Over@0.5 at +480 (BetRivers), 0.1u
 
 _Props carry the smallest stake the card uses: the standing measurement demonstrates no edge, and books reprice on the team sheet after this card is built._
+
+### What changed
+
+- **Added:** Bournemouth v Leeds 1x2 away
+- **Added:** Bournemouth v Leeds draw_no_bet away
+- **Added:** Chelsea v Man United team_total_away_1_5 over
+- **Added:** Coventry v Sunderland team_total_home_1_5 over
+- **Dropped:** Bournemouth v Leeds corners_1x2 draw
+- **Dropped:** Bournemouth v Leeds team_total_away_0_5 under
+- **Dropped:** Liverpool v Arsenal corners_1x2 home
+- **Dropped:** Liverpool v Arsenal team_total_away_0_5 under
+- **Moved section:** Chelsea v Man United team_total_away_2_5 over
 
 
 ## Beyond the Premier League
@@ -106,7 +120,7 @@ Nobody playing in this round is due.
 - Settled: **142** selections, 54 won, 7 returned the stake
 - Staked: 17.05 units
 - Profit: **-2.07 units** (-12.1% on turnover)
-- Still pending: 13
+- Still pending: 15
 
 - Stake returned (void): 7 — counted in the settled total above at zero profit, because a push is a bet
 
@@ -138,4 +152,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/40484937103)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/40507599146)

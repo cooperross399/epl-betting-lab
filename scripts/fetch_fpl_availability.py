@@ -22,7 +22,6 @@ no credit, no bet.
 from __future__ import annotations
 
 import sys
-from datetime import datetime, timezone
 from pathlib import Path
 
 from epl_betting_lab.config import PROCESSED_DIR
@@ -32,6 +31,7 @@ from epl_betting_lab.providers.fpl_players import (
     FplError,
     _default_requester,
     build_fpl_availability,
+    fetch_stamp,
 )
 
 
@@ -42,7 +42,7 @@ def _warn(text: str) -> None:
 
 def main(argv: list[str] | None = None) -> int:
     directory = Path(argv[0]) if argv else Path(PROCESSED_DIR)
-    retrieved_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    retrieved_at = fetch_stamp()
     try:
         bootstrap = _default_requester(f"{FPL_BASE_URL}/bootstrap-static/")
         if not isinstance(bootstrap, dict) or not bootstrap.get("elements"):

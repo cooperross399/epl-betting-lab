@@ -1156,8 +1156,9 @@ def ratings_feed(lab: Path, generated_at: str) -> dict:
 
     `availabilityListed` says whether an availability list was read for this
     build (so a build where nobody is missing is not mistaken for one with no
-    list), and `availabilitySource` names it with its fetch time; both are
-    null-safe for the Methods page, which reads them.
+    list); the Methods page reads it. `availabilitySource` names the list
+    with its fetch time, for the record (no page reads it yet). Both are null
+    when no list was read.
     """
     project, note = load_model(lab)
     context = getattr(project, "_context", None) if project is not None else None

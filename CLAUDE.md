@@ -139,7 +139,10 @@ Use the repo, the reports, and GitHub.
   from Fantasy Premier League's per-match Opta numbers
   (`providers/fpl_players`, keyless, fetched only once one is approved),
   last season's totals as extra evidence. Uncorrected (the shipped Platt
-  correction was fitted on the four volume markets), and one stake per
+  correction is applied to the four volume markets; it was fitted on the
+  outcomes the bought prices held, shots on target and the anytime scorer,
+  which is also all the held-out backtest ever measured: this line said
+  "fitted on the four volume markets" until 2026-10-27), and one stake per
   player per stat however many rungs clear the bar. Never measured against
   real prices: no demonstrated edge. Before writing "the provider does not
   offer X", run the event-markets listing; it is the `total_2_5` lesson a
@@ -491,6 +494,49 @@ Use the repo, the reports, and GitHub.
   (`player_props_card._load_unavailable`). Still open, an owner's call:
   the props card applies no age bound to the list, where the context
   refuses one older than 48 hours.
+- **2026-10-27: every staked player prop is posted and tracked on the site,
+  as the NHL site does it (Cooper: "We want all the player props posted and
+  tracked on the website as well just like the NHL").** The board's Props
+  tab (`web/build_board_json.props_block`, from `player_props_card.json`)
+  already carried the card's picks; it now also carries, as the NHL board
+  does, one `marketNotes` line per market restating the card's own
+  measurement and never an edge (shots on target and the anytime goal:
+  measured on two months of live prices, no demonstrated edge; shots,
+  assists, booked, sent off, tackles and goalkeeper saves: never measured
+  against real prices, no demonstrated edge, because the bought price
+  window held no shots or assists price, see the correction line above;
+  saves are priced on the keeper the books post, a keeper in the squad who
+  never comes on is void and one the match summary does not name stays
+  ungraded, the grader's rule), a note saying how many props the card
+  priced and how many are listed, or why none is (nothing cleared the bar,
+  every pick withdrawn at the lineup check, or picks on fixtures the board
+  does not carry; the shared page shows the note only as the tab's empty
+  state), and the players the card withheld as unlikely to play, by name,
+  with the stated chance or, for a status-only withhold, the status in
+  words. The card now records `priced` and `below_bar` in
+  `player_props_card.json` and on its markdown: an outcome is counted once
+  on the model's own player, stat, side and line, however many books spell
+  him. **One defect fix rode along:** two books' spellings of one player
+  ("Alexander Isak", "Isak") were two picks and two stakes on one outcome,
+  against the one-stake-per-player-per-stat rule; each pick now carries
+  `model_player` and `_one_stake_per_outcome` folds on it, so the better
+  edge keeps the stake (`player` stays the book's spelling, which grading
+  joins on). Every EPL page
+  (Game, Record, Tracker, Season, Methods) links the tab from its strip, so
+  the props are reachable from every page. Each pick is graded the morning
+  after from the match summary and the per-match tackle counts, as before,
+  and shows on Results (`props.summary`, `props.season`), on All results
+  (tracker rows in group `props`, by prop type and by player) and now on
+  the board's record strip: `settle_results.write_season` writes the
+  season's props (W-L-P, units, nights) to board.json's `record.props`,
+  which the shared board shows as "Props best bets · season" and had read
+  nothing. Unchanged: the props model, the 8% bar, the 0.1u stake, the
+  approved markets and the first-published-price grading rule. The shared
+  tab bar's rule (a Props tab wherever the adapter prices props) is a
+  betting-lab-shared change and lands here through the NHL lab's Design
+  Drop as a `shared-sync/<tag>` pull request; until it does, the shared
+  Results, Archive and Graphic pages still show the tab for the NHL only.
+  `tests/test_props_are_posted_and_tracked_like_nhl.py`.
 - **The European sections vanished on 2026-10-19 because four league feeds
   timed out (Serie A, Ligue 1, Greece, Scotland).** The European pool needs
   every domestic league, so Champions, Europa and Conference League could not

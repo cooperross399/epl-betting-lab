@@ -313,7 +313,7 @@ class Component extends DCLogic {
   sortBy(k) { this.setState((s) => ({ sortKey: k, dir: s.sortKey === k ? -s.dir : (k === "defence" || k === "formDefence" || k === "name" ? 1 : -1) })); }
   renderVals() {
     const C = this.constructor, d = this.state.data, wide = this.state.wide;
-    const tabs = [["This week", "Board.dc.html"], ["Results", "Results.dc.html"], ["Season", "Season.dc.html"], ["Record", "Record.dc.html"], ["Tracker", "Tracker.dc.html"]].map(([label, href]) => ({ label, href }));
+    const tabs = [["This week", "Board.dc.html"], ["Props", "Board.dc.html#props"], ["Results", "Results.dc.html"], ["Season", "Season.dc.html"], ["Record", "Record.dc.html"], ["Tracker", "Tracker.dc.html"]].map(([label, href]) => ({ label, href }));
     const hash = this.state.hash;
     const tocItems = [{ id: "ratings", label: "Club ratings" }, { id: "missing", label: "Who is missing" }, ...C.ENTRIES.map((e, i) => ({ id: e.id, label: `${i + 1}. ${e.title}` })), { id: "changelog", label: "Changelog" }];
     const toc = tocItems.map((t) => ({ ...t, href: `#${t.id}`, color: hash === t.id ? "var(--ink)" : "var(--mute)" }));

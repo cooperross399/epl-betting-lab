@@ -293,7 +293,7 @@ class Component extends DCLogic {
   componentDidUpdate() { this.load(); }
   renderVals() {
     const F = this.F, d = this.state.data;
-    const tabsList = [["This week", "Board.dc.html"], ["Results", "Results.dc.html"], ["Season", "Season.dc.html"], ["Record", "Record.dc.html"], ["Tracker", "Tracker.dc.html"]];
+    const tabsList = [["This week", "Board.dc.html"], ["Props", "Board.dc.html#props"], ["Results", "Results.dc.html"], ["Season", "Season.dc.html"], ["Record", "Record.dc.html"], ["Tracker", "Tracker.dc.html"]];
     const tabs = tabsList.map(([label, href]) => ({ label, href, current: label === "Record" ? "page" : undefined, shadow: label === "Record" ? "inset 0 -3px 0 var(--ink)" : "none", color: label === "Record" ? "var(--ink)" : "var(--mute)" }));
     const NOT_YET = { emptyTitle: "No matchday settled yet", emptyNote: "The first calibration numbers appear the morning after the first fixtures on the board are played. Each settled matchday adds its games to the buckets below." };
     const base = { tabs, isSample: !!this.state.isSample, kicker: "EPL · 2026–27", week: { show: false }, headline: "", mkts: { show: false, none: true, list: [] }, due: { show: false }, ...NOT_YET };

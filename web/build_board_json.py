@@ -901,6 +901,28 @@ PROP_MARKET_KEYS = {
 #: The props card's status words, as the shared page's props states.
 PROPS_STATUS = {"Props card ready": "ok", "Held by policy": "abstain", "No props staging evidence": "no_lines"}
 
+#: One line per market under each prop row, restating the card's own
+#: measurement and never claiming an edge. Only shots on target and the
+#: anytime goal were measured walk-forward against real prices (the bought
+#: window, February to May 2026, held out from April: 4 bets, see
+#: `data/outputs/player_props_backtest.md`); shots, assists, cards, tackles
+#: and saves have never met a real price.
+_VOLUME_NOTE = "Measured on two months of live prices: no demonstrated edge."
+_UNMEASURED_NOTE = "Never measured against real prices: no demonstrated edge."
+PROP_MARKET_NOTES = {
+    "shots": _UNMEASURED_NOTE,
+    "shots_on_target": _VOLUME_NOTE,
+    "goals": _VOLUME_NOTE,
+    "assists": _UNMEASURED_NOTE,
+    "booked": _UNMEASURED_NOTE,
+    "sent_off": _UNMEASURED_NOTE,
+    "tackles": _UNMEASURED_NOTE,
+    # The grader's rule, not a book's: a keeper named in the squad who never
+    # comes on is void; one the match summary does not name stays ungraded.
+    "goalie_saves": _UNMEASURED_NOTE + " Priced on the keeper the books post; a keeper in the squad who does not"
+                    " come on is void, and one the match summary does not name stays ungraded.",
+}
+
 
 def load_props_card(lab: Path) -> dict | None:
     """The run's props card, or None when no run wrote one (the board then has no Props tab)."""
@@ -951,15 +973,45 @@ def _prop_identity(p: dict) -> tuple[str, ...]:
     return tuple(str(p.get(k, "")) for k in ("player", "home_team", "away_team", "market", "selection"))
 
 
+#: The card withholds a player on a stated chance of playing of 50% or less,
+#: or on his status alone when no chance is stated (`UNAVAILABLE_STATUSES`
+#: in the props card). A status-only withhold carries no percentage, so the
+#: public line gives the status in words instead; the source is not named.
+WITHHELD_STATUS_WORDS = {"i": "injured", "s": "suspended", "u": "unavailable", "n": "not in squad"}
+
+
+def _withheld_line(entries: list) -> str:
+    """The players the card did not price because they are unlikely to play,
+    in the card's own words: the name, the club and the stated chance, or
+    the status when no chance was stated. No site is named."""
+    named = []
+    for e in entries:
+        if not isinstance(e, dict) or not e.get("player"):
+            continue
+        chance = e.get("chance")
+        why = f"{chance}%" if chance not in (None, "") else WITHHELD_STATUS_WORDS.get(str(e.get("status") or "").strip().casefold(), "")
+        detail = ", ".join(filter(None, [str(e.get("team") or ""), why]))
+        named.append(f"{e['player']} ({detail})" if detail else str(e["player"]))
+    if not named:
+        return ""
+    return ("Not priced, unlikely to play (a stated chance of playing of 50% or less, or listed as injured, "
+            "suspended or unavailable): " + ", ".join(named) + ".")
+
+
 def props_block(
     props: dict, games: dict[tuple[str, str], str], withdrawn: list[dict] | None = None
 ) -> dict:
-    """`board.json` `props` in the schema the shared Props tab reads (SCHEMA.md).
+    """`board.json` `props` in the schema the shared Props tab reads.
 
     Every row is a pick the props card staked; the card writes nothing below
     its bar, so every row is a best bet at the card's own units. A pick whose
     fixture is not on this board is dropped rather than shown without a game.
     A pick the lineup check found not starting is dropped and named in the note.
+
+    `marketNotes` carries one line per market (the NHL board's shape): what
+    the card's measurement says of it, which is never an edge. The note says
+    how many props the card priced and how many are listed here, and names
+    the players it withheld as unlikely to play.
     """
     status = PROPS_STATUS.get(str(props.get("status") or ""), "no_lines")
     out = {_prop_identity(w): w for w in withdrawn or []}
@@ -992,10 +1044,29 @@ def props_block(
             "edgePct": round(edge * 100, 1) if isinstance(edge, (int, float)) else None,
             "kind": "bet", "units": p.get("units"),
         })
-    note = str(props.get("note") or "")
+    parts = [str(props.get("note") or "")]
+    priced = props.get("priced")
+    if status == "ok" and isinstance(priced, int) and not isinstance(priced, bool):
+        picks = [p for p in props.get("picks") or [] if isinstance(p, dict)]
+        head = f"The card priced {priced:,} prop{'s' if priced != 1 else ''}"
+        if rows:
+            parts.append(f"{head} and {len(rows):,} {'are' if len(rows) != 1 else 'is'} listed here, "
+                         "each a best bet at the card's stake.")
+        elif not picks:
+            # The usual week: an opinion on everything and nothing clearing
+            # the bar. The shared page shows this note as the empty state.
+            parts.append(f"{head}; no pick cleared the bar, so none is listed.")
+        elif len(pulled) == len(picks):
+            parts.append(f"{head}; every pick was withdrawn at the lineup check, so none is listed.")
+        else:
+            parts.append(f"{head}; its {len(picks):,} pick{'s are' if len(picks) != 1 else ' is'} on fixtures "
+                         "this board does not carry, so none is listed.")
     if pulled:
-        note = " ".join(filter(None, [note, "Withdrawn at the lineup check, not starting: " + ", ".join(pulled) + "."]))
-    return {"status": status, "note": note, "rows": rows}
+        parts.append("Withdrawn at the lineup check, not starting: " + ", ".join(pulled) + ".")
+    if status == "ok":
+        parts.append(_withheld_line(props.get("withheld_unavailable") or []))
+    note = " ".join(filter(None, parts))
+    return {"status": status, "note": note, "marketNotes": dict(PROP_MARKET_NOTES), "rows": rows}
 
 
 def build(lab: Path, today: date) -> dict:

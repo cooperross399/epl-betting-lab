@@ -84,10 +84,12 @@ SHIPPED_CORRECTION = PropCalibration(
     intercept=-0.2383, slope=0.9133, fitted_on=7254
 )
 
-#: Markets the shipped correction does not touch. It was fitted on shots,
-#: shots on target, assists and the anytime scorer only; applying it to
-#: cards, tackles or saves would borrow a measurement from markets they are
-#: not, so their probabilities are the model's own, uncorrected.
+#: Markets the shipped correction does not touch. It was fitted on the
+#: outcomes the bought prices held, which were shots on target and the
+#: anytime scorer only (`data/outputs/player_props_backtest.md`); it is
+#: applied to the four volume markets, and applying it to cards, tackles or
+#: saves would borrow a measurement from markets they are not, so their
+#: probabilities are the model's own, uncorrected.
 UNCORRECTED_MARKETS = frozenset(
     {
         "player_to_receive_card",
@@ -139,6 +141,10 @@ class PropPick:
     #: props only; blank and 1.0 before the appointment is announced.
     referee: str = ""
     referee_factor: float = 1.0
+    #: The model's own name for the player (`player` is the listed book's
+    #: spelling, which grading joins on). Two books spelling one player two
+    #: ways are one outcome: `_one_stake_per_outcome` folds on this.
+    model_player: str = ""
 
 
 def approved_prop_markets(policy_path: Path | None = None) -> list[str]:
@@ -327,7 +333,10 @@ def _one_stake_per_outcome(picks: list[PropPick]) -> list[PropPick]:
     A ladder (`Over@0.5`, `Over@1.5`, ...) and two markets on one stat (the
     saves line and the saves ladder) settle on one number: staking every
     rung that clears the bar is one position sized several times. Grouped on
-    fixture, player, stat and side; the line is what is chosen between.
+    fixture, player, stat and side; the line is what is chosen between. The
+    player is the model's own name where the pick carries it, so two books'
+    spellings of one player ("Alexander Isak", "Isak") are one outcome and
+    the better-edge spelling keeps the stake.
     """
     best: dict[tuple, PropPick] = {}
     for pick in picks:
@@ -337,7 +346,7 @@ def _one_stake_per_outcome(picks: list[PropPick]) -> list[PropPick]:
             pick.home_team,
             pick.away_team,
             SETTLEMENT_COLUMNS.get(pick.market, pick.market),
-            pick.player,
+            pick.model_player or pick.player,
             "over" if side.casefold() == "yes" else side.casefold(),
         )
         if key not in best or pick.edge > best[key].edge:
@@ -536,6 +545,12 @@ def build_player_props_card(
     withheld: dict[str, dict[str, str]] = {}
 
     picks: list[PropPick] = []
+    # How many outcomes the model gave an opinion on, whether or not the
+    # opinion cleared the bar: the board says how much the card priced
+    # beside how much it lists. An outcome is counted once on the model's
+    # own player, stat, side and line, however many books spell him or
+    # however many provider markets carry the line.
+    priced_outcomes: set[tuple] = set()
     for row in best.values():
         flagged = _unavailable_match(
             unavailable, str(row["player"]), str(row["home_team"]), str(row["away_team"])
@@ -585,6 +600,10 @@ def build_player_props_card(
             raw = None
         if raw is None:
             continue
+        priced_outcomes.add((
+            str(row["date"]), str(row["home_team"]), str(row["away_team"]), stat, rates.player,
+            "over" if name.casefold() == "yes" else name.casefold(), 0.5 if point is None else point,
+        ))
         probability = (
             raw if market in UNCORRECTED_MARKETS else correction.apply(raw)
         )
@@ -611,6 +630,7 @@ def build_player_props_card(
                 units=PROPS_UNITS,
                 referee=referee,
                 referee_factor=round(multiplier, 4),
+                model_player=rates.player,
             )
         )
 
@@ -618,10 +638,15 @@ def build_player_props_card(
     picks.sort(key=lambda p: -p.edge)
     summary["status"] = READY_STATUS
     summary["picks"] = [p.__dict__ for p in picks]
+    # `below_bar` is every priced outcome that is not a pick: short of the
+    # bar, or a rung folded into the one kept for its outcome. Each kept
+    # pick is one distinct priced outcome, so this is never negative.
+    summary["priced"] = len(priced_outcomes)
+    summary["below_bar"] = len(priced_outcomes) - len(picks)
     summary["withheld_unavailable"] = sorted(withheld.values(), key=lambda e: e["player"])
     summary["note"] = (
         "The standing measurement demonstrates no edge in these markets; "
-        "these picks clear a deliberately high bar and carry the smallest "
+        "a pick clears a deliberately high bar and carries the smallest "
         "stake the card uses. Books reprice on the team sheet after this "
         "card is built."
     )
@@ -665,6 +690,16 @@ def render_player_props_markdown(summary: Mapping[str, object]) -> str:
         "",
     ]
     picks = summary.get("picks") or []
+    priced = summary.get("priced")
+    if isinstance(priced, int) and not isinstance(priced, bool):
+        below = summary.get("below_bar")
+        lines += [
+            f"- Priced: {priced} prop outcome{'s' if priced != 1 else ''} had a "
+            f"model opinion; {len(picks)} {'are' if len(picks) != 1 else 'is'} "
+            f"picked and {below if isinstance(below, int) else priced - len(picks)} "
+            "not (short of the bar, or a rung folded into the one kept for its outcome).",
+            "",
+        ]
     if picks:
         lines += [
             "## Picks",
@@ -702,7 +737,8 @@ def render_player_props_markdown(summary: Mapping[str, object]) -> str:
             "## Not priced: unlikely to play",
             "",
             "Fantasy Premier League gives these players a 50% chance of "
-            "playing or less, so none of their props is priced.",
+            "playing or less, or lists them as injured, suspended or "
+            "unavailable, so none of their props is priced.",
             "",
         ]
         for entry in withheld:

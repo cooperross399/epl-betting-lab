@@ -1,10 +1,8 @@
-## Wednesday 28 October, 12:55 UTC — manual run
+## Wednesday 28 October, 15:44 UTC — scheduled run
 
-Selections changed: 1 dropped.
+Selections changed: 2 added, 3 dropped.
 
-_This run was started by hand, not by the schedule. If you did not start it, someone was testing._
-
-Provider quota: **35556** — about 9 day(s) at the observed burn. **Top this up or the schedule stops.**
+Provider quota: **34954** — about 9 day(s) at the observed burn. **Top this up or the schedule stops.**
 
 Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5, team_total_home_0_5, team_total_home_1_5, team_total_home_2_5, team_total_away_0_5, team_total_away_1_5, team_total_away_2_5** (excluded: none)
 
@@ -15,11 +13,11 @@ Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corner
 | Newcastle v Everton | `draw_no_bet` | home | C | +5.3% | -142 | FanDuel | 0.1 |
 | Chelsea v Man United | `team_total_away_1_5` | over | C | +6.8% | +174 | FanDuel | 0.1 |
 | Liverpool v Arsenal | `draw_no_bet` | away | C | +5.0% | -140 | FanDuel | 0.1 |
-| Coventry v Sunderland | `corners_1x2` | home | C | +5.4% | +100 | BetRivers | 0.1 |
 | Liverpool v Arsenal | `team_total_away_1_5` | under | C | +5.0% | -138 | Bovada | 0.1 |
 | Tottenham v Crystal Palace | `team_total_away_1_5` | over | C | +6.9% | +250 | Bovada | 0.1 |
-| Coventry v Sunderland | `team_total_home_1_5` | over | C | +6.0% | +168 | FanDuel | 0.1 |
 | Newcastle v Everton | `1x2` | home | C | +5.7% | +135 | BetUS | 0.1 |
+| Tottenham v Crystal Palace | `draw_no_bet` | away | C | +6.5% | +350 | FanDuel | 0.1 |
+| Liverpool v Arsenal | `btts` | no | C | +5.5% | +130 | FanDuel | 0.1 |
 
 ### Leans
 
@@ -32,6 +30,7 @@ _None._
 - Chelsea v Man United — **Jordan Henderson** `player_goal_scorer_anytime` Yes at +1100 (Fanatics), 0.1u
 - Hull v Ipswich — **Regan Slater** `player_shots_on_target` Over@0.5 at +380 (BetRivers), 0.1u
 - Tottenham v Crystal Palace — **Crystal Palace goalkeeper** `player_goalie_saves_alternate` Over@2.5 at +110 (Bovada), 0.1u
+- Hull v Ipswich — **Regan Slater** `player_shots` Over@1.5 at +250 (FanDuel), 0.1u
 - Tottenham v Crystal Palace — **Adam Wharton** `player_shots_on_target` Over@0.5 at +450 (BetRivers), 0.1u
 - Brentford v Nott'm Forest — **Nott'm Forest goalkeeper** `player_goalie_saves_alternate` Over@2.5 at +100 (Bovada), 0.1u
 - Bournemouth v Leeds — **Ethan Ampadu** `player_shots_on_target` Over@0.5 at +480 (BetRivers), 0.1u
@@ -40,7 +39,11 @@ _Props carry the smallest stake the card uses: the standing measurement demonstr
 
 ### What changed
 
-- **Dropped:** Liverpool v Arsenal 1x2 away
+- **Added:** Liverpool v Arsenal btts no
+- **Added:** Tottenham v Crystal Palace draw_no_bet away
+- **Dropped:** Coventry v Sunderland corners_1x2 home
+- **Dropped:** Coventry v Sunderland team_total_away_0_5 under
+- **Dropped:** Coventry v Sunderland team_total_home_1_5 over
 
 
 ## Beyond the Premier League
@@ -113,7 +116,7 @@ Nobody playing in this round is due.
 - Settled: **142** selections, 54 won, 7 returned the stake
 - Staked: 17.05 units
 - Profit: **-2.07 units** (-12.1% on turnover)
-- Still pending: 16
+- Still pending: 17
 
 - Stake returned (void): 7 — counted in the settled total above at zero profit, because a push is a bet
 
@@ -145,4 +148,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/40690954679)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/40717913479)

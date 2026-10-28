@@ -1,8 +1,8 @@
-## Tuesday 27 October, 15:09 UTC — scheduled run
+## Wednesday 28 October, 09:10 UTC — scheduled run
 
-Selections changed: 3 added, 4 dropped.
+Selections changed: 6 added, 4 dropped, 1 moved section.
 
-Provider quota: **39399** — about 10 day(s) at the observed burn. **Top this up or the schedule stops.**
+Provider quota: **35950** — about 9 day(s) at the observed burn. **Top this up or the schedule stops.**
 
 Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5, team_total_home_0_5, team_total_home_1_5, team_total_home_2_5, team_total_away_0_5, team_total_away_1_5, team_total_away_2_5** (excluded: none)
 
@@ -10,13 +10,13 @@ Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corner
 
 | Match | Market | Selection | Tier | Edge | Price | Book | Units |
 |:------|:-------|:----------|:-----|-----:|------:|:-----|------:|
-| Newcastle v Everton | `draw_no_bet` | home | C | +5.9% | -140 | FanDuel | 0.1 |
-| Coventry v Sunderland | `corners_1x2` | home | C | +5.3% | -118 | BetRivers | 0.1 |
-| Liverpool v Arsenal | `team_total_away_1_5` | under | C | +5.2% | -136 | Bovada | 0.1 |
+| Liverpool v Arsenal | `draw_no_bet` | away | C | +5.4% | -138 | FanDuel | 0.1 |
+| Newcastle v Everton | `draw_no_bet` | home | C | +5.3% | -142 | FanDuel | 0.1 |
+| Coventry v Sunderland | `corners_1x2` | home | C | +5.3% | -104 | BetRivers | 0.1 |
+| Liverpool v Arsenal | `team_total_away_1_5` | under | C | +5.0% | -138 | Bovada | 0.1 |
 | Tottenham v Crystal Palace | `team_total_away_1_5` | over | C | +6.9% | +250 | Bovada | 0.1 |
-| Liverpool v Arsenal | `draw_no_bet` | away | C | +4.7% | -142 | FanDuel | 0.1 |
-| Chelsea v Man United | `team_total_away_1_5` | over | C | +6.0% | +168 | FanDuel | 0.1 |
 | Coventry v Sunderland | `team_total_home_1_5` | over | C | +6.0% | +168 | FanDuel | 0.1 |
+| Newcastle v Everton | `1x2` | home | C | +5.7% | +135 | BetUS | 0.1 |
 | Tottenham v Crystal Palace | `draw_no_bet` | away | C | +6.5% | +350 | FanDuel | 0.1 |
 
 ### Leans
@@ -27,22 +27,28 @@ _None._
 
 - Bournemouth v Leeds — **Leeds goalkeeper** `player_goalie_saves_alternate` Over@2.5 at +120 (Bovada), 0.1u
 - Chelsea v Man United — **Jordan Henderson** `player_shots_on_target` Over@0.5 at +310 (BetRivers), 0.1u
+- Chelsea v Man United — **Jordan Henderson** `player_goal_scorer_anytime` Yes at +1100 (Fanatics), 0.1u
 - Hull v Ipswich — **Regan Slater** `player_shots_on_target` Over@0.5 at +380 (BetRivers), 0.1u
-- Chelsea v Man United — **Jordan Henderson** `player_goal_scorer_anytime` Yes at +900 (Fanatics), 0.1u
-- Tottenham v Crystal Palace — **Adam Wharton** `player_shots_on_target` Over@0.5 at +475 (BetRivers), 0.1u
+- Tottenham v Crystal Palace — **Crystal Palace goalkeeper** `player_goalie_saves_alternate` Over@2.5 at +110 (Bovada), 0.1u
+- Tottenham v Crystal Palace — **Adam Wharton** `player_shots_on_target` Over@0.5 at +450 (BetRivers), 0.1u
+- Brentford v Nott'm Forest — **Nott'm Forest goalkeeper** `player_goalie_saves_alternate` Over@2.5 at +100 (Bovada), 0.1u
 - Bournemouth v Leeds — **Ethan Ampadu** `player_shots_on_target` Over@0.5 at +480 (BetRivers), 0.1u
 
 _Props carry the smallest stake the card uses: the standing measurement demonstrates no edge, and books reprice on the team sheet after this card is built._
 
 ### What changed
 
-- **Added:** Chelsea v Man United team_total_home_0_5 under
-- **Added:** Chelsea v Man United team_total_home_2_5 under
-- **Added:** Tottenham v Crystal Palace draw_no_bet away
-- **Dropped:** Bournemouth v Leeds corners_1x2 away
-- **Dropped:** Chelsea v Man United double_chance draw_or_away
-- **Dropped:** Chelsea v Man United team_total_away_2_5 over
-- **Dropped:** Tottenham v Crystal Palace corners_1x2 away
+- **Added:** Bournemouth v Leeds team_total_away_0_5 under
+- **Added:** Brentford v Nott'm Forest team_total_away_1_5 over
+- **Added:** Man City v Brighton 1x2 away
+- **Added:** Man City v Brighton double_chance draw_or_away
+- **Added:** Newcastle v Everton 1x2 home
+- **Added:** Newcastle v Everton corners_total_10_5 over
+- **Dropped:** Bournemouth v Leeds 1x2 away
+- **Dropped:** Chelsea v Man United team_total_away_1_5 over
+- **Dropped:** Chelsea v Man United team_total_home_2_5 under
+- **Dropped:** Tottenham v Crystal Palace corners_1x2 draw
+- **Moved section:** Brentford v Nott'm Forest team_total_away_2_5 over
 
 
 ## Beyond the Premier League
@@ -53,12 +59,10 @@ Nothing below has been shown to beat a price. Some of it has been shown not to, 
 
 Priced on the unified English ratings. Measured out of sample, a club's rating does **not** survive a division change — carrying it across is worse than calling the club average for its new division. What transfers is the division, which the market also knows.
 
-| Match | Market | Selection | Edge | Price | Book | Units |
-|:--|:--|:--|--:|--:|:--|--:|
-| Fulham v Crystal Palace | `total_2_5` | under | +3.2% | +123 | BetRivers | 0.1 |
-| Sunderland v Brentford | `total_2_5` | under | +1.7% | +100 | Bovada | 0.1 |
+_No selection this run._
 
-- 12 fixture(s) dropped as already kicked off: Bradford City v Peterborough United, Coventry v Aston Villa, Everton v Wolves, Fleetwood Town v Arsenal, Fleetwood Town v Sheffield United, Ipswich v Arsenal, and 6 more.
+- 17 fixture(s) dropped as already kicked off: Bournemouth v Aston Villa, Bradford City v Peterborough United, Coventry v Aston Villa, Everton v Wolves, Fleetwood Town v Arsenal, Fleetwood Town v Sheffield United, and 11 more.
+- None of 4 priced selections cleared the rules.
 
 ### UEFA Champions League
 
@@ -123,7 +127,7 @@ Nobody playing in this round is due.
 
 Each selection is scored at the first price a card offered it, and only rows the card staked are counted — a lean carries no stake and is not a recommendation.
 
-**Beyond the Premier League is not in these numbers.** 10 staked selection(s) from that section are on this card. It is graded on a record of its own (`beyond_record.md`): 45 settled, 17 won, 1 returned the stake, -0.80 units. The rule above is stated by stake, so without this line the only way to notice would be to total the card by hand.
+**Beyond the Premier League is not in these numbers.** 8 staked selection(s) from that section are on this card. It is graded on a record of its own (`beyond_record.md`): 45 settled, 17 won, 1 returned the stake, -0.80 units. The rule above is stated by stake, so without this line the only way to notice would be to total the card by hand.
 
 This is the only out-of-sample evidence this project has. It will take a long time to mean anything: separating a real 5% edge from zero needs roughly 1,500 settled bets.
 
@@ -149,4 +153,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/40526788093)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/40661125523)

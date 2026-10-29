@@ -82,16 +82,24 @@
       </div>
     </sc-if>
 
-    <sc-if value="{{ showScores }}" hint-placeholder-val="{{ true }}">
-      <section aria-labelledby="scores-h" style="padding:12px 0;border-bottom:1px solid var(--ink);">
-        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:2px 12px;flex-wrap:wrap;">
-          <h2 id="scores-h" style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;letter-spacing:.1em;text-transform:uppercase;">Scores</h2>
-          <span role="status" style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:{{ liveColor }};">{{ liveLine }}</span>
+    <section style="display:flex;flex-wrap:wrap;gap:24px 40px;align-items:flex-end;padding:36px 0 28px;border-bottom:1px solid var(--ink);">
+      <div style="flex:none;min-width:0;max-width:100%;">
+        <div style="font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin-bottom:10px;">{{ kicker }}</div>
+        <h1 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:clamp(56px,9vw,112px);line-height:.9;letter-spacing:-.01em;text-transform:uppercase;">{{ title1 }}<br>{{ title2 }}</h1>
+        <div style="margin-top:14px;font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.7;color:var(--mute);display:flex;flex-wrap:wrap;gap:4px 24px;align-items:baseline;">
+          <span style="white-space:nowrap;">Times in {{ tz }}</span>
         </div>
-        <sc-if value="{{ noScoreCards }}" hint-placeholder-val="{{ false }}">
-          <p style="margin:8px 0 0;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">No games on tonight's board.</p>
-        </sc-if>
-        <div style="display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x proximity;margin:10px calc(-1 * clamp(16px,3vw,24px)) 0;padding:0 clamp(16px,3vw,24px) 4px;scrollbar-width:thin;">
+      </div>
+      <sc-if value="{{ showScores }}" hint-placeholder-val="{{ true }}">
+        <section aria-labelledby="scores-h" style="flex:1 1 320px;min-width:0;">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:2px 12px;flex-wrap:wrap;">
+            <h2 id="scores-h" style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;letter-spacing:.1em;text-transform:uppercase;">Scores</h2>
+            <span role="status" style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:{{ liveColor }};">{{ liveLine }}</span>
+          </div>
+          <sc-if value="{{ noScoreCards }}" hint-placeholder-val="{{ false }}">
+            <p style="margin:8px 0 0;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">No games on tonight's board.</p>
+          </sc-if>
+          <div style="display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x proximity;margin-top:10px;padding-bottom:4px;scrollbar-width:thin;">
           <sc-for list="{{ scoreCards }}" as="s" hint-placeholder-count="5">
             <button type="button" onClick="{{ s.onClick }}" aria-label="{{ s.aria }}" aria-disabled="{{ s.disabled }}" style="flex:none;scroll-snap-align:start;width:128px;min-height:76px;text-align:left;background:transparent;color:var(--ink);border:1px solid var(--rule);border-top:3px solid {{ s.topColor }};padding:6px 10px;font:inherit;cursor:{{ s.cursor }};display:flex;flex-direction:column;gap:3px;">
               <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:{{ s.stateColor }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">{{ s.state }}</span>
@@ -103,19 +111,9 @@
               </sc-if>
             </button>
           </sc-for>
-        </div>
-      </section>
-    </sc-if>
-
-    <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:24px 40px;align-items:end;padding:36px 0 28px;border-bottom:1px solid var(--ink);">
-      <div style="min-width:0;grid-column:1 / -1;">
-        <div style="font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin-bottom:10px;">{{ kicker }}</div>
-        <h1 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:clamp(56px,9vw,112px);line-height:.9;letter-spacing:-.01em;text-transform:uppercase;">{{ title1 }}<br>{{ title2 }}</h1>
-      </div>
-      <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.7;color:var(--mute);display:flex;flex-wrap:wrap;gap:4px 24px;align-items:baseline;">
-        <span style="white-space:nowrap;">Times in {{ tz }}</span>
-        <sc-if value="{{ showScores }}" hint-placeholder-val="{{ true }}"><span style="white-space:nowrap;">Live scores {{ liveStamp }}</span></sc-if>
-      </div>
+          </div>
+        </section>
+      </sc-if>
     </section>
 
     <sc-if value="{{ hasNotice }}" hint-placeholder-val="{{ false }}">
@@ -128,6 +126,7 @@
       </div>
     </sc-if>
 
+    <sc-if value="{{ isTonight }}" hint-placeholder-val="{{ true }}">
     <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:0 24px;border-bottom:1px solid var(--ink);">
       <sc-for list="{{ strip }}" as="c" hint-placeholder-count="4">
         <div style="padding:22px 0;border-bottom:1px solid var(--rule);">
@@ -137,6 +136,7 @@
         </div>
       </sc-for>
     </section>
+    </sc-if>
 
     <div id="main">
       <sc-if value="{{ isTonight }}" hint-placeholder-val="{{ true }}">
@@ -230,24 +230,18 @@
                       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,128px),1fr));gap:14px 18px;min-width:0;">
                         <sc-for list="{{ g.cells }}" as="c" hint-placeholder-count="3">
                           <div style="border-top:2px solid var(--ink);padding-top:8px;">
-                            <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;"><span style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);">{{ c.title }}</span><sc-if value="{{ c.help }}" hint-placeholder-val="{{ false }}"><a href="{{ c.help }}" title="{{ c.helpTitle }}" aria-label="{{ c.helpTitle }}" style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--mute);border:1px solid var(--rule);width:18px;height:18px;display:inline-grid;place-items:center;text-decoration:none;flex:none;">?</a></sc-if></div>
+                            <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;"><span style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);">{{ c.title }}</span><sc-if value="{{ c.help }}" hint-placeholder-val="{{ false }}"></sc-if></div>
                             <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;line-height:1.7;margin-top:6px;">
                               <sc-for list="{{ c.rows }}" as="r" hint-placeholder-count="3">
                                 <div style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:0 8px;align-items:baseline;"><span style="color:var(--mute);white-space:nowrap;">{{ r.label }}</span><span style="text-align:right;font-weight:{{ r.weight }};">{{ r.value }}</span></div>
                               </sc-for>
                             </div>
-                            <sc-if value="{{ c.spark }}" hint-placeholder-val="{{ false }}">
-                              <div style="display:flex;align-items:center;gap:8px;margin-top:6px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mute);">
-                                <svg aria-hidden="true" width="72" height="18" viewBox="0 0 72 18" style="flex:none;overflow:visible;"><polyline sc-camel-points="{{ c.spark.points }}" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" style="color:var(--ink);"></polyline></svg>
-                                <span>{{ c.spark.note }}</span>
-                              </div>
-                            </sc-if>
                             <sc-if value="{{ c.note }}" hint-placeholder-val="{{ false }}"><div style="font-size:11px;color:var(--mute);margin-top:4px;">{{ c.note }}</div></sc-if>
                           </div>
                         </sc-for>
 
                         <div style="border-top:2px solid var(--ink);padding-top:8px;grid-column:1 / -1;">
-                          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;"><span style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);">{{ g.pick.heading }}</span><sc-if value="{{ g.pick.help }}" hint-placeholder-val="{{ false }}"><a href="{{ g.pick.help }}" title="What a best bet and a lean mean" aria-label="What a best bet and a lean mean" style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--mute);border:1px solid var(--rule);width:18px;height:18px;display:inline-grid;place-items:center;text-decoration:none;flex:none;">?</a></sc-if></div>
+                          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;"><span style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);">{{ g.pick.heading }}</span><sc-if value="{{ g.pick.help }}" hint-placeholder-val="{{ false }}"></sc-if></div>
                           <sc-if value="{{ g.pick.isBet }}" hint-placeholder-val="{{ true }}">
                             <div style="margin-top:8px;background:var(--ink);color:var(--paper);padding:8px 10px;">
                               <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:20px;line-height:1;text-transform:uppercase;letter-spacing:.02em;">{{ g.pick.label }}</div>
@@ -374,8 +368,24 @@
           </div>
           </sc-if>
 
-          <div style="display:flex;flex-wrap:wrap;gap:4px 20px;padding:10px 0;border-bottom:1px solid var(--rule);font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-2);">
-            <sc-for list="{{ propSeason }}" as="x" hint-placeholder-count="3"><span><span style="color:var(--mute);text-transform:uppercase;letter-spacing:.08em;font-size:11px;">{{ x.label }}</span> {{ x.value }}</span></sc-for>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:0 24px;border-bottom:1px solid var(--ink);margin-top:16px;">
+            <sc-for list="{{ propCards }}" as="x" hint-placeholder-count="3">
+              <div style="padding:18px 0 20px;border-top:1px solid var(--rule);">
+                <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;">
+                  <span style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);">{{ x.label }}</span>
+                  <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);white-space:nowrap;">{{ x.tag }}</span>
+                </div>
+                <div style="display:flex;align-items:baseline;gap:6px 14px;flex-wrap:wrap;margin-top:8px;">
+                  <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:44px;line-height:1;">{{ x.record }}</span>
+                  <span style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:600;color:{{ x.unitsColor }};">{{ x.units }}</span>
+                </div>
+                <dl style="margin:12px 0 0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px 12px;">
+                  <sc-for list="{{ x.stats }}" as="st" hint-placeholder-count="3">
+                    <div style="min-width:0;"><dt style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);">{{ st.k }}</dt><dd style="margin:2px 0 0;font-family:'IBM Plex Mono',monospace;font-size:14px;">{{ st.v }}</dd></div>
+                  </sc-for>
+                </dl>
+              </div>
+            </sc-for>
           </div>
 
           <sc-if value="{{ isDroughtView }}" hint-placeholder-val="{{ false }}">
@@ -982,14 +992,24 @@ class Component extends DCLogic {
       onToggleAll: () => { const next = !(S.allOpen ?? S.wide); this.setState({ allOpen: next, expanded: {} }, () => this.syncBoxes()); },
       pv: view, f, isModelView: !isDrought, isDroughtView: isDrought,
       // Season-long lines from board.json record (props, propLeans, dueList); a dash until a night has settled.
-      propSeason: (() => {
-        const R = data.record || {}, rec = (r) => `${r.w || 0}–${r.l || 0}${r.p != null ? `–${r.p}` : ""}`, ok = (r) => r && r.nights;
-        const u = (x) => (typeof x === "number" ? ` · ${x > 0 ? "+" : x < 0 ? "−" : ""}${Math.abs(x).toFixed(2)} u` : "");
-        const hit = (r) => { const n = (r.w || 0) + (r.l || 0); return n ? ` · ${Math.round(((r.w || 0) / n) * 100)}%` : ""; };
+      propCards: (() => {
+        const R = data.record || {}, ok = (r) => r && r.nights;
+        const rec = (r) => `${r.w || 0}–${r.l || 0}${r.p ? `–${r.p}` : ""}`;
+        const rate = (r) => { const n = (r.w || 0) + (r.l || 0); return n ? `${Math.round(((r.w || 0) / n) * 100)}%` : "—"; };
+        const un = (x) => (typeof x === "number" ? `${x > 0 ? "+" : x < 0 ? "−" : ""}${Math.abs(x).toFixed(2)}u` : "");
+        const col = (x) => (typeof x === "number" ? (x > 0 ? "var(--win)" : x < 0 ? "var(--alert)" : "var(--ink-2)") : "var(--ink-2)");
+        const roi = (r) => (typeof r.units === "number" && (r.staked || ((r.w || 0) + (r.l || 0)) * ((r.stake) || 0.25)) && (r.staked = r.staked || ((r.w || 0) + (r.l || 0) + (r.p || 0)) * (r.stake || 0.25)) ? `${r.units >= 0 ? "+" : "−"}${Math.abs((r.units / r.staked) * 100).toFixed(1)}%` : "—");
+        const empty = (label, tag) => ({ label, tag, record: "—", units: "", unitsColor: "var(--ink-2)", stats: [{ k: "Status", v: "No night settled yet" }] });
+        const d = R.dueList, stake = (d && d.stake) || 0.25;
         return [
-          ...(pv ? [{ label: "Props best bets · season", value: ok(R.props) ? rec(R.props) + u(R.props.units) : "—" },
-            { label: "Props leans · season", value: ok(R.propLeans) ? rec(R.propLeans) + hit(R.propLeans) : "—" }] : []),
-          { label: `Due List · season · ${(R.dueList && R.dueList.stake) || 0.25}u each`, value: ok(R.dueList) ? rec(R.dueList) + hit(R.dueList) + u(R.dueList.units) : "—" },
+          ...(pv ? [
+            ok(R.props) ? { label: "Prop best bets", tag: "season", record: rec(R.props), units: un(R.props.units), unitsColor: col(R.props.units),
+              stats: [{ k: "Win rate", v: rate(R.props) }, { k: "Bets", v: String((R.props.w || 0) + (R.props.l || 0) + (R.props.p || 0)) }, { k: "Nights", v: String(R.props.nights) }] } : empty("Prop best bets", "season"),
+            ok(R.propLeans) ? { label: "Prop leans", tag: "no stake", record: rec(R.propLeans), units: "", unitsColor: "var(--ink-2)",
+              stats: [{ k: "Win rate", v: rate(R.propLeans) }, { k: "Leans", v: String((R.propLeans.w || 0) + (R.propLeans.l || 0) + (R.propLeans.p || 0)) }, { k: "Nights", v: String(R.propLeans.nights) }] } : empty("Prop leans", "no stake"),
+          ] : []),
+          ok(d) ? { label: "Due List", tag: `${stake}u each`, record: rec(d), units: un(d.units), unitsColor: col(d.units),
+            stats: [{ k: "Hit rate", v: rate(d) }, { k: "Staked", v: `${(typeof d.staked === "number" ? d.staked : stake * ((d.w || 0) + (d.l || 0) + (d.p || 0))).toFixed(2)}u` }, { k: "Return", v: roi(d) }] } : empty("Due List", `${stake}u each`),
         ];
       })(),
       propViews: pv ? [viewBtn("model", pv.status === "ok" ? `Model props · ${pv.counts.total}` : "Model props"), viewBtn("drought", `Due List · ${dCount}`)] : [],

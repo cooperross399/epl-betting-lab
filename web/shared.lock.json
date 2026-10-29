@@ -1,9 +1,9 @@
 {
  "repo": "cooperross399/betting-lab-shared",
- "tag": "v7",
+ "tag": "v8",
  "sport": "epl",
  "files": {
-  "Board.dc.html": "fa0f3e812e68b680e5035d54b613d7b3f524ad8b2d8a08efe8bb5d5705479bd8",
+  "Board.dc.html": "9728b8fdb81beca5011e7ed40d782c408c04c69be0575ca9e172e311a5669e02",
   "Results.dc.html": "840258588f8a83f4483f8bf01c66838cbc524d84e1cb2a83c84591f981f09966",
   "Archive.dc.html": "400081b2c28902d17749e1bfa58234a1f2c5ba28cf8489ce2451286e8404f0e7",
   "Graphic.dc.html": "b931eaf7f301f757ef5be04886cc7206ce259f39b3bbfb7ce53565d982c162ee",

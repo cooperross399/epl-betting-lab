@@ -377,7 +377,8 @@ jobs:
           EPL_ODDS_API_KEY: ${{ secrets.EPL_ODDS_API_KEY }}
           PYTHONPATH: src
         run: |
-          python scripts/check_provider_credential.py --no-env-file
+          python scripts/check_provider_credential.py --no-env-file \
+            --quota-out data/outputs/provider_quota.json
 
       - name: Fetch historical results
         # The model is fitted on completed matches. Football-Data is public CSV
@@ -716,7 +717,10 @@ jobs:
           EPL_ODDS_API_KEY: ${{ secrets.EPL_ODDS_API_KEY }}
           PYTHONPATH: src
         run: |
-          python scripts/run_props_card_refresh.py
+          # Shed first when credits run low (providers/quota_gate.py).
+          if python scripts/quota_gate.py extras; then
+            python scripts/run_props_card_refresh.py
+          fi
 
       - name: Check no selection kicked off before the card
         # Asks from the output side what the two kickoff gates are supposed to

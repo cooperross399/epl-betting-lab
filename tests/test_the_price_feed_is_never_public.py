@@ -19,6 +19,8 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 WORKFLOWS = ROOT / ".github" / "workflows"
 HELPER = ROOT / "scripts" / "price_feed_remote.sh"
+#: The secret's name, bound from `secrets.` in every step; never a value here.
+SECRET_NAME = "EPL_PRICE_FEED_TOKEN"
 
 
 def _steps():
@@ -51,7 +53,8 @@ def test_every_step_touching_the_feed_uses_the_helper_and_the_secret():
             touching.append((name, step))
             assert ". scripts/price_feed_remote.sh" in run, (name, step.get("name"))
             env = step.get("env") or {}
-            assert env.get("EPL_PRICE_FEED_TOKEN") == "${{ secrets.EPL_PRICE_FEED_TOKEN }}", (name, step.get("name"))
+            bound = str(env.get(SECRET_NAME, ""))
+            assert bound.replace(" ", "") == "${{secrets.%s}}" % SECRET_NAME, (name, step.get("name"))
     names = {(n, s.get("name")) for n, s in touching}
     # The five steps that read or write the feed.
     assert len(names) >= 5, names
@@ -85,12 +88,12 @@ def _bash(script: str, env: dict[str, str]) -> subprocess.CompletedProcess:
 
 
 def test_without_the_token_nothing_is_pushed_anywhere():
-    out = _bash("feed_push deadbeef", {"GH_TOKEN": "t", "GITHUB_REPOSITORY": "cooperross399/epl-betting-lab"})
+    out = _bash("feed_push deadbeef", {"GH_TOKEN": "already-exported-value", "GITHUB_REPOSITORY": "cooperross399/epl-betting-lab"})
     assert out.returncode != 0
     assert "never published to the public repository" in out.stdout
 
 
 def test_the_push_remote_is_the_private_repository():
-    out = _bash("feed_remote", {"EPL_PRICE_FEED_TOKEN": "x"})
+    out = _bash("feed_remote", {"EPL_PRICE_FEED_TOKEN": "test-secret-that-must-not-be-written"})
     assert out.stdout.endswith("github.com/cooperross399/epl-price-feed")
     assert "epl-betting-lab" not in out.stdout

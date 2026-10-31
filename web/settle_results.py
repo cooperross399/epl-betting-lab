@@ -1111,7 +1111,9 @@ def write_season(data: Path, results: dict, season: dict) -> None:
         record.update({k: season[k] for k in SEASON_KEYS})
         record["season"] = {k: v for k, v in season.items() if k != "dueList"}
     if "dueList" in season:
-        record["dueList"] = {k: season["dueList"][k] for k in ("w", "l", "p", "nights")}
+        # The 0.25u tracking line rides along, as on the NHL board.
+        record["dueList"] = {k: season["dueList"][k] for k in ("w", "l", "p", "nights", "stake", "units", "staked", "returnPct")
+                             if k in season["dueList"]}
     if "props" in season:
         # The board's "Props best bets · season" line, as the NHL board
         # carries it: the staked props' W-L-P, units and nights settled.

@@ -537,6 +537,53 @@ Use the repo, the reports, and GitHub.
   Drop as a `shared-sync/<tag>` pull request; until it does, the shared
   Results, Archive and Graphic pages still show the tab for the NHL only.
   `tests/test_props_are_posted_and_tracked_like_nhl.py`.
+- **2026-10-31: six lessons from the NHL and CBB labs (Cooper chose "All
+  six" after a comparison of the three labs).**
+  1. **The captured odds are private.** The Odds API's terms forbid
+     redistributing its data as downloadable files, and this repository is
+     public: `price-feed` (79 day files of book-by-book prices) and
+     `odds-history` (the bought season) were exactly that, and Harvest
+     Historical BTTS also uploaded the bought odds as an artifact. Every step
+     now reads and writes through `scripts/price_feed_remote.sh`, which
+     writes only to the PRIVATE `cooperross399/epl-price-feed` with the
+     secret `EPL_PRICE_FEED_TOKEN` (a fine-grained token, Contents read and
+     write, that repository only; Cooper creates both). Without the token
+     nothing is written anywhere. The public branches are read once as a
+     legacy source so the first write carries the history across; delete
+     them after that. `tests/test_the_price_feed_is_never_public.py`.
+  2. **One match is one bet.** The card keeps the highest-ranked best bet per
+     match (DNB home and 1X2 home, or one side's team-total under and the
+     other's over, are one result seen two ways) and shows the rest as
+     unstaked leans with the reason; the props card keeps one prop per player
+     per match (`_one_stake_per_player`). The derived-market backtest's
+     8-per-round cap does not apply this yet, so its counts are an upper
+     bound twice over. `tests/test_one_bet_per_match.py`.
+  3. **Calibration on the picks, and a trust weight.** Both sister labs found
+     the model calibrated overall and 9-12 points overconfident on the rows
+     it picks. `reports/selection_calibration.py` reads both per market from
+     the derived backtest and the props backtest and writes
+     `selection_calibration.json/.md`: the trust weight is the share of the
+     model's disagreement with the price the picks earned, clipped to [0, 1],
+     unset under 30 settled picks. The card multiplies a pick's edge by it
+     (not the 2.5 line, already anchored); a pick under its bar becomes an
+     unstaked lean. Matchday Refresh re-measures it weekly from the private
+     odds-history branch; the weights ride in `matchday-state`. Not evidence
+     of an edge. `tests/test_calibration_on_the_picks.py`.
+  4. **A low quota sheds the extras first** (`providers/quota_gate.py`): below
+     10,000 credits the props refresh and the cup/European/Championship price
+     collection are skipped; below 3,000 the Closing Snapshot buys nothing, so
+     what is left buys the matchday card. The reading is the free credential
+     check's (`provider_quota.json`); an unknown quota sheds nothing.
+  5. **The card does not fight the move** (`reports/line_move.py`, CBB's
+     rule): a pick whose median implied probability across books fell a
+     point or more between its first and latest capture before kick-off is
+     halved before the bar reads it. It can only remove a stake.
+  6. **The Due List is tracked at 0.25u an entry** (`web/settle_results.
+     DUE_STAKE`), as the NHL site does: units at the staged price, a push 0,
+     a void or an entry with no price graded but not posted. The Due List is
+     re-priced after the props prices are bought. Nothing is bet.
+  No measurement, bar, stake size or market moved; items 2, 3 and 5 can only
+  turn a 0.1u best bet into an unstaked lean.
 - **The European sections vanished on 2026-10-19 because four league feeds
   timed out (Serie A, Ligue 1, Greece, Scotland).** The European pool needs
   every domestic league, so Champions, Europa and Conference League could not

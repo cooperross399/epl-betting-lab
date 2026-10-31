@@ -236,12 +236,14 @@ def test_the_due_list_is_graded_on_goals_and_assists_and_void_when_he_did_not_pl
     for row in due["rows"]:
         assert {"player", "team", "opp", "market", "line", "drought", "price", "book", "heavyJuice", "actual", "result"} <= set(row)
     assert due["summary"] == {"w": 1, "l": 1, "p": 0}
-    assert board["record"]["dueList"] == {"w": 1, "l": 1, "p": 0, "nights": 1}
+    # Since 2026-10-31 the Due List is tracked at 0.25u an entry, as the NHL
+    # board does (Cooper chose it): Saka's +180 win is staked, Odegaard had
+    # no price, so he is graded but not posted.
+    assert by["Bukayo Saka"]["units"] == 0.45 and by["Martin Odegaard"]["units"] is None
+    assert board["record"]["dueList"] == {"w": 1, "l": 1, "p": 0, "nights": 1,
+                                          "stake": 0.25, "units": 0.45, "staked": 1, "returnPct": 180.0}
     assert due["season"]["byMarket"] == {"goals": {"w": 1, "l": 0}, "assists": {"w": 0, "l": 1}}
-    # Never a unit, never a stake, and never in the picks.
-    blob = json.dumps({"dueList": due, "record": board["record"]["dueList"]})
-    for word in ("units", "stake", "staked"):
-        assert f'"{word}"' not in blob, f"the Due List carries {word}"
+    # Never in the picks.
     assert results["summary"]["picks"] == {"w": 0, "l": 0, "p": 0}
 
 

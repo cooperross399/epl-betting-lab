@@ -860,10 +860,15 @@ class Component extends DCLogic {
       const c = x.cellRecord, pc = (v) => `${v > 0 ? "+" : ""}${v.toFixed(1)}%`, whole = !!c && typeof c === "object" && [c.wagers, c.returnPct, c.lowPct, c.highPct].every((v) => num(v) != null);
       const record = !("cellRecord" in x) ? "" : whole ? `This cell${DROUGHT_WINDOW}: ${pc(c.returnPct)} over ${c.wagers} (95% ${pc(c.lowPct)} to ${pc(c.highPct)})` : "no record for this cell";
       // The same facts as labelled cells: the bar and which rule, how rare for him, and the cell's record (plain ink, no tone).
+      const dShots = num(x.droughtShots), uShots = num(x.usualShots), chance = num(x.modelChance), edge = num(x.modelEdge);
       const ruleName = { tier: "set by last season's total", surprise: "set by his own scoring rate", both: "by both measures" }[x.rule] || "";
       const facts = [
         bar != null ? { label: "Games needed", value: String(bar), sub: ruleName } : null,
         forHim ? { label: "How rare", value: forHim.replace(/ for him$/, ""), sub: "a drought this long, for him" } : null,
+        // Shots during the drought and the model's own chance (2026-10-31; SCHEMA.md droughtShots, usualShots, modelChance,
+        // modelEdge). Information beside the row, never a verdict: plain ink, and nothing when the row lacks them.
+        dShots != null && uShots != null ? { label: "Shots in drought", value: `${dShots.toFixed(1)} a game`, sub: `usual ${uShots.toFixed(1)}` } : null,
+        chance != null ? { label: "Model's chance", value: `${Math.round(chance * 100)}%`, sub: edge != null ? `${edge > 0 ? "+" : ""}${(edge * 100).toFixed(1)} pts vs the price` : "" } : null,
         !("cellRecord" in x) ? null : whole ? { label: `Past picks like this${DROUGHT_WINDOW}`, value: `${pc(c.returnPct)} over ${c.wagers}`, sub: `likely range ${pc(c.lowPct)} to ${pc(c.highPct)}` }
           : { label: `Past picks like this${DROUGHT_WINDOW}`, value: "none yet", sub: "" },
       ].filter(Boolean);

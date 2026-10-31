@@ -9,6 +9,7 @@ import pandas as pd
 from epl_betting_lab.config import MIN_EDGE
 from epl_betting_lab.models.calibration import min_calibrated_edge
 from epl_betting_lab.models.value import fair_american_from_prob
+from epl_betting_lab.reports.line_move import AGAINST_FACTOR, load_feed, move_against
 from epl_betting_lab.reports.selection_calibration import load_trust_weights
 
 from epl_betting_lab.config import BANKROLL_UNIT_DOLLARS, MAX_DEFAULT_JUICE, OUTPUTS_DIR
@@ -389,37 +390,62 @@ def _section(status: object) -> str:
 MAX_BEST_BETS_DEFAULT = 8
 
 
-def _apply_trust(df: pd.DataFrame, weights: dict[str, float]) -> pd.DataFrame:
-    """Pull each best bet toward its price by its market's measured weight.
+def _apply_trust(
+    df: pd.DataFrame, weights: dict[str, float], feed: pd.DataFrame | None = None
+) -> pd.DataFrame:
+    """Shrink each best bet's edge by what the evidence says, then re-read the bar.
 
-    The CBB lab's trust table (`models/trust.py`), read from
-    `reports/selection_calibration`: ``p' = implied + w (p - implied)``, so
-    the edge becomes ``w x edge``. A best bet whose pulled edge no longer
-    clears its market's bar is shown as an unstaked lean with the reason.
-    The 2.5 line is left alone: its anchored rule already blends toward the
-    market. A market with no weight is not moved.
+    Two multipliers, each from a sister lab:
+
+    - the market's trust weight (CBB's `models/trust.py`, read from
+      `reports/selection_calibration`): ``p' = implied + w (p - implied)``, so
+      the edge becomes ``w x edge``. The 2.5 line is left alone: its anchored
+      rule already blends toward the market.
+    - the line move (CBB's `models/line_move.py`, `reports/line_move`): a pick
+      the market has moved against since its first captured price is halved.
+
+    A best bet whose shrunk edge no longer clears its market's bar is shown as
+    an unstaked lean with the reason. Nothing here can add a stake.
     """
-    if not weights:
+    if not weights and (feed is None or feed.empty):
         return df
     df = df.copy()
     for index, row in df[df["section"] == "Best bets"].iterrows():
         market = str(row.get("market", ""))
-        weight = weights.get(market)
-        if weight is None or weight >= 1 or market == "total_2_5":
-            continue
+        selection = str(row.get("selection", "")).strip().lower()
         edge = _float_value(row, "calibrated_edge")
-        bar = min_calibrated_edge(market, str(row.get("selection", "")).strip().lower(), MIN_EDGE)
-        trusted = weight * edge
-        if trusted >= bar:
+        factor = 1.0
+        reasons = []
+        weight = weights.get(market)
+        if weight is not None and weight < 1 and market != "total_2_5":
+            factor *= weight
+            reasons.append(
+                f"{market}'s picks earned a trust weight of {weight:.2f} "
+                "(selection_calibration.md)"
+            )
+        if feed is not None and not feed.empty:
+            moved, first, latest = move_against(
+                feed, str(row.get("home_team", "")), str(row.get("away_team", "")), market, selection
+            )
+            if moved:
+                factor *= AGAINST_FACTOR
+                reasons.append(
+                    f"the market moved against it since its first price "
+                    f"({first:.1%} to {latest:.1%} implied), so it is halved"
+                )
+        if factor >= 1:
+            continue
+        bar = min_calibrated_edge(market, selection, MIN_EDGE)
+        shrunk = factor * edge
+        if shrunk >= bar:
             continue
         df.at[index, "section"] = "Leans"
         df.at[index, "confidence_tier"] = LEAN_TIER
         df.at[index, "suggested_units"] = 0.0
         df.at[index, "suggested_wager_$"] = 0.0
         df.at[index, "qualifies_reason"] = (
-            f"Cleared the bar at {edge:+.1%}, but {market}'s picks earned a trust "
-            f"weight of {weight:.2f} (selection_calibration.md): pulled toward "
-            f"the price it is {trusted:+.1%}, under the {bar:.1%} bar."
+            f"Cleared the bar at {edge:+.1%}, but {'; and '.join(reasons)}: "
+            f"that leaves {shrunk:+.1%}, under the {bar:.1%} bar."
         )
     return df
 
@@ -430,6 +456,7 @@ def build_thursday_best_bets(
     max_passes: int = 12,
     market_reliability: dict[str, float] | None = None,
     trust_weights_path: Path | None = None,
+    price_feed_path: Path | None = None,
 ) -> pd.DataFrame:
     if candidates.empty:
         return pd.DataFrame(columns=REPORT_COLUMNS)
@@ -465,7 +492,7 @@ def build_thursday_best_bets(
             df[column] = pd.NA
     df["suggested_wager_$"] = (df["suggested_units"] * BANKROLL_UNIT_DOLLARS).round(2)
 
-    df = _apply_trust(df, load_trust_weights(trust_weights_path))
+    df = _apply_trust(df, load_trust_weights(trust_weights_path), load_feed(price_feed_path))
     best = df[df["section"] == "Best bets"].sort_values(["ranking_score", "calibrated_edge"], ascending=False)
     # One match is one bet (the CBB lab's rule): draw-no-bet home and 1X2 home,
     # or one side's team total under and the other's over, are one result seen

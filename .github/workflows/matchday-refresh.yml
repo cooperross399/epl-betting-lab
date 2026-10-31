@@ -377,7 +377,8 @@ jobs:
           EPL_ODDS_API_KEY: ${{ secrets.EPL_ODDS_API_KEY }}
           PYTHONPATH: src
         run: |
-          python scripts/check_provider_credential.py --no-env-file
+          python scripts/check_provider_credential.py --no-env-file \
+            --quota-out data/outputs/provider_quota.json
 
       - name: Fetch historical results
         # The model is fitted on completed matches. Football-Data is public CSV
@@ -584,11 +585,12 @@ jobs:
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
+          EPL_PRICE_FEED_TOKEN: ${{ secrets.EPL_PRICE_FEED_TOKEN }}
         run: |
           set -u
-          REMOTE="https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}"
+          . scripts/price_feed_remote.sh
           mkdir -p data/processed
-          if git fetch "$REMOTE" +refs/heads/price-feed:refs/price-feed-tip 2>/dev/null; then
+          if feed_fetch; then
             # Through a temporary file: `>` truncates its target before the
             # command on its left runs, so a path the branch does not carry
             # empties the file instead of leaving it alone. That emptied 1,203
@@ -661,6 +663,39 @@ jobs:
         run: |
           python scripts/fetch_fpl_availability.py
 
+      - name: Measure calibration on the picks
+        # The sister labs' winner's curse: calibrated over every row priced,
+        # 9-12 points overconfident on the rows picked. Reads the bought odds
+        # from the private odds-history branch, runs the derived-market
+        # backtest walk-forward, and writes each market's trust weight, which
+        # the card reads below (reports/selection_calibration.py). Once a
+        # week: the weights ride in matchday-state and the bought prices do
+        # not change between harvests. Soft: no weights means nothing moves.
+        id: selection_calibration
+        if: always()
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EPL_PRICE_FEED_TOKEN: ${{ secrets.EPL_PRICE_FEED_TOKEN }}
+          PYTHONPATH: src
+        run: |
+          set -u
+          WEIGHTS=data/outputs/selection_calibration.json
+          # Age from the file's own stamp: a restored artifact's mtime is the
+          # moment it was downloaded, so it would never look old.
+          if [ -s "$WEIGHTS" ] && python -c "import json,sys,datetime as d; g=json.load(open(sys.argv[1]))['generated_at']; sys.exit(0 if d.datetime.now(d.timezone.utc)-d.datetime.fromisoformat(g.replace('Z','+00:00')) < d.timedelta(days=7) else 1)" "$WEIGHTS" 2>/dev/null; then
+            echo "Trust weights are under a week old; not re-measured."
+            exit 0
+          fi
+          FEED_BRANCH=odds-history
+          . scripts/price_feed_remote.sh
+          mkdir -p data/processed
+          if feed_fetch --depth=1; then
+            git show refs/odds-history-tip:historical_market_odds.csv \
+              > data/processed/historical_market_odds.csv 2>/dev/null || rm -f data/processed/historical_market_odds.csv
+          fi
+          python scripts/run_selection_calibration.py
+
       - name: Rebuild every report
         # Soft: refresh_all_reports already continues past a failed step and
         # exits non-zero at the end, so letting it stop the job here would
@@ -682,7 +717,14 @@ jobs:
           EPL_ODDS_API_KEY: ${{ secrets.EPL_ODDS_API_KEY }}
           PYTHONPATH: src
         run: |
-          python scripts/run_props_card_refresh.py
+          # Shed first when credits run low (providers/quota_gate.py).
+          if python scripts/quota_gate.py extras; then
+            python scripts/run_props_card_refresh.py
+            # Re-price the Due List now the anytime-scorer and assist prices
+            # are staged: the board tracks it at 0.25u an entry at that price
+            # (web/settle_results.DUE_STAKE). Soft; keyless; spends nothing.
+            python scripts/build_due_list.py || echo "Due List not re-priced; it keeps the first build."
+          fi
 
       - name: Check no selection kicked off before the card
         # Asks from the output side what the two kickoff gates are supposed to
@@ -795,13 +837,14 @@ jobs:
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
+          EPL_PRICE_FEED_TOKEN: ${{ secrets.EPL_PRICE_FEED_TOKEN }}
           PYTHONPATH: src
         run: |
           set -u
-          REMOTE="https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}"
+          . scripts/price_feed_remote.sh
           mkdir -p data/processed
           PARENT=""
-          if git fetch "$REMOTE" +refs/heads/price-feed:refs/price-feed-tip 2>/dev/null; then
+          if feed_fetch; then
             PARENT=$(git rev-parse refs/price-feed-tip)
             TMP=$(mktemp)
             if python scripts/price_feed_branch.py show refs/price-feed-tip price_feed.csv > "$TMP" 2>/dev/null && [ -s "$TMP" ]; then
@@ -851,7 +894,7 @@ jobs:
           else
             COMMIT=$(git commit-tree "$TREE" -m "prices $(date -u +%FT%TZ)")
           fi
-          git push "$REMOTE" "$COMMIT:refs/heads/price-feed"
+          feed_push "$COMMIT"
           echo "state=appended" >> "$GITHUB_OUTPUT"
 
       - name: Publish the card to the card-feed branch
@@ -1014,6 +1057,7 @@ jobs:
             # its Props tab.
             data/outputs/player_props_card.md
             data/outputs/player_props_card.json
+            data/outputs/selection_calibration.md
           if-no-files-found: warn
           retention-days: 30
 
@@ -1070,6 +1114,10 @@ jobs:
             # out and the Champions, Europa and Conference League sections all
             # vanished from the card.
             data/processed/football_data_*_matches.csv
+            # Each market's trust weight, re-measured weekly
+            # (Measure calibration on the picks).
+            data/outputs/selection_calibration.json
+            data/outputs/selection_calibration.md
           if-no-files-found: warn
           retention-days: 90
 

@@ -14,7 +14,9 @@ places bets, applies settlement, or enables cron.
 from __future__ import annotations
 
 import argparse
+import json
 import os
+from pathlib import Path
 
 from epl_betting_lab.providers.credential_check import (
     check_provider_credential,
@@ -36,6 +38,12 @@ def parse_args() -> argparse.Namespace:
         default=os.environ.get("EPL_ODDS_API_BASE_URL", DEFAULT_API_BASE_URL),
         help="Provider base URL. Must be an approved HTTPS host.",
     )
+    parser.add_argument(
+        "--quota-out",
+        type=Path,
+        default=None,
+        help="Write the remaining quota the provider reported here (for scripts/quota_gate.py).",
+    )
     return parser.parse_args()
 
 
@@ -56,6 +64,11 @@ def main() -> int:
     report = check_provider_credential(os.environ, base_url=args.base_url)
     for line in render_credential_check(report):
         print(line)
+
+    if args.quota_out is not None:
+        remaining = (report.get("usage_headers") or {}).get("x-requests-remaining", "")
+        args.quota_out.parent.mkdir(parents=True, exist_ok=True)
+        args.quota_out.write_text(json.dumps({"requests_remaining": remaining}), encoding="utf-8")
 
     if not report["credential_present"]:
         return 2

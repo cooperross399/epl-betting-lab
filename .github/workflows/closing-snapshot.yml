@@ -172,7 +172,8 @@ jobs:
           EPL_ODDS_API_KEY: ${{ secrets.EPL_ODDS_API_KEY }}
           PYTHONPATH: src
         run: |
-          python scripts/check_provider_credential.py --no-env-file
+          python scripts/check_provider_credential.py --no-env-file \
+            --quota-out data/outputs/provider_quota.json
 
       - name: Fetch prices
         # The same live fetch the matchday refresh runs. Soft: a bad minute at
@@ -183,6 +184,9 @@ jobs:
           EPL_ODDS_API_KEY: ${{ secrets.EPL_ODDS_API_KEY }}
           PYTHONPATH: src
         run: |
+          # Below the card's reserve the snapshot buys nothing, so the
+          # matchday card keeps its prices (providers/quota_gate.py).
+          python scripts/quota_gate.py snapshot || exit 1
           python scripts/run_provider_shadow_verification.py \
             --provider odds_api --live --overwrite-staging --include-event-markets
 
@@ -208,9 +212,10 @@ jobs:
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
+          EPL_PRICE_FEED_TOKEN: ${{ secrets.EPL_PRICE_FEED_TOKEN }}
         run: |
           set -u
-          REMOTE="https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}"
+          . scripts/price_feed_remote.sh
           mkdir -p data/processed
           # Restore one feed, trying each name it has ever had. The second
           # name carries the pre-rename file across on first sight; after that
@@ -240,7 +245,7 @@ jobs:
           # the gate to read. The append step below then started from an
           # empty frame and published this run's rows over the branch — the
           # shrink that guard now refuses. Say which happened, either way.
-          if git fetch "$REMOTE" +refs/heads/price-feed:refs/price-feed-tip 2>/dev/null; then
+          if feed_fetch; then
             restore_feed price_feed.csv price_feed.csv
             restore_feed price_feed_extra.csv price_feed_extra.csv price_feed_efl.csv
             echo "state=restored" >> "$GITHUB_OUTPUT"
@@ -273,6 +278,8 @@ jobs:
           PYTHONPATH: src
         run: |
           set -u
+          # Shed first when credits run low (providers/quota_gate.py).
+          python scripts/quota_gate.py extras || exit 0
           python scripts/collect_extra_competitions.py --live \
             --feed data/processed/price_feed_extra.csv
 
@@ -286,13 +293,14 @@ jobs:
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
+          EPL_PRICE_FEED_TOKEN: ${{ secrets.EPL_PRICE_FEED_TOKEN }}
           PYTHONPATH: src
         run: |
           set -u
-          REMOTE="https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}"
+          . scripts/price_feed_remote.sh
           mkdir -p data/processed
           PARENT=""
-          if git fetch "$REMOTE" +refs/heads/price-feed:refs/price-feed-tip 2>/dev/null; then
+          if feed_fetch; then
             PARENT=$(git rev-parse refs/price-feed-tip)
           fi
           # The feeds were restored above, before anything collected into them.
@@ -391,7 +399,7 @@ jobs:
           else
             COMMIT=$(git commit-tree "$TREE" -m "prices $(date -u +%FT%TZ)")
           fi
-          git push "$REMOTE" "$COMMIT:refs/heads/price-feed"
+          feed_push "$COMMIT"
           wc -l < data/processed/price_feed.csv | xargs echo "price-feed rows:"
           if [ -s data/processed/price_feed_extra.csv ]; then
             wc -l < data/processed/price_feed_extra.csv | xargs echo "extra-feed rows:"

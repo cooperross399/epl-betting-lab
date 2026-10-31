@@ -354,6 +354,22 @@ def _one_stake_per_outcome(picks: list[PropPick]) -> list[PropPick]:
     return list(best.values())
 
 
+def _one_stake_per_player(picks: list[PropPick]) -> list[PropPick]:
+    """Keep one prop per player per match: the best edge.
+
+    The CBB lab's rule, applied to props: a player's goal is a shot on target
+    is a shot, so anytime scorer, shots on target and shots on one player are
+    one afternoon seen three ways, and staking all three triples one position.
+    The 2026-10-31 card staked Jordan Henderson all three ways.
+    """
+    best: dict[tuple, PropPick] = {}
+    for pick in picks:
+        key = (pick.date, pick.home_team, pick.away_team, pick.model_player or pick.player)
+        if key not in best or pick.edge > best[key].edge:
+            best[key] = pick
+    return list(best.values())
+
+
 def build_player_props_card(
     *,
     props_staging_path: Path | None = None,
@@ -634,12 +650,13 @@ def build_player_props_card(
             )
         )
 
-    picks = _one_stake_per_outcome(picks)
+    picks = _one_stake_per_player(_one_stake_per_outcome(picks))
     picks.sort(key=lambda p: -p.edge)
     summary["status"] = READY_STATUS
     summary["picks"] = [p.__dict__ for p in picks]
     # `below_bar` is every priced outcome that is not a pick: short of the
-    # bar, or a rung folded into the one kept for its outcome. Each kept
+    # bar, a rung folded into the one kept for its outcome, or another prop
+    # on a player who already has one (`_one_stake_per_player`). Each kept
     # pick is one distinct priced outcome, so this is never negative.
     summary["priced"] = len(priced_outcomes)
     summary["below_bar"] = len(priced_outcomes) - len(picks)

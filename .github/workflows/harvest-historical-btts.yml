@@ -82,6 +82,7 @@ jobs:
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
+          EPL_PRICE_FEED_TOKEN: ${{ secrets.EPL_PRICE_FEED_TOKEN }}
         run: |
           set -u
           mkdir -p data/processed
@@ -89,8 +90,11 @@ jobs:
           # after ninety days, and roughly 26,000 credits of purchased prices
           # living only in one is a countdown to re-buying a season nobody
           # noticed had gone.
-          REMOTE="https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}"
-          if git fetch "$REMOTE" +refs/heads/odds-history:refs/odds-history-tip 2>/dev/null; then
+          # From the PRIVATE repository (scripts/price_feed_remote.sh): bought
+          # odds are never published on this public one.
+          FEED_BRANCH=odds-history
+          . scripts/price_feed_remote.sh
+          if feed_fetch; then
             git show refs/odds-history-tip:historical_market_odds.csv \
               > data/processed/historical_market_odds.csv 2>/dev/null || true
             git show refs/odds-history-tip:historical_market_odds_misses.csv \
@@ -131,20 +135,22 @@ jobs:
             --markets "${{ inputs.markets }}" \
             ${{ inputs.append == true && '--append' || '' }}
 
-      - name: Publish the prices to the odds-history branch
+      - name: Publish the prices to the private odds-history branch
         # Permanent, unlike an artifact. Same mechanism the Closing Snapshot
         # workflow uses for price-feed: an orphan commit built with
         # commit-tree, pushed to one ref, touching nothing else.
         if: always()
         env:
           GH_TOKEN: ${{ github.token }}
+          EPL_PRICE_FEED_TOKEN: ${{ secrets.EPL_PRICE_FEED_TOKEN }}
         run: |
           set -eu
           if [ ! -s data/processed/historical_market_odds.csv ]; then
             echo "Nothing bought; nothing to publish."
             exit 0
           fi
-          REMOTE="https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}"
+          FEED_BRANCH=odds-history
+          . scripts/price_feed_remote.sh
           PARENT=""
           if git rev-parse refs/odds-history-tip >/dev/null 2>&1; then
             PARENT=$(git rev-parse refs/odds-history-tip)
@@ -176,23 +182,9 @@ jobs:
           else
             COMMIT=$(git commit-tree "$TREE" -m "odds $(date -u +%FT%TZ)")
           fi
-          git push "$REMOTE" "$COMMIT:refs/heads/odds-history"
+          feed_push "$COMMIT"
           wc -l < data/processed/historical_market_odds.csv \
             | xargs echo "odds-history rows:"
-
-      - name: Upload the prices
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: historical-btts
-          # The misses file rides along or it is lost, and a fixture/market
-          # pair with no price anywhere gets re-bought on every future run.
-          path: |
-            data/processed/historical_market_odds.csv
-            data/processed/historical_market_odds_misses.csv
-            data/processed/historical_market_odds_fixtures.csv
-          if-no-files-found: warn
-          retention-days: 90
 
       - name: Scope reminder
         if: always()

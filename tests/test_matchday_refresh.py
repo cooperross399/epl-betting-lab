@@ -1479,7 +1479,9 @@ def test_the_price_feed_is_restored_before_the_reports_are_rebuilt() -> None:
 
     block = text.split("- name: Restore the price feed before anything reads it", 1)[1]
     block = block.split("- name:", 1)[0]
-    assert "refs/heads/price-feed" in block
+    # Fetched from the private feed repository (scripts/price_feed_remote.sh).
+    assert "feed_fetch" in block
+    assert "feed_push" not in block
     # Read-only. Publishing stays in the later step; a second pusher would race
     # the first for the same ref.
     assert "git push" not in block

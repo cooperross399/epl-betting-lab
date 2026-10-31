@@ -584,11 +584,12 @@ jobs:
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
+          EPL_PRICE_FEED_TOKEN: ${{ secrets.EPL_PRICE_FEED_TOKEN }}
         run: |
           set -u
-          REMOTE="https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}"
+          . scripts/price_feed_remote.sh
           mkdir -p data/processed
-          if git fetch "$REMOTE" +refs/heads/price-feed:refs/price-feed-tip 2>/dev/null; then
+          if feed_fetch; then
             # Through a temporary file: `>` truncates its target before the
             # command on its left runs, so a path the branch does not carry
             # empties the file instead of leaving it alone. That emptied 1,203
@@ -795,13 +796,14 @@ jobs:
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
+          EPL_PRICE_FEED_TOKEN: ${{ secrets.EPL_PRICE_FEED_TOKEN }}
           PYTHONPATH: src
         run: |
           set -u
-          REMOTE="https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}"
+          . scripts/price_feed_remote.sh
           mkdir -p data/processed
           PARENT=""
-          if git fetch "$REMOTE" +refs/heads/price-feed:refs/price-feed-tip 2>/dev/null; then
+          if feed_fetch; then
             PARENT=$(git rev-parse refs/price-feed-tip)
             TMP=$(mktemp)
             if python scripts/price_feed_branch.py show refs/price-feed-tip price_feed.csv > "$TMP" 2>/dev/null && [ -s "$TMP" ]; then
@@ -851,7 +853,7 @@ jobs:
           else
             COMMIT=$(git commit-tree "$TREE" -m "prices $(date -u +%FT%TZ)")
           fi
-          git push "$REMOTE" "$COMMIT:refs/heads/price-feed"
+          feed_push "$COMMIT"
           echo "state=appended" >> "$GITHUB_OUTPUT"
 
       - name: Publish the card to the card-feed branch

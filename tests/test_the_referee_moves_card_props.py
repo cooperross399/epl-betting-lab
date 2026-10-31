@@ -157,10 +157,12 @@ def test_the_props_card_prices_bookings_with_the_appointed_referee(tmp_path: Pat
         card_props._staging_row(),
     ]
 
-    def build(referees: Path | None) -> dict:
+    # One market per build: the card keeps one prop per player per match
+    # (`_one_stake_per_player`), and this test is about pricing, not that.
+    def build(referees: Path | None, rows: list) -> dict:
         return build_player_props_card(
             props_staging_path=card_props._write_csv(
-                tmp_path / "props.csv", card_props.STAGING_FIELDS, staged),
+                tmp_path / "props.csv", card_props.STAGING_FIELDS, rows),
             logs_path=card_props._booking_logs(tmp_path),
             policy_path=card_props._policy(
                 tmp_path / "policy.json", ["player_to_receive_card", "player_shots_on_target"]),
@@ -168,11 +170,17 @@ def test_the_props_card_prices_bookings_with_the_appointed_referee(tmp_path: Pat
             run_at=card_props.RUN_AT,
         )
 
+    def picks(referees: Path | None) -> dict:
+        found = {}
+        for row in staged:
+            found.update({p["market"]: p for p in build(referees, [row])["picks"]})
+        return found
+
     lenient = tmp_path / "referees.csv"
     pd.DataFrame([{"home_team": "Newcastle", "away_team": "Liverpool",
                    "referee": "Michael Oliver", "card_factor": 0.8}]).to_csv(lenient, index=False)
-    without = {p["market"]: p for p in build(tmp_path / "absent.csv")["picks"]}
-    with_ref = {p["market"]: p for p in build(lenient)["picks"]}
+    without = picks(tmp_path / "absent.csv")
+    with_ref = picks(lenient)
     booked, shots = "player_to_receive_card", "player_shots_on_target"
     assert with_ref[booked]["model_probability"] < without[booked]["model_probability"]
     assert with_ref[booked]["referee"] == "Michael Oliver"

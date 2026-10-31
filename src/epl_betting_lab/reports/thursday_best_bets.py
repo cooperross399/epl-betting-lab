@@ -428,8 +428,23 @@ def build_thursday_best_bets(
             df[column] = pd.NA
     df["suggested_wager_$"] = (df["suggested_units"] * BANKROLL_UNIT_DOLLARS).round(2)
 
-    best = df[df["section"] == "Best bets"].sort_values(["ranking_score", "calibrated_edge"], ascending=False).head(max_best_bets)
-    leans = df[df["section"] == "Leans"].sort_values(["ranking_score", "calibrated_edge"], ascending=False)
+    best = df[df["section"] == "Best bets"].sort_values(["ranking_score", "calibrated_edge"], ascending=False)
+    # One match is one bet (the CBB lab's rule): draw-no-bet home and 1X2 home,
+    # or one side's team total under and the other's over, are one result seen
+    # two ways. Keep the highest-ranked best bet per match; show the rest as
+    # leans, unstaked, so the slots go to other matches.
+    same_match = best.duplicated(["home_team", "away_team"], keep="first")
+    moved = best[same_match].copy()
+    moved["section"] = "Leans"
+    moved["confidence_tier"] = LEAN_TIER
+    moved["suggested_units"] = 0.0
+    moved["suggested_wager_$"] = 0.0
+    moved["qualifies_reason"] = (
+        "Cleared the bar, but a higher-ranked best bet is on the same match: "
+        "one result seen two ways is one bet, not two."
+    )
+    best = best[~same_match].head(max_best_bets)
+    leans = pd.concat([moved, df[df["section"] == "Leans"]]).sort_values(["ranking_score", "calibrated_edge"], ascending=False)
     passes = df[df["section"] == "Passes / notable avoids"].sort_values(["ranking_score", "calibrated_edge"], ascending=False).head(max_passes)
     report = pd.concat([best, leans, passes], ignore_index=True)
     return report[REPORT_COLUMNS]

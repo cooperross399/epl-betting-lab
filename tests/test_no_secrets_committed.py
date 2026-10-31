@@ -101,12 +101,13 @@ API_KEY_PARAM = re.compile(
 #: Every credential-ish variable name a tracked file may mention but never
 #: assign. The allowlist is what `.env` may carry; `ODDS_API_KEY` is the
 #: spelling `.env.example` documents; `GH_TOKEN` is what the workflows bind
-#: `github.token` to. `test_no_credential_name_in_the_repository_is_unknown_
+#: `github.token` to; `EPL_PRICE_FEED_TOKEN` is the private price-feed
+#: repository's token (scripts/price_feed_remote.sh), bound from a secret. `test_no_credential_name_in_the_repository_is_unknown_
 #: to_this_guard` fails the build if a name of this shape appears in the tree
 #: and is missing from here — a scan keyed on names it has not been taught is
 #: a scan that goes quiet on a rename.
 CREDENTIAL_NAMES: tuple[str, ...] = tuple(
-    dict.fromkeys((*PROVIDER_ENV_ALLOWLIST, "ODDS_API_KEY", "GH_TOKEN"))
+    dict.fromkeys((*PROVIDER_ENV_ALLOWLIST, "ODDS_API_KEY", "GH_TOKEN", "EPL_PRICE_FEED_TOKEN"))
 )
 
 #: The shape of a credential variable name, used to find names this guard has

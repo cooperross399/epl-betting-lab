@@ -80,7 +80,12 @@ jobs:
           restored=""
           for candidate in $(gh run list --workflow matchday-refresh.yml \
             --limit 10 --json databaseId --jq '.[].databaseId'); do
-            if gh run download "$candidate" --name matchday-reports --dir data/outputs 2>/dev/null; then
+            # Into scratch, then copied over: gh run download refuses to
+            # write over an existing file, and the checkout tracks several
+            # reports this artifact carries (see publish-board.yml).
+            rm -rf "$RUNNER_TEMP/matchday-reports"
+            if gh run download "$candidate" --name matchday-reports --dir "$RUNNER_TEMP/matchday-reports" 2>/dev/null; then
+              cp -R "$RUNNER_TEMP/matchday-reports/." data/outputs/
               restored="$candidate"
               gh run download "$candidate" --name matchday-state --dir data 2>/dev/null \
                 || echo "Run $candidate carried reports but no state."

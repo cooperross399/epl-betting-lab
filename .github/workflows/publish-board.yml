@@ -134,8 +134,18 @@ jobs:
             --limit 10 --json databaseId --jq '.[].databaseId'); do
             if gh run download "$candidate" --name matchday-state --dir data 2>/dev/null; then
               restored="$candidate"
-              gh run download "$candidate" --name matchday-reports --dir data/outputs 2>/dev/null \
-                || echo "Run $candidate carried state but no reports."
+              # Into scratch, then copied over: gh run download refuses to
+              # write over an existing file, and the checkout tracks several
+              # reports this artifact carries, so a direct download into
+              # data/outputs failed every run and the board shipped without
+              # the live props card or the Due List.
+              # tests/test_reports_restore_is_not_blocked_by_tracked_files.py
+              rm -rf "$RUNNER_TEMP/matchday-reports"
+              if gh run download "$candidate" --name matchday-reports --dir "$RUNNER_TEMP/matchday-reports" 2>/dev/null; then
+                cp -R "$RUNNER_TEMP/matchday-reports/." data/outputs/
+              else
+                echo "Run $candidate carried state but no reports."
+              fi
               break
             fi
           done

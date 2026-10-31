@@ -30,14 +30,17 @@ src/epl_betting_lab/data/fetch_understat_xg.py
 src/epl_betting_lab/data/international_results.py
 src/epl_betting_lab/data/international_teams.py
 src/epl_betting_lab/data/loaders.py
+src/epl_betting_lab/data/referee_appointments.py
 src/epl_betting_lab/models/calibration.py
 src/epl_betting_lab/models/european_ratings.py
 src/epl_betting_lab/models/goal_environment.py
 src/epl_betting_lab/models/international_ratings.py
+src/epl_betting_lab/models/match_context.py
 src/epl_betting_lab/models/player_props.py
 src/epl_betting_lab/models/poisson_counts.py
 src/epl_betting_lab/models/poisson_goals.py
 src/epl_betting_lab/models/ratings.py
+src/epl_betting_lab/models/referee.py
 src/epl_betting_lab/models/unified_ratings.py
 src/epl_betting_lab/models/value.py
 src/epl_betting_lab/providers/__init__.py
@@ -65,6 +68,7 @@ src/epl_betting_lab/reports/bet_ledger.py
 src/epl_betting_lab/reports/bet_ledger_health.py
 src/epl_betting_lab/reports/bet_settlement.py
 src/epl_betting_lab/reports/beyond_clv.py
+src/epl_betting_lab/reports/beyond_record.py
 src/epl_betting_lab/reports/browser_status.py
 src/epl_betting_lab/reports/btts_calibration.py
 src/epl_betting_lab/reports/bundle_diagnostic.py
@@ -96,6 +100,7 @@ src/epl_betting_lab/reports/fixture_slate_trim.py
 src/epl_betting_lab/reports/github_approval.py
 src/epl_betting_lab/reports/github_manual_run_verification.py
 src/epl_betting_lab/reports/ledger_prefill.py
+src/epl_betting_lab/reports/lineup_check.py
 src/epl_betting_lab/reports/live_clv.py
 src/epl_betting_lab/reports/odds_export_conversion.py
 src/epl_betting_lab/reports/odds_export_profile_diagnostic.py
@@ -149,6 +154,7 @@ src/epl_betting_lab/strategies/promoted_fades.py
 src/epl_betting_lab/strategies/team_totals.py
 src/epl_betting_lab/strategies/totals.py
 tests/test_a_failed_price_fetch_keeps_the_board_on_this_round.py
+tests/test_a_missing_league_does_not_hide_europe.py
 tests/test_a_pick_carries_its_side_and_line.py
 tests/test_a_push_is_a_bet_in_the_live_record_too.py
 tests/test_acceptance_market_aware.py
@@ -164,6 +170,7 @@ tests/test_bet_ledger.py
 tests/test_bet_ledger_health.py
 tests/test_bet_settlement.py
 tests/test_beyond_clv.py
+tests/test_beyond_picks_are_graded.py
 tests/test_books.py
 tests/test_browser_status.py
 tests/test_btts_calibration.py
@@ -180,6 +187,7 @@ tests/test_closing_odds_reach_the_backtest.py
 tests/test_clv.py
 tests/test_collect_extra_competitions.py
 tests/test_competition_watch.py
+tests/test_corners_anchored_to_the_market.py
 tests/test_count_calibration.py
 tests/test_count_model_calibration.py
 tests/test_create_receipt_from_github_approval.py
@@ -210,6 +218,7 @@ tests/test_error_messages.py
 tests/test_espn_results_supplement.py
 tests/test_european_figures_match_the_report.py
 tests/test_european_ratings.py
+tests/test_european_ties_reach_the_ratings.py
 tests/test_every_club_on_the_board_has_a_logo.py
 tests/test_explain_provider_failure.py
 tests/test_extra_card_freshness.py
@@ -231,6 +240,7 @@ tests/test_longshot_cap.py
 tests/test_manual_staging_provider.py
 tests/test_manual_thursday_workflow.py
 tests/test_market_aware_validation.py
+tests/test_markets_judged_by_the_close.py
 tests/test_matchday_refresh.py
 tests/test_no_external_strength_rating.py
 tests/test_no_secrets_committed.py
@@ -247,6 +257,7 @@ tests/test_one_name_per_card_file.py
 tests/test_operating_model_docs.py
 tests/test_out_of_sample.py
 tests/test_pick_display.py
+tests/test_picks_checked_against_lineups.py
 tests/test_player_card_props.py
 tests/test_player_props_backtest.py
 tests/test_player_props_card.py
@@ -259,7 +270,9 @@ tests/test_preview_eligible_markets.py
 tests/test_price_feed_and_live_clv.py
 tests/test_props_are_graded.py
 tests/test_props_are_in_the_freshness_population.py
+tests/test_props_are_posted_and_tracked_like_nhl.py
 tests/test_props_reach_the_board.py
+tests/test_props_skip_unavailable_players.py
 tests/test_provider_acceptance_checklist.py
 tests/test_provider_allowlist_evidence_bundle.py
 tests/test_provider_allowlist_pr_conformance.py
@@ -278,8 +291,10 @@ tests/test_provider_shadow_history.py
 tests/test_provider_shadow_verification.py
 tests/test_provider_team_names.py
 tests/test_publish_board_history.py
+tests/test_published_scripts_are_content_hashed.py
 tests/test_rating_config.py
 tests/test_refresh_all.py
+tests/test_reports_restore_is_not_blocked_by_tracked_files.py
 tests/test_request_budget.py
 tests/test_schedule_health.py
 tests/test_scheduled_task_bridge.py
@@ -307,12 +322,16 @@ tests/test_the_board_carries_open_prices_and_line_history.py
 tests/test_the_card_ledger_is_not_reseeded.py
 tests/test_the_closing_snapshot_waits_for_its_slot.py
 tests/test_the_corner_bets_reach_the_public_record.py
+tests/test_the_epl_site_has_every_page_the_nhl_site_has.py
 tests/test_the_guards_exist.py
 tests/test_the_headline_numbers_are_the_bettable_ones.py
 tests/test_the_history_guard_runs.py
 tests/test_the_outcome_gate_runs.py
+tests/test_the_price_feed_stays_under_the_file_limit.py
 tests/test_the_public_record_counts_its_picks.py
 tests/test_the_record_settles_the_day_the_game_was_played.py
+tests/test_the_referee_moves_card_props.py
+tests/test_the_review_findings_stay_fixed.py
 tests/test_the_schedule_is_described_as_it_runs.py
 tests/test_the_season_record_is_summed_from_settled_days.py
 tests/test_the_snapshot_checks_its_own_publish.py

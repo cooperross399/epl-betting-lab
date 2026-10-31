@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import re
 from datetime import date
 from pathlib import Path
 
@@ -209,7 +210,10 @@ def test_the_results_page_reads_epl_props() -> None:
     text = SPORTS_JS.read_text(encoding="utf-8")
     adapters = text.split("export const ADAPTERS", 1)[1]
     epl = adapters.split("epl:", 1)[1].split("}", 1)[0]
-    assert "propResults: nhlPropResults" in epl
+    # The adapter may hand the shared grader straight through or wrap it with
+    # EPL's own prop labels; either way the Results page grades EPL props
+    # with nhlPropResults.
+    assert re.search(r"propResults:\s*(nhlPropResults\b|\(d\)\s*=>\s*nhlPropResults\(d\b)", epl), epl
 
 
 def test_the_publish_passes_the_fpl_logs_and_matchday_keeps_them() -> None:

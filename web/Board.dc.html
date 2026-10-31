@@ -868,6 +868,14 @@ class Component extends DCLogic {
         // Shots during the drought and the model's own chance (2026-10-31; SCHEMA.md droughtShots, usualShots, modelChance,
         // modelEdge). Information beside the row, never a verdict: plain ink, and nothing when the row lacks them.
         dShots != null && uShots != null ? { label: "Shots in drought", value: `${dShots.toFixed(1)} a game`, sub: `usual ${uShots.toFixed(1)}` } : null,
+        // Tonight's line and unit, and the goalie he faces (2026-10-31, round two; SCHEMA.md lineTonight, ppTonight,
+        // lineBefore, ppBefore, lineMove, status, oppGoalie, oppGoalieStatus, oppGoalieBackup, oppGoalieVsExpected).
+        // Information beside the row: plain ink, and nothing when the row lacks them.
+        typeof x.lineTonight === "string" && x.lineTonight ? { label: "Line tonight", value: [x.lineTonight, x.ppTonight].filter((v) => typeof v === "string" && v).join(", "),
+          sub: [["up", "down", "mixed"].includes(x.lineMove) && x.lineBefore ? `${x.lineMove === "mixed" ? "changed" : x.lineMove} from ${[x.lineBefore, x.ppBefore].filter((v) => typeof v === "string" && v).join(", ")}` : x.lineMove === "same" ? "same as last game" : "",
+            typeof x.status === "string" ? x.status : ""].filter(Boolean).join(" · ") } : null,
+        typeof x.oppGoalie === "string" && x.oppGoalie ? { label: x.oppGoalieBackup === true ? "Facing the backup" : "Goalie faced", value: x.oppGoalie,
+          sub: [typeof x.oppGoalieStatus === "string" ? x.oppGoalieStatus : "", num(x.oppGoalieVsExpected) != null ? `${num(x.oppGoalieVsExpected) > 0 ? "+" : ""}${Math.round(num(x.oppGoalieVsExpected) * 100)}% goals vs expected` : ""].filter(Boolean).join(" · ") } : null,
         chance != null ? { label: "Model's chance", value: `${Math.round(chance * 100)}%`, sub: edge != null ? `${edge > 0 ? "+" : ""}${(edge * 100).toFixed(1)} pts vs the price` : "" } : null,
         !("cellRecord" in x) ? null : whole ? { label: `Past picks like this${DROUGHT_WINDOW}`, value: `${pc(c.returnPct)} over ${c.wagers}`, sub: `likely range ${pc(c.lowPct)} to ${pc(c.highPct)}` }
           : { label: `Past picks like this${DROUGHT_WINDOW}`, value: "none yet", sub: "" },

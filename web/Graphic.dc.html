@@ -109,6 +109,27 @@
       </sc-for>
     </div>
 
+    <sc-if value="{{ propsCard.show }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-top:22px;border-top:3px solid #f1efe9;padding-top:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;">
+          <span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:34px;line-height:1;text-transform:uppercase;">Player props</span>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#a3a6b1;">{{ propsCard.count }}</span>
+        </div>
+        <div style="display:grid;grid-template-columns:130px 1fr 1fr 170px;gap:0 18px;padding:10px 0 6px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#a3a6b1;border-bottom:1px solid #f1efe9;margin-top:8px;">
+          <span>Match</span><span>Player</span><span>Bet</span><span style="text-align:right;">Price</span>
+        </div>
+        <sc-for list="{{ propsCard.rows }}" as="p" hint-placeholder-count="4">
+          <div style="display:grid;grid-template-columns:130px 1fr 1fr 170px;gap:0 18px;align-items:baseline;padding:10px 0;border-bottom:1px solid #3a3d49;">
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;">{{ p.match }}</span>
+            <span style="font-weight:600;font-size:18px;">{{ p.player }} <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:400;color:#a3a6b1;">{{ p.team }}</span></span>
+            <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;line-height:1;text-transform:uppercase;">{{ p.bet }}</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:15px;text-align:right;">{{ p.price }}</span>
+          </div>
+        </sc-for>
+        <div style="margin-top:10px;display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:.06em;text-transform:uppercase;border:1px solid #f1efe9;padding:4px 10px;">No demonstrated edge</div>
+      </div>
+    </sc-if>
+
     <div style="display:flex;justify-content:space-between;padding-top:18px;font-family:'IBM Plex Mono',monospace;font-size:13px;color:#a3a6b1;">
       <span>Model projections · Times {{ tz }} · {{ hostLabel }} · @mavhightower</span>
       <span>Updated {{ updated }}</span>
@@ -116,7 +137,7 @@
   </div>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1128,&quot;height&quot;:1420},&quot;sport&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;nhl&quot;,&quot;epl&quot;,&quot;cbb&quot;],&quot;default&quot;:&quot;nhl&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Preview&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Auto&quot;,&quot;Light&quot;,&quot;Dark&quot;],&quot;default&quot;:&quot;Auto&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Preview&quot;},&quot;scenario&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Real board&quot;,&quot;Sample night&quot;],&quot;default&quot;:&quot;Real board&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Preview&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1128,&quot;height&quot;:1420},&quot;sport&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;nhl&quot;,&quot;epl&quot;,&quot;cbb&quot;],&quot;default&quot;:&quot;nhl&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Preview&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Auto&quot;,&quot;Light&quot;,&quot;Dark&quot;],&quot;default&quot;:&quot;Auto&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Preview&quot;},&quot;scenario&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Real board&quot;,&quot;Sample night&quot;,&quot;Props sample&quot;],&quot;default&quot;:&quot;Real board&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Preview&quot;}}">
 class Component extends DCLogic {
   state = { vm: null, loadedFor: null };
   async load() {
@@ -130,12 +151,13 @@ class Component extends DCLogic {
     let data;
     const onSite = /(^|\.)maverickhightower\.com$/.test(location.hostname);
     // Off the domain the preview may pick the sample night with a written breakdown; on it, always the real board (#305 rule).
-    const src = !onSite && sport === "nhl" && this.props.scenario === "Sample night" ? "./data/sample/board_game.json" : deployed ? "./data/board.json" : cfg.sample;
+    const src = !onSite && sport === "nhl" && this.props.scenario === "Sample night" ? "./data/sample/board_game.json" : !onSite && sport === "epl" && this.props.scenario === "Props sample" ? "./data/sample/board_props.json" : deployed ? "./data/board.json" : cfg.sample;
     try { const r = await fetch(src, { cache: "no-store" }); if (!r.ok) throw new Error("HTTP " + r.status); data = await r.json(); }
     catch (e) { data = await fetch(cfg.sample).then((r) => r.json()); }
     const vm = S.ADAPTERS[sport].board(data);
     vm.otherSports = S.ORDER.filter((k) => k !== sport).map((k) => ({ name: S.SPORTS[k].name, href: S.SPORTS[k].host }));
-    this.setState({ vm, teams: data.teams || {}, raw: data, pages, propsTab: S.hasProps(sport) });
+    const pv = sport === "epl" && S.ADAPTERS[sport].props ? S.ADAPTERS[sport].props(data) : null;
+    this.setState({ vm, teams: data.teams || {}, raw: data, pages, propsTab: S.hasProps(sport), pv });
   }
   componentDidMount() { this.load(); }
   componentDidUpdate() { this.load(); }
@@ -146,7 +168,7 @@ class Component extends DCLogic {
     const hasPage = (k) => this.state.pages instanceof Set && this.state.pages.has(k);
     const tabs = [tab(sk === "epl" ? "This week" : "Tonight", "Board.dc.html"), ...(this.state.propsTab ? [tab("Props", "Board.dc.html#props")] : []), tab("Results", "Results.dc.html", false), ...(hasPage("season") ? [tab("Season", "Season.dc.html")] : []), ...(hasPage("record") ? [tab("Record", "Record.dc.html", false)] : []), ...(hasPage("tracker") ? [tab("Tracker", "Tracker.dc.html", false)] : [tab("Archive", "Archive.dc.html", false)])];
     const themeAttr = { Light: "light", Dark: "dark" }[this.props.theme] || "auto";
-    if (!vm) return { themeAttr, tabs, rows: [], strip3: [], otherSports: [], title1: "Tonight's", title2: "Board.", feat: { show: false } };
+    if (!vm) return { themeAttr, tabs, rows: [], strip3: [], otherSports: [], title1: "Tonight's", title2: "Board.", feat: { show: false }, propsCard: { show: false, rows: [] } };
     const T = this.state.teams || {};
     // Team logos: `teams[abbr].logo` when the builder writes one, else ./logos/<ABBR>.png (the fetch script fills that
     // folder in every repo). The coloured circle with the abbreviation stays underneath, so a missing file shows the
@@ -168,6 +190,16 @@ class Component extends DCLogic {
       pickBg: g.pick.kind === "bet" ? "#f1efe9" : "#14151a", pickFg: g.pick.kind === "bet" ? "#14151a" : "#a3a6b1",
     }));
     const epl = vm.sport.key === "epl";
+    // EPL: the day's prop best bets as one shareable block (match, player, bet, price).
+    let propsCard = { show: false, rows: [] };
+    const pv = this.state.pv;
+    if (epl && pv && pv.status === "ok") {
+      const games = Object.fromEntries(((this.state.raw || {}).games || []).map((x) => [x.id, x]));
+      const ko = (x) => Date.parse((x && (x.kickoff || x.startUtc)) || "") || Infinity;
+      const bets = pv.rows.filter((r) => r.kind === "bet").sort((a, b) => ko(games[a.gameId]) - ko(games[b.gameId]));
+      if (bets.length) propsCard = { show: true, count: `${bets.length} best bet${bets.length === 1 ? "" : "s"} · 0.1u each`,
+        rows: bets.slice(0, 8).map((r) => { const m = games[r.gameId] || {}; return { match: m.home ? `${m.home.abbr} v ${m.away.abbr}` : "", player: r.player, team: r.team, bet: r.label, price: r.priceLine }; }) };
+    }
     // NHL: the night's biggest-edge best bet with a written breakdown gets its eight-step bar (same scale and colours as the game page).
     let feat = { show: false };
     if (hasPage("game")) {
@@ -182,7 +214,7 @@ class Component extends DCLogic {
         feat = { show: true, label: cand.pick.label, sub: `${cand.pick.market} \u00b7 ${o(cand.pick.price)} \u00b7 edge ${sg(cand.pick.edgePct || 0)}%`, awayAbbr: a.abbr, homeAbbr: h.abbr, homeWin: `${(h.winProb * 100).toFixed(1)}%`, mid: `${X(0.5).toFixed(2)}%`, end: `calc(${X(h.winProb).toFixed(2)}% - 1px)`, strip, legend };
       }
     }
-    return { themeAttr, tabs, rows, feat, strip3: vm.strip.slice(0, 3), otherSports: vm.otherSports, kicker: vm.kicker, title1: vm.title[0], title2: vm.title[1], sportLong: vm.sport.longName,
+    return { themeAttr, tabs, rows, feat, propsCard, strip3: vm.strip.slice(0, 3), otherSports: vm.otherSports, kicker: vm.kicker, title1: vm.title[0], title2: vm.title[1], sportLong: vm.sport.longName,
       timeWord: vm.sport.timeWord, leftWord: epl ? "Home" : "Away", rightWord: epl ? "Away" : "Home", tz: vm.tz, updated: vm.updated, hostLabel: vm.sport.host.replace("https://", "").replace(/\/$/, "") };
   }
 }

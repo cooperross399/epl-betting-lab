@@ -415,7 +415,7 @@ const PROP_RANK = { bet: 0, lean: 1, pass: 2 };
 const money = (x) => `$${x % 1 ? x.toFixed(2) : x.toFixed(0)}`;
 const unitsWord = (u) => `${u} unit${u === 1 ? "" : "s"}`;
 
-function nhlProps(data) {
+function nhlProps(data, labelOf = propLabel) {
   const P = data.props, T = data.teams || {}, unit = data.unitDollars ?? 25, pre = data.phase === "preseason";
   const games = Object.fromEntries((data.games || []).map((g) => [g.id, g]));
   const none = { bets: 0, leans: 0, total: 0 };
@@ -430,7 +430,7 @@ function nhlProps(data) {
       key: `${r.gameId}|${r.playerId || r.player}|${r.market}|${r.line}|${r.side}`,
       gameId: r.gameId, player: r.player, playerId: r.playerId, espnId: r.espnId, team: r.team, opp: r.opp, position: r.position || "",
       teamName: t.short || t.name || r.team, color: t.color || "#14151a", fg: t.fg || "#fff", meta: [r.position, where].filter(Boolean).join(" · "),
-      market: r.market, marketTitle: m.title, unitOne: m.one, unitMany: m.many, line: r.line, side: r.side, label: propLabel(r, m),
+      market: r.market, marketTitle: m.title, unitOne: m.one, unitMany: m.many, line: r.line, side: r.side, label: labelOf(r, m),
       priceLine: `${odds(r.price)}${r.book ? ` at ${r.book}` : ""}`, proj: typeof r.projection === "number" ? r.projection.toFixed(r.projection < 1 ? 2 : 1) : dash,
       prob: pct(r.modelProb), fair: odds(r.fairPrice), edge: typeof r.edgePct === "number" ? `${F.fmtSigned(r.edgePct)}%` : dash, edgeNum: typeof r.edgePct === "number" ? r.edgePct : -Infinity,
       kind, kindLabel: kind === "bet" ? "Best bet" : kind === "lean" ? "Lean" : "Pass",
@@ -448,13 +448,13 @@ function nhlProps(data) {
     summary: `${rows.length} priced · ${bets} best bet${bets === 1 ? "" : "s"} · ${leans} lean${leans === 1 ? "" : "s"}` };
 }
 
-function nhlPropResults(data) {
+function nhlPropResults(data, labelOf = propLabel) {
   const P = data.props, T = data.teams || {};
   if (!P || typeof P !== "object") return { status: "missing", rows: [], strip: [], summaryLine: "",
     empty: { tag: "No props", title: "No props on this page", body: "These results were settled before the pipeline published player props." } };
   const status = ["ok", "no_lines", "abstain"].includes(P.status) ? P.status : "ok";
   const rows = (status === "ok" ? P.rows || [] : []).map((r) => {
-    const m = propMarket(r.market), t = T[r.team] || {}, label = propLabel(r, m), kind = PROP_RANK[r.kind] != null ? r.kind : "pass";
+    const m = propMarket(r.market), t = T[r.team] || {}, label = labelOf(r, m), kind = PROP_RANK[r.kind] != null ? r.kind : "pass";
     const res = r.result, word = Object.hasOwn(GRADES, res) ? GRADES[res] : "Not graded", has = typeof r.actual === "number";
     const outcome = res === "void" ? (has ? `finished with ${r.actual} · void` : "did not play · void")
       : has ? `finished with ${r.actual}${res === "win" ? " ✓" : res === "loss" ? " ✗" : res === "push" ? " · push" : ""}` : "no final stat yet";
@@ -478,7 +478,12 @@ function nhlPropResults(data) {
   return { status, rows, strip, empty, summaryLine: rows.length ? `${bets} best bet${bets === 1 ? "" : "s"}${leans ? ` · ${leans} lean${leans === 1 ? "" : "s"}` : ""} settled` : "" };
 }
 
-export const ADAPTERS = { nhl: { board: nhlBoard, results: nhlResults, props: nhlProps, propResults: nhlPropResults }, epl: { board: eplBoard, results: eplResults, props: nhlProps, propResults: nhlPropResults }, cbb: { board: cbbBoard, results: cbbResults } };
+// EPL props read in plain football English: an anytime scorer is "To score", a card "To be booked" / "To be sent off".
+const EPL_YES = { goals: "To score", booked: "To be booked", sent_off: "To be sent off" };
+export const eplPropLabel = (r, m) => (r.side !== "under" && r.line === 0.5 && EPL_YES[r.market]) || propLabel(r, m);
+export const EPL_PROP_ORDER = ["goals", "shots", "shots_on_target", "assists", "tackles", "booked", "sent_off", "goalie_saves"];
+
+export const ADAPTERS = { nhl: { board: nhlBoard, results: nhlResults, props: nhlProps, propResults: nhlPropResults }, epl: { board: eplBoard, results: eplResults, props: (d) => nhlProps(d, eplPropLabel), propResults: (d) => nhlPropResults(d, eplPropLabel) }, cbb: { board: cbbBoard, results: cbbResults } };
 
 // One line for the home page.
 export function hubLine(sport, board, results) {

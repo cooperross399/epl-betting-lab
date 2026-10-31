@@ -487,6 +487,57 @@
             </div>
           </sc-if>
 
+          <sc-if value="{{ pv.noteLine }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:16px 0;border-bottom:1px solid var(--rule);display:flex;flex-direction:column;gap:8px;">
+              <p style="margin:0;font-size:15px;line-height:1.55;color:var(--ink-2);max-width:720px;text-wrap:pretty;">{{ pv.noteLine }}</p>
+              <p style="margin:0;font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.5;color:var(--mute);max-width:720px;">{{ pv.disclosure }}</p>
+            </div>
+          </sc-if>
+          <sc-for list="{{ pv.matches }}" as="m" hint-placeholder-count="0">
+            <section aria-label="{{ m.aria }}" style="margin-top:28px;">
+              <div style="display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap;padding-bottom:10px;border-bottom:2px solid var(--ink);">
+                <span style="display:inline-flex;align-items:center;gap:8px;min-width:0;"><span aria-hidden="true" style="position:relative;width:32px;height:32px;border-radius:50%;flex:none;display:grid;place-items:center;overflow:hidden;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;background:{{ m.home.color }};color:{{ m.home.fg }};box-shadow:0 0 0 1px var(--rule);">{{ m.home.abbr }}<sc-if value="{{ m.home.logo }}" hint-placeholder-val="{{ false }}"><img src="{{ m.home.logo }}" alt="" loading="lazy" decoding="async" onLoad="{{ m.home.onLogoLoad }}" onError="{{ m.home.onLogoError }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;padding:3px;"></sc-if></span><span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;line-height:1;text-transform:uppercase;">{{ m.home.name }}</span></span>
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">v</span>
+                <span style="display:inline-flex;align-items:center;gap:8px;min-width:0;"><span aria-hidden="true" style="position:relative;width:32px;height:32px;border-radius:50%;flex:none;display:grid;place-items:center;overflow:hidden;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;background:{{ m.away.color }};color:{{ m.away.fg }};box-shadow:0 0 0 1px var(--rule);">{{ m.away.abbr }}<sc-if value="{{ m.away.logo }}" hint-placeholder-val="{{ false }}"><img src="{{ m.away.logo }}" alt="" loading="lazy" decoding="async" onLoad="{{ m.away.onLogoLoad }}" onError="{{ m.away.onLogoError }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;padding:3px;"></sc-if></span><span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;line-height:1;text-transform:uppercase;">{{ m.away.name }}</span></span>
+                <span style="margin-left:auto;display:inline-flex;align-items:center;gap:10px;">
+                  <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-2);white-space:nowrap;">{{ m.when }}</span>
+                  <sc-if value="{{ m.started }}" hint-placeholder-val="{{ false }}"><span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--ink);padding:2px 7px;white-space:nowrap;">Started</span></sc-if>
+                </span>
+              </div>
+              <sc-for list="{{ m.markets }}" as="mk" hint-placeholder-count="2">
+                <div style="padding-top:14px;">
+                  <div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);font-weight:600;">{{ mk.title }}</div>
+                  <sc-if value="{{ mk.note }}" hint-placeholder-val="{{ false }}"><p style="margin:4px 0 0;font-size:12px;line-height:1.5;color:var(--mute);max-width:640px;text-wrap:pretty;">{{ mk.note }}</p></sc-if>
+                  <sc-for list="{{ mk.rows }}" as="r" hint-placeholder-count="1">
+                    <article aria-label="{{ r.aria }}" style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 14px;padding:14px 0;border-bottom:1px solid var(--rule);align-items:start;">
+                      <div style="min-width:0;display:flex;flex-direction:column;gap:4px;">
+                        <div style="display:flex;align-items:center;gap:8px;min-width:0;">
+                          <span aria-hidden="true" style="position:relative;width:28px;height:28px;border-radius:50%;flex:none;display:grid;place-items:center;overflow:hidden;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:10px;background:{{ r.color }};color:{{ r.fg }};box-shadow:0 0 0 1px var(--rule);">{{ r.team }}<sc-if value="{{ r.logo }}" hint-placeholder-val="{{ false }}"><img src="{{ r.logo }}" alt="" loading="lazy" decoding="async" onLoad="{{ r.onLogoLoad }}" onError="{{ r.onLogoError }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;padding:3px;"></sc-if></span>
+                          <span style="font-weight:600;font-size:15px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ r.player }}</span>
+                          <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mute);white-space:nowrap;">{{ r.meta }}</span>
+                        </div>
+                        <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;line-height:1.05;text-transform:uppercase;letter-spacing:.01em;">{{ r.label }}</div>
+                        <div style="display:flex;flex-wrap:wrap;gap:2px 14px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-2);">
+                          <span>{{ r.priceLine }}</span><span>model {{ r.prob }}</span><span>fair {{ r.fair }}</span><span style="font-weight:600;color:var(--ink);">edge {{ r.edge }}</span>
+                        </div>
+                        <sc-if value="{{ r.stake }}" hint-placeholder-val="{{ false }}"><div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink);">{{ r.stake }}</div></sc-if>
+                        <sc-if value="{{ r.track.show }}" hint-placeholder-val="{{ false }}">
+                          <div style="display:flex;flex-direction:column;gap:4px;margin-top:2px;">
+                            <sc-if value="{{ r.track.bar }}" hint-placeholder-val="{{ false }}"><div aria-hidden="true" style="height:4px;background:var(--rule);max-width:260px;"><div style="height:4px;width:{{ r.track.pct }};background:{{ r.track.color }};"></div></div></sc-if>
+                            <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:{{ r.track.textColor }};">{{ r.track.text }}</span>
+                          </div>
+                        </sc-if>
+                      </div>
+                      <div style="display:flex;flex-direction:column;align-items:flex-end;">
+                        <sc-if value="{{ r.isBet }}" hint-placeholder-val="{{ false }}"><span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.08em;text-transform:uppercase;background:var(--ink);color:var(--paper);padding:4px 8px;white-space:nowrap;">Best bet</span></sc-if>
+                      </div>
+                    </article>
+                  </sc-for>
+                </div>
+              </sc-for>
+            </section>
+          </sc-for>
+
           <sc-for list="{{ pv.rows }}" as="r" hint-placeholder-count="6">
             <article aria-label="{{ r.aria }}" style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 14px;padding:14px 0;border-bottom:1px solid var(--rule);align-items:start;opacity:{{ r.opacity }};">
               <div style="min-width:0;display:flex;flex-direction:column;gap:4px;">
@@ -601,7 +652,7 @@ class Component extends DCLogic {
     const scenario = this.onSite() ? "Normal" : this.props.scenario || "Props · live sample";
     if (scenario === "Leans only" || scenario === "Empty") url = cfg.sample.replace("board.json", scenario === "Leans only" ? "board_leans.json" : "board_empty.json");
     const FIX = { "Props · live sample": "./data/sample/board_props.json", "Props · no lines": "./data/sample/board_props_no_lines.json", "Props · abstain": "./data/sample/board_props_abstain.json" };
-    const fixture = sport === "nhl" && FIX[scenario];
+    const fixture = (sport === "nhl" || (sport === "epl" && scenario === "Props · live sample")) && FIX[scenario];
     if (fixture) url = fixture;
     let data = null, feedNotice = fixture ? "Sample data, not tonight's board." : null, archived = null;
     if (date) {
@@ -968,6 +1019,27 @@ class Component extends DCLogic {
     const view = pv ? { ...pv, rows: rows.map(deco), empty, filtered, hasRows: pv.status === "ok" && all.length > 0,
       countLine: `${rows.length} of ${all.length}${cleared ? "" : " · none worth a bet"}`,
       summary: pv.status === "ok" ? pv.summary : "" } : { rows: [], hasRows: false };
+    // EPL: props grouped by match in kick-off order, then by market with that market's note; the card's note and the disclosure above.
+    view.matches = []; view.noteLine = ""; view.disclosure = "";
+    if (epl && pv) {
+      view.noteLine = pv.status === "ok" ? pv.note || "" : ""; view.disclosure = pv.disclosure || "";
+      const gById = Object.fromEntries((data.games || []).map((g) => [g.id, g])), notesM = (data.props && data.props.marketNotes) || {};
+      const ORD = ["goals", "shots", "shots_on_target", "assists", "tackles", "booked", "sent_off", "goalie_saves"], rank = (k) => (ORD.indexOf(k) < 0 ? 99 : ORD.indexOf(k)), nowMs = +now || Date.now();
+      const byG = new Map();
+      for (const r of view.rows) { if (!byG.has(r.gameId)) byG.set(r.gameId, []); byG.get(r.gameId).push(r); }
+      view.matches = [...byG.entries()].map(([id, rs]) => {
+        const g = gById[id] || {}, h = (g.home || {}).abbr || "", a = (g.away || {}).abbr || "", ko = start(g) || "", kms = Date.parse(ko);
+        const side = (abbr) => { const t = T[abbr] || {}; return { abbr, name: t.short || t.name || abbr, color: t.color || "var(--ink)", fg: t.fg || "var(--paper)", logo: logoOf(abbr), onLogoLoad: showLogo, onLogoError: hideLogo }; };
+        const ms = new Map();
+        for (const r of rs) { if (!ms.has(r.market)) ms.set(r.market, []); ms.get(r.market).push(r); }
+        const markets = [...ms.entries()].sort((x, y) => rank(x[0]) - rank(y[0])).map(([k, mr]) => ({ key: k, title: mr[0].marketTitle, note: notesM[k] || "",
+          rows: mr.map((r) => ({ ...r, logo: logoOf(r.team), onLogoLoad: showLogo, onLogoError: hideLogo })) }));
+        return { id, kms: isNaN(kms) ? Infinity : kms, home: side(h), away: side(a), aria: `${h} v ${a} props`,
+          when: isNaN(kms) ? "" : `${new Date(kms).toLocaleDateString([], { weekday: "short", day: "numeric", month: "short" })} · ${F.fmtTime(ko)}`,
+          started: !!g.started || (!isNaN(kms) && kms <= nowMs), markets };
+      }).sort((x, y) => x.kms - y.kms);
+      view.rows = [];
+    }
     // One plain paragraph written from the data. NHL only; nothing here is a number the cards don't already show.
     let brief = "";
     if (nhl && Array.isArray(data.games) && data.games.length) {
@@ -1015,7 +1087,7 @@ class Component extends DCLogic {
       propViews: pv ? [viewBtn("model", pv.status === "ok" ? `Model props · ${pv.counts.total}` : "Model props"), viewBtn("drought", `Due List · ${dCount}`)] : [],
       hasPropViews: !!pv, propsTitle: pv ? "Player props" : "Due List",
       dv: { groups: dGroups, empty: dEmpty, note: DROUGHT_NOTE }, headSummary: isDrought ? (dCount ? `${dCount} player${dCount === 1 ? "" : "s"} · ${dGroups.length} game${dGroups.length === 1 ? "" : "s"}` : "") : view.summary || "",
-      gameOptions: [{ value: "", label: "All games" }, ...(data.games || []).filter((g) => byGameProps[g.id]).map((g) => ({ value: g.id, label: `${g.away.abbr} @ ${g.home.abbr} · ${F.fmtTime(g.startUtc)}` }))],
+      gameOptions: [{ value: "", label: "All games" }, ...(data.games || []).filter((g) => byGameProps[g.id]).map((g) => ({ value: g.id, label: `${epl ? `${g.home.abbr} v ${g.away.abbr}` : `${g.away.abbr} @ ${g.home.abbr}`} · ${start(g) ? F.fmtTime(start(g)) : ""}` }))],
       teamOptions: [{ value: "", label: "All teams" }, ...uniq(all.map((r) => [r.team, r.teamName])).sort((x, y) => x[1].localeCompare(y[1])).map(([value, label]) => ({ value, label }))],
       marketOptions: [{ value: "", label: "All markets" }, ...uniq(all.map((r) => [r.market, r.marketTitle])).map(([value, label]) => ({ value, label }))],
       onQ: (e) => this.setF({ q: e.target.value }), onGame: (e) => this.setF({ game: e.target.value }), onTeam: (e) => this.setF({ team: e.target.value }), onMarket: (e) => this.setF({ market: e.target.value }),

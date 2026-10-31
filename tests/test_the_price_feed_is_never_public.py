@@ -38,7 +38,7 @@ def test_no_step_fetches_or_pushes_the_price_feed_directly():
     for name, step in _steps():
         run = _code(step.get("run") or "")
         for line in run.splitlines():
-            if re.search(r"git (fetch|push)\b.*price-feed", line):
+            if re.search(r"git (fetch|push)\b.*(price-feed|odds-history)", line):
                 offenders.append(f"{name}: {step.get('name')}: {line.strip()}")
     assert offenders == [], offenders
 
@@ -55,7 +55,24 @@ def test_every_step_touching_the_feed_uses_the_helper_and_the_secret():
     names = {(n, s.get("name")) for n, s in touching}
     # The five steps that read or write the feed.
     assert len(names) >= 5, names
-    assert {n for n, _ in names} >= {"matchday-refresh.yml", "closing-snapshot.yml", "publish-board.yml"}
+    assert {n for n, _ in names} >= {
+        "matchday-refresh.yml", "closing-snapshot.yml", "publish-board.yml",
+        "harvest-historical-btts.yml",
+    }
+
+
+def test_bought_odds_are_not_uploaded_as_an_artifact():
+    """An artifact of a public repository is a downloadable file too."""
+    for name, step in _steps():
+        if "upload-artifact" in str(step.get("uses", "")):
+            paths = str((step.get("with") or {}).get("path", ""))
+            assert "historical_market_odds" not in paths, (name, step.get("name"))
+            assert "price_feed" not in paths, (name, step.get("name"))
+
+
+def test_the_bought_odds_branch_goes_through_the_helper_too():
+    out = _bash("FEED_BRANCH=odds-history; . %s; echo $FEED_BRANCH" % HELPER, {})
+    assert out.stdout.strip() == "odds-history"
 
 
 def _bash(script: str, env: dict[str, str]) -> subprocess.CompletedProcess:

@@ -1216,29 +1216,34 @@ def test_the_drop_intake_can_only_push_to_a_design_branch() -> None:
 
 
 def test_the_harvest_can_only_push_to_the_odds_history_branch() -> None:
-    """It buys prices with real credits; it must never be able to move main."""
+    """It buys prices with real credits; it must never be able to move main.
+
+    Since 2026-10-31 it pushes only through `feed_push`, to the private
+    repository's odds-history branch (scripts/price_feed_remote.sh); no
+    `git push` is left in the file at all.
+    """
     text = (_workflow_dir() / "harvest-historical-btts.yml").read_text(
         encoding="utf-8"
     )
-    pushes = [line.strip() for line in text.splitlines() if "git push" in line]
+    code = [line.strip() for line in text.splitlines() if not line.strip().startswith("#")]
 
-    assert pushes, "the publish step should push"
-    for line in pushes:
-        assert line.endswith(':refs/heads/odds-history"'), line
+    assert not [line for line in code if "git push" in line]
+    assert [line for line in code if line.startswith("feed_push ")], "the publish step should push"
+    assert "FEED_BRANCH=odds-history" in text
 
 
-def test_the_harvest_publishes_before_it_uploads_an_artifact() -> None:
-    """The permanent record is written first.
+def test_the_harvest_publishes_and_uploads_no_artifact() -> None:
+    """The permanent record is the private branch, and only that.
 
-    If the artifact upload came first and the publish failed, the run would
-    still look complete while the durable copy silently did not exist - the
-    fault shape this repo keeps producing.
+    The artifact it used to upload alongside was a downloadable copy of the
+    bought odds on a public repository, which The Odds API's terms forbid.
     """
     text = (_workflow_dir() / "harvest-historical-btts.yml").read_text(
         encoding="utf-8"
     )
 
-    assert text.index("odds-history branch") < text.index("Upload the prices")
+    assert "odds-history branch" in text
+    assert "Upload the prices" not in text
 
 
 def test_every_push_targets_the_card_feed_branch() -> None:

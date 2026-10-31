@@ -9,6 +9,7 @@ import pandas as pd
 from epl_betting_lab.config import MIN_EDGE
 from epl_betting_lab.models.calibration import min_calibrated_edge
 from epl_betting_lab.models.value import fair_american_from_prob
+from epl_betting_lab.reports.selection_calibration import load_trust_weights
 
 from epl_betting_lab.config import BANKROLL_UNIT_DOLLARS, MAX_DEFAULT_JUICE, OUTPUTS_DIR
 
@@ -388,11 +389,47 @@ def _section(status: object) -> str:
 MAX_BEST_BETS_DEFAULT = 8
 
 
+def _apply_trust(df: pd.DataFrame, weights: dict[str, float]) -> pd.DataFrame:
+    """Pull each best bet toward its price by its market's measured weight.
+
+    The CBB lab's trust table (`models/trust.py`), read from
+    `reports/selection_calibration`: ``p' = implied + w (p - implied)``, so
+    the edge becomes ``w x edge``. A best bet whose pulled edge no longer
+    clears its market's bar is shown as an unstaked lean with the reason.
+    The 2.5 line is left alone: its anchored rule already blends toward the
+    market. A market with no weight is not moved.
+    """
+    if not weights:
+        return df
+    df = df.copy()
+    for index, row in df[df["section"] == "Best bets"].iterrows():
+        market = str(row.get("market", ""))
+        weight = weights.get(market)
+        if weight is None or weight >= 1 or market == "total_2_5":
+            continue
+        edge = _float_value(row, "calibrated_edge")
+        bar = min_calibrated_edge(market, str(row.get("selection", "")).strip().lower(), MIN_EDGE)
+        trusted = weight * edge
+        if trusted >= bar:
+            continue
+        df.at[index, "section"] = "Leans"
+        df.at[index, "confidence_tier"] = LEAN_TIER
+        df.at[index, "suggested_units"] = 0.0
+        df.at[index, "suggested_wager_$"] = 0.0
+        df.at[index, "qualifies_reason"] = (
+            f"Cleared the bar at {edge:+.1%}, but {market}'s picks earned a trust "
+            f"weight of {weight:.2f} (selection_calibration.md): pulled toward "
+            f"the price it is {trusted:+.1%}, under the {bar:.1%} bar."
+        )
+    return df
+
+
 def build_thursday_best_bets(
     candidates: pd.DataFrame,
     max_best_bets: int = MAX_BEST_BETS_DEFAULT,
     max_passes: int = 12,
     market_reliability: dict[str, float] | None = None,
+    trust_weights_path: Path | None = None,
 ) -> pd.DataFrame:
     if candidates.empty:
         return pd.DataFrame(columns=REPORT_COLUMNS)
@@ -428,6 +465,7 @@ def build_thursday_best_bets(
             df[column] = pd.NA
     df["suggested_wager_$"] = (df["suggested_units"] * BANKROLL_UNIT_DOLLARS).round(2)
 
+    df = _apply_trust(df, load_trust_weights(trust_weights_path))
     best = df[df["section"] == "Best bets"].sort_values(["ranking_score", "calibrated_edge"], ascending=False)
     # One match is one bet (the CBB lab's rule): draw-no-bet home and 1X2 home,
     # or one side's team total under and the other's over, are one result seen

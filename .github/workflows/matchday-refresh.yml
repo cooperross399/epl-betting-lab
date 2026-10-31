@@ -720,6 +720,10 @@ jobs:
           # Shed first when credits run low (providers/quota_gate.py).
           if python scripts/quota_gate.py extras; then
             python scripts/run_props_card_refresh.py
+            # Re-price the Due List now the anytime-scorer and assist prices
+            # are staged: the board tracks it at 0.25u an entry at that price
+            # (web/settle_results.DUE_STAKE). Soft; keyless; spends nothing.
+            python scripts/build_due_list.py || echo "Due List not re-priced; it keeps the first build."
           fi
 
       - name: Check no selection kicked off before the card

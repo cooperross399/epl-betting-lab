@@ -23,7 +23,9 @@ Best bets are `picks`; leans are graded the same way and kept in `leans`.
 
 EPL boards carry the Due List (`games[].drought`). Each entry is graded from
 the match summary's squads: `actual` goals or assists and win/loss when he
-played, `void` when he did not. Never a unit, never a stake.
+played, `void` when he did not. Nothing is bet: since 2026-10-31 an entry
+with a staged price is tracked as if `DUE_STAKE` (0.25u) were, as the NHL
+site does (`units`); one without a price is graded but not posted.
 """
 
 from __future__ import annotations
@@ -351,6 +353,12 @@ FETCH_ERRORS = (urllib.error.URLError, OSError, json.JSONDecodeError, TimeoutErr
 #: (`providers/espn_player_logs`, which builds the list from the same feed).
 DUE_STATS = {"goals": "totalGoals", "assists": "goalAssists"}
 
+#: The NHL lab's rule (2026-10-09), brought to EPL on 2026-10-31: the Due List
+#: is tracked as if this were bet on every entry at its staged price. Nothing
+#: is bet, and none of it reaches the card. An entry with no price, a void or
+#: an ungraded entry carries no units ("not posted").
+DUE_STAKE = 0.25
+
 
 def _name_key(name: object) -> str:
     return " ".join(str(name or "").split()).casefold()
@@ -396,7 +404,8 @@ def grade_due_entry(entry: dict, g: dict, lines: dict | None) -> dict:
 
     `void` when he did not play: not in his club's matchday squad, or in it
     and never on the pitch. `actual` is his goals (or assists) when he played.
-    Nothing here is a unit or a stake. An entry the feed cannot answer for (no
+    Nothing is bet; `units` is the 0.25u tracking line when a price was
+    staged, else None. An entry the feed cannot answer for (no
     squads yet, his side not on this fixture, a statistic missing) is left
     ungraded, `result: null`, and never guessed.
     """
@@ -412,7 +421,7 @@ def grade_due_entry(entry: dict, g: dict, lines: dict | None) -> dict:
         "market": market, "line": line, "drought": entry.get("drought"),
         "price": price if isinstance(price, (int, float)) and not isinstance(price, bool) else None,
         "book": entry.get("book") or "", "heavyJuice": bool(entry.get("heavyJuice")),
-        "actual": None, "result": None,
+        "actual": None, "result": None, "units": None,
     }
     if entry.get("lastSeason") is not None:
         row["lastSeason"] = entry.get("lastSeason")
@@ -439,16 +448,23 @@ def grade_due_entry(entry: dict, g: dict, lines: dict | None) -> dict:
         return row
     row["actual"] = int(value)
     row["result"] = "push" if value == line else "win" if value > line else "loss"
+    if row["price"] is not None:
+        row["units"] = _profit(DUE_STAKE, row["price"], row["result"])
     return row
 
 
 def due_tallies(rows: list) -> dict:
     """A day's Due List in W-L-P, with what is still ungraded. A void (the
     player did not play) is counted under `void`, apart from the record."""
-    out = {"w": 0, "l": 0, "p": 0, "void": 0, "byMarket": {m: {"w": 0, "l": 0} for m in DUE_STATS}, "pending": 0}
+    out = {"w": 0, "l": 0, "p": 0, "void": 0, "byMarket": {m: {"w": 0, "l": 0} for m in DUE_STATS}, "pending": 0,
+           "stake": DUE_STAKE, "units": 0.0, "staked": 0}
     for r in rows:
         if not isinstance(r, dict):
             continue
+        units = r.get("units")
+        if isinstance(units, (int, float)) and not isinstance(units, bool) and r.get("result") in ("win", "loss", "push"):
+            out["units"] = round(out["units"] + float(units), 4)
+            out["staked"] += 1
         res = r.get("result")
         if res is None:
             out["pending"] += 1
@@ -946,11 +962,13 @@ def season_record(sport: str, day: date, hist: Path, boards: list[dict],
 
     The four tallies are absent until a day has settled; so is `dueList`
     (`{w, l, p, void, nights, byMarket}`), which sums the graded Due List entries
-    of every settled day whose board carried the list. It is never a unit or
+    of every settled day whose board carried the list, with the 0.25u tracking
+    line (`stake`, `units`, `staked`, `returnPct`). Nothing is bet, it is never
     a stake, and none of it is in `picks`; nor is a lean.
     """
     tally = {key: {"w": 0, "l": 0} if key == "straightUp" else {"w": 0, "l": 0, "p": 0} for key in SEASON_KEYS}
-    due = {"w": 0, "l": 0, "p": 0, "void": 0, "nights": 0, "byMarket": {m: {"w": 0, "l": 0} for m in DUE_STATS}}
+    due = {"w": 0, "l": 0, "p": 0, "void": 0, "nights": 0, "byMarket": {m: {"w": 0, "l": 0} for m in DUE_STATS},
+           "stake": DUE_STAKE, "units": 0.0, "staked": 0}
     props = {"w": 0, "l": 0, "p": 0, "units": 0.0, "nights": 0}
     kept = hist / SETTLED_DIR
     nights, missing, first, last = 0, 0, None, None
@@ -998,6 +1016,10 @@ def season_record(sport: str, day: date, hist: Path, boards: list[dict],
             due["nights"] += 1
             for k in ("w", "l", "p", "void"):
                 due[k] += int(night_due.get(k) or 0)
+            # A night settled before 2026-10-31 carries no units: it adds
+            # nothing to them and is not counted as staked.
+            due["units"] = round(due["units"] + float(night_due.get("units") or 0.0), 4)
+            due["staked"] += int(night_due.get("staked") or 0)
             for market, split in (night_due.get("byMarket") or {}).items():
                 if market in due["byMarket"] and isinstance(split, dict):
                     for k in ("w", "l"):
@@ -1028,6 +1050,8 @@ def season_record(sport: str, day: date, hist: Path, boards: list[dict],
     span = {"nights": nights, "firstDate": first, "lastDate": last, "missingNights": missing}
     season = {**tally, **span} if nights else dict(span)
     if due["nights"]:
+        if due["staked"]:
+            due["returnPct"] = round(100 * due["units"] / (DUE_STAKE * due["staked"]), 1)
         season["dueList"] = due
     if props["nights"]:
         season["props"] = props

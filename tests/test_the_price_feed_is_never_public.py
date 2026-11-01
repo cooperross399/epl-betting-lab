@@ -97,3 +97,29 @@ def test_the_push_remote_is_the_private_repository():
     out = _bash("feed_remote", {"EPL_PRICE_FEED_TOKEN": "test-secret-that-must-not-be-written"})
     assert out.stdout.endswith("github.com/cooperross399/epl-price-feed")
     assert "epl-betting-lab" not in out.stdout
+
+
+def test_the_bought_odds_are_carried_into_the_private_repository():
+    """Only the harvest wrote `odds-history`, and the harvest buys, so after
+    #406 nothing ever copied the bought season across: the private repository
+    held `price-feed` from the first Matchday Refresh (2026-11-01) and no
+    `odds-history`, and the public branch could not be deleted without losing
+    a season of paid prices. The calibration step carries it across, through
+    `feed_push`, the first time it finds the private branch missing."""
+    helper = HELPER.read_text()
+    assert "feed_carry_across()" in helper
+    body = helper.split("feed_carry_across()", 1)[1]
+    assert "feed_push" in body and "ls-remote" in body
+    for name, step in _steps():
+        if step.get("name") == "Measure calibration on the picks":
+            run = _code(step.get("run") or "")
+            assert run.index("feed_carry_across") < run.index("feed_fetch")
+            break
+    else:
+        raise AssertionError("no calibration step")
+
+
+def test_carrying_across_needs_the_token():
+    out = _bash("FEED_BRANCH=odds-history; feed_carry_across", {"GH_TOKEN": "already-exported-value", "GITHUB_REPOSITORY": "cooperross399/epl-betting-lab"})
+    assert out.returncode != 0
+    assert "not carried across" in out.stdout

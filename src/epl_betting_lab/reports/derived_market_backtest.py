@@ -220,6 +220,7 @@ def _score_matrix_bets(
         return rows
 
     unmapped = 0
+    unrated_fixtures = 0
     for match_date, day_odds in subset.groupby("date", sort=True):
         train = matches[matches["date"] < match_date]
         if len(train) < MIN_TRAINING_MATCHES:
@@ -232,14 +233,32 @@ def _score_matrix_bets(
         # BTTS runs on its own ratings on the live card; the derived 1X2
         # markets stay on CARD_RATINGS. Measuring them any other way would
         # measure a card that does not exist.
-        card_projections = (
-            PoissonGoalsModel()
-            .fit(train, last_n_matches_per_team=38, config=CARD_RATINGS)
-            .project_fixtures(fixtures)
+        card_model = PoissonGoalsModel().fit(
+            train, last_n_matches_per_team=38, config=CARD_RATINGS
         )
-        btts_projections = (
-            PoissonGoalsModel().fit(train, config=BTTS_RATINGS).project_fixtures(fixtures)
-        )
+        btts_model = PoissonGoalsModel().fit(train, config=BTTS_RATINGS)
+        # A club with no rating yet (promoted, no history in the frame) is
+        # left out and counted. The model refuses to price it by design, and
+        # letting that refusal end the walk-forward cost every market its
+        # measurement on 2026-11-01 (Sunderland, 2025/26's opening round).
+        rated = fixtures.apply(
+            lambda f: all(
+                team in model.team_strengths
+                for team in (f["home_team"], f["away_team"])
+                for model in (card_model, btts_model)
+            ),
+            axis=1,
+        ).astype(bool)
+        unrated_fixtures += int((~rated).sum())
+        fixtures = fixtures[rated].reset_index(drop=True)
+        if fixtures.empty:
+            continue
+        keep = set(zip(fixtures["home_team"], fixtures["away_team"]))
+        day_odds = day_odds[
+            [pair in keep for pair in zip(day_odds["home_team"], day_odds["away_team"])]
+        ]
+        card_projections = card_model.project_fixtures(fixtures)
+        btts_projections = btts_model.project_fixtures(fixtures)
 
         priced: list[dict[str, object]] = []
         for _, row in day_odds.iterrows():
@@ -302,6 +321,12 @@ def _score_matrix_bets(
         result.notes.append(
             f"{unmapped} provider selection(s) could not be mapped to a card "
             "selection and were skipped rather than guessed at."
+        )
+    if unrated_fixtures:
+        result.notes.append(
+            f"{unrated_fixtures} fixture(s) left out: a club in them had no fitted "
+            "rating yet (promoted, no history in the training frame), and the "
+            "model does not price a side it has no evidence about."
         )
     return rows
 

@@ -680,6 +680,13 @@ jobs:
           PYTHONPATH: src
         run: |
           set -u
+          # Carry the bought season into the private repository the first
+          # time it is missing there (only the harvest writes it, and the
+          # harvest buys). Before the age check, so fresh weights do not
+          # postpone it.
+          FEED_BRANCH=odds-history
+          . scripts/price_feed_remote.sh
+          feed_carry_across || echo "::warning::odds-history was not carried into the private repository."
           WEIGHTS=data/outputs/selection_calibration.json
           # Age from the file's own stamp: a restored artifact's mtime is the
           # moment it was downloaded, so it would never look old.
@@ -687,8 +694,6 @@ jobs:
             echo "Trust weights are under a week old; not re-measured."
             exit 0
           fi
-          FEED_BRANCH=odds-history
-          . scripts/price_feed_remote.sh
           mkdir -p data/processed
           if feed_fetch --depth=1; then
             git show refs/odds-history-tip:historical_market_odds.csv \

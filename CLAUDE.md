@@ -550,7 +550,10 @@ Use the repo, the reports, and GitHub.
      write, that repository only; Cooper creates both). Without the token
      nothing is written anywhere. The public branches are read once as a
      legacy source so the first write carries the history across; delete
-     them after that. `tests/test_the_price_feed_is_never_public.py`.
+     them after that. `price-feed` reached the private repository on the
+     first run (2026-11-01); `odds-history` is carried across by
+     `feed_carry_across` in "Measure calibration on the picks", because only
+     the harvest writes it and the harvest buys. `tests/test_the_price_feed_is_never_public.py`.
   2. **One match is one bet.** The card keeps the highest-ranked best bet per
      match (DNB home and 1X2 home, or one side's team-total under and the
      other's over, are one result seen two ways) and shows the rest as

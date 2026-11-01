@@ -61,3 +61,28 @@ feed_push() {
   fi
   git push "$remote" "$1:refs/heads/${FEED_BRANCH}"
 }
+
+# Copy the legacy public branch into the private repository once, when the
+# private one does not have it yet. Full history (no --depth), so the push is
+# a complete branch. Needed for `odds-history`: only the harvest writes it,
+# and the harvest buys, so nothing else would ever carry the bought season
+# across and the public branch could never be deleted safely.
+feed_carry_across() {
+  local remote
+  remote=$(feed_remote)
+  if [ -z "$remote" ]; then
+    echo "::warning::EPL_PRICE_FEED_TOKEN is not set; ${FEED_BRANCH} not carried across."
+    return 1
+  fi
+  if git ls-remote --exit-code "$remote" "refs/heads/${FEED_BRANCH}" >/dev/null 2>&1; then
+    return 0
+  fi
+  if [ -n "${GH_TOKEN:-}" ] && [ -n "${GITHUB_REPOSITORY:-}" ] \
+    && git fetch --no-tags "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}" \
+      +refs/heads/${FEED_BRANCH}:refs/${FEED_BRANCH}-legacy 2>/dev/null; then
+    feed_push "refs/${FEED_BRANCH}-legacy" && echo "${FEED_BRANCH} carried into ${PRICE_FEED_REPO}."
+    return $?
+  fi
+  echo "No public ${FEED_BRANCH} to carry across."
+  return 0
+}

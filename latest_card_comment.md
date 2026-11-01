@@ -1,8 +1,8 @@
-## Sunday 01 November, 10:23 UTC — scheduled run
+## Sunday 01 November, 11:33 UTC — scheduled run
 
-Selections changed: 10 added, 8 dropped, 5 moved section.
+Selections changed: 3 added, 2 dropped, 2 moved section.
 
-Provider quota: 99954 (about 27 days at the observed burn)
+Provider quota: 99845 (about 27 days at the observed burn)
 
 Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5, team_total_home_0_5, team_total_home_1_5, team_total_home_2_5, team_total_away_0_5, team_total_away_1_5, team_total_away_2_5** (excluded: none)
 
@@ -10,7 +10,7 @@ Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corner
 
 | Match | Market | Selection | Tier | Edge | Price | Book | Units |
 |:------|:-------|:----------|:-----|-----:|------:|:-----|------:|
-| Liverpool v Arsenal | `corners_1x2` | home | C | +5.2% | +110 | FanDuel | 0.1 |
+| Liverpool v Arsenal | `team_total_away_1_5` | under | C | +5.3% | -155 | Bovada | 0.1 |
 
 ### Leans
 
@@ -18,29 +18,13 @@ _None._
 
 ### What changed
 
-- **Added:** Liverpool v Arsenal corners_total_9_5 under
-- **Added:** Liverpool v Arsenal double_chance draw_or_away
-- **Added:** Liverpool v Arsenal team_total_away_0_5 under
-- **Added:** Liverpool v Arsenal team_total_home_1_5 over
-- **Added:** Liverpool v Arsenal team_total_home_2_5 over
-- **Added:** Newcastle v Everton btts no
-- **Added:** Newcastle v Everton corners_1x2 home
-- **Added:** Newcastle v Everton corners_total_9_5 over
-- **Added:** Newcastle v Everton double_chance home_or_draw
-- **Added:** Newcastle v Everton team_total_away_1_5 under
-- **Dropped:** Aston Villa v Fulham 1x2 away
-- **Dropped:** Aston Villa v Fulham draw_no_bet away
-- **Dropped:** Tottenham v Crystal Palace 1x2 draw
-- **Dropped:** Tottenham v Crystal Palace corners_1x2 draw
-- **Dropped:** Tottenham v Crystal Palace double_chance draw_or_away
-- **Dropped:** Tottenham v Crystal Palace team_total_away_0_5 over
-- **Dropped:** Tottenham v Crystal Palace team_total_away_2_5 over
-- **Dropped:** Tottenham v Crystal Palace team_total_home_2_5 under
-- **Moved section:** Liverpool v Arsenal draw_no_bet away
+- **Added:** Liverpool v Arsenal corners_1x2 draw
+- **Added:** Liverpool v Arsenal team_total_home_0_5 under
+- **Added:** Liverpool v Arsenal total_2_5 under
+- **Dropped:** Liverpool v Arsenal team_total_home_1_5 over
+- **Dropped:** Liverpool v Arsenal team_total_home_2_5 over
+- **Moved section:** Liverpool v Arsenal corners_1x2 home
 - **Moved section:** Liverpool v Arsenal team_total_away_1_5 under
-- **Moved section:** Newcastle v Everton 1x2 home
-- **Moved section:** Newcastle v Everton draw_no_bet home
-- **Moved section:** Newcastle v Everton team_total_home_2_5 over
 
 
 ## Beyond the Premier League
@@ -125,7 +109,7 @@ Context only: no units, nothing here is a selection, and no edge is shown.
 
 | Player | Team | Opp | Kickoff (UTC) | Last season | Drought (bar) | 1 in N for him | Status | Price |
 |:--|:--|:--|:--|--:|:--|--:|:--|:--|
-| Viktor Gyökeres | Arsenal | Liverpool | 2026-11-01 16:30 | 14 goals, 28% of apps | 8 (8) | 1 in 14 | — | +230 (BetMGM) |
+| Viktor Gyökeres | Arsenal | Liverpool | 2026-11-01 16:30 | 14 goals, 28% of apps | 8 (8) | 1 in 14 | — | +230 (Fanatics) |
 
 **1+ assist, over 0.5.** Listed: 7+ Premier League assists last season and a run of league appearances without an assist at the bar his total sets (12+ assists -> 8, 9-11 assists -> 10, 7-8 assists -> 13 straight games).
 
@@ -170,4 +154,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/41296775083)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/41301846495)

@@ -825,7 +825,7 @@ class Component extends DCLogic {
       if (!nhl || !L.PROP_STATS[r.market]) return msg("Live stat unavailable for this market");
       const b = S.boxes[e.id];
       if (!b || (!b.data && !b.error)) return { show: false };
-      if (!b.data) return msg("Live stat unavailable · retrying");
+      if (!b.data) return { show: false };
       const st = L.liveStat(r, b.data);
       if (!st.ok) return msg(st.why);
       const p = L.propProgress(r, st.value, e), v = st.value;
@@ -993,7 +993,8 @@ class Component extends DCLogic {
     const sample = live.mode === "fixture" || live.mode === "down" ? "Sample scores · " : "";
     let liveLine = "", liveColor = "var(--mute)", liveStamp = "";
     if (live.mode === "off") { liveLine = data.__archived ? "Archived board · live scores off" : "Live scores off"; liveStamp = "off"; }
-    else if (live.error) { liveLine = `${sample}Live scores unavailable — retrying in ${F.fmtIn((live.nextAt || now) - now)}${live.at ? ` · last update ${F.fmtAgo(now - live.at)}` : ""}`; liveColor = "var(--alert)"; liveStamp = live.at ? `${F.fmtAgo(now - live.at)} · retrying` : "unavailable"; }
+    // A failed poll is retried quietly: no "unavailable" notice on the page (Cooper, 2026-11-01).
+    else if (live.error) { liveLine = live.at ? `${sample}Updated ${F.fmtAgo(now - live.at)}` : ""; liveStamp = live.at ? `updated ${F.fmtAgo(now - live.at)}` : ""; }
     else if (!live.at) { liveLine = `${sample}Connecting to live scores…`; liveStamp = "connecting"; }
     else {
       const ev = live.data || [], anyIn = ev.some((x) => x.state === "in"), ago = F.fmtAgo(now - live.at), frozen = anyIn && now - live.at > 75e3;

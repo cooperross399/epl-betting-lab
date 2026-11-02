@@ -87,10 +87,13 @@ const pickView = (p, unit, opts = {}) => {
   const price = opts.priceFmt ? opts.priceFmt(p.price) : odds(p.price);
   const edge = typeof p.edgePct === "number" ? `${F.fmtSigned(p.edgePct)}%` : dash;
   const kind = p.kind || "bet";
+  // The worst price the pick still clears the edge bar at (Cooper,
+  // 2026-11-01): shown beside the price whenever the board carries one.
+  const betDownTo = typeof p.betDownTo === "number" ? (opts.priceFmt ? opts.priceFmt(p.betDownTo) : odds(p.betDownTo)) : "";
   return {
     kind, heading: kind === "bet" ? "Best bet" : kind === "lean" ? "Lean" : kind === "pass" ? "Model pick" : "Model pick",
-    label: p.label, price, edge,
-    sub: `${p.market} · ${price}${p.book ? ` at ${p.book}` : ""}${typeof p.modelProb === "number" ? ` · model ${pct(p.modelProb)}` : ""} · edge ${edge}`,
+    label: p.label, price, edge, betDownTo,
+    sub: `${p.market} · ${price}${p.book ? ` at ${p.book}` : ""}${betDownTo ? ` · bet down to ${betDownTo}` : ""}${typeof p.modelProb === "number" ? ` · model ${pct(p.modelProb)}` : ""} · edge ${edge}`,
     extra: kind === "bet" ? [p.tier ? `Tier ${p.tier}` : null, typeof p.units === "number" ? `${p.units} unit${p.units === 1 ? "" : "s"}` : null].filter(Boolean).join(" · ") : kind === "lean" ? "Recorded, not staked" : "",
   };
 };

@@ -865,7 +865,7 @@ def graded_entry(g: dict, hf: int, af: int, finish: str, res: str | None, lines:
         "bttsProb": (g.get("btts") or {}).get("yesProb"),
     }
     if pick:
-        entry["pick"] = {k: pick.get(k) for k in ("kind", "market", "label", "side", "line", "price", "units")}
+        entry["pick"] = {k: pick.get(k) for k in ("kind", "market", "label", "side", "line", "price", "betDownTo", "units")}
         entry["pick"]["result"] = res
     ml = _series_ends(lines, str(g.get("id")), "ml_home")
     if ml:
@@ -891,7 +891,8 @@ def bet_rows(day: date, results_games: list[dict], playing: dict, prop_rows: lis
         rows.append({
             "date": day.isoformat(), "group": "team", "market": pick.get("market"), "label": pick.get("label"),
             "team": home if side == "home" else away if side == "away" else None, "teams": [home, away],
-            "side": side, "line": pick.get("line"), "price": pick.get("price"), "result": pick["result"],
+            "side": side, "line": pick.get("line"), "price": pick.get("price"),
+            "betDownTo": pick.get("betDownTo"), "result": pick["result"],
             "staked": staked, "units": _profit(staked, pick.get("price"), pick["result"]),
             **({"stakeAssumed": True} if assumed else {}), "gameId": str(row.get("id")),
             "kickoff": g.get("kickoff"),
@@ -906,7 +907,8 @@ def bet_rows(day: date, results_games: list[dict], playing: dict, prop_rows: lis
             "date": day.isoformat(), "group": "props", "market": p.get("market"), "propType": p.get("market"),
             "label": f"{p.get('player', '')} {p.get('side', '')} {p.get('line', '')}".strip(),
             "player": p.get("player"), "team": p.get("team"), "opp": p.get("opp"),
-            "side": p.get("side"), "line": p.get("line"), "price": p.get("price"), "result": p["result"],
+            "side": p.get("side"), "line": p.get("line"), "price": p.get("price"),
+            "betDownTo": p.get("betDownTo"), "result": p["result"],
             "staked": float(units),
             "units": p.get("profitUnits") if isinstance(p.get("profitUnits"), (int, float)) else _profit(float(units), p.get("price"), p["result"]),
             "gameId": str(p.get("gameId")),

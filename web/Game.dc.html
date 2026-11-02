@@ -371,8 +371,10 @@ class Component extends DCLogic {
     // A pick frozen before `kind` was written (boards before 2026-10-26) was a best bet, as the archive index counts it.
     const p0 = g.pick && typeof g.pick === "object" ? { ...g.pick, kind: g.pick.kind || (g.pick.label ? "bet" : "none") } : null;
     const p = p0 && p0.kind !== "pass" ? p0 : { kind: "none" };
+    // Cooper, 2026-11-01: every pick carries the worst price that still clears its bar.
+    const downText = num(p.betDownTo) ? ` · bet down to ${odds(p.betDownTo)}` : "";
     const pick = { isBet: p.kind === "bet", isLean: p.kind === "lean", isNone: priced && p.kind !== "bet" && p.kind !== "lean", label: p.label || "",
-      sub: p.kind === "bet" ? `${odds(p.price)}${p.book ? ` at ${p.book}` : ""}${num(p.units) ? ` · ${p.units} ${p.units === 1 ? "unit" : "units"}` : ""}${num(p.edgePct) ? ` · ${F.fmtSigned(p.edgePct, 1)}% edge` : ""}` : p.kind === "lean" ? `${odds(p.price)}${p.book ? ` at ${p.book}` : ""} · a small edge, not enough to bet` : "" };
+      sub: p.kind === "bet" ? `${odds(p.price)}${downText}${p.book ? ` at ${p.book}` : ""}${num(p.units) ? ` · ${p.units} ${p.units === 1 ? "unit" : "units"}` : ""}${num(p.edgePct) ? ` · ${F.fmtSigned(p.edgePct, 1)}% edge` : ""}` : p.kind === "lean" ? `${odds(p.price)}${downText}${p.book ? ` at ${p.book}` : ""} · a small edge, not enough to bet` : "" };
 
     // The layers: strength → home edge → last five → who is missing, each with the three chances after it.
     const facts = Array.isArray(g.factors) ? g.factors : [];

@@ -229,16 +229,17 @@
         <sc-if value="{{ log.noMatch }}" hint-placeholder-val="{{ false }}"><p style="margin:12px 0 0;font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--mute);">{{ log.noMatchText }}</p></sc-if>
         <sc-if value="{{ log.hasRows }}" hint-placeholder-val="{{ true }}">
         <div style="margin-top:12px;overflow-x:auto;scrollbar-width:thin;margin-left:calc(-1 * clamp(16px,3vw,24px));margin-right:calc(-1 * clamp(16px,3vw,24px));padding:0 clamp(16px,3vw,24px);">
-          <div role="table" style="min-width:680px;border-top:2px solid var(--ink);">
-            <div role="row" style="display:grid;grid-template-columns:92px 72px minmax(220px,2fr) 64px 56px 68px 72px;gap:0 10px;padding:6px 0;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);">
-              <span style="position:sticky;left:0;background:var(--paper);">Date</span><span>Type</span><span>The bet</span><span style="text-align:right;">Price</span><span style="text-align:right;">Stake</span><span style="text-align:center;">Result</span><span style="text-align:right;">Units</span>
+          <div role="table" style="min-width:750px;border-top:2px solid var(--ink);">
+            <div role="row" style="display:grid;grid-template-columns:92px 72px minmax(220px,2fr) 64px 64px 56px 68px 72px;gap:0 10px;padding:6px 0;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);">
+              <span style="position:sticky;left:0;background:var(--paper);">Date</span><span>Type</span><span>The bet</span><span style="text-align:right;">Price</span><span style="text-align:right;" title="The worst price at which the bet still cleared its bar">Down to</span><span style="text-align:right;">Stake</span><span style="text-align:center;">Result</span><span style="text-align:right;">Units</span>
             </div>
             <sc-for list="{{ log.rows }}" as="r" hint-placeholder-count="12">
-              <div role="row" style="display:grid;grid-template-columns:92px 72px minmax(220px,2fr) 64px 56px 68px 72px;gap:0 10px;padding:8px 0;border-top:1px solid var(--rule-2);align-items:center;font-family:'IBM Plex Mono',monospace;font-size:13px;">
+              <div role="row" style="display:grid;grid-template-columns:92px 72px minmax(220px,2fr) 64px 64px 56px 68px 72px;gap:0 10px;padding:8px 0;border-top:1px solid var(--rule-2);align-items:center;font-family:'IBM Plex Mono',monospace;font-size:13px;">
                 <span style="position:sticky;left:0;background:var(--paper);color:var(--ink-2);">{{ r.date }}</span>
                 <span style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);">{{ r.type }}</span>
                 <span style="font-family:'IBM Plex Sans',sans-serif;min-width:0;"><span style="font-weight:600;">{{ r.main }}</span> <span style="color:var(--mute);font-size:12px;">{{ r.sub }}</span></span>
                 <span style="text-align:right;">{{ r.price }}</span>
+                <span style="text-align:right;color:var(--ink-2);">{{ r.down }}</span>
                 <span style="text-align:right;color:var(--ink-2);">{{ r.stake }}</span>
                 <span style="text-align:center;"><span style="display:inline-block;min-width:48px;padding:2px 6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:.08em;text-transform:uppercase;background:{{ r.chipBg }};color:{{ r.chipFg }};border:1px solid {{ r.chipBorder }};">{{ r.result }}</span></span>
                 <span style="text-align:right;font-weight:600;color:{{ r.unitsColor }};">{{ r.units }}</span>
@@ -406,7 +407,7 @@ class Component extends DCLogic {
     const logRows = lrows.slice(page * PER, page * PER + PER).map((r) => { const c = CHIP[r.result] || CHIP.push; const prop = r.player ? { main: r.player, sub: `${r.team} v ${r.opp} · ${r.propType || r.market} ${r.side || ""} ${r.line ?? ""}`.replace(/\s+/g, " ").trim() } : { main: r.label, sub: r.teams ? `${r.teams[0]} v ${r.teams[1]} · ${String(r.market || "").replace(/_/g, " ")}` : String(r.market || "").replace(/_/g, " ") };
       const numeric = (v) => typeof v === "number" && Number.isFinite(v);
       // A missing price or unit count prints as a dash, never as "−NaN" or a zero that reads as a push.
-      return { date: r.date, type: r.group === "team" ? "Team" : "Prop", ...prop, price: numeric(r.price) ? F.fmtOdds(r.price) : "—", stake: `${(r.staked || 0).toFixed(2)}u${r.stakeAssumed ? "*" : ""}`, result: c[0], chipBg: c[1], chipFg: c[2], chipBorder: c[3], units: numeric(r.units) ? u2(r.units) : "—", unitsColor: colorOf(numeric(r.units) ? r.units : 0) }; });
+      return { date: r.date, type: r.group === "team" ? "Team" : "Prop", ...prop, price: numeric(r.price) ? F.fmtOdds(r.price) : "—", down: numeric(r.betDownTo) ? F.fmtOdds(r.betDownTo) : "—", stake: `${(r.staked || 0).toFixed(2)}u${r.stakeAssumed ? "*" : ""}`, result: c[0], chipBg: c[1], chipFg: c[2], chipBorder: c[3], units: numeric(r.units) ? u2(r.units) : "—", unitsColor: colorOf(numeric(r.units) ? r.units : 0) }; });
     const log = { stamp: `${rows.length} bets · newest first`, query: this.state.logQuery, onSearch: (e) => this.setState({ logQuery: e.target.value, page: 0 }), noMatch: lrows.length === 0, noMatchText: `No bet matches "${lq}".`, hasRows: lrows.length > 0,
       rows: logRows, pageLine: `${page * PER + 1}–${Math.min(lrows.length, (page + 1) * PER)} of ${lrows.length}`, onPrev: () => this.setState({ page: Math.max(0, page - 1) }), onNext: () => this.setState({ page: Math.min(pages - 1, page + 1) }), prevDisabled: page === 0, nextDisabled: page >= pages - 1, prevColor: page === 0 ? "var(--rule)" : "var(--ink)", nextColor: page >= pages - 1 ? "var(--rule)" : "var(--ink)" };
 

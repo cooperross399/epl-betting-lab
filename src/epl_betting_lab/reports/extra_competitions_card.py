@@ -75,6 +75,8 @@ from epl_betting_lab.models.european_ratings import (
 )
 from epl_betting_lab.models.poisson_goals import PoissonGoalsModel, UnratedTeam
 from epl_betting_lab.models.unified_ratings import UNIFIED_RATINGS, build_pool
+from epl_betting_lab.reports.pick_display import format_american_odds
+from epl_betting_lab.reports.thursday_best_bets import _bet_down_to
 from epl_betting_lab.strategies.btts import evaluate_btts
 from epl_betting_lab.strategies.count_markets import (
     COUNT_MARKETS,
@@ -867,6 +869,10 @@ def build_extra_card(
     selections = selections.drop(columns=["_edge"])
     selections["competition"] = competition
     selections["suggested_units"] = EXTRA_UNITS
+    # The worst price each selection still clears its market's bar at, by the
+    # Premier League card's own rule (Cooper, 2026-11-01: every pick carries a
+    # "bet down to" number).
+    selections["bet_down_to_american"] = selections.apply(_bet_down_to, axis=1)
     # Carried from the gate, which already resolved every fixture's kickoff.
     # Recomputing it here would be a second implementation of the same
     # question, and the two could disagree.
@@ -975,15 +981,18 @@ def render_extra_card(
             lines += [f"- {note}" for note in card.notes] + [""]
             continue
         lines += [
-            "| Match | Market | Selection | Edge | Price | Book | Units |",
-            "|:--|:--|:--|--:|--:|:--|--:|",
+            # Bet down to sits before Edge: the SOCCER CARD routine's kickoff
+            # filter reads Edge, Price, Book and Units as the last four cells.
+            "| Match | Market | Selection | Bet down to | Edge | Price | Book | Units |",
+            "|:--|:--|:--|--:|--:|--:|:--|--:|",
         ]
         for _, row in card.selections.iterrows():
             edge = row.get("calibrated_edge", row.get("raw_edge"))
             edge_text = f"{float(edge) * 100:+.1f}%" if pd.notna(edge) else "—"
             lines.append(
                 f"| {row['home_team']} v {row['away_team']} | `{row['market']}` | "
-                f"{row['selection']} | {edge_text} | {int(row['american_odds']):+d} | "
+                f"{row['selection']} | {format_american_odds(row.get('bet_down_to_american'))} | "
+                f"{edge_text} | {int(row['american_odds']):+d} | "
                 f"{row.get('book', '')} | {row['suggested_units']} |"
             )
         lines.append("")
@@ -1069,6 +1078,7 @@ def extra_card_record(
                     "market": row.get("market"),
                     "selection": row.get("selection"),
                     "american_odds": row.get("american_odds"),
+                    "bet_down_to_american": row.get("bet_down_to_american"),
                     "book": row.get("book"),
                     # The provider's own identity for the fixture. The record
                     # stores mapped club names and the feed stores the

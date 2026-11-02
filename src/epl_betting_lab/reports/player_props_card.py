@@ -35,6 +35,8 @@ from pathlib import Path
 
 import pandas as pd
 
+from epl_betting_lab.models.value import bet_down_to_american
+from epl_betting_lab.reports.pick_display import format_american_odds
 from epl_betting_lab.books import bettable_only
 from epl_betting_lab.staging_provider_policy import entry_is_complete_approval
 from epl_betting_lab.config import (
@@ -145,6 +147,9 @@ class PropPick:
     #: spelling, which grading joins on). Two books spelling one player two
     #: ways are one outcome: `_one_stake_per_outcome` folds on this.
     model_player: str = ""
+    #: The worst price at which this pick still clears the props bar
+    #: (Cooper, 2026-11-01: every pick carries a "bet down to" number).
+    bet_down_to_american: int | None = None
 
 
 def approved_prop_markets(policy_path: Path | None = None) -> list[str]:
@@ -647,6 +652,7 @@ def build_player_props_card(
                 referee=referee,
                 referee_factor=round(multiplier, 4),
                 model_player=rates.player,
+                bet_down_to_american=bet_down_to_american(probability, edge_threshold),
             )
         )
 
@@ -722,9 +728,9 @@ def render_player_props_markdown(summary: Mapping[str, object]) -> str:
             "## Picks",
             "",
             "| Match | Market | Player | Selection | Model prob | Edge | "
-            "Price | Book | Units |",
+            "Price | Bet down to | Book | Units |",
             "|:------|:-------|:-------|:----------|-----------:|-----:|"
-            "------:|:-----|------:|",
+            "------:|------------:|:-----|------:|",
         ]
         for pick in picks:
             lines.append(
@@ -732,6 +738,7 @@ def render_player_props_markdown(summary: Mapping[str, object]) -> str:
                 f"`{pick['market']}` | {display_player(pick)} | "
                 f"{pick['selection']} | {pick['model_probability']:.1%} | "
                 f"{pick['edge']:+.1%} | {pick['american_odds']:+.0f} | "
+                f"{format_american_odds(pick.get('bet_down_to_american'))} | "
                 f"{pick['book']} | {pick['units']} |"
             )
         lines.append("")

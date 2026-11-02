@@ -601,6 +601,20 @@ Use the repo, the reports, and GitHub.
   taking a bet there is paying the vig for a coin flip. The tier column was
   dropped from the table because every bet is the same size, so it printed the
   same letter on every row.
+  **Since 2026-11-01 every pick everywhere carries it** (Cooper: "always
+  include a 'bet down to' number ... across all models/cards"): the card
+  comment the routines read, the props card (against the 8% props bar), the
+  cup and European section, `board.json` picks and prop rows (`betDownTo`), the
+  Game page, and `tracker.json` rows (the Tracker's "Down to" column). A lean
+  is read against the 1.5% lean bar, card-count markets against their 6% bar,
+  anchored corner totals at fair like the 2.5 line, and a best bet shrunk by
+  its trust weight or a line move against the shrunk edge; never printed
+  worse than −160 (`MAX_DEFAULT_JUICE`). In the card comment and the Beyond
+  section the column sits where the SOCCER CARD kickoff filter's positional
+  read cannot see it (Tier stays fourth; Edge, Price, Book, Units stay last),
+  pinned in `tests/test_every_pick_carries_a_bet_down_to.py`. The shared Board
+  (`betting-lab-shared`) does not print `betDownTo` yet; that is a shared-page
+  change, not this repo's.
 - **The card may only price a bet at a book on `books.BETTABLE_BOOKS`, and the
   filter runs BEFORE market eligibility.** `bettable_only` fails closed — a
   frame with no `book` column returns empty, because "I cannot tell whose price

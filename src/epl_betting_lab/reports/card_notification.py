@@ -77,8 +77,13 @@ def _clean(value: object) -> str:
 
 def _rows(rows: Sequence[Mapping[str, Any]]) -> list[str]:
     lines = [
-        "| Match | Market | Selection | Tier | Edge | Price | Book | Units |",
-        "|:------|:-------|:----------|:-----|-----:|------:|:-----|------:|",
+        # "Bet down to" (Cooper, 2026-11-01): the worst price at which the pick
+        # still clears its bar, so a moved line can be judged without the model.
+        # It sits after Tier on purpose: the SOCCER CARD routine's kickoff
+        # filter reads Tier as the fourth cell and Edge, Price, Book and Units
+        # as the last four, by position, so those five places must not move.
+        "| Match | Market | Selection | Tier | Bet down to | Edge | Price | Book | Units |",
+        "|:------|:-------|:----------|:-----|------------:|-----:|------:|:-----|------:|",
     ]
     for row in rows:
         edge = row.get("calibrated_edge")
@@ -86,6 +91,7 @@ def _rows(rows: Sequence[Mapping[str, Any]]) -> list[str]:
             f"| {_clean(row.get('home_team'))} v {_clean(row.get('away_team'))} "
             f"| `{_clean(row.get('market'))}` | {_clean(row.get('selection'))} "
             f"| {_clean(row.get('confidence_tier')) or '—'} "
+            f"| {format_american_odds(row.get('bet_down_to_american'))} "
             f"| {f'{float(edge):+.1%}' if isinstance(edge, (int, float)) else '—'} "
             f"| {format_american_odds(row.get('american_odds'))} "
             f"| {_clean(row.get('book')) or '—'} "
@@ -295,6 +301,7 @@ def build_notification(
                     f"{_clean(pick.get('selection'))} at "
                     f"{float(pick.get('american_odds', 0)):+.0f} "
                     f"({_clean(pick.get('book'))}), "
+                    f"bet down to {format_american_odds(pick.get('bet_down_to_american'))}, "
                     f"{pick.get('units')}u"
                 )
             lines += [

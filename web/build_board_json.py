@@ -1043,6 +1043,8 @@ def props_block(
             "fairPrice": to_american(prob) if isinstance(prob, (int, float)) and 0 < prob < 1 else None,
             "edgePct": round(edge * 100, 1) if isinstance(edge, (int, float)) else None,
             "kind": "bet", "units": p.get("units"),
+            # Cooper, 2026-11-01: the worst price at which the pick still clears the props bar.
+            "betDownTo": int(p["bet_down_to_american"]) if isinstance(p.get("bet_down_to_american"), (int, float)) and not isinstance(p.get("bet_down_to_american"), bool) else None,
         })
     parts = [str(props.get("note") or "")]
     priced = props.get("priced")

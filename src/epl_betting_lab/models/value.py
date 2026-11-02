@@ -35,6 +35,38 @@ def fair_american_from_prob(prob: float) -> float:
     return decimal_to_american(decimal)
 
 
+#: The edge at which `grade_edge` calls a row a LEAN rather than a PASS.
+LEAN_EDGE = 0.015
+
+
+def bet_down_to_american(
+    probability: float | None, bar: float, *, floor: float | None = None
+) -> int | None:
+    """The worst American price at which `probability` still clears `bar`.
+
+    Cooper, 2026-11-01: every pick carries a "bet down to" number. An edge here
+    is probability minus the price's implied probability, so the bar holds while
+    implied <= probability - bar. `floor` is the shortest price the rule will
+    take at all (the juice limit): a limit beyond it is printed at the floor,
+    because no shorter price is ever bet. None when no price can clear.
+    """
+    if probability is None:
+        return None
+    try:
+        p = float(probability)
+    except (TypeError, ValueError):
+        return None
+    if p != p:
+        return None
+    limit = p - float(bar)
+    if not 0 < limit < 1:
+        return None
+    american = int(round(fair_american_from_prob(limit)))
+    if floor is not None and american < floor:
+        american = int(floor)
+    return american
+
+
 def expected_value_per_unit(model_prob: float, american_odds: float) -> float:
     """Return expected profit per 1 unit staked."""
     decimal = american_to_decimal(american_odds)
@@ -65,7 +97,7 @@ def grade_edge(
         status = "PASS - price too long"
     elif edge >= min_edge and ev > 0:
         status = "BETTABLE"
-    elif edge >= 0.015 and ev > 0:
+    elif edge >= LEAN_EDGE and ev > 0:
         status = "LEAN"
     else:
         status = "PASS"

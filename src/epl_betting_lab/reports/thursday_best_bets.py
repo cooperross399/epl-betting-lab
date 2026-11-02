@@ -8,7 +8,8 @@ import pandas as pd
 
 from epl_betting_lab.config import MIN_EDGE
 from epl_betting_lab.models.calibration import min_calibrated_edge
-from epl_betting_lab.models.value import fair_american_from_prob
+from epl_betting_lab.models.value import LEAN_EDGE, bet_down_to_american
+from epl_betting_lab.strategies.count_markets import minimum_edge_for
 from epl_betting_lab.reports.line_move import AGAINST_FACTOR, load_feed, move_against
 from epl_betting_lab.reports.selection_calibration import load_trust_weights
 
@@ -293,31 +294,50 @@ UNVERIFIABLE_MARKET_TIER = "C"
 #: at fair is taking a coin flip with the vig still to pay. The limit is the
 #: price at which the edge falls to the bar this market has to clear, which is
 #: strictly longer than fair. Cross it and the bet is off, not marginal.
-def _bet_down_to(row: pd.Series) -> float | str:
+def _bet_down_to_bar(row: pd.Series) -> float:
+    """The edge this row has to keep for the card to still take it."""
     market = str(row.get("market", "")).strip()
     selection = str(row.get("selection", "")).strip().lower()
-    probability = _float_value(row, "calibrated_model_prob", _float_value(row, "model_prob"))
-    if not probability or not 0 < probability < 1:
-        return ""
-    if market == "total_2_5":
-        # The anchored rule replaced the lift floor for this market. What
-        # governs whether it is staked is the edge against the POSTED price
-        # — `_confidence_tier` returns Pass/Avoid at edge <= 0 — so the
-        # limit is where that edge reaches zero, which is fair odds.
+    if market == "total_2_5" or str(row.get("selection_rule", "")).strip() == "market_anchored":
+        # The anchored rule replaced the lift floor for this market (and for
+        # the anchored corner totals). What governs whether it is staked is
+        # the edge against the POSTED price — `_confidence_tier` returns
+        # Pass/Avoid at edge <= 0 — so the limit is where that edge reaches
+        # zero, which is fair odds.
         #
         # Using the lift floor here printed a limit the row's own price had
         # already passed: at p = 0.58 the card recommended the bet at −130
         # and said "bet down to −108" in the same row. A reader following
         # that instruction would decline a bet the card had just made.
-        floor = 0.0
-    else:
-        floor = min_calibrated_edge(market, selection, MIN_EDGE)
-    # A stake is only advised while edge >= floor, so implied must not exceed
-    # probability - floor. Above that the price has stopped paying for the risk.
-    limit = probability - floor
-    if limit <= 0 or limit >= 1:
+        return 0.0
+    if str(row.get("status", "")).strip().upper() == "LEAN":
+        # A lean cleared the lean bar, not the bet bar: quoting the bet bar
+        # would print a price better than the one the lean is listed at.
+        return LEAN_EDGE
+    # Card-count markets demand more edge than their calibrated floor
+    # (`count_markets.minimum_edge_for`); the limit has to honour the higher.
+    return max(
+        min_calibrated_edge(market, selection, MIN_EDGE),
+        minimum_edge_for(market, MIN_EDGE),
+    )
+
+
+def _bet_down_to(row: pd.Series, *, trust: float = 1.0) -> float | str:
+    """See the note above. `trust` is the multiplier `_apply_trust` puts on
+    the edge: a best bet that keeps its stake only at `trust x edge >= bar`
+    stops clearing at `implied = p - bar / trust`: it needs a better price."""
+    probability = _float_value(row, "calibrated_model_prob", _float_value(row, "model_prob"))
+    if not probability or not 0 < probability < 1:
         return ""
-    return round(fair_american_from_prob(limit))
+    bar = _bet_down_to_bar(row)
+    if 0 < trust < 1:
+        bar = bar / trust
+    # A stake is only advised while edge >= bar, so implied must not exceed
+    # probability - bar. Above that the price has stopped paying for the risk.
+    # Never printed shorter than the juice limit, because no shorter price is
+    # ever bet (`grade_edge`'s "PASS - too much juice").
+    limit = bet_down_to_american(probability, bar, floor=MAX_DEFAULT_JUICE)
+    return "" if limit is None else limit
 
 
 def _confidence_tier(row: pd.Series) -> str:
@@ -438,6 +458,9 @@ def _apply_trust(
         bar = min_calibrated_edge(market, selection, MIN_EDGE)
         shrunk = factor * edge
         if shrunk >= bar:
+            # Still a best bet, but only at the shrunk edge: its bet-down-to
+            # is where THAT edge reaches the bar.
+            df.at[index, "bet_down_to_american"] = _bet_down_to(row, trust=factor)
             continue
         df.at[index, "section"] = "Leans"
         df.at[index, "confidence_tier"] = LEAN_TIER

@@ -9,7 +9,7 @@ website as well just like the NHL". What this pins, end to end:
     with a note per market that restates the card's measurement (never an
     edge), a note saying how many props the card priced and how many are
     listed, and the players the card withheld as unlikely to play.
-(b) Every EPL page (Game, Record, Tracker, Season, Methods) links the board's
+(b) Every EPL page (Game, Record, Season, Methods) links the board's
     Props tab, as the NHL pages do.
 (c) A settled night with graded props lands in results.json (`props.summary`,
     `props.season`), in the tracker rows (group "props", with the player and
@@ -28,7 +28,8 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 WEB = ROOT / "web"
-PAGES = ("Game.dc.html", "Record.dc.html", "Tracker.dc.html", "Season.dc.html", "Methods.dc.html")
+# Tracker.dc.html is a redirect to Record.dc.html since 2026-11-03 (one page).
+PAGES = ("Game.dc.html", "Record.dc.html", "Season.dc.html", "Methods.dc.html")
 
 
 def _load(name: str, alias: str):

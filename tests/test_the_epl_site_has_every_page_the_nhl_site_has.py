@@ -42,8 +42,9 @@ WORKFLOW = PROJECT_ROOT / ".github" / "workflows" / "publish-board.yml"
 
 PAGES = {
     "Season.dc.html": "season.json",
-    "Record.dc.html": "record.json",
-    "Tracker.dc.html": "tracker.json",
+    # Record holds the old Tracker too since 2026-11-03 (it reads both feeds;
+    # Tracker.dc.html only redirects to it).
+    "Record.dc.html": "tracker.json",
     "Methods.dc.html": "ratings.json",
     "Game.dc.html": "board.json",
 }
@@ -86,7 +87,7 @@ def test_no_page_names_a_reference_site(page: str) -> None:
 def test_the_tab_strip_links_every_page_from_every_page() -> None:
     for page in PAGES:
         text = (WEB / page).read_text(encoding="utf-8")
-        for target in ("Board.dc.html", "Board.dc.html#props", "Results.dc.html", "Season.dc.html", "Record.dc.html", "Tracker.dc.html"):
+        for target in ("Board.dc.html", "Board.dc.html#props", "Results.dc.html", "Season.dc.html", "Record.dc.html"):
             assert target in text, (page, target)
         assert "Methods.dc.html" in text, page
 

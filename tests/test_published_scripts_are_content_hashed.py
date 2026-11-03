@@ -36,7 +36,13 @@ def test_every_page_loads_hashed_scripts_and_the_plain_names_stay(tmp_path: Path
     for key, hashed in names.items():
         assert (dist / f"{hashed}.js").is_file() and (dist / f"{key}.js").is_file()
     for page in dist.glob("*.dc.html"):
-        refs = re.findall(r"""["'](\./(?:support|lib/[a-z]+)[^"']*\.js)["']""", page.read_text(encoding="utf-8"))
+        text = page.read_text(encoding="utf-8")
+        if page.name == "Tracker.dc.html" and "support.js" not in text:
+            # Since 2026-11-03 a plain page that forwards to Record.dc.html,
+            # loading no script at all.
+            assert 'location.replace("Record.dc.html"' in text
+            continue
+        refs = re.findall(r"""["'](\./(?:support|lib/[a-z]+)[^"']*\.js)["']""", text)
         assert refs, page.name
         for ref in refs:
             assert re.search(r"\.[0-9a-f]{10}\.js$", ref), (page.name, ref)

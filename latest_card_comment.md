@@ -1,4 +1,4 @@
-## Tuesday 03 November, 10:22 UTC — scheduled run
+## Tuesday 03 November, 12:19 UTC — scheduled run
 
 Something went wrong in this run.
 
@@ -8,7 +8,7 @@ Something went wrong in this run.
 
 The card below was still built, from whatever evidence was available. Treat it with that in mind.
 
-Provider quota: 86339 (about 23 days at the observed burn)
+Provider quota: 86035 (about 23 days at the observed burn)
 
 Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5, team_total_home_0_5, team_total_home_1_5, team_total_home_2_5, team_total_away_0_5, team_total_away_1_5, team_total_away_2_5** (excluded: none)
 
@@ -28,69 +28,7 @@ _None._
 
 ### What changed
 
-- **Added:** Arsenal v Hull 1x2 away
-- **Added:** Arsenal v Hull btts yes
-- **Added:** Arsenal v Hull corners_1x2 draw
-- **Added:** Arsenal v Hull corners_total_10_5 under
-- **Added:** Arsenal v Hull team_total_away_0_5 over
-- **Added:** Arsenal v Hull team_total_away_1_5 over
-- **Added:** Arsenal v Hull team_total_home_0_5 under
-- **Added:** Arsenal v Hull total_2_5 under
-- **Added:** Brighton v Brentford 1x2 away
-- **Added:** Brighton v Brentford 1x2 draw
-- **Added:** Brighton v Brentford double_chance draw_or_away
-- **Added:** Brighton v Brentford draw_no_bet away
-- **Added:** Crystal Palace v Liverpool 1x2 draw
-- **Added:** Crystal Palace v Liverpool corners_total_10_5 under
-- **Added:** Crystal Palace v Liverpool team_total_away_0_5 under
-- **Added:** Crystal Palace v Liverpool team_total_away_1_5 under
-- **Added:** Everton v Coventry 1x2 home
-- **Added:** Everton v Coventry corners_1x2 away
-- **Added:** Everton v Coventry draw_no_bet home
-- **Added:** Everton v Coventry team_total_home_0_5 under
-- **Added:** Everton v Coventry team_total_home_1_5 under
-- **Added:** Fulham v Newcastle 1x2 away
-- **Added:** Fulham v Newcastle double_chance draw_or_away
-- **Added:** Fulham v Newcastle draw_no_bet away
-- **Added:** Fulham v Newcastle team_total_home_1_5 under
-- **Added:** Ipswich v Bournemouth double_chance draw_or_away
-- **Added:** Ipswich v Bournemouth draw_no_bet away
-- **Added:** Ipswich v Bournemouth team_total_away_1_5 over
-- **Added:** Ipswich v Bournemouth team_total_away_2_5 over
-- **Added:** Ipswich v Bournemouth total_2_5 over
-- **Added:** Leeds v Tottenham 1x2 away
-- **Added:** Leeds v Tottenham btts no
-- **Added:** Leeds v Tottenham corners_1x2 home
-- **Added:** Leeds v Tottenham double_chance draw_or_away
-- **Added:** Leeds v Tottenham draw_no_bet away
-- **Added:** Man United v Aston Villa 1x2 away
-- **Added:** Man United v Aston Villa corners_total_10_5 over
-- **Added:** Man United v Aston Villa corners_total_9_5 over
-- **Added:** Man United v Aston Villa draw_no_bet away
-- **Added:** Man United v Aston Villa team_total_away_1_5 over
-- **Added:** Nott'm Forest v Man City team_total_away_0_5 under
-- **Added:** Nott'm Forest v Man City team_total_away_1_5 under
-- **Added:** Nott'm Forest v Man City team_total_away_2_5 under
-- **Added:** Nott'm Forest v Man City team_total_home_1_5 over
-- **Added:** Nott'm Forest v Man City team_total_home_2_5 over
-- **Added:** Sunderland v Chelsea 1x2 away
-- **Added:** Sunderland v Chelsea btts yes
-- **Added:** Sunderland v Chelsea corners_1x2 away
-- **Added:** Sunderland v Chelsea team_total_home_2_5 over
-- **Added:** Sunderland v Chelsea total_2_5 over
-- **Dropped:** Newcastle v Everton 1x2 home
-- **Dropped:** Newcastle v Everton btts no
-- **Dropped:** Newcastle v Everton corners_1x2 home
-- **Dropped:** Newcastle v Everton double_chance home_or_away
-- **Dropped:** Newcastle v Everton draw_no_bet home
-- **Dropped:** Newcastle v Everton team_total_away_0_5 over
-- **Dropped:** Newcastle v Everton team_total_away_1_5 over
-- **Dropped:** Newcastle v Everton team_total_away_2_5 over
-- **Dropped:** Newcastle v Everton team_total_home_0_5 over
-- **Dropped:** Newcastle v Everton team_total_home_0_5 under
-- **Dropped:** Newcastle v Everton team_total_home_1_5 over
-- **Dropped:** Newcastle v Everton team_total_home_2_5 over
-- **Dropped:** Newcastle v Everton total_2_5 over
+- **Added:** Everton v Coventry btts no
 
 
 ## Beyond the Premier League
@@ -160,7 +98,7 @@ The thinnest of the three. Only 24 Conference League ties survive club resolutio
 
 | Match | Market | Selection | Bet down to | Edge | Price | Book | Units |
 |:--|:--|:--|--:|--:|--:|:--|--:|
-| Getafe v Brighton | `total_2_5` | under | -130 | +3.1% | -115 | LowVig.ag | 0.1 |
+| Getafe v Brighton | `total_2_5` | under | -130 | +3.1% | -115 | BetOnline.ag | 0.1 |
 
 - 36 fixture(s) dropped as already kicked off: AGF Aarhus v KF Egnatia, AS Monaco v SC Freiburg, Ajax v Atalanta BC, Atalanta BC v Pafos FC, Brighton v FK Kauno Žalgiris, FC Copenhagen v SC Braga, and 30 more.
 - 17 fixture(s) left out because a club has no rating in the pool: AGF Aarhus v SC Braga, AS Monaco v FC Nordsjaelland, Atalanta BC v FC Kairat, FC Copenhagen v FC Iberia 1999, FC Lugano v FK Kauno Žalgiris, FC Midtjylland v Ajax, FC Thun v Hearts, FC Twente Enschede v Pafos FC, KuPS Kuopio v Gent, Lincoln Red Imps FC v Hajduk Split, Mjällby AIF v FK Borac Banja Luka, Panathinaikos FC v PFC CSKA Sofia, Red Star Belgrade v Inter Club d'Escaldes, Riga FC v FK Jablonec, Sint Truiden v SK Brann, Trabzonspor v SC Freiburg, Universitatea Craiova v KF Egnatia.
@@ -224,4 +162,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/41617981499)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/41633929920)

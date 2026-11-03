@@ -622,18 +622,16 @@ def test_the_methods_page_states_the_bars_the_card_uses() -> None:
     assert prop and int(prop.group(1)) == round(PROPS_EDGE_THRESHOLD * 100)
 
 
-def test_the_record_page_colours_the_predicted_rate_and_tells_unreachable_from_empty() -> None:
+def test_the_record_page_tells_unreachable_from_empty() -> None:
+    # Record and Tracker are one page since 2026-11-03; Tracker.dc.html only redirects.
     src = _page("Record.dc.html")
-    assert "actualColor: b.predicted >= b.interval[0] && b.predicted <= b.interval[1]" in src
-    assert "actualColor: b.actual >= b.interval[0]" not in src, "the observed rate is always inside its own interval"
     assert '{{ emptyTitle }}' in src and '{{ emptyNote }}' in src
-    assert 'emptyTitle: "Record unreachable"' in src and 'emptyTitle: "No matchday settled yet"' in src
-    tracker = _page("Tracker.dc.html")
-    assert '{{ emptyTitle }}' in tracker and 'emptyTitle: "Results unreachable"' in tracker and 'emptyTitle: "No bet has been graded yet"' in tracker
+    assert 'emptyTitle: "Results unreachable"' in src and 'emptyTitle: "No bet has been graded yet"' in src
+    assert 'location.replace("Record.dc.html"' in _page("Tracker.dc.html")
 
 
 def test_the_tracker_page_guards_missing_prices_and_units_and_labels_the_axis_short() -> None:
-    src = _page("Tracker.dc.html")
+    src = _page("Record.dc.html")
     band = re.search(r"const band = (\(p\) => \(.*?\));\n", src).group(1)
     bands = _node(f"const band = {band}; console.log(JSON.stringify([band(null), band(undefined), band(NaN), band(-150), band(120), band(-250), band(300)]));")
     assert bands == [None, None, None, "−199 to −111", "+111 to +199", "−200 and shorter", "+200 and longer"]

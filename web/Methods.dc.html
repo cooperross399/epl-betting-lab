@@ -273,7 +273,7 @@ class Component extends DCLogic {
       formula: "bet down to = fair price of (p − bar), never below −160",
       sure: "It restates the bar the pick already cleared; it is not a separate measurement, and the chance it is read from carries the same uncertainty as every other number here." },
     { id: "graded", updated: "2026-10-26", title: "How picks are graded", def: "Every pick is frozen at publication and settled the morning after against the final score.",
-      build: "Match result settles on the ninety-minute score, extra time and penalties excluded. Draw no bet is void on a draw and the stake returned. Over and under 2.5 cannot push. Both teams to score settles on whether each side scored. Corners markets settle on the match summary's corner count. A pick is void if the match is postponed. Results carries last weekend and the season win–loss record per market; All results carries every graded bet with units and return; Track record carries calibration.",
+      build: "Match result settles on the ninety-minute score, extra time and penalties excluded. Draw no bet is void on a draw and the stake returned. Over and under 2.5 cannot push. Both teams to score settles on whether each side scored. Corners markets settle on the match summary's corner count. A pick is void if the match is postponed. Results carries last weekend and the season win–loss record per market; Our record carries every graded bet with units won or lost, and how often the win chances came true.",
       formula: "",
       sure: "Fully sure. Grading is mechanical and the frozen boards are in the archive, so any grade can be checked." },
   ];
@@ -317,7 +317,7 @@ class Component extends DCLogic {
   sortBy(k) { this.setState((s) => ({ sortKey: k, dir: s.sortKey === k ? -s.dir : (k === "defence" || k === "formDefence" || k === "name" ? 1 : -1) })); }
   renderVals() {
     const C = this.constructor, d = this.state.data, wide = this.state.wide;
-    const tabs = [["This week", "Board.dc.html"], ["Props", "Board.dc.html#props"], ["Results", "Results.dc.html"], ["Season", "Season.dc.html"], ["Record", "Record.dc.html"], ["Tracker", "Tracker.dc.html"]].map(([label, href]) => ({ label, href }));
+    const tabs = [["This week", "Board.dc.html"], ["Props", "Board.dc.html#props"], ["Results", "Results.dc.html"], ["Season", "Season.dc.html"], ["Record", "Record.dc.html"]].map(([label, href]) => ({ label, href }));
     const hash = this.state.hash;
     const tocItems = [{ id: "ratings", label: "Club ratings" }, { id: "missing", label: "Who is missing" }, ...C.ENTRIES.map((e, i) => ({ id: e.id, label: `${i + 1}. ${e.title}` })), { id: "changelog", label: "Changelog" }];
     const toc = tocItems.map((t) => ({ ...t, href: `#${t.id}`, color: hash === t.id ? "var(--ink)" : "var(--mute)" }));

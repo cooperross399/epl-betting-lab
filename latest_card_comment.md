@@ -1,4 +1,4 @@
-## Wednesday 04 November, 10:03 UTC — scheduled run
+## Wednesday 04 November, 12:31 UTC — scheduled run
 
 Something went wrong in this run.
 
@@ -8,7 +8,7 @@ Something went wrong in this run.
 
 The card below was still built, from whatever evidence was available. Treat it with that in mind.
 
-Provider quota: 80319 (about 22 days at the observed burn)
+Provider quota: 80003 (about 22 days at the observed burn)
 
 Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5, team_total_home_0_5, team_total_home_1_5, team_total_home_2_5, team_total_away_0_5, team_total_away_1_5, team_total_away_2_5** (excluded: none)
 
@@ -17,10 +17,11 @@ Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corner
 | Match | Market | Selection | Tier | Bet down to | Edge | Price | Book | Units |
 |:------|:-------|:----------|:-----|------------:|-----:|------:|:-----|------:|
 | Ipswich v Bournemouth | `team_total_away_1_5` | over | C | -133 | +6.0% | -120 | Bovada | 0.1 |
-| Man United v Aston Villa | `team_total_away_1_5` | over | C | +116 | +7.0% | +134 | FanDuel | 0.1 |
+| Man United v Aston Villa | `team_total_away_1_5` | over | C | +134 | +7.0% | +134 | FanDuel | 0.1 |
 | Nott'm Forest v Man City | `team_total_home_1_5` | over | C | +174 | +7.2% | +205 | Bovada | 0.1 |
 | Crystal Palace v Liverpool | `team_total_away_1_5` | under | C | +132 | +6.3% | +148 | FanDuel | 0.1 |
-| Everton v Coventry | `team_total_home_1_5` | under | C | +112 | +4.4% | +116 | FanDuel | 0.1 |
+| Everton v Coventry | `corners_1x2` | away | C | +177 | +5.7% | +195 | BetRivers | 0.1 |
+| Arsenal v Hull | `team_total_away_0_5` | over | C | +120 | +5.0% | +128 | Bovada | 0.1 |
 
 ### Leans
 
@@ -28,8 +29,10 @@ _None._
 
 ### What changed
 
-- **Dropped:** Arsenal v Hull btts yes
-- **Dropped:** Sunderland v Chelsea corners_1x2 away
+- **Added:** Sunderland v Chelsea corners_1x2 away
+- **Moved section:** Arsenal v Hull team_total_away_0_5 over
+- **Moved section:** Everton v Coventry corners_1x2 away
+- **Moved section:** Everton v Coventry team_total_home_1_5 under
 
 
 ## Beyond the Premier League
@@ -84,7 +87,7 @@ The thinnest of the three. Only 24 Conference League ties survive club resolutio
 
 | Match | Market | Selection | Bet down to | Edge | Price | Book | Units |
 |:--|:--|:--|--:|--:|--:|:--|--:|
-| Getafe v Brighton | `total_2_5` | under | -130 | +3.1% | -115 | LowVig.ag | 0.1 |
+| Getafe v Brighton | `total_2_5` | under | -130 | +3.1% | -115 | BetOnline.ag | 0.1 |
 
 - 36 fixture(s) dropped as already kicked off: AGF Aarhus v KF Egnatia, AS Monaco v SC Freiburg, Ajax v Atalanta BC, Atalanta BC v Pafos FC, Brighton v FK Kauno Žalgiris, FC Copenhagen v SC Braga, and 30 more.
 - 17 fixture(s) left out because a club has no rating in the pool: AGF Aarhus v SC Braga, AS Monaco v FC Nordsjaelland, Atalanta BC v FC Kairat, FC Copenhagen v FC Iberia 1999, FC Lugano v FK Kauno Žalgiris, FC Midtjylland v Ajax, FC Thun v Hearts, FC Twente Enschede v Pafos FC, KuPS Kuopio v Gent, Lincoln Red Imps FC v Hajduk Split, Mjällby AIF v FK Borac Banja Luka, Panathinaikos FC v PFC CSKA Sofia, Red Star Belgrade v Inter Club d'Escaldes, Riga FC v FK Jablonec, Sint Truiden v SK Brann, Trabzonspor v SC Freiburg, Universitatea Craiova v KF Egnatia.
@@ -118,7 +121,7 @@ Nobody playing in this round is due.
 - Settled: **165** selections, 64 won, 8 returned the stake
 - Staked: 19.35 units
 - Profit: **-2.18 units** (-11.3% on turnover)
-- Still pending: 7
+- Still pending: 9
 
 - Stake returned (void): 8 — counted in the settled total above at zero profit, because a push is a bet
 
@@ -150,4 +153,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/41811204252)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/41828997114)

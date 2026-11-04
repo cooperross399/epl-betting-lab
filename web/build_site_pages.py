@@ -8,7 +8,7 @@
                   the over-2.5 and both-teams-to-score chances the same way,
                   and whether the 1X2 line moved toward our picks. Read by
                   Record.dc.html and Game.dc.html.
-* `tracker.json`  Every graded best bet at the stake the card carried, summed
+* `tracker.json`  Every graded best bet at 0.25u (to win 0.25u on minus odds), summed
                   by group, market, prop type, team, player, price band and
                   month. Read by Tracker.dc.html.
 * `season.json`   The table as it stands, from the season's played fixtures,
@@ -94,6 +94,26 @@ def _implied(price: object) -> float | None:
 
 def _num(x: object) -> bool:
     return isinstance(x, (int, float)) and not isinstance(x, bool) and math.isfinite(x)
+
+
+#: Every tracked bet is counted at this, to win it on a minus price (Cooper,
+#: 2026-11-04). The same rule as `settle_results.quarter`, spelled out here
+#: because this module reads the kept nights and loads nothing from that one.
+TRACKED_STAKE = 0.25
+STAKE_RULE = "0.25u, to win 0.25u on a minus price"
+
+
+def restake(row: dict) -> dict:
+    """One tracker row restated at TRACKED_STAKE from its own price and result,
+    so a row kept at the card's stake reads the same as a new one."""
+    price, result = row.get("price"), row.get("result")
+    if not _num(price) or -100 < price < 100 or result not in ("win", "loss", "push"):
+        return row
+    risk = TRACKED_STAKE * abs(price) / 100.0 if price < 0 else TRACKED_STAKE
+    win = TRACKED_STAKE if price < 0 else TRACKED_STAKE * price / 100.0
+    out = {k: v for k, v in row.items() if k != "stakeAssumed"}
+    out.update(staked=round(risk, 4), units=round(win if result == "win" else -risk if result == "loss" else 0.0, 4))
+    return out
 
 
 # ---------- the settled record ----------
@@ -293,7 +313,7 @@ def tracker(hist: Path, now: str) -> dict:
         bets = night.get("bets")
         if not isinstance(bets, list):
             continue
-        kept = [b for b in bets if isinstance(b, dict) and b.get("result") in ("win", "loss", "push") and _num(b.get("staked"))]
+        kept = [restake(b) for b in bets if isinstance(b, dict) and b.get("result") in ("win", "loss", "push") and _num(b.get("staked"))]
         if kept:
             nights += 1
         rows.extend(kept)
@@ -306,6 +326,7 @@ def tracker(hist: Path, now: str) -> dict:
         "generatedAt": now, "nights": nights,
         "firstDate": dates[0] if dates else None, "lastDate": dates[-1] if dates else None,
         "teamPickDefaultUnits": TEAM_PICK_DEFAULT_UNITS, "dueStake": None,
+        "stake": TRACKED_STAKE, "stakeRule": STAKE_RULE,
         "overall": _tally(rows),
         "byGroup": [{"key": k, "label": label, **_tally([r for r in rows if r.get("group") == k])}
                     for k, label in TRACKER_GROUPS.items() if any(r.get("group") == k for r in rows)],

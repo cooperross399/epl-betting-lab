@@ -58,15 +58,15 @@ def test_an_entry_with_no_price_is_graded_but_not_posted():
 def test_the_night_and_the_season_carry_units_and_the_stake():
     S = _settle()
     rows = [
-        {"result": "win", "market": "goals", "units": 0.625},
-        {"result": "loss", "market": "goals", "units": -0.25},
+        {"result": "win", "market": "goals", "price": 250, "units": 0.625},
+        {"result": "loss", "market": "goals", "price": 120, "units": -0.25},
         {"result": "win", "market": "goals", "units": None},
         {"result": "void", "market": "goals", "units": None},
     ]
     tallies = S.due_tallies(rows)
     assert tallies["stake"] == S.DUE_STAKE == 0.25
     assert tallies["units"] == 0.375
-    assert tallies["staked"] == 2
+    assert tallies["staked"] == 0.5, "units risked, not a count (2026-11-04)"
 
 
 def test_the_season_sums_the_nights_units():

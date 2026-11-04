@@ -615,6 +615,18 @@ Use the repo, the reports, and GitHub.
   pinned in `tests/test_every_pick_carries_a_bet_down_to.py`. The shared Board
   (`betting-lab-shared`) does not print `betDownTo` yet; that is a shared-page
   change, not this repo's.
+- **Every tracked bet on the site is counted at 0.25u, or to win 0.25u on a
+  minus price (2026-11-04, Cooper: "Make it so every bet weve tracked on the
+  website in records and stuff is all .25u or to win .25u for -odds").** Site
+  only: `web/settle_results.quarter` and `restake`, and `web/build_site_pages.
+  restake`, restate each graded best bet, prop and priced Due List entry from
+  its own price and result (a plus price risks 0.25u; a minus price risks
+  0.25 x |price| / 100 to win 0.25u; a push is 0). `staked` is the amount
+  risked, never a count. Rows kept at the card's stake are restated when
+  tracker.json is built, and a kept night without `stakeRule` is settled
+  again once, so Results, the season records, props and the Due List read
+  the same rule. The Record page says so. The card, tonight's stakes, the
+  model, the ledger and the policy are unchanged.
 - **The card may only price a bet at a book on `books.BETTABLE_BOOKS`, and the
   filter runs BEFORE market eligibility.** `bettable_only` fails closed — a
   frame with no `book` column returns empty, because "I cannot tell whose price

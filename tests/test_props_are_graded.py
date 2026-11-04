@@ -126,10 +126,10 @@ def test_units_are_won_at_the_published_price(settle) -> None:
         _prop("Chris Wood", "shots", "over", 2.5, price=150),
         _prop("Chris Wood", "shots_on_target", "over", 1.5, price=-120),
     ])
-    assert _result(props, "Chris Wood", "shots")["profitUnits"] == pytest.approx(0.15)
-    assert _result(props, "Chris Wood", "shots_on_target")["profitUnits"] == pytest.approx(-0.1)
+    assert _result(props, "Chris Wood", "shots")["profitUnits"] == pytest.approx(0.375)  # 0.25u at +150 (2026-11-04)
+    assert _result(props, "Chris Wood", "shots_on_target")["profitUnits"] == pytest.approx(-0.3)  # risked to win 0.25u at -120
     assert props["summary"]["w"] == 1 and props["summary"]["l"] == 1
-    assert props["summary"]["units"] == pytest.approx(0.05)
+    assert props["summary"]["units"] == pytest.approx(0.075)
 
 
 def test_an_unused_substitute_is_void_and_costs_nothing(settle) -> None:

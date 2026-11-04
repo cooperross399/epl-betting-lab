@@ -224,7 +224,12 @@ def test_tracker_json_sums_every_graded_best_bet_and_nothing_else(tmp_path: Path
     hist = _write_nights(tmp_path, {"2026-10-17": _night("2026-10-17", bets=bets)})
     out = P.tracker(hist, "2026-10-20T09:00:00Z")
     assert out["overall"]["bets"] == 2 and out["overall"]["w"] == 1 and out["overall"]["l"] == 1
-    assert out["overall"]["staked"] == 0.75 and out["overall"]["units"] == pytest.approx(0.1667, abs=0.0001)
+    # Every row is restated at 0.25u, or to win 0.25u on a minus price (2026-11-04): the kept 0.5u
+    # -120 win reads 0.3u risked to win 0.25u, whatever the card staked it.
+    assert out["overall"]["staked"] == pytest.approx(0.55) and out["overall"]["units"] == pytest.approx(0.0, abs=0.0001)
+    assert out["stake"] == 0.25
+    kept = next(r for r in out["rows"] if r["group"] == "team")
+    assert (kept["staked"], kept["units"]) == (0.3, 0.25)
     assert [g["key"] for g in out["byGroup"]] == ["team", "props"]
     assert {g["label"] for g in out["byTeam"]} == {"ARS", "FUL"}, "a team pick counts under both clubs; the prop under its player's club"
     assert out["byPlayer"][0]["label"] == "Bukayo Saka (ARS)"
@@ -297,7 +302,7 @@ def test_a_settled_night_keeps_graded_and_bets_and_the_graded_file_is_written(tm
     assert not (hist / S.GRADED_DIR / "2026-10-18.json").exists(), "a night with no final writes nothing, so an old file is never emptied"
 
 
-def test_graded_entry_and_bet_rows_carry_the_frozen_chances_and_the_cards_stake() -> None:
+def test_graded_entry_and_bet_rows_carry_the_frozen_chances_at_a_quarter_unit() -> None:
     S = _load("settle_results.py", "settle_rows")
     g = {"id": "401", "kickoff": "2026-10-17T14:00:00Z", "home": {"abbr": "ARS", "winProb": 0.55}, "away": {"abbr": "FUL", "winProb": 0.2},
          "drawProb": 0.25, "matchResult": {"home": -120, "draw": 260, "away": 330}, "total": {"overProb": 0.6}, "btts": {"yesProb": 0.5},
@@ -316,8 +321,8 @@ def test_graded_entry_and_bet_rows_carry_the_frozen_chances_and_the_cards_stake(
     playing = {gid: ({"kickoff": "2026-10-17T14:00:00Z"}, None) for gid in ("401", "402", "403")}
     rows = S.bet_rows(date(2026, 10, 17), results_games, playing, [])
     assert [r["gameId"] for r in rows] == ["401", "403"], "a lean is not a bet"
-    assert rows[0]["units"] == pytest.approx(0.4167, abs=0.0001) and rows[0]["team"] == "ARS" and "stakeAssumed" not in rows[0]
-    assert rows[1]["staked"] == 1.0 and rows[1]["stakeAssumed"] is True and rows[1]["units"] == -1.0
+    assert rows[0]["units"] == 0.25 and rows[0]["staked"] == 0.3 and rows[0]["team"] == "ARS" and "stakeAssumed" not in rows[0]
+    assert rows[1]["staked"] == 0.5 and rows[1]["units"] == -0.5 and "stakeAssumed" not in rows[1], "to win 0.25u at -200"
 
 
 # ---------- the match context the card prices ----------

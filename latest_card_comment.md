@@ -1,35 +1,21 @@
-## Thursday 05 November, 13:35 UTC — scheduled run
+## Thursday 05 November, 16:31 UTC — scheduled run
 
 Something went wrong in this run.
 
 ### What went wrong
 
 - Team xG could not be fetched from Understat; the ratings used goals alone this run.
+- The provider run was refused: The staging receipt was generated after the Thursday automation cutoff of 10:00 America/New_York.
 
 The card below was still built, from whatever evidence was available. Treat it with that in mind.
 
-Provider quota: 76884 (about 21 days at the observed burn)
+Provider quota: 75127 (about 20 days at the observed burn)
 
-Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5, team_total_home_0_5, team_total_home_1_5, team_total_home_2_5, team_total_away_0_5, team_total_away_1_5, team_total_away_2_5** (excluded: none)
+### No card was produced
 
-### Best bets
+This is a **blocked** card, not a card with no value: nothing was generated, so nothing is being withheld as a judgement.
 
-| Match | Market | Selection | Tier | Bet down to | Edge | Price | Book | Units |
-|:------|:-------|:----------|:-----|------------:|-----:|------:|:-----|------:|
-| Ipswich v Bournemouth | `team_total_away_1_5` | over | C | -133 | +6.0% | -120 | Bovada | 0.1 |
-| Man United v Aston Villa | `team_total_away_1_5` | over | C | +134 | +7.2% | +135 | BetMGM | 0.1 |
-| Nott'm Forest v Man City | `team_total_home_1_5` | over | C | +174 | +7.2% | +205 | Bovada | 0.1 |
-| Crystal Palace v Liverpool | `team_total_away_1_5` | under | C | +132 | +6.9% | +152 | Bovada | 0.1 |
-| Everton v Coventry | `team_total_home_1_5` | under | C | +112 | +5.2% | +120 | FanDuel | 0.1 |
-| Leeds v Tottenham | `corners_1x2` | home | C | +123 | +4.5% | +128 | BetRivers | 0.1 |
-
-### Leans
-
-_None._
-
-### What changed
-
-- **Dropped:** Leeds v Tottenham draw_no_bet away
+**Start here:** Staging validation is not handoff eligible. See data/outputs/staging_input_validation.md for the failing checks.
 
 
 ## Beyond the Premier League
@@ -123,4 +109,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/42036277849)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/42064580364)

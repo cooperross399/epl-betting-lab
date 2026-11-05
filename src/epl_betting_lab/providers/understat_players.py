@@ -74,14 +74,16 @@ class UnderstatError(RuntimeError):
 def _default_requester(url: str) -> Any:
     import requests
 
-    response = requests.post(
-        url,
-        headers={
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
-            "X-Requested-With": "XMLHttpRequest",
-        },
-        timeout=30,
-    )
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+        "X-Requested-With": "XMLHttpRequest",
+    }
+    response = requests.post(url, headers=headers, timeout=30)
+    # Understat began answering 405 (Method Not Allowed) to POST on its data
+    # endpoints in November 2026, which left every Matchday Refresh pricing
+    # on goals alone. 405 means the method, not the data, so ask again by GET.
+    if response.status_code == 405:
+        response = requests.get(url, headers=headers, timeout=30)
     if response.status_code != 200:
         raise UnderstatError(f"Understat answered HTTP {response.status_code} for {url}.")
     try:

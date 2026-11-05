@@ -56,6 +56,7 @@ src/epl_betting_lab/providers/manual_staging_provider.py
 src/epl_betting_lab/providers/odds_api_staging_provider.py
 src/epl_betting_lab/providers/player_props_staging.py
 src/epl_betting_lab/providers/provider_registry.py
+src/epl_betting_lab/providers/quota_gate.py
 src/epl_betting_lab/providers/request_budget.py
 src/epl_betting_lab/providers/team_names.py
 src/epl_betting_lab/providers/understat_players.py
@@ -100,6 +101,7 @@ src/epl_betting_lab/reports/fixture_slate_trim.py
 src/epl_betting_lab/reports/github_approval.py
 src/epl_betting_lab/reports/github_manual_run_verification.py
 src/epl_betting_lab/reports/ledger_prefill.py
+src/epl_betting_lab/reports/line_move.py
 src/epl_betting_lab/reports/lineup_check.py
 src/epl_betting_lab/reports/live_clv.py
 src/epl_betting_lab/reports/odds_export_conversion.py
@@ -132,6 +134,7 @@ src/epl_betting_lab/reports/refresh_all.py
 src/epl_betting_lab/reports/run_summary.py
 src/epl_betting_lab/reports/schedule_health.py
 src/epl_betting_lab/reports/scheduled_task_bridge.py
+src/epl_betting_lab/reports/selection_calibration.py
 src/epl_betting_lab/reports/staging_input_validation.py
 src/epl_betting_lab/reports/stale_current_odds.py
 src/epl_betting_lab/reports/stale_current_odds_archive.py
@@ -154,8 +157,10 @@ src/epl_betting_lab/strategies/promoted_fades.py
 src/epl_betting_lab/strategies/team_totals.py
 src/epl_betting_lab/strategies/totals.py
 tests/test_a_failed_price_fetch_keeps_the_board_on_this_round.py
+tests/test_a_low_quota_sheds_the_extras_first.py
 tests/test_a_missing_league_does_not_hide_europe.py
 tests/test_a_pick_carries_its_side_and_line.py
+tests/test_a_promoted_club_does_not_stop_the_backtest.py
 tests/test_a_push_is_a_bet_in_the_live_record_too.py
 tests/test_acceptance_market_aware.py
 tests/test_agent_brief.py
@@ -176,6 +181,7 @@ tests/test_browser_status.py
 tests/test_btts_calibration.py
 tests/test_bundle_diagnostic.py
 tests/test_calibration.py
+tests/test_calibration_on_the_picks.py
 tests/test_card_delivery_runs.py
 tests/test_card_freshness.py
 tests/test_card_history.py
@@ -220,6 +226,7 @@ tests/test_european_figures_match_the_report.py
 tests/test_european_ratings.py
 tests/test_european_ties_reach_the_ratings.py
 tests/test_every_club_on_the_board_has_a_logo.py
+tests/test_every_pick_carries_a_bet_down_to.py
 tests/test_explain_provider_failure.py
 tests/test_extra_card_freshness.py
 tests/test_extra_card_record.py
@@ -253,7 +260,9 @@ tests/test_odds_export_profile_suggestion_validation.py
 tests/test_odds_profile_install.py
 tests/test_odds_profile_rollback.py
 tests/test_odds_profile_verification.py
+tests/test_one_bet_per_match.py
 tests/test_one_name_per_card_file.py
+tests/test_one_record_page_and_smooth_tabs.py
 tests/test_operating_model_docs.py
 tests/test_out_of_sample.py
 tests/test_pick_display.py
@@ -319,14 +328,17 @@ tests/test_the_backtest_prices_promoted_clubs.py
 tests/test_the_beyond_card_applies_the_price_gate.py
 tests/test_the_beyond_section_matches_the_epl_standard.py
 tests/test_the_board_carries_open_prices_and_line_history.py
+tests/test_the_card_does_not_fight_the_move.py
 tests/test_the_card_ledger_is_not_reseeded.py
 tests/test_the_closing_snapshot_waits_for_its_slot.py
 tests/test_the_corner_bets_reach_the_public_record.py
+tests/test_the_due_list_is_tracked_at_a_quarter_unit.py
 tests/test_the_epl_site_has_every_page_the_nhl_site_has.py
 tests/test_the_guards_exist.py
 tests/test_the_headline_numbers_are_the_bettable_ones.py
 tests/test_the_history_guard_runs.py
 tests/test_the_outcome_gate_runs.py
+tests/test_the_price_feed_is_never_public.py
 tests/test_the_price_feed_stays_under_the_file_limit.py
 tests/test_the_public_record_counts_its_picks.py
 tests/test_the_record_settles_the_day_the_game_was_played.py
@@ -347,6 +359,7 @@ tests/test_thursday_readiness.py
 tests/test_tier_performance.py
 tests/test_totals_anchored.py
 tests/test_totals_diagnostics.py
+tests/test_understat_falls_back_to_get.py
 tests/test_understat_players.py
 tests/test_understat_xg.py
 tests/test_unified_ratings.py

@@ -1,4 +1,4 @@
-## Thursday 05 November, 12:21 UTC — scheduled run
+## Thursday 05 November, 13:35 UTC — scheduled run
 
 Something went wrong in this run.
 
@@ -8,7 +8,7 @@ Something went wrong in this run.
 
 The card below was still built, from whatever evidence was available. Treat it with that in mind.
 
-Provider quota: 77065 (about 21 days at the observed burn)
+Provider quota: 76884 (about 21 days at the observed burn)
 
 Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5, team_total_home_0_5, team_total_home_1_5, team_total_home_2_5, team_total_away_0_5, team_total_away_1_5, team_total_away_2_5** (excluded: none)
 
@@ -19,9 +19,9 @@ Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corner
 | Ipswich v Bournemouth | `team_total_away_1_5` | over | C | -133 | +6.0% | -120 | Bovada | 0.1 |
 | Man United v Aston Villa | `team_total_away_1_5` | over | C | +134 | +7.2% | +135 | BetMGM | 0.1 |
 | Nott'm Forest v Man City | `team_total_home_1_5` | over | C | +174 | +7.2% | +205 | Bovada | 0.1 |
-| Crystal Palace v Liverpool | `team_total_away_1_5` | under | C | +132 | +6.6% | +150 | Bovada | 0.1 |
+| Crystal Palace v Liverpool | `team_total_away_1_5` | under | C | +132 | +6.9% | +152 | Bovada | 0.1 |
 | Everton v Coventry | `team_total_home_1_5` | under | C | +112 | +5.2% | +120 | FanDuel | 0.1 |
-| Leeds v Tottenham | `corners_1x2` | home | C | +122 | +3.7% | +123 | BetRivers | 0.1 |
+| Leeds v Tottenham | `corners_1x2` | home | C | +123 | +4.5% | +128 | BetRivers | 0.1 |
 
 ### Leans
 
@@ -29,13 +29,7 @@ _None._
 
 ### What changed
 
-- **Added:** Crystal Palace v Liverpool 1x2 draw
-- **Added:** Everton v Coventry draw_no_bet home
-- **Moved section:** Arsenal v Hull team_total_away_0_5 over
-- **Moved section:** Leeds v Tottenham corners_1x2 home
-- **Moved section:** Man United v Aston Villa team_total_away_1_5 over
-- **Moved section:** Man United v Aston Villa team_total_home_1_5 over
-- **Moved section:** Man United v Aston Villa total_2_5 over
+- **Dropped:** Leeds v Tottenham draw_no_bet away
 
 
 ## Beyond the Premier League
@@ -129,4 +123,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/42025866363)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/42036277849)

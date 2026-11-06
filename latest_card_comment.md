@@ -1,4 +1,4 @@
-## Friday 06 November, 10:05 UTC — scheduled run
+## Friday 06 November, 12:27 UTC — scheduled run
 
 Something went wrong in this run.
 
@@ -8,7 +8,7 @@ Something went wrong in this run.
 
 The card below was still built, from whatever evidence was available. Treat it with that in mind.
 
-Provider quota: 70326 (about 19 days at the observed burn)
+Provider quota: 69362 (about 19 days at the observed burn)
 
 Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5, team_total_home_0_5, team_total_home_1_5, team_total_home_2_5, team_total_away_0_5, team_total_away_1_5, team_total_away_2_5** (excluded: none)
 
@@ -16,11 +16,11 @@ Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corner
 
 | Match | Market | Selection | Tier | Bet down to | Edge | Price | Book | Units |
 |:------|:-------|:----------|:-----|------------:|-----:|------:|:-----|------:|
-| Man United v Aston Villa | `team_total_away_1_5` | over | C | +134 | +7.0% | +134 | FanDuel | 0.1 |
 | Ipswich v Bournemouth | `team_total_away_1_5` | over | C | -133 | +5.6% | -122 | Bovada | 0.1 |
 | Crystal Palace v Liverpool | `team_total_away_1_5` | under | C | +132 | +6.9% | +152 | Bovada | 0.1 |
-| Everton v Coventry | `team_total_home_1_5` | under | C | +112 | +5.2% | +120 | FanDuel | 0.1 |
-| Nott'm Forest v Man City | `team_total_home_1_5` | over | C | +201 | +5.0% | +215 | Bovada | 0.1 |
+| Nott'm Forest v Man City | `team_total_away_1_5` | under | C | +115 | +6.6% | +130 | FanDuel | 0.1 |
+| Everton v Coventry | `team_total_home_1_5` | under | C | +112 | +4.8% | +118 | BetRivers | 0.1 |
+| Man United v Aston Villa | `team_total_home_1_5` | over | C | -115 | +3.6% | -115 | Bovada | 0.1 |
 
 ### Leans
 
@@ -28,66 +28,15 @@ _None._
 
 ### What changed
 
-- **Added:** Arsenal v Hull 1x2 away
-- **Added:** Arsenal v Hull btts yes
-- **Added:** Arsenal v Hull corners_1x2 away
-- **Added:** Arsenal v Hull team_total_away_0_5 over
-- **Added:** Arsenal v Hull team_total_away_1_5 over
-- **Added:** Arsenal v Hull team_total_home_0_5 under
-- **Added:** Arsenal v Hull total_2_5 under
-- **Added:** Brighton v Brentford 1x2 away
-- **Added:** Brighton v Brentford 1x2 draw
-- **Added:** Brighton v Brentford double_chance draw_or_away
-- **Added:** Brighton v Brentford draw_no_bet away
-- **Added:** Crystal Palace v Liverpool 1x2 home
-- **Added:** Crystal Palace v Liverpool draw_no_bet home
-- **Added:** Crystal Palace v Liverpool team_total_away_0_5 under
-- **Added:** Crystal Palace v Liverpool team_total_away_1_5 under
-- **Added:** Crystal Palace v Liverpool team_total_away_2_5 under
-- **Added:** Crystal Palace v Liverpool team_total_home_1_5 over
-- **Added:** Everton v Coventry 1x2 home
-- **Added:** Everton v Coventry team_total_home_0_5 under
-- **Added:** Everton v Coventry team_total_home_1_5 under
-- **Added:** Fulham v Newcastle 1x2 away
-- **Added:** Fulham v Newcastle corners_1x2 away
-- **Added:** Fulham v Newcastle double_chance draw_or_away
-- **Added:** Fulham v Newcastle draw_no_bet away
-- **Added:** Ipswich v Bournemouth corners_1x2 home
-- **Added:** Ipswich v Bournemouth corners_total_10_5 over
-- **Added:** Ipswich v Bournemouth corners_total_9_5 over
-- **Added:** Ipswich v Bournemouth double_chance draw_or_away
-- **Added:** Ipswich v Bournemouth team_total_away_1_5 over
-- **Added:** Ipswich v Bournemouth team_total_away_2_5 over
-- **Added:** Ipswich v Bournemouth total_2_5 over
-- **Added:** Leeds v Tottenham 1x2 away
-- **Added:** Leeds v Tottenham btts no
-- **Added:** Leeds v Tottenham corners_1x2 home
-- **Added:** Leeds v Tottenham draw_no_bet away
-- **Added:** Leeds v Tottenham team_total_away_0_5 under
-- **Added:** Leeds v Tottenham team_total_home_0_5 under
-- **Added:** Man United v Aston Villa 1x2 away
-- **Added:** Man United v Aston Villa btts yes
-- **Added:** Man United v Aston Villa corners_1x2 away
-- **Added:** Man United v Aston Villa corners_total_10_5 over
-- **Added:** Man United v Aston Villa corners_total_9_5 over
-- **Added:** Man United v Aston Villa draw_no_bet away
-- **Added:** Man United v Aston Villa team_total_away_1_5 over
-- **Added:** Man United v Aston Villa team_total_away_2_5 over
-- **Added:** Man United v Aston Villa team_total_home_1_5 over
-- **Added:** Man United v Aston Villa team_total_home_2_5 over
-- **Added:** Man United v Aston Villa total_2_5 over
-- **Added:** Nott'm Forest v Man City corners_total_10_5 over
-- **Added:** Nott'm Forest v Man City team_total_away_0_5 under
-- **Added:** Nott'm Forest v Man City team_total_away_1_5 under
-- **Added:** Nott'm Forest v Man City team_total_home_0_5 over
-- **Added:** Nott'm Forest v Man City team_total_home_1_5 over
-- **Added:** Nott'm Forest v Man City team_total_home_2_5 over
-- **Added:** Sunderland v Chelsea btts yes
-- **Added:** Sunderland v Chelsea corners_1x2 away
-- **Added:** Sunderland v Chelsea team_total_away_0_5 under
-- **Added:** Sunderland v Chelsea team_total_away_1_5 under
-- **Added:** Sunderland v Chelsea team_total_home_2_5 over
-- **Added:** Sunderland v Chelsea total_2_5 over
+- **Added:** Crystal Palace v Liverpool 1x2 draw
+- **Added:** Fulham v Newcastle team_total_home_1_5 under
+- **Added:** Nott'm Forest v Man City team_total_away_2_5 under
+- **Dropped:** Leeds v Tottenham team_total_away_0_5 under
+- **Dropped:** Nott'm Forest v Man City corners_total_10_5 over
+- **Moved section:** Man United v Aston Villa team_total_away_1_5 over
+- **Moved section:** Man United v Aston Villa team_total_home_1_5 over
+- **Moved section:** Nott'm Forest v Man City team_total_away_1_5 under
+- **Moved section:** Nott'm Forest v Man City team_total_home_1_5 over
 
 
 ## Beyond the Premier League
@@ -181,4 +130,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/42199447461)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/42217163480)

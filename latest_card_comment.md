@@ -1,4 +1,4 @@
-## Saturday 07 November, 09:22 UTC — scheduled run
+## Saturday 07 November, 11:17 UTC — scheduled run
 
 Something went wrong in this run.
 
@@ -8,7 +8,7 @@ Something went wrong in this run.
 
 The card below was still built, from whatever evidence was available. Treat it with that in mind.
 
-Provider quota: 65340 (about 18 days at the observed burn)
+Provider quota: 64285 (about 17 days at the observed burn)
 
 Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5, team_total_home_0_5, team_total_home_1_5, team_total_home_2_5, team_total_away_0_5, team_total_away_1_5, team_total_away_2_5** (excluded: none)
 
@@ -17,9 +17,8 @@ Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corner
 | Match | Market | Selection | Tier | Bet down to | Edge | Price | Book | Units |
 |:------|:-------|:----------|:-----|------------:|-----:|------:|:-----|------:|
 | Ipswich v Bournemouth | `team_total_away_1_5` | over | C | -139 | +6.7% | -122 | Bovada | 0.1 |
-| Nott'm Forest v Man City | `team_total_away_1_5` | under | C | +114 | +6.0% | +126 | FanDuel | 0.1 |
+| Nott'm Forest v Man City | `team_total_away_1_5` | under | C | +114 | +7.1% | +132 | FanDuel | 0.1 |
 | Crystal Palace v Liverpool | `team_total_away_1_5` | under | C | +150 | +4.8% | +158 | Bovada | 0.1 |
-| Arsenal v Hull | `total_2_5` | under | C | +121 | +7.9% | +168 | FanDuel | 0.1 |
 | Brighton v Brentford | `1x2` | away | C | +283 | +4.0% | +290 | FanDuel | 0.1 |
 
 ### Leans
@@ -28,18 +27,8 @@ _None._
 
 ### What changed
 
-- **Added:** Leeds v Tottenham team_total_away_0_5 under
-- **Added:** Leeds v Tottenham team_total_home_1_5 under
-- **Added:** Leeds v Tottenham total_2_5 under
-- **Dropped:** Arsenal v Hull team_total_away_0_5 over
-- **Dropped:** Crystal Palace v Liverpool team_total_home_2_5 over
-- **Dropped:** Everton v Coventry 1x2 home
-- **Dropped:** Everton v Coventry team_total_away_1_5 over
-- **Dropped:** Everton v Coventry team_total_home_0_5 under
-- **Dropped:** Everton v Coventry team_total_home_1_5 under
-- **Dropped:** Fulham v Newcastle corners_1x2 away
-- **Dropped:** Fulham v Newcastle team_total_home_0_5 under
-- **Dropped:** Man United v Aston Villa total_2_5 over
+- **Added:** Crystal Palace v Liverpool team_total_home_2_5 over
+- **Dropped:** Leeds v Tottenham team_total_home_1_5 under
 - **Moved section:** Arsenal v Hull total_2_5 under
 
 
@@ -55,15 +44,15 @@ National teams, on a pool that shares no information with the club ratings — a
 |:--|:--|:--|--:|--:|--:|:--|--:|
 | Portugal v Denmark | `double_chance` | draw_or_away | +137 | +6.5% | +155 | BetRivers | 0.1 |
 | Slovenia v Switzerland | `draw_no_bet` | home | +266 | +6.5% | +310 | DraftKings | 0.1 |
+| Bulgaria v Iceland | `draw_no_bet` | home | +176 | +6.5% | +200 | DraftKings | 0.1 |
 | Romania v Poland | `double_chance` | home_or_draw | -143 | +6.3% | -127 | BetRivers | 0.1 |
-| Slovenia v Switzerland | `double_chance` | home_or_draw | +110 | +6.3% | +123 | BetRivers | 0.1 |
 
 - 103 fixture(s) dropped as already kicked off: Albania v Belarus, Albania v San Marino, Andorra v Malta, Armenia v Latvia, Armenia v Montenegro, Austria v Israel, and 97 more.
 - `btts` is not bet here: the model sits about 8 points below the market on the goals level for every fixture, so a selection in that market would be the gap rather than the fixture.
 - `total_2_5` is not bet here: the model sits about 8 points below the market on the goals level for every fixture, so a selection in that market would be the gap rather than the fixture.
 - Ratings include no result after 2026-10-06; the results archive runs about a month behind, so the current international window is not in the fit.
 - No corner model: the pool carries no corner counts.
-- 16 further selection(s) qualified and are not shown: this section prints at most 4 per competition, the highest edges first.
+- 17 further selection(s) qualified and are not shown: this section prints at most 4 per competition, the highest edges first.
 
 ### UEFA Champions League
 
@@ -72,13 +61,13 @@ Priced on the European ratings, where 868 European ties bridge eleven leagues on
 | Match | Market | Selection | Bet down to | Edge | Price | Book | Units |
 |:--|:--|:--|--:|--:|--:|:--|--:|
 | Lille v Bayern Munich | `corners_1x2` | home | +235 | +7.0% | +280 | BetRivers | 0.1 |
-| Galatasaray v Aston Villa | `draw_no_bet` | home | -127 | +7.0% | -110 | DraftKings | 0.1 |
 | Paris SG v Roma | `double_chance` | draw_or_away | +168 | +6.4% | +190 | DraftKings | 0.1 |
+| Como v AEK | `total_2_5` | under | +149 | +6.2% | +195 | BetRivers | 0.1 |
 | Man City v Napoli | `double_chance` | draw_or_away | +225 | +6.1% | +255 | BetRivers | 0.1 |
 
 - 54 fixture(s) dropped as already kicked off: AEK Athens v Real Madrid, AS Roma v Real Madrid, AS Roma v ŠK Slovan Bratislava, Arsenal v Lille, Aston Villa v Fenerbahce, Aston Villa v Viking FK, and 48 more.
 - 6 fixture(s) left out because a club has no rating in the pool: Ath Madrid v Viking FK, Bodø/Glimt v LASK, Sabah FK v Barcelona, Shakhtar Donetsk v Fenerbahce, Slavia Praha v Villarreal, ŠK Slovan Bratislava v Betis.
-- 29 further selection(s) qualified and are not shown: this section prints at most 4 per competition, the highest edges first.
+- 30 further selection(s) qualified and are not shown: this section prints at most 4 per competition, the highest edges first.
 
 _Fitted but not bet: EFL Cup (Carabao) (0 of 0 fixtures rateable), UEFA Europa League (0 of 0 fixtures rateable), UEFA Europa Conference League (0 of 0 fixtures rateable). Their results still bridge the countries in the rating pool — which is most of their value — and they return to the card on their own the run they can price something._
 
@@ -141,4 +130,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/42359195901)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/42367215195)

@@ -1,4 +1,4 @@
-## Saturday 07 November, 11:17 UTC — scheduled run
+## Saturday 07 November, 15:28 UTC — scheduled run
 
 Something went wrong in this run.
 
@@ -8,7 +8,7 @@ Something went wrong in this run.
 
 The card below was still built, from whatever evidence was available. Treat it with that in mind.
 
-Provider quota: 64285 (about 17 days at the observed burn)
+Provider quota: 61889 (about 17 days at the observed burn)
 
 Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5, team_total_home_0_5, team_total_home_1_5, team_total_home_2_5, team_total_away_0_5, team_total_away_1_5, team_total_away_2_5** (excluded: none)
 
@@ -17,8 +17,8 @@ Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corner
 | Match | Market | Selection | Tier | Bet down to | Edge | Price | Book | Units |
 |:------|:-------|:----------|:-----|------------:|-----:|------:|:-----|------:|
 | Ipswich v Bournemouth | `team_total_away_1_5` | over | C | -139 | +6.7% | -122 | Bovada | 0.1 |
-| Nott'm Forest v Man City | `team_total_away_1_5` | under | C | +114 | +7.1% | +132 | FanDuel | 0.1 |
-| Crystal Palace v Liverpool | `team_total_away_1_5` | under | C | +150 | +4.8% | +158 | Bovada | 0.1 |
+| Nott'm Forest v Man City | `team_total_away_1_5` | under | C | +114 | +7.0% | +132 | FanDuel | 0.1 |
+| Crystal Palace v Liverpool | `team_total_away_1_5` | under | C | +151 | +4.9% | +160 | BetRivers | 0.1 |
 | Brighton v Brentford | `1x2` | away | C | +283 | +4.0% | +290 | FanDuel | 0.1 |
 
 ### Leans
@@ -27,9 +27,24 @@ _None._
 
 ### What changed
 
-- **Added:** Crystal Palace v Liverpool team_total_home_2_5 over
-- **Dropped:** Leeds v Tottenham team_total_home_1_5 under
-- **Moved section:** Arsenal v Hull total_2_5 under
+- **Dropped:** Arsenal v Hull 1x2 away
+- **Dropped:** Arsenal v Hull btts yes
+- **Dropped:** Arsenal v Hull corners_1x2 away
+- **Dropped:** Arsenal v Hull team_total_away_1_5 over
+- **Dropped:** Arsenal v Hull team_total_home_0_5 under
+- **Dropped:** Arsenal v Hull total_2_5 under
+- **Dropped:** Fulham v Newcastle 1x2 away
+- **Dropped:** Fulham v Newcastle double_chance draw_or_away
+- **Dropped:** Fulham v Newcastle draw_no_bet away
+- **Dropped:** Fulham v Newcastle team_total_home_1_5 under
+- **Dropped:** Leeds v Tottenham 1x2 away
+- **Dropped:** Leeds v Tottenham btts no
+- **Dropped:** Leeds v Tottenham corners_1x2 home
+- **Dropped:** Leeds v Tottenham draw_no_bet away
+- **Dropped:** Leeds v Tottenham team_total_away_0_5 under
+- **Dropped:** Leeds v Tottenham team_total_home_0_5 under
+- **Dropped:** Leeds v Tottenham total_2_5 under
+- **Dropped:** Man United v Aston Villa btts yes
 
 
 ## Beyond the Premier League
@@ -82,9 +97,7 @@ Context only: no units, nothing here is a selection, and no edge is shown.
 
 | Player | Team | Opp | Kickoff (UTC) | Last season | Drought (bar) | 1 in N for him | Status | Price |
 |:--|:--|:--|:--|--:|:--|--:|:--|:--|
-| Harry Wilson | Leeds United | Tottenham Hotspur | 2026-11-07 12:30 | 10 goals, 28% of apps | 14 (8) | 1 in 95 | — | not posted |
 | Danny Welbeck | Chelsea | Sunderland | 2026-11-08 14:00 | 13 goals, 27% of apps | 11 (8) | 1 in 32 | — | not posted |
-| Viktor Gyökeres | Arsenal | Hull City | 2026-11-07 15:00 | 14 goals, 28% of apps | 9 (8) | 1 in 19 | — | not posted |
 | Morgan Gibbs-White | Nottingham Forest | Manchester City | 2026-11-07 17:30 | 15 goals, 35% of apps | 6 (6) | 1 in 13 | — | not posted |
 
 **1+ assist, over 0.5.** Listed: 7+ Premier League assists last season and a run of league appearances without an assist at the bar his total sets (12+ assists -> 8, 9-11 assists -> 10, 7-8 assists -> 13 straight games).
@@ -95,10 +108,11 @@ Nobody playing in this round is due.
 
 ### How the recommendations have done
 
-- Settled: **167** selections, 64 won, 8 returned the stake
-- Staked: 19.55 units
-- Profit: **-2.38 units** (-12.2% on turnover)
-- Still pending: 11
+- Settled: **168** selections, 65 won, 8 returned the stake
+- Staked: 19.65 units
+- Profit: **-2.25 units** (-11.5% on turnover)
+- Still pending: 8
+- Played, waiting on results data: **2** — these are settled matches the results feed has not caught up with, so the record above is behind rather than still accumulating.
 
 - Stake returned (void): 8 — counted in the settled total above at zero profit, because a push is a bet
 
@@ -112,7 +126,7 @@ This is the only out-of-sample evidence this project has. It will take a long ti
 
 Consensus CLV on each market's picks, judged once it has 50 with a closing price. Cutting or raising a market is your call; this says where the evidence points.
 
-- `corners_1x2`: 21 of 50 picks needed, not judged yet.
+- `corners_1x2`: 22 of 50 picks needed, not judged yet.
 - `corners_total_9_5`: 19 of 50 picks needed, not judged yet.
 - `corners_total_10_5`: 18 of 50 picks needed, not judged yet.
 - `draw_no_bet`: 18 of 50 picks needed, not judged yet.
@@ -121,8 +135,8 @@ Consensus CLV on each market's picks, judged once it has 50 with a closing price
 - `team_total_home_1_5`: 9 of 50 picks needed, not judged yet.
 - `1x2`: 5 of 50 picks needed, not judged yet.
 - `btts`: 4 of 50 picks needed, not judged yet.
-- `team_total_away_0_5`: 1 of 50 picks needed, not judged yet.
-- `total_2_5`: 1 of 50 picks needed, not judged yet.
+- `team_total_away_0_5`: 2 of 50 picks needed, not judged yet.
+- `total_2_5`: 2 of 50 picks needed, not judged yet.
 
 ---
 
@@ -130,4 +144,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/42367215195)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/42386137177)

@@ -1,4 +1,4 @@
-## Sunday 08 November, 10:08 UTC — scheduled run
+## Sunday 08 November, 11:32 UTC — scheduled run
 
 Something went wrong in this run.
 
@@ -8,7 +8,7 @@ Something went wrong in this run.
 
 The card below was still built, from whatever evidence was available. Treat it with that in mind.
 
-Provider quota: 56957 (about 15 days at the observed burn)
+Provider quota: 56333 (about 15 days at the observed burn)
 
 Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5, team_total_home_0_5, team_total_home_1_5, team_total_home_2_5, team_total_away_0_5, team_total_away_1_5, team_total_away_2_5** (excluded: none)
 
@@ -16,9 +16,9 @@ Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corner
 
 | Match | Market | Selection | Tier | Bet down to | Edge | Price | Book | Units |
 |:------|:-------|:----------|:-----|------------:|-----:|------:|:-----|------:|
-| Ipswich v Bournemouth | `team_total_away_1_5` | over | C | -138 | +7.4% | -118 | BetMGM | 0.1 |
-| Crystal Palace v Liverpool | `team_total_away_1_5` | under | C | +157 | +6.1% | +176 | FanDuel | 0.1 |
-| Man United v Aston Villa | `team_total_away_2_5` | over | C | +397 | +4.4% | +420 | FanDuel | 0.1 |
+| Ipswich v Bournemouth | `team_total_away_1_5` | over | C | -139 | +7.0% | -120 | BetMGM | 0.1 |
+| Man United v Aston Villa | `team_total_away_1_5` | over | C | +116 | +5.5% | +125 | Bovada | 0.1 |
+| Sunderland v Chelsea | `team_total_away_1_5` | under | C | -105 | +4.2% | -102 | Bovada | 0.1 |
 | Brighton v Brentford | `1x2` | away | C | +285 | +4.1% | +295 | BetRivers | 0.1 |
 
 ### Leans
@@ -27,23 +27,15 @@ _None._
 
 ### What changed
 
-- **Added:** Brighton v Brentford corners_1x2 home
-- **Added:** Crystal Palace v Liverpool team_total_home_0_5 over
-- **Added:** Crystal Palace v Liverpool total_2_5 under
-- **Added:** Ipswich v Bournemouth btts yes
-- **Added:** Ipswich v Bournemouth double_chance home_or_away
-- **Added:** Ipswich v Bournemouth draw_no_bet away
-- **Added:** Man United v Aston Villa btts yes
-- **Added:** Sunderland v Chelsea team_total_home_0_5 over
-- **Dropped:** Man United v Aston Villa corners_total_10_5 over
-- **Dropped:** Man United v Aston Villa team_total_home_1_5 over
-- **Dropped:** Man United v Aston Villa team_total_home_2_5 over
-- **Dropped:** Nott'm Forest v Man City team_total_away_0_5 under
-- **Dropped:** Nott'm Forest v Man City team_total_away_1_5 under
-- **Dropped:** Nott'm Forest v Man City team_total_home_0_5 over
-- **Dropped:** Nott'm Forest v Man City team_total_home_1_5 over
-- **Dropped:** Nott'm Forest v Man City team_total_home_2_5 over
+- **Added:** Sunderland v Chelsea 1x2 home
+- **Added:** Sunderland v Chelsea draw_no_bet home
+- **Dropped:** Ipswich v Bournemouth btts yes
+- **Dropped:** Man United v Aston Villa corners_1x2 away
+- **Moved section:** Crystal Palace v Liverpool team_total_away_1_5 under
+- **Moved section:** Man United v Aston Villa team_total_away_1_5 over
 - **Moved section:** Man United v Aston Villa team_total_away_2_5 over
+- **Moved section:** Sunderland v Chelsea team_total_away_1_5 under
+- **Moved section:** Sunderland v Chelsea total_2_5 over
 
 
 ## Beyond the Premier League
@@ -109,7 +101,7 @@ Nobody playing in this round is due.
 - Settled: **172** selections, 68 won, 8 returned the stake
 - Staked: 20.05 units
 - Profit: **-1.86 units** (-9.3% on turnover)
-- Still pending: 7
+- Still pending: 8
 
 - Stake returned (void): 8 — counted in the settled total above at zero profit, because a push is a bet
 
@@ -134,6 +126,7 @@ Consensus CLV on each market's picks, judged once it has 50 with a closing price
 - `btts`: 4 of 50 picks needed, not judged yet.
 - `team_total_away_0_5`: 2 of 50 picks needed, not judged yet.
 - `total_2_5`: 2 of 50 picks needed, not judged yet.
+- `team_total_away_2_5`: 0 of 50 picks needed, not judged yet.
 
 ---
 
@@ -141,4 +134,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/42469787676)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/42475766961)

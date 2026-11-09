@@ -1,4 +1,4 @@
-## Monday 09 November, 10:55 UTC — scheduled run
+## Monday 09 November, 13:20 UTC — scheduled run
 
 Something went wrong in this run.
 
@@ -8,7 +8,7 @@ Something went wrong in this run.
 
 The card below was still built, from whatever evidence was available. Treat it with that in mind.
 
-Provider quota: **52559** — about 14 day(s) at the observed burn. **Top this up or the schedule stops.**
+Provider quota: **51989** — about 14 day(s) at the observed burn. **Top this up or the schedule stops.**
 
 Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5, team_total_home_0_5, team_total_home_1_5, team_total_home_2_5, team_total_away_0_5, team_total_away_1_5, team_total_away_2_5** (excluded: none)
 
@@ -17,7 +17,7 @@ Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corner
 | Match | Market | Selection | Tier | Bet down to | Edge | Price | Book | Units |
 |:------|:-------|:----------|:-----|------------:|-----:|------:|:-----|------:|
 | Aston Villa v Sunderland | `1x2` | home | C | -149 | +5.7% | -136 | BetRivers | 0.1 |
-| Chelsea v Leeds | `team_total_home_1_5` | under | C | -107 | +6.4% | +105 | Bovada | 0.1 |
+| Chelsea v Leeds | `team_total_home_1_5` | under | C | -109 | +5.8% | +100 | BetRivers | 0.1 |
 | Man City v Fulham | `team_total_home_1_5` | under | C | +163 | +6.5% | +185 | BetRivers | 0.1 |
 | Hull v Brighton | `team_total_away_1_5` | under | C | +133 | +6.1% | +148 | BetRivers | 0.1 |
 | Brentford v Everton | `team_total_home_0_5` | under | C | +325 | +6.6% | +390 | BetRivers | 0.1 |
@@ -31,67 +31,10 @@ _None._
 
 ### What changed
 
-- **Added:** Aston Villa v Sunderland 1x2 home
-- **Added:** Aston Villa v Sunderland btts yes
-- **Added:** Aston Villa v Sunderland draw_no_bet home
-- **Added:** Aston Villa v Sunderland team_total_away_1_5 over
-- **Added:** Aston Villa v Sunderland team_total_home_1_5 over
-- **Added:** Aston Villa v Sunderland team_total_home_2_5 over
-- **Added:** Aston Villa v Sunderland total_2_5 over
-- **Added:** Bournemouth v Nott'm Forest 1x2 away
-- **Added:** Bournemouth v Nott'm Forest double_chance draw_or_away
-- **Added:** Bournemouth v Nott'm Forest draw_no_bet away
-- **Added:** Bournemouth v Nott'm Forest team_total_home_1_5 over
-- **Added:** Bournemouth v Nott'm Forest team_total_home_2_5 over
-- **Added:** Brentford v Everton 1x2 away
-- **Added:** Brentford v Everton 1x2 draw
-- **Added:** Brentford v Everton btts no
-- **Added:** Brentford v Everton double_chance draw_or_away
-- **Added:** Brentford v Everton draw_no_bet away
-- **Added:** Brentford v Everton team_total_home_0_5 under
-- **Added:** Brentford v Everton team_total_home_2_5 under
-- **Added:** Brentford v Everton total_2_5 under
-- **Added:** Chelsea v Leeds 1x2 away
-- **Added:** Chelsea v Leeds 1x2 draw
-- **Added:** Chelsea v Leeds btts no
-- **Added:** Chelsea v Leeds double_chance draw_or_away
-- **Added:** Chelsea v Leeds team_total_home_0_5 under
-- **Added:** Chelsea v Leeds team_total_home_1_5 under
-- **Added:** Chelsea v Leeds total_2_5 under
-- **Added:** Coventry v Crystal Palace double_chance draw_or_away
-- **Added:** Hull v Brighton 1x2 draw
-- **Added:** Hull v Brighton 1x2 home
-- **Added:** Hull v Brighton double_chance home_or_draw
-- **Added:** Hull v Brighton draw_no_bet home
-- **Added:** Hull v Brighton team_total_away_0_5 under
-- **Added:** Hull v Brighton team_total_away_1_5 under
-- **Added:** Hull v Brighton team_total_away_2_5 under
-- **Added:** Hull v Brighton team_total_home_0_5 over
-- **Added:** Hull v Brighton team_total_home_1_5 over
-- **Added:** Hull v Brighton total_2_5 under
-- **Added:** Liverpool v Man United 1x2 away
-- **Added:** Liverpool v Man United corners_1x2 home
-- **Added:** Liverpool v Man United draw_no_bet away
-- **Added:** Liverpool v Man United team_total_home_1_5 over
-- **Added:** Liverpool v Man United team_total_home_2_5 over
-- **Added:** Man City v Fulham 1x2 draw
-- **Added:** Man City v Fulham corners_1x2 home
-- **Added:** Man City v Fulham double_chance draw_or_away
-- **Added:** Man City v Fulham team_total_home_0_5 under
-- **Added:** Man City v Fulham team_total_home_1_5 under
-- **Added:** Man City v Fulham team_total_home_2_5 under
-- **Added:** Man City v Fulham total_2_5 under
-- **Added:** Newcastle v Arsenal 1x2 draw
-- **Added:** Newcastle v Arsenal 1x2 home
-- **Added:** Newcastle v Arsenal btts no
-- **Added:** Newcastle v Arsenal double_chance home_or_draw
-- **Added:** Newcastle v Arsenal draw_no_bet home
-- **Added:** Newcastle v Arsenal team_total_away_0_5 under
-- **Added:** Newcastle v Arsenal total_2_5 under
-- **Added:** Tottenham v Ipswich 1x2 home
-- **Dropped:** Man United v Aston Villa 1x2 away
-- **Dropped:** Man United v Aston Villa 1x2 draw
-- **Dropped:** Man United v Aston Villa 1x2 home
+- **Added:** Chelsea v Leeds draw_no_bet away
+- **Added:** Chelsea v Leeds team_total_home_2_5 under
+- **Added:** Man City v Fulham team_total_away_1_5 over
+- **Dropped:** Man City v Fulham team_total_home_0_5 under
 
 
 ## Beyond the Premier League
@@ -124,7 +67,7 @@ Priced on the European ratings, where 868 European ties bridge eleven leagues on
 |:--|:--|:--|--:|--:|--:|:--|--:|
 | Lille v Bayern Munich | `corners_1x2` | home | +237 | +6.9% | +280 | BetRivers | 0.1 |
 | Man City v Napoli | `double_chance` | draw_or_away | +221 | +6.5% | +255 | BetRivers | 0.1 |
-| Como v AEK | `total_2_5` | under | +148 | +6.4% | +195 | DraftKings | 0.1 |
+| Como v AEK | `total_2_5` | under | +148 | +6.4% | +195 | BetRivers | 0.1 |
 | RB Leipzig v Lens | `double_chance` | draw_or_away | +155 | +6.3% | +175 | BetRivers | 0.1 |
 
 - 54 fixture(s) dropped as already kicked off: AEK Athens v Real Madrid, AS Roma v Real Madrid, AS Roma v ŠK Slovan Bratislava, Arsenal v Lille, Aston Villa v Fenerbahce, Aston Villa v Viking FK, and 48 more.
@@ -200,6 +143,8 @@ Consensus CLV on each market's picks, judged once it has 50 with a closing price
 - `team_total_away_0_5`: 2 of 50 picks needed, not judged yet.
 - `total_2_5`: 2 of 50 picks needed, not judged yet.
 - `team_total_away_2_5`: 1 of 50 picks needed, not judged yet.
+- `team_total_home_0_5`: 0 of 50 picks needed, not judged yet.
+- `team_total_home_2_5`: 0 of 50 picks needed, not judged yet.
 
 ---
 
@@ -207,4 +152,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/42604254598)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/42623735686)

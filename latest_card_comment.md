@@ -1,4 +1,4 @@
-## Monday 09 November, 19:47 UTC — scheduled run
+## Tuesday 10 November, 10:41 UTC — scheduled run
 
 Something went wrong in this run.
 
@@ -8,7 +8,7 @@ Something went wrong in this run.
 
 The card below was still built, from whatever evidence was available. Treat it with that in mind.
 
-Provider quota: **50756** — about 14 day(s) at the observed burn. **Top this up or the schedule stops.**
+Provider quota: **45826** — about 12 day(s) at the observed burn. **Top this up or the schedule stops.**
 
 Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5, team_total_home_0_5, team_total_home_1_5, team_total_home_2_5, team_total_away_0_5, team_total_away_1_5, team_total_away_2_5** (excluded: none)
 
@@ -16,7 +16,7 @@ Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corner
 
 | Match | Market | Selection | Tier | Bet down to | Edge | Price | Book | Units |
 |:------|:-------|:----------|:-----|------------:|-----:|------:|:-----|------:|
-| Aston Villa v Sunderland | `1x2` | home | C | -155 | +6.7% | -136 | BetRivers | 0.1 |
+| Aston Villa v Sunderland | `1x2` | home | C | -138 | +4.9% | -130 | BetOnline.ag | 0.1 |
 | Man City v Fulham | `team_total_home_1_5` | under | C | +163 | +6.5% | +185 | BetRivers | 0.1 |
 | Chelsea v Leeds | `team_total_home_1_5` | under | C | -106 | +5.1% | +100 | BetRivers | 0.1 |
 | Hull v Brighton | `team_total_away_1_5` | under | C | +133 | +6.1% | +148 | BetRivers | 0.1 |
@@ -31,16 +31,10 @@ _None._
 
 ### What changed
 
-- **Added:** Coventry v Crystal Palace 1x2 away
-- **Added:** Liverpool v Man United double_chance draw_or_away
-- **Added:** Man City v Fulham team_total_home_0_5 under
-- **Dropped:** Aston Villa v Sunderland btts yes
-- **Dropped:** Aston Villa v Sunderland team_total_away_1_5 over
-- **Dropped:** Brentford v Everton team_total_home_0_5 under
-- **Dropped:** Brentford v Everton team_total_home_2_5 under
-- **Dropped:** Chelsea v Leeds 1x2 draw
-- **Dropped:** Chelsea v Leeds btts no
-- **Dropped:** Chelsea v Leeds draw_no_bet away
+- **Added:** Man City v Fulham 1x2 away
+- **Added:** Man City v Fulham draw_no_bet away
+- **Added:** Man City v Fulham team_total_away_0_5 over
+- **Dropped:** Man City v Fulham team_total_home_0_5 under
 
 
 ## Beyond the Premier League
@@ -54,7 +48,7 @@ National teams, on a pool that shares no information with the club ratings — a
 | Match | Market | Selection | Bet down to | Edge | Price | Book | Units |
 |:--|:--|:--|--:|--:|--:|:--|--:|
 | Andorra v Gibraltar | `draw_no_bet` | away | +220 | +7.0% | +260 | BetRivers | 0.1 |
-| Romania v Poland | `double_chance` | home_or_draw | -143 | +6.7% | -125 | BetRivers | 0.1 |
+| Romania v Poland | `double_chance` | home_or_draw | -143 | +6.7% | -125 | DraftKings | 0.1 |
 | Andorra v Gibraltar | `double_chance` | draw_or_away | -127 | +6.6% | -112 | BetRivers | 0.1 |
 | Portugal v Denmark | `double_chance` | draw_or_away | +137 | +6.5% | +155 | BetRivers | 0.1 |
 
@@ -63,7 +57,7 @@ National teams, on a pool that shares no information with the club ratings — a
 - `total_2_5` is not bet here: the model sits about 8 points below the market on the goals level for every fixture, so a selection in that market would be the gap rather than the fixture.
 - Ratings include no result after 2026-10-06; the results archive runs about a month behind, so the current international window is not in the fit.
 - No corner model: the pool carries no corner counts.
-- 18 further selection(s) qualified and are not shown: this section prints at most 4 per competition, the highest edges first.
+- 17 further selection(s) qualified and are not shown: this section prints at most 4 per competition, the highest edges first.
 
 ### UEFA Champions League
 
@@ -71,14 +65,14 @@ Priced on the European ratings, where 868 European ties bridge eleven leagues on
 
 | Match | Market | Selection | Bet down to | Edge | Price | Book | Units |
 |:--|:--|:--|--:|--:|--:|:--|--:|
-| Lille v Bayern Munich | `corners_1x2` | home | +237 | +6.9% | +280 | BetRivers | 0.1 |
-| Como v AEK | `total_2_5` | under | +148 | +6.4% | +195 | BetRivers | 0.1 |
-| RB Leipzig v Lens | `draw_no_bet` | away | +307 | +6.3% | +360 | FanDuel | 0.1 |
+| Como v AEK | `total_2_5` | under | +148 | +6.4% | +195 | DraftKings | 0.1 |
+| RB Leipzig v Lens | `draw_no_bet` | away | +307 | +6.3% | +360 | BetRivers | 0.1 |
 | Paris SG v Roma | `double_chance` | draw_or_away | +194 | +6.3% | +220 | FanDuel | 0.1 |
+| Inter v Stuttgart | `btts` | no | +203 | +6.2% | +220 | BetRivers | 0.1 |
 
 - 54 fixture(s) dropped as already kicked off: AEK Athens v Real Madrid, AS Roma v Real Madrid, AS Roma v ŠK Slovan Bratislava, Arsenal v Lille, Aston Villa v Fenerbahce, Aston Villa v Viking FK, and 48 more.
 - 6 fixture(s) left out because a club has no rating in the pool: Ath Madrid v Viking FK, Bodø/Glimt v LASK, Sabah FK v Barcelona, Shakhtar Donetsk v Fenerbahce, Slavia Praha v Villarreal, ŠK Slovan Bratislava v Betis.
-- 32 further selection(s) qualified and are not shown: this section prints at most 4 per competition, the highest edges first.
+- 31 further selection(s) qualified and are not shown: this section prints at most 4 per competition, the highest edges first.
 
 ### UEFA Europa League
 
@@ -161,4 +155,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/42685700526)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/42800637062)

@@ -88,8 +88,8 @@ def test_the_schedule_is_inside_the_plan() -> None:
 
     This asserted the overage until 2026-09-29, when Cooper cut the snapshot
     from seven firings a week to five against a 20,000 plan. The plan is
-    100,000 from October 2026, and the schedule, Tuesday and Wednesday
-    included, is under a quarter of it. The rest is what the counter shows
+    100,000 from October 2026 and 5,000,000 from 2026-11-11, and the schedule,
+    Tuesday and Wednesday included, is under a quarter of it. The rest is what the counter shows
     going to props, team totals and interactive work.
     """
     weekly_allowance = MONTHLY_REQUEST_ALLOWANCE / request_budget.WEEKS_PER_MONTH
@@ -98,20 +98,19 @@ def test_the_schedule_is_inside_the_plan() -> None:
     assert scheduled_weekly_requests() < weekly_allowance
 
 
-def test_the_account_still_outspends_the_plan_even_though_the_schedule_does_not() -> None:
-    """A fitting schedule is not a fitting account, and the card says so.
+def test_the_account_fits_the_plan_and_the_schedule_is_still_a_floor() -> None:
+    """The counter outspends the schedule; the plan now covers the counter.
 
-    The counter read about a thousand a day while the snapshot still fired
-    seven times; the cut takes roughly 143 of that. What is left over the
-    allowance is interactive work — the measured daily rate spans 321 on a
-    quiet day and 2,019 on a working one — which no cron change reaches.
+    This asserted the account outspent the plan until 2026-11-11: the counter
+    ran about 3,600 a day in October and about 6,000 a day across 2026-11-01
+    to 11 (college basketball's opening fortnight), both over a 100,000 month.
+    Cooper upgraded the plan to 5,000,000 that day, so the overage is retired.
 
-    Kept asserted because the card's runway comes from the counter, and a
-    reader who saw the schedule brought inside the plan would otherwise assume
-    the runway problem went with it.
+    The first assertion stays: the card's runway still comes from the counter,
+    and a schedule model can only ever understate it.
     """
     assert observed_monthly_requests() > scheduled_monthly_requests()
-    assert observed_monthly_requests() > MONTHLY_REQUEST_ALLOWANCE
+    assert observed_monthly_requests() < MONTHLY_REQUEST_ALLOWANCE
 
 
 def test_an_empty_account_buys_no_days() -> None:

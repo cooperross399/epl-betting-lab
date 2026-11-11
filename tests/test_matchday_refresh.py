@@ -341,12 +341,10 @@ def test_the_model_is_a_floor_not_the_bill() -> None:
 
     assert observed_monthly_requests() > scheduled_monthly_requests()
 
-    # The counter still reads over the allowance, and after the snapshot cut
-    # that overage is no longer the schedule's. It is interactive work: manual
-    # dispatches and scripts run from a laptop, which is why the measured rate
-    # spans 321 a day on a quiet day and 2,019 on a working one. Left asserted
-    # because it remains true of the account, not because it indicts the cron.
-    assert observed_monthly_requests() > MONTHLY_REQUEST_ALLOWANCE
+    # The counter read over a 100,000 allowance until 2026-11-11, when Cooper
+    # upgraded the plan to 5,000,000. The account now fits the plan; the gap
+    # between the counter and the model above is what stays asserted.
+    assert observed_monthly_requests() < MONTHLY_REQUEST_ALLOWANCE
 
 
 def test_the_allowance_covers_every_market_the_project_knows() -> None:

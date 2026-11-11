@@ -81,10 +81,12 @@ CLOSING_SNAPSHOTS_PER_WEEK = 5
 #: arrived inside that window, and so did a lot of interactive probing.
 OBSERVED_REQUESTS_PER_DAY = 3_600
 
-#: The plan in use, as the provider reports it. It was 20,000 until October
-#: 2026; the counter then reset to just under 100,000 (99,673 on the first card
-#: of 2026-10-10), so the plan is 100,000 a month.
-MONTHLY_REQUEST_ALLOWANCE = 100_000
+#: The plan in use. It was 20,000 until October 2026; the counter then reset
+#: to just under 100,000 (99,673 on the first card of 2026-10-10), and again on
+#: 2026-11-01 (99,954), so the month starts on the 1st. On 2026-11-11 Cooper
+#: upgraded it: "i updated my subscription to 5 million credits". One account
+#: funds every lab, so this is the whole account's allowance, not this lab's.
+MONTHLY_REQUEST_ALLOWANCE = 5_000_000
 
 #: Below this much runway the card stops reporting and starts arguing. Quota
 #: running dry is one of the ways this automation stops without producing a

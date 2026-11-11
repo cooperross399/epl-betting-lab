@@ -1,4 +1,4 @@
-## Tuesday 10 November, 16:44 UTC — scheduled run
+## Wednesday 11 November, 10:01 UTC — scheduled run
 
 Something went wrong in this run.
 
@@ -8,7 +8,7 @@ Something went wrong in this run.
 
 The card below was still built, from whatever evidence was available. Treat it with that in mind.
 
-Provider quota: **43630** — about 12 day(s) at the observed burn. **Top this up or the schedule stops.**
+Provider quota: **39446** — about 10 day(s) at the observed burn. **Top this up or the schedule stops.**
 
 Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5, team_total_home_0_5, team_total_home_1_5, team_total_home_2_5, team_total_away_0_5, team_total_away_1_5, team_total_away_2_5** (excluded: none)
 
@@ -17,17 +17,25 @@ Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corner
 | Match | Market | Selection | Tier | Bet down to | Edge | Price | Book | Units |
 |:------|:-------|:----------|:-----|------------:|-----:|------:|:-----|------:|
 | Aston Villa v Sunderland | `1x2` | home | C | -140 | +5.4% | -130 | BetOnline.ag | 0.1 |
-| Man City v Fulham | `team_total_home_1_5` | under | C | +163 | +6.5% | +185 | BetRivers | 0.1 |
+| Man City v Fulham | `team_total_home_1_5` | under | C | +163 | +6.8% | +188 | FanDuel | 0.1 |
 | Chelsea v Leeds | `team_total_home_1_5` | under | C | -106 | +5.1% | +100 | BetRivers | 0.1 |
 | Hull v Brighton | `team_total_away_1_5` | under | C | +133 | +6.1% | +148 | BetRivers | 0.1 |
+| Liverpool v Man United | `team_total_home_2_5` | over | C | +174 | +6.0% | +194 | FanDuel | 0.1 |
 | Bournemouth v Nott'm Forest | `1x2` | away | C | +249 | +5.5% | +275 | BetRivers | 0.1 |
 | Newcastle v Arsenal | `team_total_away_0_5` | under | C | +447 | +5.7% | +520 | FanDuel | 0.1 |
 | Coventry v Crystal Palace | `1x2` | away | C | +178 | +4.7% | +188 | BetUS | 0.1 |
-| Liverpool v Man United | `team_total_home_2_5` | over | C | +184 | +4.6% | +194 | FanDuel | 0.1 |
 
 ### Leans
 
 _None._
+
+### What changed
+
+- **Added:** Brentford v Everton team_total_home_2_5 under
+- **Added:** Man City v Fulham team_total_home_0_5 under
+- **Dropped:** Hull v Brighton team_total_home_0_5 over
+- **Dropped:** Hull v Brighton team_total_home_1_5 over
+- **Dropped:** Man City v Fulham total_2_5 under
 
 
 ## Beyond the Premier League
@@ -59,7 +67,7 @@ Priced on the European ratings, where 868 European ties bridge eleven leagues on
 | Match | Market | Selection | Bet down to | Edge | Price | Book | Units |
 |:--|:--|:--|--:|--:|--:|:--|--:|
 | Como v AEK | `total_2_5` | under | +148 | +6.4% | +195 | DraftKings | 0.1 |
-| RB Leipzig v Lens | `draw_no_bet` | away | +307 | +6.3% | +360 | BetRivers | 0.1 |
+| RB Leipzig v Lens | `draw_no_bet` | away | +307 | +6.3% | +360 | FanDuel | 0.1 |
 | Paris SG v Roma | `double_chance` | draw_or_away | +194 | +6.3% | +220 | FanDuel | 0.1 |
 | Inter v Stuttgart | `btts` | no | +203 | +6.2% | +220 | BetRivers | 0.1 |
 
@@ -148,4 +156,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/42856899203)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/42999189239)

@@ -9,6 +9,19 @@ legacy ChatGPT/Codex material. When they conflict with this file, this file wins
 reads there and produce confusing `Operation not permitted` errors. Do not use
 it.
 
+## Odds API plan: 5,000,000 credits a month (from 2026-11-11)
+
+Cooper upgraded The Odds API subscription on 2026-11-11: "i updated my
+subscription to 5 million credits. let all the models/hubs know". One account
+funds every lab (nhl, cbb, epl/soccer, football, ncaaf — separate secret names,
+one shared quota), and the month starts on the 1st (the counter reset to 99,954
+on 2026-11-01). Before the upgrade the plan was 100,000 a month, and the account
+was burning about 6,000 a day (60,650 used 2026-11-01 to 11, read off the soccer
+card's quota line), on course to run dry around 2026-11-17. **Any figure in this
+file that measures a spend against 100,000 (or 20,000) is superseded by this
+note.** Live gates still read `x-requests-remaining`, which is the truth on any
+given day; check it before a large purchase.
+
 ## Read these first
 
 **The card is produced by GitHub Actions, not by anything on Cooper's machine.**

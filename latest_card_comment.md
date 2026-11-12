@@ -1,4 +1,4 @@
-## Thursday 12 November, 12:44 UTC — scheduled run
+## Thursday 12 November, 14:04 UTC — scheduled run
 
 Something went wrong in this run.
 
@@ -8,7 +8,7 @@ Something went wrong in this run.
 
 The card below was still built, from whatever evidence was available. Treat it with that in mind.
 
-Provider quota: 4993618 (about 1387 days at the observed burn)
+Provider quota: 4992763 (about 1386 days at the observed burn)
 
 Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5, team_total_home_0_5, team_total_home_1_5, team_total_home_2_5, team_total_away_0_5, team_total_away_1_5, team_total_away_2_5** (excluded: none)
 
@@ -17,8 +17,8 @@ Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corner
 | Match | Market | Selection | Tier | Bet down to | Edge | Price | Book | Units |
 |:------|:-------|:----------|:-----|------------:|-----:|------:|:-----|------:|
 | Brentford v Everton | `team_total_home_1_5` | under | C | -129 | +7.1% | -112 | BetRivers | 0.1 |
-| Aston Villa v Sunderland | `1x2` | home | C | -140 | +5.4% | -130 | BetOnline.ag | 0.1 |
 | Hull v Brighton | `team_total_away_1_5` | under | C | +135 | +6.4% | +152 | FanDuel | 0.1 |
+| Aston Villa v Sunderland | `1x2` | home | C | -137 | +4.9% | -130 | BetOnline.ag | 0.1 |
 | Chelsea v Leeds | `team_total_home_1_5` | under | C | -106 | +5.1% | +100 | BetRivers | 0.1 |
 | Liverpool v Man United | `team_total_home_2_5` | over | C | +174 | +6.0% | +194 | FanDuel | 0.1 |
 | Bournemouth v Nott'm Forest | `1x2` | away | C | +249 | +5.5% | +275 | BetRivers | 0.1 |
@@ -31,11 +31,8 @@ _None._
 
 ### What changed
 
-- **Added:** Newcastle v Arsenal corners_total_10_5 under
-- **Added:** Tottenham v Ipswich draw_no_bet home
-- **Dropped:** Hull v Brighton team_total_away_2_5 under
-- **Dropped:** Liverpool v Man United corners_1x2 home
-- **Moved section:** Hull v Brighton team_total_away_0_5 under
+- **Dropped:** Aston Villa v Sunderland team_total_home_1_5 over
+- **Dropped:** Aston Villa v Sunderland team_total_home_2_5 over
 
 
 ## Beyond the Premier League
@@ -156,4 +153,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/43220004904)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/43232609142)

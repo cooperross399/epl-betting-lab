@@ -1,4 +1,4 @@
-## Friday 13 November, 12:35 UTC — scheduled run
+## Friday 13 November, 17:07 UTC — scheduled run
 
 Something went wrong in this run.
 
@@ -8,7 +8,7 @@ Something went wrong in this run.
 
 The card below was still built, from whatever evidence was available. Treat it with that in mind.
 
-Provider quota: 4986882 (about 1385 days at the observed burn)
+Provider quota: 4986510 (about 1385 days at the observed burn)
 
 Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5, team_total_home_0_5, team_total_home_1_5, team_total_home_2_5, team_total_away_0_5, team_total_away_1_5, team_total_away_2_5** (excluded: none)
 
@@ -40,7 +40,7 @@ National teams, on a pool that shares no information with the club ratings — a
 
 | Match | Market | Selection | Bet down to | Edge | Price | Book | Units |
 |:--|:--|:--|--:|--:|--:|:--|--:|
-| Romania v Poland | `double_chance` | home_or_draw | -143 | +6.7% | -125 | DraftKings | 0.1 |
+| Romania v Poland | `double_chance` | home_or_draw | -143 | +6.7% | -125 | BetRivers | 0.1 |
 | Portugal v Denmark | `double_chance` | draw_or_away | +137 | +6.5% | +155 | BetRivers | 0.1 |
 | Spain v England | `draw_no_bet` | away | +235 | +6.3% | +270 | BetMGM | 0.1 |
 | Romania v Poland | `draw_no_bet` | home | +157 | +6.0% | +175 | DraftKings | 0.1 |
@@ -59,7 +59,7 @@ Priced on the European ratings, where 868 European ties bridge eleven leagues on
 | Match | Market | Selection | Bet down to | Edge | Price | Book | Units |
 |:--|:--|:--|--:|--:|--:|:--|--:|
 | Como v AEK | `total_2_5` | under | +148 | +6.4% | +195 | DraftKings | 0.1 |
-| RB Leipzig v Lens | `draw_no_bet` | away | +307 | +6.3% | +360 | BetRivers | 0.1 |
+| RB Leipzig v Lens | `draw_no_bet` | away | +307 | +6.3% | +360 | FanDuel | 0.1 |
 | Paris SG v Roma | `double_chance` | draw_or_away | +194 | +6.3% | +220 | FanDuel | 0.1 |
 | Inter v Stuttgart | `btts` | no | +203 | +6.2% | +220 | BetRivers | 0.1 |
 
@@ -148,4 +148,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/43425744305)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/43468566521)

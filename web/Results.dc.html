@@ -24,7 +24,7 @@
   <meta name="twitter:image" content="https://maverickhightower.com/share.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
 
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     /* One look per site: NHL dark, EPL gray, CBB white. EPL and CBB darken with the phone's dark mode. */
     :root, html[data-sport="nhl"] { color-scheme: dark; --paper:#14151a; --ink:#f1efe9; --ink-2:#d2d0ca; --mute:#a3a6b1; --mute-2:#80838e; --rule:#3a3d49; --rule-2:#262832; --on-ink:#3a3d49; --alert:#f08a72; --on-alert:#14151a; --win:#5cc196; --on-win:#14151a; --desk:#0d0e12; }
@@ -33,7 +33,8 @@
     @media (prefers-color-scheme: dark) { html[data-sport="epl"] { color-scheme: dark; --paper:#2a2c32; --ink:#ecebe7; --ink-2:#cfcec9; --mute:#a9abb4; --mute-2:#878a94; --rule:#474a53; --rule-2:#363840; --on-ink:#474a53; --alert:#f29077; --on-alert:#1b1c20; --win:#62c79c; --on-win:#1b1c20; --desk:#212328; } html[data-sport="cbb"] { color-scheme: dark; --paper:#0f1a2b; --ink:#eef1f6; --ink-2:#cdd4e0; --mute:#9ba6b8; --mute-2:#7a869a; --rule:#2b3a52; --rule-2:#1c2a3f; --on-ink:#2b3a52; --alert:#f08a72; --on-alert:#0f1a2b; --win:#5cc196; --on-win:#0f1a2b; --desk:#0a1220; } }
     html[data-sport="epl"] [data-theme="dark"] { color-scheme: dark; --paper:#2a2c32; --ink:#ecebe7; --ink-2:#cfcec9; --mute:#a9abb4; --mute-2:#878a94; --rule:#474a53; --rule-2:#363840; --on-ink:#474a53; --alert:#f29077; --on-alert:#1b1c20; --win:#62c79c; --on-win:#1b1c20; --desk:#212328; }
     html[data-sport="cbb"] [data-theme="dark"] { color-scheme: dark; --paper:#0f1a2b; --ink:#eef1f6; --ink-2:#cdd4e0; --mute:#9ba6b8; --mute-2:#7a869a; --rule:#2b3a52; --rule-2:#1c2a3f; --on-ink:#2b3a52; --alert:#f08a72; --on-alert:#0f1a2b; --win:#5cc196; --on-win:#0f1a2b; --desk:#0a1220; }
-    html, body { margin: 0; padding: 0; background: var(--paper); color: var(--ink); font-family: "IBM Plex Sans", Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+    html, body { margin: 0; padding: 0; background: var(--paper); color: var(--ink); font-family: "Inter", Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+    [style*="Playfair Display"], .cond { font-variant-numeric: lining-nums; }
     * { box-sizing: border-box; }
     a { color: var(--ink); text-decoration: none; }
     a:hover { color: var(--ink-2); text-decoration: underline; text-underline-offset: 3px; }
@@ -41,18 +42,52 @@
     .skip { position: absolute; left: 12px; top: -60px; background: var(--ink); color: var(--paper); padding: 10px 14px; z-index: 10; font-size: 14px; }
     .skip:focus { top: 12px; }
   </style>
-  <meta name="theme-color" content="#14151a">
+  <meta name="theme-color" content="#0e1013">
   <script>(function(){var m=/^(nhl|epl|cbb)\./.exec(location.hostname),d=document.documentElement;d.setAttribute("data-sport",m?m[1]:(d.getAttribute("data-sport")||"nhl"));})();</script>
+  <style id="mh-modern">
+    /* Modern App theme (2026-11-13): one dark slate look for all three sites, electric-blue accent, rounded cards, pill tabs. */
+    html, html [data-theme], html[data-sport], html[data-sport] [data-theme] {
+      color-scheme: dark;
+      --paper:#0e1013 !important; --ink:#f3f4f6 !important; --ink-2:#c9cdd5 !important; --mute:#8d93a0 !important; --mute-2:#6b7180 !important;
+      --rule:#262a33 !important; --rule-2:#1c1f26 !important; --on-ink:#262a33 !important;
+      --alert:#f87171 !important; --on-alert:#0e1013 !important; --win:#34d399 !important; --on-win:#0e1013 !important; --desk:#0a0b0e !important;
+      --accent:#3b82f6; --accent-2:#60a5fa; --card:#171a20; --logo-disc:#f1f3f6;
+    }
+    html, body { background:#0e1013 !important; }
+    /* Hard white rules become soft dividers */
+    [style*="solid var(--ink)"] { border-color: var(--rule) !important; }
+    html body header[style*="border-top:4px"], html body header[style*="border-top: 4px"] { border-top:0 !important; padding-top:16px !important; }
+    /* Boxes become rounded cards */
+    [style*="border:1px solid var(--"], [style*="border: 1px solid var(--"] { border-radius:12px; }
+    /* Inverse blocks (best bets, MH mark, selected buttons) use the accent */
+    [style*="background:var(--ink)"], [style*="background: var(--ink)"] { background: var(--accent) !important; color:#fff !important; border-color: var(--accent) !important; border-radius:10px; }
+    [style*="background:var(--ink)"] *, [style*="background: var(--ink)"] * { color:#fff; }
+    /* Pill tabs */
+    html body nav[aria-label="Board sections"] { border-bottom:1px solid var(--rule) !important; gap:6px; padding:10px 0; background:rgba(14,16,19,.92) !important; backdrop-filter: blur(8px); }
+    html body nav[aria-label="Board sections"] a { flex:0 0 auto !important; max-width:none !important; min-height:38px !important; padding:0 16px !important; border-radius:999px; box-shadow:none !important; text-transform:none !important; letter-spacing:0 !important; font-size:14px !important; font-weight:600 !important; color: var(--mute) !important; }
+    html body nav[aria-label="Board sections"] a:hover { background: var(--card); color: var(--ink) !important; text-decoration:none; }
+    html body nav[aria-label="Board sections"] a[aria-current="page"] { background: var(--accent) !important; color:#fff !important; }
+    html body nav[aria-label="Board sections"] a[aria-current="page"] * { color:#fff !important; }
+    /* Team logos sit on a light disc so dark logos stay visible */
+    img[style*="object-fit:contain"], img[style*="object-fit: contain"], img.team-logo { background: var(--logo-disc) !important; }
+    /* Cards: stat strip, score tiles, game blocks */
+    section[style*="210px"] { gap:12px !important; border-bottom:0 !important; padding:10px 0 6px; }
+    section[style*="210px"] div[style*="border-bottom"] { background:var(--card); border:1px solid var(--rule) !important; border-radius:14px; padding:18px 20px !important; }
+    button[style*="scroll-snap-align"] { background:var(--card) !important; border-radius:12px !important; }
+    article[id][style*="scroll-margin"], article[style*="340px"] { background:var(--card); border:1px solid var(--rule) !important; border-radius:16px; padding:4px 20px 8px !important; margin:14px 0; box-shadow:0 8px 24px rgba(0,0,0,.28); }
+    a:focus-visible, button:focus-visible { outline-color: var(--accent) !important; }
+    ::selection { background: rgba(59,130,246,.35); }
+  </style>
 </helmet>
 <div data-screen-label="Results" data-theme="{{ themeAttr }}" style="min-height:100vh;background:var(--paper);color:var(--ink);">
   <a href="#main" class="skip">Skip to results</a>
   <div style="max-width:1240px;margin:0 auto;padding:0 clamp(16px,3vw,24px) 80px;">
     <header style="border-top:4px solid var(--ink);padding:10px 0 4px;display:flex;align-items:center;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;">
       <a href="https://maverickhightower.com/" aria-label="Maverick Hightower home" style="display:flex;align-items:center;gap:12px;min-height:44px;">
-        <span aria-hidden="true" style="width:36px;height:36px;background:var(--ink);color:var(--paper);display:grid;place-items:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:18px;letter-spacing:.04em;">MH</span>
+        <span aria-hidden="true" style="width:36px;height:36px;background:var(--ink);color:var(--paper);display:grid;place-items:center;font-family:'Inter',sans-serif;font-weight:800;font-size:18px;letter-spacing:.04em;">MH</span>
         <span style="display:flex;flex-direction:column;line-height:1.1;">
           <span style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);">Maverick Hightower</span>
-          <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;letter-spacing:.02em;text-transform:uppercase;">{{ sportLong }}</span>
+          <span style="font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:22px;letter-spacing:-.01em;">{{ sportLong }}</span>
         </span>
       </a>
       <nav aria-label="Site" style="display:flex;gap:0 18px;font-size:13px;letter-spacing:.1em;text-transform:uppercase;font-weight:500;flex-wrap:wrap;">
@@ -71,7 +106,7 @@
     <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:24px 40px;align-items:end;padding:40px 0 28px;border-bottom:1px solid var(--ink);">
       <div style="min-width:0;grid-column:1 / -1;">
         <div style="font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin-bottom:10px;">{{ kicker }}</div>
-        <h1 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:clamp(56px,9vw,112px);line-height:.9;letter-spacing:-.01em;text-transform:uppercase;">Settled.</h1>
+        <h1 style="margin:0;font-family:'Playfair Display',Georgia,serif;font-weight:800;font-size:clamp(56px,9vw,112px);line-height:.9;letter-spacing:-.01em;">Settled.</h1>
         
       </div>
       <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.7;color:var(--mute);display:flex;flex-wrap:wrap;gap:4px 24px;align-items:baseline;">
@@ -82,7 +117,7 @@
 
     <sc-if value="{{ hasFeedNotice }}" hint-placeholder-val="{{ false }}">
       <div style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:20px;align-items:start;padding:18px 0;border-bottom:1px solid var(--ink);">
-        <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--ink);padding:4px 9px;">Sample</span>
+        <span style="font-family:'Inter',sans-serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--ink);padding:4px 9px;">Sample</span>
         <p style="margin:0;font-size:15px;line-height:1.5;color:var(--ink-2);max-width:760px;">{{ feedNotice }}</p>
       </div>
     </sc-if>
@@ -91,19 +126,20 @@
       <sc-for list="{{ strip }}" as="c" hint-placeholder-count="3">
         <div style="padding:22px 0;border-bottom:1px solid var(--rule);">
           <div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);">{{ c.label }}</div>
-          <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:44px;line-height:1;margin-top:8px;">{{ c.value }}</div>
+          <div style="font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:44px;line-height:1;margin-top:8px;">{{ c.value }}</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--ink-2);margin-top:6px;">{{ c.sub }}</div>
         </div>
       </sc-for>
     </section>
 
     <section id="main" style="padding-top:44px;">
       <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;border-bottom:3px solid var(--ink);padding-bottom:10px;">
-        <h2 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:34px;line-height:1;text-transform:uppercase;letter-spacing:.01em;">{{ dateShort }}</h2>
+        <h2 style="margin:0;font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:34px;line-height:1;letter-spacing:-.01em;">{{ dateShort }}</h2>
         <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">{{ count }} settled · {{ vsLabel }}</div>
       </div>
       <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
         <div style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:20px;align-items:start;padding:22px 0;border-bottom:1px solid var(--rule);">
-          <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase;background:var(--ink);color:var(--paper);padding:5px 9px;">Nothing to settle</span>
+          <span style="font-family:'Inter',sans-serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase;background:var(--ink);color:var(--paper);padding:5px 9px;">Nothing to settle</span>
           <p style="margin:0;font-size:15px;line-height:1.5;color:var(--ink-2);max-width:760px;text-wrap:pretty;">{{ notice }}</p>
         </div>
       </sc-if>
@@ -112,10 +148,10 @@
           <div style="display:flex;flex-direction:column;gap:10px;min-width:0;">
             <sc-for list="{{ g.sides }}" as="s" hint-placeholder-count="2">
               <div style="display:flex;align-items:center;gap:12px;">
-                <span aria-hidden="true" style="position:relative;width:38px;height:38px;border-radius:50%;flex:none;display:grid;place-items:center;overflow:hidden;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:13px;letter-spacing:.02em;background:{{ s.color }};color:{{ s.fg }};box-shadow:0 0 0 1px var(--rule);">{{ s.abbr }}<sc-if value="{{ s.logo }}" hint-placeholder-val="{{ false }}"><img src="{{ s.logo }}" alt="" loading="lazy" decoding="async" onLoad="{{ s.onLogoLoad }}" onError="{{ s.onLogoError }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;padding:5px;" /></sc-if></span>
+                <span aria-hidden="true" style="position:relative;width:38px;height:38px;border-radius:50%;flex:none;display:grid;place-items:center;overflow:hidden;font-family:'Inter',sans-serif;font-weight:800;font-size:13px;letter-spacing:.02em;background:{{ s.color }};color:{{ s.fg }};box-shadow:0 0 0 1px var(--rule);">{{ s.abbr }}<sc-if value="{{ s.logo }}" hint-placeholder-val="{{ false }}"><img src="{{ s.logo }}" alt="" loading="lazy" decoding="async" onLoad="{{ s.onLogoLoad }}" onError="{{ s.onLogoError }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;padding:5px;" /></sc-if></span>
                 <span style="flex:1;font-weight:600;font-size:16px;min-width:0;">{{ s.name }}</span>
                 <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--mute);text-align:right;"><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);">projected </span>proj {{ s.proj }}</span>
-                <span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:34px;line-height:1;width:44px;text-align:right;color:{{ s.scoreColor }};">{{ s.final }}</span>
+                <span style="font-family:'Playfair Display',Georgia,serif;font-weight:800;font-size:34px;line-height:1;width:44px;text-align:right;color:{{ s.scoreColor }};">{{ s.final }}</span>
               </div>
             </sc-for>
             <div style="display:flex;align-items:center;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);"><span>Final{{ g.finishLabel }}</span><sc-if value="{{ g.gameHref }}" hint-placeholder-val="{{ false }}"><a href="{{ g.gameHref }}" style="display:inline-flex;align-items:center;min-height:44px;text-decoration:underline;text-decoration-color:var(--rule);text-underline-offset:3px;">Where the number came from →</a></sc-if></div>
@@ -136,10 +172,10 @@
                 <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);">Model pick</div>
                 <div style="margin-top:8px;display:flex;align-items:stretch;">
                   <div style="flex:1;background:var(--ink);color:var(--paper);padding:8px 10px;min-width:0;">
-                    <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:20px;line-height:1;text-transform:uppercase;">{{ g.pick.label }}</div>
+                    <div style="font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:20px;line-height:1;">{{ g.pick.label }}</div>
                     <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;margin-top:5px;color:var(--on-ink);">{{ g.pick.market }}</div>
                   </div>
-                  <div style="width:64px;flex:none;display:grid;place-items:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:18px;letter-spacing:.06em;text-transform:uppercase;border:2px solid var(--ink);color:{{ g.pick.color }};background:{{ g.pick.bg }};">{{ g.pick.result }}</div>
+                  <div style="width:64px;flex:none;display:grid;place-items:center;font-family:'Inter',sans-serif;font-weight:800;font-size:18px;letter-spacing:.06em;text-transform:uppercase;border:2px solid var(--ink);color:{{ g.pick.color }};background:{{ g.pick.bg }};">{{ g.pick.result }}</div>
                 </div>
               </div>
             </sc-if>
@@ -153,7 +189,7 @@
     <sc-if value="{{ hasProps }}" hint-placeholder-val="{{ false }}">
     <section id="props" aria-labelledby="rprops-h" style="padding-top:48px;">
       <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;border-bottom:3px solid var(--ink);padding-bottom:10px;">
-        <h2 id="rprops-h" style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:34px;line-height:1;text-transform:uppercase;letter-spacing:.01em;">Props</h2>
+        <h2 id="rprops-h" style="margin:0;font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:34px;line-height:1;letter-spacing:-.01em;">Props</h2>
         <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">{{ pr.summaryLine }}</div>
       </div>
       <p style="margin:0;padding:14px 0;border-bottom:1px solid var(--rule);font-size:15px;line-height:1.5;color:var(--ink-2);max-width:760px;text-wrap:pretty;">Graded apart from team picks.</p>
@@ -162,7 +198,7 @@
           <sc-for list="{{ pr.strip }}" as="c" hint-placeholder-count="2">
             <div style="padding:20px 0;border-bottom:1px solid var(--rule);">
               <div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);">{{ c.label }}</div>
-              <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:44px;line-height:1;margin-top:8px;">{{ c.value }}</div>
+              <div style="font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:44px;line-height:1;margin-top:8px;">{{ c.value }}</div>
               <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--ink-2);margin-top:6px;">{{ c.sub }}</div>
             </div>
           </sc-for>
@@ -170,8 +206,8 @@
       </sc-if>
       <sc-if value="{{ pr.empty }}" hint-placeholder-val="{{ false }}">
         <div role="status" style="display:flex;flex-direction:column;gap:8px;padding:22px 0;border-bottom:1px solid var(--rule);">
-          <span style="align-self:flex-start;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--ink);padding:4px 9px;">{{ pr.empty.tag }}</span>
-          <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:26px;line-height:1.05;text-transform:uppercase;">{{ pr.empty.title }}</p>
+          <span style="align-self:flex-start;font-family:'Inter',sans-serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--ink);padding:4px 9px;">{{ pr.empty.tag }}</span>
+          <p style="margin:0;font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:26px;line-height:1.05;">{{ pr.empty.title }}</p>
           <p style="margin:0;font-size:15px;line-height:1.5;color:var(--ink-2);max-width:620px;text-wrap:pretty;">{{ pr.empty.body }}</p>
         </div>
       </sc-if>
@@ -179,7 +215,7 @@
         <article aria-label="{{ r.aria }}" style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 14px;padding:14px 0;border-bottom:1px solid var(--rule);align-items:center;">
           <div style="min-width:0;display:flex;flex-direction:column;gap:4px;">
             <div style="display:flex;align-items:center;gap:8px;min-width:0;">
-              <span aria-hidden="true" style="width:28px;height:28px;border-radius:50%;flex:none;display:grid;place-items:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:10px;background:{{ r.color }};color:{{ r.fg }};box-shadow:0 0 0 1px var(--rule);">{{ r.team }}</span>
+              <span aria-hidden="true" style="width:28px;height:28px;border-radius:50%;flex:none;display:grid;place-items:center;font-family:'Inter',sans-serif;font-weight:800;font-size:10px;background:{{ r.color }};color:{{ r.fg }};box-shadow:0 0 0 1px var(--rule);">{{ r.team }}</span>
               <span style="font-weight:600;font-size:15px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ r.player }}</span>
               <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mute);white-space:nowrap;">{{ r.meta }}</span>
             </div>
@@ -187,7 +223,7 @@
             <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">{{ r.kindWord }} · {{ r.priceLine }}</div>
           </div>
           <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
-            <span style="min-width:64px;text-align:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:16px;letter-spacing:.06em;text-transform:uppercase;border:2px solid var(--ink);padding:4px 6px;color:{{ r.color2 }};background:{{ r.bg }};">{{ r.result }}</span>
+            <span style="min-width:64px;text-align:center;font-family:'Inter',sans-serif;font-weight:800;font-size:16px;letter-spacing:.06em;text-transform:uppercase;border:2px solid var(--ink);padding:4px 6px;color:{{ r.color2 }};background:{{ r.bg }};">{{ r.result }}</span>
             <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;">{{ r.units }}</span>
           </div>
         </article>
@@ -198,14 +234,14 @@
     <sc-if value="{{ dl.show }}" hint-placeholder-val="{{ false }}">
     <section id="due" aria-labelledby="due-h" style="padding-top:48px;">
       <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;border-bottom:3px solid var(--ink);padding-bottom:10px;">
-        <h2 id="due-h" style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:34px;line-height:1;text-transform:uppercase;letter-spacing:.01em;">Due List</h2>
+        <h2 id="due-h" style="margin:0;font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:34px;line-height:1;letter-spacing:-.01em;">Due List</h2>
         <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mute);border:1px solid var(--rule);padding:2px 6px;">Not model bets · tracked at 0.25u each</span>
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,160px),1fr));gap:0 24px;border-bottom:1px solid var(--ink);">
         <sc-for list="{{ dl.strip }}" as="c" hint-placeholder-count="5">
           <div style="padding:20px 0;border-bottom:1px solid var(--rule);">
             <div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);">{{ c.label }}</div>
-            <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:40px;line-height:1;margin-top:8px;">{{ c.value }}</div>
+            <div style="font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:40px;line-height:1;margin-top:8px;">{{ c.value }}</div>
             <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--ink-2);margin-top:6px;">{{ c.sub }}</div>
           </div>
         </sc-for>
@@ -220,14 +256,14 @@
         <article aria-label="{{ r.aria }}" style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 14px;padding:14px 0;border-bottom:1px solid var(--rule);align-items:center;">
           <div style="min-width:0;display:flex;flex-direction:column;gap:4px;">
             <div style="display:flex;align-items:center;gap:8px;min-width:0;">
-              <span aria-hidden="true" style="width:28px;height:28px;border-radius:50%;flex:none;display:grid;place-items:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:10px;background:{{ r.color }};color:{{ r.fg }};box-shadow:0 0 0 1px var(--rule);">{{ r.team }}</span>
+              <span aria-hidden="true" style="width:28px;height:28px;border-radius:50%;flex:none;display:grid;place-items:center;font-family:'Inter',sans-serif;font-weight:800;font-size:10px;background:{{ r.color }};color:{{ r.fg }};box-shadow:0 0 0 1px var(--rule);">{{ r.team }}</span>
               <span style="font-weight:600;font-size:15px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ r.player }}</span>
               <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mute);white-space:nowrap;">{{ r.meta }}</span>
             </div>
             <div style="font-size:16px;font-weight:600;line-height:1.35;">{{ r.line }}</div>
             <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">{{ r.priceLine }}</div>
           </div>
-          <span style="min-width:64px;text-align:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:16px;letter-spacing:.06em;text-transform:uppercase;border:1px dashed var(--ink);padding:4px 6px;color:{{ r.resultColor }};">{{ r.result }}</span>
+          <span style="min-width:64px;text-align:center;font-family:'Inter',sans-serif;font-weight:800;font-size:16px;letter-spacing:.06em;text-transform:uppercase;border:1px dashed var(--ink);padding:4px 6px;color:{{ r.resultColor }};">{{ r.result }}</span>
         </article>
       </sc-for>
     </section>
@@ -344,7 +380,8 @@ class Component extends DCLogic {
     if (pr.strip && RP.seasonLeans) pr.strip = [...pr.strip, { label: "Props · leans · season", value: RP.seasonLeans.nights ? rec(RP.seasonLeans) : "—", sub: RP.seasonLeans.nights ? rate(RP.seasonLeans) : "No night settled yet" }];
     // Due List (results.json dueList): Cooper's list, graded like a prop and tracked as if 0.25u were bet on every priced entry (nothing is bet).
     const D = raw.dueList;
-    const CAT = { points: ["1+ point", "point", "points"], goals: ["Anytime goal", "goal", "goals"], assists: ["1+ assist", "assist", "assists"] };
+    const CAT = { points: ["1+ point", "point", "points"], goals: ["Anytime goal", "goal", "goals"], assists: ["1+ assist", "assist", "assists"],
+      two_goals: ["2+ goals", "goal", "goals"], hat_trick: ["Hat trick", "goal", "goals"], shutout: ["Shutout", "shutout", "shutouts"] };
     const GW = { win: ["Hit", "var(--win)"], loss: ["Miss", "var(--alert)"], push: ["Push", "var(--ink)"], void: ["Void", "var(--mute)"] };
     const dl = !D ? { show: false, rows: [], strip: [] } : (() => {
       const se = D.season || {}, bm = se.byMarket || {}, su = D.summary;
@@ -355,7 +392,8 @@ class Component extends DCLogic {
         { label: "Season", value: se.nights ? rec(se) : "—", sub: se.nights ? `${rate(se)}${typeof se.impliedPct === "number" ? ` · prices implied ${Math.round(se.impliedPct)}%` : ""}` : "No night settled yet" },
         { label: `Units · season · ${se.stake || 0.25}u each`, value: se.nights && typeof se.units === "number" ? u(se.units) : "—",
           sub: se.nights && typeof se.staked === "number" ? `${se.staked.toFixed(2)} u staked${typeof se.returnPct === "number" ? ` · ${se.returnPct > 0 ? "+" : ""}${se.returnPct}%` : ""}${se.unpriced ? ` · ${se.unpriced} unpriced, not counted` : ""}` : "No night settled yet" },
-        ...["points", "goals", "assists"].map((k) => ({ label: `${CAT[k][0]} · season`, value: bm[k] ? rec(bm[k]) : "—", sub: bm[k] ? `${rate(bm[k])}${typeof bm[k].units === "number" ? ` · ${u(bm[k].units)}` : ""}` : "" })),
+        // The big games (2026-11-04) show once one of them has a graded entry.
+        ...["points", "goals", "assists", ...["two_goals", "hat_trick", "shutout"].filter((k) => bm[k] && (bm[k].w || bm[k].l))].map((k) => ({ label: `${CAT[k][0]} · season`, value: bm[k] ? rec(bm[k]) : "—", sub: bm[k] ? `${rate(bm[k])}${typeof bm[k].units === "number" ? ` · ${u(bm[k].units)}` : ""}` : "" })),
       ];
       const notes = [];
       if ((se.backfilledNights || []).length) notes.push(`Rebuilt after the fact, before the list was first published: ${se.backfilledNights.join(", ")}.`);
@@ -363,7 +401,7 @@ class Component extends DCLogic {
       const rows = (D.rows || []).map((x) => {
         const c = CAT[x.market] || [x.market, x.market, x.market], t = T[x.team] || {}, g = GW[x.result] || ["Not graded", "var(--mute)"];
         const fin = typeof x.actual === "number" ? `finished with ${x.actual}` : x.result === "void" ? "did not play" : "no final stat yet";
-        return { player: x.player, team: x.team || "", color: t.color || "var(--ink)", fg: t.fg || "var(--paper)", meta: [x.opp ? `vs ${x.opp}` : "", x.drought != null ? `${x.drought} games without` : ""].filter(Boolean).join(" · "),
+        return { player: x.player, team: x.team || "", color: t.color || "var(--ink)", fg: t.fg || "var(--paper)", meta: [x.opp ? `vs ${x.opp}` : "", x.drought != null ? `${x.drought} ${x.market === "shutout" ? "starts" : "games"} without` : ""].filter(Boolean).join(" · "),
           line: `${c[0]} — ${fin}`, priceLine: typeof x.price === "number" ? `${x.price > 0 ? "+" : "−"}${Math.abs(x.price)}${x.priceSource === "card" ? " (card's morning price)" : x.book ? ` at ${x.book}` : ""}${x.heavyJuice ? " · heavy juice" : ""}${typeof x.units === "number" ? ` · ${u(x.units)}` : ""}` : "price not posted · not counted in units",
           result: g[0], resultColor: g[1], aria: `${x.player}, ${c[0]}, ${g[0]}` };
       });

@@ -1,4 +1,4 @@
-## Saturday 14 November, 11:41 UTC — scheduled run
+## Saturday 14 November, 15:35 UTC — scheduled run
 
 Something went wrong in this run.
 
@@ -8,7 +8,7 @@ Something went wrong in this run.
 
 The card below was still built, from whatever evidence was available. Treat it with that in mind.
 
-Provider quota: 4981006 (about 1383 days at the observed burn)
+Provider quota: 4977584 (about 1382 days at the observed burn)
 
 Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5, team_total_home_0_5, team_total_home_1_5, team_total_home_2_5, team_total_away_0_5, team_total_away_1_5, team_total_away_2_5** (excluded: none)
 
@@ -17,9 +17,9 @@ Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corner
 | Match | Market | Selection | Tier | Bet down to | Edge | Price | Book | Units |
 |:------|:-------|:----------|:-----|------------:|-----:|------:|:-----|------:|
 | Brentford v Everton | `team_total_home_1_5` | under | C | -129 | +7.1% | -112 | BetRivers | 0.1 |
-| Hull v Brighton | `team_total_away_1_5` | under | C | +135 | +6.4% | +152 | FanDuel | 0.1 |
 | Aston Villa v Sunderland | `1x2` | home | C | -137 | +4.9% | -130 | BetOnline.ag | 0.1 |
 | Chelsea v Leeds | `team_total_home_1_5` | under | C | -106 | +5.1% | +100 | BetRivers | 0.1 |
+| Hull v Brighton | `1x2` | draw | C | +294 | +6.7% | +350 | BetRivers | 0.1 |
 | Liverpool v Man United | `team_total_home_2_5` | over | C | +174 | +6.0% | +194 | FanDuel | 0.1 |
 | Newcastle v Arsenal | `team_total_away_0_5` | under | C | +457 | +6.1% | +550 | FanDuel | 0.1 |
 | Bournemouth v Nott'm Forest | `1x2` | away | C | +249 | +5.5% | +275 | BetOnline.ag | 0.1 |
@@ -31,10 +31,8 @@ _None._
 
 ### What changed
 
-- **Added:** Aston Villa v Sunderland team_total_home_1_5 over
-- **Added:** Aston Villa v Sunderland team_total_home_2_5 over
-- **Added:** Coventry v Crystal Palace 1x2 away
-- **Moved section:** Man City v Fulham team_total_home_2_5 under
+- **Dropped:** Hull v Brighton team_total_away_1_5 under
+- **Moved section:** Hull v Brighton 1x2 draw
 
 
 ## Beyond the Premier League
@@ -47,10 +45,10 @@ National teams, on a pool that shares no information with the club ratings — a
 
 | Match | Market | Selection | Bet down to | Edge | Price | Book | Units |
 |:--|:--|:--|--:|--:|--:|:--|--:|
-| Wales v Portugal | `draw_no_bet` | home | +379 | +7.1% | +480 | BetRivers | 0.1 |
-| France v Turkey | `double_chance` | draw_or_away | +266 | +7.0% | +320 | BetRivers | 0.1 |
-| Kazakhstan v Slovakia | `double_chance` | home_or_draw | +124 | +7.0% | +143 | BetRivers | 0.1 |
+| Estonia v Bulgaria | `double_chance` | draw_or_away | -160 | +7.1% | -140 | DraftKings | 0.1 |
 | Belarus v Albania | `draw_no_bet` | home | +162 | +6.5% | +185 | BetMGM | 0.1 |
+| Latvia v Armenia | `draw_no_bet` | home | +106 | +6.1% | +118 | FanDuel | 0.1 |
+| Israel v Austria | `double_chance` | home_or_draw | +118 | +5.8% | +130 | FanDuel | 0.1 |
 
 - 130 fixture(s) dropped as already kicked off: Albania v Belarus, Albania v Finland, Albania v San Marino, Andorra v Gibraltar, Andorra v Malta, Armenia v Cyprus, and 124 more.
 - `btts` is not bet here: the model sits about 8 points below the market on the goals level for every fixture, so a selection in that market would be the gap rather than the fixture.
@@ -119,7 +117,7 @@ Context only: no units, nothing here is a selection, and no edge is shown.
 - Settled: **180** selections, 73 won, 8 returned the stake
 - Staked: 20.85 units
 - Profit: **-1.34 units** (-6.4% on turnover)
-- Still pending: 11
+- Still pending: 12
 
 - Stake returned (void): 8 — counted in the settled total above at zero profit, because a push is a bet
 
@@ -154,4 +152,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/43590936878)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/43610566633)

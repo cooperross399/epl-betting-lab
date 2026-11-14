@@ -2,6 +2,15 @@
 <html>
 <head>
 <meta charset="utf-8">
+<!-- smooth-pages -->
+<style>@media (max-width:719px){header>nav[aria-label="Site"]{flex-basis:100%;}}section div:has(+h1){min-height:1.2em;}nav[aria-label="Board sections"]{overflow-x:auto;scrollbar-width:none;}nav[aria-label="Board sections"] a{flex:1 0 auto!important;min-width:0!important;padding:0 7px!important;}@media (max-width:519px){nav[aria-label="Board sections"] a{font-size:11px!important;letter-spacing:.03em!important;padding:0 5px!important;}}html.sp-wait body{visibility:hidden;}</style>
+<script>(function(){var d=document.documentElement;d.classList.add('sp-wait');var n=0,saw=0,last=Date.now(),t0=last,done=0,f=window.fetch;function own(u){try{return new URL(u&&u.url||u,location.href).origin===location.origin}catch(e){return 0}}if(f)window.fetch=function(u){var o=own(u);if(o)n++;var p=f.apply(this,arguments);if(o){var e=function(){n--;saw=1;last=Date.now()};p.then(e,e)}return p};function show(){if(done)return;done=1;d.classList.remove('sp-wait')}function tick(){if(done)return;var now=Date.now(),fo=!document.fonts||document.fonts.status==='loaded';if(now-t0>1600||(saw&&!n&&fo&&now-last>120&&document.readyState!=='loading'))show();else setTimeout(tick,40)}new MutationObserver(function(){last=Date.now()}).observe(d,{subtree:true,childList:true,characterData:true,attributes:true});setTimeout(tick,40)})();</script>
+<script type="speculationrules">{"prerender":[{"where":{"href_matches":"/*.dc.html"},"eagerness":"moderate"}]}</script>
+<link rel="preconnect" href="https://unpkg.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="script" href="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous" integrity="sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z">
+<link rel="preload" as="script" href="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous" integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script src="./support.js"></script>
@@ -20,13 +29,14 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@mavhightower">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root, html[data-sport="nhl"] { color-scheme: dark; --paper:#14151a; --ink:#f1efe9; --ink-2:#d2d0ca; --mute:#a3a6b1; --mute-2:#80838e; --rule:#3a3d49; --rule-2:#262832; --on-ink:#3a3d49; --alert:#f08a72; --on-alert:#14151a; --win:#5cc196; --on-win:#14151a; --desk:#0d0e12; }
     html[data-sport="epl"], html[data-sport="epl"] [data-theme="light"] { color-scheme: light; --paper:#d9dade; --ink:#14151a; --ink-2:#2a2d36; --mute:#50535e; --mute-2:#767984; --rule:#b4b6bd; --rule-2:#c6c8ce; --on-ink:#c6c8ce; --alert:#9e2c19; --on-alert:#f4f4f6; --win:#22664a; --on-win:#f4f4f6; --desk:#c9cbd0; }
     @media (prefers-color-scheme: dark) { html[data-sport="epl"] { color-scheme: dark; --paper:#2a2c32; --ink:#ecebe7; --ink-2:#cfcec9; --mute:#a9abb4; --mute-2:#878a94; --rule:#474a53; --rule-2:#363840; --on-ink:#474a53; --alert:#f29077; --on-alert:#1b1c20; --win:#62c79c; --on-win:#1b1c20; --desk:#212328; } }
     html[data-sport="epl"] [data-theme="dark"] { color-scheme: dark; --paper:#2a2c32; --ink:#ecebe7; --ink-2:#cfcec9; --mute:#a9abb4; --mute-2:#878a94; --rule:#474a53; --rule-2:#363840; --on-ink:#474a53; --alert:#f29077; --on-alert:#1b1c20; --win:#62c79c; --on-win:#1b1c20; --desk:#212328; }
-    html, body { margin: 0; padding: 0; background: var(--paper); color: var(--ink); font-family: "IBM Plex Sans", Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+    html, body { margin: 0; padding: 0; background: var(--paper); color: var(--ink); font-family: "Inter", Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+    [style*="Playfair Display"], .cond { font-variant-numeric: lining-nums; }
     * { box-sizing: border-box; }
     a { color: var(--ink); text-decoration: none; }
     a:hover { color: var(--ink-2); text-decoration: underline; text-underline-offset: 3px; }
@@ -35,8 +45,42 @@
     .skip:focus { top: 12px; }
     @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; scroll-behavior: auto !important; } }
   </style>
-  <meta name="theme-color" content="#d9dade">
+  <meta name="theme-color" content="#0e1013">
   <script>(function(){document.documentElement.setAttribute("data-sport","epl");})();</script>
+  <style id="mh-modern">
+    /* Modern App theme (2026-11-13): one dark slate look for all three sites, electric-blue accent, rounded cards, pill tabs. */
+    html, html [data-theme], html[data-sport], html[data-sport] [data-theme] {
+      color-scheme: dark;
+      --paper:#0e1013 !important; --ink:#f3f4f6 !important; --ink-2:#c9cdd5 !important; --mute:#8d93a0 !important; --mute-2:#6b7180 !important;
+      --rule:#262a33 !important; --rule-2:#1c1f26 !important; --on-ink:#262a33 !important;
+      --alert:#f87171 !important; --on-alert:#0e1013 !important; --win:#34d399 !important; --on-win:#0e1013 !important; --desk:#0a0b0e !important;
+      --accent:#3b82f6; --accent-2:#60a5fa; --card:#171a20; --logo-disc:#f1f3f6;
+    }
+    html, body { background:#0e1013 !important; }
+    /* Hard white rules become soft dividers */
+    [style*="solid var(--ink)"] { border-color: var(--rule) !important; }
+    html body header[style*="border-top:4px"], html body header[style*="border-top: 4px"] { border-top:0 !important; padding-top:16px !important; }
+    /* Boxes become rounded cards */
+    [style*="border:1px solid var(--"], [style*="border: 1px solid var(--"] { border-radius:12px; }
+    /* Inverse blocks (best bets, MH mark, selected buttons) use the accent */
+    [style*="background:var(--ink)"], [style*="background: var(--ink)"] { background: var(--accent) !important; color:#fff !important; border-color: var(--accent) !important; border-radius:10px; }
+    [style*="background:var(--ink)"] *, [style*="background: var(--ink)"] * { color:#fff; }
+    /* Pill tabs */
+    html body nav[aria-label="Board sections"] { border-bottom:1px solid var(--rule) !important; gap:6px; padding:10px 0; background:rgba(14,16,19,.92) !important; backdrop-filter: blur(8px); }
+    html body nav[aria-label="Board sections"] a { flex:0 0 auto !important; max-width:none !important; min-height:38px !important; padding:0 16px !important; border-radius:999px; box-shadow:none !important; text-transform:none !important; letter-spacing:0 !important; font-size:14px !important; font-weight:600 !important; color: var(--mute) !important; }
+    html body nav[aria-label="Board sections"] a:hover { background: var(--card); color: var(--ink) !important; text-decoration:none; }
+    html body nav[aria-label="Board sections"] a[aria-current="page"] { background: var(--accent) !important; color:#fff !important; }
+    html body nav[aria-label="Board sections"] a[aria-current="page"] * { color:#fff !important; }
+    /* Team logos sit on a light disc so dark logos stay visible */
+    img[style*="object-fit:contain"], img[style*="object-fit: contain"], img.team-logo { background: var(--logo-disc) !important; }
+    /* Cards: stat strip, score tiles, game blocks */
+    section[style*="210px"] { gap:12px !important; border-bottom:0 !important; padding:10px 0 6px; }
+    section[style*="210px"] div[style*="border-bottom"] { background:var(--card); border:1px solid var(--rule) !important; border-radius:14px; padding:18px 20px !important; }
+    button[style*="scroll-snap-align"] { background:var(--card) !important; border-radius:12px !important; }
+    article[id][style*="scroll-margin"], article[style*="340px"] { background:var(--card); border:1px solid var(--rule) !important; border-radius:16px; padding:4px 20px 8px !important; margin:14px 0; box-shadow:0 8px 24px rgba(0,0,0,.28); }
+    a:focus-visible, button:focus-visible { outline-color: var(--accent) !important; }
+    ::selection { background: rgba(59,130,246,.35); }
+  </style>
 </helmet>
 <div data-screen-label="Match" style="min-height:100vh;background:var(--paper);color:var(--ink);">
   <a href="#main" class="skip">Skip to our call</a>
@@ -44,10 +88,10 @@
 
     <header style="border-top:4px solid var(--ink);padding:10px 0 4px;display:flex;align-items:center;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;">
       <a href="https://maverickhightower.com/" aria-label="Maverick Hightower home" style="display:flex;align-items:center;gap:12px;min-height:44px;">
-        <span aria-hidden="true" style="width:36px;height:36px;background:var(--ink);color:var(--paper);display:grid;place-items:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:18px;letter-spacing:.04em;">MH</span>
+        <span aria-hidden="true" style="width:36px;height:36px;background:var(--ink);color:var(--paper);display:grid;place-items:center;font-family:'Inter',sans-serif;font-weight:800;font-size:18px;letter-spacing:.04em;">MH</span>
         <span style="display:flex;flex-direction:column;line-height:1.1;">
           <span style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);">Maverick Hightower</span>
-          <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;letter-spacing:.02em;text-transform:uppercase;">EPL Projections</span>
+          <span style="font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:22px;letter-spacing:-.01em;">EPL Projections</span>
         </span>
       </a>
       <nav aria-label="Site" style="display:flex;gap:0 18px;font-size:13px;letter-spacing:.1em;text-transform:uppercase;font-weight:500;flex-wrap:wrap;">
@@ -80,14 +124,14 @@
 
     <sc-if value="{{ isSample }}" hint-placeholder-val="{{ false }}">
       <div role="status" style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:start;padding:14px 0;border-bottom:1px solid var(--ink);">
-        <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--ink);padding:4px 9px;">Sample</span>
+        <span style="font-family:'Inter',sans-serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--ink);padding:4px 9px;">Sample</span>
         <p style="margin:0;font-size:14px;line-height:1.5;color:var(--ink-2);max-width:760px;text-wrap:pretty;">Sample data. On the live site this page reads this week's board.</p>
       </div>
     </sc-if>
 
     <sc-if value="{{ missing }}" hint-placeholder-val="{{ false }}">
       <section style="padding:60px 0;">
-        <h1 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:clamp(40px,8vw,72px);line-height:.95;text-transform:uppercase;">Match not on<br>this week's board</h1>
+        <h1 style="margin:0;font-family:'Playfair Display',Georgia,serif;font-weight:800;font-size:clamp(40px,8vw,72px);line-height:.95;">Match not on<br>this week's board</h1>
         <p style="margin:16px 0 0;font-size:15px;line-height:1.5;color:var(--ink-2);max-width:560px;">{{ missingNote }}</p>
         <a href="{{ boardHref }}" style="display:inline-flex;align-items:center;min-height:44px;margin-top:8px;font-family:'IBM Plex Mono',monospace;font-size:13px;">← Back to the board</a>
       </section>
@@ -100,14 +144,14 @@
         <div style="display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:12px;align-items:center;margin-top:14px;">
           <sc-for list="{{ sides }}" as="s" hint-placeholder-count="2">
             <div style="display:flex;flex-direction:column;align-items:{{ s.align }};text-align:{{ s.textAlign }};gap:8px;min-width:0;border-top:4px solid {{ s.color }};padding-top:12px;">
-              <span aria-hidden="true" style="position:relative;width:64px;height:64px;border-radius:50%;display:grid;place-items:center;overflow:hidden;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:20px;background:{{ s.color }};color:{{ s.fg }};box-shadow:0 0 0 1px var(--rule),0 0 0 4px {{ s.ring }};"><span>{{ s.abbr }}</span><sc-if value="{{ s.hasLogo }}" hint-placeholder-val="{{ false }}"><img src="{{ s.logo }}" alt="" loading="lazy" decoding="async" onLoad="{{ s.onLogoLoad }}" onError="{{ s.onLogoError }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;padding:8px;"></sc-if></span>
-              <span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:clamp(30px,6vw,56px);line-height:.95;text-transform:uppercase;letter-spacing:-.01em;">{{ s.abbr }}</span>
+              <span aria-hidden="true" style="position:relative;width:64px;height:64px;border-radius:50%;display:grid;place-items:center;overflow:hidden;font-family:'Playfair Display',Georgia,serif;font-weight:800;font-size:20px;background:{{ s.color }};color:{{ s.fg }};box-shadow:0 0 0 1px var(--rule),0 0 0 4px {{ s.ring }};"><span>{{ s.abbr }}</span><sc-if value="{{ s.hasLogo }}" hint-placeholder-val="{{ false }}"><img src="{{ s.logo }}" alt="" loading="lazy" decoding="async" onLoad="{{ s.onLogoLoad }}" onError="{{ s.onLogoError }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;padding:8px;"></sc-if></span>
+              <span style="font-family:'Playfair Display',Georgia,serif;font-weight:800;font-size:clamp(30px,6vw,56px);line-height:.95;letter-spacing:-.01em;">{{ s.abbr }}</span>
               <span style="font-size:14px;font-weight:600;line-height:1.25;text-wrap:pretty;">{{ s.name }}</span>
               <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">{{ s.meta }}</span>
             </div>
           </sc-for>
           <div style="grid-column:2;grid-row:1;display:flex;flex-direction:column;align-items:center;gap:4px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);text-align:center;padding:0 4px;">
-            <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;color:var(--mute-2);">v</span>
+            <span style="font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:22px;color:var(--mute-2);">v</span>
             <span style="color:var(--ink);font-weight:600;font-size:15px;white-space:nowrap;">{{ time }}</span>
             <span style="white-space:nowrap;">{{ tz }}</span>
           </div>
@@ -118,7 +162,7 @@
       </section>
 
       <section id="main" aria-labelledby="verdict-h" style="padding:28px 0 26px;border-bottom:1px solid var(--ink);">
-        <h2 id="verdict-h" style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:28px;line-height:1;text-transform:uppercase;letter-spacing:.01em;">Our call</h2>
+        <h2 id="verdict-h" style="margin:0;font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:28px;line-height:1;letter-spacing:-.01em;">Our call</h2>
 
         <sc-if value="{{ hasWin }}" hint-placeholder-val="{{ true }}">
           <p style="margin:14px 0 0;font-size:clamp(20px,3.4vw,26px);line-height:1.3;font-weight:600;max-width:760px;text-wrap:pretty;">{{ headline }}</p>
@@ -139,27 +183,27 @@
         <div style="margin-top:22px;max-width:560px;">
           <sc-if value="{{ unpriced }}" hint-placeholder-val="{{ false }}">
             <div style="border:1px dashed var(--mute);padding:12px 14px;">
-              <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;line-height:1;text-transform:uppercase;">Not priced</div>
+              <div style="font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:22px;line-height:1;">Not priced</div>
               <div style="font-size:13px;margin-top:6px;line-height:1.5;color:var(--ink-2);">No betting line reached the board for this match, so there is no pick.</div>
             </div>
           </sc-if>
           <sc-if value="{{ pick.isBet }}" hint-placeholder-val="{{ true }}">
             <div style="background:var(--ink);color:var(--paper);padding:12px 14px;">
               <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;">Best bet</div>
-              <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:30px;line-height:1;text-transform:uppercase;letter-spacing:.02em;margin-top:4px;">{{ pick.label }}</div>
+              <div style="font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:30px;line-height:1;letter-spacing:-.01em;margin-top:4px;">{{ pick.label }}</div>
               <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;margin-top:6px;color:var(--on-ink);">{{ pick.sub }}</div>
             </div>
           </sc-if>
           <sc-if value="{{ pick.isLean }}" hint-placeholder-val="{{ false }}">
             <div style="border:1px dashed var(--ink);padding:12px 14px;">
               <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);">Lean, not a bet</div>
-              <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:30px;line-height:1;text-transform:uppercase;letter-spacing:.02em;margin-top:4px;">{{ pick.label }}</div>
+              <div style="font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:30px;line-height:1;letter-spacing:-.01em;margin-top:4px;">{{ pick.label }}</div>
               <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;margin-top:6px;color:var(--mute);">{{ pick.sub }}</div>
             </div>
           </sc-if>
           <sc-if value="{{ pick.isNone }}" hint-placeholder-val="{{ false }}">
             <div style="border:1px dashed var(--mute);padding:12px 14px;">
-              <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;line-height:1;text-transform:uppercase;color:var(--mute);">No bet on this match</div>
+              <div style="font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:22px;line-height:1;color:var(--mute);">No bet on this match</div>
               <div style="font-size:13px;margin-top:6px;line-height:1.5;color:var(--ink-2);">The prices are close to what we think is fair, so there is nothing worth betting.</div>
             </div>
           </sc-if>
@@ -169,7 +213,7 @@
 
       <sc-if value="{{ hasWhy }}" hint-placeholder-val="{{ true }}">
       <section aria-labelledby="why-h" style="padding:28px 0 26px;border-bottom:1px solid var(--ink);">
-        <h2 id="why-h" style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:28px;line-height:1;text-transform:uppercase;letter-spacing:.01em;">Why</h2>
+        <h2 id="why-h" style="margin:0;font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:28px;line-height:1;letter-spacing:-.01em;">Why</h2>
         <ul style="list-style:none;margin:14px 0 0;padding:0;max-width:760px;">
           <sc-for list="{{ why }}" as="w" hint-placeholder-count="3">
             <li style="display:grid;grid-template-columns:10px minmax(0,1fr);gap:12px;padding:10px 0;border-top:1px solid var(--rule-2);">
@@ -188,7 +232,7 @@
 
       <sc-if value="{{ hasRatings }}" hint-placeholder-val="{{ true }}">
       <section aria-labelledby="cmp-h" style="padding:28px 0 26px;border-bottom:1px solid var(--ink);">
-        <h2 id="cmp-h" style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:28px;line-height:1;text-transform:uppercase;letter-spacing:.01em;">Head to head</h2>
+        <h2 id="cmp-h" style="margin:0;font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:28px;line-height:1;letter-spacing:-.01em;">Head to head</h2>
         <p style="margin:6px 0 0;font-size:13px;color:var(--mute);">Compared with an average Premier League side. Plus is better.</p>
         <div style="margin-top:12px;border-top:2px solid var(--ink);max-width:560px;">
           <div style="display:grid;grid-template-columns:minmax(0,1fr) 84px 84px;gap:0 10px;padding:6px 0;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);">
@@ -206,7 +250,7 @@
       </sc-if>
 
       <section aria-labelledby="miss-h" style="padding:28px 0 26px;border-bottom:1px solid var(--ink);">
-        <h2 id="miss-h" style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:28px;line-height:1;text-transform:uppercase;letter-spacing:.01em;">Who is missing</h2>
+        <h2 id="miss-h" style="margin:0;font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:28px;line-height:1;letter-spacing:-.01em;">Who is missing</h2>
         <p style="margin:6px 0 0;font-size:13px;color:var(--mute);max-width:640px;">{{ missIntro }}</p>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:12px 24px;margin-top:14px;max-width:760px;">
           <sc-for list="{{ absences }}" as="k" hint-placeholder-count="2">
@@ -222,7 +266,7 @@
 
       <sc-if value="{{ priced }}" hint-placeholder-val="{{ true }}">
       <section aria-labelledby="mk-h" style="padding:28px 0 26px;border-bottom:1px solid var(--ink);">
-        <h2 id="mk-h" style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:28px;line-height:1;text-transform:uppercase;letter-spacing:.01em;">The odds</h2>
+        <h2 id="mk-h" style="margin:0;font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:28px;line-height:1;letter-spacing:-.01em;">The odds</h2>
         <p style="margin:6px 0 0;font-size:13px;color:var(--mute);max-width:640px;">Our chance, that chance as a fair price with no margin, and the best price we found with open → current where it moved. A pick shows up only when our chance beats the price by enough.</p>
         <div style="margin-top:12px;border-top:2px solid var(--ink);max-width:560px;">
           <div style="display:grid;grid-template-columns:minmax(0,1fr) 72px 72px 92px;gap:0 10px;padding:6px 0;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);">
@@ -230,7 +274,7 @@
           </div>
           <sc-for list="{{ markets }}" as="m" hint-placeholder-count="9">
             <div style="display:grid;grid-template-columns:minmax(0,1fr) 72px 72px 92px;gap:0 10px;padding:9px 0;border-top:1px solid {{ m.ruleColor }};align-items:baseline;">
-              <span style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;min-width:0;"><span style="font-size:15px;font-weight:{{ m.weight }};">{{ m.label }}</span><sc-if value="{{ m.tag }}" hint-placeholder-val="{{ false }}"><span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:1px 5px;background:{{ m.tagBg }};color:{{ m.tagFg }};border:1px {{ m.tagStyle }} var(--ink);white-space:nowrap;">{{ m.tag }}</span></sc-if><sc-if value="{{ m.move }}" hint-placeholder-val="{{ false }}"><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mute);white-space:nowrap;">{{ m.move }}</span></sc-if></span>
+              <span style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;min-width:0;"><span style="font-size:15px;font-weight:{{ m.weight }};">{{ m.label }}</span><sc-if value="{{ m.tag }}" hint-placeholder-val="{{ false }}"><span style="font-family:'Inter',sans-serif;font-weight:700;font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:1px 5px;background:{{ m.tagBg }};color:{{ m.tagFg }};border:1px {{ m.tagStyle }} var(--ink);white-space:nowrap;">{{ m.tag }}</span></sc-if><sc-if value="{{ m.move }}" hint-placeholder-val="{{ false }}"><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mute);white-space:nowrap;">{{ m.move }}</span></sc-if></span>
               <span style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:15px;">{{ m.chance }}</span>
               <span style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:15px;color:var(--ink-2);">{{ m.fair }}</span>
               <span style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;">{{ m.best }}<sc-if value="{{ m.book }}" hint-placeholder-val="{{ false }}"><span style="display:block;font-size:10px;font-weight:400;color:var(--mute);letter-spacing:.04em;">{{ m.book }}</span></sc-if></span>
@@ -242,7 +286,7 @@
       </sc-if>
 
       <section aria-labelledby="after-h" style="padding:28px 0 26px;">
-        <h2 id="after-h" style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:28px;line-height:1;text-transform:uppercase;letter-spacing:.01em;">After the match</h2>
+        <h2 id="after-h" style="margin:0;font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:28px;line-height:1;letter-spacing:-.01em;">After the match</h2>
         <sc-if value="{{ after.pending }}" hint-placeholder-val="{{ true }}">
           <div style="margin-top:14px;border:1px dashed var(--mute);padding:14px 16px;max-width:760px;font-family:'IBM Plex Mono',monospace;font-size:13px;line-height:1.5;color:var(--mute);">{{ after.note }}</div>
         </sc-if>
@@ -256,8 +300,8 @@
             <div style="border-top:2px solid var(--ink);padding-top:8px;">
               <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);">Model pick</div>
               <div style="display:flex;align-items:center;gap:10px;margin-top:6px;flex-wrap:wrap;">
-                <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:24px;line-height:1;text-transform:uppercase;">{{ after.pickLabel }}</span>
-                <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;background:{{ after.gradeBg }};color:{{ after.gradeFg }};">{{ after.grade }}</span>
+                <span style="font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:24px;line-height:1;">{{ after.pickLabel }}</span>
+                <span style="font-family:'Inter',sans-serif;font-weight:700;font-size:14px;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;background:{{ after.gradeBg }};color:{{ after.gradeFg }};">{{ after.grade }}</span>
               </div>
               <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);margin-top:4px;">{{ after.pickSub }}</div>
             </div>
@@ -291,7 +335,7 @@ class Component extends DCLogic {
     const want = [this.props.scenario || "", location.search].join("|");
     if (this.state.loadedFor === want) return;
     this.setState({ loadedFor: want });
-    const [S, F] = await Promise.all([import("./lib/sports.js"), import("./lib/format.js")]);
+    const [S, F] = await Promise.all([import(new URL("./lib/sports.js", location.href).href), import(new URL("./lib/format.js", location.href).href)]);
     this.S = S; this.F = F;
     const { deployed } = await S.detectSport("epl");
     // On the real domain this page always reads the real board. Off it, the sample week.

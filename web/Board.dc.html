@@ -169,7 +169,7 @@
       <sc-if value="{{ isTonight }}" hint-placeholder-val="{{ true }}">
         <section aria-labelledby="projections-h" style="padding-top:40px;">
           <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;border-bottom:3px solid var(--ink);padding-bottom:10px;">
-            <h2 id="projections-h" style="margin:0;font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:34px;line-height:1;letter-spacing:-.01em;">Projections</h2>
+            <h2 id="projections-h" style="margin:0;font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:34px;line-height:1;letter-spacing:-.01em;">{{ projTitle }}</h2>
             <div style="display:flex;align-items:center;gap:4px 16px;flex-wrap:wrap;">
               <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">{{ summary }}</span>
               <button type="button" onClick="{{ onToggleAll }}" style="min-height:44px;padding:0 12px;background:transparent;border:1px solid var(--ink);color:var(--ink);font-family:'IBM Plex Mono',monospace;font-size:12px;cursor:pointer;">{{ toggleAllLabel }}</button>
@@ -178,7 +178,7 @@
 
           <sc-for list="{{ groups }}" as="day" hint-placeholder-count="1">
             <div style="display:flex;align-items:baseline;gap:14px;padding:26px 0 10px;border-bottom:1px solid var(--ink);">
-              <h3 style="margin:0;font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:26px;letter-spacing:-.01em;">{{ day.label }}</h3>
+              <sc-if value="{{ day.showLabel }}"><h3 style="margin:0;font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:26px;letter-spacing:-.01em;">{{ day.label }}</h3></sc-if>
               <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">{{ day.countLabel }}</span>
             </div>
 
@@ -925,7 +925,7 @@ class Component extends DCLogic {
     // "?" on each cell title opens the matching Methods entry. NHL only; the shared Board stays one file.
     const HELP = { Moneyline: ["Methods.dc.html#fair", "Open, current and our fair price"], "Puck line": ["Methods.dc.html#proj-goals", "How the puck line is priced"], Total: ["Methods.dc.html#proj-goals", "Projected goals and the total"] };
     const withHelp = (c) => (hasMethods && HELP[c.title] ? { ...c, help: HELP[c.title][0], helpTitle: HELP[c.title][1] } : { ...c, help: "", helpTitle: "" });
-    const groups = vm.groups.map((d) => ({ ...d, games: d.games.map((g) => {
+    const groups = vm.groups.map((d) => ({ ...d, showLabel: sk !== "cbb", games: d.games.map((g) => {
       const r = raw[g.id] || { away: {}, home: {} }, e = M.byGame[g.id], open = this.isOpen(g.id), a = r.away.abbr, h = r.home.abbr;
       const st = e ? SL(e) : null, scored = !!e && e.state !== "pre" && e.away.score != null && e.home.score != null;
       const ls = e && r.pick && g.pick.kind !== "none" ? L.pickStatusFor(sk, { kind: "bet", ...r.pick }, e) : null;
@@ -1067,7 +1067,7 @@ class Component extends DCLogic {
       notice: vm.notice, hasNotice: !!vm.notice, hasFeedNotice: !!S.feedNotice, feedNotice: S.feedNotice || "",
       isArchived: !!vm.archived, archivedLabel: vm.archived ? `Board for ${vm.archived.date}${vm.archived.slot ? ` · ${vm.archived.slot} card` : ""}, as published` : "",
       tabs: tabsFor(S.tab, pv), isTonight: S.tab === "tonight" || (!pv && !dueOnly), isProps: S.tab === "props" && (!!pv || dueOnly),
-      showScores: !!L.LIVE_SPORTS[sk], bigTitle: epl ? "Big Matches This Week" : "Big Games Tonight", scoreCards, noScoreCards: !scoreCards.length, liveLine, liveColor, liveStamp,
+      showScores: !!L.LIVE_SPORTS[sk], bigTitle: epl ? "Big Matches This Week" : "Big Games Tonight", projTitle: epl ? "This Week's Matches" : "Today's Games", scoreCards, noScoreCards: !scoreCards.length, liveLine, liveColor, liveStamp,
       toggleAllLabel: S.allOpen ?? S.wide ? "Collapse all" : "Expand all",
       onToggleAll: () => { const next = !(S.allOpen ?? S.wide); this.setState({ allOpen: next, expanded: {} }, () => this.syncBoxes()); },
       pv: view, f, isModelView: !isDrought, isDroughtView: isDrought,

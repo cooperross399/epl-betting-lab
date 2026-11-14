@@ -128,19 +128,22 @@
       <sc-if value="{{ showScores }}" hint-placeholder-val="{{ true }}">
         <section aria-labelledby="scores-h" style="flex:1 1 320px;min-width:0;">
           <div style="display:flex;align-items:baseline;justify-content:space-between;gap:2px 12px;flex-wrap:wrap;">
-            <h2 id="scores-h" style="margin:0;font-family:'Inter',sans-serif;font-weight:700;font-size:18px;letter-spacing:.1em;text-transform:uppercase;">Scores</h2>
+            <h2 id="scores-h" style="margin:0;font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:26px;letter-spacing:-.01em;">{{ bigTitle }}</h2>
             <span role="status" style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:{{ liveColor }};">{{ liveLine }}</span>
           </div>
           <sc-if value="{{ noScoreCards }}" hint-placeholder-val="{{ false }}">
-            <p style="margin:8px 0 0;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">No games on tonight's board.</p>
+            <p style="margin:8px 0 0;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">No games on the board yet.</p>
           </sc-if>
           <div style="display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x proximity;margin-top:10px;padding-bottom:4px;scrollbar-width:thin;">
           <sc-for list="{{ scoreCards }}" as="s" hint-placeholder-count="5">
-            <button type="button" onClick="{{ s.onClick }}" aria-label="{{ s.aria }}" aria-disabled="{{ s.disabled }}" style="flex:none;scroll-snap-align:start;width:128px;min-height:76px;text-align:left;background:transparent;color:var(--ink);border:1px solid var(--rule);border-top:3px solid {{ s.topColor }};padding:6px 10px;font:inherit;cursor:{{ s.cursor }};display:flex;flex-direction:column;gap:3px;">
+            <button type="button" onClick="{{ s.onClick }}" aria-label="{{ s.aria }}" aria-disabled="{{ s.disabled }}" style="flex:none;scroll-snap-align:start;width:168px;min-height:96px;text-align:left;background:transparent;color:var(--ink);border:1px solid var(--rule);border-top:3px solid {{ s.topColor }};padding:6px 10px;font:inherit;cursor:{{ s.cursor }};display:flex;flex-direction:column;gap:3px;">
               <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:{{ s.stateColor }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">{{ s.state }}</span>
               <sc-for list="{{ s.rows }}" as="r" hint-placeholder-count="2">
-                <span style="display:flex;justify-content:space-between;gap:10px;font-family:'IBM Plex Mono',monospace;font-size:14px;line-height:1.3;font-weight:{{ r.weight }};"><span>{{ r.abbr }}</span><span>{{ r.score }}</span></span>
+                <span style="display:flex;justify-content:space-between;gap:10px;font-family:'IBM Plex Mono',monospace;font-size:14px;line-height:1.3;font-weight:{{ r.weight }};"><span style="display:flex;align-items:center;gap:6px;min-width:0;"><sc-if value="{{ r.logo }}" hint-placeholder-val="{{ false }}"><img class="team-logo" src="{{ r.logo }}" alt="" loading="lazy" decoding="async" onError="{{ r.onLogoError }}" style="width:20px;height:20px;border-radius:50%;object-fit:contain;padding:1px;flex:none;" /></sc-if><span>{{ r.abbr }}</span></span><span>{{ r.score }}</span></span>
               </sc-for>
+              <sc-if value="{{ s.tag }}" hint-placeholder-val="{{ false }}">
+                <span style="margin-top:2px;font-family:'Inter',sans-serif;font-size:11px;font-weight:600;line-height:1.3;color:{{ s.tagColor }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">{{ s.tag }}</span>
+              </sc-if>
               <sc-if value="{{ s.unmatched }}" hint-placeholder-val="{{ false }}">
                 <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;line-height:1.3;letter-spacing:.04em;text-transform:uppercase;color:var(--alert);">Unmatched · {{ s.why }}</span>
               </sc-if>
@@ -161,17 +164,6 @@
       </div>
     </sc-if>
 
-    <sc-if value="{{ isTonight }}" hint-placeholder-val="{{ true }}">
-    <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:0 24px;border-bottom:1px solid var(--ink);">
-      <sc-for list="{{ strip }}" as="c" hint-placeholder-count="4">
-        <div style="padding:22px 0;border-bottom:1px solid var(--rule);">
-          <div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);">{{ c.label }}</div>
-          <div style="font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:44px;line-height:1;margin-top:8px;">{{ c.value }}</div>
-          <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--ink-2);margin-top:6px;">{{ c.sub }}</div>
-        </div>
-      </sc-for>
-    </section>
-    </sc-if>
 
     <div id="main">
       <sc-if value="{{ isTonight }}" hint-placeholder-val="{{ true }}">
@@ -403,25 +395,6 @@
           </div>
           </sc-if>
 
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:0 24px;border-bottom:1px solid var(--ink);margin-top:16px;">
-            <sc-for list="{{ propCards }}" as="x" hint-placeholder-count="3">
-              <div style="padding:18px 0 20px;border-top:1px solid var(--rule);">
-                <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;">
-                  <span style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);">{{ x.label }}</span>
-                  <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);white-space:nowrap;">{{ x.tag }}</span>
-                </div>
-                <div style="display:flex;align-items:baseline;gap:6px 14px;flex-wrap:wrap;margin-top:8px;">
-                  <span style="font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:44px;line-height:1;">{{ x.record }}</span>
-                  <span style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:600;color:{{ x.unitsColor }};">{{ x.units }}</span>
-                </div>
-                <dl style="margin:12px 0 0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px 12px;">
-                  <sc-for list="{{ x.stats }}" as="st" hint-placeholder-count="3">
-                    <div style="min-width:0;"><dt style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);">{{ st.k }}</dt><dd style="margin:2px 0 0;font-family:'IBM Plex Mono',monospace;font-size:14px;">{{ st.v }}</dd></div>
-                  </sc-for>
-                </dl>
-              </div>
-            </sc-for>
-          </div>
 
           <sc-if value="{{ isDroughtView }}" hint-placeholder-val="{{ false }}">
             <div role="note" style="display:flex;flex-wrap:wrap;gap:10px 20px;align-items:flex-start;padding:16px 0;border-bottom:1px solid var(--ink);">
@@ -992,15 +965,19 @@ class Component extends DCLogic {
     }) }));
 
     // Scoreboard strip: every board game in start order, then every ESPN game that matched none.
-    const cardRows = (r, e, scored, code) => [p1, p2].map((k, i) => ({ abbr: r[k][code], score: scored ? String(e[k].score) : "", weight: scored && e[k].score > e[[p1, p2][1 - i]].score ? 700 : 400 }));
-    const scoreCards = (data.games || []).slice().sort((x, y) => Date.parse(start(x)) - Date.parse(start(y))).map((r) => {
+    // Big games (2026-11-14): best bets first, then leans, then the biggest games on the slate, six at most.
+    const cardRows = (r, e, scored, code) => [p1, p2].map((k, i) => ({ abbr: r[k][code], logo: code === "abbr" ? logoOf(r[k].abbr) : "", onLogoError: hideLogo, score: scored ? String(e[k].score) : "", weight: scored && e[k].score > e[[p1, p2][1 - i]].score ? 700 : 400 }));
+    const bigRank = (r) => { const k = r.pick && r.pick.kind; const big = JSON.stringify(r.tiers || "").includes("high_major") || (r.pick && r.pick.tier === "high_major"); return (k === "bet" ? 100 : k === "lean" ? 50 : 0) + (big ? 10 : 0); };
+    const bigGames = (data.games || []).slice().sort((x, y) => bigRank(y) - bigRank(x) || Date.parse(start(x)) - Date.parse(start(y))).slice(0, 6).sort((x, y) => Date.parse(start(x)) - Date.parse(start(y)));
+    const scoreCards = bigGames.map((r) => {
       const e = M.byGame[r.id], st = e ? SL(e) : null, scored = !!e && e.state !== "pre" && e.away.score != null;
       const stateTxt = st && st.top ? st.top : F.fmtTime(start(r));
       return { state: stateTxt, stateColor: st && st.tone === "in" ? "var(--alert)" : "var(--mute)", topColor: st && st.tone === "in" ? "var(--alert)" : st && st.tone === "post" ? "var(--ink)" : "var(--rule)",
         rows: cardRows(r, e, scored, "abbr"),
+        tag: r.pick && (r.pick.kind === "bet" || r.pick.kind === "lean") ? `${r.pick.kind === "bet" ? "Best bet" : "Lean"} · ${r.pick.label || ""}` : "", tagColor: r.pick && r.pick.kind === "bet" ? "var(--accent, var(--win))" : "var(--mute)",
         unmatched: false, why: "", onClick: () => this.jumpTo(r.id), disabled: undefined, cursor: "pointer",
         aria: `${r[p1].abbr} ${epl ? "v" : "at"} ${r[p2].abbr}, ${scored ? `${e.away.score} to ${e.home.score}, ` : ""}${stateTxt}. Open game.` };
-    }).concat(M.unmatched.map((u) => {
+    }).concat([].map((u) => {
       const st = SL(u), scored = u.state !== "pre" && u.away.score != null;
       return { state: st.top || F.fmtTime(u.startUtc), stateColor: "var(--alert)", topColor: "var(--alert)", unmatched: true, why: u.why, onClick: undefined, disabled: "true", cursor: "default",
         rows: cardRows(u, u, scored, "espn").map((x) => ({ ...x, weight: 400 })),
@@ -1090,7 +1067,7 @@ class Component extends DCLogic {
       notice: vm.notice, hasNotice: !!vm.notice, hasFeedNotice: !!S.feedNotice, feedNotice: S.feedNotice || "",
       isArchived: !!vm.archived, archivedLabel: vm.archived ? `Board for ${vm.archived.date}${vm.archived.slot ? ` · ${vm.archived.slot} card` : ""}, as published` : "",
       tabs: tabsFor(S.tab, pv), isTonight: S.tab === "tonight" || (!pv && !dueOnly), isProps: S.tab === "props" && (!!pv || dueOnly),
-      showScores: !!L.LIVE_SPORTS[sk], scoreCards, noScoreCards: !scoreCards.length, liveLine, liveColor, liveStamp,
+      showScores: !!L.LIVE_SPORTS[sk], bigTitle: epl ? "Big Matches This Week" : "Big Games Tonight", scoreCards, noScoreCards: !scoreCards.length, liveLine, liveColor, liveStamp,
       toggleAllLabel: S.allOpen ?? S.wide ? "Collapse all" : "Expand all",
       onToggleAll: () => { const next = !(S.allOpen ?? S.wide); this.setState({ allOpen: next, expanded: {} }, () => this.syncBoxes()); },
       pv: view, f, isModelView: !isDrought, isDroughtView: isDrought,

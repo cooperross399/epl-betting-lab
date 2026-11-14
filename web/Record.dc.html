@@ -113,6 +113,18 @@
       <p style="margin:10px 0 0;font-size:15px;line-height:1.5;color:var(--ink-2);max-width:760px;text-wrap:pretty;">A <strong>unit</strong> (u) is one standard bet. +5u means the picks are up five standard bets; −5u means down five. Win–loss–push counts every graded pick; a push is a tie that refunds the bet.</p>
     </section>
 
+    <sc-if value="{{ hasSeasonStrip }}" hint-placeholder-val="{{ true }}">
+    <section aria-label="Season records" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:0 24px;border-bottom:1px solid var(--ink);">
+      <sc-for list="{{ seasonStrip }}" as="c" hint-placeholder-count="4">
+        <div style="padding:22px 0;border-bottom:1px solid var(--rule);">
+          <div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);">{{ c.label }}</div>
+          <div style="font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:44px;line-height:1;margin-top:8px;">{{ c.value }}</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--ink-2);margin-top:6px;">{{ c.sub }}</div>
+        </div>
+      </sc-for>
+    </section>
+    </sc-if>
+
     <sc-if value="{{ empty }}" hint-placeholder-val="{{ false }}">
       <section id="main" style="padding:40px 0;">
         <div style="border:1px dashed var(--mute);padding:16px 18px;max-width:760px;">
@@ -366,12 +378,31 @@ class Component extends DCLogic {
     const url = live ? "./data/tracker.json" : scenario === "No bet graded yet" ? "./data/sample/tracker_empty.json" : "./data/sample/tracker.json";
     const get = async (u) => { try { const r = await fetch(u, { cache: "no-store" }); return r.ok ? await r.json() : null; } catch (_) { return null; } };
     const [data, board, calib] = await Promise.all([get(url), get(live ? "./data/board.json" : "./data/sample/board_game.json"), get(live ? "./data/record.json" : "./data/sample/record.json")]);
-    this.setState({ data, calib, teams: (board && board.teams) || {}, isSample: !live, err: data ? "" : "unreachable" });
+    this.setState({ data, calib, teams: (board && board.teams) || {}, boardRecord: (board && board.record) || null, isSample: !live, err: data ? "" : "unreachable" });
   }
   componentDidMount() { this.load(); }
   componentDidUpdate() { this.load(); }
   sort(tid, k) { this.setState((s) => { const cur = s.sorts[tid] || { k: "units", dir: -1 }; return { sorts: { ...s.sorts, [tid]: { k, dir: cur.k === k ? -cur.dir : k === "name" ? 1 : -1 } } }; }); }
-  renderVals() {
+  // Season records from board.json (moved here from the board, 2026-11-14).
+  seasonStrip() {
+    const r = this.state.boardRecord; if (!r || typeof r !== "object") return [];
+    const SPORT = "epl", epl = SPORT === "epl", cbb = SPORT === "cbb";
+    const kept = (x) => x && typeof x === "object" && typeof x.w === "number";
+    const rec = (x) => `${x.w || 0}–${x.l || 0}${typeof x.p === "number" ? `–${x.p}` : ""}`;
+    const wr = (x) => { const n = (x.w || 0) + (x.l || 0); return n ? `${(((x.w || 0) / n) * 100).toFixed(1)}%` : "—"; };
+    const units = (key, x) => { const m = r.season && r.season.money && r.season.money[key]; const u = m && typeof m.units === "number" ? m.units : x && typeof x.units === "number" ? x.units : null; return u == null ? "" : ` · ${u > 0.004 ? "+" : u < -0.004 ? "−" : ""}${Math.abs(u).toFixed(2)}u`; };
+    const picks = kept(r.picks) ? r.picks : typeof r.settled === "number" && typeof r.won === "number" ? { w: r.won, l: Math.max(0, r.settled - r.won - (r.void || 0)) } : null;
+    const cell = (label, x, key, tail) => ({ label, value: x ? rec(x) : "—", sub: x ? `${tail(x)}${units(key, x)}` : "Not tallied yet" });
+    return [
+      cell("Best bets · season", picks, "picks", (x) => wr(x)),
+      cell(epl ? "Favoured side · season" : "Straight up · season", kept(r.straightUp) ? r.straightUp : null, "straightUp", (x) => `${wr(x)} of ${epl ? "matches" : "games"}`),
+      cell(epl ? "Total 2.5 · season" : "Totals · season", kept(r.totals) ? r.totals : null, "totals", () => "model side of the line"),
+      ...(cbb ? [cell("Spread · season", kept(r.ats) ? r.ats : null, "ats", () => "model side of the spread")] : []),
+      cell("Leans · season", kept(r.leans) ? r.leans : null, "leans", () => "tracked, no bet"),
+    ];
+  }
+  renderVals() { const v = this._renderVals(); const seasonStrip = this.seasonStrip(); return { ...v, seasonStrip, hasSeasonStrip: seasonStrip.length > 0 }; }
+  _renderVals() {
     const F = this.F, d = this.state.data, T = this.state.teams;
     const tabsList = [["This week", "Board.dc.html"], ["Props", "Board.dc.html#props"], ["Results", "Results.dc.html"], ["Season", "Season.dc.html"], ["Record", "Record.dc.html"]];
     const tabs = tabsList.map(([label, href]) => ({ label, href, current: label === "Record" ? "page" : undefined, shadow: label === "Record" ? "inset 0 -3px 0 var(--ink)" : "none", color: label === "Record" ? "var(--ink)" : "var(--mute)" }));

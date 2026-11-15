@@ -1,4 +1,4 @@
-## Saturday 14 November, 15:35 UTC — scheduled run
+## Sunday 15 November, 10:42 UTC — scheduled run
 
 Something went wrong in this run.
 
@@ -8,7 +8,7 @@ Something went wrong in this run.
 
 The card below was still built, from whatever evidence was available. Treat it with that in mind.
 
-Provider quota: 4977584 (about 1382 days at the observed burn)
+Provider quota: 4971989 (about 1381 days at the observed burn)
 
 Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5, team_total_home_0_5, team_total_home_1_5, team_total_home_2_5, team_total_away_0_5, team_total_away_1_5, team_total_away_2_5** (excluded: none)
 
@@ -16,8 +16,8 @@ Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corner
 
 | Match | Market | Selection | Tier | Bet down to | Edge | Price | Book | Units |
 |:------|:-------|:----------|:-----|------------:|-----:|------:|:-----|------:|
+| Aston Villa v Sunderland | `1x2` | home | C | -152 | +7.3% | -130 | BetOnline.ag | 0.1 |
 | Brentford v Everton | `team_total_home_1_5` | under | C | -129 | +7.1% | -112 | BetRivers | 0.1 |
-| Aston Villa v Sunderland | `1x2` | home | C | -137 | +4.9% | -130 | BetOnline.ag | 0.1 |
 | Chelsea v Leeds | `team_total_home_1_5` | under | C | -106 | +5.1% | +100 | BetRivers | 0.1 |
 | Hull v Brighton | `1x2` | draw | C | +294 | +6.7% | +350 | BetRivers | 0.1 |
 | Liverpool v Man United | `team_total_home_2_5` | over | C | +174 | +6.0% | +194 | FanDuel | 0.1 |
@@ -31,8 +31,7 @@ _None._
 
 ### What changed
 
-- **Dropped:** Hull v Brighton team_total_away_1_5 under
-- **Moved section:** Hull v Brighton 1x2 draw
+- **Added:** Aston Villa v Sunderland team_total_away_1_5 over
 
 
 ## Beyond the Premier League
@@ -46,16 +45,16 @@ National teams, on a pool that shares no information with the club ratings — a
 | Match | Market | Selection | Bet down to | Edge | Price | Book | Units |
 |:--|:--|:--|--:|--:|--:|:--|--:|
 | Estonia v Bulgaria | `double_chance` | draw_or_away | -160 | +7.1% | -140 | DraftKings | 0.1 |
-| Belarus v Albania | `draw_no_bet` | home | +162 | +6.5% | +185 | BetMGM | 0.1 |
-| Latvia v Armenia | `draw_no_bet` | home | +106 | +6.1% | +118 | FanDuel | 0.1 |
 | Israel v Austria | `double_chance` | home_or_draw | +118 | +5.8% | +130 | FanDuel | 0.1 |
+| Iceland v Luxembourg | `double_chance` | draw_or_away | +208 | +5.7% | +230 | FanDuel | 0.1 |
+| Hungary v Northern Ireland | `draw_no_bet` | away | +200 | +5.6% | +220 | FanDuel | 0.1 |
 
-- 130 fixture(s) dropped as already kicked off: Albania v Belarus, Albania v Finland, Albania v San Marino, Andorra v Gibraltar, Andorra v Malta, Armenia v Cyprus, and 124 more.
+- 138 fixture(s) dropped as already kicked off: Albania v Belarus, Albania v Finland, Albania v San Marino, Andorra v Gibraltar, Andorra v Malta, Armenia v Cyprus, and 132 more.
 - `btts` is not bet here: the model sits about 8 points below the market on the goals level for every fixture, so a selection in that market would be the gap rather than the fixture.
 - `total_2_5` is not bet here: the model sits about 8 points below the market on the goals level for every fixture, so a selection in that market would be the gap rather than the fixture.
 - Ratings include no result after 2026-10-06; the results archive runs about a month behind, so the current international window is not in the fit.
 - No corner model: the pool carries no corner counts.
-- 7 further selection(s) qualified and are not shown: this section prints at most 4 per competition, the highest edges first.
+- 3 further selection(s) qualified and are not shown: this section prints at most 4 per competition, the highest edges first.
 
 ### UEFA Champions League
 
@@ -123,7 +122,7 @@ Context only: no units, nothing here is a selection, and no edge is shown.
 
 Each selection is scored at the first price a card offered it, and only rows the card staked are counted — a lean carries no stake and is not a recommendation.
 
-**Beyond the Premier League is not in these numbers.** 10 staked selection(s) from that section are on this card. It is graded on a record of its own (`beyond_record.md`): 76 settled, 27 won, 3 returned the stake, -1.60 units. The rule above is stated by stake, so without this line the only way to notice would be to total the card by hand.
+**Beyond the Premier League is not in these numbers.** 10 staked selection(s) from that section are on this card. It is graded on a record of its own (`beyond_record.md`): 80 settled, 31 won, 3 returned the stake, -0.83 units. The rule above is stated by stake, so without this line the only way to notice would be to total the card by hand.
 
 This is the only out-of-sample evidence this project has. It will take a long time to mean anything: separating a real 5% edge from zero needs roughly 1,500 settled bets.
 
@@ -152,4 +151,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/43610566633)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/43704959925)

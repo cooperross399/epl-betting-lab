@@ -1,4 +1,4 @@
-## Monday 16 November, 10:38 UTC — scheduled run
+## Monday 16 November, 13:07 UTC — scheduled run
 
 Something went wrong in this run.
 
@@ -8,7 +8,7 @@ Something went wrong in this run.
 
 The card below was still built, from whatever evidence was available. Treat it with that in mind.
 
-Provider quota: 4967018 (about 1379 days at the observed burn)
+Provider quota: 4966332 (about 1379 days at the observed burn)
 
 Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5, team_total_home_0_5, team_total_home_1_5, team_total_home_2_5, team_total_away_0_5, team_total_away_1_5, team_total_away_2_5** (excluded: none)
 
@@ -31,8 +31,8 @@ _None._
 
 ### What changed
 
-- **Dropped:** Aston Villa v Sunderland team_total_away_1_5 over
-- **Dropped:** Liverpool v Man United corners_1x2 home
+- **Added:** Coventry v Crystal Palace draw_no_bet away
+- **Added:** Liverpool v Man United corners_1x2 home
 - **Moved section:** Chelsea v Leeds total_2_5 under
 
 
@@ -153,4 +153,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/43850098897)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/43872140068)

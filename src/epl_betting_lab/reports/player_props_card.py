@@ -47,6 +47,7 @@ from epl_betting_lab.config import (
     STAGING_DIR,
 )
 from epl_betting_lab.data.referee_appointments import APPOINTMENTS_FILENAME
+from epl_betting_lab.providers.team_names import normalize_team_name
 from epl_betting_lab.models.player_props import (
     CARD_STATS,
     FPL_STATS,
@@ -224,6 +225,22 @@ def display_player(pick: Mapping[str, object]) -> str:
 def needs_fpl_logs(markets: list[str]) -> bool:
     """Whether any of `markets` is rated on the Fantasy Premier League logs."""
     return any(SETTLEMENT_COLUMNS.get(m) in FPL_STATS for m in markets)
+
+
+def canonical_clubs(logs: pd.DataFrame) -> pd.DataFrame:
+    """`logs` with `team` and `opponent` in the project's spelling.
+
+    Understat writes "Manchester United", "Newcastle United" and three more
+    clubs its own way, and the staged prices carry "Man United" and
+    "Newcastle". Until 2026-11-17 the logs were fitted as written, so a player
+    of those five clubs matched neither side of his own fixture and was never
+    priced, and their opponent factors were never read.
+    """
+    frame = logs.copy()
+    for column in ("team", "opponent"):
+        if column in frame.columns:
+            frame[column] = frame[column].map(normalize_team_name)
+    return frame
 
 
 def _resolve_player(
@@ -518,7 +535,7 @@ def build_player_props_card(
             "missing, so no rate can be modelled and no pick is made."
         )
         return summary
-    logs = add_card_columns(pd.read_csv(logs_file, dtype=str))
+    logs = canonical_clubs(add_card_columns(pd.read_csv(logs_file, dtype=str)))
     for stat in set(SETTLEMENT_COLUMNS.values()) | {"minutes"}:
         if stat in logs.columns:
             logs[stat] = pd.to_numeric(logs[stat], errors="coerce").fillna(0)

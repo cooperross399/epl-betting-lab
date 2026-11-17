@@ -124,3 +124,122 @@ def fetch_and_build_team_xg(
     processed_dir.mkdir(parents=True, exist_ok=True)
     table.to_csv(processed_dir / XG_FILENAME, index=False)
     return table
+
+
+# ---------------------------------------------------------------------------
+# When Understat cannot be read
+#
+# From 2026-11-02 every Understat request answered with something other than
+# JSON. The fetch raised before writing anything, so the table kept the rows an
+# earlier run had written and every match played since was rated on goals. The
+# ratings the 2.5 line, BTTS and the team totals run on are 70% xG.
+#
+# Fantasy Premier League publishes Opta's expected goals for every appearance
+# this season, keyless, and the props refresh already carries those logs from
+# run to run (`fpl_match_logs.csv`, in `matchday-state`). Summed per club and
+# match they are a team xG. Opta's and Understat's models are not the same
+# model, so the filled rows are scaled to Understat's level on the matches both
+# sources hold; with too few of those to measure, they are left unscaled.
+# ---------------------------------------------------------------------------
+
+FPL_LOGS_FILENAME = "fpl_match_logs.csv"
+
+#: Matches both sources must hold before the scale is measured rather than 1.
+MIN_OVERLAP_FOR_SCALE = 20
+
+#: The scale is a correction between two xG models, not a free parameter.
+SCALE_BOUNDS = (0.8, 1.25)
+
+_KEY = ["date", "home_team", "away_team"]
+
+
+def team_xg_from_fpl_logs(logs: pd.DataFrame) -> pd.DataFrame:
+    """One row per match FPL's logs cover from both sides, in the table's columns."""
+    columns = ["date", "home_team", "away_team", "home_xg", "away_xg"]
+    needed = {"date", "team", "opponent", "venue", "expected_goals"}
+    if logs is None or logs.empty or not needed <= set(logs.columns):
+        return pd.DataFrame(columns=columns)
+    frame = logs.copy()
+    frame["expected_goals"] = pd.to_numeric(frame["expected_goals"], errors="coerce").fillna(0.0)
+    frame["date"] = pd.to_datetime(frame["date"], errors="coerce").dt.normalize()
+    frame = frame.dropna(subset=["date"])
+    sums = frame.groupby(["date", "team", "opponent", "venue"], as_index=False)["expected_goals"].sum()
+    home = sums[sums["venue"] == "home"].rename(
+        columns={"team": "home_team", "opponent": "away_team", "expected_goals": "home_xg"}
+    )
+    away = sums[sums["venue"] == "away"].rename(
+        columns={"team": "away_team", "opponent": "home_team", "expected_goals": "away_xg"}
+    )
+    out = home.drop(columns="venue").merge(away.drop(columns="venue"), on=_KEY, how="inner")
+    return out[columns].reset_index(drop=True)
+
+
+def _scale(understat: pd.DataFrame, fpl: pd.DataFrame) -> tuple[float, int]:
+    both = understat.merge(fpl, on=_KEY, suffixes=("_u", "_f"))
+    if len(both) < MIN_OVERLAP_FOR_SCALE:
+        return 1.0, len(both)
+    opta = float(both["home_xg_f"].sum() + both["away_xg_f"].sum())
+    if opta <= 0:
+        return 1.0, len(both)
+    ratio = float(both["home_xg_u"].sum() + both["away_xg_u"].sum()) / opta
+    low, high = SCALE_BOUNDS
+    return min(max(ratio, low), high), len(both)
+
+
+def _read_table(path: Path) -> pd.DataFrame:
+    if not path.is_file():
+        return pd.DataFrame(columns=["date", "home_team", "away_team", "home_xg", "away_xg"])
+    table = pd.read_csv(path)
+    table["date"] = pd.to_datetime(table["date"], errors="coerce").dt.normalize()
+    return table.dropna(subset=["date"])
+
+
+def fetch_and_fill_team_xg(
+    seasons: Iterable[str] = DEFAULT_UNDERSTAT_SEASONS,
+    *,
+    raw_dir: Path = RAW_DIR,
+    processed_dir: Path = PROCESSED_DIR,
+    force: bool = False,
+    requester: Callable[[str], object] | None = None,
+    fpl_logs_path: Path | None = None,
+) -> tuple[pd.DataFrame, str]:
+    """Understat's table, else the table already on disk, topped up from FPL.
+
+    Returns the table written and a sentence saying where it came from.
+    Raises the Understat error only when Understat failed AND nothing could
+    be added from FPL, because then the ratings really are on goals for
+    every match since the last good fetch, and the run must say so.
+    """
+    try:
+        return fetch_and_build_team_xg(
+            seasons, raw_dir=raw_dir, processed_dir=processed_dir, force=force,
+            requester=requester,
+        ), "Team xG: Understat."
+    except (UnderstatError, OSError, ValueError) as exc:
+        failure = exc
+    target = processed_dir / XG_FILENAME
+    held = _read_table(target)
+    fpl_path = fpl_logs_path or (processed_dir / FPL_LOGS_FILENAME)
+    fpl_logs = pd.read_csv(fpl_path, dtype=str) if fpl_path.is_file() else pd.DataFrame()
+    fpl = team_xg_from_fpl_logs(fpl_logs)
+    missing = fpl.merge(held[_KEY], on=_KEY, how="left", indicator=True)
+    missing = missing[missing["_merge"] == "left_only"].drop(columns="_merge")
+    if missing.empty:
+        raise failure
+    scale, overlap = _scale(held, fpl)
+    missing = missing.assign(home_xg=missing["home_xg"] * scale, away_xg=missing["away_xg"] * scale)
+    table = (
+        pd.concat([held, missing], ignore_index=True)
+        .sort_values(_KEY)
+        .reset_index(drop=True)
+    )
+    processed_dir.mkdir(parents=True, exist_ok=True)
+    table.assign(date=table["date"].dt.strftime("%Y-%m-%d")).to_csv(target, index=False)
+    noun = "match" if len(missing) == 1 else "matches"
+    note = (
+        f"Team xG: Understat could not be read ({failure}); kept {len(held)} match(es) "
+        f"already on file and filled {len(missing)} {noun} from Fantasy Premier League's "
+        f"Opta expected goals, scaled by {scale:.3f} to Understat's level "
+        f"(measured on {overlap} match(es) both sources hold)."
+    )
+    return table, note

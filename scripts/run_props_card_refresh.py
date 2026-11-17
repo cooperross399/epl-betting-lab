@@ -39,8 +39,13 @@ from epl_betting_lab.providers.fpl_players import (
     fetch_fpl_player_data,
     write_fpl_data,
 )
+from epl_betting_lab.providers.espn_player_logs import (
+    EspnError,
+    fetch_understat_shaped_logs,
+)
 from epl_betting_lab.providers.understat_players import (
     LOG_FIELDS,
+    UnderstatError,
     fetch_player_match_logs,
 )
 from epl_betting_lab.reports.player_props_card import (
@@ -58,6 +63,15 @@ CURRENT_SEASON = "2026"
 
 
 def _refresh_player_logs() -> str:
+    """The season's player logs: Understat, else ESPN, else the file in hand.
+
+    Never raises. From 2026-11-02 Understat answered with something other
+    than JSON and this step raised, which ended the whole refresh before a
+    prop price was bought: two weeks with no props card and no word of it on
+    the match card. ESPN's match summaries carry every statistic the model
+    rates, and the season is rebuilt from them whole rather than mixed with
+    Understat's rows, whose player spellings differ.
+    """
     logs_path = Path(PROCESSED_DIR) / LOGS_FILENAME
     already: set[str] = set()
     if logs_path.is_file():
@@ -66,9 +80,12 @@ def _refresh_player_logs() -> str:
                 match_id = str(row.get("match_id", "")).strip()
                 if match_id:
                     already.add(match_id)
-    result = fetch_player_match_logs(
-        [CURRENT_SEASON], already_fetched=already, sleep_seconds=1.0
-    )
+    try:
+        result = fetch_player_match_logs(
+            [CURRENT_SEASON], already_fetched=already, sleep_seconds=1.0
+        )
+    except (UnderstatError, OSError, ValueError) as exc:
+        return _player_logs_from_espn(logs_path, f"{exc}")
     PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
     exists = logs_path.is_file()
     mode = "a" if exists else "w"
@@ -82,6 +99,30 @@ def _refresh_player_logs() -> str:
         f"Player logs: {result.matches_fetched} match(es) added, "
         f"{result.already_had} already held."
     )
+
+
+def _player_logs_from_espn(logs_path: Path, why: str) -> str:
+    try:
+        result = fetch_understat_shaped_logs(int(CURRENT_SEASON))
+    except (EspnError, OSError, ValueError) as exc:
+        held = "the previous file stands" if logs_path.is_file() else "no logs are held"
+        return f"WARNING: player logs not refreshed (Understat: {why}; ESPN: {exc}); {held}."
+    if not result.rows:
+        held = "the previous file stands" if logs_path.is_file() else "no logs are held"
+        return f"WARNING: ESPN returned no played match; {held}."
+    Path(PROCESSED_DIR).mkdir(parents=True, exist_ok=True)
+    with logs_path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=list(LOG_FIELDS))
+        writer.writeheader()
+        for row in result.rows:
+            writer.writerow({field: row.get(field, "") for field in LOG_FIELDS})
+    note = (
+        f"Player logs: Understat unavailable ({why}); rebuilt from ESPN match "
+        f"summaries, {result.fetched} match(es), {len(result.rows)} appearance(s)."
+    )
+    if result.failed:
+        note += f" {len(result.failed)} match(es) could not be read and are absent."
+    return note
 
 
 def _refresh_fpl_logs() -> str:

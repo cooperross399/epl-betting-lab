@@ -81,6 +81,10 @@ LOG_FIELDS = (
     "saves",
     "yellow_cards",
     "red_cards",
+    # Opta's expected goals for the appearance. Summed per club and match it
+    # is the team xG the ratings fall back on when Understat cannot be read
+    # (`data.fetch_understat_xg.team_xg_from_fpl_logs`).
+    "expected_goals",
 )
 
 PRIOR_FIELDS = ("player", "player_id", "minutes", "tackles", "saves")
@@ -97,6 +101,13 @@ def _int(value: object) -> int:
         return int(float(value))  # type: ignore[arg-type]
     except (TypeError, ValueError):
         return 0
+
+
+def _float(value: object) -> float:
+    try:
+        return round(float(value), 2)  # type: ignore[arg-type]
+    except (TypeError, ValueError):
+        return 0.0
 
 
 def _name(element: Mapping[str, Any]) -> str:
@@ -150,6 +161,7 @@ def build_fpl_logs(
                     "saves": _int(match.get("saves")),
                     "yellow_cards": _int(match.get("yellow_cards")),
                     "red_cards": _int(match.get("red_cards")),
+                    "expected_goals": _float(match.get("expected_goals")),
                 }
             )
     return pd.DataFrame(rows, columns=list(LOG_FIELDS))

@@ -360,6 +360,38 @@ Use the repo, the reports, and GitHub.
   log loss on 2025/26-2026/27 (440 matches) 1.0322 without, 1.0323 with. The
   tuning-season effects ran the wrong way for fatigue (a home side on short
   rest conceded 6% fewer than expected) and did not hold. Not shipped.
+- **2026-11-17 (weekly upgrade): Understat has been down since 2026-11-02,
+  and the card no longer depends on it.** Understat's league data has
+  answered 200 with a non-JSON page on every run since 2 November, so the
+  ratings ran on goals alone, every Matchday Refresh was marked degraded
+  (red), and the props refresh died before buying a price: no props on the
+  card and the Due List never re-priced for two weeks. Four fixes, no
+  measurement, bar, stake or market moved, no edge claimed:
+  1. **Player logs fall back to ESPN.** When Understat cannot be read,
+     `run_props_card_refresh._player_logs_from_espn` rebuilds the props
+     model's logs from ESPN's keyless match summaries
+     (`espn_player_logs.fetch_understat_shaped_logs`): goals, assists,
+     shots, shots on target, cards, first-goal minute, and minutes read off
+     the substitution and red-card clocks. Both down: the refresh says so
+     and carries on, never raises.
+  2. **Team xG is filled from Fantasy Premier League's Opta xG.**
+     `fetch_understat_xg.fetch_and_fill_team_xg` keeps every match already
+     on file and fills the missing ones from the FPL per-appearance
+     `expected_goals` (now kept in `fpl_match_logs.csv`), summed per team
+     and scaled to Understat's level on the matches both hold (at least 20,
+     else unscaled; ratio clipped 0.8-1.25). The step fails only when it
+     filled nothing.
+  3. **Props logs use the card's club names** (`player_props_card.
+     canonical_clubs`): Understat spells Manchester United, Manchester City,
+     Newcastle United, Nottingham Forest and Wolverhampton Wanderers in full,
+     the staged prices do not, and no prop on those five clubs was ever
+     priced.
+  4. **"What changed" names only rows the card prints**
+     (`card_notification.what_changed`): an unstaked lean or a pass moving
+     no longer appears as Added/Dropped. The 2026-11-12 card named picks in
+     no table.
+  `tests/test_the_props_and_xg_survive_understat.py`,
+  `tests/test_what_changed_names_only_what_the_card_shows.py`.
 - **Five changes on 2026-10-26 (Cooper: "What else ... to make the model more
   current and good", then "Yes do all 5").**
   1. The better ratings were re-tested held out (2025/26-2026/27) and still

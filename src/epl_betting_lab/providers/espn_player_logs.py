@@ -213,3 +213,189 @@ def fetch_logs(
             result.rows.extend(rows)
             result.fetched += 1
     return result
+
+
+# ---------------------------------------------------------------------------
+# The props card's player logs, in Understat's shape, when Understat is down.
+#
+# From 2026-11-02 Understat answered every data request with something other
+# than JSON, and `scripts/run_props_card_refresh.py` died at its first step:
+# no prop price was bought and no props card was built for two weeks, while
+# the match card carried on and said nothing about it. ESPN's match summary
+# carries every statistic the props model rates (shots, shots on target,
+# goals, assists, cards) and the substitution clocks that give minutes, so a
+# season rebuilt from it is the same table the model fits on. It is the feed
+# the public record already grades props against.
+# ---------------------------------------------------------------------------
+
+#: Understat's player-log columns (`providers.understat_players.LOG_FIELDS`),
+#: repeated here so this module stays importable without the Understat one.
+UNDERSTAT_SHAPED_FIELDS = (
+    "season",
+    "date",
+    "match_id",
+    "team",
+    "opponent",
+    "venue",
+    "player",
+    "player_id",
+    "position",
+    "minutes",
+    "goals",
+    "assists",
+    "shots",
+    "shots_on_target",
+    "yellow_cards",
+    "red_cards",
+    "first_goal_minute",
+)
+
+#: A full match, as Understat counts one: stoppage time is not added.
+FULL_MATCH_MINUTES = 90
+
+
+def _clock_minute(play: Mapping) -> int | None:
+    """`45'` -> 45 and `90'+3'` -> 90: the regulation minute, stoppage dropped."""
+    text = str(((play.get("clock") or {}).get("displayValue")) or "")
+    digits = ""
+    for char in text:
+        if char.isdigit():
+            digits += char
+        elif digits:
+            break
+    return min(int(digits), FULL_MATCH_MINUTES) if digits else None
+
+
+def understat_position(espn_position: str) -> str:
+    """ESPN's position abbreviation in Understat's vocabulary.
+
+    The props model groups on the first letter (F, M, D) or `GK`, and reads a
+    substitute's group from his named starts. ESPN writes `G`, `CD-L`, `LB`,
+    `DM`, `AM-R`, `F`, `CF-L`, `SUB` and the like.
+    """
+    text = str(espn_position or "").strip().upper()
+    if not text:
+        return ""
+    if text == "SUB":
+        return "Sub"
+    if text in {"G", "GK"}:
+        return "GK"
+    head = text.split("-")[0]
+    if head in {"CD", "CB", "LB", "RB", "LWB", "RWB", "SW", "D", "DF"}:
+        return "D" + head
+    if head in {"F", "CF", "ST", "S", "LW", "RW", "FW"}:
+        return "FW"
+    if head in {"DM", "CM", "AM", "LM", "RM", "M", "MF"}:
+        return "M" + head
+    return ""
+
+
+def _minutes_on(player: Mapping) -> int:
+    """Minutes on the pitch from the substitution and red-card clocks."""
+    if _stat(player, "appearances") <= 0:
+        return 0
+    plays = [p for p in player.get("plays") or [] if isinstance(p, Mapping)]
+    subs = [m for p in plays if p.get("substitution") and (m := _clock_minute(p)) is not None]
+    reds = [m for p in plays if p.get("redCard") and (m := _clock_minute(p)) is not None]
+    start = 0
+    if not player.get("starter"):
+        start = subs.pop(0) if subs and player.get("subbedIn") else 0
+    end = FULL_MATCH_MINUTES
+    if player.get("subbedOut") and subs:
+        end = subs[-1]
+    if reds:
+        end = min(end, min(reds))
+    # On the pitch at all is at least a minute: a stoppage-time substitute.
+    return max(1, end - start)
+
+
+def understat_shaped_rows(summary: Mapping, event: LeagueEvent) -> list[dict[str, Any]]:
+    """One row per player who got on the pitch, in Understat's log columns.
+
+    Team names are the project's canonical spelling (`team_names`), which is
+    what the staged prop prices carry. Player and match ids are prefixed
+    `espn-` so they can never be mistaken for Understat's.
+    """
+    from epl_betting_lab.providers.team_names import normalize_team_name
+
+    rosters = summary.get("rosters") or []
+    if len(rosters) != 2:
+        return []
+    names = {
+        r.get("homeAway"): normalize_team_name((r.get("team") or {}).get("displayName", ""))
+        for r in rosters
+    }
+    rows: list[dict[str, Any]] = []
+    for roster in rosters:
+        side = roster.get("homeAway")
+        if side not in ("home", "away"):
+            return []
+        for player in roster.get("roster", []) or []:
+            athlete = player.get("athlete") or {}
+            minutes = _minutes_on(player)
+            if not athlete.get("id") or minutes <= 0:
+                continue
+            goal_minutes = [
+                m
+                for p in player.get("plays") or []
+                if isinstance(p, Mapping)
+                and p.get("scoringPlay")
+                and p.get("didScore")
+                and not p.get("ownGoal")
+                and (m := _clock_minute(p)) is not None
+            ]
+            rows.append(
+                {
+                    "season": str(event.season),
+                    "date": event.kickoff[:10],
+                    "match_id": f"espn-{event.event_id}",
+                    "team": names.get(side, ""),
+                    "opponent": names.get("away" if side == "home" else "home", ""),
+                    "venue": side,
+                    "player": str(athlete.get("displayName") or ""),
+                    "player_id": f"espn-{athlete['id']}",
+                    "position": understat_position((player.get("position") or {}).get("abbreviation", "")),
+                    "minutes": minutes,
+                    "goals": _stat(player, "totalGoals"),
+                    "assists": _stat(player, "goalAssists"),
+                    "shots": _stat(player, "totalShots"),
+                    "shots_on_target": _stat(player, "shotsOnTarget"),
+                    "yellow_cards": _stat(player, "yellowCards"),
+                    "red_cards": _stat(player, "redCards"),
+                    "first_goal_minute": min(goal_minutes) if goal_minutes else "",
+                }
+            )
+    return rows
+
+
+def fetch_understat_shaped_logs(
+    season: int,
+    *,
+    request: Requester = default_requester,
+    workers: int = 8,
+) -> FetchResult:
+    """Every played match of `season` from ESPN, as Understat-shaped player rows."""
+    result = FetchResult()
+    result.events = season_events(int(season), request=request)
+    wanted = [e for e in result.events if e.completed]
+
+    def one(event: LeagueEvent) -> tuple[LeagueEvent, list[dict[str, Any]] | None]:
+        for _ in range(2):
+            try:
+                rows = understat_shaped_rows(
+                    request(f"{ESPN_SOCCER}/summary?event={event.event_id}"), event
+                )
+            except EspnError:
+                continue
+            if rows:
+                return event, rows
+        return event, None
+
+    with ThreadPoolExecutor(max_workers=max(1, workers)) as pool:
+        for event, rows in pool.map(one, wanted):
+            if rows is None:
+                result.failed.append(event.event_id)
+                continue
+            result.rows.extend(rows)
+            result.fetched += 1
+    return result

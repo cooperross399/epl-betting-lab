@@ -24,6 +24,7 @@ from pathlib import Path
 from typing import Any
 
 from epl_betting_lab.config import AUTOMATED_CARD_JSON, OUTPUTS_DIR
+from epl_betting_lab.reports.pick_display import is_stakeable
 
 
 CARD_JSON_FILENAME = AUTOMATED_CARD_JSON
@@ -34,6 +35,9 @@ COMPARISON_MARKDOWN_FILENAME = "automated_card_comparison.md"
 #: Sections compared. Passes are included because a pick moving from best bet to
 #: pass is exactly the kind of change worth noticing.
 SECTIONS = ("best_bets", "leans", "passes_or_avoids")
+
+#: The sections the card prints, and only their staked rows.
+SHOWN_SECTIONS = ("best_bets", "leans")
 
 
 def _clean(value: object) -> str:
@@ -87,6 +91,10 @@ def _index(card: Mapping[str, Any]) -> dict[str, dict[str, Any]]:
                 continue
             found[key] = {
                 "section": section,
+                # Whether the card prints this row: best bets and leans with
+                # a stake. Passes and zero-stake rows are compared too, and the
+                # card's "What changed" must not name them as if it showed them.
+                "shown": section in SHOWN_SECTIONS and is_stakeable(row),
                 "label": _label(row),
                 "market": _clean(row.get("market")),
                 "selection": _clean(row.get("selection")),
@@ -208,6 +216,8 @@ def build_card_comparison(
                     "label": new_row["label"],
                     "from_section": old_row["section"],
                     "to_section": new_row["section"],
+                    "from_shown": old_row["shown"],
+                    "to_shown": new_row["shown"],
                 }
             )
             changed = True

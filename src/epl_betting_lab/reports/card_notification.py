@@ -196,6 +196,45 @@ def closing_line_check(outputs: Path) -> list[str]:
     return render_verdicts(verdicts if isinstance(verdicts, list) else [])
 
 
+#: The card's own words for the sections it prints.
+SECTION_WORDS = {"best_bets": "best bet", "leans": "lean"}
+
+
+def what_changed(comparison: Mapping[str, Any]) -> list[str]:
+    """The card's changes since the last run, in terms of what it prints.
+
+    The comparison also tracks passes and zero-stake rows, which the card
+    does not print. Naming those ("Added: ... over" above tables without it)
+    sent the reader looking for a bet that was not there, so a change is
+    named only from the side the card shows: a row that left the printed
+    tables is Dropped, one that entered them is Added. Rows written before
+    `shown` existed are taken as shown.
+    """
+    def shown(row: Mapping[str, Any], key: str = "shown") -> bool:
+        return row.get(key, True) is not False
+
+    lines: list[str] = []
+    for row in comparison.get("added") or []:
+        if shown(row):
+            lines.append(f"**Added:** {_clean(row.get('label'))}")
+    for row in comparison.get("removed") or []:
+        if shown(row):
+            lines.append(f"**Dropped:** {_clean(row.get('label'))}")
+    for row in comparison.get("moved_section") or []:
+        was, now = shown(row, "from_shown"), shown(row, "to_shown")
+        label = _clean(row.get("label"))
+        if was and now:
+            before = SECTION_WORDS.get(_clean(row.get("from_section")), "")
+            after = SECTION_WORDS.get(_clean(row.get("to_section")), "")
+            words = f" ({before} to {after})" if before and after else ""
+            lines.append(f"**Moved:** {label}{words}")
+        elif was:
+            lines.append(f"**Dropped:** {label}")
+        elif now:
+            lines.append(f"**Added:** {label}")
+    return lines
+
+
 def build_notification(
     *,
     output_dir: Path | None = None,
@@ -312,17 +351,10 @@ def build_notification(
                 "",
             ]
 
-        added = comparison.get("added") or []
-        removed = comparison.get("removed") or []
-        moved = comparison.get("moved_section") or []
-        if added or removed or moved:
+        changes = what_changed(comparison)
+        if changes:
             lines += ["### What changed", ""]
-            for row in added:
-                lines.append(f"- **Added:** {_clean(row.get('label'))}")
-            for row in removed:
-                lines.append(f"- **Dropped:** {_clean(row.get('label'))}")
-            for row in moved:
-                lines.append(f"- **Moved section:** {_clean(row.get('label'))}")
+            lines += [f"- {change}" for change in changes]
             lines.append("")
     else:
         lines += [

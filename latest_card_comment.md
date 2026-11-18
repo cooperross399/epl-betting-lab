@@ -1,14 +1,8 @@
-## Wednesday 18 November, 13:25 UTC — scheduled run
+## Wednesday 18 November, 17:46 UTC — scheduled run
 
-Something went wrong in this run.
+Selections changed: 1 added, 2 dropped.
 
-### What went wrong
-
-- Team xG could not be fetched from Understat; the ratings used goals alone this run.
-
-The card below was still built, from whatever evidence was available. Treat it with that in mind.
-
-Provider quota: 4952082 (about 1375 days at the observed burn)
+Provider quota: 4951378 (about 1375 days at the observed burn)
 
 Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5, team_total_home_0_5, team_total_home_1_5, team_total_home_2_5, team_total_away_0_5, team_total_away_1_5, team_total_away_2_5** (excluded: none)
 
@@ -21,7 +15,7 @@ Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corner
 | Liverpool v Man United | `team_total_home_2_5` | over | C | +162 | +7.0% | +188 | FanDuel | 0.1 |
 | Chelsea v Leeds | `team_total_home_1_5` | under | C | -108 | +5.5% | +100 | BetRivers | 0.1 |
 | Hull v Brighton | `1x2` | draw | C | +303 | +6.5% | +359 | BetOnline.ag | 0.1 |
-| Coventry v Crystal Palace | `1x2` | away | C | +177 | +4.9% | +188 | BetUS | 0.1 |
+| Coventry v Crystal Palace | `1x2` | away | C | +177 | +4.8% | +187 | BetOnline.ag | 0.1 |
 | Bournemouth v Nott'm Forest | `1x2` | away | C | +278 | +5.2% | +303 | BetOnline.ag | 0.1 |
 | Newcastle v Arsenal | `team_total_away_0_5` | under | C | +509 | +5.2% | +580 | FanDuel | 0.1 |
 
@@ -90,8 +84,8 @@ Context only: no units, nothing here is a selection, and no edge is shown.
 | Player | Team | Opp | Kickoff (UTC) | Last season | Drought (bar) | 1 in N for him | Status | Price |
 |:--|:--|:--|:--|--:|:--|--:|:--|:--|
 | Harry Wilson | Leeds United | Chelsea | 2026-11-21 15:00 | 10 goals, 28% of apps | 15 (8) | 1 in 132 | — | not posted |
-| Danny Welbeck | Chelsea | Leeds United | 2026-11-21 15:00 | 13 goals, 27% of apps | 12 (8) | 1 in 44 | — | +190 (Fanatics) |
-| Viktor Gyökeres | Arsenal | Newcastle United | 2026-11-21 17:30 | 14 goals, 28% of apps | 10 (8) | 1 in 26 | — | +165 (DraftKings) |
+| Danny Welbeck | Chelsea | Leeds United | 2026-11-21 15:00 | 13 goals, 27% of apps | 12 (8) | 1 in 44 | — | +200 (Fanatics) |
+| Viktor Gyökeres | Arsenal | Newcastle United | 2026-11-21 17:30 | 14 goals, 28% of apps | 10 (8) | 1 in 26 | — | +170 (DraftKings) |
 | Morgan Gibbs-White | Nottingham Forest | AFC Bournemouth | 2026-11-21 15:00 | 15 goals, 35% of apps | 7 (6) | 1 in 21 | — | +350 (Fanatics) |
 
 **1+ assist, over 0.5.** Listed: 7+ Premier League assists last season and a run of league appearances without an assist at the bar his total sets (12+ assists -> 8, 9-11 assists -> 10, 7-8 assists -> 13 straight games).
@@ -143,4 +137,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/44312493166)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/44361364692)

@@ -225,7 +225,18 @@ def fetch_and_fill_team_xg(
     missing = fpl.merge(held[_KEY], on=_KEY, how="left", indicator=True)
     missing = missing[missing["_merge"] == "left_only"].drop(columns="_merge")
     if missing.empty:
-        raise failure
+        # Nothing to add is only good news when FPL could say what was
+        # played (an empty FPL table says nothing) and there is a table to
+        # stand on. Then every match FPL knows already has xG on file, as
+        # in a week with no round, and the ratings are not on goals alone.
+        if fpl.empty or held.empty:
+            raise failure
+        note = (
+            f"Team xG: Understat could not be read ({failure}); every one of the "
+            f"{len(fpl)} match(es) Fantasy Premier League holds is already on file "
+            f"({len(held)} match(es) in all), so nothing needed filling."
+        )
+        return held, note
     scale, overlap = _scale(held, fpl)
     missing = missing.assign(home_xg=missing["home_xg"] * scale, away_xg=missing["away_xg"] * scale)
     table = (

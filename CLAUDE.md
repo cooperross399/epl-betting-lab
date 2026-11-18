@@ -380,7 +380,12 @@ Use the repo, the reports, and GitHub.
      `expected_goals` (now kept in `fpl_match_logs.csv`), summed per team
      and scaled to Understat's level on the matches both hold (at least 20,
      else unscaled; ratio clipped 0.8-1.25). The step fails only when it
-     filled nothing.
+     filled nothing **and** something was missing: a run that finds every
+     match FPL holds already on file (a week with no round) is fine. As
+     first shipped it failed there too, so from 2026-11-17 13:44 UTC every
+     run during the international break read "ratings used goals alone"
+     while every played match had xG on file (fixed 2026-11-18). With FPL
+     unreadable as well, a held table proves nothing and the step fails.
   3. **Props logs use the card's club names** (`player_props_card.
      canonical_clubs`): Understat spells Manchester United, Manchester City,
      Newcastle United, Nottingham Forest and Wolverhampton Wanderers in full,

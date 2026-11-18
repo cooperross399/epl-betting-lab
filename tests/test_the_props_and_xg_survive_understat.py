@@ -325,3 +325,51 @@ def test_too_few_shared_matches_leave_the_fpl_figures_unscaled(tmp_path):
     filled = table[table.home_team == "Arsenal"].iloc[0]
     assert filled.home_xg == pytest.approx(1.7)
     assert "scaled by 1.000" in note
+
+
+def test_a_second_run_with_nothing_new_to_fill_is_not_a_failure(tmp_path):
+    """2026-11-17/18: the first run after PR #422 filled every FPL match and
+    the table rode to the next run in matchday-state. During the
+    international break no match was added, so the fill found nothing
+    missing and raised, and every later run said the ratings were on goals
+    alone while every played match had xG on file."""
+    processed = tmp_path / "processed"
+    processed.mkdir()
+    fpl = _fpl_file(tmp_path)
+
+    def down(url):
+        raise UnderstatError("Understat returned non-JSON.")
+
+    held = pd.DataFrame([
+        {"date": "2026-11-01", "home_team": "Man United", "away_team": "Arsenal",
+         "home_xg": 2.1, "away_xg": 0.5},
+        {"date": "2026-11-08", "home_team": "Arsenal", "away_team": "Man United",
+         "home_xg": 1.7, "away_xg": 0.7},
+    ])
+    held.to_csv(processed / xg.XG_FILENAME, index=False)
+
+    table, note = xg.fetch_and_fill_team_xg(
+        ["2026"], raw_dir=tmp_path / "raw", processed_dir=processed,
+        requester=down, fpl_logs_path=fpl,
+    )
+    assert len(table) == 2
+    assert "already on file" in note and "Fantasy Premier League" in note
+    assert len(pd.read_csv(processed / xg.XG_FILENAME)) == 2
+
+
+def test_a_held_table_without_fpl_to_check_it_against_still_fails(tmp_path):
+    """Nothing missing only means something when FPL could say what was
+    played: with FPL down too, a held table may be weeks behind."""
+    processed = tmp_path / "processed"
+    processed.mkdir()
+    pd.DataFrame([{"date": "2026-11-01", "home_team": "Man United", "away_team": "Arsenal",
+                   "home_xg": 2.1, "away_xg": 0.5}]).to_csv(processed / xg.XG_FILENAME, index=False)
+
+    def down(url):
+        raise UnderstatError("down")
+
+    with pytest.raises(UnderstatError):
+        xg.fetch_and_fill_team_xg(
+            ["2026"], raw_dir=tmp_path / "raw", processed_dir=processed,
+            requester=down, fpl_logs_path=tmp_path / "missing.csv",
+        )

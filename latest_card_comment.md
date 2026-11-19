@@ -1,8 +1,8 @@
-## Wednesday 18 November, 17:46 UTC — scheduled run
+## Thursday 19 November, 13:06 UTC — scheduled run
 
-Selections changed: 1 added, 2 dropped.
+Selections changed: 7 added, 7 dropped, 2 moved section.
 
-Provider quota: 4951378 (about 1375 days at the observed burn)
+Provider quota: 4947547 (about 1374 days at the observed burn)
 
 Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5, team_total_home_0_5, team_total_home_1_5, team_total_home_2_5, team_total_away_0_5, team_total_away_1_5, team_total_away_2_5** (excluded: none)
 
@@ -10,14 +10,14 @@ Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corner
 
 | Match | Market | Selection | Tier | Bet down to | Edge | Price | Book | Units |
 |:------|:-------|:----------|:-----|------------:|-----:|------:|:-----|------:|
-| Brentford v Everton | `team_total_home_1_5` | under | C | -133 | +7.1% | -115 | Bovada | 0.1 |
+| Man City v Fulham | `team_total_home_2_5` | under | C | -154 | +7.2% | -152 | BetRivers | 0.1 |
+| Brentford v Everton | `team_total_home_1_5` | under | C | -133 | +6.5% | -118 | Bovada | 0.1 |
 | Aston Villa v Sunderland | `1x2` | home | C | -128 | +5.5% | -118 | BetOnline.ag | 0.1 |
 | Liverpool v Man United | `team_total_home_2_5` | over | C | +162 | +7.0% | +188 | FanDuel | 0.1 |
-| Chelsea v Leeds | `team_total_home_1_5` | under | C | -108 | +5.5% | +100 | BetRivers | 0.1 |
+| Chelsea v Leeds | `team_total_home_1_5` | under | C | -110 | +5.1% | -103 | BetRivers | 0.1 |
 | Hull v Brighton | `1x2` | draw | C | +303 | +6.5% | +359 | BetOnline.ag | 0.1 |
-| Coventry v Crystal Palace | `1x2` | away | C | +177 | +4.8% | +187 | BetOnline.ag | 0.1 |
 | Bournemouth v Nott'm Forest | `1x2` | away | C | +278 | +5.2% | +303 | BetOnline.ag | 0.1 |
-| Newcastle v Arsenal | `team_total_away_0_5` | under | C | +509 | +5.2% | +580 | FanDuel | 0.1 |
+| Coventry v Crystal Palace | `1x2` | away | C | +176 | +4.7% | +185 | BetRivers | 0.1 |
 
 ### Leans
 
@@ -25,17 +25,26 @@ _None._
 
 ### Player props
 
-- Hull v Brighton — **Brighton goalkeeper** `player_goalie_saves_alternate` Over@2.5 at +176 (Bovada), bet down to +110, 0.1u
-- Chelsea v Leeds — **Jordan Henderson** `player_shots_on_target` Over@0.5 at +290 (BetRivers), bet down to +224, 0.1u
+- Hull v Brighton — **Brighton goalkeeper** `player_goalie_saves_alternate` Over@2.5 at +172 (Bovada), bet down to +110, 0.1u
+- Chelsea v Leeds — **Jordan Henderson** `player_shots` Over@1.5 at +300 (BetRivers), bet down to +200, 0.1u
+- Chelsea v Leeds — **Jayden Bogle** `player_shots_on_target` Over@0.5 at +340 (BetRivers), bet down to +262, 0.1u
 - Aston Villa v Sunderland — **Matty Cash** `player_to_receive_card` Yes at +550 (DraftKings), bet down to +405, 0.1u
-- Chelsea v Leeds — **Jayden Bogle** `player_shots_on_target` Over@0.5 at +330 (BetRivers), bet down to +262, 0.1u
+- Coventry v Crystal Palace — **Tyrick Mitchell** `player_shots` Over@0.5 at +105 (BetRivers), bet down to -111, 0.1u
+- Coventry v Crystal Palace — **Crystal Palace goalkeeper** `player_goalie_saves_alternate` Over@2.5 at -110 (Bovada), bet down to -125, 0.1u
 - Newcastle v Arsenal — **Noni Madueke** `player_to_receive_card` Yes at +900 (DraftKings), bet down to +678, 0.1u
+- Man City v Fulham — **Sander Berge** `player_shots` Over@0.5 at +130 (FanDuel), bet down to +117, 0.1u
 - Aston Villa v Sunderland — **Noah Sadiki** `player_shots_on_target` Over@0.5 at +500 (BetRivers), bet down to +425, 0.1u
-- Hull v Brighton — **Regan Slater** `player_shots_on_target` Over@0.5 at +510 (BetRivers), bet down to +446, 0.1u
+- Hull v Brighton — **Regan Slater** `player_shots_on_target` Over@0.5 at +500 (BetRivers), bet down to +446, 0.1u
+- Brentford v Everton — **Vitaly Janelt** `player_shots` Over@1.5 at +400 (BetRivers), bet down to +384, 0.1u
 - Newcastle v Arsenal — **Jacob Murphy** `player_to_receive_card` Yes at +650 (DraftKings), bet down to +615, 0.1u
 - Hull v Brighton — **Olivier Boscagli** `player_to_receive_card` Yes at +550 (DraftKings), bet down to +531, 0.1u
 
 _Props carry the smallest stake the card uses: the standing measurement demonstrates no edge, and books reprice on the team sheet after this card is built._
+
+### What changed
+
+- **Dropped:** Newcastle v Arsenal team_total_away_0_5 under
+- **Added:** Man City v Fulham team_total_home_2_5 under
 
 
 ## Beyond the Premier League
@@ -84,9 +93,9 @@ Context only: no units, nothing here is a selection, and no edge is shown.
 | Player | Team | Opp | Kickoff (UTC) | Last season | Drought (bar) | 1 in N for him | Status | Price |
 |:--|:--|:--|:--|--:|:--|--:|:--|:--|
 | Harry Wilson | Leeds United | Chelsea | 2026-11-21 15:00 | 10 goals, 28% of apps | 15 (8) | 1 in 132 | — | not posted |
-| Danny Welbeck | Chelsea | Leeds United | 2026-11-21 15:00 | 13 goals, 27% of apps | 12 (8) | 1 in 44 | — | +200 (Fanatics) |
-| Viktor Gyökeres | Arsenal | Newcastle United | 2026-11-21 17:30 | 14 goals, 28% of apps | 10 (8) | 1 in 26 | — | +170 (DraftKings) |
-| Morgan Gibbs-White | Nottingham Forest | AFC Bournemouth | 2026-11-21 15:00 | 15 goals, 35% of apps | 7 (6) | 1 in 21 | — | +350 (Fanatics) |
+| Danny Welbeck | Chelsea | Leeds United | 2026-11-21 15:00 | 13 goals, 27% of apps | 12 (8) | 1 in 44 | — | +190 (BetRivers) |
+| Viktor Gyökeres | Arsenal | Newcastle United | 2026-11-21 17:30 | 14 goals, 28% of apps | 10 (8) | 1 in 26 | — | +165 (DraftKings) |
+| Morgan Gibbs-White | Nottingham Forest | AFC Bournemouth | 2026-11-21 15:00 | 15 goals, 35% of apps | 7 (6) | 1 in 21 | — | +350 (BetMGM) |
 
 **1+ assist, over 0.5.** Listed: 7+ Premier League assists last season and a run of league appearances without an assist at the bar his total sets (12+ assists -> 8, 9-11 assists -> 10, 7-8 assists -> 13 straight games).
 
@@ -137,4 +146,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/44361364692)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/44529079226)

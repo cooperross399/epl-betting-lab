@@ -1,8 +1,8 @@
-## Friday 20 November, 10:46 UTC — scheduled run
+## Friday 20 November, 13:34 UTC — scheduled run
 
-Selections changed: 65 added.
+Selections changed: 2 dropped.
 
-Provider quota: 4940122 (about 1372 days at the observed burn)
+Provider quota: 4939371 (about 1372 days at the observed burn)
 
 Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5, team_total_home_0_5, team_total_home_1_5, team_total_home_2_5, team_total_away_0_5, team_total_away_1_5, team_total_away_2_5** (excluded: none)
 
@@ -14,9 +14,9 @@ Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corner
 | Chelsea v Leeds | `team_total_home_1_5` | under | C | -114 | +6.2% | -102 | Bovada | 0.1 |
 | Aston Villa v Sunderland | `1x2` | home | C | -138 | +5.9% | -125 | Fanatics | 0.1 |
 | Liverpool v Man United | `team_total_home_2_5` | over | C | +161 | +6.5% | +183 | Bovada | 0.1 |
-| Hull v Brighton | `1x2` | draw | C | +303 | +6.5% | +359 | BetOnline.ag | 0.1 |
+| Hull v Brighton | `1x2` | draw | C | +304 | +6.0% | +350 | Bovada | 0.1 |
 | Coventry v Crystal Palace | `1x2` | away | C | +180 | +4.7% | +190 | BetRivers | 0.1 |
-| Bournemouth v Nott'm Forest | `1x2` | away | C | +277 | +5.0% | +300 | BetUS | 0.1 |
+| Bournemouth v Nott'm Forest | `1x2` | away | C | +277 | +5.0% | +300 | FanDuel | 0.1 |
 | Newcastle v Arsenal | `team_total_away_0_5` | under | C | +517 | +5.4% | +600 | FanDuel | 0.1 |
 
 ### Leans
@@ -38,17 +38,6 @@ _None._
 - Hull v Brighton — **Olivier Boscagli** `player_to_receive_card` Yes at +550 (DraftKings), bet down to +531, 0.1u
 
 _Props carry the smallest stake the card uses: the standing measurement demonstrates no edge, and books reprice on the team sheet after this card is built._
-
-### What changed
-
-- **Added:** Aston Villa v Sunderland 1x2 home
-- **Added:** Bournemouth v Nott'm Forest 1x2 away
-- **Added:** Brentford v Everton team_total_home_1_5 under
-- **Added:** Chelsea v Leeds team_total_home_1_5 under
-- **Added:** Coventry v Crystal Palace 1x2 away
-- **Added:** Hull v Brighton 1x2 draw
-- **Added:** Liverpool v Man United team_total_home_2_5 over
-- **Added:** Newcastle v Arsenal team_total_away_0_5 under
 
 
 ## Beyond the Premier League
@@ -99,7 +88,7 @@ Context only: no units, nothing here is a selection, and no edge is shown.
 | Harry Wilson | Leeds United | Chelsea | 2026-11-21 15:00 | 10 goals, 28% of apps | 15 (8) | 1 in 132 | — | not posted |
 | Danny Welbeck | Chelsea | Leeds United | 2026-11-21 15:00 | 13 goals, 27% of apps | 12 (8) | 1 in 44 | — | +195 (BetRivers) |
 | Viktor Gyökeres | Arsenal | Newcastle United | 2026-11-21 17:30 | 14 goals, 28% of apps | 10 (8) | 1 in 26 | — | +165 (DraftKings) |
-| Morgan Gibbs-White | Nottingham Forest | AFC Bournemouth | 2026-11-21 15:00 | 15 goals, 35% of apps | 7 (6) | 1 in 21 | — | +350 (BetMGM) |
+| Morgan Gibbs-White | Nottingham Forest | AFC Bournemouth | 2026-11-21 15:00 | 15 goals, 35% of apps | 7 (6) | 1 in 21 | — | +350 (DraftKings) |
 
 **1+ assist, over 0.5.** Listed: 7+ Premier League assists last season and a run of league appearances without an assist at the bar his total sets (12+ assists -> 8, 9-11 assists -> 10, 7-8 assists -> 13 straight games).
 
@@ -107,7 +96,7 @@ Context only: no units, nothing here is a selection, and no edge is shown.
 
 | Player | Team | Opp | Kickoff (UTC) | Last season | Drought (bar) | 1 in N for him | Status | Price |
 |:--|:--|:--|:--|--:|:--|--:|:--|:--|
-| James Garner | Everton | Brentford | 2026-11-23 20:00 | 7 assists, 18% of apps | 13 (13) | 1 in 14 | — | not posted |
+| James Garner | Everton | Brentford | 2026-11-23 20:00 | 7 assists, 18% of apps | 13 (13) | 1 in 14 | — | +460 (FanDuel) |
 | Rayan Cherki | Manchester City | Fulham | 2026-11-21 12:30 | 12 assists, 27% of apps | 8 (8) | 1 in 13 | — | +115 (FanDuel) |
 
 ### How the recommendations have done
@@ -150,4 +139,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/44721171562)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/44744598766)

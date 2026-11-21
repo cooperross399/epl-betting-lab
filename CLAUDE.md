@@ -373,7 +373,18 @@ Use the repo, the reports, and GitHub.
   ratings price home sides about 2.4 points and draws about 1.3 under the
   de-vigged market, which is right, and away sides about 1 over, which
   pushes the card toward away sides and long prices. Cutting a market or
-  capping prices is Cooper's call and was put to him, not done.
+  capping prices is Cooper's call and was put to him; he left it to Claude
+  ("do whatever is best and will lead to more profits"), and the card was
+  kept as it is because no cut passed. **The tilt is not promoted clubs**
+  (only 9 of 1,620 walk-forward matches had an unrated side; a
+  relegation-level prior for them changed nothing and read worse held out)
+  and not the early season: it is the same in August-October and
+  November-May (home 0.423 against 0.442 market, away 0.354 against 0.322).
+  It is a uniform home-advantage shortfall in the legacy ratings, and the
+  one fix for it, the re-weighting above, lost on the rule seasons. A more
+  accurate model is not a more profitable card here: the card bets where
+  the model disagrees with the price, and that disagreement is mostly the
+  model's own error.
 - **Rest and fixture congestion were tested and add nothing (2026-10-26).**
   Days since each club's previous match in any competition (EPL, Champions,
   Europa and Conference League, EFL Cup, FA Cup; ESPN scoreboards), bucketed

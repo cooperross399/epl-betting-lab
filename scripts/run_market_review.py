@@ -83,6 +83,15 @@ def main() -> int:
     except Exception:  # noqa: BLE001
         notes.append("Side fix on bought prices failed: " + traceback.format_exc(limit=3).replace("\n", " "))
 
+    try:
+        from epl_betting_lab.data.loaders import load_matches_with_xg
+
+        prior_probs = review.walk_forward_with_prior(load_matches_with_xg())
+        side.append(("Where the home tilt comes from (home and away win probability)", review.tilt_breakdown(prior_probs)))
+        side.append(("Promoted-club prior: card 1X2 rule, current against fixed ratings", review.promoted_prior_rules(prior_probs)))
+    except Exception:  # noqa: BLE001
+        notes.append("Promoted-prior part failed: " + traceback.format_exc(limit=3).replace("\n", " "))
+
     report = review.render(live, derived, one_x_two, lean, notes, side)
     out = Path(args.output)
     out.parent.mkdir(parents=True, exist_ok=True)

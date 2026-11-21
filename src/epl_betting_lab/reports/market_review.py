@@ -538,3 +538,111 @@ def render(
     if notes:
         lines += ["## Notes", ""] + [f"- {n}" for n in notes] + [""]
     return "\n".join(lines)
+
+
+# --- Where the home tilt comes from, and one structural fix (2026-11-21) ---
+#
+# Cooper, after the first review: "do whatever is best and will lead to more
+# profits". The re-weighting above patched the symptom and failed on the rule
+# seasons. This looks for the cause. The old ratings price a club with no
+# history in the frame - a promoted side - as exactly league average, and
+# promoted sides are on average the weakest in the league, so every fixture
+# against one is priced too kindly to them. Declared before the run: the
+# candidate rates an unrated club as the mean of the three lowest-rated clubs
+# in the same fit (a relegation-level side; no constant, nothing fitted on any
+# test season), and it ships only under the review's rule.
+
+PROMOTED_PRIOR_RANK = 3
+
+
+def promoted_prior(model) -> "object":
+    from epl_betting_lab.models.poisson_goals import TeamStrength
+
+    ranked = sorted(model.team_strengths.values(), key=lambda s: s.attack / s.defense)
+    weakest = ranked[:PROMOTED_PRIOR_RANK]
+    if not weakest:
+        return TeamStrength(1.0, 1.0)
+    return TeamStrength(
+        attack=float(np.mean([s.attack for s in weakest])),
+        defense=float(np.mean([s.defense for s in weakest])),
+    )
+
+
+def walk_forward_with_prior(matches: pd.DataFrame, *, start_after: int = 380, last_n: int = 38) -> pd.DataFrame:
+    """Legacy walk-forward, twice per match: league-average prior and the
+    relegation-level prior for an unrated club. Flags which side was unrated."""
+    from epl_betting_lab.models.poisson_goals import PoissonGoalsModel
+
+    df = (
+        matches.dropna(subset=["home_goals", "away_goals", "date"])
+        .sort_values("date")
+        .reset_index(drop=True)
+    )
+    rows = []
+    for i in range(start_after, len(df)):
+        game = df.iloc[i]
+        model = PoissonGoalsModel().fit(df.iloc[:i], last_n_matches_per_team=last_n)
+        base = model.match_probabilities(game.home_team, game.away_team, allow_unrated=True)
+        home_new = game.home_team not in model.team_strengths
+        away_new = game.away_team not in model.team_strengths
+        if home_new or away_new:
+            prior = promoted_prior(model)
+            for team in (game.home_team, game.away_team):
+                model.team_strengths.setdefault(team, prior)
+            fixed = model.match_probabilities(game.home_team, game.away_team)
+        else:
+            fixed = base
+        row = {
+            "date": game.date, "season": game.season,
+            "home_team": game.home_team, "away_team": game.away_team,
+            "home_goals": int(game.home_goals), "away_goals": int(game.away_goals),
+            "unrated": "home" if home_new else "away" if away_new else "none",
+            "p_home": float(base["home_win"]), "p_draw": float(base["draw"]), "p_away": float(base["away_win"]),
+            "fix_home": float(fixed["home_win"]), "fix_draw": float(fixed["draw"]), "fix_away": float(fixed["away_win"]),
+        }
+        for col in ("AvgH", "AvgD", "AvgA", "AvgCH", "AvgCD", "AvgCA"):
+            row[col] = game.get(col)
+        rows.append(row)
+    return pd.DataFrame(rows)
+
+
+def tilt_breakdown(probs: pd.DataFrame) -> pd.DataFrame:
+    """Home probability: model, fixed model, market and what happened, by
+    whether a side had no rating and by month of the season."""
+    d = probs.dropna(subset=["AvgH", "AvgD", "AvgA"]).copy()
+    inv = 1.0 / d[["AvgH", "AvgD", "AvgA"]].to_numpy(dtype=float)
+    d["m_home"] = inv[:, 0] / inv.sum(axis=1)
+    d["m_away"] = inv[:, 2] / inv.sum(axis=1)
+    d["won_home"] = (d.home_goals > d.away_goals).astype(float)
+    d["won_away"] = (d.home_goals < d.away_goals).astype(float)
+    d["month"] = pd.to_datetime(d["date"]).dt.month
+    d["window"] = np.where(d["month"].isin([8, 9, 10]), "Aug-Oct", "Nov-May")
+    rows = []
+    for by in ("unrated", "window"):
+        for key, g in d.groupby(by):
+            rows.append({
+                "cut": f"{by}={key}", "matches": len(g),
+                "home model": round(g.p_home.mean(), 4), "home fixed": round(g.fix_home.mean(), 4),
+                "home market": round(g.m_home.mean(), 4), "home happened": round(g.won_home.mean(), 4),
+                "away model": round(g.p_away.mean(), 4), "away fixed": round(g.fix_away.mean(), 4),
+                "away market": round(g.m_away.mean(), 4), "away happened": round(g.won_away.mean(), 4),
+            })
+    return pd.DataFrame(rows)
+
+
+def promoted_prior_rules(probs: pd.DataFrame) -> pd.DataFrame:
+    """The card's 1X2 rule on the current and the fixed probabilities, by block."""
+    fixed = probs.copy()
+    fixed[["p_home", "p_draw", "p_away"]] = probs[["fix_home", "fix_draw", "fix_away"]].to_numpy()
+    rows = []
+    for name, frame in (("card", one_x_two_frame(probs)), ("promoted_prior", one_x_two_frame(fixed))):
+        for block, seasons in (("train", TRAIN_SEASONS), ("test", TEST_SEASONS)):
+            part = frame[frame["season"].isin(set(seasons))].copy()
+            sub = (probs if name == "card" else fixed)
+            sub = sub[sub["season"].isin(set(seasons))]
+            bets = cap_per_round(part[select(part, "card", model_column="calibrated_model_prob")].copy(), "calibrated_edge")
+            rows.append({"block": block, "rule": name, "market": "1x2", **score(bets),
+                         "log_loss": round(log_loss_1x2(sub), 4)})
+            for sel, group in bets.groupby("selection", sort=True):
+                rows.append({"block": block, "rule": name, "market": f"1x2 {sel}", **score(group)})
+    return pd.DataFrame(rows)

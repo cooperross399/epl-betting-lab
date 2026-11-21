@@ -111,3 +111,33 @@ def test_side_fix_regrades_draw_no_bet_from_the_double_chance_triple():
                      "american_odds": price, "won": won, "push": False})
     out = review.side_fix_derived(pd.DataFrame(rows), (1.0, 1.0, 1.0))
     assert set(out["rule"]) >= {"card (same fixtures)", "side_fix"}
+
+
+def test_an_unrated_club_is_rated_as_the_weakest_three_on_average():
+    from epl_betting_lab.models.poisson_goals import PoissonGoalsModel, TeamStrength
+
+    model = PoissonGoalsModel()
+    model.team_strengths = {
+        "A": TeamStrength(1.5, 0.6), "B": TeamStrength(1.0, 1.0),
+        "C": TeamStrength(0.8, 1.2), "D": TeamStrength(0.7, 1.3), "E": TeamStrength(0.6, 1.5),
+    }
+    prior = review.promoted_prior(model)
+    assert prior.attack == pytest.approx(0.7) and prior.defense == pytest.approx(1.3333333)
+
+
+def test_the_walk_forward_fixes_only_fixtures_with_an_unrated_club():
+    rows = []
+    teams = ["A", "B", "C", "D"]
+    day = pd.Timestamp("2021-08-01")
+    for k in range(40):
+        h, a = teams[k % 4], teams[(k + 1) % 4]
+        rows.append({"date": day + pd.Timedelta(days=k), "season": 2122, "home_team": h, "away_team": a,
+                     "home_goals": (k * 7) % 4, "away_goals": (k * 3) % 3})
+    rows.append({"date": day + pd.Timedelta(days=41), "season": 2122, "home_team": "A", "away_team": "NEW",
+                 "home_goals": 2, "away_goals": 0})
+    rows.append({"date": day + pd.Timedelta(days=42), "season": 2122, "home_team": "A", "away_team": "B",
+                 "home_goals": 1, "away_goals": 1})
+    out = review.walk_forward_with_prior(pd.DataFrame(rows), start_after=40)
+    new, old = out.iloc[0], out.iloc[1]
+    assert new.unrated == "away" and new.fix_home > new.p_home
+    assert old.unrated == "none" and old.fix_home == old.p_home

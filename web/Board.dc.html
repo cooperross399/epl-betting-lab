@@ -470,12 +470,6 @@
             </div>
           </sc-if>
 
-          <sc-if value="{{ pv.noteLine }}" hint-placeholder-val="{{ false }}">
-            <div style="padding:16px 0;border-bottom:1px solid var(--rule);display:flex;flex-direction:column;gap:8px;">
-              <p style="margin:0;font-size:15px;line-height:1.55;color:var(--ink-2);max-width:720px;text-wrap:pretty;">{{ pv.noteLine }}</p>
-              <p style="margin:0;font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.5;color:var(--mute);max-width:720px;">{{ pv.disclosure }}</p>
-            </div>
-          </sc-if>
           <sc-for list="{{ pv.matches }}" as="m" hint-placeholder-count="0">
             <section aria-label="{{ m.aria }}" style="margin-top:28px;">
               <div style="display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap;padding-bottom:10px;border-bottom:2px solid var(--ink);">

@@ -59,6 +59,13 @@ from epl_betting_lab.strategies.totals import ANCHOR_THRESHOLD, MODEL_WEIGHT
 #: The price from which `cap_200` refuses a best bet.
 CAP_PRICE = 200
 RULES = ("card", "cap_200", "anchored", "anchored_cap_200")
+#: Second round (declared 2026-11-21 after the first run showed the old
+#: ratings price the home side about 2.4 points under the de-vigged market
+#: over 1,620 matches, and under what happened): the card's own rule on 1X2
+#: probabilities re-weighted per outcome so that, on the rule seasons only,
+#: the average home, draw and away probability equals how often each
+#: happened. Read on the held-out seasons and on the bought 2025/26 prices.
+SIDE_RULES = ("side_fix", "side_fix_cap_200")
 
 
 def _logit(p: np.ndarray | float) -> np.ndarray:
@@ -320,6 +327,154 @@ def one_x_two_rules(probs: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+def fit_side_weights(probs: pd.DataFrame, *, iterations: int = 200) -> tuple[float, float, float]:
+    """Per-outcome weights (home, draw, away), fitted by iterative scaling.
+
+    After re-weighting and renormalising each match, the mean probability of
+    each outcome equals its observed frequency in `probs`. Three numbers,
+    fitted on the rule seasons only, so the held-out read is honest.
+    """
+    p = probs[["p_home", "p_draw", "p_away"]].to_numpy(dtype=float)
+    observed = np.array([
+        (probs.home_goals > probs.away_goals).mean(),
+        (probs.home_goals == probs.away_goals).mean(),
+        (probs.home_goals < probs.away_goals).mean(),
+    ])
+    w = np.ones(3)
+    for _ in range(iterations):
+        q = p * w
+        q /= q.sum(axis=1, keepdims=True)
+        w *= observed / q.mean(axis=0)
+        w /= w[0]
+    return tuple(float(x) for x in w)  # type: ignore[return-value]
+
+
+def reweight(h: float, d: float, a: float, weights: Sequence[float]) -> tuple[float, float, float]:
+    q = np.array([h, d, a]) * np.asarray(weights)
+    q = q / q.sum()
+    return float(q[0]), float(q[1]), float(q[2])
+
+
+def log_loss_1x2(probs: pd.DataFrame, weights: Sequence[float] | None = None) -> float:
+    p = probs[["p_home", "p_draw", "p_away"]].to_numpy(dtype=float)
+    if weights is not None:
+        p = p * np.asarray(weights)
+        p = p / p.sum(axis=1, keepdims=True)
+    outcome = np.select(
+        [probs.home_goals > probs.away_goals, probs.home_goals == probs.away_goals], [0, 1], 2
+    )
+    return float(-np.log(np.clip(p[np.arange(len(p)), outcome], 1e-9, 1)).mean())
+
+
+def market_log_loss_1x2(probs: pd.DataFrame) -> float:
+    d = probs.dropna(subset=["AvgH", "AvgD", "AvgA"])
+    inv = 1.0 / d[["AvgH", "AvgD", "AvgA"]].to_numpy(dtype=float)
+    p = inv / inv.sum(axis=1, keepdims=True)
+    outcome = np.select([d.home_goals > d.away_goals, d.home_goals == d.away_goals], [0, 1], 2)
+    return float(-np.log(np.clip(p[np.arange(len(p)), outcome], 1e-9, 1)).mean())
+
+
+def side_fix_1x2(probs: pd.DataFrame) -> tuple[pd.DataFrame, tuple[float, float, float]]:
+    """The card's 1X2 rule on re-weighted probabilities, by season block."""
+    train = probs[probs["season"].isin(set(TRAIN_SEASONS))]
+    weights = fit_side_weights(train)
+    adjusted = probs.copy()
+    triples = [reweight(h, d, a, weights) for h, d, a in zip(probs.p_home, probs.p_draw, probs.p_away)]
+    adjusted[["p_home", "p_draw", "p_away"]] = np.array(triples)
+    frame = one_x_two_frame(adjusted)
+    rows = []
+    for block, seasons in (("train", TRAIN_SEASONS), ("test", TEST_SEASONS)):
+        part = frame[frame["season"].isin(set(seasons))].copy()
+        sub = probs[probs["season"].isin(set(seasons))]
+        for rule in SIDE_RULES:
+            chosen = select(part, "cap_200" if rule.endswith("cap_200") else "card", model_column="calibrated_model_prob")
+            bets = cap_per_round(part[chosen].copy(), "calibrated_edge")
+            rows.append({"block": block, "rule": rule, "market": "1x2", **score(bets)})
+            for sel, group in bets.groupby("selection", sort=True):
+                rows.append({"block": block, "rule": rule, "market": f"1x2 {sel}", **score(group)})
+        rows.append({
+            "block": block, "rule": "log loss", "market": "model / re-weighted / market",
+            "bets": len(sub),
+            "roi_pct": round(log_loss_1x2(sub), 4),
+            "ci_low_pct": round(log_loss_1x2(sub, weights), 4),
+            "ci_high_pct": round(market_log_loss_1x2(sub), 4),
+        })
+    return pd.DataFrame(rows), weights
+
+
+def side_fix_derived(scored: pd.DataFrame, weights: Sequence[float]) -> pd.DataFrame:
+    """Draw no bet and double chance on the bought prices, re-weighted.
+
+    Each fixture's home/draw/away is recovered from the raw double-chance
+    probabilities the backtest priced (home_or_draw + draw_or_away - 1 is the
+    draw), re-weighted, and every row graded again by the card's own
+    `evaluate_derived_market` arithmetic. A fixture without both double-chance
+    sides priced is left out of both rules, so the comparison is like for like.
+    """
+    from epl_betting_lab.strategies.derived_result import evaluate_derived_market
+
+    frame = scored[scored["market"].isin(["draw_no_bet", "double_chance"])].copy()
+    key = ["date", "home_team", "away_team"]
+    dc = frame[frame["market"] == "double_chance"].pivot_table(
+        index=key, columns="selection", values="raw_model_prob", aggfunc="first"
+    )
+    if not {"home_or_draw", "draw_or_away"} <= set(dc.columns):
+        return pd.DataFrame()
+    dc = dc.dropna(subset=["home_or_draw", "draw_or_away"])
+    draw = dc["home_or_draw"] + dc["draw_or_away"] - 1
+    home = dc["home_or_draw"] - draw
+    away = dc["draw_or_away"] - draw
+    projections = []
+    for (date, ht, at), h, d, a in zip(dc.index, home, draw, away):
+        h2, d2, a2 = reweight(max(h, 1e-4), max(d, 1e-4), max(a, 1e-4), weights)
+        projections.append({
+            "date": date, "home_team": ht, "away_team": at,
+            "double_chance_home_or_draw": h2 + d2, "double_chance_draw_or_away": d2 + a2,
+            "double_chance_home_or_away": h2 + a2,
+            "draw_no_bet_home": h2 / (h2 + a2), "draw_no_bet_away": a2 / (h2 + a2),
+        })
+    proj = pd.DataFrame(projections)
+    kept = frame.merge(proj[key], on=key)
+    outcome = (
+        kept.drop_duplicates(subset=key + ["market", "selection"])
+        .set_index(key + ["market", "selection"])[["won", "push"]]
+    )
+    rows = []
+    for (date, ht, at), p_rows in proj.groupby(key):
+        odds = kept[(kept.date == date) & (kept.home_team == ht) & (kept.away_team == at)]
+        for market in ("draw_no_bet", "double_chance"):
+            graded = evaluate_derived_market(
+                market, p_rows, odds[odds.market == market][["home_team", "away_team", "market", "selection", "american_odds", "book"]],
+                min_edge=MIN_EDGE, max_juice=MAX_DEFAULT_JUICE,
+            )
+            if graded.empty:
+                continue
+            graded["date"] = date
+            rows.extend(graded.to_dict("records"))
+    regraded = pd.DataFrame(rows)
+    if regraded.empty:
+        return pd.DataFrame()
+    regraded = regraded.join(outcome, on=key + ["market", "selection"])
+    regraded["profit"] = [
+        0.0 if bool(p) else american_to_profit(float(a), bool(w))
+        for a, w, p in zip(regraded["american_odds"], regraded["won"], regraded["push"])
+    ]
+    base = kept.copy()
+    base["profit"] = [
+        0.0 if bool(p) else american_to_profit(float(a), bool(w))
+        for a, w, p in zip(base["american_odds"], base["won"], base["push"])
+    ]
+    out = []
+    for name, data in (("card (same fixtures)", base), ("side_fix", regraded)):
+        for cap in (False, True):
+            label = name + (" + cap_200" if cap else "")
+            chosen = select(data, "cap_200" if cap else "card", model_column="calibrated_model_prob")
+            bets = cap_per_round(data[chosen].copy(), "calibrated_edge")
+            for market, group in [("ALL", bets)] + list(bets.groupby("market", sort=True)):
+                out.append({"rule": label, "market": market, **score(group)})
+    return pd.DataFrame(out)
+
+
 def model_minus_market(frame: pd.DataFrame, model_column: str) -> pd.DataFrame:
     """Mean model probability, market probability and hit rate by selection.
 
@@ -349,6 +504,7 @@ def render(
     one_x_two: pd.DataFrame | None,
     lean: Sequence[pd.DataFrame],
     notes: Sequence[str],
+    side: Sequence[tuple[str, pd.DataFrame | None]] = (),
 ) -> str:
     lines = [
         "# Market review",
@@ -371,6 +527,9 @@ def render(
         (derived, "Bought 2025/26 prices: draw no bet, double chance, BTTS (walk-forward, 8 per round)"),
         (one_x_two, "1X2 on Football-Data, old ratings: rule seasons (train) and held-out seasons (test)"),
     ):
+        if frame is not None and not frame.empty:
+            lines += [f"## {title}", "", frame.to_markdown(index=False), ""]
+    for title, frame in side:
         if frame is not None and not frame.empty:
             lines += [f"## {title}", "", frame.to_markdown(index=False), ""]
     for frame in lean:

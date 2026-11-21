@@ -75,3 +75,39 @@ def test_the_live_table_counts_wins_against_what_the_prices_implied():
                                         (200, "+200 to +500"), (501, "longer than +500")])
 def test_price_bands(price, band):
     assert review.price_band(price) == band
+
+
+def _matches(n_home, n_draw, n_away, p=(0.40, 0.25, 0.35)):
+    rows = []
+    for goals in [(2, 0)] * n_home + [(1, 1)] * n_draw + [(0, 1)] * n_away:
+        rows.append({"p_home": p[0], "p_draw": p[1], "p_away": p[2],
+                     "home_goals": goals[0], "away_goals": goals[1]})
+    return pd.DataFrame(rows)
+
+
+def test_side_weights_make_the_average_match_what_happened():
+    probs = _matches(45, 25, 30)
+    weights = review.fit_side_weights(probs)
+    adjusted = [review.reweight(0.40, 0.25, 0.35, weights)]
+    assert adjusted[0][0] == pytest.approx(0.45, abs=1e-6)
+    assert adjusted[0][1] == pytest.approx(0.25, abs=1e-6)
+    assert sum(adjusted[0]) == pytest.approx(1.0)
+    assert review.log_loss_1x2(probs, weights) < review.log_loss_1x2(probs)
+
+
+def test_side_fix_regrades_draw_no_bet_from_the_double_chance_triple():
+    fixture = {"date": "2025-10-04", "home_team": "Arsenal", "away_team": "Fulham", "book": "fanduel"}
+    rows = []
+    # model triple 0.40 / 0.25 / 0.35
+    for market, sel, p, price, won in (
+        ("double_chance", "home_or_draw", 0.65, -150, True),
+        ("double_chance", "draw_or_away", 0.60, -120, False),
+        ("double_chance", "home_or_away", 0.75, -300, True),
+        ("draw_no_bet", "home", 0.40 / 0.75, -150, True),
+        ("draw_no_bet", "away", 0.35 / 0.75, 120, False),
+    ):
+        rows.append({**fixture, "market": market, "selection": sel, "raw_model_prob": p,
+                     "calibrated_model_prob": p, "calibrated_edge": 0.0, "status": "PASS",
+                     "american_odds": price, "won": won, "push": False})
+    out = review.side_fix_derived(pd.DataFrame(rows), (1.0, 1.0, 1.0))
+    assert set(out["rule"]) >= {"card (same fixtures)", "side_fix"}

@@ -26,6 +26,9 @@ def main() -> int:
     live = pd.DataFrame()
     derived = one_x_two = None
     lean: list[pd.DataFrame] = []
+    side: list[tuple[str, pd.DataFrame | None]] = []
+    scored = None
+    weights = None
 
     try:
         from epl_betting_lab.data.loaders import load_matches
@@ -45,6 +48,7 @@ def main() -> int:
         odds_path = Path(args.odds)
         if odds_path.is_file():
             result = build_backtest(pd.read_csv(odds_path), load_matches_with_xg())
+            scored = result.scored
             derived = review.derived_rules(result.scored)
             lean.append(
                 review.model_minus_market(
@@ -67,10 +71,19 @@ def main() -> int:
         probs = walk_forward_probabilities(load_matches_with_xg(), RatingConfig.legacy())
         one_x_two = review.one_x_two_rules(probs)
         lean.append(review.model_minus_market(review.one_x_two_frame(probs), "calibrated_model_prob"))
+        side_table, weights = review.side_fix_1x2(probs)
+        notes.append("Side weights (home, draw, away), fitted on the rule seasons: " + ", ".join(f"{w:.4f}" for w in weights))
+        side.append(("Side fix, 1X2: card rule on re-weighted probabilities (log loss row: model / re-weighted / market)", side_table))
     except Exception:  # noqa: BLE001
         notes.append("1X2 part failed: " + traceback.format_exc(limit=2).replace("\n", " "))
 
-    report = review.render(live, derived, one_x_two, lean, notes)
+    try:
+        if scored is not None and weights is not None:
+            side.append(("Side fix on the bought 2025/26 draw-no-bet and double-chance prices", review.side_fix_derived(scored, weights)))
+    except Exception:  # noqa: BLE001
+        notes.append("Side fix on bought prices failed: " + traceback.format_exc(limit=3).replace("\n", " "))
+
+    report = review.render(live, derived, one_x_two, lean, notes, side)
     out = Path(args.output)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(report, encoding="utf-8")

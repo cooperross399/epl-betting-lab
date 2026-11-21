@@ -353,6 +353,27 @@ Use the repo, the reports, and GitHub.
   than 0.003. Team corner rates barely beat the league average, so a corner
   pick's "edge" is mostly the price disagreeing with an average. Nothing was
   shipped: none beat the current model by more than noise.
+- **Market review, 2026-11-21 (Cooper: "reevaluate any markets where we are
+  losing money/bets and see how we can improve"): nothing passed, nothing
+  changed on the card.** `scripts/run_market_review.py`, run by the
+  dispatch-only **Market Review** workflow (restores `matchday-state`, reads
+  the private odds-history, buys nothing), writes `market_review.md`. Live,
+  180 settled picks: the losses sit in corner overs (9.5 over 8-13, 10.5 over
+  7-13), the +200 to +500 band (4-23-3 against about 7 wins priced in), 1X2
+  and draw-no-bet; the whole record is roughly the vig and inside noise.
+  Three fixes were declared before reading and judged by one rule (no worse
+  than the card on the bought 2025/26 derived prices AND on 1X2 in both the
+  rule and held-out seasons, no CLV given up): a +200 cap, the 2.5 line's
+  market anchor on the result markets, and a home/draw/away re-weighting of
+  the old ratings (weights 1.000 / 1.007 / 0.841, fitted on 2021/22-2024/25).
+  Every one failed on at least one set: the re-weighting improved log loss
+  (held out 1.0526 -> 1.0439, market 1.0146) and the derived and held-out
+  1X2 returns, but returned -13.2% over 348 rule-season bets against the
+  card's +2.8%. The robust finding stands for the next model work: the old
+  ratings price home sides about 2.4 points and draws about 1.3 under the
+  de-vigged market, which is right, and away sides about 1 over, which
+  pushes the card toward away sides and long prices. Cutting a market or
+  capping prices is Cooper's call and was put to him, not done.
 - **Rest and fixture congestion were tested and add nothing (2026-10-26).**
   Days since each club's previous match in any competition (EPL, Champions,
   Europa and Conference League, EFL Cup, FA Cup; ESPN scoreboards), bucketed

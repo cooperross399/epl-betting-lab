@@ -309,7 +309,7 @@ def test_a_settled_night_reaches_results_the_tracker_and_the_boards_record(settl
         ("Matz Sels", "goalie_saves", "win"), ("Bukayo Saka", "assists", "win"),
     }
     assert props["summary"]["w"] == 3 and props["summary"]["l"] == 1 and props["summary"]["p"] == 0
-    assert props["summary"]["units"] == pytest.approx(0.375 - 0.3 + 0.275 + 0.275, abs=0.001)
+    assert props["summary"]["units"] == pytest.approx(1.5 - 1.2 + 1.1 + 1.1, abs=0.001)  # the 1u ladder
 
     # The tracker's rows: group "props", the player and the prop type on each.
     tracked = [b for b in latest["bets"] if b["group"] == "props"]
@@ -318,7 +318,7 @@ def test_a_settled_night_reaches_results_the_tracker_and_the_boards_record(settl
         ("Matz Sels", "goalie_saves", "win"), ("Bukayo Saka", "assists", "win"),
     }
     assert all(b["market"] == b["propType"] for b in tracked)
-    assert sorted(b["staked"] for b in tracked) == [0.25, 0.25, 0.25, 0.3], "0.25u, or to win 0.25u at -120 (2026-11-04)"
+    assert sorted(b["staked"] for b in tracked) == [1.0, 1.0, 1.0, 1.2], "1u, or to win 1u at -120 (the 1u ladder, 2026-11-21)"
     pages = _load("build_site_pages.py", "bsp_props_everywhere")
     hist = tmp_path / "history"
     (hist / "settled").mkdir(parents=True)
@@ -331,14 +331,17 @@ def test_a_settled_night_reaches_results_the_tracker_and_the_boards_record(settl
 
     # The season, onto results.json and the board's record strip.
     season = settle.season_record("epl", DAY, tmp_path, boards, latest, waiting)
-    assert season["props"] == {"w": 3, "l": 1, "p": 0, "units": pytest.approx(0.625, abs=0.001), "nights": 1}
+    # The 1u ladder (2026-11-21): units won, units risked and the return per unit.
+    assert season["props"] == {"w": 3, "l": 1, "p": 0, "units": pytest.approx(2.5, abs=0.001), "staked": pytest.approx(4.2),
+                               "priced": 4, "unpriced": 0, "stake": 1.0, "returnPct": 59.5, "nights": 1}
     data = tmp_path / "data"
     data.mkdir()
     (data / "board.json").write_text(json.dumps({"record": {"settled": 3}}), encoding="utf-8")
     settle.write_season(data, latest, season)
     assert latest["props"]["season"] == season["props"]
     board = json.loads((data / "board.json").read_text(encoding="utf-8"))
-    assert board["record"]["props"] == {"w": 3, "l": 1, "p": 0, "units": pytest.approx(0.625, abs=0.001), "nights": 1}
+    assert board["record"]["props"] == {"w": 3, "l": 1, "p": 0, "units": pytest.approx(2.5, abs=0.001), "staked": pytest.approx(4.2),
+                                        "returnPct": 59.5, "stake": 1.0, "nights": 1}
     assert board["record"]["settled"] == 3, "the keys the record already carried are kept"
 
 

@@ -236,12 +236,12 @@ def test_the_due_list_is_graded_on_goals_and_assists_and_void_when_he_did_not_pl
     for row in due["rows"]:
         assert {"player", "team", "opp", "market", "line", "drought", "price", "book", "heavyJuice", "actual", "result"} <= set(row)
     assert due["summary"] == {"w": 1, "l": 1, "p": 0}
-    # Since 2026-10-31 the Due List is tracked at 0.25u an entry, as the NHL
-    # board does (Cooper chose it): Saka's +180 win is staked, Odegaard had
-    # no price, so he is graded but not posted.
-    assert by["Bukayo Saka"]["units"] == 0.45 and by["Martin Odegaard"]["units"] is None
+    # Since 2026-10-31 the Due List is tracked as if bet, as the NHL board
+    # does (Cooper chose it), on the 1u ladder since 2026-11-21: Saka's +180
+    # win is staked at 1u, Odegaard had no price, so he is graded but not posted.
+    assert by["Bukayo Saka"]["units"] == 1.8 and by["Martin Odegaard"]["units"] is None
     assert board["record"]["dueList"] == {"w": 1, "l": 1, "p": 0, "nights": 1,
-                                          "stake": 0.25, "units": 0.45, "staked": 0.25, "returnPct": 180.0}
+                                          "stake": 1.0, "units": 1.8, "staked": 1.0, "returnPct": 180.0}
     assert due["season"]["byMarket"] == {"goals": {"w": 1, "l": 0}, "assists": {"w": 0, "l": 1}}
     # Never in the picks.
     assert results["summary"]["picks"] == {"w": 0, "l": 0, "p": 0}

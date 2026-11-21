@@ -38,6 +38,7 @@ import pandas as pd
 from epl_betting_lab.models.value import bet_down_to_american
 from epl_betting_lab.reports.pick_display import format_american_odds
 from epl_betting_lab.books import bettable_only
+from epl_betting_lab.staking import STAKE_RULE, staked_units
 from epl_betting_lab.staging_provider_policy import entry_is_complete_approval
 from epl_betting_lab.config import (
     PROPS_CARD_JSON,
@@ -106,9 +107,18 @@ UNCORRECTED_MARKETS = frozenset(
 #: Above every match-level bar, for the team-sheet deficit.
 PROPS_EDGE_THRESHOLD = 0.08
 
-#: The smallest stake the card uses anywhere. Props have no demonstrated
-#: edge; a larger number would imply one.
-PROPS_UNITS = 0.1
+#: The card's base stake, on the 1u Due List ladder since 2026-11-21 (Cooper:
+#: "use the due list ladder style pricing but with 1u as the main instead of
+#: .25u"): 1u, or to win 1u on a minus price, up to +199; 0.6u / 0.4u / 0.2u
+#: from +200 (`staking`). Props have no demonstrated edge; they take the same
+#: size as every other bet on the card, never more.
+PROPS_UNITS = 1.0
+UNITS_RULE = STAKE_RULE
+
+
+def props_units(price: object) -> float:
+    """Units to risk on one prop pick at `price` (the ladder)."""
+    return staked_units(price)
 
 
 @dataclass(frozen=True)
@@ -447,6 +457,7 @@ def build_player_props_card(
         ],
         "edge_threshold": edge_threshold,
         "units_per_pick": PROPS_UNITS,
+        "units_rule": UNITS_RULE,
         "correction": {
             "intercept": correction.intercept,
             "slope": correction.slope,
@@ -665,7 +676,7 @@ def build_player_props_card(
                 edge=round(edge, 4),
                 american_odds=american,
                 book=str(row["book"]),
-                units=PROPS_UNITS,
+                units=props_units(american),
                 referee=referee,
                 referee_factor=round(multiplier, 4),
                 model_player=rates.player,

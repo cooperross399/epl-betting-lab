@@ -107,14 +107,14 @@ NO_TRACKER_TAB: dict[str, re.Pattern[str]] = {
     "lib/sports.js": re.compile(r'\n    \.\.\.\(has\("tracker"\) \? \[tab\("Tracker"[^\]]*\] : \[tab\("Archive"[^\]]*\]\),'),
 }
 
-# Under each season record on the board, how it would have paid at 0.25u a
-# bet (Cooper, 2026-11-03: "I want a tracked profit/loss for best
-# bets/totals/leans/straight up underneath the record", ".25u per bet. to win
-# .25u for -odds"). build_site_json.season_record writes `units` beside each
-# record; a record without it keeps the old line.
+# Under each season record on the board, how it would have paid (Cooper,
+# 2026-11-03: "I want a tracked profit/loss for best bets/totals/leans/straight
+# up underneath the record"), on the 1u ladder since 2026-11-21.
+# build_site_json.season_record writes `units` beside each record; a record
+# without it keeps the old line.
 PL = ('const pl = (key, alt) => { const m = r.season && r.season.money && r.season.money[key]; '
       'return m && typeof m.units === "number" ? '
-      '`${m.units > 0.004 ? "+" : m.units < -0.004 ? "−" : ""}${Math.abs(m.units).toFixed(2)}u at ${m.stake ?? 0.25}u a bet` : alt; };\n  ')
+      '`${m.units > 0.004 ? "+" : m.units < -0.004 ? "−" : ""}${Math.abs(m.units).toFixed(2)}u at ${m.stake ?? 1}u a bet` : alt; };\n  ')
 
 PATCHES: dict[str, list[tuple[str, str]]] = {
     "lib/sports.js": [
@@ -140,7 +140,7 @@ PATCHES: dict[str, list[tuple[str, str]]] = {
         ),
         (
             '[{ label: "Best bets · season", value: F.recStr(data.seasonRecord.picks) }]',
-            '[{ label: "Best bets · season", value: F.recStr(data.seasonRecord.picks), ...((m) => (m && typeof m.units === "number" ? { sub: `${m.units > 0.004 ? "+" : m.units < -0.004 ? "−" : ""}${Math.abs(m.units).toFixed(2)}u at ${m.stake ?? 0.25}u a bet` } : {}))((data.seasonRecord.money || {}).picks) }]',
+            '[{ label: "Best bets · season", value: F.recStr(data.seasonRecord.picks), ...((m) => (m && typeof m.units === "number" ? { sub: `${m.units > 0.004 ? "+" : m.units < -0.004 ? "−" : ""}${Math.abs(m.units).toFixed(2)}u at ${m.stake ?? 1}u a bet` } : {}))((data.seasonRecord.money || {}).picks) }]',
         ),
     ],
     "Board.dc.html": [
@@ -228,6 +228,54 @@ def drop_tracker_tab(name: str, text: str) -> str:
     return pat.sub("", text)
 
 
+# The EPL site's own patches (2026-11-21, Cooper: "records/profits on the
+# website for EPL"; "use the due list ladder style pricing but with 1u as the
+# main instead of .25u"). Board, Results, Graphic and lib/sports.js are pinned
+# byte for byte from betting-lab-shared, which this lab cannot change; these
+# change only the published copies, after the pin is checked, the same way
+# PATCHES does for the NHL site. They put the night's and the season's units
+# (won or lost, risked, return per unit) under each record on Results, and
+# make every stake fallback read 1u.
+EPL_UNITS = (
+    'const eplMoney = (m) => { if (!m || typeof m.units !== "number") return ""; '
+    'const sg = (n) => (n > 0.004 ? "+" : n < -0.004 ? "−" : ""), u = m.units, st = typeof m.staked === "number" ? m.staked : 0; '
+    'return `${sg(u)}${Math.abs(u).toFixed(2)}u on ${st.toFixed(2)}u${st ? ` (${sg(u)}${Math.abs((100 * u) / st).toFixed(1)}%)` : ""}`; };\n'
+    'const eplUnits = (s, season, key) => { const n = eplMoney(s.money && s.money[key]), '
+    'all = season && season.nights && season.money ? season.money[key] : null; '
+    'const t = all ? `season ${F.recStr(all).replace(/–/g, "\\u2060–\\u2060")}${eplMoney(all) ? `, ${eplMoney(all)}` : ""}` : ""; '
+    'return [n && `${n} on the night`, t].filter(Boolean).join(" · "); };\n'
+)
+EPL_PATCHES: dict[str, list[tuple[str, str]]] = {
+    "lib/sports.js": [
+        (
+            "function eplResults(data) {",
+            EPL_UNITS + "function eplResults(data) {",
+        ),
+        (
+            'strip: [picksCell(s), { label: "Favoured side", value: F.recStr(s.result || { w: 0, l: 0 }) }, { label: "Total 2.5 leans", value: F.recStr(s.totals || { w: 0, l: 0 }) }],',
+            'strip: [{ ...picksCell(s), sub: eplUnits(s, data.seasonRecord, "picks") }, '
+            '{ label: "Favoured side", value: F.recStr(s.result || { w: 0, l: 0 }), sub: eplUnits(s, data.seasonRecord, "straightUp") }, '
+            '{ label: "Total 2.5", value: F.recStr(s.totals || { w: 0, l: 0 }), sub: eplUnits(s, data.seasonRecord, "totals") }, '
+            '{ label: "Leans", value: F.recStr(s.leans || { w: 0, l: 0, p: 0 }), sub: eplUnits(s, data.seasonRecord, "leans") }],',
+        ),
+    ],
+    "Results.dc.html": [
+        ("Not model bets · tracked at 0.25u each", "Not model bets · tracked on the 1u ladder"),
+        ("tracked as if 0.25u were bet on every priced entry", "tracked as if bet on the 1u ladder on every priced entry"),
+        ("${se.stake || 0.25}u each", "1u ladder"),
+    ],
+    "Board.dc.html": [
+        ("Not model bets · tracked at 0.25u each", "Not model bets · tracked on the 1u ladder", 2),
+        ("((r.stake) || 0.25)", "((r.stake) || 1)"),
+        ("(r.stake || 0.25)", "(r.stake || 1)"),
+        ("stake = (d && d.stake) || 0.25;", "stake = (d && d.stake) || 1;"),
+    ],
+    "Graphic.dc.html": [
+        ("best bet${bets.length === 1 ? \"\" : \"s\"} · 0.1u each`", "best bet${bets.length === 1 ? \"\" : \"s\"} · 1u ladder`"),
+    ],
+}
+
+
 def site_sport(dist: Path) -> str:
     try:
         return json.loads((dist / "site.json").read_text(encoding="utf-8")).get("sport") or "nhl"
@@ -237,9 +285,11 @@ def site_sport(dist: Path) -> str:
 
 def patch(name: str, text: str, sport: str = "nhl") -> str:
     text = drop_tracker_tab(name, text)
-    for old, new in (PATCHES.get(name, []) if sport == "nhl" else []):
-        if text.count(old) != 1:
-            raise SystemExit(f"{name}: expected one {old!r} to patch, found {text.count(old)}")
+    chosen = PATCHES if sport == "nhl" else EPL_PATCHES if sport == "epl" else {}
+    for old, new, *times in chosen.get(name, []):
+        want = times[0] if times else 1
+        if text.count(old) != want:
+            raise SystemExit(f"{name}: expected {want} {old!r} to patch, found {text.count(old)}")
         text = text.replace(old, new)
     return text
 

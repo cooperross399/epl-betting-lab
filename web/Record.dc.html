@@ -336,7 +336,7 @@
         <div style="border:1px solid var(--ink);padding:16px 18px;">
           <h2 id="read-h" style="margin:0;font-family:'Inter',sans-serif;font-weight:700;font-size:16px;letter-spacing:.14em;text-transform:uppercase;">How to read this</h2>
           <ul style="margin:10px 0 0;padding-left:18px;font-size:14px;line-height:1.55;color:var(--ink-2);display:flex;flex-direction:column;gap:6px;text-wrap:pretty;">
-            <li>Every bet on this page is counted the same way: 0.25u on plus odds, or enough to win 0.25u on minus odds, however much the card staked it that week.</li>
+            <li>Every bet on this page is counted the same way, the Due List ladder on a 1u base: 1u on plus odds, or enough to win 1u on minus odds (at −150, 1.5u to win 1u), up to +199; then 0.6u from +200 to +500, 0.4u from +501 to +1500 and 0.2u beyond, however much the card staked it that week. A push or void returns nothing. The favoured-side record risks 1u flat under +200.</li>
             <li>Leans (picks listed but not bet), voids and picks with no price are not counted. The Due List is a watch list, never a bet, and is not here.</li>
             <li>A few bets is not much to go on. A club at +3u after 11 bets can be back to zero after one bad weekend, so faded rows have under 10 bets.</li>
             <li>Measured against real prices, no market shows a demonstrated edge. A positive season here is a sample, not proof.</li>
@@ -390,7 +390,8 @@ class Component extends DCLogic {
     const kept = (x) => x && typeof x === "object" && typeof x.w === "number";
     const rec = (x) => `${x.w || 0}–${x.l || 0}${typeof x.p === "number" ? `–${x.p}` : ""}`;
     const wr = (x) => { const n = (x.w || 0) + (x.l || 0); return n ? `${(((x.w || 0) / n) * 100).toFixed(1)}%` : "—"; };
-    const units = (key, x) => { const m = r.season && r.season.money && r.season.money[key]; const u = m && typeof m.units === "number" ? m.units : x && typeof x.units === "number" ? x.units : null; return u == null ? "" : ` · ${u > 0.004 ? "+" : u < -0.004 ? "−" : ""}${Math.abs(u).toFixed(2)}u`; };
+    // Units won or lost, units risked and the return on every unit risked, on the 1u ladder (2026-11-21).
+    const units = (key, x) => { const m = (r.season && r.season.money && r.season.money[key]) || (x && typeof x.units === "number" ? x : null); if (!m || typeof m.units !== "number") return ""; const u = m.units, st = typeof m.staked === "number" ? m.staked : null; const sign = (n) => (n > 0.004 ? "+" : n < -0.004 ? "−" : ""); return ` · ${sign(u)}${Math.abs(u).toFixed(2)}u${st ? ` on ${st.toFixed(2)}u risked · ${sign(u)}${Math.abs((100 * u) / st).toFixed(1)}% per unit` : ""}${m.unpriced ? ` · ${m.unpriced} unpriced` : ""}`; };
     const picks = kept(r.picks) ? r.picks : typeof r.settled === "number" && typeof r.won === "number" ? { w: r.won, l: Math.max(0, r.settled - r.won - (r.void || 0)) } : null;
     const cell = (label, x, key, tail) => ({ label, value: x ? rec(x) : "—", sub: x ? `${tail(x)}${units(key, x)}` : "Not tallied yet" });
     return [
@@ -399,6 +400,8 @@ class Component extends DCLogic {
       cell(epl ? "Total 2.5 · season" : "Totals · season", kept(r.totals) ? r.totals : null, "totals", () => "model side of the line"),
       ...(cbb ? [cell("Spread · season", kept(r.ats) ? r.ats : null, "ats", () => "model side of the spread")] : []),
       cell("Leans · season", kept(r.leans) ? r.leans : null, "leans", () => "tracked, no bet"),
+      ...(epl ? [cell("Props best bets · season", kept(r.props) ? r.props : null, "props", (x) => wr(x)),
+                 cell("Due List · season", kept(r.dueList) ? r.dueList : null, "dueList", () => "watch list, never a bet")] : []),
     ];
   }
   renderVals() { const v = this._renderVals(); const seasonStrip = this.seasonStrip(); return { ...v, seasonStrip, hasSeasonStrip: seasonStrip.length > 0 }; }

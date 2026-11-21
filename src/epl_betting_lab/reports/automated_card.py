@@ -613,9 +613,11 @@ def render_automated_card(summary: Mapping[str, Any]) -> str:
         tiers = {_clean(r.get("confidence_tier")) for r in staked}
         if len(staked) < 2 or len(tiers) != 1:
             return []
-        size = _units(staked[0].get("suggested_units"))
         return [
-            f"_Every bet below is {size}u. No market on this card has a "
+            "_Every bet below is the same size on the 1u ladder: the Units "
+            "column is what to risk, 1u on a plus price or enough to win 1u "
+            "on a minus price up to +199, then 0.6u from +200 to +500, 0.4u "
+            "from +501 to +1500 and 0.2u beyond. No market on this card has a "
             "demonstrated edge — every interval includes zero and three "
             "point estimates are negative — so they are staked the same small "
             "size "

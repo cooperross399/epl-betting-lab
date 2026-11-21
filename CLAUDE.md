@@ -631,7 +631,7 @@ Use the repo, the reports, and GitHub.
      rule): a pick whose median implied probability across books fell a
      point or more between its first and latest capture before kick-off is
      halved before the bar reads it. It can only remove a stake.
-  6. **The Due List is tracked at 0.25u an entry** (`web/settle_results.
+  6. **The Due List is tracked at 0.25u an entry** (the 1u ladder since 2026-11-21) (`web/settle_results.
      DUE_STAKE`), as the NHL site does: units at the staged price, a push 0,
      a void or an entry with no price graded but not posted. The Due List is
      re-priced after the props prices are bought. Nothing is bet.
@@ -665,6 +665,44 @@ Use the repo, the reports, and GitHub.
   pinned in `tests/test_every_pick_carries_a_bet_down_to.py`. The shared Board
   (`betting-lab-shared`) does not print `betDownTo` yet; that is a shared-page
   change, not this repo's.
+- **Every stake on the card and every record on the site is the Due List
+  ladder on a 1u base (2026-11-21, Cooper: "use the due list ladder style
+  pricing but with 1u as the main instead of .25u" and "records/profits on
+  the website for EPL"; the CBB lab adopted the same rule the same day).**
+  Up to +199: 1u on a plus price, or enough to win 1u on a minus price (at
+  -150, risk 1.5u to win 1u); +200 to +500 0.6u; +501 to +1500 0.4u; longer
+  than +1500 0.2u. A push or a void returns 0 and is neither a win nor a
+  loss; a pick with no usable price is graded and counted `unpriced`, staked
+  nothing. The rule lives in `src/epl_betting_lab/staking.py`; the publish
+  scripts (`web/settle_results.py`, `web/build_site_pages.py`) spell it out
+  because they import nothing from `src/`, and `tests/test_the_1u_ladder.py`
+  pins all three and the card to the same numbers (-150, +300, +1000, void).
+  **The card:** the Units column (`suggested_units`) is units to RISK at the
+  pick's own price, at the tiers' old proportions (C, every bet the card has
+  staked, was 0.1u and is the ladder's size; B 2.5x; A 5x), so it differs by
+  price and is no longer one number; the props card and the Beyond section
+  use the same ladder (`props_units`, `extra_units`), and the card-feed record
+  (`card_scoreboard._stake`, so `beyond_record` too) restates every archived
+  staked pick at its price. Trust weights and line moves still only turn a
+  best bet into an unstaked lean. **The site:** every night's `summary.money`
+  and the season's `money` (on results.json's `seasonRecord` and board.json's
+  `record.season`) carry `{w, l, p, units, staked, priced, unpriced,
+  returnPct, stake}` for best bets, leans, the favoured side (`straightUp`,
+  graded on the favoured outcome's own frozen 1X2 price, risked 1u FLAT
+  under +200, a draw it did not name a loss) and the 2.5 line (`totals`, on
+  the frozen over/under price), with props and the Due List beside them;
+  tracker.json's rows and every breakdown (market, prop type, club, player,
+  price band split at the ladder's brackets, month) carry units and staked.
+  1X2 and double-chance picks are graded now (`grade_pick` returned None for
+  both, so 1X2 picks never reached the record). `GRADING = 2` (and the new
+  `STAKE_RULE`) re-settles every kept night once, so history is restated;
+  a night that cannot be re-settled keeps its W-L-P and adds units only from
+  its kept bet rows. Shared pages (Board, Results, Graphic, `lib/sports.js`)
+  are pinned from `betting-lab-shared`, which this lab's sessions cannot
+  reach: `web/smooth_pages.EPL_PATCHES` changes only the published copies
+  (the night's and season's units under each Results record, every `0.25`
+  stake fallback read as 1). A shared-repo change and re-pin is still owed.
+  The two 0.25u bullets below are superseded by this one.
 - **Every tracked bet on the site is counted at 0.25u, or to win 0.25u on a
   minus price (2026-11-04, Cooper: "Make it so every bet weve tracked on the
   website in records and stuff is all .25u or to win .25u for -odds").** Site
@@ -691,7 +729,8 @@ Use the repo, the reports, and GitHub.
   Bookmakers the provider returns that are not on the list are NAMED in the
   card input report rather than dropped quietly — if one is a book Cooper can
   use, adding it is a decision about where he holds money, not a heuristic.
-- **Every bet on the card is the same size: 0.1 units.**
+- **Every bet on the card is the same size: 0.1 units** (until 2026-11-21;
+  now the 1u ladder at the pick's price, bullet above).
   `PROFIT_BACKTESTABLE_MARKETS` is `{1x2, total_2_5}` — the only two
   Football-Data ships odds for — and `1x2` is held at C by
   `FLOOR_ONLY_MARKETS` while the anchored rule caps `total_2_5` at C anyway. Tier A was never reached across 162

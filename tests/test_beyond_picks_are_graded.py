@@ -109,7 +109,8 @@ class TestGrading:
         assert len(total.settled) == 3
         assert sum(1 for s in total.settled if s.won) == 2  # DNB win, 11 corners over 10.5
         assert sum(1 for s in total.settled if s.pushed) == 1  # draw: stake back
-        assert total.profit_units == pytest.approx(0.15 + 0.1 * 100 / 110)
+        # The 1u ladder (2026-11-21): 1u at +150, to win 1u at -110.
+        assert total.profit_units == pytest.approx(1.5 + 1.0)
 
     def test_each_competition_keeps_its_own_record(self) -> None:
         result = self._board(
@@ -146,10 +147,10 @@ class TestTheReport:
             records, tmp_path, fetch=lambda competition, years: payloads.get(competition, []), now=NOW
         )
         text = (tmp_path / beyond_record.REPORT_FILENAME).read_text()
-        assert "UEFA Champions League" in text and "+0.15" in text
+        assert "UEFA Champions League" in text and "+1.50" in text  # 1u at +150, the 1u ladder
         summary = json.loads((tmp_path / beyond_record.SUMMARY_FILENAME).read_text())
         assert summary["settled"] == 1 and summary["won"] == 1
-        assert summary["profit_units"] == pytest.approx(0.15)
+        assert summary["profit_units"] == pytest.approx(1.5)
 
     def test_espn_failing_writes_a_report_that_says_so(self, tmp_path) -> None:
         def broken(competition, years):

@@ -8,7 +8,7 @@
                   the over-2.5 and both-teams-to-score chances the same way,
                   and whether the 1X2 line moved toward our picks. Read by
                   Record.dc.html and Game.dc.html.
-* `tracker.json`  Every graded best bet at 0.25u (to win 0.25u on minus odds), summed
+* `tracker.json`  Every graded best bet on the 1u ladder (to win 1u on minus odds), summed
                   by group, market, prop type, team, player, price band and
                   month. Read by Tracker.dc.html.
 * `season.json`   The table as it stands, from the season's played fixtures,
@@ -55,7 +55,8 @@ TRACKER_GROUPS = {"team": "Team picks", "props": "Player props"}
 
 PRICE_BANDS = (
     ("−200 and shorter", None, -200), ("−199 to −111", -199, -111), ("−110 to +110", -110, 110),
-    ("+111 to +199", 111, 199), ("+200 and longer", 200, None),
+    ("+111 to +199", 111, 199), ("+200 to +500", 200, 500), ("+501 to +1500", 501, 1500),
+    ("+1501 and longer", 1501, None),
 )
 
 #: A team pick frozen before its stake was recorded counts at this many units, and is marked.
@@ -96,21 +97,41 @@ def _num(x: object) -> bool:
     return isinstance(x, (int, float)) and not isinstance(x, bool) and math.isfinite(x)
 
 
-#: Every tracked bet is counted at this, to win it on a minus price (Cooper,
-#: 2026-11-04). The same rule as `settle_results.quarter`, spelled out here
-#: because this module reads the kept nights and loads nothing from that one.
-TRACKED_STAKE = 0.25
-STAKE_RULE = "0.25u, to win 0.25u on a minus price"
+#: Every tracked bet is counted on the Due List ladder on a 1u base (Cooper,
+#: 2026-11-21: "use the due list ladder style pricing but with 1u as the main
+#: instead of .25u"): 1u risked on a plus price, or to win 1u on a minus price,
+#: up to +199; +200 to +500 0.6u, +501 to +1500 0.4u, longer 0.2u. The same
+#: rule as `settle_results.quarter` and `src/epl_betting_lab/staking.py`,
+#: spelled out here because this module reads the kept nights and loads
+#: nothing from either (tests/test_the_1u_ladder.py pins all three).
+TRACKED_STAKE = 1.0
+STAKE_BRACKETS: tuple[tuple[int, float], ...] = ((500, 0.6), (1500, 0.4))
+STAKE_LONGEST = 0.2
+STAKE_RULE = (
+    "1u, to win 1u on a minus price; +200 to +500 0.6u, "
+    "+501 to +1500 0.4u, longer than +1500 0.2u"
+)
+
+
+def tracked_stake(price: float) -> float:
+    if price < 200:
+        return TRACKED_STAKE
+    for longest, stake in STAKE_BRACKETS:
+        if price <= longest:
+            return stake
+    return STAKE_LONGEST
 
 
 def restake(row: dict) -> dict:
-    """One tracker row restated at TRACKED_STAKE from its own price and result,
-    so a row kept at the card's stake reads the same as a new one."""
+    """One tracker row restated on the ladder from its own price and result,
+    so a row kept at the card's stake (or the old 0.25u) reads the same as a
+    new one."""
     price, result = row.get("price"), row.get("result")
     if not _num(price) or -100 < price < 100 or result not in ("win", "loss", "push"):
         return row
-    risk = TRACKED_STAKE * abs(price) / 100.0 if price < 0 else TRACKED_STAKE
-    win = TRACKED_STAKE if price < 0 else TRACKED_STAKE * price / 100.0
+    stake = tracked_stake(price)
+    risk = stake * abs(price) / 100.0 if price < 0 else stake
+    win = stake if price < 0 else stake * price / 100.0
     out = {k: v for k, v in row.items() if k != "stakeAssumed"}
     out.update(staked=round(risk, 4), units=round(win if result == "win" else -risk if result == "loss" else 0.0, 4))
     return out

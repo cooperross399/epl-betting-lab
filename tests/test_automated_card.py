@@ -616,7 +616,7 @@ def test_a_card_where_every_bet_is_the_same_size_says_so(tmp_path, monkeypatch):
         _generated_card(tmp_path, monkeypatch, picks=picks, fixtures=fixtures, now=now)
     )
 
-    assert "Every bet below is 0.1u" in text
+    assert "Every bet below is the same size on the 1u ladder" in text
     assert "does not size the bet" in text
 
 

@@ -7,6 +7,7 @@ from pathlib import Path
 import pandas as pd
 
 from epl_betting_lab.config import MIN_EDGE
+from epl_betting_lab.staking import card_units
 from epl_betting_lab.models.calibration import min_calibrated_edge
 from epl_betting_lab.models.value import LEAN_EDGE, bet_down_to_american
 from epl_betting_lab.strategies.count_markets import minimum_edge_for
@@ -385,14 +386,15 @@ def _confidence_tier(row: pd.Series) -> str:
     return tier
 
 
-def _suggested_units(tier: str) -> float:
-    return {
-        "A": 0.5,
-        "B": 0.25,
-        "C": 0.1,
-        LEAN_TIER: 0.0,
-        "Pass/Avoid": 0.0,
-    }.get(tier, 0.0)
+def _suggested_units(tier: str, price: object = -100) -> float:
+    """Units to RISK on a row: the 1u Due List ladder (Cooper, 2026-11-21: "use
+    the due list ladder style pricing but with 1u as the main instead of
+    .25u"), at the tier's old proportion (C was 0.1u and is the ladder's size;
+    B 2.5 times it, A 5 times). At -150 tier C risks 1.5u to win 1u; at +300
+    it is 0.6u. A lean, a pass or a row with no usable price is 0.
+    `staking.card_units` is the rule; with no price given it reads an even
+    -100, where the ladder's size is 1u."""
+    return card_units(tier, price)
 
 
 def _section(status: object) -> str:
@@ -507,7 +509,9 @@ def build_thursday_best_bets(
     df["risk_flags"] = df.apply(_risk_flags, axis=1)
     df["market_reliability_note"] = df.apply(lambda row: _market_reliability_note(row, market_reliability), axis=1)
     df["qualifies_reason"] = df.apply(lambda row: _qualifies_reason(row, row["section"]), axis=1)
-    df["suggested_units"] = df["confidence_tier"].apply(_suggested_units)
+    df["suggested_units"] = df.apply(
+        lambda row: _suggested_units(row["confidence_tier"], row.get("american_odds")), axis=1
+    )
     # Only the anchored 2.5 rule carries these; every other market's rows are
     # blank for them rather than absent, so the column selection below holds.
     for column in ("selection_rule", "market_prob", "market_prob_source", "anchor_lift"):
@@ -575,9 +579,10 @@ def render_thursday_best_bets(
         "",
         "The ranking score is a transparent 0-100 helper for sorting candidates. It rewards calibrated edge, calibrated probability, BETTABLE status, and historically stronger markets. It penalizes totals, totals unders, goal-environment under warnings, heavy juice worse than about -160, plus-money variance, and pass/avoid statuses.",
         "",
-        "- A: strongest best-bet profile, suggested up to 0.5u.",
-        "- B: playable but not top tier, suggested 0.25u.",
-        "- C: lean/watchlist only, suggested 0.10u max.",
+        "- Sizes are units to risk on the 1u Due List ladder: 1u on a plus price, or to win 1u on a minus price, up to +199; +200 to +500 0.6u; +501 to +1500 0.4u; longer 0.2u.",
+        "- A: strongest best-bet profile, five times the ladder's size.",
+        "- B: playable but not top tier, two and a half times it.",
+        "- C: the ladder's size (every bet the card has staked lands here).",
         "- Pass/Avoid: no bet, suggested 0u.",
         "",
         "Totals unders cannot receive A-tier in this conservative version because they have been a historical leak; the report can still show them as B/C only when the existing protections leave them playable.",

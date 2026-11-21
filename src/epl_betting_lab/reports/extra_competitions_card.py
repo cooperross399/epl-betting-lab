@@ -76,6 +76,7 @@ from epl_betting_lab.models.european_ratings import (
 from epl_betting_lab.models.poisson_goals import PoissonGoalsModel, UnratedTeam
 from epl_betting_lab.models.unified_ratings import UNIFIED_RATINGS, build_pool
 from epl_betting_lab.reports.pick_display import format_american_odds
+from epl_betting_lab.staking import staked_units
 from epl_betting_lab.reports.thursday_best_bets import _bet_down_to
 from epl_betting_lab.strategies.btts import evaluate_btts
 from epl_betting_lab.strategies.count_markets import (
@@ -91,9 +92,16 @@ from epl_betting_lab.strategies.totals import evaluate_total_25_anchored
 
 DEFAULT_FEED = PROCESSED_DIR / "price_feed_extra.csv"
 
-#: A tenth of a unit, the card's smallest. Sized to the evidence behind these
-#: prices rather than to the edge the model claims for them.
-EXTRA_UNITS = 0.1
+#: The card's base stake on the 1u Due List ladder (2026-11-21): 1u, or to win
+#: 1u on a minus price, up to +199; 0.6u / 0.4u / 0.2u from +200
+#: (`staking`). The same size as every Premier League bet, never more: sized
+#: to the evidence behind these prices rather than to the edge claimed.
+EXTRA_UNITS = 1.0
+
+
+def extra_units(price: object) -> float:
+    """Units to risk on one selection at `price` (the ladder)."""
+    return staked_units(price)
 
 #: `1x2` is left out for the same reason it is left out of the Premier League
 #: card: it loses out of sample. Every other market the provider returns for a
@@ -868,7 +876,7 @@ def build_extra_card(
         )
     selections = selections.drop(columns=["_edge"])
     selections["competition"] = competition
-    selections["suggested_units"] = EXTRA_UNITS
+    selections["suggested_units"] = selections["american_odds"].apply(extra_units)
     # The worst price each selection still clears its market's bar at, by the
     # Premier League card's own rule (Cooper, 2026-11-01: every pick carries a
     # "bet down to" number).
@@ -961,7 +969,8 @@ def render_extra_card(
     lines += [
         "Nothing below has been shown to beat a price. Some of it has been "
         "shown not to, and some of it cannot be tested at all. Each section "
-        f"says which. They are staked at {EXTRA_UNITS} units for that reason. "
+        "says which. They are staked at the card's base size (1u, or to win 1u on "
+        "a minus price; the ladder from +200) for that reason. "
         "See `data/outputs/unified_ratings.md` and "
         "`data/outputs/european_ratings.md`.",
         "",

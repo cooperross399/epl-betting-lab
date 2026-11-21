@@ -735,6 +735,19 @@ Use the repo, the reports, and GitHub.
   (the night's and season's units under each Results record, every `0.25`
   stake fallback read as 1). A shared-repo change and re-pin is still owed.
   The two 0.25u bullets below are superseded by this one.
+- **Props and Due List prices reach the site's record (2026-11-21, Cooper:
+  "we need to be tracking profit/record on the website for props and the due
+  list").** The record grades only the board frozen the first time a round's
+  date is built (`web/site_history.py`), and props and Due List prices are
+  bought later in the week, so every frozen board since 2026-10-25 read props
+  `no_lines` and every Due List entry unpriced: props never tallied and the
+  Due List posted 0.00u. `site_history.merge_late` now ADDS to the frozen copy
+  on every later build, for fixtures not yet kicked off only: prop rows it
+  does not hold, Due List entries it does not hold, and a price on an entry
+  frozen without one. Nothing already frozen is replaced, so the first
+  published price still wins. Props and Due List picks on fixtures played
+  before this cannot be recovered: they were never on a frozen board.
+  `tests/test_late_props_and_due_prices_reach_the_frozen_board.py`.
 - **Every tracked bet on the site is counted at 0.25u, or to win 0.25u on a
   minus price (2026-11-04, Cooper: "Make it so every bet weve tracked on the
   website in records and stuff is all .25u or to win .25u for -odds").** Site

@@ -24,7 +24,7 @@ Best bets are `picks`; leans are graded the same way and kept in `leans`.
 EPL boards carry the Due List (`games[].drought`). Each entry is graded from
 the match summary's squads: `actual` goals or assists and win/loss when he
 played, `void` when he did not. Nothing is bet: since 2026-10-31 an entry
-with a staged price is tracked as if `DUE_STAKE` (0.25u) were, as the NHL
+with a staged price is tracked as if `DUE_STAKE` (1u, on the ladder) were, as the NHL
 site does (`units`); one without a price is graded but not posted.
 """
 
@@ -243,11 +243,26 @@ def grade_pick(sport, pick, g, hf, af, teams=None, corners=None):
             if side is None:
                 return None
             return "win" if (side == "home") == (hf > af) else "loss"
-        # Corners are handled above. `double_chance` is reachable from the
-        # score alone and is left here only because every double-chance pick
-        # the card has published is a `pass`, which never reaches this
-        # function; a rule written for rows that do not exist is a rule
-        # nothing checks.
+        if m == "1x2":
+            # A three-way result, graded on its own side (2026-11-21): a draw
+            # the pick did not name is a loss.
+            side = pick.get("side") if pick.get("side") in ("home", "draw", "away") else (
+                "draw" if label.strip() == "draw 1x2" else side_named(label.replace(" 1x2", ""), g, teams))
+            if side is None:
+                return None
+            out = "home" if hf > af else "away" if hf < af else "draw"
+            return "win" if side == out else "loss"
+        if m == "double_chance":
+            out = "home" if hf > af else "away" if hf < af else "draw"
+            if label.strip() == "no draw":
+                return "win" if out != "draw" else "loss"
+            if label.endswith(" or draw"):
+                side = side_named(label[: -len(" or draw")], g, teams)
+                if side is None:
+                    return None
+                return "win" if out in (side, "draw") else "loss"
+            return None
+        # Corners are handled above.
         return None
     if sport == "cbb":
         margin = hf - af
@@ -354,40 +369,136 @@ FETCH_ERRORS = (urllib.error.URLError, OSError, json.JSONDecodeError, TimeoutErr
 DUE_STATS = {"goals": "totalGoals", "assists": "goalAssists"}
 
 #: The NHL lab's rule (2026-10-09), brought to EPL on 2026-10-31: the Due List
-#: is tracked as if this were bet on every entry at its staged price. Nothing
-#: is bet, and none of it reaches the card. An entry with no price, a void or
-#: an ungraded entry carries no units ("not posted").
-DUE_STAKE = 0.25
+#: is tracked as if this were bet on every entry at its staged price, on the
+#: same ladder as every other tracked bet (2026-11-21). Nothing is bet, and
+#: none of it reaches the card. An entry with no price, a void or an ungraded
+#: entry carries no units ("not posted").
+DUE_STAKE = 1.0
 
-#: How every bet the site tracks is counted (Cooper, 2026-11-04: "every bet
-#: weve tracked on the website in records and stuff is all .25u or to win .25u
-#: for -odds"): TRACKED_STAKE risked on a plus price, enough to win it on a
-#: minus price, whatever the card staked. The card's own stake stays on the card.
-TRACKED_STAKE = 0.25
-STAKE_RULE = "0.25u, to win 0.25u on a minus price"
+#: How every bet the site tracks is counted (Cooper, 2026-11-21: "use the due
+#: list ladder style pricing but with 1u as the main instead of .25u",
+#: "records/profits on the website for EPL"). Up to +199: TRACKED_STAKE risked
+#: on a plus price, enough to win it on a minus price. From +200 the NHL Due
+#: List ladder: +200 to +500 0.6u, +501 to +1500 0.4u, longer 0.2u. The same
+#: numbers as `src/epl_betting_lab/staking.py`, spelled out here because the
+#: publish scripts import nothing from `src/` (tests/test_the_1u_ladder.py pins
+#: the two together). Before 2026-11-21 it was 0.25u flat (2026-11-04).
+TRACKED_STAKE = 1.0
+STAKE_BRACKETS: tuple[tuple[int, float], ...] = ((500, 0.6), (1500, 0.4))
+STAKE_LONGEST = 0.2
+STAKE_RULE = (
+    "1u, to win 1u on a minus price; +200 to +500 0.6u, "
+    "+501 to +1500 0.4u, longer than +1500 0.2u"
+)
+#: Bumped whenever the way a kept night is graded or counted changes, so every
+#: kept night is settled again rather than keeping its old units. 2: the 1u
+#: ladder and units on every record (2026-11-21).
+GRADING = 2
+
+#: The four records the night and the season carry units for, plus the props
+#: and the Due List.
+MONEY_KEYS = ("picks", "leans", "straightUp", "totals")
+
+
+def _usable(price: object) -> float | None:
+    if not isinstance(price, (int, float)) or isinstance(price, bool) or price != price or -100 < price < 100:
+        return None
+    return float(price)
+
+
+def tracked_stake(price: object) -> float | None:
+    """The ladder's stake at `price`, or None without a usable price."""
+    p = _usable(price)
+    if p is None:
+        return None
+    if p < 200:
+        return TRACKED_STAKE
+    for longest, stake in STAKE_BRACKETS:
+        if p <= longest:
+            return stake
+    return STAKE_LONGEST
 
 
 def quarter(price: object, result: object) -> tuple[float, float] | None:
-    """(profit, risked) of one graded bet at TRACKED_STAKE, or None without a usable price.
+    """(profit, risked) of one graded bet on the ladder, or None without a usable price.
 
-    +150 won pays 0.375u on 0.25u risked; -150 won pays 0.25u on 0.375u
-    risked, and lost costs the 0.375u. A push returns the stake."""
-    if not isinstance(price, (int, float)) or isinstance(price, bool) or -100 < price < 100 or result not in ("win", "loss", "push"):
+    -150 won pays 1u on 1.5u risked, and lost costs the 1.5u; +300 risks
+    0.6u. A push returns the stake; a void risks nothing. (The name is from
+    the 0.25u rule it replaced.)"""
+    p = _usable(price)
+    if p is None:
         return None
-    risk = TRACKED_STAKE * abs(price) / 100.0 if price < 0 else TRACKED_STAKE
-    win = TRACKED_STAKE if price < 0 else TRACKED_STAKE * price / 100.0
+    if result == "void":
+        return 0.0, 0.0
+    if result not in ("win", "loss", "push"):
+        return None
+    stake = tracked_stake(p)
+    risk = stake * abs(p) / 100.0 if p < 0 else stake
+    win = stake if p < 0 else stake * p / 100.0
     profit = win if result == "win" else -risk if result == "loss" else 0.0
     return round(profit, 4), round(risk, 4)
 
 
+def flat(price: object, result: object) -> tuple[float, float] | None:
+    """(profit, risked) of one straight-up call: the stake is RISKED at every
+    price, 1u under +200 (a -800 favourite risks 1u to win 0.125u), the
+    ladder from +200."""
+    p = _usable(price)
+    if p is None or result not in ("win", "loss", "push"):
+        return None
+    stake = tracked_stake(p)
+    win = stake * 100.0 / abs(p) if p < 0 else stake * p / 100.0
+    profit = win if result == "win" else -stake if result == "loss" else 0.0
+    return round(profit, 4), round(stake, 4)
+
+
 def restake(row: dict) -> dict:
-    """A tracked bet row restated at TRACKED_STAKE from its own price and result."""
+    """A tracked bet row restated on the ladder from its own price and result."""
     got = quarter(row.get("price"), row.get("result"))
     if got is None:
         return row
     out = {k: v for k, v in row.items() if k != "stakeAssumed"}
     out.update(units=got[0], staked=got[1])
     return out
+
+
+def money_tally() -> dict:
+    """An empty record with its units: W-L-P, units won or lost, units risked,
+    how many graded picks were priced and how many were not."""
+    return {"w": 0, "l": 0, "p": 0, "units": 0.0, "staked": 0.0, "priced": 0, "unpriced": 0, "stake": TRACKED_STAKE}
+
+
+def add_money(tally: dict, result: object, got: tuple[float, float] | None) -> None:
+    """Count one graded pick. An unpriced pick is in the W-L-P and in
+    `unpriced`, and in no unit."""
+    if result not in ("win", "loss", "push"):
+        return
+    tally[{"win": "w", "loss": "l", "push": "p"}[result]] += 1
+    if got is None:
+        tally["unpriced"] += 1
+        return
+    tally["priced"] += 1
+    tally["units"] = round(tally["units"] + got[0], 4)
+    tally["staked"] = round(tally["staked"] + got[1], 4)
+
+
+def with_return(tally: dict) -> dict:
+    out = dict(tally)
+    out["returnPct"] = round(100 * out["units"] / out["staked"], 1) if out.get("staked") else None
+    return out
+
+
+def merge_money(into: dict, part: dict) -> None:
+    for k in ("w", "l", "p", "priced", "unpriced"):
+        into[k] += int(part.get(k) or 0)
+    for k in ("units", "staked"):
+        into[k] = round(into[k] + float(part.get(k) or 0.0), 4)
+
+
+def is_stale(night: dict) -> bool:
+    """A kept night settled before the current grading rule: settled again."""
+    return ("bets" not in night or night.get("stakeRule") != STAKE_RULE
+            or night.get("grading") != GRADING)
 
 
 def _name_key(name: object) -> str:
@@ -434,7 +545,7 @@ def grade_due_entry(entry: dict, g: dict, lines: dict | None) -> dict:
 
     `void` when he did not play: not in his club's matchday squad, or in it
     and never on the pitch. `actual` is his goals (or assists) when he played.
-    Nothing is bet; `units` is the 0.25u tracking line when a price was
+    Nothing is bet; `units` is the 1u-ladder tracking line when a price was
     staged, else None. An entry the feed cannot answer for (no
     squads yet, his side not on this fixture, a statistic missing) is left
     ungraded, `result: null`, and never guessed.
@@ -625,7 +736,8 @@ def grade_prop(row: dict, g: dict, teams: dict, lines: dict | None, fpl: dict, d
 
 def prop_tallies(rows: list) -> dict:
     """A day's staked props in W-L-P and units. Leans and voids are in none of them."""
-    out = {"w": 0, "l": 0, "p": 0, "units": 0.0, "ungraded": 0}
+    out = {"w": 0, "l": 0, "p": 0, "units": 0.0, "staked": 0.0, "priced": 0, "unpriced": 0,
+           "ungraded": 0, "stake": TRACKED_STAKE}
     for r in rows:
         if not isinstance(r, dict) or r.get("kind", "bet") != "bet":
             continue
@@ -635,10 +747,9 @@ def prop_tallies(rows: list) -> dict:
             continue
         if res not in ("win", "loss", "push"):
             continue
-        out[{"win": "w", "loss": "l", "push": "p"}[res]] += 1
-        if isinstance(r.get("profitUnits"), (int, float)):
-            out["units"] += r["profitUnits"]
-    out["units"] = round(out["units"], 4)
+        # Restated from the prop's own price and result on the ladder.
+        add_money(out, res, quarter(r.get("price"), res))
+    out["returnPct"] = round(100 * out["units"] / out["staked"], 1) if out["staked"] else None
     return out
 
 
@@ -665,6 +776,10 @@ def settle_day(sport: str, day: date, boards: list[dict], fpl_logs: dict | None 
     fin = finals(sport, day)
     games, picks, leans = [], {"w": 0, "l": 0, "p": 0}, {"w": 0, "l": 0, "p": 0}
     su, ats, tots = {"w": 0, "l": 0}, {"w": 0, "l": 0, "p": 0}, {"w": 0, "l": 0, "p": 0}
+    # Units on every record, on the 1u ladder (2026-11-21), each at the
+    # price the board first published; a pick with no price is graded and
+    # counted `unpriced`, never staked.
+    money = {key: money_tally() for key in MONEY_KEYS}
     teams_out: dict = {}
     ungraded = 0
     due_rows: list | None = None
@@ -708,6 +823,8 @@ def settle_day(sport: str, day: date, boards: list[dict], fpl_logs: dict | None 
         if res in ("win", "loss", "push"):
             tally = leans if kind == "lean" else picks
             tally[{"win": "w", "loss": "l", "push": "p"}[res]] += 1
+            if kind in ("bet", "lean"):
+                add_money(money["leans" if kind == "lean" else "picks"], res, quarter((pick or {}).get("price"), res))
         row = {"id": g["id"], "home": {"abbr": g["home"]["abbr"], "final": hf}, "away": {"abbr": g["away"]["abbr"], "final": af}, "finish": f["finish"],
                "pick": {**pick, "result": res} if pick and res else None}
         if sport == "epl":
@@ -720,10 +837,18 @@ def settle_day(sport: str, day: date, boards: list[dict], fpl_logs: dict | None 
             # model published no probabilities for has no favourite, and is
             # not counted as though it favoured the home side.
             if all(isinstance(x, (int, float)) for x in (hp, dp, ap_)):
-                su["w" if out == row["projResult"] else "l"] += 1
+                su_res = "win" if out == row["projResult"] else "loss"
+                su["w" if su_res == "win" else "l"] += 1
+                # Graded on the favoured outcome's own 1X2 price: a draw the
+                # call did not name is a loss. Risked flat (1u under +200).
+                su_price = (g.get("matchResult") or {}).get(row["projResult"])
+                add_money(money["straightUp"], su_res, flat(su_price, su_res))
             over_p = (g.get("total") or {}).get("overProb")
             if isinstance(over_p, (int, float)):
-                tots["w" if (over_p > 0.5) == (hf + af > 2.5) else "l"] += 1
+                tot_res = "win" if (over_p > 0.5) == (hf + af > 2.5) else "loss"
+                tots["w" if tot_res == "win" else "l"] += 1
+                tot_price = (g.get("total") or {}).get("over" if over_p > 0.5 else "under")
+                add_money(money["totals"], tot_res, quarter(tot_price, tot_res))
             row["markets"] = {"total": {"line": 2.5, "overProb": over_p}, "btts": {"yesProb": (g.get("btts") or {}).get("yesProb")}}
             if "drought" in g:
                 due_rows = due_rows if due_rows is not None else []
@@ -756,6 +881,7 @@ def settle_day(sport: str, day: date, boards: list[dict], fpl_logs: dict | None 
         # `result` is the key this file has always published; `straightUp`
         # is the same tally under the name every lab's season record uses.
         summary_out.update(result=su, straightUp=dict(su), totals={"w": tots["w"], "l": tots["l"]})
+        summary_out["money"] = {key: with_return(m) for key, m in money.items()}
     else:
         summary_out.update(straightUp=su, ats=ats, totals=tots)
     base.update(windowLabel=window, notice=None if games else "The games were played but no final was available when this ran; the next build settles them.",
@@ -763,7 +889,7 @@ def settle_day(sport: str, day: date, boards: list[dict], fpl_logs: dict | None 
     waiting = len(games) < len(playing) or ungraded > 0
     # What the Track record, Game and All results pages read of this day:
     # each settled fixture's final beside the chances the board froze, and
-    # every graded best bet at 0.25u (to win 0.25u on minus odds). Built from the same rows
+    # every graded best bet on the 1u ladder (to win 1u on minus odds). Built from the same rows
     # as the tallies above, so the pages and the strip cannot disagree.
     lines = published_lines(boards, playing)
     base["graded"] = {
@@ -813,7 +939,8 @@ def night_record(results: dict) -> dict:
     settled once more by `season_record`, which is the only reason a kept
     night is ever re-read from the scoreboard.
     """
-    night = {"games": len(results.get("games") or []), "summary": results.get("summary") or {}, "stakeRule": STAKE_RULE}
+    night = {"games": len(results.get("games") or []), "summary": results.get("summary") or {}, "stakeRule": STAKE_RULE,
+             "grading": GRADING}
     due = results.get("dueList")
     if isinstance(due, dict):
         night["dueList"] = due_tallies(due.get("rows") or [])
@@ -997,14 +1124,16 @@ def season_record(sport: str, day: date, hist: Path, boards: list[dict],
 
     The four tallies are absent until a day has settled; so is `dueList`
     (`{w, l, p, void, nights, byMarket}`), which sums the graded Due List entries
-    of every settled day whose board carried the list, with the 0.25u tracking
+    of every settled day whose board carried the list, with the 1u-ladder tracking
     line (`stake`, `units`, `staked`, `returnPct`). Nothing is bet, it is never
     a stake, and none of it is in `picks`; nor is a lean.
     """
     tally = {key: {"w": 0, "l": 0} if key == "straightUp" else {"w": 0, "l": 0, "p": 0} for key in SEASON_KEYS}
     due = {"w": 0, "l": 0, "p": 0, "void": 0, "nights": 0, "byMarket": {m: {"w": 0, "l": 0} for m in DUE_STATS},
            "stake": DUE_STAKE, "units": 0.0, "staked": 0.0}
-    props = {"w": 0, "l": 0, "p": 0, "units": 0.0, "nights": 0}
+    props = {"w": 0, "l": 0, "p": 0, "units": 0.0, "staked": 0.0, "priced": 0, "unpriced": 0, "nights": 0,
+             "stake": TRACKED_STAKE}
+    money = {key: money_tally() for key in MONEY_KEYS}
     kept = hist / SETTLED_DIR
     nights, missing, first, last = 0, 0, None, None
     for d in kickoff_days(boards, day):
@@ -1023,7 +1152,9 @@ def season_record(sport: str, day: date, hist: Path, boards: list[dict],
             # today, the kept tallies stand and the next run tries again.
             # So is one kept before every tracked bet was counted at
             # TRACKED_STAKE (2026-11-04), so its Due List is restated too.
-            stale = night is not None and ("bets" not in night or night.get("stakeRule") != STAKE_RULE)
+            # And so is every night kept before the 1u ladder (GRADING 2,
+            # 2026-11-21), so its units are restated rather than kept.
+            stale = night is not None and is_stale(night)
             if night is None or stale:
                 try:
                     settled, waiting = settle_day(sport, d, boards, fpl_logs)
@@ -1053,15 +1184,12 @@ def season_record(sport: str, day: date, hist: Path, boards: list[dict],
             due["nights"] += 1
             for k in ("w", "l", "p", "void"):
                 due[k] += int(night_due.get(k) or 0)
-            # A night settled before 2026-10-31 carries no units: it adds
-            # nothing to them and is not counted as staked.
-            due["units"] = round(due["units"] + float(night_due.get("units") or 0.0), 4)
+            # Units only from a night counted on the current ladder: a night
+            # kept under an older rule that could not be settled again holds
+            # tallies but no rows to restate, so it adds no units.
             if night_due.get("stakeRule") == STAKE_RULE:
+                due["units"] = round(due["units"] + float(night_due.get("units") or 0.0), 4)
                 due["staked"] = round(due["staked"] + float(night_due.get("staked") or 0.0), 4)
-            else:
-                # Kept before 2026-11-04 and not settled again: `staked`
-                # was a count of entries at DUE_STAKE.
-                due["staked"] = round(due["staked"] + DUE_STAKE * int(night_due.get("staked") or 0), 4)
             for market, split in (night_due.get("byMarket") or {}).items():
                 if market in due["byMarket"] and isinstance(split, dict):
                     for k in ("w", "l"):
@@ -1074,9 +1202,14 @@ def season_record(sport: str, day: date, hist: Path, boards: list[dict],
             # From the night's bet rows at TRACKED_STAKE, so a night kept at
             # the card's stake reads the same (2026-11-04).
             prop_bets = [b for b in night.get("bets") or [] if isinstance(b, dict) and b.get("group") == "props"]
-            units = (sum(restake(b)["units"] or 0.0 for b in prop_bets) if "bets" in night
-                     else float(night_props.get("units") or 0.0))
-            props["units"] = round(props["units"] + units, 4)
+            if "bets" in night:
+                part = money_tally()
+                for b in prop_bets:
+                    add_money(part, b.get("result"), quarter(b.get("price"), b.get("result")))
+                for k in ("units", "staked", "priced", "unpriced"):
+                    props[k] = round(props[k] + part[k], 4) if k in ("units", "staked") else props[k] + part[k]
+            else:
+                props["units"] = round(props["units"] + float(night_props.get("units") or 0.0), 4)
         if not night["games"]:
             # Fixtures kicked off and none has a final yet: not settled, and
             # said so, rather than a day that happened to go 0–0.
@@ -1087,6 +1220,18 @@ def season_record(sport: str, day: date, hist: Path, boards: list[dict],
         first = first or d.isoformat()
         last = d.isoformat()
         summary = night["summary"]
+        night_money = summary.get("money") if isinstance(summary.get("money"), dict) else {}
+        for key in MONEY_KEYS:
+            if isinstance(night_money.get(key), dict):
+                merge_money(money[key], night_money[key])
+            elif key == "picks":
+                # A night that could not be settled again keeps its tallies;
+                # its best bets are restated from the kept rows where it can.
+                part = money_tally()
+                for b in night.get("bets") or []:
+                    if isinstance(b, dict) and b.get("group") == "team":
+                        add_money(part, b.get("result"), quarter(b.get("price"), b.get("result")))
+                merge_money(money[key], part)
         for key in SEASON_KEYS:
             source = summary.get(key)
             if source is None and key == "straightUp":
@@ -1096,12 +1241,19 @@ def season_record(sport: str, day: date, hist: Path, boards: list[dict],
                     tally[key][k] += int(v)
     span = {"nights": nights, "firstDate": first, "lastDate": last, "missingNights": missing}
     season = {**tally, **span} if nights else dict(span)
+    if nights:
+        season["money"] = {key: with_return(m) for key, m in money.items()}
     if due["nights"]:
         if due["staked"]:
             due["returnPct"] = round(100 * due["units"] / due["staked"], 1)
         season["dueList"] = due
+        if "money" in season:
+            season["money"]["dueList"] = {k: due.get(k) for k in ("w", "l", "p", "units", "staked", "stake", "returnPct")}
     if props["nights"]:
+        props["returnPct"] = round(100 * props["units"] / props["staked"], 1) if props["staked"] else None
         season["props"] = props
+        if "money" in season:
+            season["money"]["props"] = {k: props[k] for k in ("w", "l", "p", "units", "staked", "priced", "unpriced", "stake", "returnPct")}
     return season
 
 
@@ -1141,6 +1293,7 @@ def write_season(data: Path, results: dict, season: dict) -> None:
     if season.get("nights"):
         span = {k: season[k] for k in ("nights", "firstDate", "lastDate", "missingNights")}
         results["seasonRecord"] = {**{k: season[k] for k in SEASON_KEYS}, **span, "season": span,
+                                   **({"money": season["money"]} if "money" in season else {}),
                                    **({"dueList": season["dueList"]} if "dueList" in season else {})}
     if "dueList" in season and isinstance(results.get("dueList"), dict):
         results["dueList"]["season"] = season["dueList"]
@@ -1158,13 +1311,14 @@ def write_season(data: Path, results: dict, season: dict) -> None:
         record.update({k: season[k] for k in SEASON_KEYS})
         record["season"] = {k: v for k, v in season.items() if k != "dueList"}
     if "dueList" in season:
-        # The 0.25u tracking line rides along, as on the NHL board.
+        # The 1u-ladder tracking line rides along, as on the NHL board.
         record["dueList"] = {k: season["dueList"][k] for k in ("w", "l", "p", "nights", "stake", "units", "staked", "returnPct")
                              if k in season["dueList"]}
     if "props" in season:
         # The board's "Props best bets · season" line, as the NHL board
         # carries it: the staked props' W-L-P, units and nights settled.
-        record["props"] = {k: season["props"][k] for k in ("w", "l", "p", "units", "nights")}
+        record["props"] = {k: season["props"][k] for k in ("w", "l", "p", "units", "staked", "returnPct", "stake", "nights")
+                           if k in season["props"]}
     board["record"] = record
     board_path.write_text(json.dumps(board, indent=1, ensure_ascii=False), encoding="utf-8")
 

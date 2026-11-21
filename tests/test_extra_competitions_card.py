@@ -117,8 +117,9 @@ class TestOnlyWhatTheRulesPass:
         assert "-39" not in report
 
     def test_the_stake_is_the_smallest_the_card_has(self) -> None:
-        """Sized to the evidence behind these prices, which is none."""
-        assert EXTRA_UNITS == 0.1
+        """Sized to the evidence behind these prices, which is none: the
+        card's base size on the 1u ladder (2026-11-21), never more."""
+        assert EXTRA_UNITS == 1.0
 
     def test_a_competition_cannot_crowd_the_card(self) -> None:
         assert MAX_EXTRA_BETS <= 8

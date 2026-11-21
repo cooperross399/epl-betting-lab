@@ -247,7 +247,8 @@ nothing about whether the schedule is healthy, but the card itself is real.
 Then tell me, in plain English:
 
 - whether a card was produced, or whether it was blocked and why
-- the best bets: market, selection, tier, edge, price, book, suggested units
+- the best bets: market, selection, tier, edge, price, book, units to risk
+  (the card's Units column, read off as printed)
 - the leans, separately, and say plainly that they carry no stake
 - the Player props section, if one appears: player, market, selection,
   price, book, units
@@ -265,6 +266,10 @@ Rules:
 - A lean is information, not a bet. It fires at a 1.5% modelled edge, which is
   below this model's own error and below a book's margin; measured, leans
   returned about -9% over 150 bets. Never present one as a play.
+- The Units column is units to RISK on the 1u Due List ladder (2026-11-21):
+  1u on a plus price, or enough to win 1u on a minus price (at -150, 1.5u to
+  win 1u), up to +199; +200 to +500 0.6u; +501 to +1500 0.4u; longer 0.2u.
+  Quote the number the card prints; never rescale it.
 - A zero-unit row is not a small bet, it is no bet. Anything under "Ranked but
   not stakeable" is in that category, whatever its edge looks like.
 - Prices longer than +600 are refused by design. The model overstates long
@@ -273,8 +278,8 @@ Rules:
 - No market in this project has a demonstrated edge. Every measured interval
   includes zero. If I ask whether it works, say exactly that.
 - A Player props section appears only when a prop pick cleared a bar set
-  above every match-level bar; every prop pick carries 0.1 units, the
-  smallest stake the card uses, and the props measurement demonstrates no
+  above every match-level bar; every prop pick carries the card's base
+  size on the 1u ladder (never more), and the props measurement demonstrates no
   edge. A missing props section means props are held by policy or nothing
   qualified — never a judgement either way.
 - Place no bets. Apply no settlement. Suggest no stake beyond the units shown.
@@ -372,7 +377,7 @@ FACTS ABOUT THE MARKETS — state these rather than guessing:
   calibration and no demonstrated edge — about two qualifying picks a month.
   They are held by the reviewed policy allowlist; if Cooper ever approves
   them on a policy PR, a Player props section appears in the published card
-  at 0.1 units. Held is the normal state, not a fault.
+  at the card's base size on the 1u ladder. Held is the normal state, not a fault.
 
 HARD RULES — follow exactly:
 - Generate no picks. Place no bets. Apply no settlement. Never edit the bet

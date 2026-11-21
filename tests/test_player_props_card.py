@@ -210,7 +210,7 @@ class TestApprovedProps:
         # The board needs whose side the player is on, which the staging row
         # never says; the model's own player rates do.
         assert pick["team"] == "Newcastle"
-        assert pick["units"] == 0.1
+        assert pick["units"] == 1.0  # +150 on the 1u ladder (2026-11-21)
         # Isak's raw SOT expectation is ~3 per match; even corrected, the
         # over-0.5 probability towers over the +150 implied 40%.
         assert pick["model_probability"] > 0.8

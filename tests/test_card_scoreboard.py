@@ -155,20 +155,21 @@ class TestProfit:
                        [_pick(american_odds=150.0, suggested_units=0.25)])]
         board = build_scoreboard(cards, _results([("2026-08-22","Arsenal","Chelsea",2,1)]))
 
-        assert board.profit_units == pytest.approx(0.375)
+        # Restated on the 1u ladder (2026-11-21): 1u at +150, whatever was archived.
+        assert board.profit_units == pytest.approx(1.5)
 
     def test_a_winning_minus_price_pays_less_than_the_stake(self) -> None:
         cards = [_card("2026-08-20T13:00:00+00:00",
                        [_pick(american_odds=-200.0, suggested_units=0.5)])]
         board = build_scoreboard(cards, _results([("2026-08-22","Arsenal","Chelsea",2,1)]))
 
-        assert board.profit_units == pytest.approx(0.25)
+        assert board.profit_units == pytest.approx(1.0)  # risk 2u to win 1u at -200
 
     def test_a_loss_costs_the_stake(self) -> None:
         cards = [_card("2026-08-20T13:00:00+00:00", [_pick(suggested_units=0.25)])]
         board = build_scoreboard(cards, _results([("2026-08-22","Arsenal","Chelsea",0,1)]))
 
-        assert board.profit_units == pytest.approx(-0.25)
+        assert board.profit_units == pytest.approx(-1.0)
 
     def test_roi_is_measured_on_turnover(self) -> None:
         cards = [_card("2026-08-20T13:00:00+00:00",

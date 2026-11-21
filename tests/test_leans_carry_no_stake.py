@@ -52,9 +52,11 @@ class TestLeansAreNotStaked:
         assert _suggested_units("C") > 0
 
     def test_real_bets_are_untouched(self) -> None:
-        assert _suggested_units("A") == 0.5
-        assert _suggested_units("B") == 0.25
-        assert _suggested_units("C") == 0.1
+        # The 1u ladder (2026-11-21) at an even price, in the old proportions
+        # (A 0.5u, B 0.25u, C 0.1u became 5u, 2.5u, 1u).
+        assert _suggested_units("A") == 5.0
+        assert _suggested_units("B") == 2.5
+        assert _suggested_units("C") == 1.0
 
     def test_a_bettable_pick_still_gets_a_stake(self) -> None:
         # total_2_5 under the plain rule: 1X2 is held at the floor since
@@ -63,7 +65,7 @@ class TestLeansAreNotStaked:
                                      market="total_2_5", selection="over"))
 
         assert tier == "A"
-        assert _suggested_units(tier) == 0.5
+        assert _suggested_units(tier) == 5.0
 
     def test_a_pass_is_still_a_pass(self) -> None:
         assert _confidence_tier(_row(status="PASS")) == "Pass/Avoid"

@@ -6,6 +6,8 @@ from pathlib import Path
 
 import pandas as pd
 
+from epl_betting_lab import staking
+
 from epl_betting_lab.reports.thursday_best_bets import (
     build_thursday_best_bets,
     list_recent_thursday_archives,
@@ -130,7 +132,7 @@ def test_build_thursday_best_bets_sections_and_fields() -> None:
     assert report.iloc[0]["home_team"] == "Liverpool"
     # The top row is a 1X2 pick, which stakes at the floor (FLOOR_ONLY_MARKETS).
     assert report.iloc[0]["confidence_tier"] == "C"
-    assert report.iloc[0]["suggested_units"] == 0.1
+    assert report.iloc[0]["suggested_units"] == 1.0  # +105, the 1u ladder
 
 
 def test_render_thursday_best_bets_includes_checklist_and_prices() -> None:
@@ -152,7 +154,7 @@ def test_totals_unders_cannot_receive_a_tier() -> None:
     totals_under = report[(report["market"] == "total_2_5") & (report["selection"] == "under") & (report["status"] == "BETTABLE")].iloc[0]
 
     assert totals_under["confidence_tier"] == "B"
-    assert totals_under["suggested_units"] == 0.25
+    assert totals_under["suggested_units"] == 2.5 * staking.risk(totals_under["american_odds"])
     assert "totals under caution" in totals_under["risk_flags"]
 
 

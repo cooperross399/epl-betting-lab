@@ -1600,9 +1600,12 @@ and keeps the totals protections. It also adds a transparent ranking score and
 confidence tier:
 
 ```text
-A = strongest best-bet profile, up to 0.5u
-B = playable, 0.25u
-C = lean/watchlist only, 0.10u max
+Sizes are units to risk on the 1u Due List ladder (2026-11-21): 1u on a
+plus price, or to win 1u on a minus price, up to +199; +200 to +500 0.6u;
++501 to +1500 0.4u; longer than +1500 0.2u.
+A = strongest best-bet profile, 5x the ladder's size
+B = playable, 2.5x
+C = the ladder's size (every bet the card stakes lands here)
 Pass/Avoid = 0u
 ```
 

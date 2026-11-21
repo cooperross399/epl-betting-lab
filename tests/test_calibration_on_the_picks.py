@@ -91,7 +91,10 @@ def test_a_pick_that_still_clears_the_bar_keeps_its_stake(tmp_path: Path):
     path = _weights(tmp_path, {"draw_no_bet": 0.8})
     report = build_thursday_best_bets(pd.DataFrame([_bet("draw_no_bet", 0.06)]), trust_weights_path=path)
     assert report.iloc[0]["section"] == "Best bets"
-    assert report.iloc[0]["suggested_units"] == 0.1
+    # The 1u ladder (2026-11-21): the pick's own price sets the stake.
+    from epl_betting_lab.staking import staked_units
+
+    assert report.iloc[0]["suggested_units"] == staked_units(report.iloc[0]["american_odds"])
 
 
 def _matchday() -> str:

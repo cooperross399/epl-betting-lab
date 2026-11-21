@@ -167,7 +167,7 @@ class TestCard:
         (pick,) = summary["picks"]
         assert pick["market"] == "player_to_receive_card"
         assert pick["selection"] == "Yes"
-        assert pick["units"] == 0.1
+        assert pick["units"] == 0.6  # +250 on the 1u ladder (2026-11-21)
         assert "player_to_receive_card" in UNCORRECTED_MARKETS
         # Booked in every one of twelve matches: no correction pulls it down.
         assert pick["model_probability"] > 0.6

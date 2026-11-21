@@ -57,6 +57,7 @@ from typing import Any
 
 import pandas as pd
 
+from epl_betting_lab.staking import staked_units
 from epl_betting_lab.strategies.team_totals import (
     TEAM_TOTAL_MARKETS,
     team_total_side_and_line,
@@ -167,10 +168,19 @@ def _key(row: Mapping[str, Any]) -> tuple[str, str, str, str]:
 
 
 def _stake(row: Mapping[str, Any]) -> float:
+    """Units risked on an archived pick, restated on the 1u ladder (2026-11-21,
+    Cooper: "use the due list ladder style pricing but with 1u as the main
+    instead of .25u"): a pick the card staked at all is counted at the
+    ladder's size for its own price (1u, or to win 1u on a minus price, up to
+    +199; 0.6u / 0.4u / 0.2u from +200), whatever the archived card said. A
+    lean (0 units) stays unstaked."""
     try:
-        return float(row.get("suggested_units") or 0.0)
+        archived = float(row.get("suggested_units") or 0.0)
     except (TypeError, ValueError):
         return 0.0
+    if archived <= 0:
+        return 0.0
+    return staked_units(row.get("american_odds"))
 
 
 def load_archived_cards(archive_root: Path) -> list[dict[str, Any]]:
@@ -433,7 +443,7 @@ class UncountedSection:
     The record's exclusion rule is stated BY STAKE — "a lean carries no stake
     and is not a recommendation" — and that sentence is only true while
     everything staked is in the denominator. The emailed card appends the
-    Beyond the Premier League table, whose every row carries 0.1u in a Units
+    Beyond the Premier League table, whose every row carries a stake in a Units
     column, three screen-lengths above a record built from the Premier League
     archive alone. A reader totalling the card's staked recommendations and
     the record's `Settled` gets two different numbers and no sentence anywhere

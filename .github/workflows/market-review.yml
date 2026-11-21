@@ -1,0 +1,80 @@
+name: Market Review
+
+# Where the card loses money, and whether two fixes declared before any
+# price was read would have helped (reports/market_review.py). Restores the
+# latest Matchday Refresh state and reads the bought prices from the private
+# odds-history branch. Buys nothing: no Odds API key is in scope here.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: market-review
+  cancel-in-progress: false
+
+jobs:
+  review:
+    name: Market Review
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install project
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install -e .
+
+      - name: Restore the latest state and the bought prices
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EPL_PRICE_FEED_TOKEN: ${{ secrets.EPL_PRICE_FEED_TOKEN }}
+        run: |
+          set -u
+          mkdir -p data data/processed
+          restored=""
+          for candidate in $(gh run list --workflow matchday-refresh.yml \
+            --limit 20 --json databaseId --jq '.[].databaseId'); do
+            if gh run download "$candidate" --name matchday-state --dir data 2>/dev/null; then
+              restored="$candidate"
+              break
+            fi
+          done
+          echo "State restored from run ${restored:-none}."
+          FEED_BRANCH=odds-history
+          . scripts/price_feed_remote.sh
+          if feed_fetch --depth=1; then
+            git show refs/odds-history-tip:historical_market_odds.csv \
+              > data/processed/historical_market_odds.csv 2>/dev/null || rm -f data/processed/historical_market_odds.csv
+          fi
+
+      - name: Review the markets
+        env:
+          PYTHONPATH: src
+        run: |
+          set -o pipefail
+          python scripts/run_market_review.py | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload the review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: market-review
+          path: data/outputs/market_review.md
+          if-no-files-found: warn
+          retention-days: 30

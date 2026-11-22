@@ -1,8 +1,8 @@
-## Sunday 22 November, 11:03 UTC — scheduled run
+## Sunday 22 November, 12:53 UTC — scheduled run
 
-Selections changed: 26 added, 4 dropped, 2 moved section.
+Selections changed: 1 added, 2 dropped, 2 moved section.
 
-Provider quota: 4925038 (about 1368 days at the observed burn)
+Provider quota: 4923888 (about 1367 days at the observed burn)
 
 Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5, team_total_home_0_5, team_total_home_1_5, team_total_home_2_5, team_total_away_0_5, team_total_away_1_5, team_total_away_2_5** (excluded: none)
 
@@ -10,9 +10,9 @@ Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corner
 
 | Match | Market | Selection | Tier | Bet down to | Edge | Price | Book | Units |
 |:------|:-------|:----------|:-----|------------:|-----:|------:|:-----|------:|
-| Hull v Brighton | `team_total_home_0_5` | over | C | -153 | +7.4% | -150 | Bovada | 1.5 |
-| Liverpool v Man United | `team_total_home_2_5` | over | C | +161 | +6.8% | +186 | FanDuel | 1.0 |
+| Hull v Brighton | `team_total_away_1_5` | under | C | +118 | +7.0% | +136 | FanDuel | 1.0 |
 | Brentford v Everton | `team_total_home_1_5` | under | C | -134 | +3.9% | -132 | Bovada | 1.32 |
+| Liverpool v Man United | `team_total_home_2_5` | over | C | +182 | +4.4% | +190 | Bovada | 1.0 |
 
 ### Leans
 
@@ -20,19 +20,18 @@ _None._
 
 ### Player props
 
-- Hull v Brighton — **Brighton goalkeeper** `player_goalie_saves_alternate` Over@2.5 at +160 (Bovada), bet down to +106, 1.0u
+- Hull v Brighton — **Brighton goalkeeper** `player_goalie_saves_alternate` Over@2.5 at +155 (Bovada), bet down to +106, 1.0u
 - Hull v Brighton — **Regan Slater** `player_shots_on_target` Over@0.5 at +500 (BetRivers), bet down to +442, 0.6u
 - Brentford v Everton — **Vitaly Janelt** `player_shots` Over@1.5 at +410 (FanDuel), bet down to +379, 0.6u
+- Hull v Brighton — **Olivier Boscagli** `player_to_receive_card` Yes at +500 (DraftKings), bet down to +477, 0.6u
+- Hull v Brighton — **Pascal Gross** `player_to_receive_card` Yes at +390 (DraftKings), bet down to +380, 0.6u
 
 _Props carry the smallest stake the card uses: the standing measurement demonstrates no edge, and books reprice on the team sheet after this card is built._
 
 ### What changed
 
-- **Added:** Brentford v Everton team_total_home_1_5 under
-- **Added:** Hull v Brighton team_total_home_0_5 over
-- **Added:** Liverpool v Man United team_total_home_2_5 over
-- **Dropped:** Hull v Brighton 1x2 draw
-- **Dropped:** Liverpool v Man United 1x2 away
+- **Added:** Hull v Brighton team_total_away_1_5 under
+- **Dropped:** Hull v Brighton team_total_home_0_5 over
 
 
 ## Beyond the Premier League
@@ -59,14 +58,14 @@ Priced on the European ratings, where 868 European ties bridge eleven leagues on
 
 | Match | Market | Selection | Bet down to | Edge | Price | Book | Units |
 |:--|:--|:--|--:|--:|--:|:--|--:|
-| Como v AEK | `total_2_5` | under | +159 | +7.9% | +225 | FanDuel | 0.6 |
+| Como v AEK | `total_2_5` | under | +159 | +7.8% | +225 | FanDuel | 0.6 |
 | Feyenoord v Porto | `corners_1x2` | home | -123 | +7.3% | -106 | BetRivers | 1.06 |
 | Arsenal v Dortmund | `draw_no_bet` | away | +424 | +7.0% | +540 | FanDuel | 0.4 |
 | Arsenal v Dortmund | `double_chance` | draw_or_away | +174 | +6.7% | +200 | FanDuel | 0.6 |
 
 - 54 fixture(s) dropped as already kicked off: AEK Athens v Real Madrid, AS Roma v Real Madrid, AS Roma v ŠK Slovan Bratislava, Arsenal v Lille, Aston Villa v Fenerbahce, Aston Villa v Viking FK, and 48 more.
 - 6 fixture(s) left out because a club has no rating in the pool: Ath Madrid v Viking FK, Bodø/Glimt v LASK, Sabah FK v Barcelona, Shakhtar Donetsk v Fenerbahce, Slavia Praha v Villarreal, ŠK Slovan Bratislava v Betis.
-- 25 further selection(s) qualified and are not shown: this section prints at most 4 per competition, the highest edges first.
+- 26 further selection(s) qualified and are not shown: this section prints at most 4 per competition, the highest edges first.
 
 ### UEFA Europa League
 
@@ -141,4 +140,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/45014959293)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/45023998265)

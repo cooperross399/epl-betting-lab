@@ -1,8 +1,8 @@
-## Monday 23 November, 11:49 UTC — scheduled run
+## Monday 23 November, 15:16 UTC — scheduled run
 
-Selections changed: 12 added.
+Selections changed: 2 added, 2 dropped.
 
-Provider quota: 4919942 (about 1366 days at the observed burn)
+Provider quota: 4917982 (about 1366 days at the observed burn)
 
 Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5, team_total_home_0_5, team_total_home_1_5, team_total_home_2_5, team_total_away_0_5, team_total_away_1_5, team_total_away_2_5** (excluded: none)
 
@@ -130,4 +130,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/45167812466)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/45202475286)

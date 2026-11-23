@@ -1,10 +1,10 @@
-## Monday 23 November, 15:16 UTC — scheduled run
+## Monday 23 November, 21:11 UTC — scheduled run
 
-Selections changed: 2 added, 2 dropped.
+Selections changed: 15 dropped.
 
-Provider quota: 4917982 (about 1366 days at the observed burn)
+Provider quota: 4916644 (about 1365 days at the observed burn)
 
-Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5, team_total_home_0_5, team_total_home_1_5, team_total_home_2_5, team_total_away_0_5, team_total_away_1_5, team_total_away_2_5** (excluded: none)
+Markets: **1x2, total_2_5, btts, corners_1x2, corners_total_9_5, corners_total_10_5, team_total_home_2_5, team_total_away_0_5, team_total_away_1_5** (excluded: double_chance, draw_no_bet, team_total_home_0_5, team_total_home_1_5, team_total_away_2_5)
 
 ### Best bets
 
@@ -16,7 +16,10 @@ _None._
 
 ### Player props
 
-- Brentford v Everton — **Vitaly Janelt** `player_shots` Over@0.5 at -108 (BetRivers), bet down to -120, 1.08u
+- Nott'm Forest v Chelsea — **Jordan Henderson** `player_shots_on_target` Over@0.5 at +380 (BetRivers), bet down to +333, 0.6u
+- Ipswich v Aston Villa — **Florentino Luis** `player_shots_on_target` Over@0.5 at +380 (BetRivers), bet down to +361, 0.6u
+- Sunderland v Tottenham — **Noah Sadiki** `player_shots_on_target` Over@0.5 at +370 (BetRivers), bet down to +353, 0.6u
+- Chelsea v Crystal Palace — **Jordan Henderson** `player_goal_scorer_anytime` Yes at +700 (Bovada), bet down to +671, 0.4u
 
 _Props carry the smallest stake the card uses: the standing measurement demonstrates no edge, and books reprice on the team sheet after this card is built._
 
@@ -31,7 +34,7 @@ National teams, on a pool that shares no information with the club ratings — a
 
 | Match | Market | Selection | Bet down to | Edge | Price | Book | Units |
 |:--|:--|:--|--:|--:|--:|:--|--:|
-| Spain v France | `draw_no_bet` | home | -160 | +6.7% | -160 | BetMGM | 1.6 |
+| Norway v England | `draw_no_bet` | away | -156 | +3.7% | -155 | BetMGM | 1.55 |
 
 - 156 fixture(s) dropped as already kicked off: Albania v Belarus, Albania v Finland, Albania v San Marino, Andorra v Gibraltar, Andorra v Malta, Armenia v Cyprus, and 150 more.
 - `btts` is not bet here: the model sits about 8 points below the market on the goals level for every fixture, so a selection in that market would be the gap rather than the fixture.
@@ -45,14 +48,14 @@ Priced on the European ratings, where 868 European ties bridge eleven leagues on
 
 | Match | Market | Selection | Bet down to | Edge | Price | Book | Units |
 |:--|:--|:--|--:|--:|--:|:--|--:|
-| Como v AEK | `total_2_5` | under | +159 | +7.8% | +225 | FanDuel | 0.6 |
-| Feyenoord v Porto | `corners_1x2` | home | -123 | +7.3% | -106 | BetRivers | 1.06 |
-| Arsenal v Dortmund | `draw_no_bet` | away | +424 | +7.0% | +540 | FanDuel | 0.4 |
-| Arsenal v Dortmund | `double_chance` | draw_or_away | +174 | +6.7% | +200 | FanDuel | 0.6 |
+| Como v AEK | `total_2_5` | under | +158 | +9.4% | +240 | FanDuel | 0.6 |
+| Arsenal v Dortmund | `double_chance` | draw_or_away | +170 | +6.6% | +195 | FanDuel | 1.0 |
+| Paris SG v Roma | `draw_no_bet` | away | +407 | +6.3% | +490 | FanDuel | 0.6 |
+| Man City v Napoli | `total_2_5` | under | +188 | +6.2% | +250 | FanDuel | 0.6 |
 
 - 54 fixture(s) dropped as already kicked off: AEK Athens v Real Madrid, AS Roma v Real Madrid, AS Roma v ŠK Slovan Bratislava, Arsenal v Lille, Aston Villa v Fenerbahce, Aston Villa v Viking FK, and 48 more.
 - 6 fixture(s) left out because a club has no rating in the pool: Ath Madrid v Viking FK, Bodø/Glimt v LASK, Sabah FK v Barcelona, Shakhtar Donetsk v Fenerbahce, Slavia Praha v Villarreal, ŠK Slovan Bratislava v Betis.
-- 26 further selection(s) qualified and are not shown: this section prints at most 4 per competition, the highest edges first.
+- 23 further selection(s) qualified and are not shown: this section prints at most 4 per competition, the highest edges first.
 
 ### UEFA Europa League
 
@@ -60,7 +63,7 @@ Same European ratings as the Champions League, and **thinner in both directions*
 
 | Match | Market | Selection | Bet down to | Edge | Price | Book | Units |
 |:--|:--|:--|--:|--:|--:|:--|--:|
-| OFI Crete v Anderlecht | `double_chance` | home_or_draw | -124 | +6.6% | -110 | DraftKings | 1.1 |
+| OFI Crete v Anderlecht | `double_chance` | home_or_draw | -122 | +7.3% | -105 | FanDuel | 1.05 |
 
 - 71 fixture(s) dropped as already kicked off: AC Milan v Benfica, AC Milan v Ferencváros TC, AZ Alkmaar v Hapoel Be'er Sheva, AZ Alkmaar v Juventus, Anderlecht v Lyon, Anderlecht v Salzburg, and 65 more.
 - 1 fixture(s) dropped because their kickoff could not be confirmed from the feed: Rennes v Olympiakos Piraeus.
@@ -79,8 +82,10 @@ Context only: no units, nothing here is a selection, and no edge is shown.
 
 | Player | Team | Opp | Kickoff (UTC) | Last season | Drought (bar) | 1 in N for him | Status | Price |
 |:--|:--|:--|:--|--:|:--|--:|:--|:--|
-| Danny Welbeck | Chelsea | Nottingham Forest | 2026-11-27 20:00 | 13 goals, 27% of apps | 13 (8) | 1 in 60 | — | not posted |
-| Morgan Gibbs-White | Nottingham Forest | Chelsea | 2026-11-27 20:00 | 15 goals, 35% of apps | 8 (6) | 1 in 32 | — | not posted |
+| Harry Wilson | Leeds United | Coventry City | 2026-11-28 15:00 | 10 goals, 28% of apps | 16 (8) | 1 in 183 | — | not posted |
+| Danny Welbeck | Chelsea | Nottingham Forest | 2026-11-27 20:00 | 13 goals, 27% of apps | 13 (8) | 1 in 60 | — | +220 (Fanatics) |
+| Viktor Gyökeres | Arsenal | Manchester City | 2026-11-29 16:30 | 14 goals, 28% of apps | 11 (8) | 1 in 36 | — | +190 (Fanatics) |
+| Morgan Gibbs-White | Nottingham Forest | Chelsea | 2026-11-27 20:00 | 15 goals, 35% of apps | 8 (6) | 1 in 32 | — | +220 (Fanatics) |
 
 **1+ assist, over 0.5.** Listed: 7+ Premier League assists last season and a run of league appearances without an assist at the bar his total sets (12+ assists -> 8, 9-11 assists -> 10, 7-8 assists -> 13 straight games).
 
@@ -88,14 +93,16 @@ Context only: no units, nothing here is a selection, and no edge is shown.
 
 | Player | Team | Opp | Kickoff (UTC) | Last season | Drought (bar) | 1 in N for him | Status | Price |
 |:--|:--|:--|:--|--:|:--|--:|:--|:--|
-| James Garner | Everton | Brentford | 2026-11-23 20:00 | 7 assists, 18% of apps | 13 (13) | 1 in 14 | — | +470 (FanDuel) |
+| Rayan Cherki | Manchester City | Arsenal | 2026-11-29 16:30 | 12 assists, 27% of apps | 9 (8) | 1 in 18 | — | not posted |
+| James Garner | Everton | Liverpool | 2026-11-29 12:00 | 7 assists, 18% of apps | 13 (13) | 1 in 14 | — | not posted |
 
 ### How the recommendations have done
 
 - Settled: **195** selections, 82 won, 8 returned the stake
 - Staked: 197.78 units
 - Profit: **+0.01 units** (+0.0% on turnover)
-- Still pending: 2
+- Still pending: 0
+- Played, waiting on results data: **2** — these are settled matches the results feed has not caught up with, so the record above is behind rather than still accumulating.
 
 - Stake returned (void): 8 — counted in the settled total above at zero profit, because a push is a bet
 
@@ -114,15 +121,15 @@ Consensus CLV on each market's picks, judged once it has 50 with a closing price
 - `corners_total_10_5`: 18 of 50 picks needed, not judged yet.
 - `draw_no_bet`: 18 of 50 picks needed, not judged yet.
 - `team_total_away_1_5`: 16 of 50 picks needed, not judged yet.
-- `team_total_home_1_5`: 14 of 50 picks needed, not judged yet.
+- `team_total_home_1_5`: 15 of 50 picks needed, not judged yet.
 - `1x2`: 13 of 50 picks needed, not judged yet.
 - `double_chance`: 11 of 50 picks needed, not judged yet.
 - `btts`: 4 of 50 picks needed, not judged yet.
 - `team_total_away_0_5`: 3 of 50 picks needed, not judged yet.
+- `team_total_home_0_5`: 2 of 50 picks needed, not judged yet.
 - `team_total_home_2_5`: 2 of 50 picks needed, not judged yet.
 - `total_2_5`: 2 of 50 picks needed, not judged yet.
 - `team_total_away_2_5`: 1 of 50 picks needed, not judged yet.
-- `team_total_home_0_5`: 1 of 50 picks needed, not judged yet.
 
 ---
 
@@ -130,4 +137,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/45202475286)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/45266131673)

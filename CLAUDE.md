@@ -392,6 +392,16 @@ Use the repo, the reports, and GitHub.
   log loss on 2025/26-2026/27 (440 matches) 1.0322 without, 1.0323 with. The
   tuning-season effects ran the wrong way for fatigue (a home side on short
   rest conceded 6% fewer than expected) and did not hold. Not shipped.
+- **2026-11-24 (weekly upgrade): a Pages deploy that cannot see its own
+  artifact is retried once.** Four Publish Board runs 2026-11-21..24 (of
+  about 25) failed at "Deploy to GitHub Pages": `github-pages` was
+  finalised, and under a second later `deploy-pages` listed the run's
+  artifacts, found only `board-history` and stopped with "No artifacts named
+  github-pages". Each left the public board a build behind until the next
+  publish. The first deploy is now `continue-on-error`, and only because a
+  second, unguarded deploy follows it after 30 seconds; the job still fails
+  if both do. Nothing the site shows changed.
+  `tests/test_a_pages_deploy_that_misses_its_artifact_is_retried.py`.
 - **2026-11-17 (weekly upgrade): Understat has been down since 2026-11-02,
   and the card no longer depends on it.** Understat's league data has
   answered 200 with a non-JSON page on every run since 2 November, so the

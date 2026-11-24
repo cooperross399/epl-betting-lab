@@ -45,7 +45,7 @@ jobs:
     timeout-minutes: 15
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: ${{ steps.deployment.outputs.page_url || steps.deployment_retry.outputs.page_url }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -421,6 +421,23 @@ jobs:
 
       - name: Deploy to GitHub Pages
         id: deployment
+        # Quiet only because the retry below is not: deploy-pages can list
+        # the run's artifacts before the one just finalised appears ("Found
+        # 1 artifact(s)" then "No artifacts named github-pages"), which
+        # failed four publishes 2026-11-21..24 and left the board a build
+        # behind for hours. tests/test_a_pages_deploy_that_misses_its_artifact_is_retried.py
+        continue-on-error: true
+        uses: actions/deploy-pages@v4
+
+      - name: Wait for the artifact listing to catch up
+        if: steps.deployment.outcome == 'failure'
+        run: |
+          echo "::warning::The first Pages deploy failed; trying once more in 30 seconds."
+          sleep 30
+
+      - name: Deploy to GitHub Pages (second attempt)
+        id: deployment_retry
+        if: steps.deployment.outcome == 'failure'
         uses: actions/deploy-pages@v4
 
       - name: Report the outcome

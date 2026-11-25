@@ -1,8 +1,8 @@
-## Wednesday 25 November, 14:55 UTC — scheduled run
+## Wednesday 25 November, 19:00 UTC — scheduled run
 
-Selections changed: 3 added, 3 dropped.
+Selections changed: 3 added, 4 dropped.
 
-Provider quota: 4904689 (about 1362 days at the observed burn)
+Provider quota: 4903550 (about 1362 days at the observed burn)
 
 Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5, team_total_home_0_5, team_total_home_1_5, team_total_home_2_5, team_total_away_0_5, team_total_away_1_5, team_total_away_2_5** (excluded: none)
 
@@ -14,8 +14,8 @@ Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corner
 | Newcastle v Man United | `team_total_home_1_5` | over | C | -120 | +6.8% | -105 | Bovada | 1.05 |
 | Aston Villa v Everton | `team_total_home_1_5` | over | C | -118 | +5.6% | -108 | Bovada | 1.08 |
 | Chelsea v Crystal Palace | `team_total_home_1_5` | under | C | +132 | +6.9% | +152 | Bovada | 1.0 |
-| Bournemouth v Brighton | `team_total_home_1_5` | over | C | +102 | +6.6% | +115 | Bovada | 1.0 |
 | Hull v Nott'm Forest | `team_total_away_1_5` | under | C | -129 | +5.3% | -120 | Bovada | 1.2 |
+| Sunderland v Tottenham | `1x2` | away | C | +100 | +6.3% | +112 | BetOnline.ag | 1.0 |
 | Coventry v Ipswich | `1x2` | home | C | +114 | +6.4% | +128 | BetRivers | 1.0 |
 | Fulham v Bournemouth | `corners_1x2` | home | C | -125 | +4.8% | -118 | BetMGM | 1.18 |
 
@@ -25,17 +25,23 @@ _None._
 
 ### Player props
 
-- Leeds v Coventry — **Leeds goalkeeper** `player_goalie_saves_alternate` Over@2.5 at +210 (Bovada), bet down to +116, 0.6u
+- Leeds v Coventry — **Leeds goalkeeper** `player_goalie_saves_alternate` Over@2.5 at +205 (Bovada), bet down to +116, 0.6u
 - Ipswich v Aston Villa — **Matty Cash** `player_to_receive_card` Yes at +390 (DraftKings), bet down to +278, 0.6u
 - Chelsea v Crystal Palace — **Jordan Henderson** `player_shots_on_target` Over@0.5 at +260 (BetRivers), bet down to +222, 0.6u
 - Arsenal v Man City — **Noni Madueke** `player_to_receive_card` Yes at +700 (DraftKings), bet down to +540, 0.4u
 - Nott'm Forest v Chelsea — **Jordan Henderson** `player_shots_on_target` Over@0.5 at +390 (BetRivers), bet down to +335, 0.6u
 - Brentford v Arsenal — **Vitaly Janelt** `player_goal_scorer_anytime` Yes at +1100 (Bovada), bet down to +823, 0.4u
+- Crystal Palace v Hull — **Hull goalkeeper** `player_goalie_saves_alternate` Over@3.5 at +105 (Bovada), bet down to -103, 1.0u
 - Ipswich v Aston Villa — **Florentino Luis** `player_shots_on_target` Over@0.5 at +400 (BetRivers), bet down to +359, 0.6u
-- Sunderland v Tottenham — **Noah Sadiki** `player_shots_on_target` Over@0.5 at +380 (BetRivers), bet down to +351, 0.6u
+- Sunderland v Tottenham — **Noah Sadiki** `player_shots_on_target` Over@0.5 at +390 (BetRivers), bet down to +351, 0.6u
 - Brighton v Newcastle — **Jacob Murphy** `player_to_receive_card` Yes at +650 (DraftKings), bet down to +584, 0.4u
 
 _Props carry the smallest stake the card uses: the standing measurement demonstrates no edge, and books reprice on the team sheet after this card is built._
+
+### What changed
+
+- **Added:** Sunderland v Tottenham 1x2 away
+- **Dropped:** Bournemouth v Brighton team_total_home_1_5 over
 
 
 ## Beyond the Premier League
@@ -83,7 +89,7 @@ Context only: no units, nothing here is a selection, and no edge is shown.
 | Player | Team | Opp | Kickoff (UTC) | Last season | Drought (bar) | 1 in N for him | Status | Price |
 |:--|:--|:--|:--|--:|:--|--:|:--|:--|
 | Harry Wilson | Leeds United | Coventry City | 2026-11-28 15:00 | 10 goals, 28% of apps | 16 (8) | 1 in 183 | — | not posted |
-| Danny Welbeck | Chelsea | Nottingham Forest | 2026-11-27 20:00 | 13 goals, 27% of apps | 13 (8) | 1 in 60 | — | +225 (DraftKings) |
+| Danny Welbeck | Chelsea | Nottingham Forest | 2026-11-27 20:00 | 13 goals, 27% of apps | 13 (8) | 1 in 60 | — | +235 (DraftKings) |
 | Viktor Gyökeres | Arsenal | Manchester City | 2026-11-29 16:30 | 14 goals, 28% of apps | 11 (8) | 1 in 36 | — | +235 (DraftKings) |
 | Morgan Gibbs-White | Nottingham Forest | Chelsea | 2026-11-27 20:00 | 15 goals, 35% of apps | 8 (6) | 1 in 32 | — | +290 (BetMGM) |
 
@@ -101,7 +107,7 @@ Context only: no units, nothing here is a selection, and no edge is shown.
 - Settled: **197** selections, 82 won, 8 returned the stake
 - Staked: 199.50 units
 - Profit: **-1.71 units** (-0.9% on turnover)
-- Still pending: 12
+- Still pending: 13
 
 - Stake returned (void): 8 — counted in the settled total above at zero profit, because a push is a bet
 
@@ -136,4 +142,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/45638069304)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/45679834031)

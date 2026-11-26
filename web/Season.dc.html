@@ -4,6 +4,50 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<!-- mh-head -->
+<meta name="theme-color" content="#0e1013">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Maverick Hightower">
+<link rel="preconnect" href="https://unpkg.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<title>Season — Maverick Hightower</title>
+<meta name="description" content="The Premier League table as it stands and where the model expects each club to finish: projected points, title, top four, top six and relegation chances.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Maverick Hightower">
+<meta property="og:title" content="Season — Maverick Hightower">
+<meta property="og:image" content="https://maverickhightower.com/share.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@mavhightower">
+<meta property="og:description" content="The Premier League table as it stands and where the model expects each club to finish: projected points, title, top four, top six and relegation chances.">
+<meta name="twitter:title" content="Season — Maverick Hightower">
+<meta name="twitter:description" content="The Premier League table as it stands and where the model expects each club to finish: projected points, title, top four, top six and relegation chances.">
+<meta name="twitter:image" content="https://maverickhightower.com/share.png">
+<meta property="og:url" content="https://epl.maverickhightower.com/Season.dc.html">
+<style id="mh-head">
+/* mh-head (2026-11-26): loading screen, phone layout fixes. */
+body:not(:has(#dc-root)) { background:#0e1013; margin:0; }
+body:not(:has(#dc-root))::before { content:"Maverick Hightower \00B7  Loading"; display:block; padding:32px 16px; font:600 12px/1.4 system-ui,-apple-system,sans-serif; letter-spacing:.16em; text-transform:uppercase; color:#8d93a0; }
+html body nav[aria-label="Board sections"][style] { overflow-x:auto; scrollbar-width:none; }
+html body nav[aria-label="Board sections"][style]::-webkit-scrollbar { display:none; }
+@media (max-width:560px) {
+  html body nav[aria-label="Board sections"][style] { gap:2px !important; }
+  html body nav[aria-label="Board sections"][style] a[href] { padding:0 11px !important; font-size:13.5px !important; min-height:36px !important; }
+  html body nav[aria-label="Board sections"][style] a[href] span[style*="IBM Plex Mono"] { font-size:10px !important; padding:0 4px !important; }
+  html body article[id] > button[aria-controls]:is([style*="grid-template-columns:64px"],[style*="grid-template-columns: 64px"]) { grid-template-columns:58px minmax(0,1fr) 14px !important; row-gap:6px !important; }
+  html body article[id] > button[aria-controls]:is([style*="grid-template-columns:64px"],[style*="grid-template-columns: 64px"]) > span:nth-of-type(2) { overflow:hidden; }
+  html body article[id] > button[aria-controls]:is([style*="grid-template-columns:64px"],[style*="grid-template-columns: 64px"]) > span:nth-of-type(3) { grid-column:2 / 3; grid-row:2; flex-direction:row !important; flex-wrap:wrap; align-items:baseline !important; justify-content:flex-start; gap:4px 10px !important; }
+  html body article[id] > button[aria-controls]:is([style*="grid-template-columns:64px"],[style*="grid-template-columns: 64px"]) > span:nth-of-type(4) { grid-column:3; grid-row:1; }
+  html body article[id] > button[aria-controls]:is([style*="grid-template-columns:64px"],[style*="grid-template-columns: 64px"]) > span:nth-of-type(3) > span:first-child { white-space:normal !important; }
+}
+@media (max-width:370px) {
+  html body nav[aria-label="Board sections"][style] a[href] { padding:0 8px !important; font-size:12.5px !important; }
+}
+</style>
+<script>(function(){var done=false;function go(){var a=document.querySelector('nav[aria-label="Board sections"] a[aria-current="page"]');if(a&&!done){done=true;try{var n=a.parentElement;n.scrollLeft=Math.max(0,a.offsetLeft-(n.clientWidth-a.offsetWidth)/2);}catch(e){}}}var mo=new MutationObserver(function(){go();if(done)mo.disconnect();});document.addEventListener("DOMContentLoaded",function(){mo.observe(document.body,{childList:true,subtree:true});go();});})();</script>
+<!-- /mh-head -->
 <script src="./support.js"></script>
 </head>
 <body>
@@ -249,6 +293,19 @@ class Component extends DCLogic {
     this.setState((s) => (s.sortKey !== k ? { sortKey: k, dir: natural } : s.dir === natural ? { sortKey: k, dir: -natural } : { sortKey: "", dir: natural }));
   }
   renderVals() {
+    // mh-guard (2026-11-26): one bad field in a feed must not blank the page. Keep the last good view;
+    // on a first-load failure, fall back to the page's own "couldn't load" view.
+    try { const v = this.__rv(); this.__good = v; return v; }
+    catch (e) {
+      if (!this.__logged) { this.__logged = true; try { console.error("[mh] page render failed; showing a safe view", e); } catch (_) {} }
+      if (this.__good) return this.__good;
+      const st = this.state;
+      try { this.state = { ...st, data: null, vm: null, board: null, game: null, season: null, err: (st && st.err) || "render" }; return this.__rv(); }
+      catch (_) { throw e; }
+      finally { this.state = st; }
+    }
+  }
+  __rv() {
     const F = this.F, d = this.state.data, T = this.state.teams;
     const tabsList = [["This week", "Board.dc.html"], ["Props", "Board.dc.html#props"], ["Results", "Results.dc.html"], ["Season", "Season.dc.html"], ["Record", "Record.dc.html"]];
     const tabs = tabsList.map(([label, href]) => ({ label, href, current: label === "Season" ? "page" : undefined, shadow: label === "Season" ? "inset 0 -3px 0 var(--ink)" : "none", color: label === "Season" ? "var(--ink)" : "var(--mute)" }));

@@ -4,6 +4,49 @@
 <meta charset="utf-8">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- mh-head -->
+<meta name="theme-color" content="#0e1013">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Maverick Hightower">
+<link rel="preconnect" href="https://unpkg.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<title>Board — Maverick Hightower</title>
+<meta name="description" content="Model-projected scores, win probabilities and market prices for tonight's slate. Frozen at publication and settled the next morning.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Maverick Hightower">
+<meta property="og:title" content="Tonight's Board — Maverick Hightower">
+<meta property="og:description" content="Model-projected scores, win probabilities and market prices for tonight's slate.">
+<meta property="og:image" content="https://maverickhightower.com/share.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@mavhightower">
+<meta name="twitter:title" content="Tonight's Board — Maverick Hightower">
+<meta name="twitter:description" content="Model-projected scores, win probabilities and market prices for tonight's slate.">
+<meta name="twitter:image" content="https://maverickhightower.com/share.png">
+<style id="mh-head">
+/* mh-head (2026-11-26): loading screen, phone layout fixes. */
+body:not(:has(#dc-root)) { background:#0e1013; margin:0; }
+body:not(:has(#dc-root))::before { content:"Maverick Hightower \00B7  Loading"; display:block; padding:32px 16px; font:600 12px/1.4 system-ui,-apple-system,sans-serif; letter-spacing:.16em; text-transform:uppercase; color:#8d93a0; }
+html body nav[aria-label="Board sections"][style] { overflow-x:auto; scrollbar-width:none; }
+html body nav[aria-label="Board sections"][style]::-webkit-scrollbar { display:none; }
+@media (max-width:560px) {
+  html body nav[aria-label="Board sections"][style] { gap:2px !important; }
+  html body nav[aria-label="Board sections"][style] a[href] { padding:0 11px !important; font-size:13.5px !important; min-height:36px !important; }
+  html body nav[aria-label="Board sections"][style] a[href] span[style*="IBM Plex Mono"] { font-size:10px !important; padding:0 4px !important; }
+  html body article[id] > button[aria-controls]:is([style*="grid-template-columns:64px"],[style*="grid-template-columns: 64px"]) { grid-template-columns:58px minmax(0,1fr) 14px !important; row-gap:6px !important; }
+  html body article[id] > button[aria-controls]:is([style*="grid-template-columns:64px"],[style*="grid-template-columns: 64px"]) > span:nth-of-type(2) { overflow:hidden; }
+  html body article[id] > button[aria-controls]:is([style*="grid-template-columns:64px"],[style*="grid-template-columns: 64px"]) > span:nth-of-type(3) { grid-column:2 / 3; grid-row:2; flex-direction:row !important; flex-wrap:wrap; align-items:baseline !important; justify-content:flex-start; gap:4px 10px !important; }
+  html body article[id] > button[aria-controls]:is([style*="grid-template-columns:64px"],[style*="grid-template-columns: 64px"]) > span:nth-of-type(4) { grid-column:3; grid-row:1; }
+  html body article[id] > button[aria-controls]:is([style*="grid-template-columns:64px"],[style*="grid-template-columns: 64px"]) > span:nth-of-type(3) > span:first-child { white-space:normal !important; }
+}
+@media (max-width:370px) {
+  html body nav[aria-label="Board sections"][style] a[href] { padding:0 8px !important; font-size:12.5px !important; }
+}
+</style>
+<script>(function(){var done=false;function go(){var a=document.querySelector('nav[aria-label="Board sections"] a[aria-current="page"]');if(a&&!done){done=true;try{var n=a.parentElement;n.scrollLeft=Math.max(0,a.offsetLeft-(n.clientWidth-a.offsetWidth)/2);}catch(e){}}}var mo=new MutationObserver(function(){go();if(done)mo.disconnect();});document.addEventListener("DOMContentLoaded",function(){mo.observe(document.body,{childList:true,subtree:true});go();});})();</script>
+<!-- /mh-head -->
 <script src="./support.js"></script>
 </head>
 <body>
@@ -123,6 +166,7 @@
         <h1 style="margin:0;font-family:'Playfair Display',Georgia,serif;font-weight:800;font-size:clamp(56px,9vw,112px);line-height:.9;letter-spacing:-.01em;">{{ title1 }}<br>{{ title2 }}</h1>
         <div style="margin-top:14px;font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.7;color:var(--mute);display:flex;flex-wrap:wrap;gap:4px 24px;align-items:baseline;">
           <span style="white-space:nowrap;">Times in {{ tz }}</span>
+          <sc-if value="{{ hasUpdated }}" hint-placeholder-val="{{ false }}"><span style="white-space:nowrap;">Updated {{ updated }}</span></sc-if>
         </div>
       </div>
       <sc-if value="{{ showScores }}" hint-placeholder-val="{{ true }}">
@@ -132,7 +176,7 @@
             <span role="status" style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:{{ liveColor }};">{{ liveLine }}</span>
           </div>
           <sc-if value="{{ noScoreCards }}" hint-placeholder-val="{{ false }}">
-            <p style="margin:8px 0 0;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">No games on the board yet.</p>
+            <p style="margin:8px 0 0;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">{{ noScoreText }}</p>
           </sc-if>
           <div style="display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x proximity;margin-top:10px;padding-bottom:4px;scrollbar-width:thin;">
           <sc-for list="{{ scoreCards }}" as="s" hint-placeholder-count="5">
@@ -171,10 +215,23 @@
           <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;border-bottom:3px solid var(--ink);padding-bottom:10px;">
             <h2 id="projections-h" style="margin:0;font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:34px;line-height:1;letter-spacing:-.01em;">{{ projTitle }}</h2>
             <div style="display:flex;align-items:center;gap:4px 16px;flex-wrap:wrap;">
-              <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">{{ summary }}</span>
-              <button type="button" onClick="{{ onToggleAll }}" style="min-height:44px;padding:0 12px;background:transparent;border:1px solid var(--ink);color:var(--ink);font-family:'IBM Plex Mono',monospace;font-size:12px;cursor:pointer;">{{ toggleAllLabel }}</button>
+              <sc-if value="{{ hasGames }}" hint-placeholder-val="{{ true }}"><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">{{ summary }}</span></sc-if>
+              <sc-if value="{{ hasGames }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ onToggleAll }}" style="min-height:44px;padding:0 12px;background:transparent;border:1px solid var(--ink);color:var(--ink);font-family:'IBM Plex Mono',monospace;font-size:12px;cursor:pointer;">{{ toggleAllLabel }}</button></sc-if>
             </div>
           </div>
+
+          <!-- mh-offnight -->
+          <sc-if value="{{ offNight.show }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:18px;padding:20px 22px;border:1px solid var(--rule);border-radius:14px;background:var(--card, transparent);display:flex;flex-direction:column;gap:10px;">
+              <p style="margin:0;font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:26px;line-height:1.1;">{{ offNight.title }}</p>
+              <p style="margin:0;font-size:15px;line-height:1.5;color:var(--ink-2);max-width:620px;">{{ offNight.body }}</p>
+              <div style="display:flex;gap:10px 18px;flex-wrap:wrap;font-weight:600;font-size:14px;">
+                <a href="Results.dc.html" style="color:var(--accent, var(--ink));min-height:40px;display:inline-flex;align-items:center;">Last results →</a>
+                <a href="Record.dc.html" style="color:var(--accent, var(--ink));min-height:40px;display:inline-flex;align-items:center;">Our record →</a>
+                <sc-if value="{{ offNight.season }}" hint-placeholder-val="{{ true }}"><a href="Season.dc.html" style="color:var(--accent, var(--ink));min-height:40px;display:inline-flex;align-items:center;">Season projections →</a></sc-if>
+              </div>
+            </div>
+          </sc-if>
 
           <sc-for list="{{ groups }}" as="day" hint-placeholder-count="1">
             <div style="display:flex;align-items:baseline;gap:14px;padding:26px 0 10px;border-bottom:1px solid var(--ink);">
@@ -733,6 +790,19 @@ class Component extends DCLogic {
   componentDidUpdate() { this.load(); }
   componentWillUnmount() { this.stopLive(); clearInterval(this.ticker); if (this.mq) this.mq.removeEventListener("change", this.onMq); }
   renderVals() {
+    // mh-guard (2026-11-26): one bad field in a feed must not blank the page. Keep the last good view;
+    // on a first-load failure, fall back to the page's own "couldn't load" view.
+    try { const v = this.__rv(); this.__good = v; return v; }
+    catch (e) {
+      if (!this.__logged) { this.__logged = true; try { console.error("[mh] page render failed; showing a safe view", e); } catch (_) {} }
+      if (this.__good) return this.__good;
+      const st = this.state;
+      try { this.state = { ...st, data: null, vm: null, board: null, game: null, season: null, err: (st && st.err) || "render" }; return this.__rv(); }
+      catch (_) { throw e; }
+      finally { this.state = st; }
+    }
+  }
+  __rv() {
     const vm = this.state.vm;
     const links = { board: "Board.dc.html", results: "Results.dc.html", archive: "Archive.dc.html", graphic: "Graphic.dc.html", season: "Season.dc.html" };
     const themeAttr = { Light: "light", Dark: "dark" }[this.props.theme] || "auto";
@@ -1057,7 +1127,8 @@ class Component extends DCLogic {
       if (unconfirmed) parts.push(`${unconfirmed} starting goalie${unconfirmed === 1 ? "" : "s"} still unconfirmed.`);
       brief = parts.filter(Boolean).join(" ");
     }
-    return { ...vm, links, themeAttr, hasMethods, brief, groups, sportLong: vm.sport.longName, title1: vm.title[0], title2: vm.title[1],
+    const __games = groups.reduce((n, d) => n + ((d && d.games) || []).length, 0);
+    return { ...vm, hasGames: __games > 0, noScoreText: __games ? "No games on the board yet." : (epl ? "No matches this week." : "No games tonight."), offNight: { show: __games === 0, title: epl ? "No matches this week" : "No games tonight", body: epl ? "The next board goes up once the fixtures are priced. Until then, here is how the picks have done." : "The board goes up on the next game day. Until then, here is how the picks have done.", season: hasPage("season") }, hasUpdated: !!(vm.updated && vm.updated !== "—"), links, themeAttr, hasMethods, brief, groups, sportLong: vm.sport.longName, title1: vm.title[0], title2: vm.title[1],
       notice: vm.notice, hasNotice: !!vm.notice, hasFeedNotice: !!S.feedNotice, feedNotice: S.feedNotice || "",
       isArchived: !!vm.archived, archivedLabel: vm.archived ? `Board for ${vm.archived.date}${vm.archived.slot ? ` · ${vm.archived.slot} card` : ""}, as published` : "",
       tabs: tabsFor(S.tab, pv), isTonight: S.tab === "tonight" || (!pv && !dueOnly), isProps: S.tab === "props" && (!!pv || dueOnly),

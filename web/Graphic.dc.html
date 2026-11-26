@@ -4,6 +4,37 @@
 <meta charset="utf-8">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- mh-head -->
+<meta name="theme-color" content="#0e1013">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Maverick Hightower">
+<link rel="preconnect" href="https://unpkg.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<style id="mh-head">
+/* mh-head (2026-11-26): loading screen, phone layout fixes. */
+body:not(:has(#dc-root)) { background:#0e1013; margin:0; }
+body:not(:has(#dc-root))::before { content:"Maverick Hightower \00B7  Loading"; display:block; padding:32px 16px; font:600 12px/1.4 system-ui,-apple-system,sans-serif; letter-spacing:.16em; text-transform:uppercase; color:#8d93a0; }
+html body nav[aria-label="Board sections"][style] { overflow-x:auto; scrollbar-width:none; }
+html body nav[aria-label="Board sections"][style]::-webkit-scrollbar { display:none; }
+@media (max-width:560px) {
+  html body nav[aria-label="Board sections"][style] { gap:2px !important; }
+  html body nav[aria-label="Board sections"][style] a[href] { padding:0 11px !important; font-size:13.5px !important; min-height:36px !important; }
+  html body nav[aria-label="Board sections"][style] a[href] span[style*="IBM Plex Mono"] { font-size:10px !important; padding:0 4px !important; }
+  html body article[id] > button[aria-controls]:is([style*="grid-template-columns:64px"],[style*="grid-template-columns: 64px"]) { grid-template-columns:58px minmax(0,1fr) 14px !important; row-gap:6px !important; }
+  html body article[id] > button[aria-controls]:is([style*="grid-template-columns:64px"],[style*="grid-template-columns: 64px"]) > span:nth-of-type(2) { overflow:hidden; }
+  html body article[id] > button[aria-controls]:is([style*="grid-template-columns:64px"],[style*="grid-template-columns: 64px"]) > span:nth-of-type(3) { grid-column:2 / 3; grid-row:2; flex-direction:row !important; flex-wrap:wrap; align-items:baseline !important; justify-content:flex-start; gap:4px 10px !important; }
+  html body article[id] > button[aria-controls]:is([style*="grid-template-columns:64px"],[style*="grid-template-columns: 64px"]) > span:nth-of-type(4) { grid-column:3; grid-row:1; }
+  html body article[id] > button[aria-controls]:is([style*="grid-template-columns:64px"],[style*="grid-template-columns: 64px"]) > span:nth-of-type(3) > span:first-child { white-space:normal !important; }
+}
+@media (max-width:370px) {
+  html body nav[aria-label="Board sections"][style] a[href] { padding:0 8px !important; font-size:12.5px !important; }
+}
+</style>
+<script>(function(){var done=false;function go(){var a=document.querySelector('nav[aria-label="Board sections"] a[aria-current="page"]');if(a&&!done){done=true;try{var n=a.parentElement;n.scrollLeft=Math.max(0,a.offsetLeft-(n.clientWidth-a.offsetWidth)/2);}catch(e){}}}var mo=new MutationObserver(function(){go();if(done)mo.disconnect();});document.addEventListener("DOMContentLoaded",function(){mo.observe(document.body,{childList:true,subtree:true});go();});})();</script>
+<!-- /mh-head -->
 <script src="./support.js"></script>
 </head>
 <body>
@@ -72,17 +103,17 @@
       </sc-for>
     </nav>
   <div style="width:1080px;flex:none;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);">
-    <span>1080 × 1350 share card</span>
+    <span style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;"><span>1080 × 1350 share card</span><button type="button" onClick="{{ onSave }}" style="min-height:36px;padding:0 16px;border:0;border-radius:999px;background:#3b82f6;color:#fff;font:600 13px Inter,system-ui,sans-serif;cursor:pointer;">{{ saveLabel }}</button><sc-if value="{{ saveErr }}" hint-placeholder-val="{{ false }}"><span style="color:var(--alert);">{{ saveErr }}</span></sc-if></span>
     <span style="display:flex;gap:22px;"><sc-for list="{{ otherSports }}" as="s" hint-placeholder-count="2"><a href="{{ s.href }}" style="display:inline-flex;align-items:center;min-height:44px;font-family:'Inter',sans-serif;text-transform:uppercase;letter-spacing:.1em;">{{ s.name }}</a></sc-for></span>
   </div>
-  <div id="share-card" style="width:1080px;height:1350px;flex:none;background:#14151a;color:#f1efe9;padding:56px 60px;display:flex;flex-direction:column;border-top:10px solid #f1efe9;">
+  <div id="share-card" style="width:1080px;height:1350px;flex:none;background:#0e1013;color:#f3f4f6;padding:56px 60px;display:flex;flex-direction:column;border-top:10px solid #3b82f6;">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;">
       <div>
         <div style="font-size:18px;letter-spacing:.16em;text-transform:uppercase;color:#a3a6b1;">{{ kicker }}</div>
         <div style="font-family:'Playfair Display',Georgia,serif;font-weight:800;font-size:132px;line-height:.88;letter-spacing:-.01em;margin-top:10px;">{{ title1 }}<br>{{ title2 }}</div>
       </div>
       <div style="display:flex;align-items:center;gap:14px;">
-        <span style="width:56px;height:56px;background:#f1efe9;color:#14151a;display:grid;place-items:center;font-family:'Playfair Display',Georgia,serif;font-weight:800;font-size:26px;">MH</span>
+        <span style="width:56px;height:56px;background:#3b82f6;color:#fff;border-radius:12px;display:grid;place-items:center;font-family:'Playfair Display',Georgia,serif;font-weight:800;font-size:26px;">MH</span>
         <span style="display:flex;flex-direction:column;line-height:1.1;">
           <span style="font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#a3a6b1;">Maverick Hightower</span>
           <span style="font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:28px;">{{ sportLong }}</span>
@@ -98,7 +129,7 @@
 
     <sc-if value="{{ feat.show }}" hint-placeholder-val="{{ false }}">
       <div style="display:grid;grid-template-columns:230px minmax(0,1fr);gap:0 24px;align-items:center;padding:16px 0;border-bottom:1px solid #f1efe9;">
-        <div style="background:#f1efe9;color:#14151a;padding:12px 14px;">
+        <div style="background:#3b82f6;color:#fff;padding:12px 14px;border-radius:10px;">
           <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;opacity:.7;">Best bet of the night</div>
           <div style="font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:30px;line-height:1;margin-top:6px;">{{ feat.label }}</div>
           <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;margin-top:5px;opacity:.75;">{{ feat.sub }}</div>
@@ -196,7 +227,34 @@ class Component extends DCLogic {
   }
   componentDidMount() { this.load(); }
   componentDidUpdate() { this.load(); }
+
+  // mh-save (2026-11-26): download the share card as a PNG.
+  async saveCard() {
+    if (this.state.saving) return;
+    this.setState({ saving: true, saveErr: "" });
+    try {
+      const lib = await import("https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/+esm");
+      const node = document.getElementById("share-card");
+      const url = await lib.toPng(node, { pixelRatio: 1, cacheBust: true, width: 1080, height: 1350 });
+      const a = document.createElement("a"); a.href = url; a.download = `maverick-hightower-${(this.state.vm && this.state.vm.sport.key) || "board"}-${new Date().toISOString().slice(0, 10)}.png`;
+      document.body.appendChild(a); a.click(); a.remove();
+      this.setState({ saving: false });
+    } catch (e) { this.setState({ saving: false, saveErr: "Couldn't make the image. Try again, or take a screenshot." }); }
+  }
   renderVals() {
+    // mh-guard (2026-11-26): one bad field in a feed must not blank the page. Keep the last good view;
+    // on a first-load failure, fall back to the page's own "couldn't load" view.
+    try { const v = this.__rv(); this.__good = v; return v; }
+    catch (e) {
+      if (!this.__logged) { this.__logged = true; try { console.error("[mh] page render failed; showing a safe view", e); } catch (_) {} }
+      if (this.__good) return this.__good;
+      const st = this.state;
+      try { this.state = { ...st, data: null, vm: null, board: null, game: null, season: null, err: (st && st.err) || "render" }; return this.__rv(); }
+      catch (_) { throw e; }
+      finally { this.state = st; }
+    }
+  }
+  __rv() {
     const vm = this.state.vm;
     const sk = (vm && vm.sport.key) || ((/^(nhl|epl|cbb)\./.exec(location.hostname) || [])[1]) || this.props.sport || "nhl";
     const tab = (label, href, on) => ({ label, href, current: on ? "page" : undefined, shadow: on ? "inset 0 -3px 0 var(--ink)" : "none" });
@@ -222,7 +280,7 @@ class Component extends DCLogic {
       // assert for an exhibition, an empty allowlist or an unpriced game.
       // Pinned by tests/test_site_never_calls_an_unpriced_game_a_pass.py.
       pickSub: g.pick.kind === "bet" || g.pick.kind === "lean" ? g.pick.sub.split(" · ").slice(0, 2).concat([`edge ${g.pick.edge}`]).join(" · ") : g.pick.kind === "pass" ? `${g.pick.label} · edge ${g.pick.edge}` : g.pick.label.split(" · ").slice(1).join(" · "),
-      pickBg: g.pick.kind === "bet" ? "#f1efe9" : "#14151a", pickFg: g.pick.kind === "bet" ? "#14151a" : "#a3a6b1",
+      pickBg: g.pick.kind === "bet" ? "#3b82f6" : "#14151a", pickFg: g.pick.kind === "bet" ? "#ffffff" : "#a3a6b1",
     }));
     const epl = vm.sport.key === "epl";
     // EPL: the day's prop best bets as one shareable block (match, player, bet, price).
@@ -249,7 +307,7 @@ class Component extends DCLogic {
         feat = { show: true, label: cand.pick.label, sub: `${cand.pick.market} \u00b7 ${o(cand.pick.price)} \u00b7 edge ${sg(cand.pick.edgePct || 0)}%`, awayAbbr: a.abbr, homeAbbr: h.abbr, homeWin: `${(h.winProb * 100).toFixed(1)}%`, mid: `${X(0.5).toFixed(2)}%`, end: `calc(${X(h.winProb).toFixed(2)}% - 1px)`, strip, legend };
       }
     }
-    return { themeAttr, tabs, rows, feat, propsCard, strip3: vm.strip.slice(0, 3), otherSports: vm.otherSports, kicker: vm.kicker, title1: vm.title[0], title2: vm.title[1], sportLong: vm.sport.longName,
+    return { themeAttr, tabs, rows, feat, propsCard, strip3: (() => { const R = (this.state.raw && this.state.raw.record) || {}, Sx = R.season || R; const wl = (x) => (x && typeof x.w === "number" ? `${x.w}–${x.l}${x.p ? `–${x.p}` : ""}` : null); const won = (x) => `${Math.round((100 * x.w) / Math.max(1, x.w + x.l))}% won${typeof x.units === "number" ? ` · ${x.units >= 0 ? "+" : "−"}${Math.abs(x.units).toFixed(2)}u` : ""}`; const want = [["Best bets · season", Sx.picks], [sk === "epl" ? "Favoured side · season" : "Straight up · season", Sx.straightUp], [sk === "cbb" && Sx.ats ? "Against the spread · season" : "Totals · season", sk === "cbb" && Sx.ats ? Sx.ats : Sx.totals]]; const got = want.filter(([, x]) => wl(x)).map(([label, x]) => ({ label, value: wl(x), sub: won(x), fine: "" })); return got.length === 3 ? got : vm.strip.slice(0, 3); })(), onSave: () => this.saveCard(), saveLabel: this.state.saving ? "Making image…" : "Save image", saveErr: this.state.saveErr || "", otherSports: vm.otherSports, kicker: vm.kicker, title1: vm.title[0], title2: vm.title[1], sportLong: vm.sport.longName,
       timeWord: vm.sport.timeWord, leftWord: epl ? "Home" : "Away", rightWord: epl ? "Away" : "Home", tz: vm.tz, updated: vm.updated, hostLabel: vm.sport.host.replace("https://", "").replace(/\/$/, "") };
   }
 }

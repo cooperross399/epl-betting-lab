@@ -523,8 +523,10 @@ export function hubLine(sport, board, results) {
   if (board.phase === "preseason") headline = `${games} exhibition games · no projections`;
   let detail = "";
   if (results && results.games && results.games.length) {
-    const p = (results.summary || {}).picks;
-    detail = p ? `Yesterday's picks ${F.recStr(p)}` : `${results.games.length} settled yesterday`;
+    // A night with no best bets reads "No best bets yesterday", not "0–0–0" (2026-11-26).
+    const sm = results.summary || {}, p = sm.picks, su = sm.straightUp;
+    const n = p ? (p.w || 0) + (p.l || 0) + (p.p || 0) : 0;
+    detail = n ? `Yesterday's best bets ${F.recStr(p)}` : p ? `No best bets yesterday${su && typeof su.w === "number" ? ` · winners ${su.w}–${su.l}` : ""}` : `${results.games.length} settled yesterday`;
   // First sentence only, with any trailing period stripped before one is
   // added back: a notice whose first sentence IS the whole notice already
   // ends in "." and printed "…settles them.." on the hub.

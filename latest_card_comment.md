@@ -1,52 +1,12 @@
-## Thursday 26 November, 13:56 UTC — scheduled run
+## Friday 27 November, 11:37 UTC — scheduled run
 
-Selections changed: 5 added, 5 dropped, 2 moved section.
+No card, and none previously — nothing new to report.
 
-Provider quota: 4896552 (about 1360 days at the observed burn)
+Provider quota: 4894803 (about 1359 days at the observed burn)
 
-Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5, team_total_home_0_5, team_total_home_1_5, team_total_home_2_5, team_total_away_0_5, team_total_away_1_5, team_total_away_2_5** (excluded: none)
+### No card was produced
 
-### Best bets
-
-| Match | Market | Selection | Tier | Bet down to | Edge | Price | Book | Units |
-|:------|:-------|:----------|:-----|------------:|-----:|------:|:-----|------:|
-| Brentford v Arsenal | `corners_1x2` | away | C | -160 | +6.5% | -155 | BetRivers | 1.55 |
-| Newcastle v Man United | `corners_1x2` | home | C | -150 | +5.8% | -136 | BetRivers | 1.36 |
-| Aston Villa v Everton | `team_total_home_1_5` | over | C | -118 | +5.6% | -108 | Bovada | 1.08 |
-| Chelsea v Crystal Palace | `team_total_home_1_5` | under | C | +132 | +6.9% | +152 | Bovada | 1.0 |
-| Fulham v Bournemouth | `corners_1x2` | home | C | -124 | +5.5% | -115 | BetMGM | 1.15 |
-| Hull v Nott'm Forest | `team_total_away_1_5` | under | C | -129 | +5.3% | -120 | Bovada | 1.2 |
-| Sunderland v Tottenham | `1x2` | away | C | +100 | +6.3% | +112 | BetOnline.ag | 1.0 |
-| Coventry v Ipswich | `1x2` | home | C | +114 | +6.4% | +128 | BetRivers | 1.0 |
-
-### Leans
-
-_None._
-
-### Player props
-
-- Leeds v Coventry — **Leeds goalkeeper** `player_goalie_saves_alternate` Over@2.5 at +240 (Bovada), bet down to +116, 0.6u
-- Ipswich v Aston Villa — **Matty Cash** `player_to_receive_card` Yes at +390 (DraftKings), bet down to +278, 0.6u
-- Leeds v Coventry — **Gabriel Gudmundsson** `player_shots` Over@0.5 at +100 (BetRivers), bet down to -117, 1.0u
-- Nott'm Forest v Chelsea — **Jordan Henderson** `player_shots` Over@0.5 at -106 (BetRivers), bet down to -124, 1.06u
-- Chelsea v Crystal Palace — **Jordan Henderson** `player_shots_on_target` Over@0.5 at +260 (BetRivers), bet down to +222, 0.6u
-- Arsenal v Man City — **Noni Madueke** `player_to_receive_card` Yes at +700 (DraftKings), bet down to +540, 0.4u
-- Brentford v Arsenal — **Vitaly Janelt** `player_goal_scorer_anytime` Yes at +1100 (Bovada), bet down to +823, 0.4u
-- Ipswich v Aston Villa — **Florentino Luis** `player_shots_on_target` Over@0.5 at +400 (BetRivers), bet down to +359, 0.6u
-- Arsenal v Man City — **Declan Rice** `player_shots` Over@1.5 at +270 (FanDuel), bet down to +251, 0.6u
-- Sunderland v Tottenham — **Noah Sadiki** `player_shots_on_target` Over@0.5 at +380 (BetRivers), bet down to +351, 0.6u
-- Brighton v Newcastle — **Jacob Murphy** `player_to_receive_card` Yes at +650 (DraftKings), bet down to +584, 0.4u
-- Everton v Liverpool — **Harrison Armstrong** `player_shots` Over@0.5 at -130 (BetRivers), bet down to -137, 1.3u
-- Crystal Palace v Hull — **Hull goalkeeper** `player_goalie_saves_alternate` Over@3.5 at +102 (Bovada), bet down to -103, 1.0u
-- Man United v Brentford — **Kobbie Mainoo** `player_shots` Over@1.5 at +280 (BetRivers), bet down to +278, 0.6u
-- Fulham v Bournemouth — **Sander Berge** `player_shots` Over@0.5 at -106 (BetRivers), bet down to -106, 1.06u
-
-_Props carry the smallest stake the card uses: the standing measurement demonstrates no edge, and books reprice on the team sheet after this card is built._
-
-### What changed
-
-- **Added:** Newcastle v Man United corners_1x2 home
-- **Dropped:** Newcastle v Man United team_total_home_1_5 over
+This is a **blocked** card, not a card with no value: nothing was generated, so nothing is being withheld as a judgement.
 
 
 ## Beyond the Premier League
@@ -81,9 +41,9 @@ Context only: no units, nothing here is a selection, and no edge is shown.
 | Player | Team | Opp | Kickoff (UTC) | Last season | Drought (bar) | 1 in N for him | Status | Price |
 |:--|:--|:--|:--|--:|:--|--:|:--|:--|
 | Harry Wilson | Leeds United | Coventry City | 2026-11-28 15:00 | 10 goals, 28% of apps | 16 (8) | 1 in 183 | — | not posted |
-| Danny Welbeck | Chelsea | Nottingham Forest | 2026-11-27 20:00 | 13 goals, 27% of apps | 13 (8) | 1 in 60 | — | +250 (DraftKings) |
-| Viktor Gyökeres | Arsenal | Manchester City | 2026-11-29 16:30 | 14 goals, 28% of apps | 11 (8) | 1 in 36 | — | +235 (DraftKings) |
-| Morgan Gibbs-White | Nottingham Forest | Chelsea | 2026-11-27 20:00 | 15 goals, 35% of apps | 8 (6) | 1 in 32 | — | +290 (FanDuel) |
+| Danny Welbeck | Chelsea | Nottingham Forest | 2026-11-27 20:00 | 13 goals, 27% of apps | 13 (8) | 1 in 60 | — | +255 (DraftKings) |
+| Viktor Gyökeres | Arsenal | Manchester City | 2026-11-29 16:30 | 14 goals, 28% of apps | 11 (8) | 1 in 36 | — | +240 (DraftKings) |
+| Morgan Gibbs-White | Nottingham Forest | Chelsea | 2026-11-27 20:00 | 15 goals, 35% of apps | 8 (6) | 1 in 32 | — | +290 (DraftKings) |
 
 **1+ assist, over 0.5.** Listed: 7+ Premier League assists last season and a run of league appearances without an assist at the bar his total sets (12+ assists -> 8, 9-11 assists -> 10, 7-8 assists -> 13 straight games).
 
@@ -105,7 +65,7 @@ Context only: no units, nothing here is a selection, and no edge is shown.
 
 Each selection is scored at the first price a card offered it, and only rows the card staked are counted — a lean carries no stake and is not a recommendation.
 
-**Beyond the Premier League is not in these numbers.** 1 staked selection(s) from that section are on this card. It is graded on a record of its own (`beyond_record.md`): 109 settled, 43 won, 8 returned the stake, +2.32 units. The rule above is stated by stake, so without this line the only way to notice would be to total the card by hand.
+**Beyond the Premier League is not in these numbers.** 1 staked selection(s) from that section are on this card. It is graded on a record of its own (`beyond_record.md`): 113 settled, 43 won, 8 returned the stake, -1.88 units. The rule above is stated by stake, so without this line the only way to notice would be to total the card by hand.
 
 This is the only out-of-sample evidence this project has. It will take a long time to mean anything: separating a real 5% edge from zero needs roughly 1,500 settled bets.
 
@@ -134,4 +94,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/45833246858)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/45991152152)

@@ -323,6 +323,18 @@ def build_notification(
         lines += ["### Leans", ""]
         lines += _rows(leans) if leans else ["_None._", ""]
 
+        # A round the fixtures feed has not listed yet is set aside rather
+        # than blocking the card (2026-11-27); say which, so its absence is
+        # not read as the model passing on it.
+        off_slate = generated.get("fixtures_not_on_slate") or []
+        if off_slate:
+            lines += [
+                "_Priced but not on the fixture slate yet, so not rated on "
+                "this card: " + ", ".join(str(item) for item in off_slate)
+                + ". They return once the fixtures feed lists them._",
+                "",
+            ]
+
         # Player props appear only when the reviewed policy has approved
         # them and a pick cleared their deliberately high bar. No section
         # means props are held by policy or found nothing — never a signal

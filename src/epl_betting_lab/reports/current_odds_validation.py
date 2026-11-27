@@ -84,6 +84,45 @@ def _fixture_keys(fixtures: pd.DataFrame) -> set[tuple[str, str]]:
     }
 
 
+def split_off_the_slate(
+    odds: pd.DataFrame, fixtures: pd.DataFrame
+) -> tuple[pd.DataFrame, list[str]]:
+    """Set aside priced fixtures the slate does not list yet, and name them.
+
+    Returns (rows to validate, "Home v Away (date)" labels set aside). A row is
+    set aside only when both clubs ARE on the slate and their pairing is not:
+    that is a round the fixture feed has not published yet (2026-11-27: the
+    feed listed the weekend, the provider priced the midweek round too, and
+    five `fixture_not_found` rows blocked the whole card). A club the slate
+    does not know is a mapping fault and stays in for validation to block.
+    When nothing priced is on the slate the slate is stale (2026-09-01), and
+    nothing is set aside, so validation still blocks and says why.
+    """
+    needed = {"home_team", "away_team"}
+    keys = _fixture_keys(fixtures)
+    if odds.empty or not keys or not needed.issubset(odds.columns):
+        return odds, []
+    slate_teams = {team for pair in keys for team in pair}
+    home = odds["home_team"].map(_clean_key)
+    away = odds["away_team"].map(_clean_key)
+    on_slate = pd.Series(
+        [(h, a) in keys for h, a in zip(home, away)], index=odds.index
+    )
+    known = home.isin(slate_teams) & away.isin(slate_teams)
+    off = known & ~on_slate
+    if not off.any() or not on_slate.any():
+        return odds, []
+    labels: list[str] = []
+    for _, row in odds[off].iterrows():
+        label = f"{_clean(row.get('home_team'))} v {_clean(row.get('away_team'))}"
+        day = _clean(row.get("date"))
+        if day:
+            label += f" ({day})"
+        if label not in labels:
+            labels.append(label)
+    return odds[~off], labels
+
+
 def _duplicate_key_columns(df: pd.DataFrame) -> list[str]:
     return [column for column in ["date", "home_team", "away_team", "market", "selection", "book"] if column in df.columns]
 

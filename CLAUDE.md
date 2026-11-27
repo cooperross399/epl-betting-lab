@@ -291,6 +291,17 @@ Use the repo, the reports, and GitHub.
   to extra time is ungradeable (markets settle on ninety minutes; the EFL Cup's
   straight-to-penalties shootouts are fine). The Premier League record's line
   about the section quotes that record instead of "nothing settles them".
+- **A round the fixtures feed has not listed yet no longer blocks the card
+  (2026-11-27).** Football-Data listed only the weekend (27-29 Nov, ten
+  fixtures) while the provider priced the midweek round too; the selected
+  window joins rounds two days apart, so five midweek prices hit
+  `fixture_not_found` and blocked the whole Premier League card.
+  `current_odds_validation.split_off_the_slate` now sets aside a priced
+  pairing of two clubs the slate DOES list on a fixture it does not, and the
+  card (`fixtures_not_on_slate`) and its comment name them; they return when
+  the feed lists them. A club the slate does not know (a mapping fault) and a
+  card input with nothing on the slate (a stale slate) still block.
+  `tests/test_a_round_the_slate_does_not_list_yet_does_not_block_the_card.py`.
 - `data/manual/upcoming_fixtures.csv` is **fetched, not typed**. Every run
   refreshes it from Football-Data's public fixtures feed
   (`scripts/refresh_upcoming_fixtures.py`), so the slate advances on its own.

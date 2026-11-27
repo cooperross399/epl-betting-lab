@@ -50,8 +50,10 @@ from epl_betting_lab.reports.pick_display import (
     format_market_list,
     split_stakeable,
 )
+from epl_betting_lab.data.loaders import load_upcoming_fixtures
 from epl_betting_lab.reports.current_odds_validation import (
     CurrentOddsValidationError,
+    split_off_the_slate,
 )
 
 
@@ -323,6 +325,33 @@ def _provider_allowlisted_now(policy_path: Path | None, provider_name: str) -> b
     return provider_name in {str(item).strip() for item in names}
 
 
+#: Where the card input goes once fixtures the slate does not list yet are set
+#: aside. Beside the provider-derived input, never over it.
+ON_SLATE_SUFFIX = "_on_slate"
+
+
+def _set_aside_off_slate(
+    card_input: Path, fixtures_path: Path | None
+) -> tuple[Path, list[str]]:
+    """The card input to validate, and the fixtures set aside from it."""
+    try:
+        odds = pd.read_csv(card_input, dtype=str).fillna("")
+        fixtures = (
+            load_upcoming_fixtures(fixtures_path)
+            if fixtures_path is not None
+            else load_upcoming_fixtures()
+        )
+    except (FileNotFoundError, OSError, UnicodeError, ValueError,
+            pd.errors.EmptyDataError, pd.errors.ParserError):
+        return card_input, []
+    kept, off_slate = split_off_the_slate(odds, fixtures)
+    if not off_slate:
+        return card_input, []
+    target = card_input.with_name(f"{card_input.stem}{ON_SLATE_SUFFIX}{card_input.suffix}")
+    kept.to_csv(target, index=False)
+    return target, off_slate
+
+
 def build_automated_card(
     *,
     output_dir: Path | None = None,
@@ -470,9 +499,15 @@ def build_automated_card(
         )
         return summary
 
+    # Prices for a round the fixture slate does not list yet (the provider
+    # prices midweek before Football-Data publishes it) are set aside and
+    # named, so they cannot block the fixtures the slate does list.
+    odds_for_card, off_slate = _set_aside_off_slate(card_input, fixtures_path)
+    summary["fixtures_not_on_slate"] = off_slate
+
     try:
         paths = run_thursday_best_bets_report(
-            current_odds_path=card_input,
+            current_odds_path=odds_for_card,
             output_dir=outputs,
             force=False,
             archive=False,
@@ -724,6 +759,23 @@ def render_automated_card(summary: Mapping[str, Any]) -> str:
                 [
                     "_None. Every selection's game kicks off after this card "
                     "was generated._",
+                    "",
+                ]
+            )
+        off_slate = summary.get("fixtures_not_on_slate") or []
+        if off_slate:
+            lines.extend(
+                [
+                    "## Priced but not on the fixture slate yet",
+                    "",
+                    (
+                        "The provider priced these before the fixtures feed "
+                        "listed them, so they were set aside rather than "
+                        "blocking the card. They return once the feed lists "
+                        "them:"
+                    ),
+                    "",
+                    *[f"- {item}" for item in off_slate],
                     "",
                 ]
             )

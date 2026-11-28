@@ -300,7 +300,10 @@ Use the repo, the reports, and GitHub.
   pairing of two clubs the slate DOES list on a fixture it does not, and the
   card (`fixtures_not_on_slate`) and its comment name them; they return when
   the feed lists them. A club the slate does not know (a mapping fault) and a
-  card input with nothing on the slate (a stale slate) still block.
+  card input with nothing on the slate (a stale slate) still block. A club is
+  known if the slate OR the historical results name it: on 2026-11-28 the
+  Friday match had kicked off, the slate held eighteen clubs, and a midweek
+  fixture of one of the other two blocked the card again (fixed the same day).
   `tests/test_a_round_the_slate_does_not_list_yet_does_not_block_the_card.py`.
 - `data/manual/upcoming_fixtures.csv` is **fetched, not typed**. Every run
   refreshes it from Football-Data's public fixtures feed

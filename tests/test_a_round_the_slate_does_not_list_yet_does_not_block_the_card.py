@@ -167,3 +167,46 @@ def test_the_card_comment_names_what_was_set_aside(tmp_path):
     note = build_notification(output_dir=tmp_path)
 
     assert "Chelsea v Liverpool (2026-12-02)" in note["body"]
+
+
+def test_a_club_that_already_played_this_round_is_still_a_known_club(
+    tmp_path, monkeypatch
+):
+    """2026-11-28: the Friday match had kicked off, so Football-Data's slate
+    listed nine fixtures and eighteen clubs. A midweek fixture involving one of
+    the Friday clubs then looked like an unknown team, was not set aside, and
+    its five rows blocked the card. A club in the historical results is known.
+    """
+    matches = tmp_path / "matches.csv"
+    pd.DataFrame(
+        [
+            {"date": "2026-11-27", "home_team": "Fulham", "away_team": "Brentford",
+             "home_goals": 1, "away_goals": 0},
+        ]
+    ).to_csv(matches, index=False)
+    midweek = [("2026-12-02", "Fulham", "Arsenal")]
+    _evidence(tmp_path)
+    card_input = _card_input(tmp_path / "card_input.csv", WEEKEND + midweek)
+    slate = _slate(tmp_path / "upcoming_fixtures.csv", WEEKEND)
+    seen: dict[str, pd.DataFrame] = {}
+    picks = tmp_path / "picks.csv"
+    pd.DataFrame(columns=["section", "home_team", "away_team", "market"]).to_csv(
+        picks, index=False
+    )
+
+    def fake_report(**kwargs):
+        seen["odds"] = pd.read_csv(kwargs["current_odds_path"], dtype=str)
+        return {"csv": str(picks), "markdown": str(picks)}
+
+    monkeypatch.setattr(automated_card, "run_thursday_best_bets_report", fake_report)
+    monkeypatch.setattr(automated_card, "_provider_allowlisted_now", lambda *a, **k: True)
+    summary = automated_card.build_automated_card(
+        output_dir=tmp_path,
+        card_input_path=card_input,
+        fixtures_path=slate,
+        matches_path=matches,
+        staging_fixtures_path=tmp_path / "absent_staging.csv",
+    )
+
+    assert "Fulham" not in set(seen["odds"]["home_team"])
+    assert summary["fixtures_not_on_slate"] == ["Fulham v Arsenal (2026-12-02)"]

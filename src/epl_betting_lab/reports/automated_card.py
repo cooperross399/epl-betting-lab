@@ -50,7 +50,7 @@ from epl_betting_lab.reports.pick_display import (
     format_market_list,
     split_stakeable,
 )
-from epl_betting_lab.data.loaders import load_upcoming_fixtures
+from epl_betting_lab.data.loaders import load_matches, load_upcoming_fixtures
 from epl_betting_lab.reports.current_odds_validation import (
     CurrentOddsValidationError,
     split_off_the_slate,
@@ -331,7 +331,7 @@ ON_SLATE_SUFFIX = "_on_slate"
 
 
 def _set_aside_off_slate(
-    card_input: Path, fixtures_path: Path | None
+    card_input: Path, fixtures_path: Path | None, matches_path: Path | None = None
 ) -> tuple[Path, list[str]]:
     """The card input to validate, and the fixtures set aside from it."""
     try:
@@ -344,7 +344,12 @@ def _set_aside_off_slate(
     except (FileNotFoundError, OSError, UnicodeError, ValueError,
             pd.errors.EmptyDataError, pd.errors.ParserError):
         return card_input, []
-    kept, off_slate = split_off_the_slate(odds, fixtures)
+    try:
+        matches = load_matches(matches_path)
+    except (FileNotFoundError, OSError, UnicodeError, ValueError,
+            pd.errors.EmptyDataError, pd.errors.ParserError):
+        matches = pd.DataFrame()
+    kept, off_slate = split_off_the_slate(odds, fixtures, matches)
     if not off_slate:
         return card_input, []
     target = card_input.with_name(f"{card_input.stem}{ON_SLATE_SUFFIX}{card_input.suffix}")
@@ -502,7 +507,9 @@ def build_automated_card(
     # Prices for a round the fixture slate does not list yet (the provider
     # prices midweek before Football-Data publishes it) are set aside and
     # named, so they cannot block the fixtures the slate does list.
-    odds_for_card, off_slate = _set_aside_off_slate(card_input, fixtures_path)
+    odds_for_card, off_slate = _set_aside_off_slate(
+        card_input, fixtures_path, matches_path
+    )
     summary["fixtures_not_on_slate"] = off_slate
 
     try:

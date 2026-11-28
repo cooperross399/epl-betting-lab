@@ -85,7 +85,9 @@ def _fixture_keys(fixtures: pd.DataFrame) -> set[tuple[str, str]]:
 
 
 def split_off_the_slate(
-    odds: pd.DataFrame, fixtures: pd.DataFrame
+    odds: pd.DataFrame,
+    fixtures: pd.DataFrame,
+    matches: pd.DataFrame | None = None,
 ) -> tuple[pd.DataFrame, list[str]]:
     """Set aside priced fixtures the slate does not list yet, and name them.
 
@@ -97,12 +99,20 @@ def split_off_the_slate(
     does not know is a mapping fault and stays in for validation to block.
     When nothing priced is on the slate the slate is stale (2026-09-01), and
     nothing is set aside, so validation still blocks and says why.
+
+    A club is known when the slate OR the historical results name it, the
+    same set validation's unknown-team check reads. The slate alone was not
+    enough: on 2026-11-28 the Friday match had kicked off, so the slate held
+    eighteen clubs, and a midweek fixture of one of the other two looked like
+    a mapping fault and blocked the card again.
     """
     needed = {"home_team", "away_team"}
     keys = _fixture_keys(fixtures)
     if odds.empty or not keys or not needed.issubset(odds.columns):
         return odds, []
     slate_teams = {team for pair in keys for team in pair}
+    if matches is not None and not matches.empty:
+        slate_teams |= _team_set(matches, pd.DataFrame())
     home = odds["home_team"].map(_clean_key)
     away = odds["away_team"].map(_clean_key)
     on_slate = pd.Series(

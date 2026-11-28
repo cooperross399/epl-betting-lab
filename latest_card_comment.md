@@ -1,8 +1,8 @@
-## Saturday 28 November, 13:26 UTC — scheduled run
+## Saturday 28 November, 17:26 UTC — scheduled run
 
-Selections changed: 57 added.
+Selections changed: 4 added, 16 dropped, 2 moved section.
 
-Provider quota: 4882796 (about 1356 days at the observed burn)
+Provider quota: 4879066 (about 1355 days at the observed burn)
 
 Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5, team_total_home_0_5, team_total_home_1_5, team_total_home_2_5, team_total_away_0_5, team_total_away_1_5, team_total_away_2_5** (excluded: none)
 
@@ -10,13 +10,11 @@ Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corner
 
 | Match | Market | Selection | Tier | Bet down to | Edge | Price | Book | Units |
 |:------|:-------|:----------|:-----|------------:|-----:|------:|:-----|------:|
-| Leeds v Coventry | `team_total_home_1_5` | under | C | +142 | +7.1% | +143 | BetRivers | 1.0 |
-| Fulham v Bournemouth | `corners_total_10_5` | over | C | +108 | +6.8% | +142 | FanDuel | 1.0 |
-| Crystal Palace v Hull | `team_total_home_1_5` | under | C | -109 | +5.0% | -102 | Bovada | 1.02 |
+| Fulham v Bournemouth | `corners_1x2` | home | C | -107 | +5.1% | +100 | FanDuel | 1.0 |
+| Crystal Palace v Hull | `team_total_home_1_5` | under | C | -108 | +5.0% | -102 | Bovada | 1.02 |
 | Sunderland v Tottenham | `1x2` | away | C | -101 | +5.0% | +105 | BetMGM | 1.0 |
-| Man United v Brentford | `1x2` | away | C | +192 | +4.9% | +205 | BetRivers | 0.6 |
-| Brighton v Newcastle | `corners_1x2` | away | C | +305 | +4.9% | +330 | DraftKings | 0.6 |
-| Arsenal v Man City | `corners_1x2` | away | C | +149 | +3.7% | +150 | FanDuel | 1.0 |
+| Brighton v Newcastle | `corners_1x2` | away | C | +301 | +4.6% | +320 | DraftKings | 0.6 |
+| Arsenal v Man City | `corners_1x2` | away | C | +149 | +3.6% | +150 | FanDuel | 1.0 |
 
 ### Leans
 
@@ -26,31 +24,26 @@ _Priced but not on the fixture slate yet, so not rated on this card: Coventry v 
 
 ### Player props
 
-- Leeds v Coventry — **Leeds goalkeeper** `player_goalie_saves_alternate` Over@2.5 at +162 (Bovada), bet down to +118, 1.0u
-- Ipswich v Aston Villa — **Matty Cash** `player_to_receive_card` Yes at +390 (DraftKings), bet down to +278, 0.6u
-- Brentford v Arsenal — **Vitaly Janelt** `player_goal_scorer_anytime` Yes at +1400 (Fanatics), bet down to +827, 0.4u
-- Chelsea v Crystal Palace — **Jordan Henderson** `player_goal_scorer_anytime` Yes at +1050 (Fanatics), bet down to +737, 0.4u
-- Arsenal v Man City — **Noni Madueke** `player_to_receive_card` Yes at +700 (DraftKings), bet down to +539, 0.4u
-- Fulham v Bournemouth — **Sander Berge** `player_shots` Over@0.5 at +105 (BetRivers), bet down to -106, 1.0u
-- Crystal Palace v Hull — **Hull goalkeeper** `player_goalie_saves_alternate` Over@3.5 at +105 (DraftKings), bet down to -104, 1.0u
+- Ipswich v Aston Villa — **Matty Cash** `player_to_receive_card` Yes at +390 (DraftKings), bet down to +275, 0.6u
+- Arsenal v Man City — **Noni Madueke** `player_to_receive_card` Yes at +700 (DraftKings), bet down to +537, 0.4u
+- Brentford v Arsenal — **Vitaly Janelt** `player_goal_scorer_anytime` Yes at +1400 (Fanatics), bet down to +913, 0.4u
+- Chelsea v Crystal Palace — **Jordan Henderson** `player_goal_scorer_anytime` Yes at +1050 (Fanatics), bet down to +753, 0.4u
+- Fulham v Bournemouth — **Sander Berge** `player_shots` Over@0.5 at +105 (BetRivers), bet down to -107, 1.0u
+- Crystal Palace v Hull — **Hull goalkeeper** `player_goalie_saves_alternate` Over@3.5 at +105 (DraftKings), bet down to -106, 1.0u
+- Ipswich v Aston Villa — **Sasa Lukic** `player_shots` Over@0.5 at +105 (BetRivers), bet down to -105, 1.0u
+- Arsenal v Man City — **Declan Rice** `player_shots` Over@1.5 at +280 (BetRivers), bet down to +248, 0.6u
 - Sunderland v Tottenham — **Noah Sadiki** `player_shots_on_target` Over@0.5 at +400 (BetRivers), bet down to +351, 0.6u
-- Arsenal v Man City — **Declan Rice** `player_shots` Over@1.5 at +280 (BetRivers), bet down to +252, 0.6u
-- Ipswich v Aston Villa — **Florentino Luis** `player_shots_on_target` Over@0.5 at +400 (BetRivers), bet down to +359, 0.6u
-- Everton v Liverpool — **Harrison Armstrong** `player_shots` Over@1.5 at +330 (BetRivers), bet down to +305, 0.6u
-- Brighton v Newcastle — **Jacob Murphy** `player_to_receive_card` Yes at +650 (DraftKings), bet down to +582, 0.4u
-- Man United v Brentford — **Kobbie Mainoo** `player_shots` Over@1.5 at +290 (BetRivers), bet down to +280, 0.6u
+- Everton v Liverpool — **Harrison Armstrong** `player_shots` Over@1.5 at +330 (BetRivers), bet down to +301, 0.6u
+- Brighton v Newcastle — **Jacob Murphy** `player_to_receive_card` Yes at +650 (DraftKings), bet down to +591, 0.4u
 
 _Props carry the smallest stake the card uses: the standing measurement demonstrates no edge, and books reprice on the team sheet after this card is built._
 
 ### What changed
 
-- **Added:** Arsenal v Man City corners_1x2 away
-- **Added:** Brighton v Newcastle corners_1x2 away
-- **Added:** Crystal Palace v Hull team_total_home_1_5 under
-- **Added:** Fulham v Bournemouth corners_total_10_5 over
-- **Added:** Leeds v Coventry team_total_home_1_5 under
-- **Added:** Man United v Brentford 1x2 away
-- **Added:** Sunderland v Tottenham 1x2 away
+- **Dropped:** Leeds v Coventry team_total_home_1_5 under
+- **Dropped:** Man United v Brentford 1x2 away
+- **Added:** Fulham v Bournemouth corners_1x2 home
+- **Dropped:** Fulham v Bournemouth corners_total_10_5 over
 
 
 ## Beyond the Premier League
@@ -81,10 +74,10 @@ Priced on the European ratings, where 868 European ties bridge eleven leagues on
 
 | Match | Market | Selection | Bet down to | Edge | Price | Book | Units |
 |:--|:--|:--|--:|--:|--:|:--|--:|
-| Stuttgart v Lille | `corners_1x2` | away | +187 | +7.1% | +220 | BetRivers | 0.6 |
+| Stuttgart v Lille | `corners_1x2` | away | +187 | +7.0% | +220 | BetRivers | 0.6 |
 | Stuttgart v Lille | `btts` | no | +151 | +6.4% | +164 | FanDuel | 1.0 |
 | Betis v Como | `btts` | no | +158 | +6.2% | +170 | FanDuel | 1.0 |
-| Stuttgart v Lille | `draw_no_bet` | away | +213 | +6.0% | +240 | FanDuel | 0.6 |
+| Man United v RB Leipzig | `double_chance` | draw_or_away | -105 | +6.2% | +106 | BetRivers | 1.0 |
 
 - 72 fixture(s) dropped as already kicked off: AEK Athens v Real Madrid, AS Roma v Real Madrid, AS Roma v ŠK Slovan Bratislava, Arsenal v Borussia Dortmund, Arsenal v Lille, Aston Villa v Fenerbahce, and 66 more.
 - 6 fixture(s) left out because a club has no rating in the pool: Bayern Munich v Slavia Praha, LASK v Fenerbahce, Lens v Bodø/Glimt, Viking FK v Feyenoord, Villarreal v Sabah FK, ŠK Slovan Bratislava v Shakhtar Donetsk.
@@ -96,7 +89,7 @@ Same European ratings as the Champions League, and **thinner in both directions*
 
 | Match | Market | Selection | Bet down to | Edge | Price | Book | Units |
 |:--|:--|:--|--:|--:|--:|:--|--:|
-| Benfica v OFI Crete | `total_2_5` | under | +257 | +1.7% | +280 | FanDuel | 0.6 |
+| Benfica v OFI Crete | `total_2_5` | under | +256 | +1.8% | +280 | FanDuel | 0.6 |
 | Lyon v St. Gilloise | `total_2_5` | under | -102 | +1.5% | +104 | FanDuel | 1.0 |
 
 - 89 fixture(s) dropped as already kicked off: AC Milan v Benfica, AC Milan v Ferencváros TC, AZ Alkmaar v Hapoel Be'er Sheva, AZ Alkmaar v Juventus, Anderlecht v Lyon, Anderlecht v Salzburg, and 83 more.
@@ -116,7 +109,7 @@ Context only: no units, nothing here is a selection, and no edge is shown.
 
 | Player | Team | Opp | Kickoff (UTC) | Last season | Drought (bar) | 1 in N for him | Status | Price |
 |:--|:--|:--|:--|--:|:--|--:|:--|:--|
-| Harry Wilson | Leeds United | Coventry City | 2026-11-28 15:00 | 10 goals, 28% of apps | 16 (8) | 1 in 183 | — | not posted |
+| Harry Wilson | Leeds United | Manchester City | 2026-12-02 19:30 | 10 goals, 28% of apps | 16 (8) | 1 in 183 | — | not posted |
 | Danny Welbeck | Chelsea | Crystal Palace | 2026-12-02 19:30 | 13 goals, 27% of apps | 14 (8) | 1 in 82 | — | +150 (Fanatics) |
 | Viktor Gyökeres | Arsenal | Manchester City | 2026-11-29 16:30 | 14 goals, 28% of apps | 11 (8) | 1 in 36 | — | +240 (DraftKings) |
 
@@ -131,10 +124,10 @@ Context only: no units, nothing here is a selection, and no edge is shown.
 
 ### How the recommendations have done
 
-- Settled: **198** selections, 83 won, 8 returned the stake
-- Staked: 200.50 units
-- Profit: **-0.46 units** (-0.2% on turnover)
-- Still pending: 21
+- Settled: **202** selections, 84 won, 8 returned the stake
+- Staked: 204.20 units
+- Profit: **-2.24 units** (-1.1% on turnover)
+- Still pending: 17
 
 - Stake returned (void): 8 — counted in the settled total above at zero profit, because a push is a bet
 
@@ -148,13 +141,13 @@ This is the only out-of-sample evidence this project has. It will take a long ti
 
 Consensus CLV on each market's picks, judged once it has 50 with a closing price. Cutting or raising a market is your call; this says where the evidence points.
 
-- `corners_1x2`: 22 of 50 picks needed, not judged yet.
+- `corners_1x2`: 23 of 50 picks needed, not judged yet.
 - `corners_total_9_5`: 19 of 50 picks needed, not judged yet.
 - `corners_total_10_5`: 18 of 50 picks needed, not judged yet.
 - `draw_no_bet`: 18 of 50 picks needed, not judged yet.
-- `team_total_away_1_5`: 16 of 50 picks needed, not judged yet.
-- `team_total_home_1_5`: 16 of 50 picks needed, not judged yet.
-- `1x2`: 13 of 50 picks needed, not judged yet.
+- `team_total_away_1_5`: 17 of 50 picks needed, not judged yet.
+- `team_total_home_1_5`: 17 of 50 picks needed, not judged yet.
+- `1x2`: 14 of 50 picks needed, not judged yet.
 - `double_chance`: 11 of 50 picks needed, not judged yet.
 - `btts`: 4 of 50 picks needed, not judged yet.
 - `team_total_away_0_5`: 3 of 50 picks needed, not judged yet.
@@ -169,4 +162,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/46149096201)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/46169932604)

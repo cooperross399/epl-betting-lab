@@ -1,12 +1,56 @@
-## Saturday 28 November, 11:03 UTC — scheduled run
+## Saturday 28 November, 13:26 UTC — scheduled run
 
-The card is blocked; the previous card's picks are gone.
+Selections changed: 57 added.
 
-Provider quota: 4884891 (about 1356 days at the observed burn)
+Provider quota: 4882796 (about 1356 days at the observed burn)
 
-### No card was produced
+Markets: **1x2, total_2_5, btts, double_chance, draw_no_bet, corners_1x2, corners_total_9_5, corners_total_10_5, team_total_home_0_5, team_total_home_1_5, team_total_home_2_5, team_total_away_0_5, team_total_away_1_5, team_total_away_2_5** (excluded: none)
 
-This is a **blocked** card, not a card with no value: nothing was generated, so nothing is being withheld as a judgement.
+### Best bets
+
+| Match | Market | Selection | Tier | Bet down to | Edge | Price | Book | Units |
+|:------|:-------|:----------|:-----|------------:|-----:|------:|:-----|------:|
+| Leeds v Coventry | `team_total_home_1_5` | under | C | +142 | +7.1% | +143 | BetRivers | 1.0 |
+| Fulham v Bournemouth | `corners_total_10_5` | over | C | +108 | +6.8% | +142 | FanDuel | 1.0 |
+| Crystal Palace v Hull | `team_total_home_1_5` | under | C | -109 | +5.0% | -102 | Bovada | 1.02 |
+| Sunderland v Tottenham | `1x2` | away | C | -101 | +5.0% | +105 | BetMGM | 1.0 |
+| Man United v Brentford | `1x2` | away | C | +192 | +4.9% | +205 | BetRivers | 0.6 |
+| Brighton v Newcastle | `corners_1x2` | away | C | +305 | +4.9% | +330 | DraftKings | 0.6 |
+| Arsenal v Man City | `corners_1x2` | away | C | +149 | +3.7% | +150 | FanDuel | 1.0 |
+
+### Leans
+
+_None._
+
+_Priced but not on the fixture slate yet, so not rated on this card: Coventry v Ipswich (2026-12-01), Aston Villa v Everton (2026-12-02), Bournemouth v Brighton (2026-12-02), Brentford v Arsenal (2026-12-02), Chelsea v Crystal Palace (2026-12-02), Hull v Nott'm Forest (2026-12-02), Liverpool v Sunderland (2026-12-02), Man City v Leeds (2026-12-02), Newcastle v Man United (2026-12-02), Tottenham v Fulham (2026-12-03). They return once the fixtures feed lists them._
+
+### Player props
+
+- Leeds v Coventry — **Leeds goalkeeper** `player_goalie_saves_alternate` Over@2.5 at +162 (Bovada), bet down to +118, 1.0u
+- Ipswich v Aston Villa — **Matty Cash** `player_to_receive_card` Yes at +390 (DraftKings), bet down to +278, 0.6u
+- Brentford v Arsenal — **Vitaly Janelt** `player_goal_scorer_anytime` Yes at +1400 (Fanatics), bet down to +827, 0.4u
+- Chelsea v Crystal Palace — **Jordan Henderson** `player_goal_scorer_anytime` Yes at +1050 (Fanatics), bet down to +737, 0.4u
+- Arsenal v Man City — **Noni Madueke** `player_to_receive_card` Yes at +700 (DraftKings), bet down to +539, 0.4u
+- Fulham v Bournemouth — **Sander Berge** `player_shots` Over@0.5 at +105 (BetRivers), bet down to -106, 1.0u
+- Crystal Palace v Hull — **Hull goalkeeper** `player_goalie_saves_alternate` Over@3.5 at +105 (DraftKings), bet down to -104, 1.0u
+- Sunderland v Tottenham — **Noah Sadiki** `player_shots_on_target` Over@0.5 at +400 (BetRivers), bet down to +351, 0.6u
+- Arsenal v Man City — **Declan Rice** `player_shots` Over@1.5 at +280 (BetRivers), bet down to +252, 0.6u
+- Ipswich v Aston Villa — **Florentino Luis** `player_shots_on_target` Over@0.5 at +400 (BetRivers), bet down to +359, 0.6u
+- Everton v Liverpool — **Harrison Armstrong** `player_shots` Over@1.5 at +330 (BetRivers), bet down to +305, 0.6u
+- Brighton v Newcastle — **Jacob Murphy** `player_to_receive_card` Yes at +650 (DraftKings), bet down to +582, 0.4u
+- Man United v Brentford — **Kobbie Mainoo** `player_shots` Over@1.5 at +290 (BetRivers), bet down to +280, 0.6u
+
+_Props carry the smallest stake the card uses: the standing measurement demonstrates no edge, and books reprice on the team sheet after this card is built._
+
+### What changed
+
+- **Added:** Arsenal v Man City corners_1x2 away
+- **Added:** Brighton v Newcastle corners_1x2 away
+- **Added:** Crystal Palace v Hull team_total_home_1_5 under
+- **Added:** Fulham v Bournemouth corners_total_10_5 over
+- **Added:** Leeds v Coventry team_total_home_1_5 under
+- **Added:** Man United v Brentford 1x2 away
+- **Added:** Sunderland v Tottenham 1x2 away
 
 
 ## Beyond the Premier League
@@ -39,7 +83,7 @@ Priced on the European ratings, where 868 European ties bridge eleven leagues on
 |:--|:--|:--|--:|--:|--:|:--|--:|
 | Stuttgart v Lille | `corners_1x2` | away | +187 | +7.1% | +220 | BetRivers | 0.6 |
 | Stuttgart v Lille | `btts` | no | +151 | +6.4% | +164 | FanDuel | 1.0 |
-| Betis v Como | `btts` | no | +158 | +6.2% | +170 | DraftKings | 1.0 |
+| Betis v Como | `btts` | no | +158 | +6.2% | +170 | FanDuel | 1.0 |
 | Stuttgart v Lille | `draw_no_bet` | away | +213 | +6.0% | +240 | FanDuel | 0.6 |
 
 - 72 fixture(s) dropped as already kicked off: AEK Athens v Real Madrid, AS Roma v Real Madrid, AS Roma v ŠK Slovan Bratislava, Arsenal v Borussia Dortmund, Arsenal v Lille, Aston Villa v Fenerbahce, and 66 more.
@@ -82,15 +126,15 @@ Context only: no units, nothing here is a selection, and no edge is shown.
 
 | Player | Team | Opp | Kickoff (UTC) | Last season | Drought (bar) | 1 in N for him | Status | Price |
 |:--|:--|:--|:--|--:|:--|--:|:--|:--|
-| Rayan Cherki | Manchester City | Arsenal | 2026-11-29 16:30 | 12 assists, 27% of apps | 9 (8) | 1 in 18 | — | +290 (FanDuel) |
-| James Garner | Everton | Liverpool | 2026-11-29 12:00 | 7 assists, 18% of apps | 14 (13) | 1 in 17 | — | +650 (FanDuel) |
+| Rayan Cherki | Manchester City | Arsenal | 2026-11-29 16:30 | 12 assists, 27% of apps | 9 (8) | 1 in 18 | — | +280 (FanDuel) |
+| James Garner | Everton | Liverpool | 2026-11-29 12:00 | 7 assists, 18% of apps | 14 (13) | 1 in 17 | — | +600 (FanDuel) |
 
 ### How the recommendations have done
 
 - Settled: **198** selections, 83 won, 8 returned the stake
 - Staked: 200.50 units
 - Profit: **-0.46 units** (-0.2% on turnover)
-- Still pending: 19
+- Still pending: 21
 
 - Stake returned (void): 8 — counted in the settled total above at zero profit, because a push is a bet
 
@@ -125,4 +169,4 @@ Recommendations only. No bet was placed and no settlement was applied.
 
 You get one card a day while the schedule runs, plus a message whenever a run goes wrong. So **a day with no message at all means a run did not happen.**
 
-[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/46137563985)
+[Full run summary](https://github.com/cooperross399/epl-betting-lab/actions/runs/46149096201)
